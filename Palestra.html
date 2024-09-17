@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palestra Joy Fit</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const gymData = {
+            istruttori: {
+                "Mirella": ["Pilates"],
+                "Titti": ["Body Sculpt"],
+                "Checco": ["Funzionale"],
+                "Sabrina": ["Aerea Kids"],
+                "Antonella": ["Pilates"],
+                "Saverio C.": ["Defence System", "Krav Maga"],
+                "Roberta": ["Postural/Pilates"],
+                "Rosilenia": ["Functional Kids"],
+                "Mimmo": ["Slow Fit"],
+                "Matteo": ["Calisthenics Junior", "Calisthenics"]
+            },
+            corsi: {
+                "Pilates": [
+                    {giorno: "Lunedì", ora: "07:30", istruttore: "Mirella"},
+                    {giorno: "Lunedì", ora: "17:15", istruttore: "Antonella"},
+                    {giorno: "Lunedì", ora: "18:15", istruttore: "Antonella"},
+                    {giorno: "Lunedì", ora: "19:15", istruttore: "Antonella"},
+                    {giorno: "Mercoledì", ora: "07:00", istruttore: "Mirella"},
+                    {giorno: "Giovedì", ora: "17:15", istruttore: "Antonella"},
+                    {giorno: "Giovedì", ora: "18:15", istruttore: "Antonella"},
+                    {giorno: "Giovedì", ora: "19:15", istruttore: "Antonella"},
+                    {giorno: "Venerdì", ora: "07:00", istruttore: "Mirella"}
+                ],
+                "Body Sculpt": [
+                    {giorno: "Lunedì", ora: "09:15", istruttore: "Titti"},
+                    {giorno: "Lunedì", ora: "19:30", istruttore: "Titti"},
+                    {giorno: "Giovedì", ora: "09:15", istruttore: "Titti"},
+                    {giorno: "Venerdì", ora: "19:30", istruttore: "Titti"},
+                    {giorno: "Sabato", ora: "09:00", istruttore: "Titti"}
+                ],
+                "Funzionale": [
+                    {giorno: "Lunedì", ora: "13:30", istruttore: "Checco"},
+                    {giorno: "Lunedì", ora: "14:30", istruttore: "Checco"},
+                    {giorno: "Martedì", ora: "19:15", istruttore: "Checco"},
+                    {giorno: "Giovedì", ora: "13:30", istruttore: "Checco"},
+                    {giorno: "Giovedì", ora: "14:30", istruttore: "Checco"},
+                    {giorno: "Giovedì", ora: "19:15", istruttore: "Checco"},
+                    {giorno: "Sabato", ora: "11:00", istruttore: "Checco"}
+                ],
+                "Aerea Kids": [
+                    {giorno: "Lunedì", ora: "17:00", istruttore: "Sabrina"},
+                    {giorno: "Mercoledì", ora: "17:00", istruttore: "Sabrina"}
+                ],
+                "Defence System": [
+                    {giorno: "Lunedì", ora: "18:00", istruttore: "Saverio C."},
+                    {giorno: "Mercoledì", ora: "18:00", istruttore: "Saverio C."}
+                ],
+                "Krav Maga": [
+                    {giorno: "Lunedì", ora: "20:00", istruttore: "Saverio C."},
+                    {giorno: "Mercoledì", ora: "20:00", istruttore: "Saverio C."}
+                ],
+                "Postural/Pilates": [
+                    {giorno: "Martedì", ora: "09:00", istruttore: "Roberta"},
+                    {giorno: "Martedì", ora: "10:00", istruttore: "Roberta"},
+                    {giorno: "Venerdì", ora: "09:00", istruttore: "Roberta"},
+                    {giorno: "Venerdì", ora: "10:00", istruttore: "Roberta"}
+                ],
+                "Functional Kids": [
+                    {giorno: "Martedì", ora: "16:00", istruttore: "Rosilenia"},
+                    {giorno: "Venerdì", ora: "16:00", istruttore: "Rosilenia"}
+                ],
+                "Slow Fit": [
+                    {giorno: "Martedì", ora: "18:30", istruttore: "Mimmo"},
+                    {giorno: "Martedì", ora: "19:30", istruttore: "Mimmo"},
+                    {giorno: "Venerdì", ora: "18:30", istruttore: "Mimmo"},
+                    {giorno: "Venerdì", ora: "19:30", istruttore: "Mimmo"}
+                ],
+                "Calisthenics Junior": [
+                    {giorno: "Martedì", ora: "18:00", istruttore: "Matteo"},
+                    {giorno: "Giovedì", ora: "18:00", istruttore: "Matteo"}
+                ],
+                "Calisthenics": [
+                    {giorno: "Martedì", ora: "20:15", istruttore: "Matteo"},
+                    {giorno: "Giovedì", ora: "20:15", istruttore: "Matteo"},
+                    {giorno: "Venerdì", ora: "20:15", istruttore: "Matteo"}
+                ]
+            },
+            orari: {
+                segreteria: [
+                    "Lunedì: 08:00 - 12:00, 16:00 - 20:00",
+                    "Martedì: 08:00 - 12:00, 16:00 - 20:00",
+                    "Mercoledì: 16:00 - 20:00",
+                    "Giovedì: 08:00 - 12:00, 16:00 - 20:00",
+                    "Venerdì: 08:00 - 12:00, 16:00 - 20:00",
+                    "Sabato: 09:00 - 12:00"
+                ],
+                salaFitness: [
+                    "Lunedì: 07:00 - 21:30",
+                    "Martedì: 07:00 - 21:30",
+                    "Mercoledì: 07:00 - 21:30",
+                    "Giovedì: 07:00 - 21:30",
+                    "Venerdì: 07:00 - 21:30",
+                    "Sabato: 09:00 - 12:00, 15:00 - 18:00",
+                    "Domenica: chiuso"
+                ]
+            }
+        };
+
+        function App() {
+            const [view, setView] = React.useState('welcome');
+            const [selectedInstructor, setSelectedInstructor] = React.useState(null);
+            const [selectedCourse, setSelectedCourse] = React.useState(null);
+
+            const renderWelcome = () => (
+                <div className="text-center">
+                    <h1 className="text-3xl font-bold mb-4">Benvenuto nella Palestra Joy Fit</h1>
+                    <p className="mb-4">Scegli cosa vuoi vedere</p>
+                    <div className="space-x-2">
+                        {['Corsi', 'Orari', 'Istruttori'].map(button => (
+                            <button
+                                key={button}
+                                onClick={() => setView(button.toLowerCase())}
+                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                            >
+                                {button}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="mt-8">
+                        <button
+                            onClick={() => window.close()}
+                            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                        >
+                            Esci
+                        </button>
+                    </div>
+                </div>
+            );
+
+            const renderInstructors = () => (
+                <div className="text-center">
+                    <h2 className="text-2xl font-bold mb-4">Istruttori</h2>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {Object.keys(gymData.istruttori).map(instructor => (
+                            <button
+                                key={instructor}
+                                onClick={() => setSelectedInstructor(instructor)}
+                                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                            >
+                                {instructor}
+                            </button>
+                        ))}
+                    </div>
+                    <button onClick={() => setView('welcome')} className="mt-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                        Torna indietro
+                    </button>
+                </div>
+            );
+
+            const renderInstructorCourses = () => (
+                <div className="text-center">
+                    <h2 className="text-2xl font-bold mb-4">Corsi di {selectedInstructor}</h2>
+                    <ul className="list-disc list-inside">
+                        {gymData.istruttori[selectedInstructor].map(course => (
+                            <li key={course} className="mb-2">
+                                <strong>{course}</strong>
+                                <ul className="list-none pl-4">
+                                    {gymData.corsi[course]
+                                        .filter(session => session.istruttore === selectedInstructor)
+                                        .map((session, index) => (
+                                            <li key={index}>
+                                                {session.giorno} alle {session.ora}
+                                            </li>
+                                        ))}
+                                </ul>
+                            </li>
+                        ))}
+                    </ul>
+                    <button onClick={() => setSelectedInstructor(null)} className="mt-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                        Torna agli istruttori
+                    </button>
+                </div>
+            );
+
+            const renderCourses = () => (
+                <div className="text-center">
+                    <h2 className="text-2xl font-bold mb-4">Seleziona un Corso</h2>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {Object.keys(gymData.corsi).map(course => (
+                            <button
+                                key={course}
+                                onClick={() => setSelectedCourse(course)}
+                                className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
+                            >
+                                {course}
+                            </button>
+                        ))}
+                    </div>
+                    <button onClick={() => setView('welcome')} className="mt-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                        Torna indietro
+                    </button>
+                </div>
+            );
+
+            const renderCourseDetails = () => (
+                <div className="text-center">
+                    <h2 className="text-2xl font-bold mb-4">Dettagli del Corso: {selectedCourse}</h2>
+                    <ul className="list-disc list-inside">
+                        {gymData.corsi[selectedCourse].map((session, index) => (
+                            <li key={index}>
+                                {session.giorno} alle {session.ora} (Istruttore: {session.istruttore})
+                            </li>
+                        ))}
+                    </ul>
+                    <button onClick={() => setSelectedCourse(null)} className="mt-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                        Torna ai corsi
+                    </button>
+                </div>
+            );
+
+            const renderOrari = () => (
+                <div className="text-center">
+                    <h2 className="text-2xl font-bold mb-4">Orari</h2>
+                    <h3 className="text-xl font-bold mb-2">Orario Segreteria</h3>
+                    <ul className="list-disc list-inside">
+                        {gymData.orari.segreteria.map((orario, index) => (
+                            <li key={index}>{orario}</li>
+                        ))}
+                    </ul>
+                    <h3 className="text-xl font-bold mt-4 mb-2">Orario Sala Fitness</h3>
+                    <ul className="list-disc list-inside">
+                        {gymData.orari.salaFitness.map((orario, index) => (
+                            <li key={index}>{orario}</li>
+                        ))}
+                    </ul>
+                    <button onClick={() => setView('welcome')} className="mt-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                        Torna indietro
+                    </button>
+                </div>
+            );
+
+            const renderView = () => {
+                if (view === 'welcome') return renderWelcome();
+                if (view === 'istruttori') {
+                    return selectedInstructor ? renderInstructorCourses() : renderInstructors();
+                }
+                if (view === 'corsi') {
+                    return selectedCourse ? renderCourseDetails() : renderCourses();
+                }
+                if (view === 'orari') return renderOrari();
+                return <div>Contenuto per {view} in arrivo...</div>;
+            };
+
+            return (
+                <div className="container mx-auto p-4">
+                    {renderView()}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
