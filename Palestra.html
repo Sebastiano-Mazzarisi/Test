@@ -118,52 +118,81 @@
             const [view, setView] = React.useState('welcome');
             const [selectedInstructor, setSelectedInstructor] = React.useState(null);
             const [selectedCourse, setSelectedCourse] = React.useState(null);
+            const [selectedDay, setSelectedDay] = React.useState(null);
 
-            const renderWelcome = () => (
-                <div className="text-center">
-                    <h1 className="text-3xl font-bold mb-4">Benvenuto nella Palestra Joy Fit</h1>
-                    <p className="mb-4">Scegli cosa vuoi vedere</p>
-                    <div className="space-x-2">
-                        {['Corsi', 'Orari', 'Istruttori'].map(button => (
+            // Calcolo delle quantità
+            const courseCount = Object.keys(gymData.corsi).length; // 11
+            const instructorCount = Object.keys(gymData.istruttori).length; // 10
+            const daysOfWeek = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+            const daysCount = daysOfWeek.length; // 6
+
+            const renderWelcome = () => {
+                const menuButtons = [
+                    { label: 'Corsi', view: 'corsi', count: courseCount },
+                    { label: 'Orari', view: 'orari', count: null },
+                    { label: 'Istruttori', view: 'istruttori', count: instructorCount },
+                    { label: 'Giorni', view: 'giorni', count: daysCount }
+                ];
+
+                return (
+                    <div className="text-center">
+                        <h1 className="text-3xl font-bold mb-4">Benvenuto nella Palestra Joy Fit</h1>
+                        <p className="mb-4">Scegli cosa vuoi vedere</p>
+                        <div className="space-x-2">
+                            {menuButtons.map(button => (
+                                <button
+                                    key={button.label}
+                                    onClick={() => setView(button.view)}
+                                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                                >
+                                    {button.label}{button.count !== null ? ` [${button.count}]` : ''}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="mt-8">
                             <button
-                                key={button}
-                                onClick={() => setView(button.toLowerCase())}
-                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                                onClick={() => window.close()}
+                                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
                             >
-                                {button}
+                                Esci
                             </button>
-                        ))}
+                        </div>
                     </div>
-                    <div className="mt-8">
-                        <button
-                            onClick={() => window.close()}
-                            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                        >
-                            Esci
+                );
+            };
+
+            const renderInstructors = () => {
+                const instructors = Object.keys(gymData.istruttori);
+
+                // Calcola il numero di sessioni per ogni istruttore
+                const instructorSessionsCount = instructors.map(instructor => {
+                    let count = 0;
+                    gymData.istruttori[instructor].forEach(course => {
+                        count += gymData.corsi[course].filter(session => session.istruttore === instructor).length;
+                    });
+                    return { instructor, count };
+                });
+
+                return (
+                    <div className="text-center">
+                        <h2 className="text-2xl font-bold mb-4">Istruttori</h2>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            {instructorSessionsCount.map(item => (
+                                <button
+                                    key={item.instructor}
+                                    onClick={() => setSelectedInstructor(item.instructor)}
+                                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                                >
+                                    {item.instructor} [{item.count}]
+                                </button>
+                            ))}
+                        </div>
+                        <button onClick={() => setView('welcome')} className="mt-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                            Torna indietro
                         </button>
                     </div>
-                </div>
-            );
-
-            const renderInstructors = () => (
-                <div className="text-center">
-                    <h2 className="text-2xl font-bold mb-4">Istruttori</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {Object.keys(gymData.istruttori).map(instructor => (
-                            <button
-                                key={instructor}
-                                onClick={() => setSelectedInstructor(instructor)}
-                                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-                            >
-                                {instructor}
-                            </button>
-                        ))}
-                    </div>
-                    <button onClick={() => setView('welcome')} className="mt-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                        Torna indietro
-                    </button>
-                </div>
-            );
+                );
+            };
 
             const renderInstructorCourses = () => (
                 <div className="text-center">
@@ -190,25 +219,35 @@
                 </div>
             );
 
-            const renderCourses = () => (
-                <div className="text-center">
-                    <h2 className="text-2xl font-bold mb-4">Seleziona un Corso</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {Object.keys(gymData.corsi).map(course => (
-                            <button
-                                key={course}
-                                onClick={() => setSelectedCourse(course)}
-                                className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
-                            >
-                                {course}
-                            </button>
-                        ))}
+            const renderCourses = () => {
+                const courses = Object.keys(gymData.corsi);
+
+                // Calcola il numero di sessioni per ogni corso
+                const courseSessionsCount = courses.map(course => {
+                    const count = gymData.corsi[course].length;
+                    return { course, count };
+                });
+
+                return (
+                    <div className="text-center">
+                        <h2 className="text-2xl font-bold mb-4">Seleziona un Corso</h2>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            {courseSessionsCount.map(item => (
+                                <button
+                                    key={item.course}
+                                    onClick={() => setSelectedCourse(item.course)}
+                                    className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
+                                >
+                                    {item.course} [{item.count}]
+                                </button>
+                            ))}
+                        </div>
+                        <button onClick={() => setView('welcome')} className="mt-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                            Torna indietro
+                        </button>
                     </div>
-                    <button onClick={() => setView('welcome')} className="mt-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                        Torna indietro
-                    </button>
-                </div>
-            );
+                );
+            };
 
             const renderCourseDetails = () => (
                 <div className="text-center">
@@ -225,6 +264,80 @@
                     </button>
                 </div>
             );
+
+            const renderDays = () => {
+                const days = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+
+                // Calcola il numero di sessioni per ogni giorno
+                const daySessionsCount = days.map(day => {
+                    let count = 0;
+                    Object.values(gymData.corsi).forEach(courseSessions => {
+                        count += courseSessions.filter(session => session.giorno === day).length;
+                    });
+                    return { day, count };
+                });
+
+                return (
+                    <div className="text-center">
+                        <h2 className="text-2xl font-bold mb-4">Seleziona un Giorno</h2>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            {daySessionsCount.map(item => (
+                                <button
+                                    key={item.day}
+                                    onClick={() => setSelectedDay(item.day)}
+                                    className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+                                >
+                                    {item.day} [{item.count}]
+                                </button>
+                            ))}
+                        </div>
+                        <button onClick={() => setView('welcome')} className="mt-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                            Torna indietro
+                        </button>
+                    </div>
+                );
+            };
+
+            const renderDayCourses = () => {
+                const daySessions = [];
+                Object.keys(gymData.corsi).forEach(courseName => {
+                    gymData.corsi[courseName].forEach(session => {
+                        if (session.giorno === selectedDay) {
+                            daySessions.push({
+                                courseName,
+                                ...session
+                            });
+                        }
+                    });
+                });
+
+                // Ordina i corsi per ora crescente
+                daySessions.sort((a, b) => {
+                    const [hourA, minuteA] = a.ora.split(':').map(Number);
+                    const [hourB, minuteB] = b.ora.split(':').map(Number);
+                    return hourA * 60 + minuteA - (hourB * 60 + minuteB);
+                });
+
+                return (
+                    <div className="text-center">
+                        <h2 className="text-2xl font-bold mb-4">Corsi del {selectedDay}</h2>
+                        {daySessions.length > 0 ? (
+                            <ul className="list-disc list-inside">
+                                {daySessions.map((session, index) => (
+                                    <li key={index}>
+                                        {session.ora}: {session.courseName} (Istruttore: {session.istruttore})
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p>Nessun corso disponibile per questo giorno.</p>
+                        )}
+                        <button onClick={() => setSelectedDay(null)} className="mt-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                            Torna ai giorni
+                        </button>
+                    </div>
+                );
+            };
 
             const renderOrari = () => (
                 <div className="text-center">
@@ -256,6 +369,9 @@
                     return selectedCourse ? renderCourseDetails() : renderCourses();
                 }
                 if (view === 'orari') return renderOrari();
+                if (view === 'giorni') {
+                    return selectedDay ? renderDayCourses() : renderDays();
+                }
                 return <div>Contenuto per {view} in arrivo...</div>;
             };
 
