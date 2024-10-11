@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz sulle nascite</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .question-container {
+            margin-bottom: 20px;
+            font-weight: bold; /* Grassetto per la domanda */
+        }
+        .answer {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff8dc; /* Giallino chiaro */
+        }
+        .answer.correct {
+            background-color: lightgreen;
+        }
+        .answer.incorrect {
+            background-color: lightcoral;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+        .counters {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        /* Ingrandisci i pulsanti per schermi più piccoli */
+        @media only screen and (max-width: 600px) {
+            button {
+                font-size: 20px; /* Aumenta la dimensione del testo del pulsante */
+                padding: 15px; /* Aumenta il padding (spazio interno) */
+                width: 100%; /* Fai in modo che il pulsante occupi tutta la larghezza */
+                margin: 10px 0; /* Spazio sopra e sotto i pulsanti */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Quiz sulle nascite</h1>
+
+    <div class="quiz-container">
+        <div id="question" class="question-container"></div>
+        <div id="answers"></div>
+    </div>
+
+    <div class="controls">
+        <button id="continueBtn" onclick="nextQuestion()">Continua</button>
+        <button onclick="endQuiz()">Esci</button>
+    </div>
+
+    <!-- Contatori delle risposte indovinate e totali -->
+    <div class="counters">
+        <span id="correctAnswers">0</span>/<span id="totalAnswers">0</span>
+    </div>
+
+    <script>
+        const questions = [
+            { question: "Quando è nata Angela Gasparro?", answers: ["05-06-1909", "17-12-1920", "05-03-1937"], correct: "05-06-1909" },
+            { question: "Quando è nato Onofrio Mazzarisi?", answers: ["17-12-1920", "05-06-1909", "05-01-1933"], correct: "17-12-1920" },
+            { question: "Quando è nata Maria Rosa Longo?", answers: ["05-01-1933", "16-11-1933", "05-03-1937"], correct: "05-01-1933" },
+            { question: "Quando è nato Luigi Pricci?", answers: ["16-11-1933", "05-06-1909", "17-12-1920"], correct: "16-11-1933" },
+            { question: "Quando è nata Teresa Grilletti?", answers: ["05-03-1937", "05-08-1951", "13-01-1957"], correct: "05-03-1937" },
+            { question: "Quando è nato Onofrio Lorusso?", answers: ["05-08-1951", "25-11-1953", "16-11-1933"], correct: "05-08-1951" },
+            { question: "Quando è nata Enza Nitti?", answers: ["25-11-1953", "13-01-1957", "06-02-1957"], correct: "25-11-1953" },
+            { question: "Quando è nata Angela Pricci?", answers: ["13-01-1957", "07-05-1957", "06-02-1957"], correct: "13-01-1957" },
+            { question: "Quando è nato Domenico Lefemine?", answers: ["06-02-1957", "10-09-1957", "21-05-1958"], correct: "06-02-1957" },
+            { question: "Quando è nato Sebastiano Mazzarisi?", answers: ["07-05-1957", "10-09-1957", "12-04-1961"], correct: "07-05-1957" },
+            { question: "Quando è nata Maria Antonietta Pricci?", answers: ["21-05-1958", "22-08-1958", "23-03-1960"], correct: "21-05-1958" },
+            { question: "Quando è nato Vito Mazzarisi?", answers: ["22-08-1958", "05-07-1961", "12-04-1961"], correct: "22-08-1958" },
+            { question: "Quando è nata Anna Pellegrini?", answers: ["23-03-1960", "05-06-1992", "24-02-1964"], correct: "23-03-1960" },
+            { question: "Quando è nata Maria Carmela Pricci?", answers: ["12-04-1961", "24-05-1997", "05-07-1961"], correct: "12-04-1961" },
+            { question: "Quando è nato Francesco Mazzarisi?", answers: ["05-07-1961", "11-09-1963", "12-08-1968"], correct: "05-07-1961" },
+            { question: "Quando è nata Maria Mazzarisi?", answers: ["05-07-1961", "02-01-1969", "24-05-1997"], correct: "05-07-1961" },
+            { question: "Quando è nata Vanna Pricci?", answers: ["11-09-1963", "24-02-1964", "22-08-1958"], correct: "11-09-1963" },
+            { question: "Quando è nato Domenico Mazzarisi?", answers: ["24-02-1964", "24-10-1964", "12-07-1969"], correct: "24-02-1964" },
+            { question: "Quando è nato Giovanni Pricci?", answers: ["24-10-1964", "12-08-1968", "16-11-1996"], correct: "24-10-1964" },
+            { question: "Quando è nato Giuseppe Pricci?", answers: ["12-08-1968", "01-04-1994", "28-12-1999"], correct: "12-08-1968" },
+            { question: "Quando è nata Anna Sabatelli?", answers: ["02-01-1969", "17-11-1975", "05-06-1992"], correct: "02-01-1969" },
+            { question: "Quando è nata Anna Trivisani?", answers: ["12-07-1969", "20-07-2013", "08-03-1974"], correct: "12-07-1969" },
+            { question: "Quando è nata Tiziana Pricci?", answers: ["27-06-1972", "04-07-1975", "06-04-1980"], correct: "27-06-1972" },
+            { question: "Quando è nato Riccardo Dalena?", answers: ["11-04-1973", "05-06-1992", "20-03-2000"], correct: "11-04-1973" },
+            { question: "Quando è nato Gianni Rotondi?", answers: ["08-03-1974", "17-07-2008", "29-11-2015"], correct: "08-03-1974" },
+            { question: "Quando è nata Gemma Lepore?", answers: ["04-07-1975", "11-10-1988", "12-02-2019"], correct: "04-07-1975" },
+            { question: "Quando è nato Benedetto Lorusso?", answers: ["17-11-1975", "06-04-1980", "20-06-2001"], correct: "17-11-1975" },
+            { question: "Quando è nata Cinzia Lorusso?", answers: ["06-04-1980", "28-12-1999", "20-03-2000"], correct: "06-04-1980" },
+            { question: "Quando è nato Marco Mazzarisi?", answers: ["28-04-1987", "09-10-1988", "29-06-2004"], correct: "28-04-1987" },
+            { question: "Quando è nato Daniele Mazzarisi?", answers: ["09-10-1988", "21-01-1989", "12-04-1961"], correct: "09-10-1988" },
+            { question: "Quando è nata Alessandra Mazzarisi?", answers: ["11-10-1988", "07-06-2006", "21-05-1958"], correct: "11-10-1988" },
+            { question: "Quando è nata Maria Grazia Mazzarisi?", answers: ["21-01-1989", "11-09-1963", "29-11-2015"], correct: "21-01-1989" },
+            { question: "Quando è nato Onofrio Mazzarisi?", answers: ["05-06-1992", "06-02-1957", "11-04-1973"], correct: "05-06-1992" },
+            { question: "Quando è nato Andrea Mazzarisi?", answers: ["08-11-1993", "16-11-1933", "24-10-1964"], correct: "08-11-1993" },
+            { question: "Quando è nata Teresa Mazzarisi?", answers: ["01-04-1994", "17-12-1920", "16-11-1996"], correct: "01-04-1994" },
+            { question: "Quando è nata Flavia Lefemine?", answers: ["16-11-1996", "28-12-1999", "07-06-2006"], correct: "16-11-1996" },
+            { question: "Quando è nato Martino Chiarappa?", answers: ["24-05-1997", "20-03-2000", "12-02-2019"], correct: "24-05-1997" },
+            { question: "Quando è nata Marilù Mazzarisi?", answers: ["28-12-1999", "24-02-1964", "12-04-1961"], correct: "28-12-1999" },
+            { question: "Quando è nato Francesco Lefemine?", answers: ["20-03-2000", "04-07-1975", "05-03-1937"], correct: "20-03-2000" },
+            { question: "Quando è nato Cristiano Chiarappa?", answers: ["20-06-2001", "11-09-1963", "16-11-1933"], correct: "20-06-2001" },
+            { question: "Quando è nata Gilda Pricci?", answers: ["29-06-2004", "21-05-1958", "06-02-1957"], correct: "29-06-2004" },
+            { question: "Quando è nata Asia Pricci?", answers: ["07-06-2006", "25-11-1953", "05-06-1992"], correct: "07-06-2006" },
+            { question: "Quando è nata Gessie Chira?", answers: ["17-07-2008", "11-04-1973", "13-01-1957"], correct: "17-07-2008" },
+            { question: "Quando è nato Alessandro Lorusso?", answers: ["17-07-2010", "20-07-2013", "09-10-1988"], correct: "17-07-2010" },
+            { question: "Quando è nata Alice Lorusso?", answers: ["20-07-2013", "02-01-1969", "04-07-1975"], correct: "20-07-2013" },
+            { question: "Quando è nata Nina Lorusso?", answers: ["29-11-2015", "07-06-2006", "28-12-1999"], correct: "29-11-2015" },
+            { question: "Quando è nata Nicoletta Rotondi?", answers: ["12-02-2019", "20-06-2001", "05-06-1992"], correct: "12-02-2019" }
+        ];
+
+        let currentQuestionIndex = 0;
+        let correctAnswersCount = 0; // Contatore delle risposte corrette
+        let totalAnswersCount = 0; // Contatore delle risposte totali
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Mischia le domande una volta al caricamento
+        shuffle(questions);
+
+        // Carica la domanda corrente e le risposte
+        function loadQuestion() {
+            const questionData = questions[currentQuestionIndex];
+            document.getElementById('question').innerHTML = questionData.question;
+            const answersDiv = document.getElementById('answers');
+            answersDiv.innerHTML = '';
+
+            const shuffledAnswers = [...questionData.answers];
+            shuffle(shuffledAnswers);
+
+            shuffledAnswers.forEach((answer) => {
+                const answerElement = document.createElement('div');
+                answerElement.classList.add('answer');
+                answerElement.innerHTML = answer;
+                answerElement.onclick = () => checkAnswer(answerElement, answer, questionData.correct);
+                answersDiv.appendChild(answerElement);
+            });
+
+            document.getElementById('continueBtn').style.display = 'inline';
+        }
+
+        function checkAnswer(element, answer, correctAnswer) {
+            const isCorrect = answer === correctAnswer;
+            totalAnswersCount++;
+            if (isCorrect) {
+                element.classList.add('correct');
+                correctAnswersCount++;
+            } else {
+                element.classList.add('incorrect');
+            }
+            document.querySelectorAll('.answer').forEach(el => el.onclick = null);
+            updateCounters();
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex >= questions.length) {
+                currentQuestionIndex = 0;
+                shuffle(questions);
+            }
+            loadQuestion();
+        }
+
+        function updateCounters() {
+            document.getElementById('correctAnswers').innerText = correctAnswersCount;
+            document.getElementById('totalAnswers').innerText = totalAnswersCount;
+        }
+
+        function endQuiz() {
+            const summaryMessage = `Hai risposto correttamente a ${correctAnswersCount} domande su ${totalAnswersCount}.`;
+            document.body.innerHTML = `<h2>Grazie per aver partecipato al quiz!</h2><p>${summaryMessage}</p>`;
+        }
+
+        window.onload = loadQuestion;
+    </script>
+</body>
+</html>
