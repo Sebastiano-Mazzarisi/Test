@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Tesi Vito Zonno</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .question-container {
+            margin-bottom: 20px;
+            font-weight: bold; /* Grassetto per la domanda */
+        }
+        .answer {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff8dc; /* Giallino chiaro */
+        }
+        .answer.correct {
+            background-color: lightgreen;
+        }
+        .answer.incorrect {
+            background-color: lightcoral;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+        .counters {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-container">
+        <div id="question" class="question-container"></div>
+        <div id="answers"></div>
+    </div>
+
+    <div class="controls">
+        <button id="continueBtn" onclick="nextQuestion()">Continua</button>
+        <button onclick="endQuiz()">Esci</button>
+    </div>
+
+    <!-- Contatori delle risposte indovinate e totali -->
+    <div class="counters">
+        <span id="correctAnswers">0</span>/<span id="totalAnswers">0</span>
+    </div>
+
+    <script>
+        // Dati del quiz importati dal file CSV
+        const questions = [
+            "Cos'è la teoria della scelta razionale?,Una teoria sull'ottimizzazione delle risorse,Un modello per decisioni incerte,Una teoria che valuta i processi decisionali secondo l'utilità attesa,Una teoria che valuta i processi decisionali secondo l'utilità attesa",
+            "Chi ha elaborato la teoria della razionalità limitata?,Daniel Kahneman,Herbert Simon,Amos Tversky,Herbert Simon",
+            "Quale direttiva è stata introdotta dall'UE per ridurre i conflitti di interesse?,Mifid 1,Mifid 2,Mifid 3,Mifid 1",
+            "In quale anno è entrata in vigore la Mifid 2?,2015,2017,2018,2018",
+            "Cos'è la Prospect Theory?,Una teoria sui rischi finanziari,Una teoria comportamentale che mostra come gli individui commettono errori cognitivi,Un modello classico di rischio,Una teoria comportamentale che mostra come gli individui commettono errori cognitivi"
+        ];
+
+        let currentQuestionIndex = 0;
+        let correctAnswer = "";
+        let correctAnswersCount = 0; // Contatore delle risposte corrette
+        let totalAnswersCount = 0; // Contatore delle risposte totali
+
+        // Mischia casualmente l'array
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Mischia le domande una volta al caricamento
+        shuffle(questions);
+
+        // Carica la domanda corrente e le risposte
+        function loadQuestion() {
+            const questionData = questions[currentQuestionIndex].split(',');
+            const questionText = questionData[0];
+            let answers = questionData.slice(1, 4);
+            correctAnswer = questionData[4];
+
+            document.getElementById('question').innerHTML = questionText;
+            const answersDiv = document.getElementById('answers');
+            answersDiv.innerHTML = '';
+
+            // Mischia le risposte
+            shuffle(answers);
+
+            answers.forEach((answer, index) => {
+                const answerElement = document.createElement('div');
+                answerElement.classList.add('answer');
+                answerElement.innerHTML = answer;
+                answerElement.onclick = () => checkAnswer(answerElement, answer);
+                answersDiv.appendChild(answerElement);
+            });
+
+            // Mostra il pulsante "Continua" anche prima che l'utente risponda
+            document.getElementById('continueBtn').style.display = 'inline';
+        }
+
+        // Controlla la risposta e colora correttamente l'elemento
+        function checkAnswer(element, answer) {
+            const isCorrect = answer === correctAnswer;
+            totalAnswersCount++; // Incrementa il contatore delle risposte totali
+            if (isCorrect) {
+                element.classList.add('correct');
+                correctAnswersCount++; // Incrementa il contatore delle risposte corrette
+            } else {
+                element.classList.add('incorrect');
+            }
+            document.querySelectorAll('.answer').forEach(el => el.onclick = null); // Disabilita clic sulle altre risposte
+            updateCounters(); // Aggiorna i contatori
+        }
+
+        // Mostra la prossima domanda o ricomincia se finisce
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex >= questions.length) {
+                currentQuestionIndex = 0; // Ricomincia da capo
+                shuffle(questions); // Mischia di nuovo
+            }
+            loadQuestion();
+        }
+
+        // Aggiorna i contatori
+        function updateCounters() {
+            document.getElementById('correctAnswers').innerText = correctAnswersCount;
+            document.getElementById('totalAnswers').innerText = totalAnswersCount;
+        }
+
+        // Esci dal quiz e mostra il riepilogo
+        function endQuiz() {
+            const summaryMessage = `Hai risposto correttamente a ${correctAnswersCount} domande su ${totalAnswersCount}.`;
+            document.body.innerHTML = `<h2>Grazie per aver partecipato al quiz!</h2><p>${summaryMessage}</p>`;
+        }
+
+        // Carica la prima domanda al caricamento della pagina
+        window.onload = loadQuestion;
+    </script>
+</body>
+</html>
