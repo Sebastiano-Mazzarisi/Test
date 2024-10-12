@@ -12,6 +12,7 @@
         .question-container {
             margin-bottom: 20px;
             font-weight: bold; /* Grassetto per la domanda */
+            font-size: 1.8em; /* Aumenta la dimensione del carattere della domanda */
         }
         .answer {
             display: block;
@@ -50,6 +51,9 @@
 <body>
 
     <div class="quiz-container">
+        <div class="logo-container">
+            <img src="Logo.jpg" alt="Logo Università degli Studi di Teramo" style="width: 337.5px; margin-bottom: 20px;">
+        </div>
         <div id="question" class="question-container"></div>
         <div id="answers"></div>
     </div>
@@ -67,11 +71,119 @@
     <script>
         // Dati del quiz importati dal file CSV
         const questions = [
-            "Cos'è la teoria della scelta razionale?,Una teoria sull'ottimizzazione delle risorse,Un modello per decisioni incerte,Una teoria che valuta i processi decisionali secondo l'utilità attesa,Una teoria che valuta i processi decisionali secondo l'utilità attesa",
-            "Chi ha elaborato la teoria della razionalità limitata?,Daniel Kahneman,Herbert Simon,Amos Tversky,Herbert Simon",
-            "Quale direttiva è stata introdotta dall'UE per ridurre i conflitti di interesse?,Mifid 1,Mifid 2,Mifid 3,Mifid 1",
-            "In quale anno è entrata in vigore la Mifid 2?,2015,2017,2018,2018",
-            "Cos'è la Prospect Theory?,Una teoria sui rischi finanziari,Una teoria comportamentale che mostra come gli individui commettono errori cognitivi,Un modello classico di rischio,Una teoria comportamentale che mostra come gli individui commettono errori cognitivi"
+    "Cos'è la teoria della scelta razionale?,Una teoria sull'ottimizzazione delle risorse,Un modello per decisioni incerte,Una teoria che valuta i processi decisionali secondo l'utilità attesa,Una teoria che valuta i processi decisionali secondo l'utilità attesa",
+    "Chi ha elaborato la teoria della razionalità limitata?,Daniel Kahneman,Herbert Simon,Amos Tversky,Herbert Simon",
+    "Quale direttiva è stata introdotta dall'UE per ridurre i conflitti di interesse?,Mifid 1,Mifid 2,Mifid 3,Mifid 1",
+    "In quale anno è entrata in vigore la Mifid 2?,2015,2017,2018,2018",
+    "Cos'è la Prospect Theory?,Una teoria sui rischi finanziari,Una teoria comportamentale che mostra come gli individui commettono errori cognitivi,Un modello classico di rischio,Una teoria comportamentale che mostra come gli individui commettono errori cognitivi",
+    "Chi è il padre della finanza comportamentale?,Richard Thaler,Robert Shiller,Daniel Kahneman,Richard Thaler",
+    "Quale concetto è fondamentale nella teoria della razionalità limitata?,Limitazioni cognitive,Ottimizzazione,Arbitraggio,Limitazioni cognitive",
+    "Chi ha formulato la teoria delle prospettive?,Daniel Kahneman,Amos Tversky,Richard Thaler,Daniel Kahneman",
+    "Qual è l'obiettivo principale della Mifid?,Tutela degli investitori,Riduzione delle tasse,Creazione di un mercato unico,Tutela degli investitori",
+    "Qual è il significato di 'nudging' in economia comportamentale?,Incoraggiare comportamenti positivi,Penalizzare comportamenti errati,Eliminare opzioni,Incoraggiare comportamenti positivi",
+    "Chi ha vinto il Premio Nobel per l'economia per il lavoro sulla finanza comportamentale nel 2002?,Daniel Kahneman,Amos Tversky,Richard Thaler,Daniel Kahneman",
+    "Quale fenomeno descrive la tendenza delle persone a sovrastimare le loro capacità?,Overconfidence,Anchoring,Loss aversion,Overconfidence",
+    "Cos'è l'anchoring?,Fare affidamento su una prima informazione ricevuta,Paura di perdere,Fissare un obiettivo di guadagno,Fare affidamento su una prima informazione ricevuta",
+    "Qual è l'effetto di framing?,L'influenza del modo in cui le informazioni vengono presentate,La memoria selettiva,La pressione sociale,L'influenza del modo in cui le informazioni vengono presentate",
+    "Chi ha sviluppato il concetto di 'Homo Economicus'?,Adam Smith,Herbert Simon,Richard Thaler,Adam Smith",
+    "Quale dei seguenti è un bias cognitivo?,Confirmation bias,Arbitraggio,Equilibrio generale,Confirmation bias",
+    "Cosa descrive la loss aversion?,La tendenza delle persone a preferire evitare le perdite piuttosto che ottenere guadagni equivalenti,La paura di perdere tutto,Il desiderio di guadagnare di più,La tendenza delle persone a preferire evitare le perdite piuttosto che ottenere guadagni equivalenti",
+    "Chi ha introdotto il concetto di 'razionalità limitata'?,Herbert Simon,Daniel Kahneman,Amos Tversky,Herbert Simon",
+    "Cos'è il 'paradosso di Allais'?,Un paradosso che dimostra la violazione dell'assioma dell'indipendenza nelle scelte,Un paradosso economico sulle scelte tra risparmio e consumo,Un esperimento di fiducia,Un paradosso che dimostra la violazione dell'assioma dell'indipendenza nelle scelte",
+    "Cosa significa 'esposizione al rischio'?,La quantità di rischio a cui si è esposti in un investimento,Il guadagno atteso,Il numero di opzioni disponibili,La quantità di rischio a cui si è esposti in un investimento",
+    "Cos'è l'avversione alle perdite?,La tendenza a evitare perdite più che ottenere guadagni,Il desiderio di rischio,La paura del fallimento,La tendenza a evitare perdite più che ottenere guadagni",
+    "Chi ha teorizzato l'euristica della disponibilità?,Amos Tversky,Daniel Kahneman,Richard Thaler,Amos Tversky",
+    "Cos'è l'euristica?,Una scorciatoia mentale,Un algoritmo matematico,Una prova statistica,Una scorciatoia mentale",
+    "Quale teoria spiega il comportamento irrazionale degli investitori?,Finanza comportamentale,Teoria classica,Teoria dei giochi,Finanza comportamentale",
+    "Chi ha scritto 'Misbehaving'?,Richard Thaler,Daniel Kahneman,Robert Shiller,Richard Thaler",
+    "Qual è il significato di 'conferma del bias'?,Tendenza a cercare informazioni che confermano le nostre convinzioni,Evita informazioni contrarie,Ignora informazioni casuali,Tendenza a cercare informazioni che confermano le nostre convinzioni",
+    "Cosa significa 'effetto dotazione'?,Valutare qualcosa di più quando lo si possiede,Valutare meno,Ignorare il valore,Valutare qualcosa di più quando lo si possiede",
+    "Quale dei seguenti è un esempio di comportamento razionale?,Investire sulla base di informazioni accurate,Seguire una moda,Reagire impulsivamente,Investire sulla base di informazioni accurate",
+    "Chi è considerato uno dei pionieri dell'economia comportamentale?,Amos Tversky,Adam Smith,David Ricardo,Amos Tversky",
+    "Cosa implica il concetto di razionalità limitata?,Decisioni prese con risorse cognitive limitate,Decisioni ottimali,Decisioni senza errore,Decisioni prese con risorse cognitive limitate",
+    "Quale tecnica può essere utilizzata per migliorare le scelte?,Nudging,Forcing,Divieto,Nudging",
+    "Cos'è il bias di rappresentatività?,Sovrastimare la probabilità di un evento basato su somiglianze,Valutare senza informazioni,Agire senza pensare,Sovrastimare la probabilità di un evento basato su somiglianze",
+    "Chi ha introdotto il concetto di utilità attesa?,John von Neumann,Adam Smith,Herbert Simon,John von Neumann",
+    "Cosa descrive il concetto di autoefficacia?,La fiducia nelle proprie capacità di raggiungere un obiettivo,La tendenza ad evitare errori,Il desiderio di guadagnare di più,La fiducia nelle proprie capacità di raggiungere un obiettivo",
+    "Cos'è l'effetto placebo in economia comportamentale?,Il miglioramento dovuto solo alla credenza di un trattamento,Un errore sistematico,Una tendenza a investire di più,Il miglioramento dovuto solo alla credenza di un trattamento",
+    "Chi ha formulato la teoria del prospetto?,Daniel Kahneman e Amos Tversky,Richard Thaler,Robert Shiller,Daniel Kahneman e Amos Tversky",
+    "Cos'è il fallimento del mercato?,Situazione in cui il mercato non riesce a allocare risorse efficientemente,Una crescita economica,Un aumento dei prezzi,Situazione in cui il mercato non riesce a allocare risorse efficientemente",
+    "Qual è il ruolo dell'informazione asimmetrica?,Crea squilibri nel mercato,Permette un'allocazione efficiente,Riduce il rischio,Crea squilibri nel mercato",
+    "Cos'è il comportamento gregario?,Seguire il comportamento degli altri,Agire in modo indipendente,Massimizzare l'utilità personale,Seguire il comportamento degli altri",
+    "Cosa significa 'moral hazard'?,Rischio che un individuo prenda decisioni rischiose perché non ne sopporta le conseguenze,Evita comportamenti rischiosi,Un vantaggio morale,Rischio che un individuo prenda decisioni rischiose perché non ne sopporta le conseguenze",
+    "Cos'è l'overconfidence bias?,Sopravvalutazione delle proprie capacità,Paura del fallimento,Indecisione,Sopravvalutazione delle proprie capacità",
+    "Cosa significa 'sunk cost fallacy'?,Tendenza a continuare un investimento a causa dei costi già sostenuti,Un investimento irrazionale,Un errore di previsione,Tendenza a continuare un investimento a causa dei costi già sostenuti",
+    "Cos'è la 'teoria del prospetto'?,Teoria che descrive come le persone scelgono tra probabilità di guadagno o perdita,Una teoria dell'ottimizzazione,Un modello di mercato,Teoria che descrive come le persone scelgono tra probabilità di guadagno o perdita",
+    "Chi ha scritto 'Thinking, Fast and Slow'?,Daniel Kahneman,Amos Tversky,Richard Thaler,Daniel Kahneman",
+    "Cosa rappresenta il 'punto di riferimento' in economia comportamentale?,Il valore di riferimento utilizzato per valutare i guadagni o le perdite,Il prezzo di mercato,Il livello di rischio,Il valore di riferimento utilizzato per valutare i guadagni o le perdite",
+    "Cosa significa 'fallacia della pianificazione'?,Sottostimare il tempo necessario per completare un progetto,Esagerare i costi,Investire senza riflettere,Sottostimare il tempo necessario per completare un progetto",
+    "Cos'è la 'fallacia dell'ottimismo'?,La tendenza a sottovalutare i rischi e sovrastimare le proprie capacità,Ignorare completamente le possibilità di fallimento,Aumentare la fiducia altrui,La tendenza a sottovalutare i rischi e sovrastimare le proprie capacità",
+    "Qual è l'effetto della dissonanza cognitiva?,L'incongruenza tra atteggiamenti e comportamenti,Un equilibrio cognitivo,Un aumento di concentrazione,L'incongruenza tra atteggiamenti e comportamenti",
+    "Cos'è l'effetto alone?,La tendenza a lasciarsi influenzare da un'impressione generale,Un errore di previsione,Un fenomeno raro,La tendenza a lasciarsi influenzare da un'impressione generale",
+    "Cos'è il comportamento di escalation dell'impegno?,Continuare un'azione nonostante le prove che suggeriscano di abbandonarla,Abbandonare immediatamente ogni rischio,Investire meno in situazioni incerte,Continuare un'azione nonostante le prove che suggeriscano di abbandonarla",
+    "Chi ha proposto la 'teoria del ruolo sociale'?,Alice Eagly,Daniel Kahneman,Amos Tversky,Alice Eagly",
+        "Cos'è la teoria della scelta razionale?,Una teoria sull'ottimizzazione delle risorse,Un modello per decisioni incerte,Una teoria che valuta i processi decisionali secondo l'utilità attesa,Una teoria che valuta i processi decisionali secondo l'utilità attesa",
+    "Chi ha elaborato la teoria della razionalità limitata?,Daniel Kahneman,Herbert Simon,Amos Tversky,Herbert Simon",
+    "Quale direttiva è stata introdotta dall'UE per ridurre i conflitti di interesse?,Mifid 1,Mifid 2,Mifid 3,Mifid 1",
+    "In quale anno è entrata in vigore la Mifid 2?,2015,2017,2018,2018",
+    "Cos'è la Prospect Theory?,Una teoria sui rischi finanziari,Una teoria comportamentale che mostra come gli individui commettono errori cognitivi,Un modello classico di rischio,Una teoria comportamentale che mostra come gli individui commettono errori cognitivi",
+    "Chi è il padre della finanza comportamentale?,Richard Thaler,Robert Shiller,Daniel Kahneman,Richard Thaler",
+    "Quale concetto è fondamentale nella teoria della razionalità limitata?,Limitazioni cognitive,Ottimizzazione,Arbitraggio,Limitazioni cognitive",
+    "Chi ha formulato la teoria delle prospettive?,Daniel Kahneman,Amos Tversky,Richard Thaler,Daniel Kahneman",
+    "Qual è l'obiettivo principale della Mifid?,Tutela degli investitori,Riduzione delle tasse,Creazione di un mercato unico,Tutela degli investitori",
+    "Qual è il significato di 'nudging' in economia comportamentale?,Incoraggiare comportamenti positivi,Penalizzare comportamenti errati,Eliminare opzioni,Incoraggiare comportamenti positivi",
+    "Chi ha vinto il Premio Nobel per l'economia per il lavoro sulla finanza comportamentale nel 2002?,Daniel Kahneman,Amos Tversky,Richard Thaler,Daniel Kahneman",
+    "Quale fenomeno descrive la tendenza delle persone a sovrastimare le loro capacità?,Overconfidence,Anchoring,Loss aversion,Overconfidence",
+    "Cos'è l'anchoring?,Fare affidamento su una prima informazione ricevuta,Paura di perdere,Fissare un obiettivo di guadagno,Fare affidamento su una prima informazione ricevuta",
+    "Qual è l'effetto di framing?,L'influenza del modo in cui le informazioni vengono presentate,La memoria selettiva,La pressione sociale,L'influenza del modo in cui le informazioni vengono presentate",
+    "Chi ha sviluppato il concetto di 'Homo Economicus'?,Adam Smith,Herbert Simon,Richard Thaler,Adam Smith",
+    "Quale dei seguenti è un bias cognitivo?,Confirmation bias,Arbitraggio,Equilibrio generale,Confirmation bias",
+    "Cosa descrive la loss aversion?,La tendenza delle persone a preferire evitare le perdite piuttosto che ottenere guadagni equivalenti,La paura di perdere tutto,Il desiderio di guadagnare di più,La tendenza delle persone a preferire evitare le perdite piuttosto che ottenere guadagni equivalenti",
+    "Chi ha introdotto il concetto di 'razionalità limitata'?,Herbert Simon,Daniel Kahneman,Amos Tversky,Herbert Simon",
+    "Cos'è il 'paradosso di Allais'?,Un paradosso che dimostra la violazione dell'assioma dell'indipendenza nelle scelte,Un paradosso economico sulle scelte tra risparmio e consumo,Un esperimento di fiducia,Un paradosso che dimostra la violazione dell'assioma dell'indipendenza nelle scelte",
+    "Cosa significa 'esposizione al rischio'?,La quantità di rischio a cui si è esposti in un investimento,Il guadagno atteso,Il numero di opzioni disponibili,La quantità di rischio a cui si è esposti in un investimento",
+    "Cos'è l'avversione alle perdite?,La tendenza a evitare perdite più che ottenere guadagni,Il desiderio di rischio,La paura del fallimento,La tendenza a evitare perdite più che ottenere guadagni",
+    "Chi ha teorizzato l'euristica della disponibilità?,Amos Tversky,Daniel Kahneman,Richard Thaler,Amos Tversky",
+    "Cos'è l'euristica?,Una scorciatoia mentale,Un algoritmo matematico,Una prova statistica,Una scorciatoia mentale",
+    "Quale teoria spiega il comportamento irrazionale degli investitori?,Finanza comportamentale,Teoria classica,Teoria dei giochi,Finanza comportamentale",
+    "Chi ha scritto 'Misbehaving'?,Richard Thaler,Daniel Kahneman,Robert Shiller,Richard Thaler",
+    "Qual è il significato di 'conferma del bias'?,Tendenza a cercare informazioni che confermano le nostre convinzioni,Evita informazioni contrarie,Ignora informazioni casuali,Tendenza a cercare informazioni che confermano le nostre convinzioni",
+    "Cosa significa 'effetto dotazione'?,Valutare qualcosa di più quando lo si possiede,Valutare meno,Ignorare il valore,Valutare qualcosa di più quando lo si possiede",
+    "Quale dei seguenti è un esempio di comportamento razionale?,Investire sulla base di informazioni accurate,Seguire una moda,Reagire impulsivamente,Investire sulla base di informazioni accurate",
+    "Chi è considerato uno dei pionieri dell'economia comportamentale?,Amos Tversky,Adam Smith,David Ricardo,Amos Tversky",
+    "Cosa implica il concetto di razionalità limitata?,Decisioni prese con risorse cognitive limitate,Decisioni ottimali,Decisioni senza errore,Decisioni prese con risorse cognitive limitate",
+    "Quale tecnica può essere utilizzata per migliorare le scelte?,Nudging,Forcing,Divieto,Nudging",
+    "Cos'è il bias di rappresentatività?,Sovrastimare la probabilità di un evento basato su somiglianze,Valutare senza informazioni,Agire senza pensare,Sovrastimare la probabilità di un evento basato su somiglianze",
+    "Chi ha introdotto il concetto di utilità attesa?,John von Neumann,Adam Smith,Herbert Simon,John von Neumann",
+    "Cosa descrive il concetto di autoefficacia?,La fiducia nelle proprie capacità di raggiungere un obiettivo,La tendenza ad evitare errori,Il desiderio di guadagnare di più,La fiducia nelle proprie capacità di raggiungere un obiettivo",
+    "Cos'è l'effetto placebo in economia comportamentale?,Il miglioramento dovuto solo alla credenza di un trattamento,Un errore sistematico,Una tendenza a investire di più,Il miglioramento dovuto solo alla credenza di un trattamento",
+    "Chi ha formulato la teoria del prospetto?,Daniel Kahneman e Amos Tversky,Richard Thaler,Robert Shiller,Daniel Kahneman e Amos Tversky",
+    "Cos'è il fallimento del mercato?,Situazione in cui il mercato non riesce a allocare risorse efficientemente,Una crescita economica,Un aumento dei prezzi,Situazione in cui il mercato non riesce a allocare risorse efficientemente",
+    "Qual è il ruolo dell'informazione asimmetrica?,Crea squilibri nel mercato,Permette un'allocazione efficiente,Riduce il rischio,Crea squilibri nel mercato",
+    "Cos'è il comportamento gregario?,Seguire il comportamento degli altri,Agire in modo indipendente,Massimizzare l'utilità personale,Seguire il comportamento degli altri",
+    "Cosa significa 'moral hazard'?,Rischio che un individuo prenda decisioni rischiose perché non ne sopporta le conseguenze,Evita comportamenti rischiosi,Un vantaggio morale,Rischio che un individuo prenda decisioni rischiose perché non ne sopporta le conseguenze",
+    "Cos'è l'overconfidence bias?,Sopravvalutazione delle proprie capacità,Paura del fallimento,Indecisione,Sopravvalutazione delle proprie capacità",
+    "Cosa significa 'sunk cost fallacy'?,Tendenza a continuare un investimento a causa dei costi già sostenuti,Un investimento irrazionale,Un errore di previsione,Tendenza a continuare un investimento a causa dei costi già sostenuti",
+    "Cos'è la 'teoria del prospetto'?,Teoria che descrive come le persone scelgono tra probabilità di guadagno o perdita,Una teoria dell'ottimizzazione,Un modello di mercato,Teoria che descrive come le persone scelgono tra probabilità di guadagno o perdita",
+    "Chi ha scritto 'Thinking, Fast and Slow'?,Daniel Kahneman,Amos Tversky,Richard Thaler,Daniel Kahneman",
+    "Cosa rappresenta il 'punto di riferimento' in economia comportamentale?,Il valore di riferimento utilizzato per valutare i guadagni o le perdite,Il prezzo di mercato,Il livello di rischio,Il valore di riferimento utilizzato per valutare i guadagni o le perdite",
+    "Cosa significa 'fallacia della pianificazione'?,Sottostimare il tempo necessario per completare un progetto,Esagerare i costi,Investire senza riflettere,Sottostimare il tempo necessario per completare un progetto",
+    "Cos'è la 'fallacia dell'ottimismo'?,La tendenza a sottovalutare i rischi e sovrastimare le proprie capacità,Ignorare completamente le possibilità di fallimento,Aumentare la fiducia altrui,La tendenza a sottovalutare i rischi e sovrastimare le proprie capacità",
+    "Qual è l'effetto della dissonanza cognitiva?,L'incongruenza tra atteggiamenti e comportamenti,Un equilibrio cognitivo,Un aumento di concentrazione,L'incongruenza tra atteggiamenti e comportamenti",
+    "Cos'è l'effetto alone?,La tendenza a lasciarsi influenzare da un'impressione generale,Un errore di previsione,Un fenomeno raro,La tendenza a lasciarsi influenzare da un'impressione generale",
+    "Cos'è il comportamento di escalation dell'impegno?,Continuare un'azione nonostante le prove che suggeriscano di abbandonarla,Abbandonare immediatamente ogni rischio,Investire meno in situazioni incerte,Continuare un'azione nonostante le prove che suggeriscano di abbandonarla",
+    "Chi ha proposto la 'teoria del ruolo sociale'?,Alice Eagly,Daniel Kahneman,Amos Tversky,Alice Eagly",
+    "Cosa implica il 'bias di ottimismo'?,Sottostimare i rischi e sopravvalutare le possibilità di successo,Essere troppo critici verso sé stessi,Esagerare i pericoli esterni,Sottostimare i rischi e sopravvalutare le possibilità di successo",
+    "Qual è l'effetto del 'priming'?,Influenzare la risposta di qualcuno attraverso stimoli precedenti,Ricordare eventi passati senza stimoli,Ignorare segnali esterni,Influenzare la risposta di qualcuno attraverso stimoli precedenti",
+    "Cos'è il 'conflitto di agency'?,Un problema che sorge quando gli interessi del principale e dell'agente non coincidono,Un problema tra pari,Un conflitto tra società,Un problema che sorge quando gli interessi del principale e dell'agente non coincidono",
+    "Chi ha introdotto il concetto di 'selezione avversa'?,George Akerlof,John Nash,Daniel Kahneman,George Akerlof",
+    "Cos'è il 'mercato dei limoni'?,Un mercato caratterizzato da informazioni asimmetriche sulla qualità dei prodotti,Un mercato di agrumi,Un mercato volatile,Un mercato caratterizzato da informazioni asimmetriche sulla qualità dei prodotti",
+    "Cosa rappresenta l'effetto 'bandwagon'?,La tendenza delle persone a fare qualcosa solo perché molti altri lo fanno,Un effetto di isolamento,Un comportamento indipendente,La tendenza delle persone a fare qualcosa solo perché molti altri lo fanno",
+    "Cos'è l''effetto di avversione al rischio'?,La tendenza a preferire una minore incertezza,Una tendenza ad assumere più rischi,Ignorare il rischio,La tendenza a preferire una minore incertezza",
+    "Chi ha introdotto la 'teoria dei giochi'?,John von Neumann,Adam Smith,Robert Shiller,John von Neumann",
+    "Qual è lo scopo della 'teoria dei giochi'?,Analizzare le decisioni in situazioni competitive,Massimizzare il profitto,Minimizzare il rischio,Analizzare le decisioni in situazioni competitive",
+    "Cos'è un 'equilibrio di Nash'?,Una situazione in cui nessun giocatore ha interesse a cambiare la propria strategia,Una massimizzazione del profitto,Un fallimento di mercato,Una situazione in cui nessun giocatore ha interesse a cambiare la propria strategia"
+
         ];
 
         let currentQuestionIndex = 0;
@@ -120,12 +232,20 @@
         function checkAnswer(element, answer) {
             const isCorrect = answer === correctAnswer;
             totalAnswersCount++; // Incrementa il contatore delle risposte totali
+
             if (isCorrect) {
                 element.classList.add('correct');
                 correctAnswersCount++; // Incrementa il contatore delle risposte corrette
             } else {
                 element.classList.add('incorrect');
+                // Colora il pulsante corretto di verde
+                document.querySelectorAll('.answer').forEach(el => {
+                    if (el.innerText === correctAnswer) {
+                        el.classList.add('correct');
+                    }
+                });
             }
+
             document.querySelectorAll('.answer').forEach(el => el.onclick = null); // Disabilita clic sulle altre risposte
             updateCounters(); // Aggiorna i contatori
         }
