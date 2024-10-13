@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz sulle nascite</title>
+    <title>Quiz nascite</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,7 +11,8 @@
         }
         .question-container {
             margin-bottom: 20px;
-            font-weight: bold; /* Grassetto per la domanda */
+            font-weight: bold;
+            font-size: 24px; /* Aggiungi questa riga o modifica la dimensione */
         }
         .answer {
             display: block;
@@ -20,7 +21,7 @@
             cursor: pointer;
             border: 1px solid #ccc;
             border-radius: 5px;
-            background-color: #fff8dc; /* Giallino chiaro */
+            background-color: #fff8dc;
         }
         .answer.correct {
             background-color: lightgreen;
@@ -36,20 +37,18 @@
             font-size: 18px;
         }
 
-        /* Ingrandisci i pulsanti per schermi più piccoli */
         @media only screen and (max-width: 600px) {
             button {
-                font-size: 20px; /* Aumenta la dimensione del testo del pulsante */
-                padding: 15px; /* Aumenta il padding (spazio interno) */
-                width: 100%; /* Fai in modo che il pulsante occupi tutta la larghezza */
-                margin: 10px 0; /* Spazio sopra e sotto i pulsanti */
+                font-size: 20px;
+                padding: 15px;
+                width: 100%;
+                margin: 10px 0;
             }
         }
     </style>
 </head>
 <body>
 
-    <h1>Quiz sulle nascite</h1>
 
     <div class="quiz-container">
         <div id="question" class="question-container"></div>
@@ -61,7 +60,6 @@
         <button onclick="endQuiz()">Esci</button>
     </div>
 
-    <!-- Contatori delle risposte indovinate e totali -->
     <div class="counters">
         <span id="correctAnswers">0</span>/<span id="totalAnswers">0</span>
     </div>
@@ -118,8 +116,8 @@
         ];
 
         let currentQuestionIndex = 0;
-        let correctAnswersCount = 0; // Contatore delle risposte corrette
-        let totalAnswersCount = 0; // Contatore delle risposte totali
+        let correctAnswersCount = 0;
+        let totalAnswersCount = 0;
 
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
@@ -128,10 +126,8 @@
             }
         }
 
-        // Mischia le domande una volta al caricamento
         shuffle(questions);
 
-        // Carica la domanda corrente e le risposte
         function loadQuestion() {
             const questionData = questions[currentQuestionIndex];
             document.getElementById('question').innerHTML = questionData.question;
@@ -155,13 +151,22 @@
         function checkAnswer(element, answer, correctAnswer) {
             const isCorrect = answer === correctAnswer;
             totalAnswersCount++;
+
             if (isCorrect) {
                 element.classList.add('correct');
                 correctAnswersCount++;
             } else {
                 element.classList.add('incorrect');
             }
-            document.querySelectorAll('.answer').forEach(el => el.onclick = null);
+
+            // Colora di verde la risposta corretta
+            document.querySelectorAll('.answer').forEach(el => {
+                el.onclick = null;
+                if (el.innerHTML === correctAnswer) {
+                    el.classList.add('correct');
+                }
+            });
+
             updateCounters();
         }
 
