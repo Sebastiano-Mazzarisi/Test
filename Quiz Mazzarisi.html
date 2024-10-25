@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz nascite</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .question-container {
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 24px; /* Aggiungi questa riga o modifica la dimensione */
+        }
+        .answer {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff8dc;
+        }
+        .answer.correct {
+            background-color: lightgreen;
+        }
+        .answer.incorrect {
+            background-color: lightcoral;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+        .counters {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        @media only screen and (max-width: 600px) {
+            button {
+                font-size: 20px;
+                padding: 15px;
+                width: 100%;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+
+    <div class="quiz-container">
+        <div id="question" class="question-container"></div>
+        <div id="answers"></div>
+    </div>
+
+    <div class="controls">
+        <button id="continueBtn" onclick="nextQuestion()">Continua</button>
+        <button onclick="endQuiz()">Esci</button>
+    </div>
+
+    <div class="counters">
+        <span id="correctAnswers">0</span>/<span id="totalAnswers">0</span>
+    </div>
+
+    <script>
+        const questions = [
+
+            { question: "Quando è nato Onofrio Mazzarisi (nonno)?", answers: ["17-12-1920", "05-06-1909", "05-01-1933"], correct: "17-12-1920" },
+            { question: "Quando è nata Maria Rosa Longo?", answers: ["05-01-1933", "16-11-1933", "05-03-1937"], correct: "05-01-1933" },
+            { question: "Quando è nata Enza Nitti?", answers: ["25-11-1953", "13-01-1957", "06-02-1957"], correct: "25-11-1953" },
+            { question: "Quando è nato Sebastiano Mazzarisi?", answers: ["07-05-1957", "10-09-1957", "12-04-1961"], correct: "07-05-1957" },
+            { question: "Quando è nato Vito Mazzarisi?", answers: ["22-08-1958", "05-07-1961", "12-04-1961"], correct: "22-08-1958" },
+            { question: "Quando è nata Anna Pellegrini?", answers: ["23-03-1960", "05-06-1992", "24-02-1964"], correct: "23-03-1960" },
+            { question: "Quando è nata Marica Pricci?", answers: ["12-04-1961", "24-05-1997", "05-07-1961"], correct: "12-04-1961" },
+            { question: "Quando è nato Francesco Mazzarisi?", answers: ["05-07-1961", "11-09-1963", "12-08-1968"], correct: "05-07-1961" },
+            { question: "Quando è nata Maria Mazzarisi?", answers: ["05-07-1961", "02-01-1969", "24-05-1997"], correct: "05-07-1961" },
+            { question: "Quando è nato Domenico Mazzarisi?", answers: ["24-02-1964", "24-10-1964", "12-07-1969"], correct: "24-02-1964" },
+            { question: "Quando è nata Anna Sabatelli?", answers: ["02-01-1969", "17-11-1975", "05-06-1992"], correct: "02-01-1969" },
+            { question: "Quando è nato Marco Mazzarisi?", answers: ["28-04-1987", "09-10-1988", "29-06-2004"], correct: "28-04-1987" },
+            { question: "Quando è nato Daniele Mazzarisi?", answers: ["09-10-1988", "21-01-1989", "12-04-1961"], correct: "09-10-1988" },
+            { question: "Quando è nata Alessandra Mazzarisi?", answers: ["11-10-1988", "07-06-2006", "21-05-1958"], correct: "11-10-1988" },
+            { question: "Quando è nata Maria Grazia Mazzarisi?", answers: ["21-01-1989", "11-09-1963", "29-11-2015"], correct: "21-01-1989" },
+            { question: "Quando è nato Onofrio Mazzarisi?", answers: ["05-06-1992", "06-02-1957", "11-04-1973"], correct: "05-06-1992" },
+            { question: "Quando è nato Andrea Mazzarisi?", answers: ["08-11-1993", "16-11-1933", "24-10-1964"], correct: "08-11-1993" },
+            { question: "Quando è nata Teresa Mazzarisi?", answers: ["01-04-1994", "17-12-1920", "16-11-1996"], correct: "01-04-1994" },
+            { question: "Quando è nata Marilù Mazzarisi?", answers: ["28-12-1999", "24-02-1964", "12-04-1961"], correct: "28-12-1999" },
+        ];
+
+        let currentQuestionIndex = 0;
+        let correctAnswersCount = 0;
+        let totalAnswersCount = 0;
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        shuffle(questions);
+
+        function loadQuestion() {
+            const questionData = questions[currentQuestionIndex];
+            document.getElementById('question').innerHTML = questionData.question;
+            const answersDiv = document.getElementById('answers');
+            answersDiv.innerHTML = '';
+
+            const shuffledAnswers = [...questionData.answers];
+            shuffle(shuffledAnswers);
+
+            shuffledAnswers.forEach((answer) => {
+                const answerElement = document.createElement('div');
+                answerElement.classList.add('answer');
+                answerElement.innerHTML = answer;
+                answerElement.onclick = () => checkAnswer(answerElement, answer, questionData.correct);
+                answersDiv.appendChild(answerElement);
+            });
+
+            document.getElementById('continueBtn').style.display = 'inline';
+        }
+
+        function checkAnswer(element, answer, correctAnswer) {
+            const isCorrect = answer === correctAnswer;
+            totalAnswersCount++;
+
+            if (isCorrect) {
+                element.classList.add('correct');
+                correctAnswersCount++;
+            } else {
+                element.classList.add('incorrect');
+            }
+
+            // Colora di verde la risposta corretta
+            document.querySelectorAll('.answer').forEach(el => {
+                el.onclick = null;
+                if (el.innerHTML === correctAnswer) {
+                    el.classList.add('correct');
+                }
+            });
+
+            updateCounters();
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex >= questions.length) {
+                currentQuestionIndex = 0;
+                shuffle(questions);
+            }
+            loadQuestion();
+        }
+
+        function updateCounters() {
+            document.getElementById('correctAnswers').innerText = correctAnswersCount;
+            document.getElementById('totalAnswers').innerText = totalAnswersCount;
+        }
+
+        function endQuiz() {
+            const summaryMessage = `Hai risposto correttamente a ${correctAnswersCount} domande su ${totalAnswersCount}.`;
+            document.body.innerHTML = `<h2>Grazie per aver partecipato al quiz!</h2><p>${summaryMessage}</p>`;
+        }
+
+        window.onload = loadQuestion;
+    </script>
+</body>
+</html>
