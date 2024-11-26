@@ -3,179 +3,693 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz nascite</title>
+    <title>Quiz Date Famiglia Pricci</title>
     <style>
+        /* INIZIO STILI - NON MODIFICARE QUESTA SEZIONE */
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        .question-container {
-            margin-bottom: 20px;
-            font-weight: bold;
-            font-size: 24px; /* Aggiungi questa riga o modifica la dimensione */
-        }
-        .answer {
-            display: block;
-            margin: 10px 0;
-            padding: 10px;
-            cursor: pointer;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: #fff8dc;
-        }
-        .answer.correct {
-            background-color: lightgreen;
-        }
-        .answer.incorrect {
-            background-color: lightcoral;
-        }
-        .controls {
-            margin-top: 20px;
-        }
-        .counters {
-            margin-top: 20px;
-            font-size: 18px;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f2f5;
         }
 
-        @media only screen and (max-width: 600px) {
-            button {
-                font-size: 20px;
-                padding: 15px;
-                width: 100%;
-                margin: 10px 0;
-            }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+
+        .question {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-button {
+            padding: 12px;
+            text-align: left;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-button:hover {
+            background-color: #f0f9ff;
+        }
+
+        .score {
+            font-size: 14px;
+            color: #666;
+            margin-top: 16px;
+            margin-bottom: 16px;
+        }
+
+        .buttons-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .restart-button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .restart-button:hover {
+            background-color: #2563eb;
+        }
+
+        .exit-button {
+            background-color: #7928CA;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .exit-button:hover {
+            background-color: #6B21A8;
+        }
+
+        .close-button {
+            background-color: #EF4444;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .close-button:hover {
+            background-color: #DC2626;
+        }
+
+        .history-item {
+            padding: 16px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .history-item.correct {
+            background-color: #dcfce7;
+        }
+
+        .history-item.incorrect {
+            background-color: #fee2e2;
+        }
+
+        .history-question {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .correct-answer {
+            color: #166534;
+        }
+        /* FINE STILI */
     </style>
 </head>
 <body>
-
-
-    <div class="quiz-container">
-        <div id="question" class="question-container"></div>
-        <div id="answers"></div>
-    </div>
-
-    <div class="controls">
-        <button id="continueBtn" onclick="nextQuestion()">Continua</button>
-        <button onclick="endQuiz()">Esci</button>
-    </div>
-
-    <div class="counters">
-        <span id="correctAnswers">0</span>/<span id="totalAnswers">0</span>
+    <div id="quiz-container">
+        <!-- Il contenuto del quiz verrà inserito qui dinamicamente -->
     </div>
 
     <script>
-        const questions = [
+        // INIZIO ARRAY DOMANDE - SOSTITUIRE QUESTO ARRAY CON QUELLO COMPLETO
+const allQuestions = [
+  // Compleanni
+  {
+    question: "Quando è il compleanno di Luigi Pricci?",
+    correctAnswer: "16/11/1933",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Teresa Grilletti?",
+    correctAnswer: "05/03/1937",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Onofrio Lorusso?",
+    correctAnswer: "05/08/1951",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Saverio Chiarappa?",
+    correctAnswer: "26/11/1951",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Angela Pricci?",
+    correctAnswer: "13/01/1957",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Domenico Lefemine?",
+    correctAnswer: "06/02/1957",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Nino Mazzarisi?",
+    correctAnswer: "07/05/1957",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Maria Antonietta Pricci?",
+    correctAnswer: "21/05/1958",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Marica Pricci?",
+    correctAnswer: "12/04/1961",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Vanna Pricci?",
+    correctAnswer: "11/09/1963",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Giovanni Pricci?",
+    correctAnswer: "24/10/1964",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Giuseppe Pricci?",
+    correctAnswer: "12/08/1968",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Anna Trivisani?",
+    correctAnswer: "12/07/1969",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Rosa Bianco?",
+    correctAnswer: "02/09/1971",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Tiziana Pricci?",
+    correctAnswer: "27/06/1972",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Riccardo Dalena?",
+    correctAnswer: "11/04/1973",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Gianni Rotondi?",
+    correctAnswer: "08/03/1974",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Genny Lepore?",
+    correctAnswer: "04/07/1975",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Benny Lorusso?",
+    correctAnswer: "17/11/1975",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Cinzia Lorusso?",
+    correctAnswer: "06/04/1980",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Maria Grazia Mazzarisi?",
+    correctAnswer: "21/01/1989",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Onofrio Mazzarisi?",
+    correctAnswer: "05/06/1992",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Teresa Mazzarisi?",
+    correctAnswer: "01/04/1994",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Flavia Lefemine?",
+    correctAnswer: "16/11/1996",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Martino Chiarappa?",
+    correctAnswer: "24/05/1997",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Francesco Lefemine?",
+    correctAnswer: "20/03/2000",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Cristiano Chiarappa?",
+    correctAnswer: "20/06/2001",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Gilda Pricci?",
+    correctAnswer: "29/06/2004",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Asia Pricci?",
+    correctAnswer: "07/06/2006",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Alessandro Lorusso?",
+    correctAnswer: "17/07/2010",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Alice Lorusso?",
+    correctAnswer: "20/07/2013",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Nina Lorusso?",
+    correctAnswer: "29/11/2015",
+    type: "compleanno"
+  },
+  {
+    question: "Quando è il compleanno di Nicoletta Rotondi?",
+    correctAnswer: "12/02/2019",
+    type: "compleanno"
+  },
 
-            { question: "Quando è nata Angela Gasparro?", answers: ["05-06-1909", "17-12-1920", "05-03-1937"], correct: "05-06-1909" },
-            { question: "Quando è nato Luigi Pricci?", answers: ["16-11-1933", "05-06-1909", "17-12-1920"], correct: "16-11-1933" },
-            { question: "Quando è nata Teresa Grilletti?", answers: ["05-03-1937", "05-08-1951", "13-01-1957"], correct: "05-03-1937" },
-            { question: "Quando è nato Onofrio Lorusso?", answers: ["05-08-1951", "25-11-1953", "16-11-1933"], correct: "05-08-1951" },
-            { question: "Quando è nata Angela Pricci?", answers: ["13-01-1957", "07-05-1957", "06-02-1957"], correct: "13-01-1957" },
-            { question: "Quando è nato Domenico Lefemine?", answers: ["06-02-1957", "10-09-1957", "21-05-1958"], correct: "06-02-1957" },
-            { question: "Quando è nato Sebastiano Mazzarisi?", answers: ["07-05-1957", "10-09-1957", "12-04-1961"], correct: "07-05-1957" },
-            { question: "Quando è nata Maria Antonietta Pricci?", answers: ["21-05-1958", "22-08-1958", "23-03-1960"], correct: "21-05-1958" },
-            { question: "Quando è nata Marica Pricci?", answers: ["12-04-1961", "24-05-1997", "05-07-1961"], correct: "12-04-1961" },
-            { question: "Quando è nata Vanna Pricci?", answers: ["11-09-1963", "24-02-1964", "22-08-1958"], correct: "11-09-1963" },
-            { question: "Quando è nato Giovanni Pricci?", answers: ["24-10-1964", "12-08-1968", "16-11-1996"], correct: "24-10-1964" },
-            { question: "Quando è nato Giuseppe Pricci?", answers: ["12-08-1968", "01-04-1994", "28-12-1999"], correct: "12-08-1968" },
-            { question: "Quando è nata Anna Trivisani?", answers: ["12-07-1969", "20-07-2013", "08-03-1974"], correct: "12-07-1969" },
-            { question: "Quando è nata Tiziana Pricci?", answers: ["27-06-1972", "04-07-1975", "06-04-1980"], correct: "27-06-1972" },
-            { question: "Quando è nato Riccardo Dalena?", answers: ["11-04-1973", "05-06-1992", "20-03-2000"], correct: "11-04-1973" },
-            { question: "Quando è nato Gianni Rotondi?", answers: ["08-03-1974", "17-07-2008", "29-11-2015"], correct: "08-03-1974" },
-            { question: "Quando è nata Gemma Lepore?", answers: ["04-07-1975", "11-10-1988", "12-02-2019"], correct: "04-07-1975" },
-            { question: "Quando è nato Benedetto Lorusso?", answers: ["17-11-1975", "06-04-1980", "20-06-2001"], correct: "17-11-1975" },
-            { question: "Quando è nata Cinzia Lorusso?", answers: ["06-04-1980", "28-12-1999", "20-03-2000"], correct: "06-04-1980" },
-            { question: "Quando è nata Maria Grazia Mazzarisi?", answers: ["21-01-1989", "11-09-1963", "29-11-2015"], correct: "21-01-1989" },
-            { question: "Quando è nato Onofrio Mazzarisi?", answers: ["05-06-1992", "06-02-1957", "11-04-1973"], correct: "05-06-1992" },
-            { question: "Quando è nata Teresa Mazzarisi?", answers: ["01-04-1994", "17-12-1920", "16-11-1996"], correct: "01-04-1994" },
-            { question: "Quando è nata Flavia Lefemine?", answers: ["16-11-1996", "28-12-1999", "07-06-2006"], correct: "16-11-1996" },
-            { question: "Quando è nato Martino Chiarappa?", answers: ["24-05-1997", "20-03-2000", "12-02-2019"], correct: "24-05-1997" },
-            { question: "Quando è nato Francesco Lefemine?", answers: ["20-03-2000", "04-07-1975", "05-03-1937"], correct: "20-03-2000" },
-            { question: "Quando è nato Cristiano Chiarappa?", answers: ["20-06-2001", "11-09-1963", "16-11-1933"], correct: "20-06-2001" },
-            { question: "Quando è nata Gilda Pricci?", answers: ["29-06-2004", "21-05-1958", "06-02-1957"], correct: "29-06-2004" },
-            { question: "Quando è nata Asia Pricci?", answers: ["07-06-2006", "25-11-1953", "05-06-1992"], correct: "07-06-2006" },
-            { question: "Quando è nato Alessandro Lorusso?", answers: ["17-07-2010", "20-07-2013", "09-10-1988"], correct: "17-07-2010" },
-            { question: "Quando è nata Alice Lorusso?", answers: ["20-07-2013", "02-01-1969", "04-07-1975"], correct: "20-07-2013" },
-            { question: "Quando è nata Nina Lorusso?", answers: ["29-11-2015", "07-06-2006", "28-12-1999"], correct: "29-11-2015" },
-            { question: "Quando è nata Nicoletta Rotondi?", answers: ["12-02-2019", "20-06-2001", "05-06-1992"], correct: "12-02-2019" }
+  // Anniversari di matrimonio
+  {
+    question: "Quando è l'anniversario di matrimonio di Luigi e Teresa?",
+    correctAnswer: "03/12/1956",
+    type: "matrimonio"
+  },
+  {
+    question: "Quando è l'anniversario di matrimonio di Angela e Onofrio?",
+    correctAnswer: "09/08/1975",
+    type: "matrimonio"
+  },
+  {
+    question: "Quando è l'anniversario di matrimonio di Marica e Nino?",
+    correctAnswer: "04/07/1987",
+    type: "matrimonio"
+  },
+  {
+    question: "Quando è l'anniversario di matrimonio di Vanna e Domenico?",
+    correctAnswer: "28/08/1991",
+    type: "matrimonio"
+  },
+  {
+    question: "Quando è l'anniversario di matrimonio di Giuseppe e Anna?",
+    correctAnswer: "09/07/1997",
+    type: "matrimonio"
+  },
+  {
+    question: "Quando è l'anniversario di matrimonio di Antonietta e Saverio?",
+    correctAnswer: "09/09/2000",
+    type: "matrimonio"
+  },
+  {
+    question: "Quando è l'anniversario di matrimonio di Tiziana e Riccardo?",
+    correctAnswer: "04/10/2002",
+    type: "matrimonio"
+  },
+  {
+    question: "Quando è l'anniversario di matrimonio di Giovanni e Rosa?",
+    correctAnswer: "29/12/2004",
+    type: "matrimonio"
+  },
+  {
+    question: "Quando è l'anniversario di matrimonio di Benny e Genny?",
+    correctAnswer: "26/07/2008",
+    type: "matrimonio"
+  },
+  {
+    question: "Quando è l'anniversario di matrimonio di Cinzia e Gianni?",
+    correctAnswer: "13/09/2014",
+    type: "matrimonio"
+  },
+
+  // Onomastici
+  {
+    question: "Quando è l'onomastico di Nino Mazzarisi?",
+    correctAnswer: "20/01",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Gilda Pricci?",
+    correctAnswer: "13/02",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Asia Pricci?",
+    correctAnswer: "19/02",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Tiziana Pricci?",
+    correctAnswer: "03/03",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Giuseppe Pricci?",
+    correctAnswer: "19/03",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Benny Lorusso?",
+    correctAnswer: "21/03",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Riccardo Dalena?",
+    correctAnswer: "03/04",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Cristiano Chiarappa?",
+    correctAnswer: "07/04",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Genny Lepore?",
+    correctAnswer: "11/04",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Flavia Lefemine?",
+    correctAnswer: "07/05",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Onofrio Lorusso?",
+    correctAnswer: "12/06",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Onofrio Mazzarisi?",
+    correctAnswer: "12/06",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Maria Antonietta Pricci?",
+    correctAnswer: "13/06",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Alice Lorusso?",
+    correctAnswer: "13/06",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Luigi Pricci?",
+    correctAnswer: "21/06",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Vanna Pricci?",
+    correctAnswer: "24/06",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Giovanni Pricci?",
+    correctAnswer: "24/06",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Gianni Rotondi?",
+    correctAnswer: "24/06",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Anna Trivisani?",
+    correctAnswer: "26/07",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Angela Pricci?",
+    correctAnswer: "02/08",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Domenico Lefemine?",
+    correctAnswer: "04/08",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Rosa Bianco?",
+    correctAnswer: "23/08",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Alessandro Lorusso?",
+    correctAnswer: "26/08",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Marica Pricci?",
+    correctAnswer: "12/09",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Maria Grazia Mazzarisi?",
+    correctAnswer: "12/09",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Francesco Lefemine?",
+    correctAnswer: "04/10",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Teresa Grilletti?",
+    correctAnswer: "15/10",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Teresa Mazzarisi?",
+    correctAnswer: "15/10",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Martino Chiarappa?",
+    correctAnswer: "11/11",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Saverio Chiarappa?",
+    correctAnswer: "03/12",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Nicoletta Rotondi?",
+    correctAnswer: "06/12",
+    type: "onomastico"
+  },
+  {
+    question: "Quando è l'onomastico di Nina Lorusso?",
+    correctAnswer: "15/12",
+    type: "onomastico"
+  }
+];
+        // FINE ARRAY DOMANDE
+
+        // INIZIO LOGICA QUIZ - NON MODIFICARE QUESTA SEZIONE
+        const mesi = [
+            'gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno',
+            'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'
         ];
 
+        let currentQuestions = [];
         let currentQuestionIndex = 0;
-        let correctAnswersCount = 0;
-        let totalAnswersCount = 0;
+        let correctAnswers = 0;
+        let answeredQuestions = [];
 
-        function shuffle(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
+        function formatDateToText(dateStr, type) {
+            const [day, month] = dateStr.split('/');
+            return type === 'onomastico' ? `${parseInt(day)} ${mesi[parseInt(month) - 1]}` : dateStr;
         }
 
-        shuffle(questions);
+        function generateWrongDates(correctDate, type) {
+            const [day, month, year] = correctDate.split('/');
+            const correct = new Date(year || new Date().getFullYear(), month - 1, day);
+            
+            const wrong1 = new Date(correct);
+            wrong1.setDate(wrong1.getDate() + Math.floor(Math.random() * 10) + 1);
+            
+            const wrong2 = new Date(correct);
+            wrong2.setDate(wrong2.getDate() - Math.floor(Math.random() * 10) - 1);
 
-        function loadQuestion() {
-            const questionData = questions[currentQuestionIndex];
-            document.getElementById('question').innerHTML = questionData.question;
-            const answersDiv = document.getElementById('answers');
-            answersDiv.innerHTML = '';
+            const formatDate = (date) => {
+                const d = date.getDate().toString().padStart(2, '0');
+                const m = (date.getMonth() + 1).toString().padStart(2, '0');
+                const y = date.getFullYear();
+                return type === 'onomastico' ? `${d}/${m}` : `${d}/${m}/${y}`;
+            };
 
-            const shuffledAnswers = [...questionData.answers];
-            shuffle(shuffledAnswers);
+            const dates = [correctDate, formatDate(wrong1), formatDate(wrong2)]
+                .sort(() => Math.random() - 0.5);
+            
+            return type === 'onomastico' 
+                ? dates.map(d => formatDateToText(d, type))
+                : dates;
+        }
 
-            shuffledAnswers.forEach((answer) => {
-                const answerElement = document.createElement('div');
-                answerElement.classList.add('answer');
-                answerElement.innerHTML = answer;
-                answerElement.onclick = () => checkAnswer(answerElement, answer, questionData.correct);
-                answersDiv.appendChild(answerElement);
+        function shuffleQuestions() {
+            currentQuestions = [...allQuestions]
+                .sort(() => Math.random() - 0.5)
+                .map(q => ({
+                    ...q,
+                    correctAnswer: q.type === 'onomastico' ? formatDateToText(q.correctAnswer, q.type) : q.correctAnswer,
+                    options: generateWrongDates(q.correctAnswer, q.type)
+                }));
+        }
+
+        function handleAnswer(selectedAnswer) {
+            const currentQ = currentQuestions[currentQuestionIndex];
+            const isCorrect = selectedAnswer === currentQ.correctAnswer;
+            
+            answeredQuestions.unshift({
+                question: currentQ.question,
+                userAnswer: selectedAnswer,
+                correctAnswer: currentQ.correctAnswer,
+                isCorrect
             });
-
-            document.getElementById('continueBtn').style.display = 'inline';
-        }
-
-        function checkAnswer(element, answer, correctAnswer) {
-            const isCorrect = answer === correctAnswer;
-            totalAnswersCount++;
 
             if (isCorrect) {
-                element.classList.add('correct');
-                correctAnswersCount++;
-            } else {
-                element.classList.add('incorrect');
+                correctAnswers++;
             }
 
-            // Colora di verde la risposta corretta
-            document.querySelectorAll('.answer').forEach(el => {
-                el.onclick = null;
-                if (el.innerHTML === correctAnswer) {
-                    el.classList.add('correct');
-                }
-            });
-
-            updateCounters();
-        }
-
-        function nextQuestion() {
             currentQuestionIndex++;
-            if (currentQuestionIndex >= questions.length) {
-                currentQuestionIndex = 0;
-                shuffle(questions);
+            renderQuiz();
+        }
+
+        function exitQuiz() {
+            showFinalScore(true);
+        }
+
+        function closeQuiz() {
+            window.close();
+            window.location.href = "about:blank";
+        }
+
+        function showFinalScore(isExit = false) {
+            const container = document.getElementById('quiz-container');
+            const totalAnswered = answeredQuestions.length;
+            
+            container.innerHTML = `
+                <div class="card">
+                    <h3 class="question">${isExit ? 'Quiz interrotto' : 'Quiz completato!'}</h3>
+                    <p class="score">
+                        Punteggio finale: ${correctAnswers}/${totalAnswered} risposte corrette<br>
+                        ${isExit ? `Domande risposte: ${totalAnswered}/${currentQuestions.length}` : ''}
+                    </p>
+                    <div class="buttons-container">
+                        <button class="restart-button" onclick="restartQuiz()">
+                            Ricomincia
+                        </button>
+                        <button class="close-button" onclick="closeQuiz()">
+                            Chiudi Quiz
+                        </button>
+                    </div>
+                </div>
+                <div class="history-container">
+                    ${answeredQuestions.map(item => `
+                        <div class="history-item ${item.isCorrect ? 'correct' : 'incorrect'}">
+                            <div class="history-question">${item.question}</div>
+                            <div>La tua risposta: ${item.userAnswer}</div>
+                            ${!item.isCorrect ? `
+                                <div class="correct-answer">
+                                    Risposta corretta: ${item.correctAnswer}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function restartQuiz() {
+            shuffleQuestions();
+            currentQuestionIndex = 0;
+            correctAnswers = 0;
+            answeredQuestions = [];
+            renderQuiz();
+        }
+
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            
+            if (currentQuestionIndex < currentQuestions.length) {
+                const currentQ = currentQuestions[currentQuestionIndex];
+                
+                container.innerHTML = `
+                    <div class="card">
+                        <div class="question">${currentQ.question}</div>
+                        <div class="options-container">
+                            ${currentQ.options.map((option, index) => `
+                                <button class="option-button" onclick="handleAnswer('${option}')">
+                                    ${option}
+                                </button>
+                            `).join('')}
+                        </div>
+                        <div class="score">
+                            ${correctAnswers}/${currentQuestions.length} risposte corrette
+                        </div>
+                        <div class="buttons-container">
+                            <button class="exit-button" onclick="exitQuiz()">
+                                Esci
+                            </button>
+                        </div>
+                    </div>
+                    <div class="history-container">
+                        ${answeredQuestions.map(item => `
+                            <div class="history-item ${item.isCorrect ? 'correct' : 'incorrect'}">
+                                <div class="history-question">${item.question}</div>
+                                <div>La tua risposta: ${item.userAnswer}</div>
+                                ${!item.isCorrect ? `
+                                    <div class="correct-answer">
+                                        Risposta corretta: ${item.correctAnswer}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                showFinalScore();
             }
-            loadQuestion();
         }
 
-        function updateCounters() {
-            document.getElementById('correctAnswers').innerText = correctAnswersCount;
-            document.getElementById('totalAnswers').innerText = totalAnswersCount;
-        }
-
-        function endQuiz() {
-            const summaryMessage = `Hai risposto correttamente a ${correctAnswersCount} domande su ${totalAnswersCount}.`;
-            document.body.innerHTML = `<h2>Grazie per aver partecipato al quiz!</h2><p>${summaryMessage}</p>`;
-        }
-
-        window.onload = loadQuestion;
+        // Inizializza il quiz
+        shuffleQuestions();
+        renderQuiz();
+        // FINE LOGICA QUIZ
     </script>
 </body>
 </html>
