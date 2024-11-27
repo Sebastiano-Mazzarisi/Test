@@ -136,6 +136,7 @@
 </head>
 <body>
 
+<audio id="correctSound" src="https://sebastiano-mazzarisi.github.io/Test/Applauso.mp3" preload="auto"></audio>
 
 <div style="text-align: center; margin: 5px 0; font-family: Arial, sans-serif;">
 <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=sebastiano-mazzarisi.github.io/Test/Quiz-Pricci.html&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=visits&edge_flat=false" alt="Contatore Visite">
@@ -585,7 +586,15 @@ const allQuestions = [
         function handleAnswer(selectedAnswer) {
             const currentQ = currentQuestions[currentQuestionIndex];
             const isCorrect = selectedAnswer === currentQ.correctAnswer;
+
+            if (isCorrect) {
+                const sound = document.getElementById('correctSound');
+                sound.currentTime = 0;
+                sound.play().catch(error => console.log('Errore nella riproduzione del suono:', error));
+            }
             
+
+
             answeredQuestions.unshift({
                 question: currentQ.question,
                 userAnswer: selectedAnswer,
