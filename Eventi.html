@@ -5,631 +5,150 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Prossimi eventi</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            background-color: #f0f0f0;  /* Sfondo grigio chiaro */
-        }
-
-        h1 { 
-            color: #444;
-            text-align: center;         /* Titolo centrato */
-            margin-bottom: 30px;
-        }
-
-        ul { 
-            list-style-type: none;
-            padding: 0;
-        }
-
-        li { 
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f0f0f0; }
+        h1 { color: #444; text-align: center; margin-bottom: 5px; }
+        #oggi { text-align: center; color: #666; font-size: 1em; margin-bottom: 30px; }
+        ul { list-style-type: none; padding: 0; }
+        li {
             margin-bottom: 25px;
             padding: 20px;
             background: white;
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             text-align: center;
+            line-height: 1.6;
         }
-
-        strong { 
-            font-size: 1.5em;
-        }
-
-        .tipo-evento { 
-            color: #444; 
-        }
-
-        @media only screen and (max-device-width: 812px) {
-            body {
-                margin: 20px;
-            }
-        }
+        strong { font-size: 1.5em; }
+        .tipo-evento { color: #000; }
+        .compleanno strong { color: #00008B; } /* Blu scuro */
+        .onomastico strong { color: #006400; } /* Verde scuro */
+        .anniversario strong { color: #8B0000; } /* Rosso scuro */
+        .thumbnail { height: 300px; width: auto; object-fit: contain; display: block; margin: 10px auto; }
+        .error-message { color: red; font-size: 0.9em; }
     </style>
-
-
-
-
-
-
-
-
-
-    <script>
-        function calcolaAnni(dataEvento) {
-            const oggi = new Date();
-            const [giorno, mese, anno] = dataEvento.split('/').map(Number);
-            const dataCompleanno = new Date(oggi.getFullYear(), mese - 1, giorno);
-            let anni = oggi.getFullYear() - anno;
-            
-            // Se l'evento di quest'anno non è ancora arrivato, sottrai un anno
-            if (oggi < dataCompleanno) {
-                anni--;
-            }
-            
-            return anni;
-        }
-
-        function calcolaGiorniMancanti(dataEvento, tipo) {
-            const oggi = new Date();
-            const [giorno, mese, anno] = dataEvento.split('/').map(Number);
-            
-            // Imposta la data dell'evento per quest'anno
-            const evento = new Date(oggi.getFullYear(), mese - 1, giorno);
-            
-            // Se l'evento è già passato quest'anno, passa all'anno prossimo
-            if (evento < oggi) {
-                evento.setFullYear(evento.getFullYear() + 1);
-            }
-            
-            const diffTime = evento - oggi;
-            const giorniMancanti = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            return giorniMancanti;
-        }
-
-        function aggiornaEventi() {
-            const elementi = document.querySelectorAll('.data-evento');
-            elementi.forEach(el => {
-                const data = el.dataset.date;
-                const tipo = el.dataset.type;
-                const tipoEvento = el.parentElement.querySelector('.tipo-evento');
-                
-                // Calcola giorni mancanti
-                const giorniMancanti = calcolaGiorniMancanti(data, tipo);
-                el.innerText = `Giorni mancanti: ${giorniMancanti}`;
-
-                // Aggiorna anni solo per Compleanno e AM se la data ha l'anno
-                if ((tipo === 'Compleanno' || tipo === 'AM') && data.split('/').length === 3) {
-                    const anni = calcolaAnni(data);
-                    const anniSuccessivi = anni + 1; // L'età che compirà al prossimo evento
-                    
-                    if (tipo === 'Compleanno') {
-                        tipoEvento.innerText = `Compleanno (${anniSuccessivi})`;
-                    } else {
-                        tipoEvento.innerText = `Anniversario (${anniSuccessivi})`;
-                    }
-                }
-            });
-        }
-
-        window.onload = aggiornaEventi;
-        // Aggiorna ogni giorno
-        setInterval(aggiornaEventi, 24 * 60 * 60 * 1000);
-    </script>
 </head>
 <body>
     <h1>Prossimi eventi</h1>
-    <ul>
-        <li>
-            <strong>AM Rosa e Giovanni</strong><br>
-            <span class="tipo-evento">Anniversario</span><br>
-            Data: 29/12/2004<br>
-            <span class="data-evento" data-date="29/12/2004" data-type="AM">Giorni mancanti: </span>
-        </li>
-        
-        <li>
-            <strong>Pricci Angela</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 13/01/1957<br>
-            <span class="data-evento" data-date="13/01/1957" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-        
-        <li>
-            <strong>Mazzarisi Nino</strong><br>
-            <span>Onomastico</span><br>
-            Data: 20/01<br>
-            <span class="data-evento" data-date="20/01" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Mazzarisi Maria Grazia</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 21/01/1989<br>
-            <span class="data-evento" data-date="21/01/1989" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Rotondi Nicoletta</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 12/02/2019<br>
-            <span class="data-evento" data-date="12/02/2019" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Pricci Gilda</strong><br>
-            <span>Onomastico</span><br>
-            Data: 13/02<br>
-            <span class="data-evento" data-date="13/02" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Pricci Asia</strong><br>
-            <span>Onomastico</span><br>
-            Data: 19/02<br>
-            <span class="data-evento" data-date="19/02" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Pricci Tiziana</strong><br>
-            <span>Onomastico</span><br>
-            Data: 03/03<br>
-            <span class="data-evento" data-date="03/03" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Grilletti Teresa</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 05/03/1937<br>
-            <span class="data-evento" data-date="05/03/1937" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Rotondi Gianni</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 08/03/1974<br>
-            <span class="data-evento" data-date="08/03/1974" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Pricci Giuseppe</strong><br>
-            <span>Onomastico</span><br>
-            Data: 19/03<br>
-            <span class="data-evento" data-date="19/03" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Lefemine Francesco</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 20/03/2000<br>
-            <span class="data-evento" data-date="20/03/2000" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Lorusso Benny</strong><br>
-            <span>Onomastico</span><br>
-            Data: 21/03<br>
-            <span class="data-evento" data-date="21/03" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Mazzarisi Teresa</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 01/04/1994<br>
-            <span class="data-evento" data-date="01/04/1994" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Dalena Riccardo</strong><br>
-            <span>Onomastico</span><br>
-            Data: 03/04<br>
-            <span class="data-evento" data-date="03/04" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Lorusso Cinzia</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 06/04/1980<br>
-            <span class="data-evento" data-date="06/04/1980" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Chiarappa Cristiano</strong><br>
-            <span>Onomastico</span><br>
-            Data: 07/04<br>
-            <span class="data-evento" data-date="07/04" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Lepore Genny</strong><br>
-            <span>Onomastico</span><br>
-            Data: 11/04<br>
-            <span class="data-evento" data-date="11/04" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Pricci Marica</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 12/04/1961<br>
-            <span class="data-evento" data-date="12/04/1961" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Dalena Riccardo</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 17/04/1973<br>
-            <span class="data-evento" data-date="17/04/1973" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Pricci Maria Antonietta</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 20/04/1951<br>
-            <span class="data-evento" data-date="20/04/1951" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Lefemine Flavia</strong><br>
-            <span>Onomastico</span><br>
-            Data: 07/05<br>
-            <span class="data-evento" data-date="07/05" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Mazzarisi Nino</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 07/05/1957<br>
-            <span class="data-evento" data-date="07/05/1957" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Pricci Maria Antonietta</strong><br>
-            <span>Onomastico</span><br>
-            Data: 23/05<br>
-            <span class="data-evento" data-date="23/05" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Chiarappa Martino</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 24/05/1997<br>
-            <span class="data-evento" data-date="24/05/1997" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Lefemine Domenico</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 02/06/1962<br>
-            <span class="data-evento" data-date="02/06/1962" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Mazzarisi Onofrio</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 05/06/1942<br>
-            <span class="data-evento" data-date="05/06/1942" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Pricci Asia</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 07/06/2006<br>
-            <span class="data-evento" data-date="07/06/2006" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Mazzarisi Onofrio</strong><br>
-            <span>Onomastico</span><br>
-            Data: 12/06<br>
-            <span class="data-evento" data-date="12/06" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Lorusso Onofrio</strong><br>
-            <span>Onomastico</span><br>
-            Data: 12/06<br>
-            <span class="data-evento" data-date="12/06" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Lorusso Alice</strong><br>
-            <span>Onomastico</span><br>
-            Data: 13/06<br>
-            <span class="data-evento" data-date="13/06" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Chiarappa Cristiano</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 20/06/2001<br>
-            <span class="data-evento" data-date="20/06/2001" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Pricci Luigi</strong><br>
-            <span>Onomastico</span><br>
-            Data: 21/06<br>
-            <span class="data-evento" data-date="21/06" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Pricci Giovanni</strong><br>
-            <span>Onomastico</span><br>
-            Data: 24/06<br>
-            <span class="data-evento" data-date="24/06" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Rotondi Gianni</strong><br>
-            <span>Onomastico</span><br>
-            Data: 24/06<br>
-            <span class="data-evento" data-date="24/06" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Pricci Vanna</strong><br>
-            <span>Onomastico</span><br>
-            Data: 24/06<br>
-            <span class="data-evento" data-date="24/06" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Pricci Tiziana</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 27/06/1972<br>
-            <span class="data-evento" data-date="27/06/1972" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Pricci Gilda</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 29/06/2004<br>
-            <span class="data-evento" data-date="29/06/2004" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>AM Marica e Nino</strong><br>
-            <span class="tipo-evento">Anniversario</span><br>
-            Data: 04/07/1987<br>
-            <span class="data-evento" data-date="04/07/1987" data-type="AM">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Lepore Genny</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 04/07/1975<br>
-            <span class="data-evento" data-date="04/07/1975" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>AM Anna e Giuseppe</strong><br>
-            <span class="tipo-evento">Anniversario</span><br>
-            Data: 09/07/1997<br>
-            <span class="data-evento" data-date="09/07/1997" data-type="AM">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Trivisani Anna</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 12/07/1969<br>
-            <span class="data-evento" data-date="12/07/1969" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Lorusso Alessandro</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 17/07/2010<br>
-            <span class="data-evento" data-date="17/07/2010" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Lorusso Alice</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 20/07/2013<br>
-            <span class="data-evento" data-date="20/07/2013" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Trivisani Anna</strong><br>
-            <span>Onomastico</span><br>
-            Data: 26/07<br>
-            <span class="data-evento" data-date="26/07" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>AM Genny e Benny</strong><br>
-            <span class="tipo-evento">Anniversario</span><br>
-            Data: 26/07/2008<br>
-            <span class="data-evento" data-date="26/07/2008" data-type="AM">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Pricci Angela</strong><br>
-            <span>Onomastico</span><br>
-            Data: 02/08<br>
-            <span class="data-evento" data-date="02/08" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Lefemine Domenico</strong><br>
-            <span>Onomastico</span><br>
-            Data: 04/08<br>
-            <span class="data-evento" data-date="04/08" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Lorusso Onofrio</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 05/08/1951<br>
-            <span class="data-evento" data-date="05/08/1951" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>AM Angela e Onofrio</strong><br>
-            <span class="tipo-evento">Anniversario</span><br>
-            Data: 09/08/1975<br>
-            <span class="data-evento" data-date="09/08/1975" data-type="AM">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Pricci Giuseppe</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 12/08/1968<br>
-            <span class="data-evento" data-date="12/08/1968" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Lorusso Alessandro</strong><br>
-            <span>Onomastico</span><br>
-            Data: 26/08<br>
-            <span class="data-evento" data-date="26/08" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>AM Vanna e Domenico</strong><br>
-            <span class="tipo-evento">Anniversario</span><br>
-            Data: 28/08/1991<br>
-            <span class="data-evento" data-date="28/08/1991" data-type="AM">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>AM Antonietta e Saverio</strong><br>
-            <span class="tipo-evento">Anniversario</span><br>
-            Data: 09/09/2000<br>
-            <span class="data-evento" data-date="09/09/2000" data-type="AM">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Pricci Vanna</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 11/09/1963<br>
-            <span class="data-evento" data-date="11/09/1963" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Mazzarisi Maria Grazia</strong><br>
-            <span>Onomastico</span><br>
-            Data: 12/09<br>
-            <span class="data-evento" data-date="12/09" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Pricci Marica</strong><br>
-            <span>Onomastico</span><br>
-            Data: 12/09<br>
-            <span class="data-evento" data-date="12/09" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>AM Cinzia e Gianni</strong><br>
-            <span class="tipo-evento">Anniversario</span><br>
-            Data: 13/09/2014<br>
-            <span class="data-evento" data-date="13/09/2014" data-type="AM">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Lefemine Francesco</strong><br>
-            <span>Onomastico</span><br>
-            Data: 04/10<br>
-            <span class="data-evento" data-date="04/10" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>AM Tiziana e Riccardo</strong><br>
-            <span class="tipo-evento">Anniversario</span><br>
-            Data: 04/10/2002<br>
-            <span class="data-evento" data-date="04/10/2002" data-type="AM">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Grilletti Teresa</strong><br>
-            <span>Onomastico</span><br>
-            Data: 15/10<br>
-            <span class="data-evento" data-date="15/10" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Mazzarisi Teresa</strong><br>
-            <span>Onomastico</span><br>
-            Data: 15/10<br>
-            <span class="data-evento" data-date="15/10" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Pricci Giovanni</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 24/10/1964<br>
-            <span class="data-evento" data-date="24/10/1964" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Chiarappa Martino</strong><br>
-            <span>Onomastico</span><br>
-            Data: 11/11<br>
-            <span class="data-evento" data-date="11/11" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Lefemine Flavia</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 16/11/1996<br>
-            <span class="data-evento" data-date="16/11/1996" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Pricci Luigi</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 16/11/1933<br>
-            <span class="data-evento" data-date="16/11/1933" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Lorusso Benny</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 17/11/1975<br>
-            <span class="data-evento" data-date="17/11/1975" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Chiarappa Saverio</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 26/11/1951<br>
-            <span class="data-evento" data-date="26/11/1951" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Lorusso Nina</strong><br>
-            <span class="tipo-evento">Compleanno</span><br>
-            Data: 29/11/2015<br>
-            <span class="data-evento" data-date="29/11/2015" data-type="Compleanno">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>AM Teresa e Luigi</strong><br>
-            <span class="tipo-evento">Anniversario</span><br>
-            Data: 03/12/1956<br>
-            <span class="data-evento" data-date="03/12/1956" data-type="AM">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Chiarappa Saverio</strong><br>
-            <span>Onomastico</span><br>
-            Data: 03/12<br>
-            <span class="data-evento" data-date="03/12" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Rotondi Nicoletta</strong><br>
-            <span>Onomastico</span><br>
-            Data: 06/12<br>
-            <span class="data-evento" data-date="06/12" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-    
-        <li>
-            <strong>Lorusso Nina</strong><br>
-            <span>Onomastico</span><br>
-            Data: 15/12<br>
-            <span class="data-evento" data-date="15/12" data-type="Onomastico">Giorni mancanti: </span>
-        </li>
-
+    <div id="oggi"></div>
+    <ul id="eventi-lista">
+        <!-- Gli eventi verranno caricati dinamicamente qui -->
     </ul>
+
+    <script>
+        // Funzione per leggere il CSV
+        async function caricaEventiDaCSV(url) {
+            const response = await fetch(url);
+            const csvText = await response.text();
+            const righe = csvText.split("\n").filter(riga => riga.trim() !== "").map(riga => riga.split(","));
+
+            // Estrarre intestazioni e dati
+            const [intestazioni, ...dati] = righe;
+            return dati.map(riga => {
+                return intestazioni.reduce((acc, colonna, index) => {
+                    acc[colonna.trim()] = riga[index]?.trim();
+                    return acc;
+                }, {});
+            });
+        }
+
+        // Funzione per correggere i link (aggiunge https:// se manca e gestisce Google Drive)
+        function correggiLink(link) {
+            if (link.includes("drive.google.com")) {
+                const fileIdMatch = link.match(/\bid=([^&]+)/); // Cerca id nei parametri del link
+                if (fileIdMatch) {
+                    const correctedLink = `https://drive.google.com/uc?id=${fileIdMatch[1]}`;
+                    console.log(`Google Drive link trasformato: ${correctedLink}`);
+                    return correctedLink;
+                } else {
+                    const fileIdPath = link.match(/\/d\/(.*?)\//); // Cerca id nel percorso
+                    if (fileIdPath) {
+                        const correctedLink = `https://drive.google.com/uc?id=${fileIdPath[1]}`;
+                        console.log(`Google Drive link trasformato (da path): ${correctedLink}`);
+                        return correctedLink;
+                    }
+                }
+                console.warn(`Link Google Drive non valido: ${link}`);
+            } else if (link.includes("drive.usercontent.google.com")) {
+                console.log(`Link già valido: ${link}`);
+                return link; // Restituisci il link così com'è
+            }
+            if (!link.startsWith('http://') && !link.startsWith('https://')) {
+                console.log(`Percorso relativo utilizzato: ${link}`);
+                return link; // Percorso relativo
+            }
+            console.log(`Link valido utilizzato: ${link}`);
+            return link;
+        }
+
+        // Funzione per ordinare gli eventi in base alla data (MM/GG), circolarmente a partire da oggi
+        function ordinaPerData(eventi) {
+            const oggi = new Date();
+            const oggiMMGG = new Date(2000, oggi.getMonth(), oggi.getDate());
+
+            return eventi.filter(evento => evento.Data) // Filtra solo eventi con una data valida
+                .map(evento => {
+                    const dataEvento = parseDataMMGG(evento.Data);
+                    const giorniMancanti = calcolaGiorniMancanti(dataEvento, oggiMMGG);
+                    return { ...evento, dataEvento, giorniMancanti }; // Aggiunge campi con la data e i giorni mancanti
+                })
+                .sort((a, b) => {
+                    const diffA = a.dataEvento - oggiMMGG;
+                    const diffB = b.dataEvento - oggiMMGG;
+
+                    // Ordina in modo circolare: prima gli eventi futuri, poi quelli passati
+                    return (diffA >= 0 ? diffA : diffA + 365 * 24 * 60 * 60 * 1000) - 
+                           (diffB >= 0 ? diffB : diffB + 365 * 24 * 60 * 60 * 1000);
+                });
+        }
+
+        // Funzione per convertire date in formato MM/GG in oggetti Date
+        function parseDataMMGG(data) {
+            const [giorno, mese] = data.split("/").map(Number);
+            return new Date(2000, mese - 1, giorno); // Anno fisso per confronto solo MM/GG
+        }
+
+        // Funzione per calcolare i giorni mancanti a un evento
+        function calcolaGiorniMancanti(dataEvento, oggiMMGG) {
+            const diff = dataEvento - oggiMMGG;
+            return diff >= 0 ? Math.ceil(diff / (1000 * 60 * 60 * 24)) : Math.ceil((diff + 365 * 24 * 60 * 60 * 1000) / (1000 * 60 * 60 * 24));
+        }
+
+        // Funzione per aggiornare la data di oggi
+        function aggiornaDataOggi() {
+            const oggi = new Date();
+            const giorniSettimana = ["domenica", "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato"];
+            const nomeGiorno = giorniSettimana[oggi.getDay()];
+            const dataOggi = `${nomeGiorno} ${oggi.getDate().toString().padStart(2, '0')}/${(oggi.getMonth() + 1).toString().padStart(2, '0')}/${oggi.getFullYear()}`;
+            document.getElementById('oggi').innerText = `Oggi: ${dataOggi}`;
+        }
+
+        // Funzione per generare il DOM degli eventi
+        function aggiornaEventi(eventi) {
+            const lista = document.getElementById('eventi-lista');
+            lista.innerHTML = '';
+
+            eventi.forEach(evento => {
+                const classeTipo = evento.Tipo.toLowerCase();
+                const li = document.createElement('li');
+                li.classList.add(classeTipo);
+                const imgSrc = evento.Link ? correggiLink(evento.Link) : `${evento.Nominativo}.JPG`;
+                console.log(`Caricamento immagine per ${evento.Nominativo}: ${imgSrc}`);
+                li.innerHTML = `
+                    <strong>${evento.Nominativo}</strong><br>
+                    <span class="tipo-evento">${evento.Tipo} (${evento.giorniMancanti} giorni)</span><br>
+                    Data: ${evento.Data}<br>
+                    <img src="${imgSrc}" alt="${evento.Nominativo}" class="thumbnail" onerror="this.onerror=null; this.src='default-thumbnail.jpg'; const errorMessage = document.createElement('div'); errorMessage.className = 'error-message'; errorMessage.innerText = 'Immagine non disponibile'; this.parentElement.appendChild(errorMessage);">
+                `;
+                lista.appendChild(li);
+            });
+        }
+
+        // Carica il CSV, ordina e aggiorna gli eventi
+        aggiornaDataOggi();
+        caricaEventiDaCSV('https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/refs/heads/main/Eventi-Link.csv')
+            .then(eventi => ordinaPerData(eventi))
+            .then(aggiornaEventi)
+            .catch(err => console.error('Errore nel caricamento degli eventi:', err));
+    </script>
 </body>
 </html>
