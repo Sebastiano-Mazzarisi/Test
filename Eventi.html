@@ -12,17 +12,26 @@
         li {
             margin-bottom: 25px;
             padding: 20px;
-            background: white;
             border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border: 1px solid #000;
+            box-shadow: 4px 4px 12px rgba(0,0,0,0.3);
             text-align: center;
             line-height: 1.6;
         }
+        li.compleanno {
+            background-color: #e6f3ff;  /* Azzurro chiaro */
+        }
+        li.onomastico {
+            background-color: #e6ffe6;  /* Verde chiaro */
+        }
+        li.anniversario {
+            background-color: #ffe6e6;  /* Rosso chiaro */
+        }
         strong { font-size: 1.5em; }
         .tipo-evento { color: #000; }
-        .compleanno strong { color: #00008B; } /* Blu scuro */
-        .onomastico strong { color: #006400; } /* Verde scuro */
-        .anniversario strong { color: #8B0000; } /* Rosso scuro */
+        .compleanno strong { color: #00008B; }
+        .onomastico strong { color: #006400; }
+        .anniversario strong { color: #8B0000; }
         .thumbnail { height: 300px; width: auto; object-fit: contain; display: block; margin: 10px auto; }
         .error-message { color: red; font-size: 0.9em; }
     </style>
@@ -35,13 +44,11 @@
     </ul>
 
     <script>
-        // Funzione per leggere il CSV
         async function caricaEventiDaCSV(url) {
             const response = await fetch(url);
             const csvText = await response.text();
             const righe = csvText.split("\n").filter(riga => riga.trim() !== "").map(riga => riga.split(","));
 
-            // Estrarre intestazioni e dati
             const [intestazioni, ...dati] = righe;
             return dati.map(riga => {
                 return intestazioni.reduce((acc, colonna, index) => {
@@ -51,16 +58,15 @@
             });
         }
 
-        // Funzione per correggere i link (aggiunge https:// se manca e gestisce Google Drive)
         function correggiLink(link) {
             if (link.includes("drive.google.com")) {
-                const fileIdMatch = link.match(/\bid=([^&]+)/); // Cerca id nei parametri del link
+                const fileIdMatch = link.match(/\bid=([^&]+)/);
                 if (fileIdMatch) {
                     const correctedLink = `https://drive.google.com/uc?id=${fileIdMatch[1]}`;
                     console.log(`Google Drive link trasformato: ${correctedLink}`);
                     return correctedLink;
                 } else {
-                    const fileIdPath = link.match(/\/d\/(.*?)\//); // Cerca id nel percorso
+                    const fileIdPath = link.match(/\/d\/(.*?)\//);
                     if (fileIdPath) {
                         const correctedLink = `https://drive.google.com/uc?id=${fileIdPath[1]}`;
                         console.log(`Google Drive link trasformato (da path): ${correctedLink}`);
@@ -70,50 +76,55 @@
                 console.warn(`Link Google Drive non valido: ${link}`);
             } else if (link.includes("drive.usercontent.google.com")) {
                 console.log(`Link già valido: ${link}`);
-                return link; // Restituisci il link così com'è
+                return link;
             }
             if (!link.startsWith('http://') && !link.startsWith('https://')) {
                 console.log(`Percorso relativo utilizzato: ${link}`);
-                return link; // Percorso relativo
+                return link;
             }
             console.log(`Link valido utilizzato: ${link}`);
             return link;
         }
 
-        // Funzione per ordinare gli eventi in base alla data (MM/GG), circolarmente a partire da oggi
         function ordinaPerData(eventi) {
             const oggi = new Date();
             const oggiMMGG = new Date(2000, oggi.getMonth(), oggi.getDate());
 
-            return eventi.filter(evento => evento.Data) // Filtra solo eventi con una data valida
+            return eventi.filter(evento => evento.Data)
                 .map(evento => {
                     const dataEvento = parseDataMMGG(evento.Data);
                     const giorniMancanti = calcolaGiorniMancanti(dataEvento, oggiMMGG);
-                    return { ...evento, dataEvento, giorniMancanti }; // Aggiunge campi con la data e i giorni mancanti
+                    const eta = calcolaEta(evento);
+                    return { ...evento, dataEvento, giorniMancanti, eta };
                 })
                 .sort((a, b) => {
                     const diffA = a.dataEvento - oggiMMGG;
                     const diffB = b.dataEvento - oggiMMGG;
 
-                    // Ordina in modo circolare: prima gli eventi futuri, poi quelli passati
                     return (diffA >= 0 ? diffA : diffA + 365 * 24 * 60 * 60 * 1000) - 
                            (diffB >= 0 ? diffB : diffB + 365 * 24 * 60 * 60 * 1000);
                 });
         }
 
-        // Funzione per convertire date in formato MM/GG in oggetti Date
         function parseDataMMGG(data) {
             const [giorno, mese] = data.split("/").map(Number);
-            return new Date(2000, mese - 1, giorno); // Anno fisso per confronto solo MM/GG
+            return new Date(2000, mese - 1, giorno);
         }
 
-        // Funzione per calcolare i giorni mancanti a un evento
         function calcolaGiorniMancanti(dataEvento, oggiMMGG) {
             const diff = dataEvento - oggiMMGG;
             return diff >= 0 ? Math.ceil(diff / (1000 * 60 * 60 * 24)) : Math.ceil((diff + 365 * 24 * 60 * 60 * 1000) / (1000 * 60 * 60 * 24));
         }
 
-        // Funzione per aggiornare la data di oggi
+        function calcolaEta(evento) {
+            if (evento.Anno && evento.Tipo === "Compleanno") {
+                const oggi = new Date();
+                const annoCorrente = oggi.getFullYear();
+                return annoCorrente - parseInt(evento.Anno);
+            }
+            return null;
+        }
+
         function aggiornaDataOggi() {
             const oggi = new Date();
             const giorniSettimana = ["domenica", "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato"];
@@ -122,7 +133,6 @@
             document.getElementById('oggi').innerText = `Oggi: ${dataOggi}`;
         }
 
-        // Funzione per generare il DOM degli eventi
         function aggiornaEventi(eventi) {
             const lista = document.getElementById('eventi-lista');
             lista.innerHTML = '';
@@ -132,18 +142,51 @@
                 const li = document.createElement('li');
                 li.classList.add(classeTipo);
                 const imgSrc = evento.Link ? correggiLink(evento.Link) : `${evento.Nominativo}.JPG`;
-                console.log(`Caricamento immagine per ${evento.Nominativo}: ${imgSrc}`);
+                
+                let tipoEventoText;
+                if (evento.Tipo === "Compleanno" || evento.Tipo === "Anniversario") {
+                    const oggi = new Date();
+                    const annoNascita = parseInt(evento.Data.split('/')[2]);
+                    const meseNascita = parseInt(evento.Data.split('/')[1]) - 1;  // 0-based month
+                    const giornoNascita = parseInt(evento.Data.split('/')[0]);
+                    
+                    const dataNascita = new Date(2000, meseNascita, giornoNascita);
+                    const dataOggi = new Date(2000, oggi.getMonth(), oggi.getDate());
+                    
+                    let prossimaEta = oggi.getFullYear() - annoNascita;
+                    if (dataOggi >= dataNascita) {
+                        prossimaEta += 1;
+                    }
+                    
+                    tipoEventoText = `${prossimaEta}° ${evento.Tipo} tra ${evento.giorniMancanti} giorni`;
+                } else if (evento.Tipo === "Onomastico") {
+                    tipoEventoText = `${evento.Tipo} tra ${evento.giorniMancanti} giorni`;
+                }
+                
+                const mesi = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
+                
+                let dataFormattata;
+                const [giorno, mese, anno] = evento.Data.split("/");
+                if (evento.Tipo === "Onomastico") {
+                    dataFormattata = `${parseInt(giorno)} ${mesi[parseInt(mese) - 1]}`;
+                } else {  // Compleanno o Anniversario
+                    dataFormattata = `${parseInt(giorno)} ${mesi[parseInt(mese) - 1]} ${anno}`;
+                }
+
                 li.innerHTML = `
                     <strong>${evento.Nominativo}</strong><br>
-                    <span class="tipo-evento">${evento.Tipo} (${evento.giorniMancanti} giorni)</span><br>
-                    Data: ${evento.Data}<br>
-                    <img src="${imgSrc}" alt="${evento.Nominativo}" class="thumbnail" onerror="this.onerror=null; this.src='default-thumbnail.jpg'; const errorMessage = document.createElement('div'); errorMessage.className = 'error-message'; errorMessage.innerText = 'Immagine non disponibile'; this.parentElement.appendChild(errorMessage);">
+                    <span class="tipo-evento">${tipoEventoText}</span><br>
+                    ${dataFormattata}<br>
+                    <div class="image-container">
+                        <img src="${imgSrc}" alt="${evento.Nominativo}" 
+                             style="height: 300px; width: auto; border: 4px solid #B4A28C; background: white; margin: 10px auto; display: block; box-shadow: 4px 4px 12px rgba(0,0,0,0.3);" 
+                             onerror="this.onerror=null; this.src='default-thumbnail.jpg'; const errorMessage = document.createElement('div'); errorMessage.className = 'error-message'; errorMessage.innerText = 'Immagine non disponibile'; this.parentElement.appendChild(errorMessage);">
+                    </div>
                 `;
                 lista.appendChild(li);
             });
         }
 
-        // Carica il CSV, ordina e aggiorna gli eventi
         aggiornaDataOggi();
         caricaEventiDaCSV('https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/refs/heads/main/Eventi-Link.csv')
             .then(eventi => ordinaPerData(eventi))
