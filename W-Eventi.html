@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Widget Eventi</title>
+    <style>
+        body { 
+            margin: 0; 
+            padding: 0; 
+            font-family: Arial, sans-serif; 
+            overflow: hidden;
+        }
+        .widget {
+            width: 200px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            padding: 10px;
+            cursor: pointer;
+        }
+        .widget-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .calendar-icon {
+            background: #e6f3ff;
+            padding: 5px;
+            border-radius: 5px;
+            margin-right: 10px;
+            width: 24px;
+            height: 24px;
+        }
+        .widget-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+        .next-event {
+            font-size: 12px;
+            color: #666;
+            padding-left: 34px;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget" onclick="window.location.href='Eventi.html'">
+        <div class="widget-header">
+            <svg class="calendar-icon" viewBox="0 0 24 24" fill="none" stroke="#2c5282" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+            </svg>
+            <div class="widget-title">Prossimi eventi</div>
+        </div>
+        <div id="next-event" class="next-event">Caricamento...</div>
+    </div>
+
+    <script>
+        async function caricaEventiDaCSV(url) {
+            const response = await fetch(url);
+            const csvText = await response.text();
+            const righe = csvText.split("\n").filter(riga => riga.trim() !== "").map(riga => riga.split(","));
+
+            const [intestazioni, ...dati] = righe;
+            return dati.map(riga => {
+                return intestazioni.reduce((acc, colonna, index) => {
+                    acc[colonna.trim()] = riga[index]?.trim();
+                    return acc;
+                }, {});
+            });
+        }
+
+        function ordinaPerData(eventi) {
+            const oggi = new Date();
+            const oggiMMGG = new Date(2000, oggi.getMonth(), oggi.getDate());
+
+            return eventi.filter(evento => evento.Data)
+                .map(evento => {
+                    const [giorno, mese] = evento.Data.split("/").map(Number);
+                    const dataEvento = new Date(2000, mese - 1, giorno);
+                    const diff = dataEvento - oggiMMGG;
+                    const giorniMancanti = diff >= 0 ? 
+                        Math.ceil(diff / (1000 * 60 * 60 * 24)) : 
+                        Math.ceil((diff + 365 * 24 * 60 * 60 * 1000) / (1000 * 60 * 60 * 24));
+                    return { ...evento, dataEvento, giorniMancanti };
+                })
+                .sort((a, b) => a.giorniMancanti - b.giorniMancanti);
+        }
+
+        function aggiornaWidget(eventi) {
+            const prossimoEvento = eventi[0];
+            if (prossimoEvento) {
+                let giorni;
+                if (prossimoEvento.giorniMancanti === 0) {
+                    giorni = "oggi";
+                } else if (prossimoEvento.giorniMancanti === 1) {
+                    giorni = "domani";
+                } else {
+                    giorni = `tra ${prossimoEvento.giorniMancanti} giorni`;
+                }
+                
+                document.getElementById('next-event').innerText = 
+                    `${prossimoEvento.Nominativo} - ${prossimoEvento.Tipo} ${giorni}`;
+            }
+        }
+
+        // Carica eventi
+        caricaEventiDaCSV('https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/refs/heads/main/Eventi-Link.csv')
+            .then(eventi => ordinaPerData(eventi))
+            .then(aggiornaWidget)
+            .catch(err => {
+                console.error('Errore nel caricamento degli eventi:', err);
+                document.getElementById('next-event').innerText = 'Errore nel caricamento';
+            });
+    </script>
+</body>
+</html>
