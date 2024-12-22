@@ -6,6 +6,38 @@
     <title>Prossimi eventi</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 40px; background-color: #f0f0f0; }
+        .data-simulata { 
+            background-color: #ffe6e6; 
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        #reset-data, #cambia-data {
+            display: none;
+            margin: 0 5px;
+            padding: 5px 10px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #reset-data {
+            background-color: #ff4444;
+        }
+        #reset-data:hover {
+            background-color: #cc0000;
+        }
+        #cambia-data {
+            background-color: #4444ff;
+            display: inline-block;
+        }
+        #cambia-data:hover {
+            background-color: #0000cc;
+        }
+        .pulsanti-data {
+            text-align: center;
+            margin-bottom: 10px;
+        }
         h1 { color: #444; text-align: center; margin-bottom: 5px; }
         #oggi { text-align: center; color: #666; font-size: 1em; margin-bottom: 30px; }
         ul { list-style-type: none; padding: 0; }
@@ -38,12 +70,18 @@
 </head>
 <body>
     <h1>Prossimi eventi</h1>
+    <div class="pulsanti-data">
+        <button id="cambia-data">Cambia data</button>
+        <button id="reset-data">Torna alla data reale</button>
+    </div>
     <div id="oggi"></div>
     <ul id="eventi-lista">
         <!-- Gli eventi verranno caricati dinamicamente qui -->
     </ul>
 
     <script>
+        let dataSimulata = null;
+
         async function caricaEventiDaCSV(url) {
             const response = await fetch(url);
             const csvText = await response.text();
@@ -86,8 +124,12 @@
             return link;
         }
 
+        function getDataCorrente() {
+            return dataSimulata || new Date();
+        }
+
         function ordinaPerData(eventi) {
-            const oggi = new Date();
+            const oggi = getDataCorrente();
             const oggiMMGG = new Date(2000, oggi.getMonth(), oggi.getDate());
 
             return eventi.filter(evento => evento.Data)
@@ -118,7 +160,7 @@
 
         function calcolaEta(evento) {
             if (evento.Anno && evento.Tipo === "Compleanno") {
-                const oggi = new Date();
+                const oggi = getDataCorrente();
                 const annoCorrente = oggi.getFullYear();
                 return annoCorrente - parseInt(evento.Anno);
             }
@@ -126,10 +168,12 @@
         }
 
         function aggiornaDataOggi() {
-            const oggi = new Date();
+            const oggi = getDataCorrente();
             const giorniSettimana = ["domenica", "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato"];
+            const mesi = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
             const nomeGiorno = giorniSettimana[oggi.getDay()];
-            const dataOggi = `${nomeGiorno} ${oggi.getDate().toString().padStart(2, '0')}/${(oggi.getMonth() + 1).toString().padStart(2, '0')}/${oggi.getFullYear()}`;
+            const nomeMese = mesi[oggi.getMonth()];
+            const dataOggi = `${nomeGiorno} ${oggi.getDate()} ${nomeMese} ${oggi.getFullYear()}`;
             document.getElementById('oggi').innerText = `Oggi: ${dataOggi}`;
         }
 
@@ -145,7 +189,7 @@
                 
                 let tipoEventoText;
                 if (evento.Tipo === "Compleanno" || evento.Tipo === "Anniversario") {
-                    const oggi = new Date();
+                    const oggi = getDataCorrente();
                     const annoNascita = parseInt(evento.Data.split('/')[2]);
                     const meseNascita = parseInt(evento.Data.split('/')[1]) - 1;  // 0-based month
                     const giornoNascita = parseInt(evento.Data.split('/')[0]);
@@ -154,13 +198,29 @@
                     const dataOggi = new Date(2000, oggi.getMonth(), oggi.getDate());
                     
                     let prossimaEta = oggi.getFullYear() - annoNascita;
-                    if (dataOggi >= dataNascita) {
+                    if (dataOggi > dataNascita) {  // Cambiato da >= a > per non incrementare nel giorno stesso
                         prossimaEta += 1;
                     }
                     
-                    tipoEventoText = `${prossimaEta}° ${evento.Tipo} tra ${evento.giorniMancanti} giorni`;
+                    let giorniText;
+                    if (evento.giorniMancanti === 0) {
+                        giorniText = "oggi";
+                    } else if (evento.giorniMancanti === 1) {
+                        giorniText = "domani";
+                    } else {
+                        giorniText = `tra ${evento.giorniMancanti} giorni`;
+                    }
+                    tipoEventoText = `${prossimaEta}° ${evento.Tipo} ${giorniText}`;
                 } else if (evento.Tipo === "Onomastico") {
-                    tipoEventoText = `${evento.Tipo} tra ${evento.giorniMancanti} giorni`;
+                    let giorniText;
+                    if (evento.giorniMancanti === 0) {
+                        giorniText = "oggi";
+                    } else if (evento.giorniMancanti === 1) {
+                        giorniText = "domani";
+                    } else {
+                        giorniText = `tra ${evento.giorniMancanti} giorni`;
+                    }
+                    tipoEventoText = `${evento.Tipo} ${giorniText}`;
                 }
                 
                 const mesi = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
@@ -186,6 +246,59 @@
                 lista.appendChild(li);
             });
         }
+
+        function promptData() {
+            const dataString = prompt("Inserisci la data nel formato DD/MM/YYYY:", 
+                                    dataSimulata ? 
+                                    `${dataSimulata.getDate().toString().padStart(2, '0')}/${(dataSimulata.getMonth() + 1).toString().padStart(2, '0')}/${dataSimulata.getFullYear()}` :
+                                    new Date().toLocaleDateString('it-IT'));
+            
+            if (dataString === null) return; // L'utente ha premuto Annulla
+            
+            const [giorno, mese, anno] = dataString.split("/").map(num => parseInt(num.trim()));
+            
+            if (!giorno || !mese || !anno || 
+                giorno < 1 || giorno > 31 || 
+                mese < 1 || mese > 12 || 
+                anno < 1900 || anno > 2100) {
+                alert("Data non valida! Usa il formato DD/MM/YYYY");
+                return;
+            }
+            
+            dataSimulata = new Date(anno, mese - 1, giorno);
+            document.getElementById('reset-data').style.display = 'block';
+            
+            // Ricarica gli eventi con la nuova data
+            caricaEventiDaCSV('https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/refs/heads/main/Eventi-Link.csv')
+                .then(eventi => ordinaPerData(eventi))
+                .then(aggiornaEventi);
+            
+            aggiornaDataOggi();
+        }
+
+        function resetData() {
+            dataSimulata = null;
+            document.getElementById('reset-data').style.display = 'none';
+            
+            // Ricarica gli eventi con la data reale
+            caricaEventiDaCSV('https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/refs/heads/main/Eventi-Link.csv')
+                .then(eventi => ordinaPerData(eventi))
+                .then(aggiornaEventi);
+            
+            aggiornaDataOggi();
+        }
+
+        // Gestione degli eventi da tastiera e pulsanti
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'F2') {
+                event.preventDefault(); // Previene l'azione predefinita del tasto F2
+                promptData();
+            }
+        });
+
+        // Aggiungi event listener per i pulsanti
+        document.getElementById('cambia-data').addEventListener('click', promptData);
+        document.getElementById('reset-data').addEventListener('click', resetData);
 
         aggiornaDataOggi();
         caricaEventiDaCSV('https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/refs/heads/main/Eventi-Link.csv')
