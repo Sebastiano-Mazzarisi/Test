@@ -4,13 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Prossimi eventi</title>
-    <!-- Icone per iOS -->
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Eventi.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Eventi">
-    <!-- Favicon standard -->
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Eventi.png">
     <style>
         body { font-family: Arial, sans-serif; margin: 40px; background-color: #f0f0f0; }
         .data-simulata { 
@@ -20,7 +13,7 @@
             display: inline-block;
         }
         #reset-data, #cambia-data {
-            display: none !important; /* Nasconde sempre i pulsanti */
+            display: none !important;
             margin: 0 5px;
             padding: 5px 10px;
             color: white;
@@ -41,12 +34,12 @@
             background-color: #0000cc;
         }
         .pulsanti-data {
-            display: none !important; /* Nasconde il contenitore dei pulsanti */
+            display: none !important;
             text-align: center;
             margin-bottom: 10px;
         }
         .data-simulata {
-            background-color: transparent; /* Rimuove l'evidenziazione della data simulata */
+            background-color: transparent;
             padding: 5px 10px;
             border-radius: 5px;
             display: inline-block;
@@ -56,28 +49,21 @@
         ul { list-style-type: none; padding: 0; }
         li {
             margin-bottom: 25px;
-            padding: 20px 30px;  /* Aumentato padding laterale */
+            padding: 20px;
             border-radius: 10px;
             border: 1px solid #000;
             box-shadow: 4px 4px 12px rgba(0,0,0,0.3);
             text-align: center;
             line-height: 1.6;
         }
-        .image-container {
-            margin: 20px auto;  /* Aumentato margine verticale */
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
         li.compleanno {
-            background-color: #e6f3ff;  /* Azzurro chiaro */
+            background-color: #e6f3ff;
         }
         li.onomastico {
-            background-color: #e6ffe6;  /* Verde chiaro */
+            background-color: #e6ffe6;
         }
         li.anniversario {
-            background-color: #fff0f0;  /* Rosa molto tenue */
+            background-color: #fff0f0;
         }
         strong { font-size: 1.5em; }
         .tipo-evento { color: #000; }
@@ -101,6 +87,21 @@
 
     <script>
         let dataSimulata = null;
+        let nomiAnniversari = {};
+
+        async function caricaNomiAnniversari() {
+            try {
+                const response = await fetch('https://sebastiano-mazzarisi.github.io/Test/Eventi-Nozze.csv');
+                const text = await response.text();
+                const righe = text.split("\n").filter(riga => riga.trim() !== "");
+                righe.forEach(riga => {
+                    const [anno, nome] = riga.split(",");
+                    nomiAnniversari[anno.trim()] = nome.trim();
+                });
+            } catch (err) {
+                console.error('Errore nel caricamento dei nomi degli anniversari:', err);
+            }
+        }
 
         async function caricaEventiDaCSV(url) {
             const response = await fetch(url);
@@ -208,17 +209,19 @@
                 const imgSrc = evento.Link ? correggiLink(evento.Link) : `${evento.Nominativo}.JPG`;
                 
                 let tipoEventoText;
+                let prossimaEta;
+                
                 if (evento.Tipo === "Compleanno" || evento.Tipo === "Anniversario") {
                     const oggi = getDataCorrente();
                     const annoNascita = parseInt(evento.Data.split('/')[2]);
-                    const meseNascita = parseInt(evento.Data.split('/')[1]) - 1;  // 0-based month
+                    const meseNascita = parseInt(evento.Data.split('/')[1]) - 1;
                     const giornoNascita = parseInt(evento.Data.split('/')[0]);
                     
                     const dataNascita = new Date(2000, meseNascita, giornoNascita);
                     const dataOggi = new Date(2000, oggi.getMonth(), oggi.getDate());
                     
-                    let prossimaEta = oggi.getFullYear() - annoNascita;
-                    if (dataOggi > dataNascita) {  // Cambiato da >= a > per non incrementare nel giorno stesso
+                    prossimaEta = oggi.getFullYear() - annoNascita;
+                    if (dataOggi > dataNascita) {
                         prossimaEta += 1;
                     }
                     
@@ -249,17 +252,26 @@
                 const [giorno, mese, anno] = evento.Data.split("/");
                 if (evento.Tipo === "Onomastico") {
                     dataFormattata = `${parseInt(giorno)} ${mesi[parseInt(mese) - 1]}`;
-                } else {  // Compleanno o Anniversario
+                } else {
                     dataFormattata = `${parseInt(giorno)} ${mesi[parseInt(mese) - 1]} ${anno}`;
+                }
+
+                let nomeAnniversarioHtml = '';
+                if (evento.Tipo === "Anniversario" && prossimaEta) {
+                    const nomeAnniversario = nomiAnniversari[prossimaEta];
+                    if (nomeAnniversario) {
+                        nomeAnniversarioHtml = `<span class="tipo-evento">${nomeAnniversario}</span><br>`;
+                    }
                 }
 
                 li.innerHTML = `
                     <strong>${evento.Nominativo}</strong><br>
                     <span class="tipo-evento">${tipoEventoText}</span><br>
                     ${dataFormattata}<br>
+                    ${nomeAnniversarioHtml}
                     <div class="image-container">
                         <img src="${imgSrc}" alt="${evento.Nominativo}" 
-                             style="width: 60%; max-width: 200px; height: auto; display: block; border: 4px solid #B4A28C; box-shadow: 4px 4px 12px rgba(0,0,0,0.3); background: white; padding: 4px;" 
+                             style="height: 300px; width: auto; border: 4px solid #B4A28C; background: white; margin: 10px auto; display: block; box-shadow: 4px 4px 12px rgba(0,0,0,0.3);" 
                              onerror="this.onerror=null; this.src='default-thumbnail.jpg'; const errorMessage = document.createElement('div'); errorMessage.className = 'error-message'; errorMessage.innerText = 'Immagine non disponibile'; this.parentElement.appendChild(errorMessage);">
                     </div>
                 `;
@@ -273,7 +285,7 @@
                                     `${dataSimulata.getDate().toString().padStart(2, '0')}/${(dataSimulata.getMonth() + 1).toString().padStart(2, '0')}/${dataSimulata.getFullYear()}` :
                                     new Date().toLocaleDateString('it-IT'));
             
-            if (dataString === null) return; // L'utente ha premuto Annulla
+            if (dataString === null) return;
             
             const [giorno, mese, anno] = dataString.split("/").map(num => parseInt(num.trim()));
             
@@ -288,7 +300,6 @@
             dataSimulata = new Date(anno, mese - 1, giorno);
             document.getElementById('reset-data').style.display = 'block';
             
-            // Ricarica gli eventi con la nuova data
             caricaEventiDaCSV('https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/refs/heads/main/Eventi-Link.csv')
                 .then(eventi => ordinaPerData(eventi))
                 .then(aggiornaEventi);
@@ -300,7 +311,6 @@
             dataSimulata = null;
             document.getElementById('reset-data').style.display = 'none';
             
-            // Ricarica gli eventi con la data reale
             caricaEventiDaCSV('https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/refs/heads/main/Eventi-Link.csv')
                 .then(eventi => ordinaPerData(eventi))
                 .then(aggiornaEventi);
@@ -320,11 +330,14 @@
         document.getElementById('cambia-data').addEventListener('click', promptData);
         document.getElementById('reset-data').addEventListener('click', resetData);
 
-        aggiornaDataOggi();
-        caricaEventiDaCSV('https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/refs/heads/main/Eventi-Link.csv')
-            .then(eventi => ordinaPerData(eventi))
-            .then(aggiornaEventi)
-            .catch(err => console.error('Errore nel caricamento degli eventi:', err));
+        // Carica i nomi degli anniversari e inizializza la pagina
+        caricaNomiAnniversari().then(() => {
+            aggiornaDataOggi();
+            caricaEventiDaCSV('https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/refs/heads/main/Eventi-Link.csv')
+                .then(eventi => ordinaPerData(eventi))
+                .then(aggiornaEventi)
+                .catch(err => console.error('Errore nel caricamento degli eventi:', err));
+        });
     </script>
 </body>
 </html>
