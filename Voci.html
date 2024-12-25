@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Prova tutte le voci di sintesi</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .voice-item {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 5px;
+      border-radius: 5px;
+    }
+    .voice-item button {
+      margin-left: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Prova tutte le voci disponibili</h1>
+  <p>Clicca su "Prova voce" per ascoltare come suona. Se non senti nulla, controlla il volume o se il dispositivo supporta la Web Speech API.</p>
+
+  <div id="voicesContainer"></div>
+
+  <script>
+    const voicesContainer = document.getElementById('voicesContainer');
+
+    function elencaVoci() {
+      // Recuperiamo tutte le voci disponibili
+      const vociDisponibili = speechSynthesis.getVoices();
+
+      // Svuotiamo eventuali voci precedenti
+      voicesContainer.innerHTML = '';
+
+      if (vociDisponibili.length === 0) {
+        voicesContainer.innerHTML = '<p>Nessuna voce disponibile.</p>';
+        return;
+      }
+
+      // Creiamo un elemento .voice-item per ciascuna voce
+      vociDisponibili.forEach((voice, index) => {
+        const div = document.createElement('div');
+        div.className = 'voice-item';
+
+        // Mostriamo alcune info utili
+        // (voice.name, voice.lang, voice.localService, voice.default)
+        div.innerHTML = `
+          <strong>Voce #${index + 1}</strong><br>
+          <em>Nome:</em> ${voice.name}<br>
+          <em>Lingua (lang):</em> ${voice.lang}<br>
+          <em>Local service:</em> ${voice.localService}<br>
+          <em>Default:</em> ${voice.default}<br>
+          <button>Prova voce</button>
+        `;
+
+        // Quando clicchiamo "Prova voce", pronunciamo una frase di esempio con quella voce
+        const provaBtn = div.querySelector('button');
+        provaBtn.addEventListener('click', () => {
+          const testo = `Ciao, mi chiamo ${voice.name}. Benvenuto!`;
+          const utterance = new SpeechSynthesisUtterance(testo);
+          utterance.voice = voice;  // Impostiamo la voce selezionata
+          speechSynthesis.speak(utterance);
+        });
+
+        voicesContainer.appendChild(div);
+      });
+    }
+
+    // Alcuni browser (spec. Chrome) caricano le voci in modo asincrono.
+    // Quindi, per essere sicuri che siano disponibili, usiamo onvoiceschanged.
+    speechSynthesis.onvoiceschanged = () => {
+      elencaVoci();
+    };
+
+    // Avviamo la funzione una prima volta (alcuni browser già le hanno)
+    elencaVoci();
+  </script>
+</body>
+</html>
