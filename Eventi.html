@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=no">
   <title>Prossimi eventi</title>
+
+  <!-- Stili originali -->
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -53,6 +55,7 @@
       text-align: center;
       margin-bottom: 5px;
       font-size: 2.5em;
+      cursor: pointer; /* Rende cliccabile il titolo */
     }
     #oggi {
       text-align: center;
@@ -107,8 +110,6 @@
       margin: 10px auto; 
       display: block; 
       box-shadow: 4px 4px 12px rgba(0,0,0,0.3);
-
-      /* Transizione per l'effetto hover */
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     .image-container img:hover {
@@ -120,15 +121,36 @@
       color: red;
       font-size: 0.9em;
     }
+
+    /* Canvas overlay per i coriandoli */
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+    }
   </style>
+
+  <!-- Libreria canvas-confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-  <h1>Prossimi eventi</h1>
+
+  <!-- Titolo cliccabile per aprire prompt data -->
+  <h1 id="titolo">Prossimi eventi</h1>
+
   <div class="pulsanti-data">
     <button id="cambia-data">Cambia data</button>
     <button id="reset-data">Torna alla data reale</button>
   </div>
   <div id="oggi"></div>
+
+  <!-- Canvas per i coriandoli in overlay -->
+  <canvas id="confetti-canvas"></canvas>
+
   <ul id="eventi-lista">
     <!-- Gli eventi verranno caricati dinamicamente qui -->
   </ul>
@@ -137,7 +159,14 @@
     let dataSimulata = null;
     let nomiAnniversari = {};
 
-    // Carichiamo i nomi degli anniversari (es. 75 -> "Nozze di Platino")
+    // Inizializziamo canvas-confetti
+    const canvas = document.getElementById('confetti-canvas');
+    const confetti = window.confetti.create(canvas, {
+      resize: true,
+      useWorker: true
+    });
+
+    // Carica i nomi degli anniversari
     async function caricaNomiAnniversari() {
       try {
         const response = await fetch('https://sebastiano-mazzarisi.github.io/Test/Eventi-Nozze.csv');
@@ -152,7 +181,7 @@
       }
     }
 
-    // Carichiamo gli eventi
+    // Carica gli eventi
     async function caricaEventiDaCSV(url) {
       const response = await fetch(url);
       const csvText = await response.text();
@@ -169,7 +198,6 @@
       });
     }
 
-    // Se link di Google Drive, correggiamo in "uc?id=..."
     function correggiLink(link) {
       if (link.includes("drive.google.com")) {
         const fileIdMatch = link.match(/\bid=([^&]+)/);
@@ -194,13 +222,11 @@
       return dataSimulata || new Date();
     }
 
-    // "DD/MM" -> data con anno=2000
     function parseDataMMGG(data) {
       const [giorno, mese] = data.split("/").map(Number);
       return new Date(2000, mese - 1, giorno);
     }
 
-    // Se data passata, aggiungiamo 365 giorni
     function calcolaGiorniMancanti(dataEvento, oggiMMGG) {
       const diff = dataEvento - oggiMMGG;
       return diff >= 0
@@ -208,7 +234,6 @@
         : Math.ceil((diff + 365 * 24 * 60 * 60 * 1000) / (1000 * 60 * 60 * 24));
     }
 
-    // Calcoliamo l'età (Compleanno / Anniversario)
     function calcolaEta(evento) {
       if (evento.Tipo !== "Compleanno" && evento.Tipo !== "Anniversario") return null;
 
@@ -236,7 +261,6 @@
       return anni;
     }
 
-    // Ordiniamo in base ai giorni mancanti
     function ordinaPerData(eventi) {
       const oggi = getDataCorrente();
       const oggiMMGG = new Date(2000, oggi.getMonth(), oggi.getDate());
@@ -252,13 +276,12 @@
         .sort((a, b) => {
           const diffA = a.dataEvento - oggiMMGG;
           const diffB = b.dataEvento - oggiMMGG;
-          const tA = diffA >= 0 ? diffA : diffA + 365 * 24 * 60 * 60 * 1000;
-          const tB = diffB >= 0 ? diffB : diffB + 365 * 24 * 60 * 60 * 1000;
+          const tA = (diffA >= 0 ? diffA : diffA + 365*24*60*60*1000);
+          const tB = (diffB >= 0 ? diffB : diffB + 365*24*60*60*1000);
           return tA - tB;
         });
     }
 
-    // Mostra data "Oggi"
     function aggiornaDataOggi() {
       const oggi = getDataCorrente();
       const giorniSettimana = ["domenica", "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato"];
@@ -295,14 +318,37 @@
       }
     }
 
-    // Dizionari di base
+    // Lancia coriandoli per 10 secondi
+    function lanciaCoriandoli10s() {
+      const end = Date.now() + 10 * 1000; // 10 secondi da ora
+
+      (function frame() {
+        // Spariamo un po' di coriandoli a sinistra e a destra
+        confetti({
+          particleCount: 5,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 }
+        });
+        confetti({
+          particleCount: 5,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 }
+        });
+        // Se non sono trascorsi 10s, continuiamo
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      })();
+    }
+
     const giorniSettimana = ["domenica", "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato"];
     const mesiNome = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno",
                       "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
 
-    // Calcola la data REALE di quest'anno (o prossimo) in cui cade l'evento
     function costruisciDataEventoGGMM(evento) {
-      const baseDate = getDataCorrente(); 
+      const baseDate = getDataCorrente();
       const currentYear = baseDate.getFullYear();
 
       const day = evento.dataEvento.getDate();
@@ -318,30 +364,23 @@
       const nomeMese = mesiNome[eventDate.getMonth()];
       const annoVero = eventDate.getFullYear();
 
-      return { 
-        giornoSettimana, 
-        giornoDelMese, 
-        nomeMese,
-        annoVero
-      };
+      return { giornoSettimana, giornoDelMese, nomeMese, annoVero };
     }
 
-    // Trasforma "Cognome Nome" -> "Nome Cognome" se Compleanno/Onomastico
-    // Togli "AM " e sostituisci "Lefemine" -> "Le-Femine" se Anniversario
     function sistemaNominativo(evento) {
       let nominativo = evento.Nominativo.trim();
       if (evento.Tipo === "Anniversario") {
         if (nominativo.startsWith("AM ")) {
           nominativo = nominativo.substring(3).trim();
         }
-        return nominativo.replace("Lefemine", "Lefèmine");
+        return nominativo.replace("Lefemine", "Le-Femmine");
       } else {
         const parti = nominativo.split(" ");
         if (parti[0] === "AM") {
           parti.shift();
         }
         if (parti[0] === "Lefemine") {
-          parti[0] = "Le-Femine";
+          parti[0] = "Le-Femmine";
         }
         const cognome = parti[0];
         const nomeArray = parti.slice(1);
@@ -350,46 +389,37 @@
       }
     }
 
-    // ★★★ Fallback voce: Google italiano -> Alice -> prima it-IT
     function selezionaVoce() {
       const vociDisponibili = speechSynthesis.getVoices();
-      // 1) “Google italiano”
-      let voceSelezionata = vociDisponibili.find( v => 
+      let voceSelezionata = vociDisponibili.find(v =>
         v.lang === 'it-IT' && v.name.toLowerCase().includes('google italiano')
       );
-      // 2) se non trovata, “Alice”
       if (!voceSelezionata) {
         voceSelezionata = vociDisponibili.find(v =>
           v.lang === 'it-IT' && v.name.toLowerCase().includes('alice')
         );
       }
-      // 3) se ancora nulla, prendi la prima voce it-IT
       if (!voceSelezionata) {
         voceSelezionata = vociDisponibili.find(v => v.lang === 'it-IT');
       }
       return voceSelezionata;
     }
 
-    // Frase da leggere con la sintesi vocale
-    // "oggi" => “è” o “compie”
-    // "domani"/futuro => “sarà” o “compirà”
     function costruisciTestoLettura(evento) {
       const nominativoLetto = sistemaNominativo(evento);
       const { giornoSettimana, giornoDelMese, nomeMese, annoVero } = costruisciDataEventoGGMM(evento);
 
-      // Oggi, domani, tra X giorni
       let quandoBase;
       if (evento.giorniMancanti === 0) {
         quandoBase = "oggi";
       } else if (evento.giorniMancanti === 1) {
         quandoBase = "domani";
       } else {
-        quandoBase = `tra ${evento.giorniMancanti} giorni`;
+        quandoBase = `Tra ${evento.giorniMancanti} giorni`;
       }
 
       const dataCompleta = `${quandoBase}, ${giornoSettimana} ${giornoDelMese} ${nomeMese}`;
 
-      // Compleanno => "compie" se oggi, "compirà" se futuro
       if (evento.Tipo === "Compleanno") {
         const eta = evento.eta || 0;
         if (evento.giorniMancanti === 0) {
@@ -397,28 +427,22 @@
         } else {
           return `${dataCompleta} ${annoVero}, ${nominativoLetto} compirà ${eta} anni.`;
         }
-      }
-      // Onomastico => "è l'onomastico" se oggi, "sarà l'onomastico" se futuro
-      else if (evento.Tipo === "Onomastico") {
+      } else if (evento.Tipo === "Onomastico") {
         if (evento.giorniMancanti === 0) {
           return `${dataCompleta} ${annoVero}, è l'onomastico di ${nominativoLetto}. Auguri a ${nominativoLetto}!`;
         } else {
           return `${dataCompleta} ${annoVero}, sarà l'onomastico di ${nominativoLetto}.`;
         }
-      }
-      // Anniversario => "è l'anniversario" e "festeggiano" se oggi, "sarà l'anniversario" e "festeggeranno" se futuro
-      else if (evento.Tipo === "Anniversario") {
+      } else if (evento.Tipo === "Anniversario") {
         const anni = evento.eta || 0;
         const nomeAnniv = nomiAnniversari[anni] || "";
 
-        // se oggi => "è l'anniversario", se futuro => "sarà l'anniversario"
-        let testoIniziale = (evento.giorniMancanti === 0) 
-          ? "è l'anniversario di matrimonio di" 
+        let testoIniziale = (evento.giorniMancanti === 0)
+          ? "è l'anniversario di matrimonio di"
           : "sarà l'anniversario di matrimonio di";
 
-        // se oggi => "festeggiano", se futuro => "festeggeranno"
-        let verbo = (evento.giorniMancanti === 0) 
-          ? "festeggiano" 
+        let verbo = (evento.giorniMancanti === 0)
+          ? "festeggiano"
           : "festeggeranno";
 
         if (nomeAnniv) {
@@ -429,11 +453,9 @@
                + `cioè ${anni} anni insieme.`;
         }
       }
-      // fallback
       return `Evento non riconosciuto per ${nominativoLetto}`;
     }
 
-    // Aggiorniamo la lista e associamo TTS + beep
     function aggiornaEventi(eventi) {
       const lista = document.getElementById('eventi-lista');
       lista.innerHTML = '';
@@ -448,7 +470,6 @@
         const { giornoSettimana, giornoDelMese, nomeMese, annoVero } = costruisciDataEventoGGMM(evento);
         const dataFormattataUI = `${giornoSettimana} ${giornoDelMese} ${nomeMese} ${annoVero}`;
 
-        // Tipo evento (per la UI)
         let tipoEventoText = "";
         if (evento.Tipo === "Compleanno" || evento.Tipo === "Anniversario") {
           if (evento.eta) {
@@ -474,7 +495,6 @@
           }
         }
 
-        // Se è anniversario e c’è un nome (Nozze di Platino, ecc.)
         let nomeAnniversarioHtml = "";
         if (evento.Tipo === "Anniversario" && evento.eta) {
           const nomeAnniversario = nomiAnniversari[evento.eta];
@@ -505,25 +525,28 @@
         `;
         lista.appendChild(li);
 
-        // Click: beep+TTS+beep se oggi
+        // Al click -> beep+TTS+beep e coriandoli per 10s se oggi
         const imgElement = li.querySelector('img');
         imgElement.addEventListener('click', () => {
           const testoDaLeggere = costruisciTestoLettura(evento);
           const utterance = new SpeechSynthesisUtterance(testoDaLeggere);
-
-          // Lingua di base
           utterance.lang = 'it-IT';
 
-          // Impostiamo la voce con fallback
           const voceMigliore = selezionaVoce();
           if (voceMigliore) {
             utterance.voice = voceMigliore;
           }
 
-          // Se è "oggi"
+          // Se evento è "oggi"
           if (evento.giorniMancanti === 0) {
             suonaBeepSingolo();
-            utterance.onend = () => suonaTreBeep();
+
+            // Lancia coriandoli per 10 secondi
+            lanciaCoriandoli10s();
+
+            utterance.onend = () => {
+              suonaTreBeep();
+            };
           }
 
           speechSynthesis.speak(utterance);
@@ -531,7 +554,6 @@
       });
     }
 
-    // Prompt per cambiare data
     function promptData() {
       const dataString = prompt(
         "Inserisci la data nel formato DD/MM/YYYY:",
@@ -559,7 +581,6 @@
       aggiornaDataOggi();
     }
 
-    // Reset data simulata
     function resetData() {
       dataSimulata = null;
       document.getElementById('reset-data').style.display = 'none';
@@ -571,8 +592,11 @@
       aggiornaDataOggi();
     }
 
+    // Al click sul titolo, apriamo la funzione promptData
+    document.getElementById('titolo').addEventListener('click', promptData);
+
     // Tasto F2 => prompt data
-    document.addEventListener('keydown', (event) => {
+    document.addEventListener('keydown', event => {
       if (event.key === 'F2') {
         event.preventDefault();
         promptData();
@@ -581,7 +605,7 @@
     document.getElementById('cambia-data').addEventListener('click', promptData);
     document.getElementById('reset-data').addEventListener('click', resetData);
 
-    // Quando le voci vengono caricate (asincrono), possiamo visualizzarle in console
+    // Voci caricate in modo asincrono
     speechSynthesis.onvoiceschanged = () => {
       console.log("Voci di sintesi disponibili:", speechSynthesis.getVoices());
     };
