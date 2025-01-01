@@ -155,7 +155,96 @@
     <!-- Gli eventi verranno caricati dinamicamente qui -->
   </ul>
 
-  <script>
+  
+    <script>
+    let descrizioniMap = new Map();
+
+    // Funzione per caricare il CSV e popolare la mappa delle descrizioni
+    async function caricaDescrizioni() {
+      try {
+        const response = await fetch("https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/refs/heads/main/EventiDescrizioni.csv");
+        const csvText = await response.text();
+        const righe = csvText.split("\n").filter(riga => riga.trim() !== "");
+        let csvContent = "";
+        righe.forEach((riga, index) => {
+          const separatore = riga.indexOf(","); // Trova la posizione della prima virgola
+          if (separatore > -1) {
+            const nominativo = riga.substring(0, separatore).replace(/"/g, "").trim();
+            const descrizione = riga.substring(separatore + 1).replace(/"/g, "").trim();
+            // Trasformo sia il nominativo che la descrizione in minuscolo
+            const nominativoNormalizzato = nominativo.toLowerCase();
+            descrizioniMap.set(nominativoNormalizzato, descrizione);
+            csvContent += `${index + 1}. ${nominativoNormalizzato} -> ${descrizione}\n`;
+          }
+        });
+        // console.log("Descrizioni caricate (testo completo):", Array.from(descrizioniMap.entries()));
+        // Mostra il contenuto completo del CSV in un alert
+        // alert(`Contenuto completo del CSV:\n\n${csvContent}`);
+       } catch (error) {
+        console.error("Errore nel caricamento del CSV:", error);
+      }
+    }
+
+    
+    // Funzione per gestire eccezioni nel testo del nominativo
+    function correggiPronuncia(testo) {
+      return testo.replace(/marica/gi, "Marìca"); // Corregge "Marica" in "Marìca"
+    }
+    
+    function gestisciEccezioni(nome) {
+      let testo = nome.trim().toLowerCase(); // Normalizzo in minuscolo
+      if (testo.startsWith("am ")) {
+        testo = testo.substring(3).trim();
+      }
+      if (testo.includes("lefemine")) {
+        testo = testo.replace("lefemine", "le femmine");
+      }
+      return testo;
+    }
+
+    // Funzione per dividere il testo in frammenti basati su frasi (delimitati da punti)
+    function dividiTestoInFrammentiPerFrasi(testo) {
+      const frammenti = testo.split(".").map(frammento => frammento.trim()).filter(f => f.length > 0);
+      return frammenti.map(frammento => frammento + "."); // Aggiungo il punto mancante alla fine di ogni frammento
+    }
+
+    // Funzione per leggere il nominativo o la descrizione alternativa
+    function leggiTesto(nominativo) {
+      const nomeNormalizzato = gestisciEccezioni(nominativo);
+      console.log("Nominativo normalizzato cercato:", nomeNormalizzato);
+
+      const descrizione = descrizioniMap.get(nomeNormalizzato);
+      console.log("Descrizione trovata nella mappa:", descrizione);
+
+      const testoDaLeggere = correggiPronuncia(descrizione || gestisciEccezioni(nominativo));
+      console.log("Testo da leggere:", testoDaLeggere);
+
+      // Divido il testo in frammenti basati su frasi
+      const frammenti = dividiTestoInFrammentiPerFrasi(testoDaLeggere);
+
+      // Leggo i frammenti uno alla volta con un ritardo
+      frammenti.forEach((frammento, index) => {
+        setTimeout(() => {
+          const utterance = new SpeechSynthesisUtterance(frammento);
+          utterance.lang = 'it-IT';
+          const voce = selezionaVoce();
+          if (voce) {
+            utterance.voice = voce;
+          }
+          console.log("Leggendo frammento:", frammento);
+          speechSynthesis.speak(utterance);
+        }, index * 3000); // Aggiungo un ritardo di 3 secondi tra le frasi
+      });
+    }
+
+    // Modifica della funzione di click
+    function mostraAlert(nome) {
+      leggiTesto(nome);
+    }
+
+    // Carica le descrizioni al caricamento della pagina
+    caricaDescrizioni();
+    
     let dataSimulata = null;
     let nomiAnniversari = {};
 
@@ -504,7 +593,11 @@
         }
 
         li.innerHTML = `
-          <strong>${evento.Nominativo}</strong><br>
+          
+    <a href="javascript:void(0)" onclick="mostraAlert('${evento.Nominativo}')" style="text-decoration:none; color: inherit;">
+      <strong>${evento.Nominativo}</strong>
+    </a>
+    <br>
           <span class="tipo-evento">${tipoEventoText}</span><br>
           ${dataFormattataUI}<br>
           ${nomeAnniversarioHtml ? nomeAnniversarioHtml : ""}
