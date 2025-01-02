@@ -284,28 +284,30 @@ function dividiTestoInFrammentiPerFrasi(testo) {
           document.body.appendChild(speechPlayer);
       }
 
-      // Funzione per riprodurre il prossimo frammento
-      let currentIndex = 0;
-      function playNextFragment() {
-          if (currentIndex < frammenti.length) {
-              const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=it-IT&client=tw-ob&q=${encodeURIComponent(frammenti[currentIndex])}`;
-              
-              speechPlayer.onloadedmetadata = function() {
-                  speechPlayer.playbackRate = 1.25;
-              };
-              
-              speechPlayer.src = url;
-              speechPlayer.playbackRate = 1.25;
-              
-              // Al termine di ogni frammento, passa al successivo
-              speechPlayer.onended = () => {
-                  currentIndex++;
-                  playNextFragment();
-              };
-              
-              speechPlayer.play();
-          }
-      }
+// Funzione per riprodurre il prossimo frammento
+let currentIndex = 0;
+function playNextFragment() {
+    if (currentIndex < frammenti.length) {
+        // Aggiungiamo il parametro spacing per ridurre le pause
+        const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=it-IT&client=tw-ob&q=${encodeURIComponent(frammenti[currentIndex])}&spacing=0.5`;
+        
+        speechPlayer.onloadedmetadata = function() {
+            speechPlayer.playbackRate = 1.3;
+        };
+        
+        speechPlayer.src = url;
+        speechPlayer.playbackRate = 1.3;
+        
+        // Al termine di ogni frammento, passa subito al successivo
+        speechPlayer.onended = () => {
+            currentIndex++;
+            playNextFragment();
+        };
+        
+        speechPlayer.play();
+    }
+}
+
 
       // Avvia la riproduzione del primo frammento
       playNextFragment();
@@ -620,11 +622,11 @@ function ordinaPerData(eventi) {
               const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=it-IT&client=tw-ob&q=${encodeURIComponent(frammenti[currentIndex])}`;
               
               speechPlayer.onloadedmetadata = function() {
-                  speechPlayer.playbackRate = 1.25;
+                  speechPlayer.playbackRate = 1.3;
               };
               
               speechPlayer.src = url;
-              speechPlayer.playbackRate = 1.25;
+              speechPlayer.playbackRate = 1.3;
               
               // Al termine di ogni frammento, passa al successivo
               speechPlayer.onended = () => {
