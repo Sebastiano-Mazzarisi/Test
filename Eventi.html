@@ -1,4 +1,3 @@
-<!-- ============= INIZIO PARTE 1: HEAD E STILI ============= -->
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -127,18 +126,13 @@
       pointer-events: none;
       z-index: 9999;
     }
-    #speechPlayer {
-      display: none;
-    }
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
 </head>
-<!-- ============= FINE PARTE 1: HEAD E STILI ============= -->
 
-<!-- ============= INIZIO PARTE 2: BODY HTML ============= -->
 <body>
-  <h1 id="titolo">Prossimi eventi 7.5</h1>
+  <h1 id="titolo">Prossimi eventi 7.6</h1>
 
   <div class="pulsanti-data">
     <button id="cambia-data">Cambia data</button>
@@ -152,10 +146,6 @@
     <!-- Gli eventi verranno caricati dinamicamente qui -->
   </ul>
 
-  <audio id="speechPlayer" style="display: none;"></audio>
-<!-- ============= FINE PARTE 2: BODY HTML ============= -->
-
-<!-- ============= INIZIO PARTE 3: SCRIPT INIZIALE E FUNZIONI DI GESTIONE DESCRIZIONI ============= -->
   <script>
     let descrizioniMap = new Map();
 
@@ -216,9 +206,7 @@
     function correggiPronuncia(testo) {
       return testo.replace(/marica/gi, "Marìca");
     }
-<!-- ============= FINE PARTE 3: SCRIPT INIZIALE E FUNZIONI DI GESTIONE DESCRIZIONI ============= -->
 
-<!-- ============= INIZIO PARTE 4: FUNZIONI TTS E GESTIONE AUDIO ============= -->
     function dividiTestoInFrammentiPerFrasi(testo) {
         const maxLength = 120;
         const frammenti = [];
@@ -268,33 +256,23 @@
         const frammenti = dividiTestoInFrammentiPerFrasi(testoDaLeggere);
         console.log("Frammenti da leggere:", frammenti);
 
-        let speechPlayer = document.getElementById('speechPlayer');
-        if (!speechPlayer) {
-            speechPlayer = document.createElement('audio');
-            speechPlayer.id = 'speechPlayer';
-            speechPlayer.style.display = 'none';
-            document.body.appendChild(speechPlayer);
-        }
+        // Ferma qualsiasi sintesi vocale in corso
+        window.speechSynthesis.cancel();
 
         let currentIndex = 0;
+        
         function playNextFragment() {
-            if (currentIndex < frammenti.length) {const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=it-IT&client=tw-ob&q=${encodeURIComponent(frammenti[currentIndex])}`;
+            if (currentIndex < frammenti.length) {
+                const utterance = new SpeechSynthesisUtterance(frammenti[currentIndex]);
+                utterance.lang = 'it-IT';
+                utterance.rate = 1.3;
                 
-                speechPlayer.onloadedmetadata = function() {
-                    speechPlayer.playbackRate = 1.3;
-                };
-                
-                speechPlayer.src = url;
-                speechPlayer.playbackRate = 1.3;
-                
-                speechPlayer.onended = () => {
+                utterance.onend = () => {
                     currentIndex++;
                     setTimeout(playNextFragment, 125);
                 };
                 
-                speechPlayer.play().catch(error => {
-                    console.error('Errore nella riproduzione:', error);
-                });
+                window.speechSynthesis.speak(utterance);
             }
         }
 
@@ -311,11 +289,7 @@
             leggiTesto(nome);
         }
     }
-<!-- ============= FINE PARTE 4: FUNZIONI TTS E GESTIONE AUDIO ============= -->
 
-
-
-<!-- ============= INIZIO PARTE 5: FUNZIONI DI GESTIONE DATA E CALCOLI ============= -->
     let dataSimulata = null;
     let nomiAnniversari = {};
 
@@ -449,12 +423,7 @@
         const dataOggi = `${nomeGiorno} ${oggi.getDate()} ${nomeMese} ${oggi.getFullYear()}`;
         document.getElementById('oggi').innerText = `Oggi: ${dataOggi}`;
     }
-<!-- ============= FINE PARTE 5: FUNZIONI DI GESTIONE DATA E CALCOLI ============= -->
 
-
-
-
-<!-- ============= INIZIO PARTE 6: FUNZIONI PER EFFETTI AUDIO E VISUALI ============= -->
     function suonaBeepSingolo() {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = ctx.createOscillator();
@@ -545,10 +514,7 @@
             return `${nome} ${cognome}`.trim();
         }
     }
-<!-- ============= FINE PARTE 6: FUNZIONI PER EFFETTI AUDIO E VISUALI ============= -->
 
-
-<!-- ============= INIZIO PARTE 7: FUNZIONE COSTRUISCI TESTO LETTURA ============= -->
     function costruisciTestoLettura(evento) {
         const nominativoLetto = sistemaNominativo(evento);
         const { giornoSettimana, giornoDelMese, nomeMese, annoVero } = costruisciDataEventoGGMM(evento);
@@ -600,30 +566,19 @@
             testoFinale = `Evento non riconosciuto per ${nominativoLetto}`;
         }
 
+        // Ferma qualsiasi sintesi vocale in corso
+        window.speechSynthesis.cancel();
+
         const frammenti = dividiTestoInFrammentiPerFrasi(testoFinale);
-        console.log("Frammenti da leggere:", frammenti);
-
-        let speechPlayer = document.getElementById('speechPlayer');
-        if (!speechPlayer) {
-            speechPlayer = document.createElement('audio');
-            speechPlayer.id = 'speechPlayer';
-            speechPlayer.style.display = 'none';
-            document.body.appendChild(speechPlayer);
-        }
-
         let currentIndex = 0;
+
         function playNextFragment() {
             if (currentIndex < frammenti.length) {
-const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=it-IT&client=tw-ob&q=${encodeURIComponent(frammenti[currentIndex])}`;
+                const utterance = new SpeechSynthesisUtterance(frammenti[currentIndex]);
+                utterance.lang = 'it-IT';
+                utterance.rate = 1.3;
                 
-                speechPlayer.onloadedmetadata = function() {
-                    speechPlayer.playbackRate = 1.3;
-                };
-                
-                speechPlayer.src = url;
-                speechPlayer.playbackRate = 1.3;
-                
-                speechPlayer.onended = () => {
+                utterance.onend = () => {
                     currentIndex++;
                     if (currentIndex < frammenti.length) {
                         setTimeout(playNextFragment, 125);
@@ -632,18 +587,14 @@ const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=it-IT&client
                     }
                 };
                 
-                speechPlayer.play().catch(error => {
-                    console.error('Errore nella riproduzione:', error);
-                });
+                window.speechSynthesis.speak(utterance);
             }
         }
 
         playNextFragment();
         return testoFinale;
     }
-<!-- ============= FINE PARTE 7: FUNZIONE COSTRUISCI TESTO LETTURA ============= -->
 
-<!-- ============= INIZIO PARTE 8: FUNZIONE AGGIORNA EVENTI ============= -->
     function aggiornaEventi(eventi) {
         const lista = document.getElementById('eventi-lista');
         lista.innerHTML = '';
@@ -726,9 +677,7 @@ const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=it-IT&client
             });
         });
     }
-<!-- ============= FINE PARTE 8: FUNZIONE AGGIORNA EVENTI ============= -->
 
-<!-- ============= INIZIO PARTE 9: FUNZIONI DI GESTIONE DATA E INIZIALIZZAZIONE ============= -->
     function promptData() {
         const dataString = prompt(
             "Inserisci la data nel formato DD/MM/YYYY:",
@@ -792,5 +741,3 @@ const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=it-IT&client
   </script>
 </body>
 </html>
-<!-- ============= FINE PARTE 9: FUNZIONI DI GESTIONE DATA E INIZIALIZZAZIONE ============= -->
-
