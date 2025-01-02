@@ -130,7 +130,7 @@
 </head>
 
 <body>
-  <h1 id="titolo">Prossimi eventi 7.10</h1>
+  <h1 id="titolo">Prossimi eventi 7.11</h1>
 
   <div class="pulsanti-data">
     <button id="cambia-data">Cambia data</button>
@@ -239,43 +239,46 @@
       return frammenti;
     }
 
-    function leggiTesto(nominativo) {
-      const nomeNormalizzato = gestisciEccezioni(nominativo);
-      console.log("Cercando descrizione per:", nomeNormalizzato);
-      console.log("Descrizioni disponibili:", Array.from(descrizioniMap.keys()));
+function leggiTesto(nominativo) {
+  const nomeNormalizzato = gestisciEccezioni(nominativo);
+  console.log("Cercando descrizione per:", nomeNormalizzato);
+  console.log("Descrizioni disponibili:", Array.from(descrizioniMap.keys()));
 
-      const descrizione = descrizioniMap.get(nomeNormalizzato);
-      console.log("Descrizione trovata:", descrizione);
+  const descrizione = descrizioniMap.get(nomeNormalizzato);
+  console.log("Descrizione trovata:", descrizione);
 
-      const testoDaLeggere = correggiPronuncia(descrizione || nominativo);
-      console.log("Testo che verrà letto:", testoDaLeggere);
+  // Applica la correzione di pronuncia
+  const testoDaLeggere = correggiPronuncia(descrizione || nominativo);
+  console.log("Testo che verrà letto:", testoDaLeggere);
 
-      // Ferma qualsiasi sintesi vocale in corso
-      responsiveVoice.cancel();
+  // Ferma qualsiasi sintesi vocale in corso
+  responsiveVoice.cancel();
 
-      const frammenti = dividiTestoInFrammentiPerFrasi(testoDaLeggere);
-      console.log("Frammenti da leggere:", frammenti);
+  const frammenti = dividiTestoInFrammentiPerFrasi(testoDaLeggere);
+  console.log("Frammenti da leggere:", frammenti);
 
-      let currentIndex = 0;
+  let currentIndex = 0;
+  
+  function playNextFragment() {
+    if (currentIndex < frammenti.length) {
+      // Rilevamento dispositivo mobile
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       
-      function playNextFragment() {
-        if (currentIndex < frammenti.length) {
-          responsiveVoice.speak(correggiPronuncia(frammenti[currentIndex]), "Italian Female", {
-            rate: 1.1,
-            volume: 1,
-            onend: () => {
-              currentIndex++;
-              if (currentIndex < frammenti.length) {
-                setTimeout(playNextFragment, 25);
-              }
-            }
-          });
+      responsiveVoice.speak(correggiPronuncia(frammenti[currentIndex]), "Italian Female", {
+        rate: isMobile ? 1.0 : 1.1,  // Velocità ridotta per dispositivi mobili
+        volume: 1,
+        onend: () => {
+          currentIndex++;
+          if (currentIndex < frammenti.length) {
+            setTimeout(playNextFragment, 25);
+          }
         }
-      }
-
-      playNextFragment();
+      });
     }
+  }
 
+  playNextFragment();
+}
     function mostraAlert(nome) {
       if (!descrizioniMap.size) {
         console.log("Ricarico le descrizioni...");
@@ -574,8 +577,11 @@ function costruisciTestoLettura(evento) {
 
   function playNextFragment() {
     if (currentIndex < frammenti.length) {
+      // Rilevamento dispositivo mobile
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
       responsiveVoice.speak(correggiPronuncia(frammenti[currentIndex]), "Italian Female", {
-        rate: 1.1,
+        rate: isMobile ? 1.0 : 1.1,  // Velocità ridotta per dispositivi mobili
         volume: 1,
         onend: () => {
           currentIndex++;
