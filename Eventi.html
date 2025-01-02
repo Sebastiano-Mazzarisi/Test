@@ -2,6 +2,12 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
+
+<meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';">
+  <meta http-equiv="X-Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';">
+  <meta http-equiv="X-WebKit-CSP" content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';">
+
+
   <meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=no">
   <title>Prossimi eventi</title>
 
@@ -55,7 +61,7 @@
       text-align: center;
       margin-bottom: 5px;
       font-size: 2.5em;
-      cursor: pointer; /* Rende cliccabile il titolo */
+      cursor: pointer;
     }
     #oggi {
       text-align: center;
@@ -101,7 +107,6 @@
       color: #8B0000;
     }
 
-    /* Effetto sollevamento immagine su PC */
     .image-container img {
       height: 300px; 
       width: auto; 
@@ -122,7 +127,6 @@
       font-size: 0.9em;
     }
 
-    /* Canvas overlay per i coriandoli */
     #confetti-canvas {
       position: fixed;
       top: 0;
@@ -132,14 +136,16 @@
       pointer-events: none;
       z-index: 9999;
     }
+
+    #speechPlayer {
+      display: none;
+    }
   </style>
 
   <!-- Libreria canvas-confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-
-  <!-- Titolo cliccabile per aprire prompt data -->
   <h1 id="titolo">Prossimi eventi</h1>
 
   <div class="pulsanti-data">
@@ -148,130 +154,191 @@
   </div>
   <div id="oggi"></div>
 
-  <!-- Canvas per i coriandoli in overlay -->
   <canvas id="confetti-canvas"></canvas>
 
   <ul id="eventi-lista">
     <!-- Gli eventi verranno caricati dinamicamente qui -->
   </ul>
 
-  
-    <script>
+  <audio id="speechPlayer" style="display: none;"></audio>
+
+  <script>
     let descrizioniMap = new Map();
 
-    // Funzione per caricare il CSV e popolare la mappa delle descrizioni
     async function caricaDescrizioni() {
       try {
         const response = await fetch("https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/refs/heads/main/EventiDescrizioni.csv");
         const csvText = await response.text();
         const righe = csvText.split("\n").filter(riga => riga.trim() !== "");
-        let csvContent = "";
+        
         righe.forEach((riga, index) => {
-          const separatore = riga.indexOf(","); // Trova la posizione della prima virgola
-          if (separatore > -1) {
-            const nominativo = riga.substring(0, separatore).replace(/"/g, "").trim();
-            const descrizione = riga.substring(separatore + 1).replace(/"/g, "").trim();
-            // Trasformo sia il nominativo che la descrizione in minuscolo
-            const nominativoNormalizzato = nominativo.toLowerCase();
+          let inQuotes = false;
+          let separatorIndex = -1;
+          
+          for (let i = 0; i < riga.length; i++) {
+            if (riga[i] === '"') {
+              inQuotes = !inQuotes;
+            } else if (riga[i] === ',' && !inQuotes) {
+              separatorIndex = i;
+              break;
+            }
+          }
+          
+          if (separatorIndex > -1) {
+            let nominativo = riga.substring(0, separatorIndex).trim();
+            let descrizione = riga.substring(separatorIndex + 1).trim();
+            
+            nominativo = nominativo.replace(/^"|"$/g, '').trim();
+            descrizione = descrizione.replace(/^"|"$/g, '').trim();
+            
+            const nominativoNormalizzato = gestisciEccezioni(nominativo);
             descrizioniMap.set(nominativoNormalizzato, descrizione);
-            csvContent += `${index + 1}. ${nominativoNormalizzato} -> ${descrizione}\n`;
+            console.log(`Caricata descrizione per: ${nominativoNormalizzato}`);
           }
         });
-        console.log("Descrizioni caricate (testo completo):", Array.from(descrizioniMap.entries()));
-        // Mostra il contenuto completo del CSV in un alert
         
+        console.log("Descrizioni caricate:", descrizioniMap.size);
       } catch (error) {
         console.error("Errore nel caricamento del CSV:", error);
       }
     }
 
-    
-    // Funzione per gestire eccezioni nel testo del nominativo
-    function correggiPronuncia(testo) {
-      return testo.replace(/marica/gi, "Marìca"); // Corregge "Marica" in "Marìca"
-    }
-    
     function gestisciEccezioni(nome) {
-      let testo = nome.trim().toLowerCase(); // Normalizzo in minuscolo
+      let testo = nome.toLowerCase().trim();
+      
       if (testo.startsWith("am ")) {
-        testo = testo.substring(3).trim();
+        testo = testo.substring(3);
       }
+      
       if (testo.includes("lefemine")) {
         testo = testo.replace("lefemine", "le femmine");
       }
+      
+      testo = testo.replace(/\s+/g, ' ').trim();
+      
       return testo;
     }
 
-    // Funzione per dividere il testo in frammenti basati su frasi (delimitati da punti)
-    function dividiTestoInFrammentiPerFrasi(testo) {
-      const frammenti = testo.split(".").map(frammento => frammento.trim()).filter(f => f.length > 0);
-      return frammenti.map(frammento => frammento + "."); // Aggiungo il punto mancante alla fine di ogni frammento
+    function correggiPronuncia(testo) {
+      return testo.replace(/marica/gi, "Marìca");
     }
 
-    // Funzione per leggere il nominativo o la descrizione alternativa
+function dividiTestoInFrammentiPerFrasi(testo) {
+    const maxLength = 120; // Lunghezza massima di ogni frammento
+    const frammenti = [];
+    
+    // Prima dividiamo per punti
+    const frasiPunti = testo.split(".").filter(f => f.trim().length > 0);
+    
+    for (let frase of frasiPunti) {
+        frase = frase.trim() + "."; // Riaggiungiamo il punto
+        
+        // Se la frase è più lunga di maxLength, la dividiamo ulteriormente
+        if (frase.length > maxLength) {
+            // Dividiamo la frase in parole
+            const parole = frase.split(" ");
+            let frammentoCorrente = "";
+            
+            for (const parola of parole) {
+                // Se aggiungendo la parola non superiamo maxLength
+                if ((frammentoCorrente + " " + parola).length <= maxLength) {
+                    frammentoCorrente += (frammentoCorrente ? " " : "") + parola;
+                } else {
+                    // Il frammento corrente è pieno, lo salviamo e ne iniziamo uno nuovo
+                    if (frammentoCorrente) {
+                        frammenti.push(frammentoCorrente.trim() + (frammentoCorrente.endsWith(".") ? "" : "..."));
+                    }
+                    frammentoCorrente = parola;
+                }
+            }
+            // Aggiungiamo l'ultimo frammento
+            if (frammentoCorrente) {
+                frammenti.push(frammentoCorrente.trim() + (frammentoCorrente.endsWith(".") ? "" : "."));
+            }
+        } else {
+            // La frase è abbastanza corta, la aggiungiamo direttamente
+            frammenti.push(frase);
+        }
+    }
+    
+    console.log("Frammenti creati:", frammenti);
+    return frammenti;
+}
+
+
     function leggiTesto(nominativo) {
       const nomeNormalizzato = gestisciEccezioni(nominativo);
-      console.log("Nominativo normalizzato cercato:", nomeNormalizzato);
+      console.log("Cercando descrizione per:", nomeNormalizzato);
+      console.log("Descrizioni disponibili:", Array.from(descrizioniMap.keys()));
 
       const descrizione = descrizioniMap.get(nomeNormalizzato);
-      console.log("Descrizione trovata nella mappa:", descrizione);
+      console.log("Descrizione trovata:", descrizione);
 
-      
-    const testoDaLeggere = correggiPronuncia(descrizione || gestisciEccezioni(nominativo));
-    
-      console.log("Testo da leggere:", testoDaLeggere);
+      const testoDaLeggere = descrizione || nominativo;
+      console.log("Testo che verrà letto:", testoDaLeggere);
 
-      // Divido il testo in frammenti basati su frasi
+      // Dividiamo il testo in frammenti basati sui punti
       const frammenti = dividiTestoInFrammentiPerFrasi(testoDaLeggere);
+      console.log("Frammenti da leggere:", frammenti);
 
-      
-    // Leggo i frammenti uno alla volta con un ritardo
-    frammenti.forEach((frammento, index) => {
-      setTimeout(() => {
-        const utterance = new SpeechSynthesisUtterance(frammento);
-        utterance.lang = 'it-IT';
-        const voce = selezionaVoce();
-        if (voce) {
-          utterance.voice = voce;
-        }
-        console.log("Leggendo frammento:", frammento);
-        speechSynthesis.speak(utterance);
-      }, index * 3000); // Aggiungo un ritardo di 3 secondi tra i frammenti
-    });
-    
-      frammenti.forEach((frammento, index) => {
-        setTimeout(() => {
-          const utterance = new SpeechSynthesisUtterance(frammento);
-          utterance.lang = 'it-IT';
-          const voce = selezionaVoce();
-          if (voce) {
-            utterance.voice = voce;
-          }
-          console.log("Leggendo frammento:", frammento);
-          speechSynthesis.speak(utterance);
-        }, index * 3000); // Aggiungo un ritardo di 3 secondi tra le frasi
-      });
+      // Creiamo o otteniamo il player audio
+      let speechPlayer = document.getElementById('speechPlayer');
+      if (!speechPlayer) {
+          speechPlayer = document.createElement('audio');
+          speechPlayer.id = 'speechPlayer';
+          speechPlayer.style.display = 'none';
+          document.body.appendChild(speechPlayer);
+      }
+
+// Funzione per riprodurre il prossimo frammento
+let currentIndex = 0;
+function playNextFragment() {
+    if (currentIndex < frammenti.length) {
+        // Aggiungiamo il parametro spacing per ridurre le pause
+        const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=it-IT&client=tw-ob&q=${encodeURIComponent(frammenti[currentIndex])}&spacing=0.5`;
+        
+        speechPlayer.onloadedmetadata = function() {
+            speechPlayer.playbackRate = 1.3;
+        };
+        
+        speechPlayer.src = url;
+        speechPlayer.playbackRate = 1.3;
+        
+        // Al termine di ogni frammento, passa subito al successivo
+        speechPlayer.onended = () => {
+            currentIndex++;
+            playNextFragment();
+        };
+        
+        speechPlayer.play();
+    }
+}
+
+
+      // Avvia la riproduzione del primo frammento
+      playNextFragment();
     }
 
-    // Modifica della funzione di click
     function mostraAlert(nome) {
-      leggiTesto(nome);
+      if (!descrizioniMap.size) {
+        console.log("Ricarico le descrizioni...");
+        caricaDescrizioni().then(() => {
+          leggiTesto(nome);
+        });
+      } else {
+        leggiTesto(nome);
+      }
     }
 
-    // Carica le descrizioni al caricamento della pagina
-    caricaDescrizioni();
-    
     let dataSimulata = null;
     let nomiAnniversari = {};
 
-    // Inizializziamo canvas-confetti
     const canvas = document.getElementById('confetti-canvas');
     const confetti = window.confetti.create(canvas, {
       resize: true,
       useWorker: true
     });
 
-    // Carica i nomi degli anniversari
     async function caricaNomiAnniversari() {
       try {
         const response = await fetch('https://sebastiano-mazzarisi.github.io/Test/Eventi-Nozze.csv');
@@ -286,7 +353,6 @@
       }
     }
 
-    // Carica gli eventi
     async function caricaEventiDaCSV(url) {
       const response = await fetch(url);
       const csvText = await response.text();
@@ -315,10 +381,10 @@
           }
         }
       } else if (link.includes("drive.usercontent.google.com")) {
-        return link; 
+        return link;
       }
       if (!link.startsWith('http://') && !link.startsWith('https://')) {
-        return link; 
+        return link;
       }
       return link;
     }
@@ -366,7 +432,10 @@
       return anni;
     }
 
-    function ordinaPerData(eventi) {
+
+
+
+function ordinaPerData(eventi) {
       const oggi = getDataCorrente();
       const oggiMMGG = new Date(2000, oggi.getMonth(), oggi.getDate());
 
@@ -398,7 +467,6 @@
       document.getElementById('oggi').innerText = `Oggi: ${dataOggi}`;
     }
 
-    // beep singolo
     function suonaBeepSingolo() {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
       const osc = ctx.createOscillator();
@@ -409,7 +477,6 @@
       osc.stop(ctx.currentTime + 0.2);
     }
 
-    // beep triplo
     function suonaTreBeep() {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
       for (let i = 0; i < 3; i++) {
@@ -423,12 +490,10 @@
       }
     }
 
-    // Lancia coriandoli per 10 secondi
     function lanciaCoriandoli10s() {
-      const end = Date.now() + 10 * 1000; // 10 secondi da ora
+      const end = Date.now() + 10 * 1000;
 
       (function frame() {
-        // Spariamo un po' di coriandoli a sinistra e a destra
         confetti({
           particleCount: 5,
           angle: 60,
@@ -441,7 +506,6 @@
           spread: 55,
           origin: { x: 1 }
         });
-        // Se non sono trascorsi 10s, continuiamo
         if (Date.now() < end) {
           requestAnimationFrame(frame);
         }
@@ -494,22 +558,6 @@
       }
     }
 
-    function selezionaVoce() {
-      const vociDisponibili = speechSynthesis.getVoices();
-      let voceSelezionata = vociDisponibili.find(v =>
-        v.lang === 'it-IT' && v.name.toLowerCase().includes('google italiano')
-      );
-      if (!voceSelezionata) {
-        voceSelezionata = vociDisponibili.find(v =>
-          v.lang === 'it-IT' && v.name.toLowerCase().includes('alice')
-        );
-      }
-      if (!voceSelezionata) {
-        voceSelezionata = vociDisponibili.find(v => v.lang === 'it-IT');
-      }
-      return voceSelezionata;
-    }
-
     function costruisciTestoLettura(evento) {
       const nominativoLetto = sistemaNominativo(evento);
       const { giornoSettimana, giornoDelMese, nomeMese, annoVero } = costruisciDataEventoGGMM(evento);
@@ -525,18 +573,20 @@
 
       const dataCompleta = `${quandoBase}, ${giornoSettimana} ${giornoDelMese} ${nomeMese}`;
 
+      let testoFinale = '';
+
       if (evento.Tipo === "Compleanno") {
         const eta = evento.eta || 0;
         if (evento.giorniMancanti === 0) {
-          return `${dataCompleta} ${annoVero}, ${nominativoLetto} compie ${eta} anni. Auguri di buon compleanno!`;
+          testoFinale = `${dataCompleta} ${annoVero}, ${nominativoLetto} compie ${eta} anni. Auguri di buon compleanno!`;
         } else {
-          return `${dataCompleta} ${annoVero}, ${nominativoLetto} compirà ${eta} anni.`;
+          testoFinale = `${dataCompleta} ${annoVero}, ${nominativoLetto} compirà ${eta} anni.`;
         }
       } else if (evento.Tipo === "Onomastico") {
         if (evento.giorniMancanti === 0) {
-          return `${dataCompleta} ${annoVero}, è l'onomastico di ${nominativoLetto}. Auguri a ${nominativoLetto}!`;
+          testoFinale = `${dataCompleta} ${annoVero}, è l'onomastico di ${nominativoLetto}. Auguri a ${nominativoLetto}!`;
         } else {
-          return `${dataCompleta} ${annoVero}, sarà l'onomastico di ${nominativoLetto}.`;
+          testoFinale = `${dataCompleta} ${annoVero}, sarà l'onomastico di ${nominativoLetto}.`;
         }
       } else if (evento.Tipo === "Anniversario") {
         const anni = evento.eta || 0;
@@ -551,14 +601,53 @@
           : "festeggeranno";
 
         if (nomeAnniv) {
-          return `${dataCompleta} ${annoVero}, ${testoIniziale} ${nominativoLetto} `
-               + `che ${verbo} le ${nomeAnniv}, cioè ${anni} anni insieme.`;
+          testoFinale = `${dataCompleta} ${annoVero}, ${testoIniziale} ${nominativoLetto} che ${verbo} le ${nomeAnniv}, cioè ${anni} anni insieme.`;
         } else {
-          return `${dataCompleta} ${annoVero}, ${testoIniziale} ${nominativoLetto}, `
-               + `cioè ${anni} anni insieme.`;
+          testoFinale = `${dataCompleta} ${annoVero}, ${testoIniziale} ${nominativoLetto}, cioè ${anni} anni insieme.`;
         }
+      } else {
+        testoFinale = `Evento non riconosciuto per ${nominativoLetto}`;
       }
-      return `Evento non riconosciuto per ${nominativoLetto}`;
+
+      // Dividiamo il testo in frammenti basati sui punti
+      const frammenti = dividiTestoInFrammentiPerFrasi(testoFinale);
+      console.log("Frammenti da leggere:", frammenti);
+
+      let speechPlayer = document.getElementById('speechPlayer');
+      if (!speechPlayer) {
+          speechPlayer = document.createElement('audio');
+          speechPlayer.id = 'speechPlayer';
+          speechPlayer.style.display = 'none';
+          document.body.appendChild(speechPlayer);
+      }
+
+      // Funzione per riprodurre il prossimo frammento
+      let currentIndex = 0;
+      function playNextFragment() {
+          if (currentIndex < frammenti.length) {
+              const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=it-IT&client=tw-ob&q=${encodeURIComponent(frammenti[currentIndex])}`;
+              
+              speechPlayer.onloadedmetadata = function() {
+                  speechPlayer.playbackRate = 1.3;
+              };
+              
+              speechPlayer.src = url;
+              speechPlayer.playbackRate = 1.3;
+              
+              // Al termine di ogni frammento, passa al successivo
+              speechPlayer.onended = () => {
+                  currentIndex++;
+                  playNextFragment();
+              };
+              
+              speechPlayer.play();
+          }
+      }
+
+      // Avvia la riproduzione del primo frammento
+      playNextFragment();
+
+      return testoFinale;
     }
 
     function aggiornaEventi(eventi) {
@@ -609,11 +698,10 @@
         }
 
         li.innerHTML = `
-          
-    <a href="javascript:void(0)" onclick="mostraAlert('${evento.Nominativo}')" style="text-decoration:none; color: inherit;">
-      <strong>${evento.Nominativo}</strong>
-    </a>
-    <br>
+          <a href="javascript:void(0)" onclick="mostraAlert('${evento.Nominativo}')" style="text-decoration:none; color: inherit;">
+            <strong>${evento.Nominativo}</strong>
+          </a>
+          <br>
           <span class="tipo-evento">${tipoEventoText}</span><br>
           ${dataFormattataUI}<br>
           ${nomeAnniversarioHtml ? nomeAnniversarioHtml : ""}
@@ -634,31 +722,21 @@
         `;
         lista.appendChild(li);
 
-        // Al click -> beep+TTS+beep e coriandoli per 10s se oggi
         const imgElement = li.querySelector('img');
         imgElement.addEventListener('click', () => {
           const testoDaLeggere = costruisciTestoLettura(evento);
-          const utterance = new SpeechSynthesisUtterance(testoDaLeggere);
-          utterance.lang = 'it-IT';
-
-          const voceMigliore = selezionaVoce();
-          if (voceMigliore) {
-            utterance.voice = voceMigliore;
-          }
-
-          // Se evento è "oggi"
+          
           if (evento.giorniMancanti === 0) {
             suonaBeepSingolo();
-
-            // Lancia coriandoli per 10 secondi
             lanciaCoriandoli10s();
-
-            utterance.onend = () => {
-              suonaTreBeep();
-            };
+            
+            const speechPlayer = document.getElementById('speechPlayer');
+            if (speechPlayer) {
+              speechPlayer.onended = () => {
+                suonaTreBeep();
+              };
+            }
           }
-
-          speechSynthesis.speak(utterance);
         });
       });
     }
@@ -690,7 +768,11 @@
       aggiornaDataOggi();
     }
 
-    function resetData() {
+
+
+
+
+function resetData() {
       dataSimulata = null;
       document.getElementById('reset-data').style.display = 'none';
 
@@ -701,10 +783,8 @@
       aggiornaDataOggi();
     }
 
-    // Al click sul titolo, apriamo la funzione promptData
     document.getElementById('titolo').addEventListener('click', promptData);
 
-    // Tasto F2 => prompt data
     document.addEventListener('keydown', event => {
       if (event.key === 'F2') {
         event.preventDefault();
@@ -714,11 +794,6 @@
     document.getElementById('cambia-data').addEventListener('click', promptData);
     document.getElementById('reset-data').addEventListener('click', resetData);
 
-    // Voci caricate in modo asincrono
-    speechSynthesis.onvoiceschanged = () => {
-      console.log("Voci di sintesi disponibili:", speechSynthesis.getVoices());
-    };
-
     // Avvio
     caricaNomiAnniversari().then(() => {
       aggiornaDataOggi();
@@ -727,6 +802,9 @@
         .then(aggiornaEventi)
         .catch(err => console.error('Errore nel caricamento degli eventi:', err));
     });
+
+    // Carica le descrizioni all'avvio
+    caricaDescrizioni();
   </script>
 </body>
 </html>
