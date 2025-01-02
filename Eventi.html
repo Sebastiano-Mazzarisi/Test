@@ -2,12 +2,6 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-
-<meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';">
-  <meta http-equiv="X-Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';">
-  <meta http-equiv="X-WebKit-CSP" content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';">
-
-
   <meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=no">
   <title>Prossimi eventi</title>
 
@@ -146,7 +140,7 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-  <h1 id="titolo">Prossimi eventi 7.1</h1>
+  <h1 id="titolo">Prossimi eventi 7.3</h1>
 
   <div class="pulsanti-data">
     <button id="cambia-data">Cambia data</button>
@@ -223,103 +217,87 @@
       return testo.replace(/marica/gi, "Marìca");
     }
 
-function dividiTestoInFrammentiPerFrasi(testo) {
-    const maxLength = 120; // Lunghezza massima di ogni frammento
-    const frammenti = [];
-    
-    // Prima dividiamo per punti
-    const frasiPunti = testo.split(".").filter(f => f.trim().length > 0);
-    
-    for (let frase of frasiPunti) {
-        frase = frase.trim() + "."; // Riaggiungiamo il punto
+    function dividiTestoInFrammentiPerFrasi(testo) {
+        const maxLength = 120;
+        const frammenti = [];
         
-        // Se la frase è più lunga di maxLength, la dividiamo ulteriormente
-        if (frase.length > maxLength) {
-            // Dividiamo la frase in parole
-            const parole = frase.split(" ");
-            let frammentoCorrente = "";
+        const frasiPunti = testo.split(".").filter(f => f.trim().length > 0);
+        
+        for (let frase of frasiPunti) {
+            frase = frase.trim() + ".";
             
-            for (const parola of parole) {
-                // Se aggiungendo la parola non superiamo maxLength
-                if ((frammentoCorrente + " " + parola).length <= maxLength) {
-                    frammentoCorrente += (frammentoCorrente ? " " : "") + parola;
-                } else {
-                    // Il frammento corrente è pieno, lo salviamo e ne iniziamo uno nuovo
-                    if (frammentoCorrente) {
-                        frammenti.push(frammentoCorrente.trim() + (frammentoCorrente.endsWith(".") ? "" : "..."));
+            if (frase.length > maxLength) {
+                const parole = frase.split(" ");
+                let frammentoCorrente = "";
+                
+                for (const parola of parole) {
+                    if ((frammentoCorrente + " " + parola).length <= maxLength) {
+                        frammentoCorrente += (frammentoCorrente ? " " : "") + parola;
+                    } else {
+                        if (frammentoCorrente) {
+                            frammenti.push(frammentoCorrente.trim() + (frammentoCorrente.endsWith(".") ? "" : "..."));
+                        }
+                        frammentoCorrente = parola;
                     }
-                    frammentoCorrente = parola;
                 }
+                if (frammentoCorrente) {
+                    frammenti.push(frammentoCorrente.trim() + (frammentoCorrente.endsWith(".") ? "" : "."));
+                }
+            } else {
+                frammenti.push(frase);
             }
-            // Aggiungiamo l'ultimo frammento
-            if (frammentoCorrente) {
-                frammenti.push(frammentoCorrente.trim() + (frammentoCorrente.endsWith(".") ? "" : "."));
-            }
-        } else {
-            // La frase è abbastanza corta, la aggiungiamo direttamente
-            frammenti.push(frase);
         }
+        
+        console.log("Frammenti creati:", frammenti);
+        return frammenti;
     }
-    
-    console.log("Frammenti creati:", frammenti);
-    return frammenti;
-}
-
 
     function leggiTesto(nominativo) {
-      const nomeNormalizzato = gestisciEccezioni(nominativo);
-      console.log("Cercando descrizione per:", nomeNormalizzato);
-      console.log("Descrizioni disponibili:", Array.from(descrizioniMap.keys()));
+        const nomeNormalizzato = gestisciEccezioni(nominativo);
+        console.log("Cercando descrizione per:", nomeNormalizzato);
+        console.log("Descrizioni disponibili:", Array.from(descrizioniMap.keys()));
 
-      const descrizione = descrizioniMap.get(nomeNormalizzato);
-      console.log("Descrizione trovata:", descrizione);
+        const descrizione = descrizioniMap.get(nomeNormalizzato);
+        console.log("Descrizione trovata:", descrizione);
 
-      const testoDaLeggere = descrizione || nominativo;
-      console.log("Testo che verrà letto:", testoDaLeggere);
+        const testoDaLeggere = descrizione || nominativo;
+        console.log("Testo che verrà letto:", testoDaLeggere);
 
-      // Dividiamo il testo in frammenti basati sui punti
-      const frammenti = dividiTestoInFrammentiPerFrasi(testoDaLeggere);
-      console.log("Frammenti da leggere:", frammenti);
+        const frammenti = dividiTestoInFrammentiPerFrasi(testoDaLeggere);
+        console.log("Frammenti da leggere:", frammenti);
 
-      // Creiamo o otteniamo il player audio
-      let speechPlayer = document.getElementById('speechPlayer');
-      if (!speechPlayer) {
-          speechPlayer = document.createElement('audio');
-          speechPlayer.id = 'speechPlayer';
-          speechPlayer.style.display = 'none';
-          document.body.appendChild(speechPlayer);
-      }
+        let speechPlayer = document.getElementById('speechPlayer');
+        if (!speechPlayer) {
+            speechPlayer = document.createElement('audio');
+            speechPlayer.id = 'speechPlayer';
+            speechPlayer.style.display = 'none';
+            document.body.appendChild(speechPlayer);
+        }
 
-// Funzione per riprodurre il prossimo frammento
-let currentIndex = 0;
+        let currentIndex = 0;
+        function playNextFragment() {
+            if (currentIndex < frammenti.length) {
+                const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=it-IT&client=tw-ob&q=${encodeURIComponent(frammenti[currentIndex])}`;
+                
+                speechPlayer.onloadedmetadata = function() {
+                    speechPlayer.playbackRate = 1.3;
+                };
+                
+                speechPlayer.src = url;
+                speechPlayer.playbackRate = 1.3;
+                
+                speechPlayer.onended = () => {
+                    currentIndex++;
+                    setTimeout(playNextFragment, 95);
+                };
+                
+                speechPlayer.play().catch(error => {
+                    console.error('Errore nella riproduzione:', error);
+                });
+            }
+        }
 
-function playNextFragment() {
-    if (currentIndex < frammenti.length) {
-        // Usiamo un proxy CORS affidabile
-        const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=it-IT&client=tw-ob&q=${encodeURIComponent(frammenti[currentIndex])}`;
-        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(ttsUrl)}`;
-        
-        speechPlayer.onloadedmetadata = function() {
-            speechPlayer.playbackRate = 1.3;
-        };
-        
-        speechPlayer.src = proxyUrl;
-        speechPlayer.playbackRate = 1.3;
-        
-        speechPlayer.onended = () => {
-            currentIndex++;
-            playNextFragment();
-        };
-        
-        speechPlayer.play().catch(error => {
-            console.error('Errore nella riproduzione:', error);
-        });
-    }
-}
-
-
-      // Avvia la riproduzione del primo frammento
-      playNextFragment();
+        playNextFragment();
     }
 
     function mostraAlert(nome) {
@@ -408,7 +386,12 @@ function playNextFragment() {
         : Math.ceil((diff + 365 * 24 * 60 * 60 * 1000) / (1000 * 60 * 60 * 24));
     }
 
-    function calcolaEta(evento) {
+
+
+
+
+
+function calcolaEta(evento) {
       if (evento.Tipo !== "Compleanno" && evento.Tipo !== "Anniversario") return null;
 
       let annoNascita = parseInt(evento.Anno);
@@ -435,10 +418,7 @@ function playNextFragment() {
       return anni;
     }
 
-
-
-
-function ordinaPerData(eventi) {
+    function ordinaPerData(eventi) {
       const oggi = getDataCorrente();
       const oggiMMGG = new Date(2000, oggi.getMonth(), oggi.getDate());
 
@@ -562,95 +542,97 @@ function ordinaPerData(eventi) {
     }
 
     function costruisciTestoLettura(evento) {
-      const nominativoLetto = sistemaNominativo(evento);
-      const { giornoSettimana, giornoDelMese, nomeMese, annoVero } = costruisciDataEventoGGMM(evento);
+        const nominativoLetto = sistemaNominativo(evento);
+        const { giornoSettimana, giornoDelMese, nomeMese, annoVero } = costruisciDataEventoGGMM(evento);
 
-      let quandoBase;
-      if (evento.giorniMancanti === 0) {
-        quandoBase = "oggi";
-      } else if (evento.giorniMancanti === 1) {
-        quandoBase = "domani";
-      } else {
-        quandoBase = `Tra ${evento.giorniMancanti} giorni`;
-      }
-
-      const dataCompleta = `${quandoBase}, ${giornoSettimana} ${giornoDelMese} ${nomeMese}`;
-
-      let testoFinale = '';
-
-      if (evento.Tipo === "Compleanno") {
-        const eta = evento.eta || 0;
+        let quandoBase;
         if (evento.giorniMancanti === 0) {
-          testoFinale = `${dataCompleta} ${annoVero}, ${nominativoLetto} compie ${eta} anni. Auguri di buon compleanno!`;
+            quandoBase = "oggi";
+        } else if (evento.giorniMancanti === 1) {
+            quandoBase = "domani";
         } else {
-          testoFinale = `${dataCompleta} ${annoVero}, ${nominativoLetto} compirà ${eta} anni.`;
+            quandoBase = `Tra ${evento.giorniMancanti} giorni`;
         }
-      } else if (evento.Tipo === "Onomastico") {
-        if (evento.giorniMancanti === 0) {
-          testoFinale = `${dataCompleta} ${annoVero}, è l'onomastico di ${nominativoLetto}. Auguri a ${nominativoLetto}!`;
+
+        const dataCompleta = `${quandoBase}, ${giornoSettimana} ${giornoDelMese} ${nomeMese}`;
+
+        let testoFinale = '';
+
+        if (evento.Tipo === "Compleanno") {
+            const eta = evento.eta || 0;
+            if (evento.giorniMancanti === 0) {
+                testoFinale = `${dataCompleta} ${annoVero}, ${nominativoLetto} compie ${eta} anni. Auguri di buon compleanno!`;
+            } else {
+                testoFinale = `${dataCompleta} ${annoVero}, ${nominativoLetto} compirà ${eta} anni.`;
+            }
+        } else if (evento.Tipo === "Onomastico") {
+            if (evento.giorniMancanti === 0) {
+                testoFinale = `${dataCompleta} ${annoVero}, è l'onomastico di ${nominativoLetto}. Auguri a ${nominativoLetto}!`;
+            } else {
+                testoFinale = `${dataCompleta} ${annoVero}, sarà l'onomastico di ${nominativoLetto}.`;
+            }
+        } else if (evento.Tipo === "Anniversario") {
+            const anni = evento.eta || 0;
+            const nomeAnniv = nomiAnniversari[anni] || "";
+
+            let testoIniziale = (evento.giorniMancanti === 0)
+                ? "è l'anniversario di matrimonio di"
+                : "sarà l'anniversario di matrimonio di";
+
+            let verbo = (evento.giorniMancanti === 0)
+                ? "festeggiano"
+                : "festeggeranno";
+
+            if (nomeAnniv) {
+                testoFinale = `${dataCompleta} ${annoVero}, ${testoIniziale} ${nominativoLetto} che ${verbo} le ${nomeAnniv}, cioè ${anni} anni insieme.`;
+            } else {
+                testoFinale = `${dataCompleta} ${annoVero}, ${testoIniziale} ${nominativoLetto}, cioè ${anni} anni insieme.`;
+            }
         } else {
-          testoFinale = `${dataCompleta} ${annoVero}, sarà l'onomastico di ${nominativoLetto}.`;
+            testoFinale = `Evento non riconosciuto per ${nominativoLetto}`;
         }
-      } else if (evento.Tipo === "Anniversario") {
-        const anni = evento.eta || 0;
-        const nomeAnniv = nomiAnniversari[anni] || "";
 
-        let testoIniziale = (evento.giorniMancanti === 0)
-          ? "è l'anniversario di matrimonio di"
-          : "sarà l'anniversario di matrimonio di";
+        const frammenti = dividiTestoInFrammentiPerFrasi(testoFinale);
+        console.log("Frammenti da leggere:", frammenti);
 
-        let verbo = (evento.giorniMancanti === 0)
-          ? "festeggiano"
-          : "festeggeranno";
-
-        if (nomeAnniv) {
-          testoFinale = `${dataCompleta} ${annoVero}, ${testoIniziale} ${nominativoLetto} che ${verbo} le ${nomeAnniv}, cioè ${anni} anni insieme.`;
-        } else {
-          testoFinale = `${dataCompleta} ${annoVero}, ${testoIniziale} ${nominativoLetto}, cioè ${anni} anni insieme.`;
+        let speechPlayer = document.getElementById('speechPlayer');
+        if (!speechPlayer) {
+            speechPlayer = document.createElement('audio');
+            speechPlayer.id = 'speechPlayer';
+            speechPlayer.style.display = 'none';
+            document.body.appendChild(speechPlayer);
         }
-      } else {
-        testoFinale = `Evento non riconosciuto per ${nominativoLetto}`;
-      }
 
-      // Dividiamo il testo in frammenti basati sui punti
-      const frammenti = dividiTestoInFrammentiPerFrasi(testoFinale);
-      console.log("Frammenti da leggere:", frammenti);
+        let currentIndex = 0;
+        function playNextFragment() {
+            if (currentIndex < frammenti.length) {
+                const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=it-IT&client=tw-ob&q=${encodeURIComponent(frammenti[currentIndex])}`;
+                
+                speechPlayer.onloadedmetadata = function() {
+                    speechPlayer.playbackRate = 1.3;
+                };
+                
+                speechPlayer.src = url;
+                speechPlayer.playbackRate = 1.3;
+                
+                speechPlayer.onended = () => {
+                    currentIndex++;
+                    if (currentIndex < frammenti.length) {
+                        setTimeout(playNextFragment, 95);
+                    } else if (evento.giorniMancanti === 0) {
+                        setTimeout(suonaTreBeep, 95);
+                    }
+                };
+                
+                speechPlayer.play().catch(error => {
+                    console.error('Errore nella riproduzione:', error);
+                });
+            }
+        }
 
-      let speechPlayer = document.getElementById('speechPlayer');
-      if (!speechPlayer) {
-          speechPlayer = document.createElement('audio');
-          speechPlayer.id = 'speechPlayer';
-          speechPlayer.style.display = 'none';
-          document.body.appendChild(speechPlayer);
-      }
+        playNextFragment();
 
-      // Funzione per riprodurre il prossimo frammento
-      let currentIndex = 0;
-      function playNextFragment() {
-          if (currentIndex < frammenti.length) {
-              const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=it-IT&client=tw-ob&q=${encodeURIComponent(frammenti[currentIndex])}`;
-              
-              speechPlayer.onloadedmetadata = function() {
-                  speechPlayer.playbackRate = 1.3;
-              };
-              
-              speechPlayer.src = url;
-              speechPlayer.playbackRate = 1.3;
-              
-              // Al termine di ogni frammento, passa al successivo
-              speechPlayer.onended = () => {
-                  currentIndex++;
-                  playNextFragment();
-              };
-              
-              speechPlayer.play();
-          }
-      }
-
-      // Avvia la riproduzione del primo frammento
-      playNextFragment();
-
-      return testoFinale;
+        return testoFinale;
     }
 
     function aggiornaEventi(eventi) {
@@ -727,24 +709,21 @@ function ordinaPerData(eventi) {
 
         const imgElement = li.querySelector('img');
         imgElement.addEventListener('click', () => {
-          const testoDaLeggere = costruisciTestoLettura(evento);
-          
           if (evento.giorniMancanti === 0) {
             suonaBeepSingolo();
             lanciaCoriandoli10s();
-            
-            const speechPlayer = document.getElementById('speechPlayer');
-            if (speechPlayer) {
-              speechPlayer.onended = () => {
-                suonaTreBeep();
-              };
-            }
           }
+          costruisciTestoLettura(evento);
         });
       });
     }
 
-    function promptData() {
+
+
+
+
+
+function promptData() {
       const dataString = prompt(
         "Inserisci la data nel formato DD/MM/YYYY:",
         dataSimulata
@@ -771,11 +750,7 @@ function ordinaPerData(eventi) {
       aggiornaDataOggi();
     }
 
-
-
-
-
-function resetData() {
+    function resetData() {
       dataSimulata = null;
       document.getElementById('reset-data').style.display = 'none';
 
@@ -811,3 +786,4 @@ function resetData() {
   </script>
 </body>
 </html>
+
