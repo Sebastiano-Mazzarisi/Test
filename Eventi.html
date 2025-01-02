@@ -146,7 +146,7 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-  <h1 id="titolo">Prossimi eventi 7.0</h1>
+  <h1 id="titolo">Prossimi eventi 7.1</h1>
 
   <div class="pulsanti-data">
     <button id="cambia-data">Cambia data</button>
@@ -292,25 +292,28 @@ function dividiTestoInFrammentiPerFrasi(testo) {
 
 // Funzione per riprodurre il prossimo frammento
 let currentIndex = 0;
+
 function playNextFragment() {
     if (currentIndex < frammenti.length) {
-        // Aggiungiamo il parametro spacing per ridurre le pause
-        const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=it-IT&client=tw-ob&q=${encodeURIComponent(frammenti[currentIndex])}&spacing=0.5`;
+        // Usiamo un proxy CORS affidabile
+        const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=it-IT&client=tw-ob&q=${encodeURIComponent(frammenti[currentIndex])}`;
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(ttsUrl)}`;
         
         speechPlayer.onloadedmetadata = function() {
             speechPlayer.playbackRate = 1.3;
         };
         
-        speechPlayer.src = url;
+        speechPlayer.src = proxyUrl;
         speechPlayer.playbackRate = 1.3;
         
-        // Al termine di ogni frammento, passa subito al successivo
         speechPlayer.onended = () => {
             currentIndex++;
             playNextFragment();
         };
         
-        speechPlayer.play();
+        speechPlayer.play().catch(error => {
+            console.error('Errore nella riproduzione:', error);
+        });
     }
 }
 
