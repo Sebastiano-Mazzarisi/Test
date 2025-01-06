@@ -197,7 +197,7 @@ li {
 
 <body>
   <!-- Titolo principale (cliccabile per cambiare data) -->
-  <h1 id="titolo">Prossimi eventi 16:42</h1>
+  <h1 id="titolo">Prossimi eventi 16:50</h1>
 </h1>
 
   <!-- Pulsanti per la gestione della data -->
@@ -224,7 +224,9 @@ li {
 
 // Inizializzazione variabili globali
     let descrizioniMap = new Map();
-    
+    let isVoiceBusy = false;
+
+
     // Configurazione Azure Speech Services
     const speechKey = "GXmSkX5oMKs4N7KNBUghseLTkbMIOsVuwlgVhFbqFVwiwjy77p7VJQQJ99BAAC5RqLJXJ3w3AAAYACOGN9Hv";
     const serviceRegion = "westeurope";
@@ -292,11 +294,17 @@ function speak(text, voiceName = "it-IT-ElsaNeural", rate = "1.0") {
 
 
 async function mostraAlert(nome) {
-  if (!synthesizer) {
-    initAzureSpeech();
+  if (isVoiceBusy) {
+    console.log('Sintesi vocale occupata, ignoro la richiesta');
+    return;
   }
 
   try {
+    isVoiceBusy = true;
+    if (!synthesizer) {
+      initAzureSpeech();
+    }
+
     if (!descrizioniMap.size) {
       console.log("Ricarico le descrizioni...");
       await caricaDescrizioni();
@@ -314,6 +322,8 @@ async function mostraAlert(nome) {
     }
   } catch (error) {
     console.error('Errore in mostraAlert:', error);
+  } finally {
+    isVoiceBusy = false;
   }
 }
 
@@ -332,9 +342,11 @@ async function leggiTestoImmagine(evento) {
     
     for (let i = 0; i < frammenti.length; i++) {
       try {
-        await speak(correggiPronuncia(frammenti[i]), "it-IT-ElsaNeural", "1.0");
-        if (i < frammenti.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 500));
+        if (!isVoiceBusy) { // Controllo aggiuntivo nel caso la voce sia stata interrotta
+          await speak(correggiPronuncia(frammenti[i]), "it-IT-ElsaNeural", "1.0");
+          if (i < frammenti.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
         }
       } catch (error) {
         console.error('Errore nella lettura del frammento:', error);
@@ -352,6 +364,8 @@ async function leggiTestoImmagine(evento) {
     throw error;
   }
 }
+
+
 
 
 
@@ -429,19 +443,20 @@ function aggiornaEventi(eventi) {
 
     const imgElement = li.querySelector('img');
     let isProcessing = false;
-    let touchStartTime = 0;
+    let isTouching = false;
 
     // Handler generico per gli eventi
     const handleImageEvent = async (e) => {
       e.preventDefault();
       e.stopPropagation();
       
-      if (isProcessing) {
-        console.log('Già in elaborazione, ignoro il click');
+      if (isVoiceBusy || isProcessing) {
+        console.log('Voce o elaborazione occupata, ignoro la richiesta');
         return;
       }
       
       isProcessing = true;
+      isVoiceBusy = true;
       console.log('Inizio elaborazione click');
       
       try {
@@ -455,30 +470,33 @@ function aggiornaEventi(eventi) {
       } finally {
         console.log('Fine elaborazione click');
         isProcessing = false;
+        isVoiceBusy = false;
+        isTouching = false;
       }
     };
 
-    // Gestione touch
+    // Gestione touch per iOS
     imgElement.addEventListener('touchstart', (e) => {
-      touchStartTime = Date.now();
-    }, { passive: true });
+      e.preventDefault();
+      isTouching = true;
+    }, { passive: false });
 
     imgElement.addEventListener('touchend', (e) => {
-      const touchDuration = Date.now() - touchStartTime;
-      if (touchDuration < 300) { // Solo tap veloci
+      e.preventDefault();
+      if (isTouching) {
+        isTouching = false;
         handleImageEvent(e);
       }
     }, { passive: false });
 
-    // Fallback per click su desktop
+    // Gestione click per desktop (solo se non è un evento touch)
     imgElement.addEventListener('click', (e) => {
-      if (!e.touches) {
+      if (!isTouching && !('ontouchstart' in window)) {
         handleImageEvent(e);
       }
     });
   });
 }
-
     /**
      * Carica le descrizioni dal file CSV remoto
      */
