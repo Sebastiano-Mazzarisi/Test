@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="format-detection" content="telephone=no">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=no">
   <title>Prossimi eventi</title>
@@ -242,63 +245,76 @@ li {
      * @param {string} voiceName - Nome della voce (ElsaNeural o GiuseppeNeural)
      * @param {string} rate - Velocità di lettura
      */
-    function speak(text, voiceName = "it-IT-ElsaNeural", rate = "1.0") {
-      if (!synthesizer) {
-        initAzureSpeech();
-      }
 
-      // Interrompi eventuale sintesi in corso
-      synthesizer.close();
+
+function speak(text, voiceName = "it-IT-ElsaNeural", rate = "1.0") {
+  return new Promise((resolve, reject) => {
+    if (!synthesizer) {
       initAzureSpeech();
-
-      const ssml = `
-        <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="it-IT">
-          <voice name="${voiceName}">
-            <prosody rate="${rate}">
-              ${text}
-            </prosody>
-          </voice>
-        </speak>`;
-
-      synthesizer.speakSsmlAsync(
-        ssml,
-        result => {
-          if (result.errorDetails) {
-            console.error('Error:', result.errorDetails);
-          }
-        },
-        error => {
-          console.error('Error:', error);
-        }
-      );
     }
+
+    // Chiudi e reinizializza il sintetizzatore per evitare problemi su iOS
+    synthesizer.close();
+    initAzureSpeech();
+
+    const ssml = `
+      <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="it-IT">
+        <voice name="${voiceName}">
+          <prosody rate="${rate}">
+            ${text}
+          </prosody>
+        </voice>
+      </speak>`;
+
+    synthesizer.speakSsmlAsync(
+      ssml,
+      result => {
+        if (result.errorDetails) {
+          console.error('Error:', result.errorDetails);
+          reject(result.errorDetails);
+        } else {
+          resolve();
+        }
+      },
+      error => {
+        console.error('Error:', error);
+        reject(error);
+      }
+    );
+  });
+}
 
     /**
      * Gestisce il click sul nominativo usando la voce maschile
      * @param {string} nome - Nome della persona
      */
-    function mostraAlert(nome) {
-      if (!synthesizer) {
-        initAzureSpeech();
-      }
 
-      if (!descrizioniMap.size) {
-        console.log("Ricarico le descrizioni...");
-        caricaDescrizioni().then(() => {
-          const nomeNormalizzato = gestisciEccezioni(nome);
-          const descrizione = descrizioniMap.get(nomeNormalizzato);
-          console.log("Descrizione trovata:", descrizione);
-          
-          const testoDaLeggere = correggiPronuncia(descrizione || nome);
-          speak(testoDaLeggere, "it-IT-GiuseppeNeural", "1.0");
-        });
-      } else {
-        const nomeNormalizzato = gestisciEccezioni(nome);
-        const descrizione = descrizioniMap.get(nomeNormalizzato);
-        const testoDaLeggere = correggiPronuncia(descrizione || nome);
-        speak(testoDaLeggere, "it-IT-GiuseppeNeural", "1.0");
-      }
+
+async function mostraAlert(nome) {
+  if (!synthesizer) {
+    initAzureSpeech();
+  }
+
+  try {
+    if (!descrizioniMap.size) {
+      console.log("Ricarico le descrizioni...");
+      await caricaDescrizioni();
+      const nomeNormalizzato = gestisciEccezioni(nome);
+      const descrizione = descrizioniMap.get(nomeNormalizzato);
+      console.log("Descrizione trovata:", descrizione);
+      
+      const testoDaLeggere = correggiPronuncia(descrizione || nome);
+      await speak(testoDaLeggere, "it-IT-GiuseppeNeural", "1.0");
+    } else {
+      const nomeNormalizzato = gestisciEccezioni(nome);
+      const descrizione = descrizioniMap.get(nomeNormalizzato);
+      const testoDaLeggere = correggiPronuncia(descrizione || nome);
+      await speak(testoDaLeggere, "it-IT-GiuseppeNeural", "1.0");
     }
+  } catch (error) {
+    console.error('Errore in mostraAlert:', error);
+  }
+}
 
     /**
      * Legge il testo dell'evento quando si clicca sull'immagine usando la voce femminile
@@ -644,28 +660,46 @@ li {
 /**
      * Funzioni per gli effetti sonori
      */
-    function suonaBeepSingolo() {
+async function suonaBeepSingolo() {
+  return new Promise((resolve, reject) => {
+    try {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
       const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      gain.gain.value = 0.1; // Volume più basso per iOS
       osc.type = 'sine';
       osc.frequency.setValueAtTime(500, ctx.currentTime);
-      osc.connect(ctx.destination);
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
       osc.start();
       osc.stop(ctx.currentTime + 0.2);
+      
+      setTimeout(() => {
+        ctx.close();
+        resolve();
+      }, 250);
+    } catch (err) {
+      console.error('Errore audio:', err);
+      reject(err);
     }
+  });
+}
 
-    function suonaTreBeep() {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      for (let i = 0; i < 3; i++) {
-        const startTime = ctx.currentTime + i * 0.5;
-        const osc = ctx.createOscillator();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(500, startTime);
-        osc.connect(ctx.destination);
-        osc.start(startTime);
-        osc.stop(startTime + 0.2);
+async function suonaTreBeep() {
+  try {
+    for (let i = 0; i < 3; i++) {
+      await suonaBeepSingolo();
+      if (i < 2) {
+        await new Promise(resolve => setTimeout(resolve, 300));
       }
     }
+  } catch (err) {
+    console.error('Errore nei tre beep:', err);
+  }
+}
 
     /**
      * Effetto visivo dei coriandoli
