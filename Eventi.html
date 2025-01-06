@@ -197,7 +197,7 @@ li {
 
 <body>
   <!-- Titolo principale (cliccabile per cambiare data) -->
-  <h1 id="titolo">Prossimi eventi 17:11</h1>
+  <h1 id="titolo">Prossimi eventi 17:54</h1>
 </h1>
 
   <!-- Pulsanti per la gestione della data -->
@@ -226,6 +226,10 @@ li {
     let descrizioniMap = new Map();
     let isVoiceBusy = false;
 
+
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
 
     // Configurazione Azure Speech Services
     const speechKey = "GXmSkX5oMKs4N7KNBUghseLTkbMIOsVuwlgVhFbqFVwiwjy77p7VJQQJ99BAAC5RqLJXJ3w3AAAYACOGN9Hv";
@@ -431,19 +435,23 @@ function aggiornaEventi(eventi) {
     const imgElement = li.querySelector('img');
     let isProcessing = false;
 
+    // Verifica se è iOS
+    function isIOS() {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    }
+
     // Handler generico per gli eventi
     const handleImageEvent = async (e) => {
       e.preventDefault();
       e.stopPropagation();
       
-      if (isVoiceBusy || isProcessing) {
-        console.log('Voce o elaborazione occupata, ignoro la richiesta');
+      if (isProcessing || isVoiceBusy) {
+        console.log('Elaborazione o sintesi vocale in corso');
         return;
       }
       
       isProcessing = true;
       isVoiceBusy = true;
-      console.log('Inizio elaborazione click');
       
       try {
         if (evento.giorniMancanti === 0) {
@@ -454,28 +462,28 @@ function aggiornaEventi(eventi) {
       } catch (error) {
         console.error('Errore:', error);
       } finally {
-        console.log('Fine elaborazione click');
         isProcessing = false;
         isVoiceBusy = false;
       }
     };
 
-    // Solo touch per iOS
-    let lastTapTime = 0;
-    imgElement.addEventListener('touchstart', () => {
-      lastTapTime = Date.now();
-    });
+    // Rimuovi vecchi event listener
+    const imgClone = imgElement.cloneNode(true);
+    imgElement.parentNode.replaceChild(imgClone, imgElement);
 
-    imgElement.addEventListener('touchend', (e) => {
-      const tapDuration = Date.now() - lastTapTime;
-      if (tapDuration < 300) {
-        handleImageEvent(e);
-      }
-    });
+    // Aggiungi nuovi event listener
+    imgClone.addEventListener('click', handleImageEvent);
+    imgClone.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      handleImageEvent(e);
+    }, { passive: false });
 
-    // Solo click per desktop
-    if (!('ontouchstart' in window)) {
-      imgElement.addEventListener('click', handleImageEvent);
+    // Feedback visivo per iOS
+    if (isIOS()) {
+      imgClone.style.cursor = 'pointer';
+      imgClone.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+      }, { passive: false });
     }
   });
 }
