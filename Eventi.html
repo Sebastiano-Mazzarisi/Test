@@ -197,7 +197,7 @@ li {
 
 <body>
   <!-- Titolo principale (cliccabile per cambiare data) -->
-  <h1 id="titolo">Prossimi eventi 16:50</h1>
+  <h1 id="titolo">Prossimi eventi 17:11</h1>
 </h1>
 
   <!-- Pulsanti per la gestione della data -->
@@ -330,26 +330,13 @@ async function mostraAlert(nome) {
 
 async function leggiTestoImmagine(evento) {
   try {
-    if (!synthesizer) {
-      initAzureSpeech();
-    }
-
-    synthesizer.close();
-    initAzureSpeech();
-
     const testoFinale = costruisciTestoEventoImmagine(evento);
     const frammenti = dividiTestoInFrammentiPerFrasi(testoFinale);
     
     for (let i = 0; i < frammenti.length; i++) {
-      try {
-        if (!isVoiceBusy) { // Controllo aggiuntivo nel caso la voce sia stata interrotta
-          await speak(correggiPronuncia(frammenti[i]), "it-IT-ElsaNeural", "1.0");
-          if (i < frammenti.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, 500));
-          }
-        }
-      } catch (error) {
-        console.error('Errore nella lettura del frammento:', error);
+      await speak(correggiPronuncia(frammenti[i]), "it-IT-ElsaNeural", "1.0");
+      if (i < frammenti.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
     }
 
@@ -443,7 +430,6 @@ function aggiornaEventi(eventi) {
 
     const imgElement = li.querySelector('img');
     let isProcessing = false;
-    let isTouching = false;
 
     // Handler generico per gli eventi
     const handleImageEvent = async (e) => {
@@ -471,32 +457,30 @@ function aggiornaEventi(eventi) {
         console.log('Fine elaborazione click');
         isProcessing = false;
         isVoiceBusy = false;
-        isTouching = false;
       }
     };
 
-    // Gestione touch per iOS
-    imgElement.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      isTouching = true;
-    }, { passive: false });
+    // Solo touch per iOS
+    let lastTapTime = 0;
+    imgElement.addEventListener('touchstart', () => {
+      lastTapTime = Date.now();
+    });
 
     imgElement.addEventListener('touchend', (e) => {
-      e.preventDefault();
-      if (isTouching) {
-        isTouching = false;
-        handleImageEvent(e);
-      }
-    }, { passive: false });
-
-    // Gestione click per desktop (solo se non è un evento touch)
-    imgElement.addEventListener('click', (e) => {
-      if (!isTouching && !('ontouchstart' in window)) {
+      const tapDuration = Date.now() - lastTapTime;
+      if (tapDuration < 300) {
         handleImageEvent(e);
       }
     });
+
+    // Solo click per desktop
+    if (!('ontouchstart' in window)) {
+      imgElement.addEventListener('click', handleImageEvent);
+    }
   });
 }
+
+
     /**
      * Carica le descrizioni dal file CSV remoto
      */
