@@ -12,6 +12,34 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
 
   <style>
+
+/* Aggiungi questi stili nel blocco <style> */
+
+.image-container {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.image-container img {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+li {
+  touch-action: manipulation;
+  position: relative;
+  z-index: 0;
+}
+
+
+
     /* Stili di base */
     body {
       font-family: Arial, sans-serif;
@@ -276,33 +304,35 @@
      * Legge il testo dell'evento quando si clicca sull'immagine usando la voce femminile
      * @param {Object} evento - Oggetto evento
      */
-    function leggiTestoImmagine(evento) {
-      if (!synthesizer) {
-        initAzureSpeech();
-      }
 
-      const testoFinale = costruisciTestoEventoImmagine(evento);
-      const frammenti = dividiTestoInFrammentiPerFrasi(testoFinale);
-      let currentIndex = 0;
 
-      function playNextFragment() {
-        if (currentIndex < frammenti.length) {
-          speak(correggiPronuncia(frammenti[currentIndex]), "it-IT-ElsaNeural", "1.0");
-          
-          setTimeout(() => {
-            currentIndex++;
-            if (currentIndex < frammenti.length) {
-              playNextFragment();
-            } else if (evento.giorniMancanti === 0) {
-              setTimeout(suonaTreBeep, 1500);
-            }
-          }, 3000);
-        }
-      }
+  async function leggiTestoImmagine(evento) {
+  if (!synthesizer) {
+    initAzureSpeech();
+  }
 
-      playNextFragment();
-      return testoFinale;
-    }
+  // Chiudi eventuali sintesi in corso
+  synthesizer.close();
+  initAzureSpeech();
+
+  const testoFinale = costruisciTestoEventoImmagine(evento);
+  const frammenti = dividiTestoInFrammentiPerFrasi(testoFinale);
+  
+  for (let i = 0; i < frammenti.length; i++) {
+    await new Promise((resolve) => {
+      speak(correggiPronuncia(frammenti[i]), "it-IT-ElsaNeural", "1.0");
+      setTimeout(resolve, 3000);
+    });
+  }
+
+  if (evento.giorniMancanti === 0) {
+    setTimeout(suonaTreBeep, 1500);
+  }
+
+  return testoFinale;
+}
+
+
 
     /**
      * Carica le descrizioni dal file CSV remoto
@@ -863,87 +893,112 @@
 
 
 function aggiornaEventi(eventi) {
-      const lista = document.getElementById('eventi-lista');
-      lista.innerHTML = '';
+  const lista = document.getElementById('eventi-lista');
+  lista.innerHTML = '';
 
-      eventi.forEach(evento => {
-        const classeTipo = evento.Tipo.toLowerCase();
-        const li = document.createElement('li');
-        li.classList.add(classeTipo);
+  eventi.forEach(evento => {
+    const classeTipo = evento.Tipo.toLowerCase();
+    const li = document.createElement('li');
+    li.classList.add(classeTipo);
 
-        const imgSrc = evento.Link ? correggiLink(evento.Link) : `${evento.Nominativo}.JPG`;
+    const imgSrc = evento.Link ? correggiLink(evento.Link) : `${evento.Nominativo}.JPG`;
 
-        const { giornoSettimana, giornoDelMese, nomeMese, annoVero } = costruisciDataEventoGGMM(evento);
-        const dataFormattataUI = `${giornoSettimana} ${giornoDelMese} ${nomeMese} ${annoVero}`;
+    const { giornoSettimana, giornoDelMese, nomeMese, annoVero } = costruisciDataEventoGGMM(evento);
+    const dataFormattataUI = `${giornoSettimana} ${giornoDelMese} ${nomeMese} ${annoVero}`;
 
-        let tipoEventoText = "";
-        if (evento.Tipo === "Compleanno" || evento.Tipo === "Anniversario") {
-          if (evento.eta) {
-            let giorniText;
-            if (evento.giorniMancanti === 0) {
-              giorniText = "oggi";
-            } else if (evento.giorniMancanti === 1) {
-              giorniText = "domani";
-            } else {
-              giorniText = `tra ${evento.giorniMancanti} giorni`;
-            }
-            tipoEventoText = `${evento.eta}° ${evento.Tipo} ${giorniText}`;
-          } else {
-            tipoEventoText = `${evento.Tipo} in ${evento.giorniMancanti} giorni`;
-          }
-        } else if (evento.Tipo === "Onomastico") {
-          if (evento.giorniMancanti === 0) {
-            tipoEventoText = "Onomastico oggi";
-          } else if (evento.giorniMancanti === 1) {
-            tipoEventoText = "Onomastico domani";
-          } else {
-            tipoEventoText = `Onomastico tra ${evento.giorniMancanti} giorni`;
-          }
+    let tipoEventoText = "";
+    if (evento.Tipo === "Compleanno" || evento.Tipo === "Anniversario") {
+      if (evento.eta) {
+        let giorniText;
+        if (evento.giorniMancanti === 0) {
+          giorniText = "oggi";
+        } else if (evento.giorniMancanti === 1) {
+          giorniText = "domani";
+        } else {
+          giorniText = `tra ${evento.giorniMancanti} giorni`;
         }
-
-        let nomeAnniversarioHtml = "";
-        if (evento.Tipo === "Anniversario" && evento.eta) {
-          const nomeAnniversario = nomiAnniversari[evento.eta];
-          if (nomeAnniversario) {
-            nomeAnniversarioHtml = `${nomeAnniversario}<br>`;
-          }
-        }
-
-        li.innerHTML = `
-          <a href="javascript:void(0)" onclick="mostraAlert('${evento.Nominativo}')" style="text-decoration:none; color: inherit;">
-            <strong>${evento.Nominativo}</strong>
-          </a>
-          <br>
-          <span class="tipo-evento">${tipoEventoText}</span><br>
-          ${dataFormattataUI}<br>
-          ${nomeAnniversarioHtml ? nomeAnniversarioHtml : ""}
-          <div class="image-container">
-            <img
-              src="${imgSrc}"
-              alt="${evento.Tipo} di ${evento.Nominativo}"
-              onerror="
-                this.onerror=null;
-                this.src='default-thumbnail.jpg';
-                const errorMessage = document.createElement('div');
-                errorMessage.className = 'error-message';
-                errorMessage.innerText = 'Immagine non disponibile';
-                this.parentElement.appendChild(errorMessage);
-              "
-            >
-          </div>
-        `;
-        lista.appendChild(li);
-
-        const imgElement = li.querySelector('img');
-        imgElement.addEventListener('click', () => {
-          if (evento.giorniMancanti === 0) {
-            suonaBeepSingolo();
-            lanciaCoriandoli10s();
-          }
-          leggiTestoImmagine(evento);
-        });
-      });
+        tipoEventoText = `${evento.eta}° ${evento.Tipo} ${giorniText}`;
+      } else {
+        tipoEventoText = `${evento.Tipo} in ${evento.giorniMancanti} giorni`;
+      }
+    } else if (evento.Tipo === "Onomastico") {
+      if (evento.giorniMancanti === 0) {
+        tipoEventoText = "Onomastico oggi";
+      } else if (evento.giorniMancanti === 1) {
+        tipoEventoText = "Onomastico domani";
+      } else {
+        tipoEventoText = `Onomastico tra ${evento.giorniMancanti} giorni`;
+      }
     }
+
+    let nomeAnniversarioHtml = "";
+    if (evento.Tipo === "Anniversario" && evento.eta) {
+      const nomeAnniversario = nomiAnniversari[evento.eta];
+      if (nomeAnniversario) {
+        nomeAnniversarioHtml = `${nomeAnniversario}<br>`;
+      }
+    }
+
+    li.innerHTML = `
+      <a href="javascript:void(0)" onclick="mostraAlert('${evento.Nominativo}')" style="text-decoration:none; color: inherit;">
+        <strong>${evento.Nominativo}</strong>
+      </a>
+      <br>
+      <span class="tipo-evento">${tipoEventoText}</span><br>
+      ${dataFormattataUI}<br>
+      ${nomeAnniversarioHtml ? nomeAnniversarioHtml : ""}
+      <div class="image-container">
+        <img
+          src="${imgSrc}"
+          alt="${evento.Tipo} di ${evento.Nominativo}"
+          onerror="
+            this.onerror=null;
+            this.src='default-thumbnail.jpg';
+            const errorMessage = document.createElement('div');
+            errorMessage.className = 'error-message';
+            errorMessage.innerText = 'Immagine non disponibile';
+            this.parentElement.appendChild(errorMessage);
+          "
+        >
+      </div>
+    `;
+    lista.appendChild(li);
+
+    const imgElement = li.querySelector('img');
+    let isProcessing = false;
+
+    // Handler generico per gli eventi
+    const handleImageEvent = async (e) => {
+      if (isProcessing) return;
+      isProcessing = true;
+      
+      try {
+        if (evento.giorniMancanti === 0) {
+          await suonaBeepSingolo();
+          lanciaCoriandoli10s();
+        }
+        await leggiTestoImmagine(evento);
+      } catch (error) {
+        console.error('Errore:', error);
+      } finally {
+        isProcessing = false;
+      }
+    };
+
+    // Gestione touch
+    imgElement.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      handleImageEvent(e);
+    }, { passive: false });
+
+    // Fallback per click su desktop
+    imgElement.addEventListener('click', (e) => {
+      if (!e.touches) { // Solo se non è un evento touch
+        handleImageEvent(e);
+      }
+    });
+  });
+}
 
     /**
      * Aggiorna la visualizzazione della data corrente
