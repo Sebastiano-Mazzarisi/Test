@@ -1,16 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="it">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assistente Virtuale</title>
     <script>
-        // Funzione per leggere il CSV dal link pubblico su GitHub
+        // Funzione per leggere il CSV dal link pubblico
         async function fetchCSV() {
-            const url = 'https://sebastiano-mazzarisi.github.io/Test/Assistente.csv'; // Link al file Assistente.csv
+            const url = 'https://sebastiano-mazzarisi.github.io/Test/Assistente.csv'; // Link al file CSV
             try {
                 const response = await fetch(url);
                 const csvText = await response.text();
                 const rows = csvText.split('\n').slice(1).map(row => row.split(',')); // Escludi l'intestazione
-                return rows; // Ritorna i dati come array
+                return rows;
             } catch (error) {
                 console.error('Errore nel caricamento del CSV:', error);
                 return [];
@@ -69,11 +71,9 @@
                 }
             }
 
-            // Gestione dei risultati
+            // Genera la risposta
             if (matches.length === 0) {
                 return 'Nessuna corrispondenza trovata.';
-            } else if (matches.length > 10) {
-                return 'Ci sono troppe corrispondenze. Specifica meglio il nominativo.';
             } else if (matches.length === 1) {
                 const person = matches[0];
                 let response = `${person.Nome} `;
@@ -117,23 +117,27 @@
             }
         }
 
-        // Funzione principale per interazione continua
-        async function interact() {
-            let keepGoing = true;
-            while (keepGoing) {
-                const partialName = prompt('Dimmi il nome e cognome o parti di essi oppure dimmi basta:');
-                if (partialName.toLowerCase() === 'basta') {
-                    keepGoing = false;
-                    alert('Arrivederci!');
-                } else {
-                    const result = await search(partialName);
-                    alert(result); // Mostra il risultato
-                }
+        // Gestisci il parametro "nome" o chiedi manualmente
+        async function handleInteraction() {
+            const params = new URLSearchParams(window.location.search);
+            let nome = params.get('nome');
+
+            // Se il parametro "nome" non è presente, chiedi il nome
+            if (!nome) {
+                nome = prompt('Inserisci il nome e cognome o parti di essi:');
+            }
+
+            if (nome) {
+                const result = await search(nome);
+                alert(result); // Mostra il risultato
+                const speech = new SpeechSynthesisUtterance(result);
+                speech.lang = 'it-IT'; // Imposta la lingua italiana
+                window.speechSynthesis.speak(speech); // Leggi il risultato ad alta voce
             }
         }
 
-        // Avvio automatico dell'interazione
-        window.onload = interact;
+        // Avvia l'interazione all'apertura della pagina
+        window.onload = handleInteraction;
     </script>
 </head>
 <body>
