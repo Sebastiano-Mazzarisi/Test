@@ -191,24 +191,69 @@
 
 
 // Inizializzazione variabili globali
-    let descrizioniMap = new Map();
-    
-    // Configurazione Azure Speech Services
-    const speechKey = "GXmSkX5oMKs4N7KNBUghseLTkbMIOsVuwlgVhFbqFVwiwjy77p7VJQQJ99BAAC5RqLJXJ3w3AAAYACOGN9Hv";
-    const serviceRegion = "westeurope";
-    let synthesizer = null;
+let descrizioniMap = new Map();
 
-    /**
-     * Inizializza il sintetizzatore vocale di Azure
-     */
-    function initAzureSpeech() {
-      const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(speechKey, serviceRegion);
-      speechConfig.speechSynthesisLanguage = "it-IT";
-      const audioConfig = SpeechSDK.AudioConfig.fromDefaultSpeakerOutput();
-      synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig, audioConfig);
-    }
+// Configurazione Azure Speech Services
+const speechKey = "GXmSkX5oMKs4N7KNBUghseLTkbMIOsVuwlgVhFbqFVwiwjy77p7VJQQJ99BAAC5RqLJXJ3w3AAAYACOGN9Hv";
+const serviceRegion = "westeurope";
+let synthesizer = null;
 
-    /**
+/**
+ * Inizializza il sintetizzatore vocale di Azure
+ */
+function initAzureSpeech() {
+  const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(speechKey, serviceRegion);
+  speechConfig.speechSynthesisLanguage = "it-IT";
+  const audioConfig = SpeechSDK.AudioConfig.fromDefaultSpeakerOutput();
+  synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig, audioConfig);
+}
+
+/**
+ * Esegue la sintesi vocale del testo usando Azure
+ * @param {string} text - Testo da leggere
+ * @param {string} voiceName - Nome della voce (ElsaNeural o GiuseppeNeural)
+ * @param {string} rate - Velocità di lettura
+ */
+async function eseguiSintesiVocale(text, voiceName = "it-IT-ElsaNeural", rate = "1.0") {
+  if (!synthesizer) {
+    initAzureSpeech();
+  }
+
+  // Interrompi eventuale sintesi in corso
+  synthesizer.close();
+  initAzureSpeech();
+
+  const ssml = `
+    <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="it-IT">
+      <voice name="${voiceName}">
+        <prosody rate="${rate}">
+          ${text}
+        </prosody>
+      </voice>
+    </speak>`;
+
+  return new Promise((resolve, reject) => {
+    synthesizer.speakSsmlAsync(
+      ssml,
+      result => {
+        if (result.errorDetails) {
+          console.error('Error:', result.errorDetails);
+          reject(result.errorDetails);
+        } else {
+          resolve();
+        }
+      },
+      error => {
+        console.error('Error:', error);
+        reject(error);
+      }
+    );
+  });
+}
+
+function mostraAlert(nome) {
+  // ...
+}    /**
      * Esegue la sintesi vocale del testo usando Azure
      * @param {string} text - Testo da leggere
      * @param {string} voiceName - Nome della voce (ElsaNeural o GiuseppeNeural)
@@ -249,60 +294,69 @@
      * Gestisce il click sul nominativo usando la voce maschile
      * @param {string} nome - Nome della persona
      */
-    function mostraAlert(nome) {
-      if (!synthesizer) {
-        initAzureSpeech();
-      }
 
-      if (!descrizioniMap.size) {
-        console.log("Ricarico le descrizioni...");
-        caricaDescrizioni().then(() => {
-          const nomeNormalizzato = gestisciEccezioni(nome);
-          const descrizione = descrizioniMap.get(nomeNormalizzato);
-          console.log("Descrizione trovata:", descrizione);
-          
-          const testoDaLeggere = correggiPronuncia(descrizione || nome);
-          speak(testoDaLeggere, "it-IT-GiuseppeNeural", "1.0");
-        });
-      } else {
-        const nomeNormalizzato = gestisciEccezioni(nome);
-        const descrizione = descrizioniMap.get(nomeNormalizzato);
-        const testoDaLeggere = correggiPronuncia(descrizione || nome);
-        speak(testoDaLeggere, "it-IT-GiuseppeNeural", "1.0");
-      }
-    }
+
+
+ function mostraAlert(nome) {
+  if (!synthesizer) {
+    initAzureSpeech();
+  }
+
+  if (!descrizioniMap.size) {
+    console.log("Ricarico le descrizioni...");
+    caricaDescrizioni().then(() => {
+      const nomeNormalizzato = gestisciEccezioni(nome);
+      const descrizione = descrizioniMap.get(nomeNormalizzato);
+      console.log("Descrizione trovata:", descrizione);
+      
+      const testoDaLeggere = correggiPronuncia(descrizione || nome);
+      eseguiSintesiVocale(testoDaLeggere, "it-IT-GiuseppeNeural", "1.0");
+    });
+  } else {
+    const nomeNormalizzato = gestisciEccezioni(nome);
+    const descrizione = descrizioniMap.get(nomeNormalizzato);
+    const testoDaLeggere = correggiPronuncia(descrizione || nome);
+    eseguiSintesiVocale(testoDaLeggere, "it-IT-GiuseppeNeural", "1.0");
+  }
+}
+
+
 
     /**
      * Legge il testo dell'evento quando si clicca sull'immagine usando la voce femminile
      * @param {Object} evento - Oggetto evento
      */
     function leggiTestoImmagine(evento) {
-      if (!synthesizer) {
-        initAzureSpeech();
-      }
+  if (!synthesizer) {
+    initAzureSpeech();
+  }
 
-      const testoFinale = costruisciTestoEventoImmagine(evento);
-      const frammenti = dividiTestoInFrammentiPerFrasi(testoFinale);
-      let currentIndex = 0;
+  const testoFinale = costruisciTestoEventoImmagine(evento);
+  const frammenti = dividiTestoInFrammentiPerFrasi(testoFinale);
+  let currentIndex = 0;
 
-      function playNextFragment() {
-        if (currentIndex < frammenti.length) {
-          speak(correggiPronuncia(frammenti[currentIndex]), "it-IT-ElsaNeural", "1.0");
-          
-          setTimeout(() => {
-            currentIndex++;
-            if (currentIndex < frammenti.length) {
-              playNextFragment();
-            } else if (evento.giorniMancanti === 0) {
-              setTimeout(suonaTreBeep, 1500);
-            }
-          }, 3000);
-        }
-      }
-
-      playNextFragment();
-      return testoFinale;
+  function playNextFragment() {
+    if (currentIndex < frammenti.length) {
+      eseguiSintesiVocale(correggiPronuncia(frammenti[currentIndex]), "it-IT-ElsaNeural", "1.0")
+        .then(() => {
+          currentIndex++;
+          if (currentIndex < frammenti.length) {
+            playNextFragment();
+          } else if (evento.giorniMancanti === 0) {
+            setTimeout(suonaTreBeep, 1500);
+          }
+        })
+        .catch(error => {
+          console.error('Errore nella sintesi vocale:', error);
+        });
     }
+  }
+
+  playNextFragment();
+  return testoFinale;
+}
+
+
 
     /**
      * Carica le descrizioni dal file CSV remoto
