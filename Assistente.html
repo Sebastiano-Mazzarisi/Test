@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="it">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assistente Virtuale</title>
     <script>
+        // Funzione per leggere il CSV dal link pubblico su GitHub
         async function fetchCSV() {
             const url = 'https://sebastiano-mazzarisi.github.io/Test/Assistente.csv';
             try {
@@ -18,6 +17,7 @@
             }
         }
 
+        // Funzioni helper rimangono identiche
         function getDayOfWeek(dateStr) {
             const [day, month, year] = dateStr.split('/').map(Number);
             const date = new Date(year, month - 1, day);
@@ -37,96 +37,92 @@
             const [day, month, year] = dateStr.split('/').map(Number);
             const today = new Date();
             let age = today.getFullYear() - year;
-            if (today.getMonth() + 1 < month || (today.getMonth() + 1 === month && today.getDate() < day)) {
+            if (
+                today.getMonth() + 1 < month || 
+                (today.getMonth() + 1 === month && today.getDate() < day)
+            ) {
                 age--;
             }
             return age;
         }
 
-async function search(partialName) {
-    const rows = await fetchCSV();
-    const matches = [];
-    const nameParts = partialName.toLowerCase().split(' ');
+        // Funzione di ricerca rimane identica
+        async function search(partialName) {
+            const rows = await fetchCSV();
+            const matches = [];
+            const nameParts = partialName.toLowerCase().split(' ');
 
-    for (const row of rows) {
-        const name = row[0]?.trim().toLowerCase();
-        if (nameParts.every(part => name?.includes(part))) {
-            matches.push({
-                Nome: row[0]?.trim(),
-                Sesso: row[1]?.trim(),
-                Nascita: row[2]?.trim(),
-                Onomastico: row[3]?.trim(),
-                Matrimonio: row[4]?.trim(),
-                Coniuge: row[5]?.trim()
-            });
-        }
-    }
+            for (const row of rows) {
+                const name = row[0]?.trim().toLowerCase();
+                if (nameParts.every(part => name?.includes(part))) {
+                    matches.push({
+                        Nome: row[0]?.trim(),
+                        Sesso: row[1]?.trim(),
+                        Nascita: row[2]?.trim(),
+                        Onomastico: row[3]?.trim(),
+                        Matrimonio: row[4]?.trim(),
+                        Coniuge: row[5]?.trim()
+                    });
+                }
+            }
 
-    if (matches.length === 0) {
-        return 'Nessuna corrispondenza trovata.';
-    } else if (matches.length === 1) {
-        const person = matches[0];
-        let response = `${person.Nome}. `;
-
-        if (person.Nascita) {
-            const [day, month, year] = person.Nascita.split('/').map(Number);
-            const age = calculateYears(person.Nascita);
-            response += `${person.Nome} è ${person.Sesso === 'M' ? 'nato' : 'nata'} il ${day}/${month}/${year}. Ha ${age} anni. `;
-        }
-
-        if (person.Onomastico) {
-            const [day, month] = person.Onomastico.split('/').map(Number);
-            response += `L'onomastico è il ${day}/${month}. `;
-        }
-
-        if (person.Matrimonio) {
-            const [day, month, year] = person.Matrimonio.split('/').map(Number);
-            response += `Si è sposato il ${day}/${month}/${year}. `;
-            if (person.Coniuge) {
-                response += `Il coniuge si chiama ${person.Coniuge}. `;
+            if (matches.length === 0) {
+                return 'Nessuna corrispondenza trovata.';
+            } else if (matches.length > 10) {
+                return 'Ci sono troppe corrispondenze. Specifica meglio il nominativo.';
+            } else if (matches.length === 1) {
+                const person = matches[0];
+                let response = `${person.Nome} `;
+                if (person.Nascita) {
+                    const [day, month, year] = person.Nascita.split('/').map(Number);
+                    const dayOfWeek = getDayOfWeek(person.Nascita);
+                    const monthName = getMonthName(month);
+                    const age = calculateYears(person.Nascita);
+                    response += `è ${person.Sesso === 'M' ? 'nato' : 'nata'} ${dayOfWeek} ${day} ${monthName} ${year} (ha ${age} anni). `;
+                }
+                if (person.Onomastico) {
+                    const [day, month] = person.Onomastico.split('/').map(Number);
+                    const monthName = getMonthName(month);
+                    response += `Festeggia l'onomastico il ${day} ${monthName}. `;
+                }
+                if (person.Matrimonio) {
+                    const [day, month, year] = person.Matrimonio.split('/').map(Number);
+                    const dayOfWeek = getDayOfWeek(person.Matrimonio);
+                    const monthName = getMonthName(month);
+                    const yearsMarried = calculateYears(person.Matrimonio);
+                    response += `Si è ${person.Sesso === 'M' ? 'sposato' : 'sposata'} ${dayOfWeek} ${day} ${monthName} ${year} (${yearsMarried} anni fa). `;
+                    if (person.Coniuge) {
+                        response += `Il coniuge si chiama ${person.Coniuge}. `;
+                    }
+                }
+                return response.trim();
+            } else {
+                const names = matches.map(match => match.Nome);
+                const namesFormatted = names.slice(0, -1).join(', ') + (names.length > 1 ? ' e ' : '') + names.slice(-1);
+                return `Trovate ${matches.length} occorrenze: ${namesFormatted}. Specifica meglio il nome.`;
             }
         }
 
-        return response.trim();
+        // Nuova funzione per gestire i parametri URL
+// Nuova funzione per gestire i parametri URL
+async function handleURLParams() {
+    const params = new URLSearchParams(window.location.search);
+    const nome = params.get('nome');
+    
+    if (nome) {
+        if (nome.toLowerCase() === 'basta') {
+            document.body.textContent = 'Arrivederci';
+        } else {
+            const result = await search(nome);
+            document.body.textContent = result;
+        }
     } else {
-        const names = matches.map(match => match.Nome);
-        const namesFormatted = names.join(', ');
-        return `Trovate ${matches.length} corrispondenze: ${namesFormatted}. Specifica meglio il nome.`;
+        document.body.textContent = 'Nessun nome specificato.';
     }
 }
 
-async function handleInteraction() {
-    let nome;
-    do {
-        // Chiedi il nome
-        nome = prompt('Inserisci il nome da cercare (scrivi "basta" per uscire):');
-
-        if (nome && nome.toLowerCase() === "basta") {
-            // Saluta e termina la procedura
-            const speech = new SpeechSynthesisUtterance("Arrivederci! Alla prossima.");
-            speech.lang = 'it-IT';
-            window.speechSynthesis.speak(speech);
-            alert("Arrivederci! Alla prossima.");
-            break;
-        }
-
-        if (nome) {
-            // Cerca nel database
-            const result = await search(nome);
-            const speech = new SpeechSynthesisUtterance(result);
-            speech.lang = 'it-IT';
-            window.speechSynthesis.speak(speech);
-            alert(result);
-        } else {
-            // Se nessun nome è fornito
-            alert("Nessun nome fornito. Riprova.");
-        }
-    } while (true);
-}
-
-
-
-        window.onload = handleInteraction;
+        // Avvio automatico con gestione parametri URL
+        window.onload = handleURLParams;
     </script>
 </head>
 <body>
