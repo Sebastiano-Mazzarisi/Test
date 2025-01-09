@@ -2,6 +2,8 @@
 <html>
 <head>
     <title>Assistente Virtuale</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
     <script>
         // Funzione per leggere il CSV dal link pubblico su GitHub
         async function fetchCSV() {
@@ -17,7 +19,7 @@
             }
         }
 
-        // Funzioni helper rimangono identiche
+        // Funzioni helper 
         function getDayOfWeek(dateStr) {
             const [day, month, year] = dateStr.split('/').map(Number);
             const date = new Date(year, month - 1, day);
@@ -46,7 +48,7 @@
             return age;
         }
 
-        // Funzione di ricerca rimane identica
+        // Funzione di ricerca 
         async function search(partialName) {
             const rows = await fetchCSV();
             const matches = [];
@@ -103,28 +105,29 @@
             }
         }
 
-        // Nuova funzione per gestire i parametri URL
-// Nuova funzione per gestire i parametri URL
-async function handleURLParams() {
-    const params = new URLSearchParams(window.location.search);
-    const nome = params.get('nome');
-    
-    if (nome) {
-        if (nome.toLowerCase() === 'basta') {
-            document.body.textContent = 'Arrivederci';
-        } else {
-            const result = await search(nome);
-            document.body.textContent = result;
+        // Funzione per gestire i parametri URL
+        async function handleURLParams() {
+            const params = new URLSearchParams(window.location.search);
+            const nome = params.get('nome');
+            
+            if (nome) {
+                if (nome.toLowerCase() === 'basta') {
+                    document.body.textContent = 'Arrivederci';
+                } else {
+                    const result = await search(nome);
+                    // Formattare il risultato in modo più chiaro per la lettura vocale
+                    const formattedResult = result.replace(/\./g, '.\n');
+                    document.body.innerHTML = `<pre style="white-space: pre-wrap; word-wrap: break-word;">${formattedResult}</pre>`;
+                }
+            } else {
+                document.body.textContent = 'Nessun nome specificato.';
+            }
         }
-    } else {
-        document.body.textContent = 'Nessun nome specificato.';
-    }
-}
 
         // Avvio automatico con gestione parametri URL
         window.onload = handleURLParams;
     </script>
 </head>
-<body>
+<body style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; max-width: 600px; margin: 0 auto;">
 </body>
 </html>
