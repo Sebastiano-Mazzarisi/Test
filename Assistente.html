@@ -106,23 +106,26 @@
         }
 
         // Funzione per gestire i parametri URL
-        async function handleURLParams() {
-            const params = new URLSearchParams(window.location.search);
-            const nome = params.get('nome');
-            
-            if (nome) {
-                if (nome.toLowerCase() === 'basta') {
-                    document.body.textContent = 'Arrivederci';
-                } else {
-                    const result = await search(nome);
-                    // Formattare il risultato in modo più chiaro per la lettura vocale
-                    const formattedResult = result.replace(/\./g, '.\n');
-                    document.body.innerHTML = `<pre style="white-space: pre-wrap; word-wrap: break-word;">${formattedResult}</pre>`;
-                }
-            } else {
-                document.body.textContent = 'Nessun nome specificato.';
-            }
+async function handleURLParams() {
+    const params = new URLSearchParams(window.location.search);
+    const nome = params.get('nome');
+    
+    if (nome) {
+        if (nome.toLowerCase() === 'basta') {
+            document.body.textContent = 'Arrivederci';
+        } else {
+            const result = await search(nome);
+            // Usare alert() per restituire il risultato come testo semplice
+            alert(result); // Usa 'alert()' per far vedere il testo all'utente
+            // Puoi anche visualizzare il risultato nella pagina, come già fai
+            document.body.innerHTML = `<pre style="white-space: pre-wrap; word-wrap: break-word;">${result}</pre>`;
         }
+    } else {
+        document.body.textContent = 'Nessun nome specificato.';
+    }
+}
+
+
 
         // Avvio automatico con gestione parametri URL
         window.onload = handleURLParams;
