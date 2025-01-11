@@ -105,25 +105,29 @@
             }
         }
 
+
+
+
         // Funzione per gestire i parametri URL
 
 async function handleURLParams() {
     const params = new URLSearchParams(window.location.search);
     const nome = params.get('nome');
+    const result = params.get('result'); // Leggi il parametro 'result' dall'URL
     
-    if (nome) {
-        if (nome.toLowerCase() === 'basta') {
-            document.body.textContent = 'Arrivederci';
-        } else {
-            const result = await search(nome);
-            // Usa 'alert()' per restituire il risultato come testo semplice
-            alert(result); // Questo è quello che Siri leggerà
-        }
+    if (result) {
+        // Se c'è un risultato, decodifichiamolo e visualizzalo nel corpo della pagina
+        document.body.innerHTML = `<pre style="white-space: pre-wrap; word-wrap: break-word;">${decodeURIComponent(result)}</pre>`;
+    } else if (nome) {
+        // Se c'è un nome ma nessun risultato (nessuna corrispondenza)
+        document.body.textContent = 'Nessuna corrispondenza trovata.';
     } else {
-        // Mostra l'alert anche se non viene specificato un nome
-        alert('Nessun nome specificato.');
+        // Se non c'è un nome, visualizza il messaggio di "Nessun nome specificato"
+        document.body.textContent = 'Nessun nome specificato.';
     }
 }
+
+
 
 
 
