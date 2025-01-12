@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
     <script>
-        // Funzione per leggere il CSV dal link pubblico su GitHub
         async function fetchCSV() {
             const url = 'https://sebastiano-mazzarisi.github.io/Test/Assistente.csv';
             try {
@@ -19,7 +18,12 @@
             }
         }
 
-        // Funzioni helper 
+        function sanitizeInput(input) {
+            return input.trim()
+                       .replace(/[<>]/g, '')
+                       .replace(/[^a-zA-Z0-9àèéìíîòóùúÀÈÉÌÍÎÒÓÙÚ\s]/g, ' ');
+        }
+
         function getDayOfWeek(dateStr) {
             const [day, month, year] = dateStr.split('/').map(Number);
             const date = new Date(year, month - 1, day);
@@ -48,11 +52,10 @@
             return age;
         }
 
-        // Funzione di ricerca 
         async function search(partialName) {
             const rows = await fetchCSV();
             const matches = [];
-            const nameParts = partialName.toLowerCase().split(' ');
+            const nameParts = sanitizeInput(partialName).toLowerCase().split(' ');
 
             for (const row of rows) {
                 const name = row[0]?.trim().toLowerCase();
@@ -105,24 +108,21 @@
             }
         }
 
-        // Funzione per gestire i parametri URL
         async function handleURLParams() {
             const params = new URLSearchParams(window.location.search);
             const nome = params.get('nome');
             
             if (nome) {
                 const risultato = await search(nome);
-                // Mostra il risultato direttamente nella pagina
-                document.body.innerHTML = `<pre style="font-family: Arial, sans-serif; white-space: pre-wrap; word-wrap: break-word; padding: 20px;">${risultato}</pre>`;
+                document.body.innerHTML = `<div style="font-family: Arial, sans-serif;">${risultato}</div>`;
             } else {
-                document.body.innerHTML = '<pre style="font-family: Arial, sans-serif; padding: 20px;">Nessun nome specificato.</pre>';
+                document.body.innerHTML = '<div style="font-family: Arial, sans-serif;">Nessun nome specificato.</div>';
             }
         }
 
-        // Avvio automatico
         window.onload = handleURLParams;
     </script>
 </head>
-<body style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; max-width: 600px; margin: 0 auto;">
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 20px;">
 </body>
 </html>
