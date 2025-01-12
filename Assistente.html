@@ -105,32 +105,20 @@
             }
         }
 
-
-
-
         // Funzione per gestire i parametri URL
-
-async function handleURLParams() {
-    const params = new URLSearchParams(window.location.search);
-    const nome = params.get('nome');
-    const result = params.get('result'); // Leggi il parametro 'result'
-    
-    if (result) {
-        // Reindirizza al comando rapido, passando il risultato come parametro
-        window.location.href = `shortcuts://run-shortcut?name=LeggiRisultato&input=${encodeURIComponent(result)}`;
-    } else if (nome) {
-        // Se non c'è risultato, reindirizza con un messaggio di errore
-        window.location.href = `shortcuts://run-shortcut?name=LeggiRisultato&input=Nessuna%20corrispondenza%20trovata.`;
-    } else {
-        // Se non è stato fornito alcun nome
-        window.location.href = `shortcuts://run-shortcut?name=LeggiRisultato&input=Nessun%20nome%20specificato.`;
-    }
-}
-
-
-
-
-
+        async function handleURLParams() {
+            const params = new URLSearchParams(window.location.search);
+            const nome = params.get('nome');
+            
+            if (nome) {
+                const risultato = await search(nome);
+                // Reindirizza al comando rapido con il risultato
+                window.location.href = `shortcuts://run-shortcut?name=AssistenteRisposta&input=${encodeURIComponent(risultato)}`;
+            } else {
+                // Se non è stato fornito alcun nome
+                window.location.href = `shortcuts://run-shortcut?name=AssistenteRisposta&input=Nessun nome specificato.`;
+            }
+        }
 
         // Avvio automatico con gestione parametri URL
         window.onload = handleURLParams;
