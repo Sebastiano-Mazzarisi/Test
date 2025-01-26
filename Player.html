@@ -25,9 +25,18 @@
             return urlParams.get(param);
         }
 
+        function parseTime(timeStr) {
+            if (!timeStr) return 0;
+            const match = timeStr.match(/(?:(\d+)m)?(?:(\d+)s)?/);
+            if (!match) return 0;
+            const minutes = parseInt(match[1]) || 0;
+            const seconds = parseInt(match[2]) || 0;
+            return minutes * 60 + seconds;
+        }
+
         const videoId = getQueryParam('id');
-        const startTime = parseInt(getQueryParam('start')) || 0;
-        const endTime = parseInt(getQueryParam('end')) || 0;
+        const startTime = parseTime(getQueryParam('start'));
+        const endTime = parseTime(getQueryParam('end'));
 
         if (!videoId) {
             document.body.innerHTML = '<h1 style="color: white; text-align: center; margin-top: 20%;">Errore: parametro "id" mancante!</h1>';
