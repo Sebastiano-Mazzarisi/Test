@@ -27,7 +27,7 @@
 
         function parseTime(timeStr) {
             if (!timeStr) return 0;
-            const match = timeStr.match(/(?:(\\d+)m)?(?:(\\d+)s)?/);
+            const match = timeStr.match(/(?:(\d+)m)?(?:(\d+)s)?/);
             if (!match) return 0;
             const minutes = parseInt(match[1]) || 0;
             const seconds = parseInt(match[2]) || 0;
@@ -58,6 +58,8 @@
                     'rel': 0,
                     'showinfo': 0,
                     'modestbranding': 1,
+                    'start': startTime,
+                    'end': endTime,
                     'playsinline': 1
                 },
                 events: {
@@ -68,18 +70,18 @@
         }
 
         function onPlayerReady(event) {
-            player.seekTo(startTime, true);
-            player.playVideo(); // Avvia il video al punto specificato
+            player.seekTo(startTime, true); // Forza il video a partire dal punto specificato
+            player.playVideo(); // Avvia il video
         }
 
         function onPlayerStateChange(event) {
             if (event.data === YT.PlayerState.PLAYING && endTime > 0) {
                 const interval = setInterval(() => {
                     if (player.getCurrentTime() >= endTime) {
-                        player.pauseVideo();
+                        player.pauseVideo(); // Ferma il video al punto finale
                         clearInterval(interval);
                     }
-                }, 500); // Controllo ogni mezzo secondo
+                }, 500); // Controlla ogni mezzo secondo
             }
         }
     </script>
