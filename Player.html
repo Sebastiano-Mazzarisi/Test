@@ -73,13 +73,10 @@
         }
 
         function onPlayerStateChange(event) {
-            if (event.data === YT.PlayerState.PLAYING && endTime > 0) {
+            if (event.data === YT.PlayerState.PLAYING) {
                 const interval = setInterval(() => {
                     if (player.getCurrentTime() >= endTime) {
-                        player.pauseVideo(); // Pausa al termine
-                        player.seekTo(startTime, true); // Torna all'inizio indicato
-                        player.playVideo(); // Riparte
-                        clearInterval(interval); // Evita che l'intervallo continui a funzionare
+                        player.seekTo(startTime, true); // Riparte dal punto iniziale
                     }
                 }, 500); // Controlla ogni mezzo secondo
             }
