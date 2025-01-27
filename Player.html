@@ -38,9 +38,6 @@
         const startTime = parseTime(getQueryParam('start'));
         const endTime = parseTime(getQueryParam('end'));
 
-        console.log("Start time in seconds: ", startTime);
-        console.log("End time in seconds: ", endTime);
-
         if (!videoId) {
             document.body.innerHTML = '<h1 style="color: white; text-align: center; margin-top: 20%;">Errore: parametro "id" mancante!</h1>';
             throw new Error('Parametro "id" mancante');
@@ -71,9 +68,7 @@
         }
 
         function onPlayerReady(event) {
-            if (startTime > 0) {
-                player.seekTo(startTime, true); // Salta al punto specificato
-            }
+            player.seekTo(startTime, true); // Salta al punto specificato
             player.playVideo(); // Avvia il video
         }
 
@@ -81,8 +76,8 @@
             if (event.data === YT.PlayerState.PLAYING && endTime > 0) {
                 const interval = setInterval(() => {
                     if (player.getCurrentTime() >= endTime) {
-                        player.pauseVideo(); // Ferma il video al punto finale
-                        clearInterval(interval);
+                        player.seekTo(startTime, true); // Riparte dal punto iniziale
+                        player.playVideo(); // Continua a riprodurre
                     }
                 }, 500); // Controlla ogni mezzo secondo
             }
