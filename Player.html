@@ -58,24 +58,27 @@
                     'rel': 0,
                     'showinfo': 0,
                     'modestbranding': 1,
-                    'start': startTime,
                     'playsinline': 1
                 },
                 events: {
+                    'onReady': onPlayerReady,
                     'onStateChange': onPlayerStateChange
                 }
             });
         }
 
+        function onPlayerReady(event) {
+            player.seekTo(startTime, true);
+        }
+
         function onPlayerStateChange(event) {
-            if (event.data == YT.PlayerState.PLAYING && endTime > 0) {
-                // Controlla che il video si fermi all'ora di fine specificata
-                const checkTime = setInterval(() => {
+            if (event.data === YT.PlayerState.PLAYING && endTime > 0) {
+                const interval = setInterval(() => {
                     if (player.getCurrentTime() >= endTime) {
                         player.pauseVideo();
-                        clearInterval(checkTime);
+                        clearInterval(interval);
                     }
-                }, 500); // Controlla ogni mezzo secondo
+                }, 500); // Controllo ogni mezzo secondo
             }
         }
     </script>
