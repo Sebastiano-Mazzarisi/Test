@@ -59,26 +59,23 @@
                     'showinfo': 0,
                     'modestbranding': 1,
                     'start': startTime,
-                    'end': endTime,
-                    'playsinline': 1  // Permette la riproduzione inline su iPhone
+                    'playsinline': 1
                 },
                 events: {
-                    'onReady': onPlayerReady,
                     'onStateChange': onPlayerStateChange
                 }
             });
         }
 
-        function onPlayerReady(event) {
-            // Forza lo schermo intero al primo clic su iPhone
-            const iframe = document.querySelector('iframe');
-            iframe.setAttribute('allowfullscreen', 'true');
-            iframe.setAttribute('webkit-playsinline', 'true');
-        }
-
         function onPlayerStateChange(event) {
-            if (event.data == YT.PlayerState.ENDED && endTime > 0) {
-                player.seekTo(startTime, true);
+            if (event.data == YT.PlayerState.PLAYING && endTime > 0) {
+                // Controlla che il video si fermi all'ora di fine specificata
+                const checkTime = setInterval(() => {
+                    if (player.getCurrentTime() >= endTime) {
+                        player.pauseVideo();
+                        clearInterval(checkTime);
+                    }
+                }, 500); // Controlla ogni mezzo secondo
             }
         }
     </script>
