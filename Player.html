@@ -36,15 +36,28 @@
       return minutes * 60 + seconds;
     }
     
-    // Estrai i parametri dall'URL
-    const videoId = getQueryParam('id');
-    const startTime = parseTime(getQueryParam('start'));
-    const endTime = parseTime(getQueryParam('end'));
+    // Salva i parametri raw
+    const rawVideoId = getQueryParam('id');
+    const rawStart = getQueryParam('start');
+    const rawEnd = getQueryParam('end');
+    
+    // Salva i valori in variabili, così li usiamo per il loop
+    const videoId = rawVideoId; // obbligatorio
+    const startTime = parseTime(rawStart);
+    const endTime = parseTime(rawEnd);
     
     if (!videoId) {
       document.body.innerHTML = '<h1 style="color: white; text-align: center; margin-top: 20%;">Errore: parametro "id" mancante!</h1>';
       throw new Error('Parametro "id" mancante');
     }
+    
+    // Rimuoviamo il parametro "end" dall'URL per evitare che venga passato al player
+    (function removeEndParam() {
+      const urlParams = new URLSearchParams(window.location.search);
+      urlParams.delete('end');
+      const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + urlParams.toString();
+      window.history.replaceState({}, document.title, newUrl);
+    })();
     
     // Carica l'API IFrame di YouTube
     var tag = document.createElement('script');
@@ -52,7 +65,7 @@
     document.head.appendChild(tag);
     
     var player;
-    var loopInterval = null; // Variabile globale per il loop
+    var loopInterval = null; // Variabile per il loop
     
     // Funzione per richiedere il full screen
     function goFullscreen() {
@@ -68,7 +81,7 @@
       }
     }
     
-    // Inizializza il player (senza parametro "end" per evitare l'interruzione automatica)
+    // Inizializza il player SENZA il parametro "end"
     function onYouTubeIframeAPIReady() {
       player = new YT.Player('player', {
         videoId: videoId,
@@ -80,6 +93,7 @@
           'modestbranding': 1,
           'playsinline': 1,
           'start': startTime
+          // NOTA: non passiamo "end" qui!
         },
         events: {
           'onReady': onPlayerReady,
@@ -88,7 +102,7 @@
       });
     }
     
-    // Quando il player è pronto, salta al tempo di inizio e avvia il video
+    // Quando il player è pronto, cerca al tempo di start, avvia il video e richiede full screen
     function onPlayerReady(event) {
       player.seekTo(startTime, true);
       player.playVideo();
@@ -98,23 +112,22 @@
     // Gestione dello stato del player
     function onPlayerStateChange(event) {
       if (event.data === YT.PlayerState.PLAYING) {
-        // Avvia (se non già attivo) un intervallo per controllare il tempo
         if (!loopInterval) {
           loopInterval = setInterval(function() {
-            // Se il tempo corrente è vicino o supera endTime, torna a startTime
-            if (player.getCurrentTime() >= (endTime - 0.5)) { // buffer di 0.5 secondi
+            // Controlla se il tempo corrente si è avvicinato (o superato) al tempo di fine
+            if (player.getCurrentTime() >= (endTime - 0.3)) {  // buffer di 0.3 secondi
               player.seekTo(startTime, true);
             }
-          }, 200); // Controlla ogni 200 ms (più frequente per maggiore precisione)
+          }, 200); // Controlla ogni 200 ms per una maggiore precisione
         }
       } else if (event.data === YT.PlayerState.ENDED) {
-        // Se il video entra nello stato "ENDED", forziamo il riavvio
+        // In caso di ENDED (per qualsiasi motivo), riavvia
         player.seekTo(startTime, true);
         player.playVideo();
       }
     }
     
-    // Al click dell'utente, richiede il full screen (utile per abilitare il full screen se non è partito)
+    // Al click, richiede full screen
     document.addEventListener('click', function() {
       goFullscreen();
     });
