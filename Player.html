@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background: black;
+        }
+        #player {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        function parseTime(timeStr) {
+            if (!timeStr) return 0;
+            const match = timeStr.match(/(?:(\d+)m)?(?:(\d+)s)?/);
+            if (!match) return parseInt(timeStr) || 0;
+            const minutes = parseInt(match[1]) || 0;
+            const seconds = parseInt(match[2]) || 0;
+            return minutes * 60 + seconds;
+        }
+
+        var player;
+        var loopInterval;
+        const videoId = getQueryParam('id');
+        const startTime = parseTime(getQueryParam('start'));
+        const endTime = parseTime(getQueryParam('end'));
+
+        function onYouTubeIframeAPIReady() {
+            if (!videoId) {
+                document.body.innerHTML = '<h1 style="color: white; text-align: center; margin-top: 20%;">Errore: parametro "id" mancante!</h1>';
+                return;
+            }
+
+            player = new YT.Player('player', {
+                videoId: videoId,
+                playerVars: {
+                    'autoplay': 1,
+                    'controls': 1,
+                    'start': startTime,
+                    'fs': 1,
+                    'modestbranding': 1,
+                    'rel': 0,
+                    'iv_load_policy': 3,
+                    'mute': 0
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            event.target.playVideo();
+        }
+
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.PLAYING) {
+                loopInterval = setInterval(checkTime, 250);
+            } else if (event.data === YT.PlayerState.ENDED) {
+                player.seekTo(startTime, true);
+                player.playVideo();
+            } else {
+                clearInterval(loopInterval);
+            }
+        }
+
+        function checkTime() {
+            if (player.getCurrentTime() >= endTime) {
+                player.seekTo(startTime, true);
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="player"></div>
+</body>
+</html>
