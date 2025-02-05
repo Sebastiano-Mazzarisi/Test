@@ -44,17 +44,22 @@
         const endTime = parseTime(getQueryParam('end'));
 
         function onYouTubeIframeAPIReady() {
+            if (!videoId) {
+                document.body.innerHTML = '<h1 style="color: white; text-align: center; margin-top: 20%;">Errore: parametro "id" mancante!</h1>';
+                return;
+            }
+
             player = new YT.Player('player', {
                 videoId: videoId,
                 playerVars: {
                     'autoplay': 1,
-                    'controls': 0,
+                    'controls': 1,
                     'start': startTime,
-                    'fs': 0,
+                    'fs': 1,
                     'modestbranding': 1,
                     'rel': 0,
                     'iv_load_policy': 3,
-                    'mute': 1
+                    'mute': 0
                 },
                 events: {
                     'onReady': onPlayerReady,
@@ -64,9 +69,7 @@
         }
 
         function onPlayerReady(event) {
-            player.mute();
             event.target.playVideo();
-            requestFullscreen();
         }
 
         function onPlayerStateChange(event) {
@@ -81,22 +84,8 @@
         }
 
         function checkTime() {
-            var currentTime = player.getCurrentTime();
-            if (currentTime >= endTime) {
+            if (player.getCurrentTime() >= endTime) {
                 player.seekTo(startTime, true);
-                player.playVideo();
-            }
-        }
-
-        function requestFullscreen() {
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen();
-            } else if (document.documentElement.mozRequestFullScreen) {
-                document.documentElement.mozRequestFullScreen();
-            } else if (document.documentElement.webkitRequestFullscreen) {
-                document.documentElement.webkitRequestFullscreen();
-            } else if (document.documentElement.msRequestFullscreen) {
-                document.documentElement.msRequestFullscreen();
             }
         }
     </script>
