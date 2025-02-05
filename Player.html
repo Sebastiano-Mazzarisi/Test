@@ -1,129 +1,132 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Player</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background: black;
-        }
-        #player {
-            position: fixed;
-            width: 100vw;
-            height: 100vh;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Player</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
+    }
+    #player {
+      position: fixed;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
 </head>
 <body>
-    <div id="player"></div>
-    <script>
-        // Funzione per ottenere i parametri dalla query string
-        function getQueryParam(param) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(param);
+  <div id="player"></div>
+  <script>
+    // Funzione per ottenere i parametri dalla query string
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+    
+    // Funzione per interpretare il tempo (es. "1m30s" o "90")
+    function parseTime(timeStr) {
+      if (!timeStr) return 0;
+      const match = timeStr.match(/(?:(\d+)m)?(?:(\d+)s)?/);
+      if (!match) return parseInt(timeStr) || 0;
+      const minutes = parseInt(match[1]) || 0;
+      const seconds = parseInt(match[2]) || 0;
+      return minutes * 60 + seconds;
+    }
+    
+    // Estrai i parametri dall'URL
+    const videoId = getQueryParam('id');
+    const startTime = parseTime(getQueryParam('start'));
+    const endTime = parseTime(getQueryParam('end'));
+    
+    if (!videoId) {
+      document.body.innerHTML = '<h1 style="color: white; text-align: center; margin-top: 20%;">Errore: parametro "id" mancante!</h1>';
+      throw new Error('Parametro "id" mancante');
+    }
+    
+    // Carica l'API IFrame di YouTube
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(tag);
+    
+    var player;
+    var loopInterval = null;     // Per gestire il loop manuale
+    var userIntervened = false;  // Flag che diventa true se l'utente clicca
+    
+    // Funzione per richiedere il full screen
+    function goFullscreen() {
+      const docEl = document.documentElement;
+      if (docEl.requestFullscreen) {
+        docEl.requestFullscreen();
+      } else if (docEl.mozRequestFullScreen) {
+        docEl.mozRequestFullScreen();
+      } else if (docEl.webkitRequestFullscreen) {
+        docEl.webkitRequestFullscreen();
+      } else if (docEl.msRequestFullscreen) {
+        docEl.msRequestFullscreen();
+      }
+    }
+    
+    // Inizializza il player senza il parametro "end"
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        videoId: videoId,
+        playerVars: {
+          'autoplay': 1,
+          'controls': 1,
+          'rel': 0,
+          'showinfo': 0,
+          'modestbranding': 1,
+          'playsinline': 1,
+          'start': startTime
+          // NON includiamo 'end' per evitare che YouTube gestisca la fine del video
+        },
+        events: {
+          'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange
         }
-
-        // Funzione per interpretare il tempo (es. "1m30s" o "90")
-        function parseTime(timeStr) {
-            if (!timeStr) return 0;
-            const match = timeStr.match(/(?:(\d+)m)?(?:(\d+)s)?/);
-            if (!match) return parseInt(timeStr) || 0;
-            const minutes = parseInt(match[1]) || 0;
-            const seconds = parseInt(match[2]) || 0;
-            return minutes * 60 + seconds;
-        }
-
-        // Estrai i parametri dall'URL
-        const videoId = getQueryParam('id');
-        const startTime = parseTime(getQueryParam('start'));
-        const endTime = parseTime(getQueryParam('end'));
-
-        if (!videoId) {
-            document.body.innerHTML = '<h1 style="color: white; text-align: center; margin-top: 20%;">Errore: parametro "id" mancante!</h1>';
-            throw new Error('Parametro "id" mancante');
-        }
-
-        // Carica l'API IFrame di YouTube
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        document.head.appendChild(tag);
-
-        var player;
-        var loopInterval = null;     // Per memorizzare l'intervallo del loop
-        var userIntervened = false;  // Flag per controllare se l'utente ha cliccato
-
-        // Funzione per richiedere la modalità full screen
-        function goFullscreen() {
-            const docEl = document.documentElement;
-            if (docEl.requestFullscreen) {
-                docEl.requestFullscreen();
-            } else if (docEl.mozRequestFullScreen) {
-                docEl.mozRequestFullScreen();
-            } else if (docEl.webkitRequestFullscreen) {
-                docEl.webkitRequestFullscreen();
-            } else if (docEl.msRequestFullscreen) {
-                docEl.msRequestFullscreen();
+      });
+    }
+    
+    // Quando il player è pronto, salta al tempo di inizio, avvia il video e richiede il full screen
+    function onPlayerReady(event) {
+      player.seekTo(startTime, true);
+      player.playVideo();
+      goFullscreen();
+    }
+    
+    // Gestione degli stati del player
+    function onPlayerStateChange(event) {
+      // Se il video è terminato, riportalo all'inizio
+      if (event.data === YT.PlayerState.ENDED && !userIntervened) {
+        player.seekTo(startTime, true);
+        player.playVideo();
+      }
+      // Se il video è in riproduzione, imposta un intervallo per controllare il tempo
+      else if (event.data === YT.PlayerState.PLAYING && !userIntervened) {
+        if (!loopInterval) {
+          loopInterval = setInterval(function() {
+            if (player.getCurrentTime() >= endTime) {
+              player.seekTo(startTime, true);
             }
+          }, 500); // Verifica ogni 500 ms
         }
-
-        // Funzione chiamata dall'API di YouTube quando è pronta
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('player', {
-                videoId: videoId,
-                playerVars: {
-                    'autoplay': 1,
-                    'controls': 1,
-                    'rel': 0,
-                    'showinfo': 0,
-                    'modestbranding': 1,
-                    'playsinline': 1,
-                    'start': startTime,
-                    'end': endTime
-                },
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
-                }
-            });
+      }
+    }
+    
+    // Al click dell'utente, interrompi il loop (l'utente ha "intervenuto") e richiedi il full screen
+    document.addEventListener('click', function() {
+      if (!userIntervened) {
+        userIntervened = true;
+        if (loopInterval) {
+          clearInterval(loopInterval);
+          loopInterval = null;
         }
-
-        // Quando il player è pronto, salta al tempo di inizio e avvia il video
-        function onPlayerReady(event) {
-            player.seekTo(startTime, true);
-            player.playVideo();
-            // Prova a forzare il full screen (potrebbe essere bloccato se non c'è un gesto utente)
-            goFullscreen();
-        }
-
-        // Quando lo stato del player cambia, se sta riproducendo e non è intervenuto l'utente,
-        // imposta un intervallo per controllare il tempo corrente e riciclare il video.
-        function onPlayerStateChange(event) {
-            if (event.data === YT.PlayerState.PLAYING && !userIntervened) {
-                if (!loopInterval) {
-                    loopInterval = setInterval(function() {
-                        if (player.getCurrentTime() >= endTime) {
-                            player.seekTo(startTime, true);
-                        }
-                    }, 500); // Controlla ogni 500 ms
-                }
-            }
-        }
-
-        // Se l'utente clicca, interrompi il loop e richiedi il full screen (questo gestisce il "l'intervento")
-        document.addEventListener('click', function() {
-            if (!userIntervened) {
-                userIntervened = true;
-                if (loopInterval) {
-                    clearInterval(loopInterval);
-                    loopInterval = null;
-                }
-            }
-            // Richiede comunque il full screen ad ogni click (nel caso non sia stato attivato)
-            goFullscreen();
-        });
-    </script>
+      }
+      goFullscreen();
+    });
+  </script>
 </body>
 </html>
