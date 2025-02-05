@@ -52,8 +52,7 @@
     document.head.appendChild(tag);
     
     var player;
-    var loopInterval = null;     // Per gestire il loop manuale
-    var userIntervened = false;  // Flag che diventa true se l'utente clicca
+    var loopInterval = null; // Variabile globale per il loop
     
     // Funzione per richiedere il full screen
     function goFullscreen() {
@@ -69,7 +68,7 @@
       }
     }
     
-    // Inizializza il player senza il parametro "end"
+    // Inizializza il player (senza parametro "end" per evitare l'interruzione automatica)
     function onYouTubeIframeAPIReady() {
       player = new YT.Player('player', {
         videoId: videoId,
@@ -81,7 +80,6 @@
           'modestbranding': 1,
           'playsinline': 1,
           'start': startTime
-          // NON includiamo 'end' per evitare che YouTube gestisca la fine del video
         },
         events: {
           'onReady': onPlayerReady,
@@ -90,41 +88,34 @@
       });
     }
     
-    // Quando il player è pronto, salta al tempo di inizio, avvia il video e richiede il full screen
+    // Quando il player è pronto, salta al tempo di inizio e avvia il video
     function onPlayerReady(event) {
       player.seekTo(startTime, true);
       player.playVideo();
       goFullscreen();
     }
     
-    // Gestione degli stati del player
+    // Gestione dello stato del player
     function onPlayerStateChange(event) {
-      // Se il video è terminato, riportalo all'inizio
-      if (event.data === YT.PlayerState.ENDED && !userIntervened) {
+      if (event.data === YT.PlayerState.PLAYING) {
+        // Avvia (se non già attivo) un intervallo per controllare il tempo
+        if (!loopInterval) {
+          loopInterval = setInterval(function() {
+            // Se il tempo corrente è vicino o supera endTime, torna a startTime
+            if (player.getCurrentTime() >= (endTime - 0.5)) { // buffer di 0.5 secondi
+              player.seekTo(startTime, true);
+            }
+          }, 200); // Controlla ogni 200 ms (più frequente per maggiore precisione)
+        }
+      } else if (event.data === YT.PlayerState.ENDED) {
+        // Se il video entra nello stato "ENDED", forziamo il riavvio
         player.seekTo(startTime, true);
         player.playVideo();
       }
-      // Se il video è in riproduzione, imposta un intervallo per controllare il tempo
-      else if (event.data === YT.PlayerState.PLAYING && !userIntervened) {
-        if (!loopInterval) {
-          loopInterval = setInterval(function() {
-            if (player.getCurrentTime() >= endTime) {
-              player.seekTo(startTime, true);
-            }
-          }, 500); // Verifica ogni 500 ms
-        }
-      }
     }
     
-    // Al click dell'utente, interrompi il loop (l'utente ha "intervenuto") e richiedi il full screen
+    // Al click dell'utente, richiede il full screen (utile per abilitare il full screen se non è partito)
     document.addEventListener('click', function() {
-      if (!userIntervened) {
-        userIntervened = true;
-        if (loopInterval) {
-          clearInterval(loopInterval);
-          loopInterval = null;
-        }
-      }
       goFullscreen();
     });
   </script>
