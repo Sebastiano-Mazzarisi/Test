@@ -72,6 +72,9 @@
         function onPlayerStateChange(event) {
             if (event.data === YT.PlayerState.PLAYING) {
                 loopInterval = setInterval(checkTime, 250);
+            } else if (event.data === YT.PlayerState.ENDED) {
+                player.seekTo(startTime, true);
+                player.playVideo();
             } else {
                 clearInterval(loopInterval);
             }
@@ -81,6 +84,7 @@
             var currentTime = player.getCurrentTime();
             if (currentTime >= endTime) {
                 player.seekTo(startTime, true);
+                player.playVideo();
             }
         }
 
