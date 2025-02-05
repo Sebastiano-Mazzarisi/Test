@@ -15,18 +15,48 @@
       width: 100vw;
       height: 100vh;
     }
+    /* Overlay iniziale con pulsante Play */
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    #playButton {
+      font-size: 24px;
+      padding: 20px 40px;
+      cursor: pointer;
+    }
   </style>
+  <script>
+    // Salviamo i parametri e rimuoviamo "end" dall'URL (come fatto nelle versioni precedenti)
+    window.initialQueryParams = new URLSearchParams(window.location.search);
+    if (window.initialQueryParams.has('end')) {
+      window.initialQueryParams.delete('end');
+      const newUrl = window.location.protocol + '//' + window.location.host + window.location.pathname + '?' + window.initialQueryParams.toString();
+      window.history.replaceState({}, document.title, newUrl);
+    }
+  </script>
 </head>
 <body>
+  <div id="overlay">
+    <button id="playButton">Play</button>
+  </div>
   <div id="player"></div>
+  
   <script>
-    // Funzione per ottenere i parametri dalla query string
     function getQueryParam(param) {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get(param);
+      if (window.initialQueryParams)
+        return window.initialQueryParams.get(param);
+      return new URLSearchParams(window.location.search).get(param);
     }
-    
-    // Funzione per interpretare il tempo (es. "1m30s" o "90")
+
     function parseTime(timeStr) {
       if (!timeStr) return 0;
       const match = timeStr.match(/(?:(\d+)m)?(?:(\d+)s)?/);
@@ -35,39 +65,18 @@
       const seconds = parseInt(match[2]) || 0;
       return minutes * 60 + seconds;
     }
-    
-    // Salva i parametri raw
-    const rawVideoId = getQueryParam('id');
-    const rawStart = getQueryParam('start');
-    const rawEnd = getQueryParam('end');
-    
-    // Salva i valori in variabili, così li usiamo per il loop
-    const videoId = rawVideoId; // obbligatorio
-    const startTime = parseTime(rawStart);
-    const endTime = parseTime(rawEnd);
-    
+
+    // Leggiamo i parametri
+    const videoId = getQueryParam('id');
+    const startTime = parseTime(getQueryParam('start'));
+    const endTime = parseTime(window.initialQueryParams.get('end'));
+
     if (!videoId) {
       document.body.innerHTML = '<h1 style="color: white; text-align: center; margin-top: 20%;">Errore: parametro "id" mancante!</h1>';
       throw new Error('Parametro "id" mancante');
     }
-    
-    // Rimuoviamo il parametro "end" dall'URL per evitare che venga passato al player
-    (function removeEndParam() {
-      const urlParams = new URLSearchParams(window.location.search);
-      urlParams.delete('end');
-      const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + urlParams.toString();
-      window.history.replaceState({}, document.title, newUrl);
-    })();
-    
-    // Carica l'API IFrame di YouTube
-    var tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    document.head.appendChild(tag);
-    
-    var player;
-    var loopInterval = null; // Variabile per il loop
-    
-    // Funzione per richiedere il full screen
+
+    // Funzione per richiedere il fullscreen
     function goFullscreen() {
       const docEl = document.documentElement;
       if (docEl.requestFullscreen) {
@@ -80,8 +89,15 @@
         docEl.msRequestFullscreen();
       }
     }
-    
-    // Inizializza il player SENZA il parametro "end"
+
+    // Carichiamo l'API IFrame di YouTube
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(tag);
+
+    var player;
+    var loopInterval = null;
+
     function onYouTubeIframeAPIReady() {
       player = new YT.Player('player', {
         videoId: videoId,
@@ -92,8 +108,8 @@
           'showinfo': 0,
           'modestbranding': 1,
           'playsinline': 1,
-          'start': startTime
-          // NOTA: non passiamo "end" qui!
+          'start': startTime,
+          'fs': 1  // Abilita il pulsante fullscreen, ma il vero passaggio al fullscreen è fatto tramite il click
         },
         events: {
           'onReady': onPlayerReady,
@@ -101,35 +117,39 @@
         }
       });
     }
-    
-    // Quando il player è pronto, cerca al tempo di start, avvia il video e richiede full screen
+
     function onPlayerReady(event) {
-      player.seekTo(startTime, true);
-      player.playVideo();
-      goFullscreen();
+      // Ricarichiamo il video per essere sicuri che il parametro "end" non venga applicato
+      player.loadVideoById({
+        videoId: videoId,
+        startSeconds: startTime,
+        suggestedQuality: 'large'
+      });
     }
-    
-    // Gestione dello stato del player
+
     function onPlayerStateChange(event) {
       if (event.data === YT.PlayerState.PLAYING) {
         if (!loopInterval) {
           loopInterval = setInterval(function() {
-            // Controlla se il tempo corrente si è avvicinato (o superato) al tempo di fine
-            if (player.getCurrentTime() >= (endTime - 0.3)) {  // buffer di 0.3 secondi
+            if (player.getCurrentTime() >= (endTime - 0.3)) {
               player.seekTo(startTime, true);
             }
-          }, 200); // Controlla ogni 200 ms per una maggiore precisione
+          }, 200);
         }
       } else if (event.data === YT.PlayerState.ENDED) {
-        // In caso di ENDED (per qualsiasi motivo), riavvia
         player.seekTo(startTime, true);
         player.playVideo();
       }
     }
-    
-    // Al click, richiede full screen
-    document.addEventListener('click', function() {
-      goFullscreen();
+
+    // Quando l'utente clicca sul pulsante Play:
+    document.getElementById('playButton').addEventListener('click', function() {
+      goFullscreen();              // Richiede fullscreen
+      document.getElementById('overlay').style.display = 'none';  // Nasconde l'overlay
+      // Se il video non è già in riproduzione, lo avvia
+      if (player && player.playVideo) {
+        player.playVideo();
+      }
     });
   </script>
 </body>
