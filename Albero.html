@@ -1,0 +1,2262 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#3498db">
+    <title>Albero Genealogico - Famiglia Pricci</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --light-bg: #ecf0f1;
+            --dark-bg: #34495e;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --border-color: #bdc3c7;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
+            --radius: 16px;
+            --touch-target: 44px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            font-size: 16px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            font-weight: 700;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: var(--radius);
+            padding: 16px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .stat-card.clickable {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .stat-card.clickable:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--secondary-color);
+        }
+
+        .stat-card.clickable:active {
+            transform: scale(0.98);
+        }
+
+        .stat-number {
+            font-size: clamp(1.4rem, 3vw, 1.8rem);
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: clamp(0.75rem, 2vw, 0.85rem);
+        }
+
+        .navigation-bar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 15px;
+            z-index: 100;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            min-height: var(--touch-target);
+            padding: 12px 20px;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            touch-action: manipulation;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .nav-btn:active {
+            transform: scale(0.95);
+        }
+
+        .nav-btn.home {
+            background: var(--success-color);
+        }
+
+        .nav-btn.back {
+            background: var(--warning-color);
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            min-height: var(--touch-target);
+            padding: 12px 50px 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius);
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: var(--text-secondary);
+        }
+
+        .breadcrumb {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: var(--radius);
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            display: none;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .breadcrumb-item {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: inline-block;
+        }
+
+        .breadcrumb-item:active {
+            background: var(--light-bg);
+        }
+
+        .breadcrumb-item.current {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .breadcrumb-separator {
+            color: var(--text-secondary);
+            margin: 0 4px;
+        }
+
+        .search-results {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .search-results.show {
+            display: block;
+        }
+
+        .search-result-item {
+            min-height: var(--touch-target);
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            touch-action: manipulation;
+        }
+
+        .search-result-item:active {
+            background: var(--light-bg);
+            transform: scale(0.98);
+        }
+
+        .current-person {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 3px solid var(--secondary-color);
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            position: relative; /* Modified */
+        }
+
+        .current-person-content {
+            flex: 1;
+        }
+
+        .current-person-calendar {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: absolute; /* Modified */
+            top: 20px; /* Modified */
+            right: 20px; /* Modified */
+        }
+
+        .calendar-header {
+            background: var(--accent-color);
+            color: white;
+            padding: 4px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+        }
+
+        .calendar-day {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            background: white;
+        }
+
+        /* New style for the PDF download button */
+        .pdf-download-button {
+            position: absolute;
+            top: 110px; /* Adjust this value to be below the calendar, considering its height and padding */
+            right: 20px; /* Same right alignment as the calendar */
+            width: 80px; /* Same width as calendar */
+            height: 80px; /* Increased height to match calendar */
+            background: white; /* White background like calendar */
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--border-color); /* Border like calendar */
+            display: flex;
+            flex-direction: column; /* To stack icon and text */
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-decoration: none; /* Remove underline for links */
+            transition: all 0.3s ease;
+            overflow: hidden; /* Ensure content doesn't overflow */
+        }
+
+        .pdf-download-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--secondary-color); /* Colored border on hover like stat-card */
+        }
+
+        .pdf-download-button:active {
+            transform: scale(0.95);
+        }
+
+        .pdf-download-button .pdf-text {
+            font-size: 20px; /* Font size for PDF text */
+            font-weight: 700;
+            color: var(--primary-color); /* Primary color for text */
+            line-height: 1; /* Remove extra space */
+            margin-top: 5px; /* Space between icon and text */
+        }
+
+        .pdf-download-button .pdf-icon-symbol {
+            font-size: 30px; /* Font size for the symbol icon */
+            color: var(--accent-color); /* Accent color (red) for the symbol */
+            line-height: 1;
+        }
+
+
+        .current-person-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .current-person-name {
+            font-size: clamp(1.4rem, 4vw, 2rem);
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .current-person-age {
+            font-size: clamp(1rem, 3vw, 1.1rem);
+            color: var(--text-secondary);
+            background: var(--light-bg);
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .current-person-info {
+            display: grid;
+            gap: 12px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 8px 0;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            min-width: 100px;
+            font-size: 14px;
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 14px;
+            flex: 1;
+        }
+
+        .relationships-container {
+            display: grid;
+            gap: 20px;
+        }
+
+        .relationship-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .relationship-title {
+            font-size: clamp(1.1rem, 3vw, 1.3rem);
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 16px;
+            text-align: center;
+            position: relative;
+        }
+
+        .relationship-title::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 3px;
+            background: var(--secondary-color);
+            border-radius: 2px;
+        }
+
+        .people-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .person-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            min-height: 140px;
+            touch-action: manipulation;
+        }
+
+        .person-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--secondary-color), var(--success-color));
+        }
+
+        .person-card:active {
+            transform: scale(0.98);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .person-card.deceased::after {
+            content: '†';
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: 20px;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .person-name {
+            font-size: clamp(1rem, 2.5vw, 1.1rem);
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .relationship-badge {
+            font-size: 12px;
+            color: var(--secondary-color);
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .person-details {
+            display: grid;
+            gap: 6px;
+            font-size: 13px;
+        }
+
+        .person-detail {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            color: var(--text-secondary);
+            min-width: 60px;
+            font-size: 12px;
+        }
+
+        .detail-value {
+            color: var(--text-primary);
+            font-size: 12px;
+        }
+
+        .click-hint {
+            margin-top: 12px;
+            padding: 8px;
+            background: var(--light-bg);
+            border-radius: 8px;
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* Mobile-specific improvements */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .people-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-buttons {
+                flex-direction: column;
+            }
+            
+            .nav-btn {
+                flex: none;
+                min-width: auto;
+            }
+            
+            .current-person-info {
+                font-size: 14px;
+            }
+            
+            .info-label {
+                min-width: 80px;
+                font-size: 13px;
+            }
+            
+            .info-value {
+                font-size: 13px;
+            }
+        }
+
+        /* iPhone specific */
+        @media (max-width: 414px) {
+            .header {
+                padding: 16px;
+            }
+            
+            .current-person {
+                padding: 16px;
+            }
+            
+            .relationship-section {
+                padding: 16px;
+            }
+            
+            .person-card {
+                padding: 16px;
+                min-height: 120px;
+            }
+        }
+
+        /* Landscape mobile */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .header {
+                padding: 12px 20px;
+            }
+            
+            .stats {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .people-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--light-bg);
+            border-top: 4px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Better focus states for accessibility */
+        .nav-btn:focus,
+        .person-card:focus,
+        .search-input:focus {
+            outline: 2px solid var(--secondary-color);
+            outline-offset: 2px;
+        }
+
+        /* Safe area for iPhone X and newer */
+        @supports (padding: max(0px)) {
+            .container {
+                padding-left: max(15px, env(safe-area-inset-left));
+                padding-right: max(15px, env(safe-area-inset-right));
+                padding-bottom: max(15px, env(safe-area-inset-bottom));
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Pagina tutte le persone */
+        .all-people-page {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            display: none;
+        }
+
+        .all-people-page.show {
+            display: block;
+        }
+
+        .all-people-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .all-people-title {
+            font-size: clamp(1.3rem, 4vw, 1.8rem);
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .all-people-subtitle {
+            color: var(--text-secondary);
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+        }
+
+        .people-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+        }
+
+        .person-button {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            touch-action: manipulation;
+            min-height: var(--touch-target);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .person-button:hover {
+            border-color: var(--secondary-color);
+            box-shadow: var(--shadow);
+            transform: translateY(-1px);
+        }
+
+        .person-button:active {
+            transform: scale(0.98);
+        }
+
+        .person-button.deceased {
+            border-color: var(--accent-color);
+            background: rgba(231, 76, 60, 0.05);
+        }
+
+        .person-button-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 6px;
+        }
+
+        .person-button-details {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .person-button-birth {
+            margin-bottom: 2px;
+        }
+
+        .person-button-saint {
+            font-style: italic;
+        }
+
+        /* Pagina generazioni */
+        .generations-page {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            display: none;
+        }
+
+        .generations-page.show {
+            display: block;
+        }
+
+        .generation-group {
+            margin-bottom: 30px;
+            background: white;
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .generation-group-title {
+            font-size: clamp(1.1rem, 3vw, 1.3rem);
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            text-align: center;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .generation-group-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--secondary-color);
+            border-radius: 2px;
+        }
+
+        .generation-members {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 12px;
+        }
+
+        /* Pagina matrimoni */
+        .marriages-page {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            display: none;
+        }
+
+        .marriages-page.show {
+            display: block;
+        }
+
+        .marriage-item {
+            background: white;
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .marriage-date {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--secondary-color);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .marriage-couple {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .marriage-person {
+            background: var(--light-bg);
+            border: 2px solid transparent;
+            border-radius: var(--radius);
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 140px;
+            text-align: center;
+            touch-action: manipulation;
+        }
+
+        .marriage-person:hover {
+            border-color: var(--secondary-color);
+            background: white;
+            box-shadow: var(--shadow);
+        }
+
+        .marriage-person:active {
+            transform: scale(0.98);
+        }
+
+        .marriage-person-name {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 4px;
+        }
+
+        .marriage-person-age {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .marriage-heart {
+            font-size: 20px;
+            color: var(--accent-color);
+            flex-shrink: 0;
+        }
+
+        /* Pagina grafico età */
+        .age-chart-page {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            display: none;
+        }
+
+        .age-chart-page.show {
+            display: block;
+        }
+
+        .age-chart-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .age-chart-title {
+            font-size: clamp(1.3rem, 4vw, 1.8rem);
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .age-chart-subtitle {
+            color: var(--text-secondary);
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            margin-bottom: 15px;
+        }
+
+        .age-legend {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .age-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .age-legend-bar {
+            width: 30px;
+            height: 12px;
+            border-radius: 6px;
+        }
+
+        .age-chart-container {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .age-chart-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .age-chart-name {
+            width: 180px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--primary-color);
+            flex-shrink: 0;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+
+        .age-chart-name:hover {
+            background: var(--light-bg);
+        }
+
+        .age-chart-bar-container {
+            flex: 1;
+            height: 24px;
+            position: relative;
+            margin: 0 10px;
+        }
+
+        .age-chart-bar {
+            height: 100%;
+            border-radius: 12px;
+            position: relative;
+            transition: all 0.3s ease;
+            width: 100%;
+            background: #bdc3c7;
+        }
+
+        .age-chart-bar:hover {
+            opacity: 0.8;
+            transform: scaleY(1.1);
+        }
+
+        .age-chart-age {
+            width: 50px;
+            text-align: right;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 768px) {
+            .people-list,
+            .generation-members {
+                grid-template-columns: 1fr;
+            }
+            
+            .person-button {
+                padding: 14px;
+            }
+
+            .marriage-couple {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .marriage-person {
+                min-width: auto;
+                width: 100%;
+            }
+
+            .age-chart-name {
+                width: 140px;
+                font-size: 12px;
+            }
+
+            .age-chart-age {
+                width: 40px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Albero Genealogico</h1>
+            <p>Famiglia Pricci</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card clickable" onclick="showAllPeople()">
+                <div class="stat-number" id="totalPeople">36</div>
+                <div class="stat-label">Persone</div>
+            </div>
+            <div class="stat-card clickable" onclick="showGenerations()">
+                <div class="stat-number">5</div>
+                <div class="stat-label">Generazioni</div>
+            </div>
+            <div class="stat-card clickable" onclick="showMarriages()">
+                <div class="stat-number" id="totalMarriages">13</div>
+                <div class="stat-label">Matrimoni</div>
+            </div>
+            <div class="stat-card clickable" onclick="showAgeChart()">
+                <div class="stat-number" id="averageAge">45</div>
+                <div class="stat-label">Età Media</div>
+            </div>
+        </div>
+
+        <div class="navigation-bar">
+            <div class="nav-buttons">
+                <button class="nav-btn home" onclick="goToPerson('Luigi Pricci')">
+                    🏠 Home
+                </button>
+                <button class="nav-btn back" onclick="goBack()">
+                    ← Indietro
+                </button>
+            </div>
+            <div class="search-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="Cerca una persona...">
+                <span class="search-icon">🔍</span>
+            </div>
+        </div>
+
+        <div class="breadcrumb" id="breadcrumb">
+            </div>
+
+        <div class="search-results" id="searchResults">
+            </div>
+
+        <div class="current-person" id="currentPersonSection">
+            <div class="loading">
+                <div class="spinner"></div>
+            </div>
+        </div>
+
+        <div class="relationships-container" id="relationshipsContainer">
+            </div>
+
+        <div class="all-people-page" id="allPeoplePage">
+            <div class="all-people-header">
+                <div class="all-people-title">Tutti i Membri della Famiglia</div>
+                <div class="all-people-subtitle">Tocca una persona per esplorare le sue relazioni</div>
+            </div>
+            <div class="people-list" id="peopleList">
+                </div>
+        </div>
+
+        <div class="generations-page" id="generationsPage">
+            <div class="all-people-header">
+                <div class="all-people-title">Generazioni della Famiglia</div>
+                <div class="all-people-subtitle">Esplora la famiglia per generazioni</div>
+            </div>
+            <div id="generationsList">
+                </div>
+        </div>
+
+        <div class="marriages-page" id="marriagesPage">
+            <div class="all-people-header">
+                <div class="all-people-title">Matrimoni della Famiglia</div>
+                <div class="all-people-subtitle">In ordine cronologico - tocca i nomi per esplorare</div>
+            </div>
+            <div id="marriagesList">
+                </div>
+        </div>
+
+        <div class="age-chart-page" id="ageChartPage">
+            <div class="age-chart-header">
+                <div class="age-chart-title">Grafico delle Età</div>
+                <div class="age-chart-subtitle">Distribuzione delle età dei membri della famiglia</div>
+                <div class="age-legend">
+                    <div class="age-legend-item">
+                        <div style="width: 30px; height: 12px; border-radius: 6px; background: linear-gradient(to right, var(--secondary-color) 40%, var(--warning-color) 40% 70%, #bdc3c7 70%);"></div>
+                        <span>Blu = anni vissuti, Arancione = oltre la media</span>
+                    </div>
+                </div>
+            </div>
+            <div class="age-chart-container" id="ageChartContainer">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // Dati completi della famiglia (stessi dati di prima)
+        const familyData = {
+            "Giovanni Pricci": {
+                birth: "01/01/1909",
+                death: "01/01/1944",
+                onomastic: "24 giugno",
+                spouse: "Angelina Gasparro",
+                children: ["Luigi Pricci"],
+                generation: 1,
+                gender: "M",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Angelina Gasparro": {
+                birth: "05/06/1909",
+                death: "16/07/2001",
+                onomastic: "",
+                spouse: "Giovanni Pricci",
+                children: ["Luigi Pricci"],
+                generation: 1,
+                gender: "F",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Luigi Pricci": {
+                birth: "16/11/1933",
+                death: null,
+                onomastic: "21 giugno",
+                spouse: "Teresa Grilletti",
+                marriage: "03/12/1956",
+                children: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Raffaele Pricci", "Giuseppe Pricci", "Tiziana Pricci"],
+                parents: ["Giovanni Pricci", "Angelina Gasparro"],
+                generation: 2,
+                gender: "M",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Teresa Grilletti": {
+                birth: "05/03/1937",
+                death: null,
+                onomastic: "15 ottobre",
+                spouse: "Luigi Pricci",
+                marriage: "03/12/1956",
+                children: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Raffaele Pricci", "Giuseppe Pricci", "Tiziana Pricci"],
+                generation: 2,
+                gender: "F",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Angela Pricci": {
+                birth: "13/01/1957",
+                death: null,
+                onomastic: "2 agosto",
+                spouse: "Onofrio Lorusso",
+                marriage: "09/08/1975",
+                children: ["Benny Lorusso", "Cinzia Lorusso"],
+                parents: ["Luigi Pricci", "Teresa Grilletti"],
+                siblings: ["Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Raffaele Pricci", "Giuseppe Pricci", "Tiziana Pricci"],
+                generation: 3,
+                gender: "F",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Onofrio Lorusso": {
+                birth: "05/08/1951",
+                death: null,
+                onomastic: "12 giugno",
+                spouse: "Angela Pricci",
+                marriage: "09/08/1975",
+                children: ["Benny Lorusso", "Cinzia Lorusso"],
+                generation: 3,
+                gender: "M",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Maria Antonietta Pricci": {
+                birth: "21/05/1958",
+                death: null,
+                onomastic: "13 giugno",
+                spouse: "Saverio Chiarappa",
+                marriage: "09/09/2000",
+                children: ["Martino Chiarappa", "Cristiano Chiarappa"],
+                parents: ["Luigi Pricci", "Teresa Grilletti"],
+                siblings: ["Angela Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Raffaele Pricci", "Giuseppe Pricci", "Tiziana Pricci"],
+                generation: 3,
+                gender: "F",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Saverio Chiarappa": {
+                birth: "26/11/1951",
+                death: null,
+                onomastic: "3 dicembre",
+                spouse: "Maria Antonietta Pricci",
+                marriage: "09/09/2000",
+                children: ["Martino Chiarappa", "Cristiano Chiarappa"],
+                generation: 3,
+                gender: "M",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Marica Pricci": {
+                birth: "12/04/1961",
+                death: null,
+                onomastic: "12 settembre",
+                spouse: "Sebastiano Mazzarisi",
+                marriage: "04/07/1987",
+                children: ["Maria Grazia Mazzarisi", "Onofrio Mazzarisi", "Teresa Mazzarisi"],
+                parents: ["Luigi Pricci", "Teresa Grilletti"],
+                siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Vanna Pricci", "Giovanni Raffaele Pricci", "Giuseppe Pricci", "Tiziana Pricci"],
+                generation: 3,
+                gender: "F",
+                pdfLink: "https://www.dropbox.com/scl/fi/ahybte28cibt9ix6ahfdu/GrafoP-Marica-Pricci.pdf?rlkey=1uvcr7jv8y4ccyhgkrtaf9jlg&st=otdphoe6&dl=1" // PDF per Marica Pricci, dl=1 per apertura diretta
+            },
+            "Sebastiano Mazzarisi": {
+                birth: "07/05/1957",
+                death: null,
+                onomastic: "20 gennaio",
+                spouse: "Marica Pricci",
+                marriage: "04/07/1987",
+                children: ["Maria Grazia Mazzarisi", "Onofrio Mazzarisi", "Teresa Mazzarisi"],
+                generation: 3,
+                gender: "M",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Vanna Pricci": {
+                birth: "11/09/1963",
+                death: null,
+                onomastic: "24 giugno",
+                spouse: "Domenico Lefemine",
+                marriage: "28/08/1991",
+                children: ["Flavia Lefemine", "Francesco Lefemine"],
+                parents: ["Luigi Pricci", "Teresa Grilletti"],
+                siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Giovanni Raffaele Pricci", "Giuseppe Pricci", "Tiziana Pricci"],
+                generation: 3,
+                gender: "F",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Domenico Lefemine": {
+                birth: "06/02/1957",
+                death: null,
+                onomastic: "4 agosto",
+                spouse: "Vanna Pricci",
+                marriage: "28/08/1991",
+                children: ["Flavia Lefemine", "Francesco Lefemine"],
+                generation: 3,
+                gender: "M",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Giovanni Raffaele Pricci": {
+                birth: "24/10/1964",
+                death: null,
+                onomastic: "24 giugno",
+                spouse: "Rosa Bianco",
+                marriage: "29/12/2004",
+                parents: ["Luigi Pricci", "Teresa Grilletti"],
+                siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giuseppe Pricci", "Tiziana Pricci"],
+                generation: 3,
+                gender: "M",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Rosa Bianco": {
+                birth: "02/09/1971",
+                death: null,
+                onomastic: "23 agosto",
+                spouse: "Giovanni Raffaele Pricci",
+                marriage: "29/12/2004",
+                generation: 3,
+                gender: "F",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Giuseppe Pricci": {
+                birth: "12/08/1968",
+                death: null,
+                onomastic: "19 marzo",
+                spouse: "Anna Trivisani",
+                marriage: "09/07/1997",
+                children: ["Gilda Pricci", "Asia Pricci"],
+                parents: ["Luigi Pricci", "Teresa Grilletti"],
+                siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Raffaele Pricci", "Tiziana Pricci"],
+                generation: 3,
+                gender: "M",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Anna Trivisani": {
+                birth: "12/07/1969",
+                death: null,
+                onomastic: "26 luglio",
+                spouse: "Giuseppe Pricci",
+                marriage: "09/07/1997",
+                children: ["Gilda Pricci", "Asia Pricci"],
+                generation: 3,
+                gender: "F",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Tiziana Pricci": {
+                birth: "27/06/1972",
+                death: null,
+                onomastic: "3 marzo",
+                spouse: "Riccardo Dalena",
+                marriage: "04/10/2002",
+                parents: ["Luigi Pricci", "Teresa Grilletti"],
+                siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Raffaele Pricci", "Giuseppe Pricci"],
+                generation: 3,
+                gender: "F",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Riccardo Dalena": {
+                birth: "11/04/1973",
+                death: null,
+                onomastic: "3 aprile",
+                spouse: "Tiziana Pricci",
+                marriage: "04/10/2002",
+                generation: 3,
+                gender: "M",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Benny Lorusso": {
+                birth: "17/11/1975",
+                death: null,
+                onomastic: "21 marzo",
+                spouse: "Genny Lepore",
+                marriage: "26/07/2008",
+                children: ["Alessandro Lorusso", "Alice Lorusso", "Nina Lorusso"],
+                parents: ["Onofrio Lorusso", "Angela Pricci"],
+                siblings: ["Cinzia Lorusso"],
+                generation: 4,
+                gender: "M",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Genny Lepore": {
+                birth: "04/07/1975",
+                death: null,
+                onomastic: "11 aprile",
+                spouse: "Benny Lorusso",
+                marriage: "26/07/2008",
+                children: ["Alessandro Lorusso", "Alice Lorusso", "Nina Lorusso"],
+                generation: 4,
+                gender: "F",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Cinzia Lorusso": {
+                birth: "06/04/1980",
+                death: null,
+                onomastic: "",
+                spouse: "Gianni Rotondi",
+                marriage: "13/09/2014",
+                children: ["Nicoletta Rotondi"],
+                parents: ["Onofrio Lorusso", "Angela Pricci"],
+                siblings: ["Benny Lorusso"],
+                generation: 4,
+                gender: "F",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Gianni Rotondi": {
+                birth: "08/03/1974",
+                death: null,
+                onomastic: "24 giugno",
+                spouse: "Cinzia Lorusso",
+                marriage: "13/09/2014",
+                children: ["Nicoletta Rotondi"],
+                generation: 4,
+                gender: "M",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Martino Chiarappa": {
+                birth: "24/05/1997",
+                death: null,
+                onomastic: "11 novembre",
+                parents: ["Saverio Chiarappa", "Maria Antonietta Pricci"],
+                siblings: ["Cristiano Chiarappa"],
+                generation: 4,
+                gender: "M",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Cristiano Chiarappa": {
+                birth: "20/06/2001",
+                death: null,
+                onomastic: "7 aprile",
+                parents: ["Saverio Chiarappa", "Maria Antonietta Pricci"],
+                siblings: ["Martino Chiarappa"],
+                generation: 4,
+                gender: "M",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Maria Grazia Mazzarisi": {
+                birth: "21/01/1989",
+                death: null,
+                onomastic: "12 settembre",
+                parents: ["Sebastiano Mazzarisi", "Marica Pricci"],
+                siblings: ["Onofrio Mazzarisi", "Teresa Mazzarisi"],
+                generation: 4,
+                gender: "F",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Onofrio Mazzarisi": {
+                birth: "05/06/1992",
+                death: null,
+                onomastic: "12 giugno",
+                parents: ["Sebastiano Mazzarisi", "Marica Pricci"],
+                siblings: ["Maria Grazia Mazzarisi", "Teresa Mazzarisi"],
+                generation: 4,
+                gender: "M",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Teresa Mazzarisi": {
+                birth: "01/04/1994",
+                death: null,
+                onomastic: "15 ottobre",
+                parents: ["Sebastiano Mazzarisi", "Marica Pricci"],
+                siblings: ["Maria Grazia Mazzarisi", "Onofrio Mazzarisi"],
+                generation: 4,
+                gender: "F",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Flavia Lefemine": {
+                birth: "16/11/1996",
+                death: null,
+                onomastic: "7 maggio",
+                parents: ["Domenico Lefemine", "Vanna Pricci"],
+                siblings: ["Francesco Lefemine"],
+                generation: 4,
+                gender: "F",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Francesco Lefemine": {
+                birth: "20/03/2000",
+                death: null,
+                onomastic: "4 ottobre",
+                parents: ["Domenico Lefemine", "Vanna Pricci"],
+                siblings: ["Flavia Lefemine"],
+                generation: 4,
+                gender: "M",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Gilda Pricci": {
+                birth: "29/06/2004",
+                death: null,
+                onomastic: "13 febbraio",
+                parents: ["Giuseppe Pricci", "Anna Trivisani"],
+                siblings: ["Asia Pricci"],
+                generation: 4,
+                gender: "F",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Asia Pricci": {
+                birth: "07/06/2006",
+                death: null,
+                onomastic: "19 febbraio",
+                parents: ["Giuseppe Pricci", "Anna Trivisani"],
+                siblings: ["Gilda Pricci"],
+                generation: 4,
+                gender: "F",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Alessandro Lorusso": {
+                birth: "17/07/2010",
+                death: null,
+                onomastic: "26 agosto",
+                parents: ["Benny Lorusso", "Genny Lepore"],
+                siblings: ["Alice Lorusso", "Nina Lorusso"],
+                generation: 5,
+                gender: "M",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Alice Lorusso": {
+                birth: "20/07/2013",
+                death: null,
+                onomastic: "13 giugno",
+                parents: ["Benny Lorusso", "Genny Lepore"],
+                siblings: ["Alessandro Lorusso", "Nina Lorusso"],
+                generation: 5,
+                gender: "F",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Nina Lorusso": {
+                birth: "29/11/2015",
+                death: null,
+                onomastic: "15 dicembre",
+                parents: ["Benny Lorusso", "Genny Lepore"],
+                siblings: ["Alessandro Lorusso", "Alice Lorusso"],
+                generation: 5,
+                gender: "F",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            },
+            "Nicoletta Rotondi": {
+                birth: "12/02/2019",
+                death: null,
+                onomastic: "6 dicembre",
+                parents: ["Gianni Rotondi", "Cinzia Lorusso"],
+                generation: 5,
+                gender: "F",
+                pdfLink: null // Esempio: assegna il link qui se presente
+            }
+        };
+
+        // Variabili globali
+        let currentPerson = "Luigi Pricci";
+        let navigationHistory = [];
+        let isLoading = false;
+        let currentView = "person"; // "person", "all-people", "generations", "marriages", "age-chart"
+
+        // Funzioni utili (stesse di prima ma ottimizzate per mobile)
+        function calculateAge(birthDate, deathDate = null) {
+            const birth = new Date(birthDate.split('/').reverse().join('-'));
+            const end = deathDate ? new Date(deathDate.split('/').reverse().join('-')) : new Date();
+            return Math.floor((end - birth) / (365.25 * 24 * 60 * 60 * 1000));
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            return dateString;
+        }
+
+        function createPersonCard(personName, relationship = "") {
+            const person = familyData[personName];
+            const age = calculateAge(person.birth, person.death);
+            const ageText = person.death ? `${age} anni (†)` : `${age} anni`;
+            const deceasedClass = person.death ? 'deceased' : '';
+            
+            return `
+                <div class="person-card ${deceasedClass}" onclick="goToPerson('${personName}')">
+                    <div class="person-name">${personName}</div>
+                    ${relationship ? `<div class="relationship-badge">${relationship}</div>` : ''}
+                    <div class="person-details">
+                        <div class="person-detail">
+                            <span class="detail-label">Età:</span>
+                            <span class="detail-value">${ageText}</span>
+                        </div>
+                        <div class="person-detail">
+                            <span class="detail-label">Nascita:</span>
+                            <span class="detail-value">${formatDate(person.birth)}</span>
+                        </div>
+                        ${person.onomastic ? `
+                        <div class="person-detail">
+                            <span class="detail-label">Onomastico:</span>
+                            <span class="detail-value">${person.onomastic}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                    <div class="click-hint">Tocca per esplorare</div>
+                </div>
+            `;
+        }
+
+        function renderCurrentPerson() {
+            const person = familyData[currentPerson];
+            const age = calculateAge(person.birth, person.death);
+            const ageText = person.death ? `${age} anni (†)` : `${age} anni`;
+            const calendar = getBirthCalendar(person.birth);
+            
+            let pdfButtonHtml = '';
+            // Condizione per mostrare il pulsante PDF solo se la persona ha un pdfLink definito
+            if (person.pdfLink) { 
+                pdfButtonHtml = `
+                    <a href="${person.pdfLink}" target="_blank" class="pdf-download-button"> <span class="pdf-icon-symbol">🗎</span>
+                        <span class="pdf-text">PDF</span>
+                    </a>
+                `;
+            }
+
+            const currentPersonSection = document.getElementById('currentPersonSection');
+            currentPersonSection.innerHTML = `
+                <div class="current-person-content">
+                    <div class="current-person-header">
+                        <div class="current-person-name">${currentPerson}</div>
+                        <div class="current-person-age">${ageText}</div>
+                    </div>
+                    <div class="current-person-info">
+                        <div class="info-item">
+                            <span class="info-label">Nascita:</span>
+                            <span class="info-value">${formatDate(person.birth)}</span>
+                        </div>
+                        ${person.death ? `
+                        <div class="info-item">
+                            <span class="info-label">Morte:</span>
+                            <span class="info-value">${formatDate(person.death)}</span>
+                        </div>
+                        ` : ''}
+                        ${person.onomastic ? `
+                        <div class="info-item">
+                            <span class="info-label">Onomastico:</span>
+                            <span class="info-value">${person.onomastic}</span>
+                        </div>
+                        ` : ''}
+                        ${person.marriage ? `
+                        <div class="info-item">
+                            <span class="info-label">Matrimonio:</span>
+                            <span class="info-value">${formatDate(person.marriage)}</span>
+                        </div>
+                        ` : ''}
+                        <div class="info-item">
+                            <span class="info-label">Genere:</span>
+                            <span class="info-value">${person.gender === 'M' ? '👨 Maschio' : '👩 Femmina'}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="current-person-calendar">
+                    <div class="calendar-header">${calendar.month}</div>
+                    <div class="calendar-day">${calendar.day}</div>
+                </div>
+                ${pdfButtonHtml}
+            `;
+        }
+
+        function renderRelationships() {
+            const person = familyData[currentPerson];
+            const container = document.getElementById('relationshipsContainer');
+            let html = '';
+            
+            // Coniuge
+            if (person.spouse) {
+                html += `
+                    <div class="relationship-section">
+                        <h3 class="relationship-title">💑 Coniuge</h3>
+                        <div class="people-grid">
+                            ${createPersonCard(person.spouse, "Coniuge")}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Genitori
+            if (person.parents && person.parents.length > 0) {
+                html += `
+                    <div class="relationship-section">
+                        <h3 class="relationship-title">👫 Genitori</h3>
+                        <div class="people-grid">
+                            ${person.parents.map(parent => 
+                                createPersonCard(parent, "Genitore")
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Figli
+            if (person.children && person.children.length > 0) {
+                html += `
+                    <div class="relationship-section">
+                        <h3 class="relationship-title">👶 Figli (${person.children.length})</h3>
+                        <div class="people-grid">
+                            ${person.children.map(child => 
+                                createPersonCard(child, "Figlio/a")
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Fratelli/Sorelle
+            if (person.siblings && person.siblings.length > 0) {
+                html += `
+                    <div class="relationship-section">
+                        <h3 class="relationship-title">👫 Fratelli e Sorelle (${person.siblings.length})</h3>
+                        <div class="people-grid">
+                            ${person.siblings.map(sibling => 
+                                createPersonCard(sibling, "Fratello/Sorella")
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Nipoti (figli dei figli)
+            const grandchildren = [];
+            if (person.children) {
+                person.children.forEach(child => {
+                    const childData = familyData[child];
+                    if (childData.children) {
+                        grandchildren.push(...childData.children);
+                    }
+                });
+            }
+            
+            if (grandchildren.length > 0) {
+                html += `
+                    <div class="relationship-section">
+                        <h3 class="relationship-title">👧👦 Nipoti (${grandchildren.length})</h3>
+                        <div class="people-grid">
+                            ${grandchildren.map(grandchild => 
+                                createPersonCard(grandchild, "Nipote")
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Nonni (genitori dei genitori)
+            const grandparents = [];
+            if (person.parents) {
+                person.parents.forEach(parent => {
+                    const parentData = familyData[parent];
+                    if (parentData.parents) {
+                        grandparents.push(...parentData.parents);
+                    }
+                });
+            }
+            
+            if (grandparents.length > 0) {
+                html += `
+                    <div class="relationship-section">
+                        <h3 class="relationship-title">👴👵 Nonni</h3>
+                        <div class="people-grid">
+                            ${grandparents.map(grandparent => 
+                                createPersonCard(grandparent, "Nonno/a")
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        function goToPerson(personName) {
+            if (!familyData[personName] || isLoading) return;
+            
+            // Se siamo nella vista di tutte le persone, nascondiamo quella vista
+            if (currentView === "all-people") {
+                hideAllPeople();
+            }
+            
+            isLoading = true;
+            
+            // Aggiungi persona corrente alla cronologia
+            if (currentPerson !== personName) {
+                navigationHistory.push(currentPerson);
+            }
+            
+            currentPerson = personName;
+            
+            // Mostra loading
+            showLoading();
+            
+            // Simula un breve caricamento per feedback visivo
+            setTimeout(() => {
+                updateDisplay();
+                isLoading = false;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 300);
+        }
+
+        function showLoading() {
+            document.getElementById('currentPersonSection').innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            `;
+            document.getElementById('relationshipsContainer').innerHTML = '';
+        }
+
+        function updateDisplay() {
+            renderCurrentPerson();
+            renderRelationships();
+            updateBreadcrumb();
+            document.getElementById('searchResults').classList.remove('show');
+            document.getElementById('searchInput').value = '';
+        }
+
+        function updateBreadcrumb() {
+            const breadcrumb = document.getElementById('breadcrumb');
+            if (navigationHistory.length === 0 || currentPerson === "Luigi Pricci") {
+                breadcrumb.style.display = 'none';
+                return;
+            }
+            
+            breadcrumb.style.display = 'block';
+            let html = '';
+            
+            html += `<span class="breadcrumb-item" onclick="goToPerson('Luigi Pricci')">🏠 Home</span>`;
+            
+            // Mostra solo gli ultimi 2 elementi della cronologia per risparmiare spazio
+            const recentHistory = navigationHistory.slice(-2);
+            recentHistory.forEach(person => {
+                html += `<span class="breadcrumb-separator">></span>`;
+                html += `<span class="breadcrumb-item" onclick="goToPerson('${person}')">${person.split(' ')[0]}</span>`;
+            });
+            
+            html += `<span class="breadcrumb-separator">></span>`;
+            html += `<span class="breadcrumb-item current">${currentPerson.split(' ')[0]}</span>`;
+            
+            breadcrumb.innerHTML = html;
+        }
+
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const searchResults = document.getElementById('searchResults');
+            let searchTimeout;
+            
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                const searchTerm = e.target.value.toLowerCase().trim();
+                
+                if (searchTerm.length < 2) {
+                    searchResults.classList.remove('show');
+                    return;
+                }
+                
+                // Debounce per performance su mobile
+                searchTimeout = setTimeout(() => {
+                    const matches = Object.keys(familyData).filter(name => 
+                        name.toLowerCase().includes(searchTerm)
+                    );
+                    
+                    if (matches.length > 0) {
+                        let html = `<h4 style="margin-bottom: 15px; color: var(--primary-color);">Trovati ${matches.length} risultati:</h4>`;
+                        matches.slice(0, 5).forEach(name => { // Limita a 5 risultati
+                            const person = familyData[name];
+                            const age = calculateAge(person.birth, person.death);
+                            html += `
+                                <div class="search-result-item" onclick="goToPerson('${name}')">
+                                    <div>
+                                        <strong>${name}</strong><br>
+                                        <small>${age} anni ${person.death ? '(†)' : ''} - ${formatDate(person.birth)}</small>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        
+                        if (matches.length > 5) {
+                            html += `<p style="text-align: center; color: var(--text-secondary); font-size: 12px; margin-top: 10px;">... e altri ${matches.length - 5} risultati</p>`;
+                        }
+                        
+                        searchResults.innerHTML = html;
+                        searchResults.classList.add('show');
+                    } else {
+                        searchResults.innerHTML = `<p style="color: var(--text-secondary); text-align: center;">Nessun risultato per "${searchTerm}"</p>`;
+                        searchResults.classList.add('show');
+                    }
+                }, 300);
+            });
+            
+            // Chiudi risultati quando si clicca altrove
+            document.addEventListener('click', (e) => {
+                if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                    searchResults.classList.remove('show');
+                }
+            });
+        }
+
+        function showAllPeople() {
+            currentView = "all-people";
+            hideAllViews();
+            
+            // Mostra la pagina di tutte le persone
+            const allPeoplePage = document.getElementById('allPeoplePage');
+            allPeoplePage.classList.add('show');
+            
+            renderAllPeople();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showGenerations() {
+            currentView = "generations";
+            hideAllViews();
+            
+            // Mostra la pagina delle generazioni
+            const generationsPage = document.getElementById('generationsPage');
+            generationsPage.classList.add('show');
+            
+            renderGenerations();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showMarriages() {
+            currentView = "marriages";
+            hideAllViews();
+            
+            // Mostra la pagina dei matrimoni
+            const marriagesPage = document.getElementById('marriagesPage');
+            marriagesPage.classList.add('show');
+            
+            renderMarriages();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showAgeChart() {
+            currentView = "age-chart";
+            hideAllViews();
+            
+            // Mostra la pagina del grafico età
+            const ageChartPage = document.getElementById('ageChartPage');
+            ageChartPage.classList.add('show');
+            
+            renderAgeChart();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function hideAllViews() {
+            // Nascondi tutte le viste
+            document.getElementById('currentPersonSection').style.display = 'none';
+            document.getElementById('relationshipsContainer').style.display = 'none';
+            document.getElementById('breadcrumb').style.display = 'none';
+            document.getElementById('searchResults').classList.remove('show');
+            
+            // Nascondi tutte le pagine speciali
+            document.getElementById('allPeoplePage').classList.remove('show');
+            document.getElementById('generationsPage').classList.remove('show');
+            document.getElementById('marriagesPage').classList.remove('show');
+            document.getElementById('ageChartPage').classList.remove('show');
+        }
+
+        function hideAllPeople() {
+            currentView = "person";
+            hideAllViews();
+            
+            // Mostra la vista della persona corrente
+            document.getElementById('currentPersonSection').style.display = 'block';
+            document.getElementById('relationshipsContainer').style.display = 'block';
+            
+            updateDisplay();
+        }
+
+        function renderAllPeople() {
+            const peopleList = document.getElementById('peopleList');
+            
+            // Ordina le persone per cognome e nome
+            const sortedPeople = Object.entries(familyData).sort((a, b) => {
+                const nameA = a[0].split(' ');
+                const nameB = b[0].split(' ');
+                const lastNameA = nameA[nameA.length - 1];
+                const lastNameB = nameB[nameB.length - 1];
+                
+                if (lastNameA !== lastNameB) {
+                    return lastNameA.localeCompare(lastNameB);
+                }
+                return nameA[0].localeCompare(nameB[0]);
+            });
+            
+            let html = '';
+            
+            sortedPeople.forEach(([name, person]) => {
+                const nameParts = name.split(' ');
+                const firstName = nameParts[0];
+                const lastName = nameParts.slice(1).join(' ');
+                const age = calculateAge(person.birth, person.death);
+                const ageText = person.death ? `${age} anni (†)` : `${age} anni`;
+                const deceasedClass = person.death ? 'deceased' : '';
+                
+                html += `
+                    <div class="person-button ${deceasedClass}" onclick="selectPersonFromList('${name}')">
+                        <div class="person-button-name">
+                            ${lastName.toUpperCase()}, ${firstName}
+                        </div>
+                        <div class="person-button-details">
+                            <div class="person-button-birth">
+                                📅 ${formatDate(person.birth)} (${ageText})
+                            </div>
+                            ${person.onomastic ? `
+                            <div class="person-button-saint">
+                                ⭐ ${person.onomastic}
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            peopleList.innerHTML = html;
+        }
+
+        function renderGenerations() {
+            const generationsList = document.getElementById('generationsList');
+            
+            // Raggruppa le persone per generazione
+            const generations = {};
+            Object.entries(familyData).forEach(([name, person]) => {
+                if (!generations[person.generation]) {
+                    generations[person.generation] = [];
+                }
+                generations[person.generation].push({ name, person });
+            });
+            
+            // Titoli delle generazioni
+            const generationTitles = {
+                1: "1ª Generazione - Trisavoli",
+                2: "2ª Generazione - Bisnonni", 
+                3: "3ª Generazione - Nonni",
+                4: "4ª Generazione - Genitori e Figli",
+                5: "5ª Generazione - Nipoti"
+            };
+            
+            let html = '';
+            
+            // Ordina per generazione
+            Object.keys(generations)
+                .sort((a, b) => parseInt(a) - parseInt(b))
+                .forEach(generation => {
+                    const members = generations[generation];
+                    const title = generationTitles[generation] || `${generation}ª Generazione`;
+                    
+                    html += `
+                        <div class="generation-group">
+                            <h3 class="generation-group-title">${title} (${members.length} persone)</h3>
+                            <div class="generation-members">
+                                ${members.map(({name, person}) => {
+                                    const age = calculateAge(person.birth, person.death);
+                                    const ageText = person.death ? `${age} anni (†)` : `${age} anni`;
+                                    const deceasedClass = person.death ? 'deceased' : '';
+                                    
+                                    return `
+                                        <div class="person-button ${deceasedClass}" onclick="selectPersonFromList('${name}')">
+                                            <div class="person-button-name">${name}</div>
+                                            <div class="person-button-details">
+                                                <div class="person-button-birth">
+                                                    📅 ${formatDate(person.birth)} (${ageText})
+                                                </div>
+                                                ${person.onomastic ? `
+                                                <div class="person-button-saint">
+                                                    ⭐ ${person.onomastic}
+                                                </div>
+                                                ` : ''}
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+            
+            generationsList.innerHTML = html;
+        }
+
+        function renderMarriages() {
+            const marriagesList = document.getElementById('marriagesList');
+            
+            // Estrai tutti i matrimoni
+            const marriages = [];
+            Object.entries(familyData).forEach(([name, person]) => {
+                if (person.spouse && person.marriage && person.gender === 'M') {
+                    // Solo per evitare duplicati, prendi solo i maschi
+                    const spouseData = familyData[person.spouse];
+                    marriages.push({
+                        date: person.marriage,
+                        husband: { name, data: person },
+                        wife: { name: person.spouse, data: spouseData }
+                    });
+                }
+            });
+            
+            // Ordina per data di matrimonio
+            marriages.sort((a, b) => {
+                const dateA = new Date(a.date.split('/').reverse().join('-'));
+                const dateB = new Date(b.date.split('/').reverse().join('-'));
+                return dateA - dateB;
+            });
+            
+            let html = '';
+            
+            marriages.forEach(marriage => {
+                const marriageDate = new Date(marriage.date.split('/').reverse().join('-'));
+                const husbandAgeAtMarriage = calculateAgeAtDate(marriage.husband.data.birth, marriage.date);
+                const wifeAgeAtMarriage = calculateAgeAtDate(marriage.wife.data.birth, marriage.date);
+                const currentYear = new Date().getFullYear();
+                const marriageYear = marriageDate.getFullYear();
+                const yearsMarried = currentYear - marriageYear;
+                
+                html += `
+                    <div class="marriage-item">
+                        <div class="marriage-date">
+                            💒 ${formatDate(marriage.date)} (${yearsMarried} anni fa)
+                        </div>
+                        <div class="marriage-couple">
+                            <div class="marriage-person" onclick="selectPersonFromList('${marriage.husband.name}')">
+                                <div class="marriage-person-name">${marriage.husband.name}</div>
+                                <div class="marriage-person-age">${husbandAgeAtMarriage} anni</div>
+                            </div>
+                            <div class="marriage-heart">💕</div>
+                            <div class="marriage-person" onclick="selectPersonFromList('${marriage.wife.name}')">
+                                <div class="marriage-person-name">${marriage.wife.name}</div>
+                                <div class="marriage-person-age">${wifeAgeAtMarriage} anni</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            marriagesList.innerHTML = html;
+        }
+
+        function renderAgeChart() {
+            const ageChartContainer = document.getElementById('ageChartContainer');
+            
+            // Calcola tutte le età
+            const people = Object.entries(familyData).map(([name, person]) => ({
+                name,
+                age: calculateAge(person.birth, person.death),
+                person
+            }));
+            
+            // Ordina per età (decrescente)
+            people.sort((a, b) => b.age - a.age);
+            
+            // Calcola min, max e media
+            const ages = people.map(p => p.age);
+            const maxAge = Math.max(...ages);
+            const averageAge = Math.round(ages.reduce((a, b) => a + b, 0) / ages.length);
+            
+            let html = '';
+            
+            people.forEach(({name, age, person}) => {
+                // Calcola le percentuali
+                const agePercentage = (age / maxAge) * 100;
+                const averagePercentage = (averageAge / maxAge) * 100;
+                
+                let gradientStyle;
+                
+                if (age <= averageAge) {
+                    // Persona sotto o pari alla media: solo blu + grigio
+                    gradientStyle = `linear-gradient(to right, var(--secondary-color) ${agePercentage}%, #bdc3c7 ${agePercentage}%)`;
+                } else {
+                    // Persona sopra la media: blu (fino alla media) + arancione (oltre la media) + grigio
+                    gradientStyle = `linear-gradient(to right, 
+                        var(--secondary-color) ${averagePercentage}%, 
+                        var(--warning-color) ${averagePercentage}% ${agePercentage}%, 
+                        #bdc3c7 ${agePercentage}%)`;
+                }
+                
+                const deceasedClass = person.death ? 'deceased' : '';
+                
+                html += `
+                    <div class="age-chart-item">
+                        <div class="age-chart-name ${deceasedClass}" onclick="selectPersonFromList('${name}')">
+                            ${name} ${person.death ? '†' : ''}
+                        </div>
+                        <div class="age-chart-bar-container">
+                            <div class="age-chart-bar" style="background: ${gradientStyle}"></div>
+                        </div>
+                        <div class="age-chart-age">${age}</div>
+                    </div>
+                `;
+            });
+            
+            ageChartContainer.innerHTML = html;
+        }
+
+        function getMonthName(monthNumber) {
+            const months = [
+                "GEN", "FEB", "MAR", "APR", "MAG", "GIU",
+                "LUG", "AGO", "SET", "OTT", "NOV", "DIC"
+            ];
+            return months[monthNumber - 1] || "";
+        }
+
+        function getBirthCalendar(birthDate) {
+            const [day, month, year] = birthDate.split('/');
+            return {
+                day: parseInt(day),
+                month: getMonthName(parseInt(month))
+            };
+        }
+
+        function calculateAgeAtDate(birthDate, targetDate) {
+            const birth = new Date(birthDate.split('/').reverse().join('-'));
+            const target = new Date(targetDate.split('/').reverse().join('-'));
+            return Math.floor((target - birth) / (365.25 * 24 * 60 * 60 * 1000));
+        }
+
+        function selectPersonFromList(personName) {
+            // Torna alla vista persona e naviga a quella persona
+            hideAllPeople();
+            goToPerson(personName);
+        }
+
+        function goBack() {
+            if (currentView === "all-people") {
+                hideAllPeople();
+                return;
+            }
+            
+            if (navigationHistory.length > 0 && !isLoading) {
+                isLoading = true;
+                currentPerson = navigationHistory.pop();
+                showLoading();
+                setTimeout(() => {
+                    updateDisplay();
+                    isLoading = false;
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }, 300);
+            }
+        }
+
+        // Inizializzazione ottimizzata per mobile
+        document.addEventListener('DOMContentLoaded', () => {
+            // Prevenire zoom su iOS quando si clicca agli input
+            if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                const viewport = document.querySelector('meta[name=viewport]');
+                viewport.setAttribute('content', viewport.getAttribute('content') + ', maximum-scale=1.0');
+            }
+            
+            updateDisplay();
+            setupSearch();
+            
+            // Aggiorna statistiche
+            const totalPeople = Object.keys(familyData).length;
+            const totalMarriages = Object.values(familyData).filter(person => person.spouse).length / 2;
+            const ages = Object.values(familyData).map(person => calculateAge(person.birth, person.death));
+            const averageAge = Math.round(ages.reduce((a, b) => a + b, 0) / ages.length);
+            
+            document.getElementById('totalPeople').textContent = totalPeople;
+            document.getElementById('totalMarriages').textContent = Math.floor(totalMarriages);
+            document.getElementById('averageAge').textContent = averageAge;
+            
+            // Aggiungi supporto per swipe su mobile (semplice)
+            let startX = 0;
+            let startY = 0;
+            
+            document.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            });
+            
+            document.addEventListener('touchend', (e) => {
+                if (!startX || !startY) return;
+                
+                const endX = e.changedTouches[0].clientX;
+                const endY = e.changedTouches[0].clientY;
+                
+                const diffX = startX - endX;
+                const diffY = startY - endY;
+                
+                // Se lo swipe è principalmente orizzontale e abbastanza lungo
+                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 100) {
+                    if (diffX > 0) {
+                        // Swipe a sinistra - indietro
+                        goBack();
+                    }
+                }
+                
+                startX = 0;
+                startY = 0;
+            });
+        });
+    </script>
+</body>
+</html>
