@@ -410,18 +410,6 @@
             position: relative;
         }
 
-        .relationship-title::after {
-            content: '';
-            position: absolute;
-            bottom: -6px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 40px;
-            height: 3px;
-            background: var(--secondary-color);
-            border-radius: 2px;
-        }
-
         .people-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -781,18 +769,6 @@
             text-align: center;
             position: relative;
             padding-bottom: 10px;
-        }
-
-        .generation-group-title::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 3px;
-            background: var(--secondary-color);
-            border-radius: 2px;
         }
 
         .generation-members {
@@ -1696,26 +1672,6 @@
             const container = document.getElementById('relationshipsContainer');
             let html = '';
             
-            // Cronologia per Marica Pricci (test)
-            if (currentPerson === "Marica Pricci") {
-                const chronologyEvents = generateChronology(currentPerson);
-                html += `
-                    <div class="relationship-section" id="chronology-section">
-                        <h3 class="relationship-title">🕒 Cronologia (${chronologyEvents.length})</h3>
-                        <div class="chronology-events">
-                            ${chronologyEvents.map(event => `
-                                <div class="chronology-event-card">
-                                    <div class="chronology-event-content">
-                                        <div class="chronology-event-date">${event.date}:</div>
-                                        <div class="chronology-event-text">${event.description}</div>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-            
             // Coniuge
             if (person.spouse) {
                 html += `
@@ -1818,15 +1774,38 @@
                 `;
             }
             
+            // Cronologia come ultimo riquadro
+            const chronologyEvents = generateChronology(currentPerson);
+            if (chronologyEvents.length > 0) {
+                html += `
+                    <div class="relationship-section" id="chronology-section">
+                        <h3 class="relationship-title">🕒 Cronologia (${chronologyEvents.length})</h3>
+                        <div class="chronology-events">
+                            ${chronologyEvents.map(event => `
+                                <div class="chronology-event-card">
+                                    <div class="chronology-event-content">
+                                        <div class="chronology-event-date">${event.date}:</div>
+                                        <div class="chronology-event-text">${event.description}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
             container.innerHTML = html;
         }
 
         function goToPerson(personName) {
             if (!familyData[personName] || isLoading) return;
             
-            // Se siamo nella vista di tutte le persone, nascondiamo quella vista
-            if (currentView === "all-people") {
-                hideAllPeople();
+            // Se siamo in una vista speciale, torniamo alla vista principale
+            if (currentView !== "person") {
+                hideAllViews();
+                document.getElementById('currentPersonSection').style.display = 'block';
+                document.getElementById('relationshipsContainer').style.display = 'block';
+                currentView = "person";
             }
             
             isLoading = true;
@@ -2303,189 +2282,241 @@
             const person = familyData[personName];
             const events = [];
 
-            // Eventi per Marica Pricci (test)
-            if (personName === "Marica Pricci") {
-                // Nascita nonni
+            // Funzione helper per aggiungere eventi di una persona
+            function addPersonEvents(targetPersonName, relationship = '') {
+                if (!familyData[targetPersonName]) return;
+                const targetPerson = familyData[targetPersonName];
+                
+                // Nascita
                 events.push({
-                    date: "01/01/1909",
-                    description: "Nasce il nonno <span class='clickable-person' onclick=\"goToPerson('Nonno Giovanni Pricci')\">Giovanni Pricci</span>"
+                    date: targetPerson.birth,
+                    description: `Nasce ${relationship} <span class='clickable-person' onclick="goToPerson('${targetPersonName}')">${targetPersonName}</span>`
                 });
                 
-                events.push({
-                    date: "05/06/1909",
-                    description: "Nasce la nonna <span class='clickable-person' onclick=\"goToPerson('Angelina Gasparro')\">Angelina Gasparro</span>"
-                });
+                // Matrimonio
+                if (targetPerson.marriage && targetPerson.spouse) {
+                    events.push({
+                        date: targetPerson.marriage,
+                        description: `Matrimonio di ${relationship} <span class='clickable-person' onclick="goToPerson('${targetPersonName}')">${targetPersonName.split(' ')[0]}</span> con <span class='clickable-person' onclick="goToPerson('${targetPerson.spouse}')">${targetPerson.spouse}</span>`
+                    });
+                }
+            }
 
-                // Nascita genitori
-                events.push({
-                    date: "16/11/1933",
-                    description: "Nasce il padre <span class='clickable-person' onclick=\"goToPerson('Luigi Pricci')\">Luigi Pricci</span>"
-                });
-
-                events.push({
-                    date: "05/03/1937",
-                    description: "Nasce la madre <span class='clickable-person' onclick=\"goToPerson('Teresa Grilletti')\">Teresa Grilletti</span>"
-                });
-
-                // Matrimonio genitori
-                events.push({
-                    date: "03/12/1956",
-                    description: "Matrimonio dei genitori <span class='clickable-person' onclick=\"goToPerson('Luigi Pricci')\">Luigi</span> e <span class='clickable-person' onclick=\"goToPerson('Teresa Grilletti')\">Teresa</span>"
-                });
-
-                // Nascita fratelli/sorelle in ordine cronologico
-                events.push({
-                    date: "13/01/1957",
-                    description: "Nasce la sorella <span class='clickable-person' onclick=\"goToPerson('Angela Pricci')\">Angela Pricci</span>"
-                });
-
-                events.push({
-                    date: "21/05/1958",
-                    description: "Nasce la sorella <span class='clickable-person' onclick=\"goToPerson('Maria Antonietta Pricci')\">Maria Antonietta Pricci</span>"
-                });
-
-                // Nascita di Marica
-                events.push({
-                    date: "12/04/1961",
-                    description: "Nasce Marica Pricci"
-                });
-
-                events.push({
-                    date: "11/09/1963",
-                    description: "Nasce la sorella <span class='clickable-person' onclick=\"goToPerson('Vanna Pricci')\">Vanna Pricci</span>"
-                });
-
-                events.push({
-                    date: "24/10/1964",
-                    description: "Nasce il fratello <span class='clickable-person' onclick=\"goToPerson('Giovanni Pricci')\">Giovanni Pricci</span>"
-                });
-
-                events.push({
-                    date: "12/08/1968",
-                    description: "Nasce il fratello <span class='clickable-person' onclick=\"goToPerson('Giuseppe Pricci')\">Giuseppe Pricci</span>"
-                });
-
-                events.push({
-                    date: "27/06/1972",
-                    description: "Nasce la sorella <span class='clickable-person' onclick=\"goToPerson('Tiziana Pricci')\">Tiziana Pricci</span>"
-                });
-
-                // Matrimoni fratelli/sorelle
-                events.push({
-                    date: "09/08/1975",
-                    description: "Matrimonio della sorella <span class='clickable-person' onclick=\"goToPerson('Angela Pricci')\">Angela</span> con <span class='clickable-person' onclick=\"goToPerson('Onofrio Lorusso')\">Onofrio Lorusso</span>"
-                });
-
-                // Matrimonio di Marica
-                events.push({
-                    date: "04/07/1987",
-                    description: "Matrimonio di Marica con <span class='clickable-person' onclick=\"goToPerson('Sebastiano Mazzarisi')\">Sebastiano Mazzarisi</span>"
-                });
-
-                // Nascita figli di Marica
-                events.push({
-                    date: "21/01/1989",
-                    description: "Nasce la figlia <span class='clickable-person' onclick=\"goToPerson('Maria Grazia Mazzarisi')\">Maria Grazia Mazzarisi</span>"
-                });
-
-                // Matrimonio di Vanna
-                events.push({
-                    date: "28/08/1991",
-                    description: "Matrimonio della sorella <span class='clickable-person' onclick=\"goToPerson('Vanna Pricci')\">Vanna</span> con <span class='clickable-person' onclick=\"goToPerson('Domenico Lefemine')\">Domenico Lefemine</span>"
-                });
-
-                events.push({
-                    date: "05/06/1992",
-                    description: "Nasce il figlio <span class='clickable-person' onclick=\"goToPerson('Onofrio Mazzarisi')\">Onofrio Mazzarisi</span>"
-                });
-
-                events.push({
-                    date: "01/04/1994",
-                    description: "Nasce la figlia <span class='clickable-person' onclick=\"goToPerson('Teresa Mazzarisi')\">Teresa Mazzarisi</span>"
-                });
-
-                // Matrimonio di Giuseppe
-                events.push({
-                    date: "09/07/1997",
-                    description: "Matrimonio del fratello <span class='clickable-person' onclick=\"goToPerson('Giuseppe Pricci')\">Giuseppe</span> con <span class='clickable-person' onclick=\"goToPerson('Anna Trivisani')\">Anna Trivisani</span>"
-                });
-
-                // Matrimonio di Maria Antonietta
-                events.push({
-                    date: "09/09/2000",
-                    description: "Matrimonio della sorella <span class='clickable-person' onclick=\"goToPerson('Maria Antonietta Pricci')\">Maria Antonietta</span> con <span class='clickable-person' onclick=\"goToPerson('Saverio Chiarappa')\">Saverio Chiarappa</span>"
-                });
-
-                // Matrimonio di Tiziana
-                events.push({
-                    date: "04/10/2002",
-                    description: "Matrimonio della sorella <span class='clickable-person' onclick=\"goToPerson('Tiziana Pricci')\">Tiziana</span> con <span class='clickable-person' onclick=\"goToPerson('Riccardo Dalena')\">Riccardo Dalena</span>"
-                });
-
-                // Nascita nipoti (figli dei fratelli/sorelle)
-                events.push({
-                    date: "29/06/2004",
-                    description: "Nasce la nipote <span class='clickable-person' onclick=\"goToPerson('Gilda Pricci')\">Gilda Pricci</span> (figlia di Giuseppe)"
-                });
-
-                // Matrimonio di Giovanni
-                events.push({
-                    date: "29/12/2004",
-                    description: "Matrimonio del fratello <span class='clickable-person' onclick=\"goToPerson('Giovanni Pricci')\">Giovanni</span> con <span class='clickable-person' onclick=\"goToPerson('Rosa Bianco')\">Rosa Bianco</span>"
-                });
-
-                events.push({
-                    date: "07/06/2006",
-                    description: "Nasce la nipote <span class='clickable-person' onclick=\"goToPerson('Asia Pricci')\">Asia Pricci</span> (figlia di Giuseppe)"
-                });
-
-                events.push({
-                    date: "26/07/2008",
-                    description: "Matrimonio del nipote <span class='clickable-person' onclick=\"goToPerson('Benny Lorusso')\">Benny Lorusso</span> con <span class='clickable-person' onclick=\"goToPerson('Genny Lepore')\">Genny Lepore</span>"
-                });
-
-                // Nascita pronipoti
-                events.push({
-                    date: "17/07/2010",
-                    description: "Nasce il pronipote <span class='clickable-person' onclick=\"goToPerson('Alessandro Lorusso')\">Alessandro Lorusso</span> (figlio di Benny)"
-                });
-
-                events.push({
-                    date: "20/07/2013",
-                    description: "Nasce la pronipote <span class='clickable-person' onclick=\"goToPerson('Alice Lorusso')\">Alice Lorusso</span> (figlia di Benny)"
-                });
-
-                events.push({
-                    date: "13/09/2014",
-                    description: "Matrimonio della nipote <span class='clickable-person' onclick=\"goToPerson('Cinzia Lorusso')\">Cinzia Lorusso</span> con <span class='clickable-person' onclick=\"goToPerson('Gianni Rotondi')\">Gianni Rotondi</span>"
-                });
-
-                events.push({
-                    date: "29/11/2015",
-                    description: "Nasce la pronipote <span class='clickable-person' onclick=\"goToPerson('Nina Lorusso')\">Nina Lorusso</span> (figlia di Benny)"
-                });
-
-                events.push({
-                    date: "12/02/2019",
-                    description: "Nasce la pronipote <span class='clickable-person' onclick=\"goToPerson('Nicoletta Rotondi')\">Nicoletta Rotondi</span> (figlia di Cinzia)"
+            // 1. BISNONNI (genitori dei nonni)
+            if (person.parents) {
+                person.parents.forEach(parentName => {
+                    const parentData = familyData[parentName];
+                    if (parentData.parents) {
+                        parentData.parents.forEach(grandparentName => {
+                            const grandparentData = familyData[grandparentName];
+                            if (grandparentData.parents) {
+                                grandparentData.parents.forEach(greatGrandparentName => {
+                                    addPersonEvents(greatGrandparentName, 'il bisnonno/a');
+                                });
+                            }
+                        });
+                    }
                 });
             }
 
-            // Ordina eventi per data e calcola età di Marica
-            events.sort((a, b) => {
+            // 2. NONNI (genitori dei genitori)
+            if (person.parents) {
+                person.parents.forEach(parentName => {
+                    const parentData = familyData[parentName];
+                    if (parentData.parents) {
+                        parentData.parents.forEach(grandparentName => {
+                            const grandparentData = familyData[grandparentName];
+                            const relation = grandparentData.gender === 'M' ? 'il nonno' : 'la nonna';
+                            addPersonEvents(grandparentName, relation);
+                        });
+                    }
+                });
+            }
+
+            // 3. GENITORI
+            if (person.parents) {
+                person.parents.forEach(parentName => {
+                    const parentData = familyData[parentName];
+                    const relation = parentData.gender === 'M' ? 'il padre' : 'la madre';
+                    addPersonEvents(parentName, relation);
+                });
+
+                // Matrimonio genitori
+                if (person.parents.length === 2) {
+                    const parent1 = familyData[person.parents[0]];
+                    if (parent1.marriage) {
+                        events.push({
+                            date: parent1.marriage,
+                            description: `Matrimonio dei genitori <span class='clickable-person' onclick="goToPerson('${person.parents[0]}')">${person.parents[0].split(' ')[0]}</span> e <span class='clickable-person' onclick="goToPerson('${person.parents[1]}')">${person.parents[1].split(' ')[0]}</span>`
+                        });
+                    }
+                }
+            }
+
+            // 4. SUOCERI (genitori del coniuge)
+            if (person.spouse && familyData[person.spouse] && familyData[person.spouse].parents) {
+                familyData[person.spouse].parents.forEach(inLawName => {
+                    const inLawData = familyData[inLawName];
+                    const relation = inLawData.gender === 'M' ? 'il suocero' : 'la suocera';
+                    addPersonEvents(inLawName, relation);
+                });
+            }
+
+            // 5. ZII/ZIE (fratelli dei genitori)
+            if (person.parents) {
+                person.parents.forEach(parentName => {
+                    const parentData = familyData[parentName];
+                    if (parentData.siblings) {
+                        parentData.siblings.forEach(uncleName => {
+                            const uncleData = familyData[uncleName];
+                            const relation = uncleData.gender === 'M' ? 'lo zio' : 'la zia';
+                            addPersonEvents(uncleName, relation);
+                        });
+                    }
+                });
+            }
+
+            // 6. FRATELLI/SORELLE
+            if (person.siblings) {
+                person.siblings.forEach(siblingName => {
+                    const siblingData = familyData[siblingName];
+                    const relation = siblingData.gender === 'M' ? 'il fratello' : 'la sorella';
+                    addPersonEvents(siblingName, relation);
+                });
+            }
+
+            // 7. COGNATI/COGNATE (fratelli del coniuge)
+            if (person.spouse && familyData[person.spouse] && familyData[person.spouse].siblings) {
+                familyData[person.spouse].siblings.forEach(inLawSiblingName => {
+                    const inLawSiblingData = familyData[inLawSiblingName];
+                    const relation = inLawSiblingData.gender === 'M' ? 'il cognato' : 'la cognata';
+                    addPersonEvents(inLawSiblingName, relation);
+                });
+            }
+
+            // 8. NASCITA DELLA PERSONA
+            events.push({
+                date: person.birth,
+                description: `Nasce ${personName}`
+            });
+
+            // 9. MATRIMONIO DELLA PERSONA
+            if (person.marriage && person.spouse) {
+                events.push({
+                    date: person.marriage,
+                    description: `Matrimonio con <span class='clickable-person' onclick="goToPerson('${person.spouse}')">${person.spouse}</span>`
+                });
+            }
+
+            // 10. FIGLI
+            if (person.children) {
+                person.children.forEach(childName => {
+                    const childData = familyData[childName];
+                    const relation = childData.gender === 'M' ? 'il figlio' : 'la figlia';
+                    addPersonEvents(childName, relation);
+                });
+            }
+
+            // 11. NIPOTI (figli dei fratelli/sorelle)
+            if (person.siblings) {
+                person.siblings.forEach(siblingName => {
+                    const siblingData = familyData[siblingName];
+                    if (siblingData.children) {
+                        siblingData.children.forEach(nephewName => {
+                            const nephewData = familyData[nephewName];
+                            const relation = nephewData.gender === 'M' ? 'il nipote' : 'la nipote';
+                            addPersonEvents(nephewName, `${relation} (figlio di ${siblingName.split(' ')[0]})`);
+                        });
+                    }
+                });
+            }
+
+            // 12. NIPOTI ACQUISITI (figli dei cognati)
+            if (person.spouse && familyData[person.spouse] && familyData[person.spouse].siblings) {
+                familyData[person.spouse].siblings.forEach(inLawSiblingName => {
+                    const inLawSiblingData = familyData[inLawSiblingName];
+                    if (inLawSiblingData.children) {
+                        inLawSiblingData.children.forEach(acquiredNephewName => {
+                            const acquiredNephewData = familyData[acquiredNephewName];
+                            const relation = acquiredNephewData.gender === 'M' ? 'il nipote acquisito' : 'la nipote acquisita';
+                            addPersonEvents(acquiredNephewName, `${relation} (figlio di ${inLawSiblingName.split(' ')[0]})`);
+                        });
+                    }
+                });
+            }
+
+            // 13. NIPOTI DIRETTI (figli dei figli)
+            if (person.children) {
+                person.children.forEach(childName => {
+                    const childData = familyData[childName];
+                    if (childData.children) {
+                        childData.children.forEach(grandchildName => {
+                            const grandchildData = familyData[grandchildName];
+                            const relation = grandchildData.gender === 'M' ? 'il nipote' : 'la nipote';
+                            addPersonEvents(grandchildName, `${relation} (figlio di ${childName.split(' ')[0]})`);
+                        });
+                    }
+                });
+            }
+
+            // 14. PRONIPOTI (figli dei nipoti)
+            if (person.children) {
+                person.children.forEach(childName => {
+                    const childData = familyData[childName];
+                    if (childData.children) {
+                        childData.children.forEach(grandchildName => {
+                            const grandchildData = familyData[grandchildName];
+                            if (grandchildData.children) {
+                                grandchildData.children.forEach(greatGrandchildName => {
+                                    const greatGrandchildData = familyData[greatGrandchildName];
+                                    const relation = greatGrandchildData.gender === 'M' ? 'il pronipote' : 'la pronipote';
+                                    addPersonEvents(greatGrandchildName, `${relation} (figlio di ${grandchildName.split(' ')[0]})`);
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+
+            // 15. PRONIPOTI ACQUISITI (figli dei nipoti acquisiti)
+            if (person.siblings) {
+                person.siblings.forEach(siblingName => {
+                    const siblingData = familyData[siblingName];
+                    if (siblingData.children) {
+                        siblingData.children.forEach(nephewName => {
+                            const nephewData = familyData[nephewName];
+                            if (nephewData.children) {
+                                nephewData.children.forEach(greatNephewName => {
+                                    const greatNephewData = familyData[greatNephewName];
+                                    const relation = greatNephewData.gender === 'M' ? 'il pronipote' : 'la pronipote';
+                                    addPersonEvents(greatNephewName, `${relation} (figlio di ${nephewName.split(' ')[0]})`);
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Rimuovi duplicati basati sulla data e descrizione
+            const uniqueEvents = events.filter((event, index, self) => 
+                index === self.findIndex(e => e.date === event.date && e.description === event.description)
+            );
+
+            // Ordina eventi per data
+            uniqueEvents.sort((a, b) => {
                 const dateA = new Date(a.date.split('/').reverse().join('-'));
                 const dateB = new Date(b.date.split('/').reverse().join('-'));
                 return dateA - dateB;
             });
 
-            // Aggiungi età per eventi dopo la nascita di Marica
-            const maricaBirth = "12/04/1961";
-            return events.map(event => {
+            // Aggiungi età per eventi dopo la nascita della persona
+            const personBirth = person.birth;
+            return uniqueEvents.map(event => {
                 const eventDate = new Date(event.date.split('/').reverse().join('-'));
-                const birthDate = new Date(maricaBirth.split('/').reverse().join('-'));
+                const birthDate = new Date(personBirth.split('/').reverse().join('-'));
                 
-                if (eventDate >= birthDate && event.date !== maricaBirth) {
-                    const age = calculateAgeAtDate(maricaBirth, event.date);
+                if (eventDate >= birthDate && event.date !== personBirth) {
+                    const age = calculateAgeAtDate(personBirth, event.date);
                     return {
                         date: event.date,
                         description: `${event.description} (${age} anni)`
@@ -2531,11 +2562,16 @@
         }
 
         function goBack() {
-            if (currentView === "all-people") {
-                hideAllPeople();
+            // Se siamo in una vista speciale, torniamo alla vista principale
+            if (currentView !== "person") {
+                hideAllViews();
+                document.getElementById('currentPersonSection').style.display = 'block';
+                document.getElementById('relationshipsContainer').style.display = 'block';
+                currentView = "person";
                 return;
             }
             
+            // Se siamo nella vista principale e abbiamo cronologia, naviga indietro
             if (navigationHistory.length > 0 && !isLoading) {
                 isLoading = true;
                 currentPerson = navigationHistory.pop();
