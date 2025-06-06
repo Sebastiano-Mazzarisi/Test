@@ -71,54 +71,6 @@
             font-size: clamp(0.9rem, 2.5vw, 1rem);
         }
 
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(15px);
-            border-radius: var(--radius);
-            padding: 16px;
-            text-align: center;
-            box-shadow: var(--shadow);
-            min-height: 80px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .stat-card.clickable {
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-        }
-
-        .stat-card.clickable:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-hover);
-            border-color: var(--secondary-color);
-        }
-
-        .stat-card.clickable:active {
-            transform: scale(0.98);
-        }
-
-        .stat-number {
-            font-size: clamp(1.4rem, 3vw, 1.8rem);
-            font-weight: 700;
-            color: var(--secondary-color);
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: clamp(0.75rem, 2vw, 0.85rem);
-        }
-
         .navigation-bar {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(15px);
@@ -133,30 +85,30 @@
 
         .nav-buttons {
             display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 6px;
             flex-wrap: wrap;
         }
 
         .nav-btn {
             min-height: var(--touch-target);
-            padding: 12px 20px;
+            padding: 8px 12px;
             background: var(--secondary-color);
             color: white;
             border: none;
             border-radius: var(--radius);
             cursor: pointer;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 12px;
             transition: all 0.3s ease;
             text-decoration: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
             touch-action: manipulation;
+            flex-shrink: 0;
+            white-space: nowrap;
             flex: 1;
-            min-width: 120px;
+            min-width: 0;
         }
 
         .nav-btn:active {
@@ -171,8 +123,25 @@
             background: var(--warning-color);
         }
 
+        .nav-btn.search-toggle {
+            background: var(--warning-color);
+        }
+
         .search-container {
             position: relative;
+            margin-top: 10px;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .search-input {
@@ -561,12 +530,14 @@
             }
             
             .nav-buttons {
-                flex-direction: column;
+                gap: 4px;
             }
             
             .nav-btn {
-                flex: none;
-                min-width: auto;
+                padding: 6px 8px;
+                font-size: 11px;
+                min-width: 0;
+                flex: 1;
             }
             
             .current-person-info {
@@ -580,6 +551,33 @@
             
             .info-value {
                 font-size: 13px;
+            }
+        }
+
+        /* Molto piccolo - forza due righe */
+        @media (max-width: 480px) {
+            .nav-btn {
+                flex-basis: calc(50% - 2px);
+                max-width: calc(50% - 2px);
+            }
+            
+            .nav-btn:nth-child(1),
+            .nav-btn:nth-child(2) {
+                flex-basis: calc(50% - 2px);
+            }
+            
+            .nav-btn:nth-child(3),
+            .nav-btn:nth-child(4) {
+                flex-basis: calc(50% - 2px);
+            }
+            
+            .nav-btn:nth-child(5),
+            .nav-btn:nth-child(6) {
+                flex-basis: calc(50% - 2px);
+            }
+            
+            .nav-btn:nth-child(7) {
+                flex-basis: calc(50% - 2px);
             }
         }
 
@@ -1106,35 +1104,31 @@
             <p>Famiglia Pricci</p>
         </div>
 
-        <div class="stats">
-            <div class="stat-card clickable" onclick="showAllPeople()">
-                <div class="stat-number" id="totalPeople">36</div>
-                <div class="stat-label">Persone</div>
-            </div>
-            <div class="stat-card clickable" onclick="showGenerations()">
-                <div class="stat-number">5</div>
-                <div class="stat-label">Generazioni</div>
-            </div>
-            <div class="stat-card clickable" onclick="showMarriages()">
-                <div class="stat-number" id="totalMarriages">13</div>
-                <div class="stat-label">Matrimoni</div>
-            </div>
-            <div class="stat-card clickable" onclick="showAgeChart()">
-                <div class="stat-number" id="averageAge">45</div>
-                <div class="stat-label">Età Media</div>
-            </div>
-        </div>
-
         <div class="navigation-bar">
             <div class="nav-buttons">
                 <button class="nav-btn home" onclick="goToPerson('Luigi Pricci')">
-                    🏠 Home
+                    Home
                 </button>
                 <button class="nav-btn back" onclick="goBack()">
-                    ← Indietro
+                    Indietro
+                </button>
+                <button class="nav-btn clickable" onclick="showAllPeople()">
+                    Persone
+                </button>
+                <button class="nav-btn clickable" onclick="showGenerations()">
+                    Generazioni
+                </button>
+                <button class="nav-btn clickable" onclick="showMarriages()">
+                    Matrimoni
+                </button>
+                <button class="nav-btn clickable" onclick="showAgeChart()">
+                    Età Media
+                </button>
+                <button class="nav-btn search-toggle" onclick="toggleSearch()">
+                    Cerca
                 </button>
             </div>
-            <div class="search-container">
+            <div class="search-container" id="searchContainer" style="display: none;">
                 <input type="text" class="search-input" id="searchInput" placeholder="Cerca una persona...">
                 <span class="search-icon">🔍</span>
             </div>
@@ -1954,6 +1948,10 @@
         }
 
         function selectPersonFromSearch(personName) {
+            // Nascondi i risultati di ricerca
+            document.getElementById('searchResults').classList.remove('show');
+            document.getElementById('searchInput').value = '';
+            
             // Prima torna alla vista principale se non ci siamo già
             if (currentView !== "person") {
                 hideAllViews();
@@ -2019,7 +2017,6 @@
             document.getElementById('currentPersonSection').style.display = 'none';
             document.getElementById('relationshipsContainer').style.display = 'none';
             document.getElementById('breadcrumb').style.display = 'none';
-            document.getElementById('searchResults').classList.remove('show');
             
             // Nascondi tutte le pagine speciali
             document.getElementById('allPeoplePage').classList.remove('show');
@@ -2041,6 +2038,10 @@
 
         function renderAllPeople() {
             const peopleList = document.getElementById('peopleList');
+            const totalPeople = Object.keys(familyData).length;
+            
+            // Aggiorna il titolo con il conteggio
+            document.querySelector('#allPeoplePage .all-people-title').textContent = `Tutti i Membri della Famiglia (${totalPeople})`;
             
             // Ordina le persone per cognome e nome
             const sortedPeople = Object.entries(familyData).sort((a, b) => {
@@ -2098,6 +2099,11 @@
                 }
                 generations[person.generation].push({ name, person });
             });
+            
+            const totalGenerations = Object.keys(generations).length;
+            
+            // Aggiorna il titolo con il conteggio
+            document.querySelector('#generationsPage .all-people-title').textContent = `Generazioni della Famiglia (${totalGenerations})`;
             
             // Titoli delle generazioni
             const generationTitles = {
@@ -2167,6 +2173,9 @@
                 }
             });
             
+            // Aggiorna il titolo con il conteggio
+            document.querySelector('#marriagesPage .all-people-title').textContent = `Matrimoni della Famiglia (${marriages.length})`;
+            
             // Ordina per data di matrimonio
             marriages.sort((a, b) => {
                 const dateA = new Date(a.date.split('/').reverse().join('-'));
@@ -2217,13 +2226,18 @@
                 person
             }));
             
+            // Calcola età media
+            const ages = people.map(p => p.age);
+            const averageAge = Math.round(ages.reduce((a, b) => a + b, 0) / ages.length);
+            
+            // Aggiorna il titolo con l'età media
+            document.querySelector('#ageChartPage .age-chart-title').textContent = `Grafico delle Età (Media: ${averageAge} anni)`;
+            
             // Ordina per età (decrescente)
             people.sort((a, b) => b.age - a.age);
             
-            // Calcola min, max e media
-            const ages = people.map(p => p.age);
+            // Calcola min, max
             const maxAge = Math.max(...ages);
-            const averageAge = Math.round(ages.reduce((a, b) => a + b, 0) / ages.length);
             
             let html = '';
             
@@ -2496,6 +2510,20 @@
             }
         }
 
+        function toggleSearch() {
+            const searchContainer = document.getElementById('searchContainer');
+            const searchInput = document.getElementById('searchInput');
+            
+            if (searchContainer.style.display === 'none') {
+                searchContainer.style.display = 'block';
+                setTimeout(() => searchInput.focus(), 100);
+            } else {
+                searchContainer.style.display = 'none';
+                document.getElementById('searchResults').classList.remove('show');
+                searchInput.value = '';
+            }
+        }
+
         function selectPersonFromList(personName) {
             // Torna alla vista persona e naviga a quella persona
             hideAllPeople();
@@ -2530,16 +2558,6 @@
             
             updateDisplay();
             setupSearch();
-            
-            // Aggiorna statistiche
-            const totalPeople = Object.keys(familyData).length;
-            const totalMarriages = Object.values(familyData).filter(person => person.spouse).length / 2;
-            const ages = Object.values(familyData).map(person => calculateAge(person.birth, person.death));
-            const averageAge = Math.round(ages.reduce((a, b) => a + b, 0) / ages.length);
-            
-            document.getElementById('totalPeople').textContent = totalPeople;
-            document.getElementById('totalMarriages').textContent = Math.floor(totalMarriages);
-            document.getElementById('averageAge').textContent = averageAge;
             
             // Aggiungi supporto per swipe su mobile (semplice)
             let startX = 0;
