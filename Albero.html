@@ -283,7 +283,7 @@
             display: flex;
             gap: 20px;
             align-items: flex-start;
-            position: relative; /* Modified */
+            position: relative;
         }
 
         .current-person-content {
@@ -300,9 +300,9 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            position: absolute; /* Modified */
-            top: 20px; /* Modified */
-            right: 20px; /* Modified */
+            position: absolute;
+            top: 20px;
+            right: 20px;
         }
 
         .calendar-header {
@@ -327,31 +327,30 @@
             background: white;
         }
 
-        /* New style for the PDF download button */
         .pdf-download-button {
             position: absolute;
-            top: 110px; /* Adjust this value to be below the calendar, considering its height and padding */
-            right: 20px; /* Same right alignment as the calendar */
-            width: 80px; /* Same width as calendar */
-            height: 80px; /* Increased height to match calendar */
-            background: white; /* White background like calendar */
+            top: 110px;
+            right: 20px;
+            width: 80px;
+            height: 80px;
+            background: white;
             border-radius: 12px;
             box-shadow: var(--shadow);
-            border: 2px solid var(--border-color); /* Border like calendar */
+            border: 2px solid var(--border-color);
             display: flex;
-            flex-direction: column; /* To stack icon and text */
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            text-decoration: none; /* Remove underline for links */
+            text-decoration: none;
             transition: all 0.3s ease;
-            overflow: hidden; /* Ensure content doesn't overflow */
+            overflow: hidden;
         }
 
         .pdf-download-button:hover {
             transform: translateY(-2px);
             box-shadow: var(--shadow-hover);
-            border-color: var(--secondary-color); /* Colored border on hover like stat-card */
+            border-color: var(--secondary-color);
         }
 
         .pdf-download-button:active {
@@ -359,19 +358,18 @@
         }
 
         .pdf-download-button .pdf-text {
-            font-size: 20px; /* Font size for PDF text */
+            font-size: 20px;
             font-weight: 700;
-            color: var(--primary-color); /* Primary color for text */
-            line-height: 1; /* Remove extra space */
-            margin-top: 5px; /* Space between icon and text */
+            color: var(--primary-color);
+            line-height: 1;
+            margin-top: 5px;
         }
 
         .pdf-download-button .pdf-icon-symbol {
-            font-size: 30px; /* Font size for the symbol icon */
-            color: var(--accent-color); /* Accent color (red) for the symbol */
+            font-size: 30px;
+            color: var(--accent-color);
             line-height: 1;
         }
-
 
         .current-person-header {
             text-align: center;
@@ -732,7 +730,6 @@
 
         .person-button.deceased {
             border-color: var(--accent-color);
-            background: rgba(231, 76, 60, 0.05);
         }
 
         .person-button-name {
@@ -998,6 +995,64 @@
             flex-shrink: 0;
         }
 
+        /* Sezione Cronologia */
+        .chronology-events {
+            display: grid;
+            gap: 8px;
+        }
+
+        .chronology-event-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 12px;
+            box-shadow: var(--shadow);
+            border-left: 3px solid var(--warning-color);
+            transition: all 0.2s ease;
+        }
+
+        .chronology-event-card:hover {
+            transform: translateX(2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .chronology-event-content {
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .chronology-event-date {
+            font-weight: 600;
+            color: var(--secondary-color);
+            font-size: 13px;
+            min-width: 85px;
+            flex-shrink: 0;
+        }
+
+        .chronology-event-text {
+            color: var(--text-primary);
+            font-size: 13px;
+            line-height: 1.4;
+            flex: 1;
+        }
+
+        .clickable-person {
+            color: var(--secondary-color);
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: underline;
+            transition: color 0.2s ease;
+        }
+
+        .clickable-person:hover {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+
+        .clickable-person:active {
+            transform: scale(0.98);
+        }
+
         @media (max-width: 768px) {
             .people-list,
             .generation-members {
@@ -1025,6 +1080,20 @@
 
             .age-chart-age {
                 width: 40px;
+                font-size: 12px;
+            }
+
+            .chronology-event-content {
+                flex-direction: column;
+                gap: 4px;
+            }
+            
+            .chronology-event-date {
+                min-width: auto;
+                font-size: 12px;
+            }
+            
+            .chronology-event-text {
                 font-size: 12px;
             }
         }
@@ -1130,9 +1199,9 @@
     </div>
 
     <script>
-        // Dati completi della famiglia (stessi dati di prima)
+        // Dati completi della famiglia con link PDF aggiornati
         const familyData = {
-            "Giovanni Pricci": {
+            "Nonno Giovanni Pricci": {
                 birth: "01/01/1909",
                 death: "01/01/1944",
                 onomastic: "24 giugno",
@@ -1140,17 +1209,17 @@
                 children: ["Luigi Pricci"],
                 generation: 1,
                 gender: "M",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1UO_r4dx9TY_AkvYi0xMtvVNybZREEuKB/preview"
             },
             "Angelina Gasparro": {
                 birth: "05/06/1909",
                 death: "16/07/2001",
                 onomastic: "",
-                spouse: "Giovanni Pricci",
+                spouse: "Nonno Giovanni Pricci",
                 children: ["Luigi Pricci"],
                 generation: 1,
                 gender: "F",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1bVZpf0fA_0EbH-eF-AfTgdRcuh9Uw5nR/preview"
             },
             "Luigi Pricci": {
                 birth: "16/11/1933",
@@ -1158,11 +1227,11 @@
                 onomastic: "21 giugno",
                 spouse: "Teresa Grilletti",
                 marriage: "03/12/1956",
-                children: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Raffaele Pricci", "Giuseppe Pricci", "Tiziana Pricci"],
-                parents: ["Giovanni Pricci", "Angelina Gasparro"],
+                children: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Pricci", "Giuseppe Pricci", "Tiziana Pricci"],
+                parents: ["Nonno Giovanni Pricci", "Angelina Gasparro"],
                 generation: 2,
                 gender: "M",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1SvUaQVnipFWQEgbbK9EhlIyoyXYoDKrz/preview"
             },
             "Teresa Grilletti": {
                 birth: "05/03/1937",
@@ -1170,10 +1239,10 @@
                 onomastic: "15 ottobre",
                 spouse: "Luigi Pricci",
                 marriage: "03/12/1956",
-                children: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Raffaele Pricci", "Giuseppe Pricci", "Tiziana Pricci"],
+                children: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Pricci", "Giuseppe Pricci", "Tiziana Pricci"],
                 generation: 2,
                 gender: "F",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1-ZdeVRK8uOraJihJWVLvCQS4QCdaJJT2/preview"
             },
             "Angela Pricci": {
                 birth: "13/01/1957",
@@ -1183,10 +1252,10 @@
                 marriage: "09/08/1975",
                 children: ["Benny Lorusso", "Cinzia Lorusso"],
                 parents: ["Luigi Pricci", "Teresa Grilletti"],
-                siblings: ["Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Raffaele Pricci", "Giuseppe Pricci", "Tiziana Pricci"],
+                siblings: ["Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Pricci", "Giuseppe Pricci", "Tiziana Pricci"],
                 generation: 3,
                 gender: "F",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/19Y1vcbTjKBmhRu5_unEuKEKJ74NicV94/preview"
             },
             "Onofrio Lorusso": {
                 birth: "05/08/1951",
@@ -1197,7 +1266,7 @@
                 children: ["Benny Lorusso", "Cinzia Lorusso"],
                 generation: 3,
                 gender: "M",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1DUqNCrnLSDWGJ2zX0yq3vQzFFKWBBzOT/preview"
             },
             "Maria Antonietta Pricci": {
                 birth: "21/05/1958",
@@ -1207,10 +1276,10 @@
                 marriage: "09/09/2000",
                 children: ["Martino Chiarappa", "Cristiano Chiarappa"],
                 parents: ["Luigi Pricci", "Teresa Grilletti"],
-                siblings: ["Angela Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Raffaele Pricci", "Giuseppe Pricci", "Tiziana Pricci"],
+                siblings: ["Angela Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Pricci", "Giuseppe Pricci", "Tiziana Pricci"],
                 generation: 3,
                 gender: "F",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1i56zhHocLw-OKwjZZVZtv3RAzHEuIIlR/preview"
             },
             "Saverio Chiarappa": {
                 birth: "26/11/1951",
@@ -1221,7 +1290,7 @@
                 children: ["Martino Chiarappa", "Cristiano Chiarappa"],
                 generation: 3,
                 gender: "M",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1w5fzRCiYIMWYK15J_J8HpmhoGvk69FH7/preview"
             },
             "Marica Pricci": {
                 birth: "12/04/1961",
@@ -1231,10 +1300,10 @@
                 marriage: "04/07/1987",
                 children: ["Maria Grazia Mazzarisi", "Onofrio Mazzarisi", "Teresa Mazzarisi"],
                 parents: ["Luigi Pricci", "Teresa Grilletti"],
-                siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Vanna Pricci", "Giovanni Raffaele Pricci", "Giuseppe Pricci", "Tiziana Pricci"],
+                siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Vanna Pricci", "Giovanni Pricci", "Giuseppe Pricci", "Tiziana Pricci"],
                 generation: 3,
                 gender: "F",
-                pdfLink: "https://www.dropbox.com/scl/fi/ahybte28cibt9ix6ahfdu/GrafoP-Marica-Pricci.pdf?rlkey=1uvcr7jv8y4ccyhgkrtaf9jlg&st=otdphoe6&dl=1" // PDF per Marica Pricci, dl=1 per apertura diretta
+                pdfLink: "https://drive.google.com/file/d/1RCsFaWZ9E698snnWBka6UkSSJ6N01s4h/preview"
             },
             "Sebastiano Mazzarisi": {
                 birth: "07/05/1957",
@@ -1245,7 +1314,7 @@
                 children: ["Maria Grazia Mazzarisi", "Onofrio Mazzarisi", "Teresa Mazzarisi"],
                 generation: 3,
                 gender: "M",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1r5LF4Z-lLoDlSMTfPC1Cks2NH43pg1Zt/preview"
             },
             "Vanna Pricci": {
                 birth: "11/09/1963",
@@ -1255,10 +1324,10 @@
                 marriage: "28/08/1991",
                 children: ["Flavia Lefemine", "Francesco Lefemine"],
                 parents: ["Luigi Pricci", "Teresa Grilletti"],
-                siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Giovanni Raffaele Pricci", "Giuseppe Pricci", "Tiziana Pricci"],
+                siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Giovanni Pricci", "Giuseppe Pricci", "Tiziana Pricci"],
                 generation: 3,
                 gender: "F",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1nlsFxi1YeIzjzn-ev5KNGL7W0r8iFYLP/preview"
             },
             "Domenico Lefemine": {
                 birth: "06/02/1957",
@@ -1269,9 +1338,9 @@
                 children: ["Flavia Lefemine", "Francesco Lefemine"],
                 generation: 3,
                 gender: "M",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1uxmQTI_6rPvFHlHdjoVtiolUlerOE5FM/preview"
             },
-            "Giovanni Raffaele Pricci": {
+            "Giovanni Pricci": {
                 birth: "24/10/1964",
                 death: null,
                 onomastic: "24 giugno",
@@ -1281,17 +1350,17 @@
                 siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giuseppe Pricci", "Tiziana Pricci"],
                 generation: 3,
                 gender: "M",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1pQtMd2thpNvoV2jXR2ZNbJtExNc8L_JL/preview"
             },
             "Rosa Bianco": {
                 birth: "02/09/1971",
                 death: null,
                 onomastic: "23 agosto",
-                spouse: "Giovanni Raffaele Pricci",
+                spouse: "Giovanni Pricci",
                 marriage: "29/12/2004",
                 generation: 3,
                 gender: "F",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1_FNq5V2p2eUu1BSo1IQAq-I-kPIU1w6p/preview"
             },
             "Giuseppe Pricci": {
                 birth: "12/08/1968",
@@ -1301,10 +1370,10 @@
                 marriage: "09/07/1997",
                 children: ["Gilda Pricci", "Asia Pricci"],
                 parents: ["Luigi Pricci", "Teresa Grilletti"],
-                siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Raffaele Pricci", "Tiziana Pricci"],
+                siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Pricci", "Tiziana Pricci"],
                 generation: 3,
                 gender: "M",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1MCEtJ_9CuncUxqbObnUO_x5WIR8ihnRS/preview"
             },
             "Anna Trivisani": {
                 birth: "12/07/1969",
@@ -1315,7 +1384,7 @@
                 children: ["Gilda Pricci", "Asia Pricci"],
                 generation: 3,
                 gender: "F",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1Q2iDOWagW3kq7Xqds6gwwy__SD2xs0CQ/preview"
             },
             "Tiziana Pricci": {
                 birth: "27/06/1972",
@@ -1324,10 +1393,10 @@
                 spouse: "Riccardo Dalena",
                 marriage: "04/10/2002",
                 parents: ["Luigi Pricci", "Teresa Grilletti"],
-                siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Raffaele Pricci", "Giuseppe Pricci"],
+                siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Pricci", "Giuseppe Pricci"],
                 generation: 3,
                 gender: "F",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1WJGO-9ctHMntTx4uZCiIAald0liJXa-3/preview"
             },
             "Riccardo Dalena": {
                 birth: "11/04/1973",
@@ -1337,7 +1406,7 @@
                 marriage: "04/10/2002",
                 generation: 3,
                 gender: "M",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1eh8kfaTJNbygtLOCH57PL4-GkvFW96CA/preview"
             },
             "Benny Lorusso": {
                 birth: "17/11/1975",
@@ -1350,7 +1419,7 @@
                 siblings: ["Cinzia Lorusso"],
                 generation: 4,
                 gender: "M",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1zYd3GY_MgF4EULRwttnMmTIl5aaOumQq/preview"
             },
             "Genny Lepore": {
                 birth: "04/07/1975",
@@ -1361,7 +1430,7 @@
                 children: ["Alessandro Lorusso", "Alice Lorusso", "Nina Lorusso"],
                 generation: 4,
                 gender: "F",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1ZRryYvbLeg34SDlfpi_Rl5hcQT5UvbRZ/preview"
             },
             "Cinzia Lorusso": {
                 birth: "06/04/1980",
@@ -1374,7 +1443,7 @@
                 siblings: ["Benny Lorusso"],
                 generation: 4,
                 gender: "F",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1cDXvBWN7uTPcgMkuyX8gs5KldC3BFM0p/preview"
             },
             "Gianni Rotondi": {
                 birth: "08/03/1974",
@@ -1385,7 +1454,7 @@
                 children: ["Nicoletta Rotondi"],
                 generation: 4,
                 gender: "M",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1ppwLLOULPDfqwl1SHRcHOSs_ZAJNaV0c/preview"
             },
             "Martino Chiarappa": {
                 birth: "24/05/1997",
@@ -1395,7 +1464,7 @@
                 siblings: ["Cristiano Chiarappa"],
                 generation: 4,
                 gender: "M",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1YX_yXh4XKXS91er-WQF2QjfJEWfg4dR5/preview"
             },
             "Cristiano Chiarappa": {
                 birth: "20/06/2001",
@@ -1405,7 +1474,7 @@
                 siblings: ["Martino Chiarappa"],
                 generation: 4,
                 gender: "M",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1omeF2nJRTB8BoDwvgtB78AyB1DHKFl42/preview"
             },
             "Maria Grazia Mazzarisi": {
                 birth: "21/01/1989",
@@ -1415,7 +1484,7 @@
                 siblings: ["Onofrio Mazzarisi", "Teresa Mazzarisi"],
                 generation: 4,
                 gender: "F",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1OYd68TYQieMB2TJyryzivSgGXZICFaoL/preview"
             },
             "Onofrio Mazzarisi": {
                 birth: "05/06/1992",
@@ -1425,7 +1494,7 @@
                 siblings: ["Maria Grazia Mazzarisi", "Teresa Mazzarisi"],
                 generation: 4,
                 gender: "M",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1Osjy9a-SaDtrrftMUI0AplN1uXcpMYHZ/preview"
             },
             "Teresa Mazzarisi": {
                 birth: "01/04/1994",
@@ -1435,7 +1504,7 @@
                 siblings: ["Maria Grazia Mazzarisi", "Onofrio Mazzarisi"],
                 generation: 4,
                 gender: "F",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1T19Sufwr1bpczbElt40B0vHzxXY1VMqG/preview"
             },
             "Flavia Lefemine": {
                 birth: "16/11/1996",
@@ -1445,7 +1514,7 @@
                 siblings: ["Francesco Lefemine"],
                 generation: 4,
                 gender: "F",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1NWQEmGoIdzb-bD09p_Azc2z3ch-Yc2xE/preview"
             },
             "Francesco Lefemine": {
                 birth: "20/03/2000",
@@ -1455,7 +1524,7 @@
                 siblings: ["Flavia Lefemine"],
                 generation: 4,
                 gender: "M",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1UabUzt1EnCquh_jLns4yrUx0z_gt0DQi/preview"
             },
             "Gilda Pricci": {
                 birth: "29/06/2004",
@@ -1465,7 +1534,7 @@
                 siblings: ["Asia Pricci"],
                 generation: 4,
                 gender: "F",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/169hu0OfJxpJJaqHqgR6bbDLSndUPA-_n/preview"
             },
             "Asia Pricci": {
                 birth: "07/06/2006",
@@ -1475,7 +1544,7 @@
                 siblings: ["Gilda Pricci"],
                 generation: 4,
                 gender: "F",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1AtxTUzkfLQrIyiQ5ULqIPOI5mZTeUduU/preview"
             },
             "Alessandro Lorusso": {
                 birth: "17/07/2010",
@@ -1485,7 +1554,7 @@
                 siblings: ["Alice Lorusso", "Nina Lorusso"],
                 generation: 5,
                 gender: "M",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1U-QUlKehVgyVAOOX4nAsH5RanfspL8L1/preview"
             },
             "Alice Lorusso": {
                 birth: "20/07/2013",
@@ -1495,7 +1564,7 @@
                 siblings: ["Alessandro Lorusso", "Nina Lorusso"],
                 generation: 5,
                 gender: "F",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1syP1cSnZI0S04OLpKQuzz_7j-TPVpB92/preview"
             },
             "Nina Lorusso": {
                 birth: "29/11/2015",
@@ -1505,7 +1574,7 @@
                 siblings: ["Alessandro Lorusso", "Alice Lorusso"],
                 generation: 5,
                 gender: "F",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1VEJFmFPhbEwl09HQuq3dpaXwjVxD1nHT/preview"
             },
             "Nicoletta Rotondi": {
                 birth: "12/02/2019",
@@ -1514,7 +1583,7 @@
                 parents: ["Gianni Rotondi", "Cinzia Lorusso"],
                 generation: 5,
                 gender: "F",
-                pdfLink: null // Esempio: assegna il link qui se presente
+                pdfLink: "https://drive.google.com/file/d/1eaelAlInC3uyqAfUj1xtRqFqn58SPI98/preview"
             }
         };
 
@@ -1524,7 +1593,7 @@
         let isLoading = false;
         let currentView = "person"; // "person", "all-people", "generations", "marriages", "age-chart"
 
-        // Funzioni utili (stesse di prima ma ottimizzate per mobile)
+        // Funzioni utili
         function calculateAge(birthDate, deathDate = null) {
             const birth = new Date(birthDate.split('/').reverse().join('-'));
             const end = deathDate ? new Date(deathDate.split('/').reverse().join('-')) : new Date();
@@ -1577,7 +1646,8 @@
             // Condizione per mostrare il pulsante PDF solo se la persona ha un pdfLink definito
             if (person.pdfLink) { 
                 pdfButtonHtml = `
-                    <a href="${person.pdfLink}" target="_blank" class="pdf-download-button"> <span class="pdf-icon-symbol">🗎</span>
+                    <a href="${person.pdfLink}" target="_blank" class="pdf-download-button">
+                        <span class="pdf-icon-symbol">🗎</span>
                         <span class="pdf-text">PDF</span>
                     </a>
                 `;
@@ -1619,7 +1689,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="current-person-calendar">
+                <div class="current-person-calendar" onclick="scrollToChronology()" style="cursor: pointer;" title="Vai alla cronologia">
                     <div class="calendar-header">${calendar.month}</div>
                     <div class="calendar-day">${calendar.day}</div>
                 </div>
@@ -1631,6 +1701,26 @@
             const person = familyData[currentPerson];
             const container = document.getElementById('relationshipsContainer');
             let html = '';
+            
+            // Cronologia per Marica Pricci (test)
+            if (currentPerson === "Marica Pricci") {
+                const chronologyEvents = generateChronology(currentPerson);
+                html += `
+                    <div class="relationship-section" id="chronology-section">
+                        <h3 class="relationship-title">🕒 Cronologia (${chronologyEvents.length})</h3>
+                        <div class="chronology-events">
+                            ${chronologyEvents.map(event => `
+                                <div class="chronology-event-card">
+                                    <div class="chronology-event-content">
+                                        <div class="chronology-event-date">${event.date}:</div>
+                                        <div class="chronology-event-text">${event.description}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
             
             // Coniuge
             if (person.spouse) {
@@ -1833,7 +1923,7 @@
                             const person = familyData[name];
                             const age = calculateAge(person.birth, person.death);
                             html += `
-                                <div class="search-result-item" onclick="goToPerson('${name}')">
+                                <div class="search-result-item" onclick="selectPersonFromSearch('${name}')">
                                     <div>
                                         <strong>${name}</strong><br>
                                         <small>${age} anni ${person.death ? '(†)' : ''} - ${formatDate(person.birth)}</small>
@@ -1861,6 +1951,19 @@
                     searchResults.classList.remove('show');
                 }
             });
+        }
+
+        function selectPersonFromSearch(personName) {
+            // Prima torna alla vista principale se non ci siamo già
+            if (currentView !== "person") {
+                hideAllViews();
+                document.getElementById('currentPersonSection').style.display = 'block';
+                document.getElementById('relationshipsContainer').style.display = 'block';
+                currentView = "person";
+            }
+            
+            // Poi naviga alla persona
+            goToPerson(personName);
         }
 
         function showAllPeople() {
@@ -2180,6 +2283,217 @@
             const birth = new Date(birthDate.split('/').reverse().join('-'));
             const target = new Date(targetDate.split('/').reverse().join('-'));
             return Math.floor((target - birth) / (365.25 * 24 * 60 * 60 * 1000));
+        }
+
+        function generateChronology(personName) {
+            const person = familyData[personName];
+            const events = [];
+
+            // Eventi per Marica Pricci (test)
+            if (personName === "Marica Pricci") {
+                // Nascita nonni
+                events.push({
+                    date: "01/01/1909",
+                    description: "Nasce il nonno <span class='clickable-person' onclick=\"goToPerson('Nonno Giovanni Pricci')\">Giovanni Pricci</span>"
+                });
+                
+                events.push({
+                    date: "05/06/1909",
+                    description: "Nasce la nonna <span class='clickable-person' onclick=\"goToPerson('Angelina Gasparro')\">Angelina Gasparro</span>"
+                });
+
+                // Nascita genitori
+                events.push({
+                    date: "16/11/1933",
+                    description: "Nasce il padre <span class='clickable-person' onclick=\"goToPerson('Luigi Pricci')\">Luigi Pricci</span>"
+                });
+
+                events.push({
+                    date: "05/03/1937",
+                    description: "Nasce la madre <span class='clickable-person' onclick=\"goToPerson('Teresa Grilletti')\">Teresa Grilletti</span>"
+                });
+
+                // Matrimonio genitori
+                events.push({
+                    date: "03/12/1956",
+                    description: "Matrimonio dei genitori <span class='clickable-person' onclick=\"goToPerson('Luigi Pricci')\">Luigi</span> e <span class='clickable-person' onclick=\"goToPerson('Teresa Grilletti')\">Teresa</span>"
+                });
+
+                // Nascita fratelli/sorelle in ordine cronologico
+                events.push({
+                    date: "13/01/1957",
+                    description: "Nasce la sorella <span class='clickable-person' onclick=\"goToPerson('Angela Pricci')\">Angela Pricci</span>"
+                });
+
+                events.push({
+                    date: "21/05/1958",
+                    description: "Nasce la sorella <span class='clickable-person' onclick=\"goToPerson('Maria Antonietta Pricci')\">Maria Antonietta Pricci</span>"
+                });
+
+                // Nascita di Marica
+                events.push({
+                    date: "12/04/1961",
+                    description: "Nasce Marica Pricci"
+                });
+
+                events.push({
+                    date: "11/09/1963",
+                    description: "Nasce la sorella <span class='clickable-person' onclick=\"goToPerson('Vanna Pricci')\">Vanna Pricci</span>"
+                });
+
+                events.push({
+                    date: "24/10/1964",
+                    description: "Nasce il fratello <span class='clickable-person' onclick=\"goToPerson('Giovanni Pricci')\">Giovanni Pricci</span>"
+                });
+
+                events.push({
+                    date: "12/08/1968",
+                    description: "Nasce il fratello <span class='clickable-person' onclick=\"goToPerson('Giuseppe Pricci')\">Giuseppe Pricci</span>"
+                });
+
+                events.push({
+                    date: "27/06/1972",
+                    description: "Nasce la sorella <span class='clickable-person' onclick=\"goToPerson('Tiziana Pricci')\">Tiziana Pricci</span>"
+                });
+
+                // Matrimoni fratelli/sorelle
+                events.push({
+                    date: "09/08/1975",
+                    description: "Matrimonio della sorella <span class='clickable-person' onclick=\"goToPerson('Angela Pricci')\">Angela</span> con <span class='clickable-person' onclick=\"goToPerson('Onofrio Lorusso')\">Onofrio Lorusso</span>"
+                });
+
+                // Matrimonio di Marica
+                events.push({
+                    date: "04/07/1987",
+                    description: "Matrimonio di Marica con <span class='clickable-person' onclick=\"goToPerson('Sebastiano Mazzarisi')\">Sebastiano Mazzarisi</span>"
+                });
+
+                // Nascita figli di Marica
+                events.push({
+                    date: "21/01/1989",
+                    description: "Nasce la figlia <span class='clickable-person' onclick=\"goToPerson('Maria Grazia Mazzarisi')\">Maria Grazia Mazzarisi</span>"
+                });
+
+                // Matrimonio di Vanna
+                events.push({
+                    date: "28/08/1991",
+                    description: "Matrimonio della sorella <span class='clickable-person' onclick=\"goToPerson('Vanna Pricci')\">Vanna</span> con <span class='clickable-person' onclick=\"goToPerson('Domenico Lefemine')\">Domenico Lefemine</span>"
+                });
+
+                events.push({
+                    date: "05/06/1992",
+                    description: "Nasce il figlio <span class='clickable-person' onclick=\"goToPerson('Onofrio Mazzarisi')\">Onofrio Mazzarisi</span>"
+                });
+
+                events.push({
+                    date: "01/04/1994",
+                    description: "Nasce la figlia <span class='clickable-person' onclick=\"goToPerson('Teresa Mazzarisi')\">Teresa Mazzarisi</span>"
+                });
+
+                // Matrimonio di Giuseppe
+                events.push({
+                    date: "09/07/1997",
+                    description: "Matrimonio del fratello <span class='clickable-person' onclick=\"goToPerson('Giuseppe Pricci')\">Giuseppe</span> con <span class='clickable-person' onclick=\"goToPerson('Anna Trivisani')\">Anna Trivisani</span>"
+                });
+
+                // Matrimonio di Maria Antonietta
+                events.push({
+                    date: "09/09/2000",
+                    description: "Matrimonio della sorella <span class='clickable-person' onclick=\"goToPerson('Maria Antonietta Pricci')\">Maria Antonietta</span> con <span class='clickable-person' onclick=\"goToPerson('Saverio Chiarappa')\">Saverio Chiarappa</span>"
+                });
+
+                // Matrimonio di Tiziana
+                events.push({
+                    date: "04/10/2002",
+                    description: "Matrimonio della sorella <span class='clickable-person' onclick=\"goToPerson('Tiziana Pricci')\">Tiziana</span> con <span class='clickable-person' onclick=\"goToPerson('Riccardo Dalena')\">Riccardo Dalena</span>"
+                });
+
+                // Nascita nipoti (figli dei fratelli/sorelle)
+                events.push({
+                    date: "29/06/2004",
+                    description: "Nasce la nipote <span class='clickable-person' onclick=\"goToPerson('Gilda Pricci')\">Gilda Pricci</span> (figlia di Giuseppe)"
+                });
+
+                // Matrimonio di Giovanni
+                events.push({
+                    date: "29/12/2004",
+                    description: "Matrimonio del fratello <span class='clickable-person' onclick=\"goToPerson('Giovanni Pricci')\">Giovanni</span> con <span class='clickable-person' onclick=\"goToPerson('Rosa Bianco')\">Rosa Bianco</span>"
+                });
+
+                events.push({
+                    date: "07/06/2006",
+                    description: "Nasce la nipote <span class='clickable-person' onclick=\"goToPerson('Asia Pricci')\">Asia Pricci</span> (figlia di Giuseppe)"
+                });
+
+                events.push({
+                    date: "26/07/2008",
+                    description: "Matrimonio del nipote <span class='clickable-person' onclick=\"goToPerson('Benny Lorusso')\">Benny Lorusso</span> con <span class='clickable-person' onclick=\"goToPerson('Genny Lepore')\">Genny Lepore</span>"
+                });
+
+                // Nascita pronipoti
+                events.push({
+                    date: "17/07/2010",
+                    description: "Nasce il pronipote <span class='clickable-person' onclick=\"goToPerson('Alessandro Lorusso')\">Alessandro Lorusso</span> (figlio di Benny)"
+                });
+
+                events.push({
+                    date: "20/07/2013",
+                    description: "Nasce la pronipote <span class='clickable-person' onclick=\"goToPerson('Alice Lorusso')\">Alice Lorusso</span> (figlia di Benny)"
+                });
+
+                events.push({
+                    date: "13/09/2014",
+                    description: "Matrimonio della nipote <span class='clickable-person' onclick=\"goToPerson('Cinzia Lorusso')\">Cinzia Lorusso</span> con <span class='clickable-person' onclick=\"goToPerson('Gianni Rotondi')\">Gianni Rotondi</span>"
+                });
+
+                events.push({
+                    date: "29/11/2015",
+                    description: "Nasce la pronipote <span class='clickable-person' onclick=\"goToPerson('Nina Lorusso')\">Nina Lorusso</span> (figlia di Benny)"
+                });
+
+                events.push({
+                    date: "12/02/2019",
+                    description: "Nasce la pronipote <span class='clickable-person' onclick=\"goToPerson('Nicoletta Rotondi')\">Nicoletta Rotondi</span> (figlia di Cinzia)"
+                });
+            }
+
+            // Ordina eventi per data e calcola età di Marica
+            events.sort((a, b) => {
+                const dateA = new Date(a.date.split('/').reverse().join('-'));
+                const dateB = new Date(b.date.split('/').reverse().join('-'));
+                return dateA - dateB;
+            });
+
+            // Aggiungi età per eventi dopo la nascita di Marica
+            const maricaBirth = "12/04/1961";
+            return events.map(event => {
+                const eventDate = new Date(event.date.split('/').reverse().join('-'));
+                const birthDate = new Date(maricaBirth.split('/').reverse().join('-'));
+                
+                if (eventDate >= birthDate && event.date !== maricaBirth) {
+                    const age = calculateAgeAtDate(maricaBirth, event.date);
+                    return {
+                        date: event.date,
+                        description: `${event.description} (${age} anni)`
+                    };
+                }
+                
+                return event;
+            });
+        }
+
+        function scrollToChronology() {
+            const chronologySection = document.getElementById('chronology-section');
+            if (chronologySection) {
+                const headerOffset = 120; // Offset per non nascondere il titolo
+                const elementPosition = chronologySection.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }
         }
 
         function selectPersonFromList(personName) {
