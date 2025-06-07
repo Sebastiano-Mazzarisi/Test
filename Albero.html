@@ -46,9 +46,10 @@
         }
 
         .container {
-            max-width: 100%;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 15px;
+            width: 100%;
         }
 
         .header {
@@ -250,14 +251,29 @@
             margin-bottom: 20px;
             box-shadow: var(--shadow);
             border: 3px solid var(--secondary-color);
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr auto;
             gap: 20px;
-            align-items: flex-start;
-            position: relative;
+            align-items: start;
+            width: 100%;
+            min-height: 200px;
+        }
+
+        .current-person.celebration {
+            background: #fffbeb;
+            border-color: #fbbf24;
+            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
         }
 
         .current-person-content {
-            flex: 1;
+            min-width: 0;
+        }
+
+        .current-person-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex-shrink: 0;
         }
 
         .current-person-calendar {
@@ -270,9 +286,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            position: absolute;
-            top: 20px;
-            right: 20px;
+            cursor: pointer;
         }
 
         .calendar-header {
@@ -298,9 +312,6 @@
         }
 
         .pdf-download-button {
-            position: absolute;
-            top: 110px;
-            right: 20px;
             width: 80px;
             height: 80px;
             background: white;
@@ -317,14 +328,48 @@
             overflow: hidden;
         }
 
-        .pdf-download-button:hover {
+        .summary-button {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .current-person-calendar:hover,
+        .pdf-download-button:hover,
+        .summary-button:hover {
             transform: translateY(-2px);
             box-shadow: var(--shadow-hover);
             border-color: var(--secondary-color);
         }
 
-        .pdf-download-button:active {
+        .current-person-calendar:active,
+        .pdf-download-button:active,
+        .summary-button:active {
             transform: scale(0.95);
+        }
+
+        .summary-button .summary-text {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary-color);
+            line-height: 1;
+            margin-top: 5px;
+        }
+
+        .summary-button .summary-icon-symbol {
+            font-size: 24px;
+            color: var(--secondary-color);
+            line-height: 1;
         }
 
         .pdf-download-button .pdf-text {
@@ -366,6 +411,7 @@
         .current-person-info {
             display: grid;
             gap: 12px;
+            grid-template-columns: 1fr;
         }
 
         .info-item {
@@ -380,6 +426,7 @@
             color: var(--text-secondary);
             min-width: 100px;
             font-size: 14px;
+            flex-shrink: 0;
         }
 
         .info-value {
@@ -387,6 +434,28 @@
             font-weight: 500;
             font-size: 14px;
             flex: 1;
+            word-wrap: break-word;
+        }
+
+        /* Layout migliorato per schermi più grandi */
+        @media (min-width: 768px) {
+            .current-person-info {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 16px 24px;
+            }
+            
+            .info-item {
+                padding: 6px 0;
+            }
+            
+            .info-label {
+                min-width: 90px;
+                font-size: 15px;
+            }
+            
+            .info-value {
+                font-size: 15px;
+            }
         }
 
         .relationships-container {
@@ -528,10 +597,27 @@
             font-style: italic;
         }
 
+        /* Forza layout a due righe per schermi stretti */
+        @media (max-width: 600px) {
+            .nav-buttons {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                grid-template-rows: 1fr 1fr;
+                gap: 6px;
+            }
+            
+            .nav-btn {
+                padding: 8px 6px;
+                font-size: 10px;
+                min-height: var(--touch-target);
+            }
+        }
+
         /* Mobile-specific improvements */
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
+                max-width: 100%;
             }
             
             .people-grid {
@@ -549,6 +635,19 @@
                 flex: 1;
             }
             
+            .current-person {
+                padding: 16px;
+                min-height: 180px;
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .current-person-buttons {
+                flex-direction: row;
+                justify-content: center;
+                gap: 8px;
+            }
+            
             .current-person-info {
                 font-size: 14px;
             }
@@ -561,28 +660,83 @@
             .info-value {
                 font-size: 13px;
             }
+
+            /* Dimensioni uniformi per i tre bottoni su mobile */
+            .current-person-calendar,
+            .pdf-download-button,
+            .summary-button {
+                width: 70px;
+                height: 70px;
+            }
+
+            .current-person-calendar .calendar-header {
+                font-size: 10px;
+            }
+
+            .current-person-calendar .calendar-day {
+                font-size: 20px;
+            }
+
+            .pdf-download-button .pdf-text,
+            .summary-button .summary-text {
+                font-size: 14px;
+            }
+
+            .pdf-download-button .pdf-icon-symbol {
+                font-size: 24px;
+            }
+
+            .summary-button .summary-icon-symbol {
+                font-size: 18px;
+            }
         }
 
-        /* Molto piccolo - forza due righe */
+        /* Molto piccolo - forza layout a griglia */
         @media (max-width: 480px) {
+            .nav-buttons {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: 1fr 1fr 1fr;
+                gap: 4px;
+            }
+            
             .nav-btn {
-                flex-basis: calc(50% - 2px);
-                max-width: calc(50% - 2px);
+                padding: 8px 4px;
+                font-size: 9px;
             }
-            
-            .nav-btn:nth-child(1),
-            .nav-btn:nth-child(2) {
-                flex-basis: calc(50% - 2px);
+
+            /* Bottoni ancora più piccoli su schermi molto piccoli */
+            .current-person-calendar,
+            .pdf-download-button,
+            .summary-button {
+                width: 60px;
+                height: 60px;
             }
-            
-            .nav-btn:nth-child(3),
-            .nav-btn:nth-child(4) {
-                flex-basis: calc(50% - 2px);
+
+            .current-person-calendar .calendar-header {
+                font-size: 9px;
+                padding: 2px;
             }
-            
-            .nav-btn:nth-child(5),
-            .nav-btn:nth-child(6) {
-                flex-basis: calc(50% - 2px);
+
+            .current-person-calendar .calendar-day {
+                font-size: 18px;
+            }
+
+            .pdf-download-button .pdf-text,
+            .summary-button .summary-text {
+                font-size: 12px;
+            }
+
+            .pdf-download-button .pdf-icon-symbol {
+                font-size: 20px;
+            }
+
+            .summary-button .summary-icon-symbol {
+                font-size: 16px;
+            }
+
+            .current-person-buttons {
+                gap: 6px;
             }
         }
 
@@ -618,6 +772,51 @@
             
             .people-grid {
                 grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            }
+        }
+
+        /* Tablet e schermi medi */
+        @media (min-width: 769px) and (max-width: 1200px) {
+            .container {
+                max-width: 1200px;
+                padding: 20px;
+            }
+            
+            .current-person {
+                padding: 25px;
+                min-height: 220px;
+                grid-template-columns: 1fr auto;
+                gap: 25px;
+            }
+            
+            .current-person-buttons {
+                gap: 12px;
+            }
+            
+            .people-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+        }
+
+        /* Desktop e schermi grandi */
+        @media (min-width: 1201px) {
+            .container {
+                padding: 25px;
+            }
+            
+            .current-person {
+                padding: 30px;
+                min-height: 240px;
+                grid-template-columns: 1fr auto;
+                gap: 30px;
+            }
+            
+            .current-person-buttons {
+                gap: 15px;
+            }
+            
+            .people-grid {
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             }
         }
 
@@ -667,6 +866,205 @@
 
         .hidden {
             display: none !important;
+        }
+
+        /* Finestra modale per il sunto */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--radius);
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-hover);
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        /* Finestra modale per eventi speciali (compleanni/onomastici) */
+        .celebration-modal {
+            background: #fffbeb;
+            border-radius: var(--radius);
+            max-width: 400px;
+            width: 100%;
+            padding: 30px;
+            box-shadow: var(--shadow-hover);
+            text-align: center;
+            position: relative;
+            animation: celebrationPulse 0.6s ease;
+            border: 3px solid #fbbf24;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .celebration-modal:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(251, 191, 36, 0.4);
+        }
+
+        @keyframes celebrationPulse {
+            0% { opacity: 0; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .celebration-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            animation: celebrationBounce 1s ease infinite;
+        }
+
+        @keyframes celebrationBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .celebration-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .celebration-date {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+        }
+
+        .celebration-message {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #ea580c;
+            margin-bottom: 20px;
+        }
+
+        .celebration-close {
+            background: #fbbf24;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .celebration-close:hover {
+            background: #f59e0b;
+            transform: translateY(-2px);
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            padding: 20px 20px 15px 20px;
+            border-bottom: 2px solid var(--light-bg);
+            position: sticky;
+            top: 0;
+            background: white;
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0;
+            text-align: center;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: var(--light-bg);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .summary-content {
+            line-height: 1.6;
+            color: var(--text-primary);
+        }
+
+        .summary-section {
+            margin-bottom: 20px;
+            padding: 0;
+        }
+
+        .summary-section:not(:last-child) {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            font-weight: 600;
+            color: var(--secondary-color);
+            margin-bottom: 5px;
+        }
+
+        .summary-value {
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .summary-person-link {
+            color: var(--secondary-color);
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: underline;
+            transition: color 0.2s ease;
+        }
+
+        .summary-person-link:hover {
+            color: var(--accent-color);
+            text-decoration: none;
         }
 
         /* Pagina tutte le persone */
@@ -733,6 +1131,18 @@
 
         .person-button.deceased {
             border-color: var(--accent-color);
+        }
+
+        .person-button.celebration {
+            background: #fffbeb;
+            border-color: #fbbf24;
+            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+        }
+
+        .person-button.celebration:hover {
+            background: #fef3c7;
+            border-color: #f59e0b;
+            transform: translateY(-2px);
         }
 
         .person-button-name {
@@ -815,6 +1225,8 @@
             margin-bottom: 16px;
             box-shadow: var(--shadow);
             border-left: 4px solid var(--secondary-color);
+            border: 2px solid var(--border-color);
+            border-left: 4px solid var(--secondary-color);
         }
 
         .marriage-date {
@@ -836,7 +1248,7 @@
 
         .marriage-person {
             background: var(--light-bg);
-            border: 2px solid transparent;
+            border: 2px solid var(--border-color);
             border-radius: var(--radius);
             padding: 12px 16px;
             cursor: pointer;
@@ -851,6 +1263,7 @@
             border-color: var(--secondary-color);
             background: white;
             box-shadow: var(--shadow);
+            transform: translateY(-1px);
         }
 
         .marriage-person:active {
@@ -1093,6 +1506,84 @@
                 font-size: 12px;
             }
         }
+
+        /* Media queries per la modale su mobile */
+        @media (max-width: 768px) {
+            .modal-content {
+                margin: 10px;
+                max-height: 90vh;
+            }
+            
+            .modal-header {
+                padding: 15px;
+            }
+            
+            .modal-title {
+                font-size: 1.3rem;
+            }
+            
+            .modal-body {
+                padding: 15px;
+            }
+            
+            .summary-section {
+                margin-bottom: 12px;
+                padding: 10px 0;
+            }
+            
+            .summary-label {
+                font-size: 13px;
+            }
+            
+            .summary-value {
+                font-size: 13px;
+            }
+            
+            .celebration-modal {
+                margin: 10px;
+                padding: 25px;
+                max-width: 350px;
+            }
+            
+            .celebration-icon {
+                font-size: 3rem;
+                margin-bottom: 12px;
+            }
+            
+            .celebration-name {
+                font-size: 1.3rem;
+                margin-bottom: 8px;
+            }
+            
+            .celebration-date {
+                font-size: 0.9rem;
+                margin-bottom: 12px;
+            }
+            
+            .celebration-message {
+                font-size: 1.1rem;
+                margin-bottom: 18px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .celebration-modal {
+                padding: 20px;
+                margin: 5px;
+            }
+            
+            .celebration-icon {
+                font-size: 2.5rem;
+            }
+            
+            .celebration-name {
+                font-size: 1.2rem;
+            }
+            
+            .celebration-message {
+                font-size: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1183,6 +1674,32 @@
                 </div>
             </div>
             <div class="age-chart-container" id="ageChartContainer">
+            </div>
+        </div>
+
+        <!-- Finestra modale per il sunto -->
+        <div class="modal-overlay" id="summaryModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="summaryModalTitle">Sunto Relazioni</h2>
+                    <button class="modal-close" onclick="closeSummaryModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="summary-content" id="summaryContent">
+                        <!-- Il contenuto del sunto verrà inserito qui -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Finestra modale per celebrazioni -->
+        <div class="modal-overlay" id="celebrationModal">
+            <div class="celebration-modal">
+                <div class="celebration-icon" id="celebrationIcon">🎂</div>
+                <div class="celebration-name" id="celebrationName">Nome Persona</div>
+                <div class="celebration-date" id="celebrationDate">01/01/2000</div>
+                <div class="celebration-message" id="celebrationMessage">Oggi compie X anni</div>
+                <button class="celebration-close" onclick="closeCelebrationModal()">🎉 Chiudi</button>
             </div>
         </div>
     </div>
@@ -1631,7 +2148,13 @@
             const ageText = person.death ? `${age} anni (†)` : `${age} anni`;
             const calendar = getBirthCalendar(person.birth);
             
+            // Controlla se la persona sta festeggiando oggi
+            const celebrationType = isPersonCelebratingToday(person);
+            const celebrationClass = celebrationType ? 'celebration' : '';
+            
             let pdfButtonHtml = '';
+            let summaryButtonHtml = '';
+            
             // Condizione per mostrare il pulsante PDF solo se la persona ha un pdfLink definito
             if (person.pdfLink) { 
                 pdfButtonHtml = `
@@ -1642,47 +2165,60 @@
                 `;
             }
 
+            // Bottone Sunto sempre presente
+            summaryButtonHtml = `
+                <button class="summary-button" onclick="showSummaryModal('${currentPerson}')">
+                    <span class="summary-icon-symbol">📋</span>
+                    <span class="summary-text">Sunto</span>
+                </button>
+            `;
+
             const currentPersonSection = document.getElementById('currentPersonSection');
             currentPersonSection.innerHTML = `
-                <div class="current-person-content">
-                    <div class="current-person-header">
-                        <div class="current-person-name">${currentPerson}</div>
-                        <div class="current-person-age">${ageText}</div>
+                <div class="current-person ${celebrationClass}">
+                    <div class="current-person-content">
+                        <div class="current-person-header">
+                            <div class="current-person-name">${currentPerson}</div>
+                            <div class="current-person-age">${ageText}</div>
+                        </div>
+                        <div class="current-person-info">
+                            <div class="info-item">
+                                <span class="info-label">Nascita:</span>
+                                <span class="info-value">${formatDate(person.birth)}</span>
+                            </div>
+                            ${person.death ? `
+                            <div class="info-item">
+                                <span class="info-label">Morte:</span>
+                                <span class="info-value">${formatDate(person.death)}</span>
+                            </div>
+                            ` : ''}
+                            ${person.onomastic ? `
+                            <div class="info-item">
+                                <span class="info-label">Onomastico:</span>
+                                <span class="info-value">${person.onomastic}</span>
+                            </div>
+                            ` : ''}
+                            ${person.marriage ? `
+                            <div class="info-item">
+                                <span class="info-label">Matrimonio:</span>
+                                <span class="info-value">${formatDate(person.marriage)}</span>
+                            </div>
+                            ` : ''}
+                            <div class="info-item">
+                                <span class="info-label">Genere:</span>
+                                <span class="info-value">${person.gender === 'M' ? '👨 Maschio' : '👩 Femmina'}</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="current-person-info">
-                        <div class="info-item">
-                            <span class="info-label">Nascita:</span>
-                            <span class="info-value">${formatDate(person.birth)}</span>
+                    <div class="current-person-buttons">
+                        <div class="current-person-calendar" onclick="scrollToChronology()" style="cursor: pointer;" title="Vai alla cronologia">
+                            <div class="calendar-header">${calendar.month}</div>
+                            <div class="calendar-day">${calendar.day}</div>
                         </div>
-                        ${person.death ? `
-                        <div class="info-item">
-                            <span class="info-label">Morte:</span>
-                            <span class="info-value">${formatDate(person.death)}</span>
-                        </div>
-                        ` : ''}
-                        ${person.onomastic ? `
-                        <div class="info-item">
-                            <span class="info-label">Onomastico:</span>
-                            <span class="info-value">${person.onomastic}</span>
-                        </div>
-                        ` : ''}
-                        ${person.marriage ? `
-                        <div class="info-item">
-                            <span class="info-label">Matrimonio:</span>
-                            <span class="info-value">${formatDate(person.marriage)}</span>
-                        </div>
-                        ` : ''}
-                        <div class="info-item">
-                            <span class="info-label">Genere:</span>
-                            <span class="info-value">${person.gender === 'M' ? '👨 Maschio' : '👩 Femmina'}</span>
-                        </div>
+                        ${pdfButtonHtml}
+                        ${summaryButtonHtml}
                     </div>
                 </div>
-                <div class="current-person-calendar" onclick="scrollToChronology()" style="cursor: pointer;" title="Vai alla cronologia">
-                    <div class="calendar-header">${calendar.month}</div>
-                    <div class="calendar-day">${calendar.day}</div>
-                </div>
-                ${pdfButtonHtml}
             `;
         }
 
@@ -1729,7 +2265,8 @@
                     if (parentData.parents) {
                         parentData.parents.forEach(grandparentName => {
                             const grandparentData = familyData[grandparentName];
-                            const side = person.parents[0] === parentName ? 'paterno' : 'materno';
+                            // Determina il lato in base al genere del genitore, non alla posizione nell'array
+                            const side = parentData.gender === 'M' ? 'paterno' : 'materno';
                             const relation = grandparentData.gender === 'M' ? `Nonno (${side})` : `Nonna (${side})`;
                             grandparents.push({name: grandparentName, relation});
                         });
@@ -2129,6 +2666,13 @@
                 updateDisplay();
                 isLoading = false;
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // Controlla celebrazioni se si va alla home (Luigi Pricci)
+                if (personName === "Luigi Pricci") {
+                    setTimeout(() => {
+                        checkCelebrations();
+                    }, 500); // Piccolo delay per far vedere prima il caricamento
+                }
             }, 300);
         }
 
@@ -2360,10 +2904,22 @@
                 const ageText = person.death ? `${age} anni (†)` : `${age} anni`;
                 const deceasedClass = person.death ? 'deceased' : '';
                 
+                // Controlla se la persona sta festeggiando oggi
+                const celebrationType = isPersonCelebratingToday(person);
+                const celebrationClass = celebrationType ? 'celebration' : '';
+                
+                // Aggiungi icona di celebrazione se appropriato
+                let celebrationIcon = '';
+                if (celebrationType === 'birthday') {
+                    celebrationIcon = ' 🎂';
+                } else if (celebrationType === 'nameday') {
+                    celebrationIcon = ' 🎊';
+                }
+                
                 html += `
-                    <div class="person-button ${deceasedClass}" onclick="selectPersonFromList('${name}')">
+                    <div class="person-button ${deceasedClass} ${celebrationClass}" onclick="selectPersonFromList('${name}')">
                         <div class="person-button-name">
-                            ${lastName.toUpperCase()}, ${firstName}
+                            ${lastName.toUpperCase()}, ${firstName}${celebrationIcon}
                         </div>
                         <div class="person-button-details">
                             <div class="person-button-birth">
@@ -2426,9 +2982,21 @@
                                     const ageText = person.death ? `${age} anni (†)` : `${age} anni`;
                                     const deceasedClass = person.death ? 'deceased' : '';
                                     
+                                    // Controlla se la persona sta festeggiando oggi
+                                    const celebrationType = isPersonCelebratingToday(person);
+                                    const celebrationClass = celebrationType ? 'celebration' : '';
+                                    
+                                    // Aggiungi icona di celebrazione se appropriato
+                                    let celebrationIcon = '';
+                                    if (celebrationType === 'birthday') {
+                                        celebrationIcon = ' 🎂';
+                                    } else if (celebrationType === 'nameday') {
+                                        celebrationIcon = ' 🎊';
+                                    }
+                                    
                                     return `
-                                        <div class="person-button ${deceasedClass}" onclick="selectPersonFromList('${name}')">
-                                            <div class="person-button-name">${name}</div>
+                                        <div class="person-button ${deceasedClass} ${celebrationClass}" onclick="selectPersonFromList('${name}')">
+                                            <div class="person-button-name">${name}${celebrationIcon}</div>
                                             <div class="person-button-details">
                                                 <div class="person-button-birth">
                                                     📅 ${formatDate(person.birth)} (${ageText})
@@ -2759,7 +3327,8 @@
                     if (parentData.parents) {
                         parentData.parents.forEach(grandparentName => {
                             const grandparentData = familyData[grandparentName];
-                            const side = person.parents[0] === parentName ? 'paterno' : 'materno';
+                            // Determina il lato in base al genere del genitore, non alla posizione nell'array
+                            const side = parentData.gender === 'M' ? 'paterno' : 'materno';
                             const relation = grandparentData.gender === 'M' ? `il nonno (${side})` : `la nonna (${side})`;
                             addPersonEvents(grandparentName, relation);
                         });
@@ -3009,6 +3578,712 @@
             });
         }
 
+        // FUNZIONI PER IL SUNTO DELLE RELAZIONI
+        function showSummaryModal(personName) {
+            const modal = document.getElementById('summaryModal');
+            const modalTitle = document.getElementById('summaryModalTitle');
+            const summaryContent = document.getElementById('summaryContent');
+            
+            modalTitle.textContent = `Sunto Relazioni - ${personName}`;
+            summaryContent.innerHTML = generateSummary(personName);
+            
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden'; // Previene scroll della pagina sottostante
+            
+            // Copia automaticamente il testo nel clipboard
+            copyToClipboard(personName);
+        }
+
+        async function copyToClipboard(personName) {
+            try {
+                const textVersion = generateTextSummary(personName);
+                
+                if (navigator.clipboard && window.isSecureContext) {
+                    // API Clipboard moderna
+                    await navigator.clipboard.writeText(textVersion);
+                    showCopyFeedback('✅ Copiato! Pronto per WhatsApp');
+                } else {
+                    // Fallback per browser più vecchi
+                    const textArea = document.createElement('textarea');
+                    textArea.value = textVersion;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    textArea.style.top = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    
+                    const success = document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    
+                    if (success) {
+                        showCopyFeedback('✅ Copiato! Pronto per WhatsApp');
+                    } else {
+                        showCopyFeedback('❌ Impossibile copiare automaticamente');
+                    }
+                }
+            } catch (err) {
+                console.error('Errore nella copia:', err);
+                showCopyFeedback('❌ Errore nella copia automatica');
+            }
+        }
+
+        function showCopyFeedback(message) {
+            // Rimuovi feedback precedenti
+            const existingFeedback = document.querySelector('.copy-feedback');
+            if (existingFeedback) {
+                existingFeedback.remove();
+            }
+            
+            // Crea nuovo feedback
+            const feedback = document.createElement('div');
+            feedback.className = 'copy-feedback';
+            feedback.textContent = message;
+            feedback.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #27ae60;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 25px;
+                font-weight: 600;
+                font-size: 14px;
+                z-index: 10000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                animation: feedbackSlide 3s ease forwards;
+            `;
+            
+            // Aggiungi l'animazione CSS
+            if (!document.querySelector('#feedback-animation')) {
+                const style = document.createElement('style');
+                style.id = 'feedback-animation';
+                style.textContent = `
+                    @keyframes feedbackSlide {
+                        0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+                        15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                        85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                        100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            document.body.appendChild(feedback);
+            
+            // Rimuovi dopo l'animazione
+            setTimeout(() => {
+                if (feedback.parentNode) {
+                    feedback.remove();
+                }
+            }, 3000);
+        }
+
+        function closeSummaryModal() {
+            const modal = document.getElementById('summaryModal');
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Funzione helper per estrarre il nome corretto (già definita sopra ma ripetuta per chiarezza)
+        function getDisplayNameForSummary(fullName) {
+            const nameParts = fullName.split(' ');
+            // Se inizia con "Maria" e ha almeno 3 parti (Maria + secondo nome + cognome)
+            if (nameParts[0] === 'Maria' && nameParts.length >= 3) {
+                return `${nameParts[0]} ${nameParts[1]}`;
+            }
+            // Altrimenti solo il primo nome
+            return nameParts[0];
+        }
+
+        function generateSummary(personName) {
+            const person = familyData[personName];
+            let summary = '';
+
+            // Funzione helper per creare link cliccabili nella versione HTML
+            function createPersonLink(name) {
+                return `<span class="summary-person-link" onclick="goToPersonFromSummary('${name}')">${name}</span>`;
+            }
+
+            function createPersonLinkWithShortName(name) {
+                return `<span class="summary-person-link" onclick="goToPersonFromSummary('${name}')">${getDisplayNameForSummary(name)}</span>`;
+            }
+
+            // Determina i termini corretti in base al genere
+            const isMale = person.gender === 'M';
+            const genderTerms = {
+                figlio: isMale ? 'Figlio' : 'Figlia',
+                sposato: isMale ? 'Sposato' : 'Sposata',
+                nato: isMale ? 'Nato' : 'Nata',
+                deceduto: isMale ? 'Deceduto' : 'Deceduta',
+                genitore: isMale ? 'Padre' : 'Madre',
+                fratello: isMale ? 'Fratello' : 'Sorella',
+                zio: isMale ? 'Zio' : 'Zia',
+                nonno: isMale ? 'Nonno' : 'Nonna',
+                prozio: isMale ? 'Prozio' : 'Prozia',
+                cugino: isMale ? 'Cugino' : 'Cugina',
+                genero: isMale ? 'Genero' : 'Nuora',
+                cognato: isMale ? 'Cognato' : 'Cognata',
+                nipotePaterno: isMale ? 'Nipote paterno' : 'Nipote paterna',
+                nipoteMaterno: isMale ? 'Nipote materno' : 'Nipote materna'
+            };
+
+            // INFORMAZIONI BASILARI - inizia direttamente con nome
+            summary += `<div class="summary-section">`;
+            summary += `<div class="summary-value">`;
+            summary += `<strong>${personName}</strong><br>`;
+            summary += `${genderTerms.nato} il ${formatDate(person.birth)}`;
+            if (person.death) {
+                summary += `<br>${genderTerms.deceduto} il ${formatDate(person.death)}`;
+            }
+            if (person.onomastic) {
+                summary += `<br>Onomastico il ${person.onomastic}`;
+            }
+            summary += `</div></div>`;
+
+            // MATRIMONIO
+            if (person.marriage && person.spouse) {
+                summary += `<div class="summary-section">`;
+                summary += `<div class="summary-value">${genderTerms.sposato} il ${formatDate(person.marriage)} con ${createPersonLink(person.spouse)}</div>`;
+                summary += `</div>`;
+            }
+
+            // GENITORI
+            if (person.parents && person.parents.length > 0) {
+                summary += `<div class="summary-section">`;
+                summary += `<div class="summary-value">${genderTerms.figlio} di: ${person.parents.map(parent => createPersonLink(parent)).join(' e ')}</div>`;
+                summary += `</div>`;
+            }
+
+            // NONNI
+            const grandparents = [];
+            if (person.parents) {
+                person.parents.forEach(parentName => {
+                    const parentData = familyData[parentName];
+                    if (parentData.parents) {
+                        parentData.parents.forEach(grandparentName => {
+                            const grandparentData = familyData[grandparentName];
+                            // Determina il lato in base al genere del genitore, non alla posizione nell'array
+                            const side = parentData.gender === 'M' ? 'paterni' : 'materni';
+                            grandparents.push({name: grandparentName, side, gender: grandparentData.gender});
+                        });
+                    }
+                });
+            }
+
+            if (grandparents.length > 0) {
+                const paternalGrandparents = grandparents.filter(g => g.side === 'paterni');
+                const maternalGrandparents = grandparents.filter(g => g.side === 'materni');
+                
+                summary += `<div class="summary-section">`;
+                summary += `<div class="summary-value">`;
+                
+                if (paternalGrandparents.length > 0) {
+                    summary += `${genderTerms.nipotePaterno} di: ${paternalGrandparents.map(g => createPersonLink(g.name)).join(' e ')}`;
+                }
+                if (maternalGrandparents.length > 0) {
+                    if (paternalGrandparents.length > 0) summary += '<br>';
+                    summary += `${genderTerms.nipoteMaterno} di: ${maternalGrandparents.map(g => createPersonLink(g.name)).join(' e ')}`;
+                }
+                
+                summary += `</div></div>`;
+            }
+
+            // FIGLI
+            if (person.children && person.children.length > 0) {
+                summary += `<div class="summary-section">`;
+                summary += `<div class="summary-value">${genderTerms.genitore} di: ${person.children.map(child => createPersonLinkWithShortName(child)).join(', ')}</div>`;
+                summary += `</div>`;
+            }
+
+            // FRATELLI/SORELLE
+            if (person.siblings && person.siblings.length > 0) {
+                summary += `<div class="summary-section">`;
+                summary += `<div class="summary-value">${genderTerms.fratello} di: ${person.siblings.map(sibling => createPersonLinkWithShortName(sibling)).join(', ')}</div>`;
+                summary += `</div>`;
+            }
+
+            // ZII/ZIE (Nipoti dei fratelli/sorelle)
+            const nephews = [];
+            if (person.siblings) {
+                person.siblings.forEach(siblingName => {
+                    const siblingData = familyData[siblingName];
+                    if (siblingData.children) {
+                        siblingData.children.forEach(nephewName => {
+                            nephews.push(nephewName);
+                        });
+                    }
+                });
+            }
+
+            if (nephews.length > 0) {
+                summary += `<div class="summary-section">`;
+                summary += `<div class="summary-value">${genderTerms.zio} di: ${nephews.map(nephew => createPersonLinkWithShortName(nephew)).join(', ')}</div>`;
+                summary += `</div>`;
+            }
+
+            // PROZIO/PROZIA (Figli dei nipoti - pronipoti)
+            const greatNephews = [];
+            nephews.forEach(nephewName => {
+                const nephewData = familyData[nephewName];
+                if (nephewData.children) {
+                    nephewData.children.forEach(greatNephewName => {
+                        greatNephews.push(greatNephewName);
+                    });
+                }
+            });
+
+            if (greatNephews.length > 0) {
+                summary += `<div class="summary-section">`;
+                summary += `<div class="summary-value">${genderTerms.prozio} di: ${greatNephews.map(gn => createPersonLinkWithShortName(gn)).join(', ')}</div>`;
+                summary += `</div>`;
+            }
+
+            // NIPOTI DIRETTI (figli dei propri figli)
+            const directGrandchildren = [];
+            if (person.children) {
+                person.children.forEach(childName => {
+                    const childData = familyData[childName];
+                    if (childData.children) {
+                        childData.children.forEach(grandchildName => {
+                            directGrandchildren.push(grandchildName);
+                        });
+                    }
+                });
+            }
+
+            if (directGrandchildren.length > 0) {
+                summary += `<div class="summary-section">`;
+                summary += `<div class="summary-value">${genderTerms.nonno} di: ${directGrandchildren.map(gc => createPersonLinkWithShortName(gc)).join(', ')}</div>`;
+                summary += `</div>`;
+            }
+
+            // ZII E ZIE (fratelli/sorelle dei genitori)
+            const unclesAunts = [];
+            if (person.parents) {
+                person.parents.forEach(parentName => {
+                    const parentData = familyData[parentName];
+                    if (parentData.siblings) {
+                        parentData.siblings.forEach(uncleName => {
+                            unclesAunts.push(uncleName);
+                        });
+                    }
+                });
+            }
+
+            if (unclesAunts.length > 0) {
+                summary += `<div class="summary-section">`;
+                summary += `<div class="summary-value">Nipote di: ${unclesAunts.map(ua => createPersonLinkWithShortName(ua)).join(', ')}</div>`;
+                summary += `</div>`;
+            }
+
+            // CUGINI (figli degli zii)
+            const cousins = [];
+            unclesAunts.forEach(uncleName => {
+                const uncleData = familyData[uncleName];
+                if (uncleData.children) {
+                    uncleData.children.forEach(cousinName => {
+                        cousins.push(cousinName);
+                    });
+                }
+            });
+
+            if (cousins.length > 0) {
+                summary += `<div class="summary-section">`;
+                summary += `<div class="summary-value">${genderTerms.cugino} di: ${cousins.map(c => createPersonLinkWithShortName(c)).join(', ')}</div>`;
+                summary += `</div>`;
+            }
+
+            // SUOCERI (se sposato)
+            if (person.spouse && familyData[person.spouse] && familyData[person.spouse].parents) {
+                const inLaws = familyData[person.spouse].parents;
+                summary += `<div class="summary-section">`;
+                summary += `<div class="summary-value">${genderTerms.genero} di: ${inLaws.map(il => createPersonLink(il)).join(' e ')}</div>`;
+                summary += `</div>`;
+            }
+
+            // COGNATI (fratelli/sorelle del coniuge)
+            if (person.spouse && familyData[person.spouse] && familyData[person.spouse].siblings) {
+                const broInLaws = familyData[person.spouse].siblings;
+                summary += `<div class="summary-section">`;
+                summary += `<div class="summary-value">${genderTerms.cognato} di: ${broInLaws.map(bil => createPersonLinkWithShortName(bil)).join(', ')}</div>`;
+                summary += `</div>`;
+            }
+
+            return summary;
+        }
+
+        // Genera versione testo per WhatsApp (senza HTML)
+        function generateTextSummary(personName) {
+            const person = familyData[personName];
+            let textSummary = '';
+
+            // Funzione helper per nomi senza link
+            function getShortName(name) {
+                return getDisplayNameForSummary(name);
+            }
+
+            // Funzione helper per aggiungere anno di nascita
+            function getNameWithYear(name) {
+                if (!familyData[name]) return name;
+                const birthYear = familyData[name].birth.split('/')[2];
+                return `${getShortName(name)} (${birthYear})`;
+            }
+
+            function getFullNameWithYear(name) {
+                if (!familyData[name]) return name;
+                const birthYear = familyData[name].birth.split('/')[2];
+                return `${name} (${birthYear})`;
+            }
+
+            // Determina i termini corretti in base al genere
+            const isMale = person.gender === 'M';
+            const genderTerms = {
+                figlio: isMale ? '*Figlio*' : '*Figlia*',
+                sposato: isMale ? '*Sposato*' : '*Sposata*',
+                nato: isMale ? 'Nato' : 'Nata',
+                deceduto: isMale ? '*Deceduto*' : '*Deceduta*',
+                genitore: isMale ? '*Padre*' : '*Madre*',
+                fratello: isMale ? '*Fratello*' : '*Sorella*',
+                zio: isMale ? '*Zio*' : '*Zia*',
+                nonno: isMale ? '*Nonno*' : '*Nonna*',
+                prozio: isMale ? '*Prozio*' : '*Prozia*',
+                cugino: isMale ? '*Cugino*' : '*Cugina*',
+                genero: isMale ? '*Genero*' : '*Nuora*',
+                cognato: isMale ? '*Cognato*' : '*Cognata*',
+                nipotePaterno: isMale ? '*Nipote paterno*' : '*Nipote paterna*',
+                nipoteMaterno: isMale ? '*Nipote materno*' : '*Nipote materna*'
+            };
+
+            // INFORMAZIONI BASILARI
+            textSummary += `👤 *${personName}*\n`;
+            textSummary += `${genderTerms.nato} il ${formatDate(person.birth)}`;
+            if (person.death) {
+                textSummary += `\n${genderTerms.deceduto} il ${formatDate(person.death)}`;
+            }
+            if (person.onomastic) {
+                textSummary += `\nOnomastico il ${person.onomastic}`;
+            }
+            textSummary += '\n\n';
+
+            // MATRIMONIO
+            if (person.marriage && person.spouse) {
+                textSummary += `💒 ${genderTerms.sposato} il ${formatDate(person.marriage)} con ${getFullNameWithYear(person.spouse)}\n\n`;
+            }
+
+            // GENITORI
+            if (person.parents && person.parents.length > 0) {
+                textSummary += `👫 ${genderTerms.figlio} di: ${person.parents.map(parent => getFullNameWithYear(parent)).join(' e ')}\n\n`;
+            }
+
+            // NONNI
+            const grandparents = [];
+            if (person.parents) {
+                person.parents.forEach(parentName => {
+                    const parentData = familyData[parentName];
+                    if (parentData.parents) {
+                        parentData.parents.forEach(grandparentName => {
+                            const grandparentData = familyData[grandparentName];
+                            // Determina il lato in base al genere del genitore, non alla posizione nell'array
+                            const side = parentData.gender === 'M' ? 'paterni' : 'materni';
+                            grandparents.push({name: grandparentName, side, gender: grandparentData.gender});
+                        });
+                    }
+                });
+            }
+
+            if (grandparents.length > 0) {
+                const paternalGrandparents = grandparents.filter(g => g.side === 'paterni');
+                const maternalGrandparents = grandparents.filter(g => g.side === 'materni');
+                
+                if (paternalGrandparents.length > 0) {
+                    textSummary += `👴👵 ${genderTerms.nipotePaterno} di: ${paternalGrandparents.map(g => getFullNameWithYear(g.name)).join(' e ')}\n`;
+                }
+                if (maternalGrandparents.length > 0) {
+                    textSummary += `👴👵 ${genderTerms.nipoteMaterno} di: ${maternalGrandparents.map(g => getFullNameWithYear(g.name)).join(' e ')}\n`;
+                }
+                textSummary += '\n';
+            }
+
+            // FIGLI
+            if (person.children && person.children.length > 0) {
+                textSummary += `👶 ${genderTerms.genitore} di: ${person.children.map(child => getNameWithYear(child)).join(', ')}\n\n`;
+            }
+
+            // FRATELLI/SORELLE
+            if (person.siblings && person.siblings.length > 0) {
+                textSummary += `👫 ${genderTerms.fratello} di: ${person.siblings.map(sibling => getNameWithYear(sibling)).join(', ')}\n\n`;
+            }
+
+            // ZII/ZIE (Nipoti dei fratelli/sorelle)
+            const nephews = [];
+            if (person.siblings) {
+                person.siblings.forEach(siblingName => {
+                    const siblingData = familyData[siblingName];
+                    if (siblingData.children) {
+                        siblingData.children.forEach(nephewName => {
+                            nephews.push(nephewName);
+                        });
+                    }
+                });
+            }
+
+            if (nephews.length > 0) {
+                textSummary += `👦👧 ${genderTerms.zio} di: ${nephews.map(nephew => getNameWithYear(nephew)).join(', ')}\n\n`;
+            }
+
+            // PROZIO/PROZIA (Figli dei nipoti - pronipoti)
+            const greatNephews = [];
+            nephews.forEach(nephewName => {
+                const nephewData = familyData[nephewName];
+                if (nephewData.children) {
+                    nephewData.children.forEach(greatNephewName => {
+                        greatNephews.push(greatNephewName);
+                    });
+                }
+            });
+
+            if (greatNephews.length > 0) {
+                textSummary += `👶 ${genderTerms.prozio} di: ${greatNephews.map(gn => getNameWithYear(gn)).join(', ')}\n\n`;
+            }
+
+            // NIPOTI DIRETTI (figli dei propri figli)
+            const directGrandchildren = [];
+            if (person.children) {
+                person.children.forEach(childName => {
+                    const childData = familyData[childName];
+                    if (childData.children) {
+                        childData.children.forEach(grandchildName => {
+                            directGrandchildren.push(grandchildName);
+                        });
+                    }
+                });
+            }
+
+            if (directGrandchildren.length > 0) {
+                textSummary += `👧👦 ${genderTerms.nonno} di: ${directGrandchildren.map(gc => getNameWithYear(gc)).join(', ')}\n\n`;
+            }
+
+            // ZII E ZIE (fratelli/sorelle dei genitori)
+            const unclesAunts = [];
+            if (person.parents) {
+                person.parents.forEach(parentName => {
+                    const parentData = familyData[parentName];
+                    if (parentData.siblings) {
+                        parentData.siblings.forEach(uncleName => {
+                            unclesAunts.push(uncleName);
+                        });
+                    }
+                });
+            }
+
+            if (unclesAunts.length > 0) {
+                textSummary += `👨‍👩‍👦 *Nipote* di: ${unclesAunts.map(ua => getNameWithYear(ua)).join(', ')}\n\n`;
+            }
+
+            // CUGINI (figli degli zii)
+            const cousins = [];
+            unclesAunts.forEach(uncleName => {
+                const uncleData = familyData[uncleName];
+                if (uncleData.children) {
+                    uncleData.children.forEach(cousinName => {
+                        cousins.push(cousinName);
+                    });
+                }
+            });
+
+            if (cousins.length > 0) {
+                textSummary += `👥 ${genderTerms.cugino} di: ${cousins.map(c => getNameWithYear(c)).join(', ')}\n\n`;
+            }
+
+            // SUOCERI (se sposato)
+            if (person.spouse && familyData[person.spouse] && familyData[person.spouse].parents) {
+                const inLaws = familyData[person.spouse].parents;
+                textSummary += `👨‍👩‍👦 ${genderTerms.genero} di: ${inLaws.map(il => getFullNameWithYear(il)).join(' e ')}\n\n`;
+            }
+
+            // COGNATI (fratelli/sorelle del coniuge)
+            if (person.spouse && familyData[person.spouse] && familyData[person.spouse].siblings) {
+                const broInLaws = familyData[person.spouse].siblings;
+                textSummary += `👫 ${genderTerms.cognato} di: ${broInLaws.map(bil => getNameWithYear(bil)).join(', ')}\n\n`;
+            }
+
+            return textSummary.trim(); // Rimuovi l'ultimo \n\n
+        }
+
+        function goToPersonFromSummary(personName) {
+            closeSummaryModal();
+            goToPerson(personName);
+        }
+
+        // FUNZIONI PER LE CELEBRAZIONI (COMPLEANNI E ONOMASTICI)
+        function checkCelebrations() {
+            const today = new Date();
+            const todayDay = today.getDate();
+            const todayMonth = today.getMonth() + 1; // JavaScript months are 0-indexed
+            
+            let celebrationFound = false;
+            
+            // Controlla compleanni
+            Object.entries(familyData).forEach(([name, person]) => {
+                if (person.death) return; // Salta persone decedute
+                
+                const birthParts = person.birth.split('/');
+                const birthDay = parseInt(birthParts[0]);
+                const birthMonth = parseInt(birthParts[1]);
+                
+                if (birthDay === todayDay && birthMonth === todayMonth) {
+                    const age = calculateAge(person.birth);
+                    showCelebrationModal(name, person.birth, 'birthday', age);
+                    celebrationFound = true;
+                    return;
+                }
+            });
+            
+            // Se non ci sono compleanni, controlla onomastici
+            if (!celebrationFound) {
+                Object.entries(familyData).forEach(([name, person]) => {
+                    if (person.death || !person.onomastic) return; // Salta persone decedute o senza onomastico
+                    
+                    const onomasticDate = parseOnomasticDate(person.onomastic);
+                    if (onomasticDate && onomasticDate.day === todayDay && onomasticDate.month === todayMonth) {
+                        showCelebrationModal(name, person.birth, 'nameday', null);
+                        celebrationFound = true;
+                        return;
+                    }
+                });
+            }
+        }
+
+        // Funzione helper per controllare se una persona sta festeggiando oggi
+        function isPersonCelebratingToday(person) {
+            if (person.death) return false; // Persone decedute non festeggiano
+            
+            const today = new Date();
+            const todayDay = today.getDate();
+            const todayMonth = today.getMonth() + 1;
+            
+            // Controlla compleanno
+            const birthParts = person.birth.split('/');
+            const birthDay = parseInt(birthParts[0]);
+            const birthMonth = parseInt(birthParts[1]);
+            
+            if (birthDay === todayDay && birthMonth === todayMonth) {
+                return 'birthday';
+            }
+            
+            // Controlla onomastico
+            if (person.onomastic) {
+                const onomasticDate = parseOnomasticDate(person.onomastic);
+                if (onomasticDate && onomasticDate.day === todayDay && onomasticDate.month === todayMonth) {
+                    return 'nameday';
+                }
+            }
+            
+            return false;
+        }
+        
+        function parseOnomasticDate(onomasticString) {
+            if (!onomasticString) return null;
+            
+            // Mappa dei mesi in italiano
+            const months = {
+                'gennaio': 1, 'febbraio': 2, 'marzo': 3, 'aprile': 4,
+                'maggio': 5, 'giugno': 6, 'luglio': 7, 'agosto': 8,
+                'settembre': 9, 'ottobre': 10, 'novembre': 11, 'dicembre': 12
+            };
+            
+            // Formato "24 giugno"
+            const monthNameRegex = /(\d{1,2})\s+(\w+)/;
+            const monthNameMatch = onomasticString.match(monthNameRegex);
+            if (monthNameMatch) {
+                const day = parseInt(monthNameMatch[1]);
+                const monthName = monthNameMatch[2].toLowerCase();
+                const month = months[monthName];
+                if (month) {
+                    return { day, month };
+                }
+            }
+            
+            // Formato "15/03" o "15/3"
+            const slashRegex = /(\d{1,2})\/(\d{1,2})/;
+            const slashMatch = onomasticString.match(slashRegex);
+            if (slashMatch) {
+                const day = parseInt(slashMatch[1]);
+                const month = parseInt(slashMatch[2]);
+                return { day, month };
+            }
+            
+            return null;
+        }
+        
+        function showCelebrationModal(personName, birthDate, type, age) {
+            const modal = document.getElementById('celebrationModal');
+            const celebrationModal = modal.querySelector('.celebration-modal');
+            const icon = document.getElementById('celebrationIcon');
+            const name = document.getElementById('celebrationName');
+            const date = document.getElementById('celebrationDate');
+            const message = document.getElementById('celebrationMessage');
+            
+            name.textContent = personName;
+            date.textContent = formatDate(birthDate);
+            
+            if (type === 'birthday') {
+                icon.textContent = '🎂';
+                message.textContent = `Oggi compie ${age} anni`;
+            } else if (type === 'nameday') {
+                icon.textContent = '🎊';
+                message.textContent = 'Onomastico';
+            }
+            
+            // Aggiungi click handler per navigare alla persona
+            const clickHandler = () => {
+                closeCelebrationModal();
+                goToPerson(personName);
+            };
+            
+            // Rimuovi eventuali listener precedenti
+            celebrationModal.removeEventListener('click', celebrationModal._clickHandler);
+            
+            // Aggiungi nuovo listener
+            celebrationModal._clickHandler = clickHandler;
+            celebrationModal.addEventListener('click', clickHandler);
+            
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+            
+            // Chiudi automaticamente dopo 7 secondi (aumentato da 5)
+            const autoCloseTimer = setTimeout(() => {
+                if (modal.classList.contains('show')) {
+                    closeCelebrationModal();
+                }
+            }, 7000);
+            
+            // Memorizza il timer per poterlo cancellare se necessario
+            modal._autoCloseTimer = autoCloseTimer;
+        }
+        
+        function closeCelebrationModal() {
+            const modal = document.getElementById('celebrationModal');
+            const celebrationModal = modal.querySelector('.celebration-modal');
+            
+            // Cancella il timer di auto-chiusura se esiste
+            if (modal._autoCloseTimer) {
+                clearTimeout(modal._autoCloseTimer);
+                modal._autoCloseTimer = null;
+            }
+            
+            // Rimuovi event listener
+            if (celebrationModal._clickHandler) {
+                celebrationModal.removeEventListener('click', celebrationModal._clickHandler);
+                celebrationModal._clickHandler = null;
+            }
+            
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+
         function scrollToChronology() {
             const chronologySection = document.getElementById('chronology-section');
             if (chronologySection) {
@@ -3077,6 +4352,35 @@
             updateDisplay();
             setupSearch();
             
+            // Controlla celebrazioni all'avvio
+            setTimeout(() => {
+                checkCelebrations();
+            }, 1000); // Delay per far caricare prima la pagina
+            
+            // Gestione modale sunto
+            const modal = document.getElementById('summaryModal');
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeSummaryModal();
+                }
+            });
+            
+            // Gestione modale celebrazioni
+            const celebrationModal = document.getElementById('celebrationModal');
+            celebrationModal.addEventListener('click', (e) => {
+                if (e.target === celebrationModal) {
+                    closeCelebrationModal();
+                }
+            });
+            
+            // Chiudi modale con ESC
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeSummaryModal();
+                    closeCelebrationModal();
+                }
+            });
+            
             // Aggiungi supporto per swipe su mobile per tornare indietro o alla home
             let startX = 0;
             let startY = 0;
@@ -3119,4 +4423,3 @@
     </script>
 </body>
 </html>
-            
