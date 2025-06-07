@@ -101,7 +101,7 @@
             border-radius: var(--radius);
             cursor: pointer;
             font-weight: 600;
-            font-size: 12px;
+            font-size: 14px;
             transition: all 0.3s ease;
             text-decoration: none;
             display: flex;
@@ -176,12 +176,15 @@
             padding: 12px 16px;
             margin-bottom: 20px;
             box-shadow: var(--shadow);
-            display: none;
+            display: block;
             overflow-x: auto;
             white-space: nowrap;
             position: sticky;
             top: 90px;
             z-index: 99;
+            border: 2px solid #fbbf24;
+            background: #fffbeb;
+            min-height: 44px;
         }
 
         .breadcrumb-item {
@@ -276,6 +279,36 @@
             flex-shrink: 0;
         }
 
+        .back-button {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .back-button .back-text {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary-color);
+            line-height: 1;
+            margin-top: 5px;
+        }
+
+        .back-button .back-icon-symbol {
+            font-size: 24px;
+            color: var(--success-color);
+            line-height: 1;
+        }
+
         .current-person-calendar {
             width: 80px;
             height: 80px;
@@ -346,7 +379,8 @@
 
         .current-person-calendar:hover,
         .pdf-download-button:hover,
-        .summary-button:hover {
+        .summary-button:hover,
+        .back-button:hover {
             transform: translateY(-2px);
             box-shadow: var(--shadow-hover);
             border-color: var(--secondary-color);
@@ -354,7 +388,8 @@
 
         .current-person-calendar:active,
         .pdf-download-button:active,
-        .summary-button:active {
+        .summary-button:active,
+        .back-button:active {
             transform: scale(0.95);
         }
 
@@ -608,7 +643,7 @@
             
             .nav-btn {
                 padding: 8px 6px;
-                font-size: 10px;
+                font-size: 12px;
                 min-height: var(--touch-target);
             }
         }
@@ -630,7 +665,7 @@
             
             .nav-btn {
                 padding: 6px 8px;
-                font-size: 11px;
+                font-size: 13px;
                 min-width: 0;
                 flex: 1;
             }
@@ -646,6 +681,7 @@
                 flex-direction: row;
                 justify-content: center;
                 gap: 8px;
+                flex-wrap: wrap;
             }
             
             .current-person-info {
@@ -661,10 +697,11 @@
                 font-size: 13px;
             }
 
-            /* Dimensioni uniformi per i tre bottoni su mobile */
+            /* Dimensioni uniformi per i quattro bottoni su mobile */
             .current-person-calendar,
             .pdf-download-button,
-            .summary-button {
+            .summary-button,
+            .back-button {
                 width: 70px;
                 height: 70px;
             }
@@ -678,7 +715,8 @@
             }
 
             .pdf-download-button .pdf-text,
-            .summary-button .summary-text {
+            .summary-button .summary-text,
+            .back-button .back-text {
                 font-size: 14px;
             }
 
@@ -686,7 +724,8 @@
                 font-size: 24px;
             }
 
-            .summary-button .summary-icon-symbol {
+            .summary-button .summary-icon-symbol,
+            .back-button .back-icon-symbol {
                 font-size: 18px;
             }
         }
@@ -702,13 +741,14 @@
             
             .nav-btn {
                 padding: 8px 4px;
-                font-size: 9px;
+                font-size: 11px;
             }
 
             /* Bottoni ancora più piccoli su schermi molto piccoli */
             .current-person-calendar,
             .pdf-download-button,
-            .summary-button {
+            .summary-button,
+            .back-button {
                 width: 60px;
                 height: 60px;
             }
@@ -723,7 +763,8 @@
             }
 
             .pdf-download-button .pdf-text,
-            .summary-button .summary-text {
+            .summary-button .summary-text,
+            .back-button .back-text {
                 font-size: 12px;
             }
 
@@ -731,7 +772,8 @@
                 font-size: 20px;
             }
 
-            .summary-button .summary-icon-symbol {
+            .summary-button .summary-icon-symbol,
+            .back-button .back-icon-symbol {
                 font-size: 16px;
             }
 
@@ -792,6 +834,11 @@
             .current-person-buttons {
                 gap: 12px;
             }
+
+            .back-button {
+                width: 80px;
+                height: 80px;
+            }
             
             .people-grid {
                 grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -813,6 +860,11 @@
             
             .current-person-buttons {
                 gap: 15px;
+            }
+
+            .back-button {
+                width: 80px;
+                height: 80px;
             }
             
             .people-grid {
@@ -1263,7 +1315,6 @@
             border-color: var(--secondary-color);
             background: white;
             box-shadow: var(--shadow);
-            transform: translateY(-1px);
         }
 
         .marriage-person:active {
@@ -2173,6 +2224,14 @@
                 </button>
             `;
 
+            // Bottone Torna indietro sempre presente
+            const backButtonHtml = `
+                <button class="back-button" onclick="goBack()" title="Torna indietro">
+                    <span class="back-icon-symbol">←</span>
+                    <span class="back-text">Indietro</span>
+                </button>
+            `;
+
             const currentPersonSection = document.getElementById('currentPersonSection');
             currentPersonSection.innerHTML = `
                 <div class="current-person ${celebrationClass}">
@@ -2217,6 +2276,7 @@
                         </div>
                         ${pdfButtonHtml}
                         ${summaryButtonHtml}
+                        ${backButtonHtml}
                     </div>
                 </div>
             `;
@@ -2695,10 +2755,6 @@
 
         function updateBreadcrumb() {
             const breadcrumb = document.getElementById('breadcrumb');
-            if (navigationHistory.length === 0 || currentPerson === "Luigi Pricci") {
-                breadcrumb.style.display = 'none';
-                return;
-            }
             
             // Funzione helper per estrarre il nome corretto (gestisce doppi nomi)
             function getDisplayName(fullName) {
@@ -2711,20 +2767,27 @@
                 return nameParts[0];
             }
             
+            // Breadcrumb sempre visibile
             breadcrumb.style.display = 'block';
             let html = '';
             
             html += `<span class="breadcrumb-item" onclick="goToPerson('Luigi Pricci')">🏠 Home</span>`;
             
-            // Mostra solo gli ultimi 2 elementi della cronologia per risparmiare spazio
-            const recentHistory = navigationHistory.slice(-2);
-            recentHistory.forEach(person => {
+            if (navigationHistory.length > 0) {
+                // Mostra solo gli ultimi 2 elementi della cronologia per risparmiare spazio
+                const recentHistory = navigationHistory.slice(-2);
+                recentHistory.forEach(person => {
+                    html += `<span class="breadcrumb-separator">></span>`;
+                    html += `<span class="breadcrumb-item" onclick="goToPerson('${person}')">${getDisplayName(person)}</span>`;
+                });
+                
                 html += `<span class="breadcrumb-separator">></span>`;
-                html += `<span class="breadcrumb-item" onclick="goToPerson('${person}')">${getDisplayName(person)}</span>`;
-            });
-            
-            html += `<span class="breadcrumb-separator">></span>`;
-            html += `<span class="breadcrumb-item current">${getDisplayName(currentPerson)}</span>`;
+                html += `<span class="breadcrumb-item current">${getDisplayName(currentPerson)}</span>`;
+            } else if (currentPerson !== "Luigi Pricci") {
+                // Mostra almeno la persona corrente se non è Luigi Pricci
+                html += `<span class="breadcrumb-separator">></span>`;
+                html += `<span class="breadcrumb-item current">${getDisplayName(currentPerson)}</span>`;
+            }
             
             breadcrumb.innerHTML = html;
         }
@@ -2854,7 +2917,6 @@
             // Nascondi tutte le viste
             document.getElementById('currentPersonSection').style.display = 'none';
             document.getElementById('relationshipsContainer').style.display = 'none';
-            document.getElementById('breadcrumb').style.display = 'none';
             
             // Nascondi tutte le pagine speciali
             document.getElementById('allPeoplePage').classList.remove('show');
@@ -4338,7 +4400,11 @@
                     isLoading = false;
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }, 300);
+            } else if (currentPerson !== "Luigi Pricci") {
+                // Se non c'è cronologia ma non siamo alla home, torna alla home
+                goToPerson('Luigi Pricci');
             }
+            // Se siamo già alla home e non c'è cronologia, non fare nulla
         }
 
         // Inizializzazione ottimizzata per mobile
