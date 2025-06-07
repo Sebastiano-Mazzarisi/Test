@@ -277,8 +277,8 @@
         }
 
         .current-person-photo {
-            width: 100px;
-            height: 100px;
+            width: 300px; /* Modificato a 300px */
+            height: 300px; /* Modificato a 300px */
             border-radius: 12px;
             object-fit: cover;
             border: 2px solid var(--border-color);
@@ -725,8 +725,8 @@
             }
 
             .current-person-photo {
-                width: 80px;
-                height: 80px;
+                width: 150px; /* Adattato per mobile */
+                height: 150px; /* Adattato per mobile */
                 margin: 0 auto;
             }
             
@@ -892,8 +892,8 @@
             }
             
             .current-person-photo {
-                width: 90px;
-                height: 90px;
+                width: 250px; /* Adattato per tablet */
+                height: 250px; /* Adattato per tablet */
             }
             
             .current-person-buttons {
@@ -931,8 +931,8 @@
             }
             
             .current-person-photo {
-                width: 100px;
-                height: 100px;
+                width: 300px; /* Mantenuto a 300px per desktop */
+                height: 300px; /* Mantenuto a 300px per desktop */
             }
             
             .current-person-buttons {
@@ -1861,7 +1861,7 @@
                 generation: 2,
                 gender: "M",
                 pdfLink: "https://drive.google.com/file/d/1SvUaQVnipFWQEgbbK9EhlIyoyXYoDKrz/preview",
-                photoLink: "https://drive.google.com/uc?export=view&id=1N1ELCSVGzKcXtn4PyRNBJ7rp4F4a6qXH" // Aggiunto per testing
+                photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Luigi%20Pricci.jpg" // AGGIORNATO CON SOTTOCARTELLA
             },
             "Teresa Grilletti": {
                 birth: "05/03/1937",
@@ -1909,7 +1909,8 @@
                 siblings: ["Angela Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Pricci", "Giuseppe Pricci", "Tiziana Pricci"],
                 generation: 3,
                 gender: "F",
-                pdfLink: "https://drive.google.com/file/d/1i56zhHocLw-OKwjZZVZtv3RAzHEuIIlR/preview"
+                pdfLink: "https://drive.google.com/file/d/1i56zhHocLw-OKwjZZVZtv3RAzHEuIIlR/preview",
+                photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Maria%20Antonietta%20Pricci.jpg" // Esempio: AGGIORNATO CON SOTTOCARTELLA
             },
             "Saverio Chiarappa": {
                 birth: "26/11/1951",
@@ -1934,7 +1935,7 @@
                 generation: 3,
                 gender: "F",
                 pdfLink: "https://drive.google.com/file/d/1RCsFaWZ9E698snnWBka6UkSSJ6N01s4h/preview",
-                photoLink: "https://drive.google.com/uc?export=view&id=1N1ELCSVGzKcXtn4PyRNBJ7rp4F4a6qXH"
+                photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Marica%20Pricci.jpg" // AGGIORNATO CON SOTTOCARTELLA
             },
             "Sebastiano Mazzarisi": {
                 birth: "07/05/1957",
@@ -2027,7 +2028,8 @@
                 siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Pricci", "Giuseppe Pricci"],
                 generation: 3,
                 gender: "F",
-                pdfLink: "https://drive.google.com/file/d/1WJGO-9ctHMntTx4uZCiIAald0liJXa-3/preview"
+                pdfLink: "https://drive.google.com/file/d/1WJGO-9ctHMntTx4uZCiIAald0liJXa-3/preview",
+                photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Tiziana%20Pricci.jpg" // AGGIORNATO CON SOTTOCARTELLA
             },
             "Riccardo Dalena": {
                 birth: "11/04/1973",
@@ -2224,40 +2226,8 @@
         let isLoading = false;
         let currentView = "person"; // "person", "all-people", "generations", "marriages", "age-chart"
 
-        // Funzione helper per convertire i link di Google Drive in URL diretti per le immagini
-        function convertGoogleDriveLink(shareUrl) {
-            if (!shareUrl) return null;
-            
-            // Se è già nel formato corretto, restituiscilo così com'è
-            if (shareUrl.includes('uc?export=view&id=')) {
-                return shareUrl;
-            }
-            
-            // Estrae l'ID del file dall'URL di condivisione
-            let fileId = null;
-            
-            // Formato: https://drive.google.com/file/d/FILE_ID/view?usp=sharing o ?usp=drive_link
-            // Ho aggiunto `(?:sharing|drive_link)` per coprire entrambi i casi
-            let match = shareUrl.match(/\/file\/d\/([a-zA-Z0-9-_]+)\/view\?usp=(?:sharing|drive_link)/);
-            if (match && match[1]) {
-                fileId = match[1];
-            }
-            
-            // Formato alternativo: https://drive.google.com/open?id=FILE_ID
-            if (!fileId) {
-                match = shareUrl.match(/[?&]id=([a-zA-Z0-9-_]+)/);
-                if (match && match[1]) {
-                    fileId = match[1];
-                }
-            }
-            
-            if (fileId) {
-                return `https://drive.google.com/uc?export=view&id=${fileId}`;
-            }
-            
-            // Se non riusciamo a convertire, restituiamo l'URL originale
-            return shareUrl;
-        }
+        // Funzione per convertire i link di Google Drive è stata rimossa,
+        // dato che le immagini sono ora su GitHub Pages.
 
         // Funzioni utili
         function calculateAge(birthDate, deathDate = null) {
@@ -2271,7 +2241,7 @@
             return dateString;
         }
 
-        // Nuova funzione per scomporre il nome completo
+        // Nuova funzione per scomporre il nome completo, gestisce prefissi e doppi nomi
         function parseFullName(fullName) {
             const parts = fullName.split(' ');
             let firstName = '';
@@ -2284,16 +2254,16 @@
                 parts.shift(); // Rimuove il prefisso dalla lista delle parti
             }
 
-            // Caso di nomi composti che iniziano con "Maria" o altri doppi nomi
+            // Caso di nomi composti che iniziano con "Maria" (o altri doppi nomi se ce ne fossero)
             if (parts[0] === "Maria" && parts.length > 2) {
                 firstName = `${parts[0]} ${parts[1]}`; // Maria Grazia, Maria Antonietta
                 lastName = parts.slice(2).join(' ');
-            } else if (parts.length > 1) {
+            } else if (parts.length > 1) { // Nomi normali con nome e cognome
                 firstName = parts[0];
                 lastName = parts.slice(1).join(' ');
-            } else {
+            } else { // Caso di nome singolo o solo cognome
                 firstName = parts[0];
-                lastName = ''; // Se c'è solo una parola, è il nome (o cognome se non c'è nome)
+                lastName = ''; 
             }
 
             return {
@@ -2341,14 +2311,12 @@
             const ageText = person.death ? `${age} anni (†)` : `${age} anni`;
             const calendar = getBirthCalendar(person.birth);
             
-            // Controlla se la persona sta festeggiando oggi
             const celebrationType = isPersonCelebratingToday(person);
             const celebrationClass = celebrationType ? 'celebration' : '';
             
             let pdfButtonHtml = '';
             let summaryButtonHtml = '';
             
-            // Condizione per mostrare il pulsante PDF solo se la persona ha un pdfLink definito
             if (person.pdfLink) { 
                 pdfButtonHtml = `
                     <a href="${person.pdfLink}" target="_blank" class="pdf-download-button">
@@ -2358,7 +2326,6 @@
                 `;
             }
 
-            // Bottone Sunto sempre presente
             summaryButtonHtml = `
                 <button class="summary-button" onclick="showSummaryModal('${currentPerson}')">
                     <span class="summary-icon-symbol">📋</span>
@@ -2366,7 +2333,6 @@
                 </button>
             `;
 
-            // Bottone Torna indietro sempre presente
             const backButtonHtml = `
                 <button class="back-button" onclick="goBack()" title="Torna indietro">
                     <span class="back-icon-symbol">←</span>
@@ -2376,7 +2342,7 @@
 
             const currentPersonSection = document.getElementById('currentPersonSection');
             
-            // Prima rendiamo senza foto, poi controlliamo se possiamo caricare l'immagine
+            // Inizializza il container con la classe 'no-photo' (per il quadratino vuoto di default)
             currentPersonSection.innerHTML = `
                 <div class="current-person ${celebrationClass} no-photo" id="person-container">
                     <div class="current-person-content">
@@ -2425,65 +2391,70 @@
                 </div>
             `;
 
-            // Se c'è un link foto, prova a caricarla
-            if (person.photoLink) {
-                tryLoadPhoto(person.photoLink, currentPerson);
+            // Qui, prima di provare a caricare la foto, creiamo un placeholder vuoto
+            // che diventerà la foto se il caricamento riesce, o rimarrà vuoto.
+            const container = document.getElementById('person-container');
+            if (container) {
+                const photoPlaceholder = document.createElement('div');
+                photoPlaceholder.className = 'current-person-photo'; // Applica la classe per le dimensioni e lo sfondo
+                photoPlaceholder.textContent = '👤'; // Icona o testo placeholder se preferisci
+                container.insertBefore(photoPlaceholder, container.firstChild); // Inserisci il placeholder
+
+                // Se c'è un link foto, prova a caricarla nel placeholder
+                if (person.photoLink) {
+                    tryLoadPhoto(person.photoLink, currentPerson, photoPlaceholder); // Passa il placeholder
+                } else {
+                    console.log(`[PHOTO_DEBUG] Nessun photoLink per ${currentPerson}. Mostrato placeholder vuoto.`);
+                }
             }
         }
 
-        function tryLoadPhoto(photoLink, personName) {
-            const imageUrl = convertGoogleDriveLink(photoLink) || photoLink;
-            console.log(`[PHOTO_DEBUG] Tentativo di caricare la foto per ${personName} da: ${imageUrl}`); // Debug
-            const img = new Image();
+        // Funzione tryLoadPhoto modificata per usare il placeholder
+        function tryLoadPhoto(photoLink, personName, placeholderElement) {
+            const imageUrl = photoLink; // Ora l'URL è già pulito da Google Drive
+            console.log(`[PHOTO_DEBUG] Tentativo di caricare la foto per ${personName} da: ${imageUrl}`);
             
-            // Imposta attributi CORS per facilitare l'embedding da altri domini (spesso necessario per Google Drive)
-            img.crossOrigin = "anonymous"; // Importante per gestire eventuali problemi CORS
+            const img = new Image();
+            // img.crossOrigin = "anonymous"; // Rimosso: non più necessario con immagini sulla stessa origine
 
             img.onload = function() {
-                console.log(`[PHOTO_DEBUG] Foto caricata con successo per ${personName}.`); // Debug
+                console.log(`[PHOTO_DEBUG] Foto caricata con successo per ${personName}.`);
                 const container = document.getElementById('person-container');
-                
-                // Controllo per assicurarsi che il container esista e che la persona visualizzata sia ancora quella corretta
                 if (container && container.querySelector('.current-person-name').textContent === personName) {
-                    // Rimuovi eventuali foto placeholder o precedenti immagini
-                    let existingPhoto = container.querySelector('.current-person-photo');
-                    if (existingPhoto) {
-                        existingPhoto.remove();
-                        console.log(`[PHOTO_DEBUG] Rimossa foto esistente per ${personName}.`); // Debug
+                    // Sostituisci il placeholder con l'immagine effettiva
+                    if (placeholderElement && placeholderElement.parentNode === container) {
+                         // Crea l'elemento immagine effettivo
+                        const photoElement = document.createElement('img');
+                        photoElement.src = imageUrl;
+                        photoElement.alt = `Foto di ${personName}`;
+                        photoElement.className = 'current-person-photo'; // Mantieni la classe per le dimensioni
+                        photoElement.loading = 'lazy';
+                        
+                        container.replaceChild(photoElement, placeholderElement); // Sostituisci il div con l'immagine
+                        container.classList.remove('no-photo');
+                        container.classList.add('has-photo');
+                        console.log(`[PHOTO_DEBUG] Immagine effettiva aggiunta per ${personName}.`);
+                    } else {
+                        console.warn(`[PHOTO_DEBUG] Placeholder non trovato o non nel DOM previsto per ${personName}.`);
                     }
-
-                    // Crea l'elemento foto
-                    const photoElement = document.createElement('img');
-                    photoElement.src = imageUrl;
-                    photoElement.alt = `Foto di ${personName}`;
-                    photoElement.className = 'current-person-photo';
-                    photoElement.loading = 'lazy'; // Ottimizzazione caricamento
-                    
-                    // Inserisci la foto come primo elemento del container
-                    container.insertBefore(photoElement, container.firstChild);
-                    
-                    // Applica le classi CSS per il layout con foto
-                    container.classList.remove('no-photo');
-                    container.classList.add('has-photo');
-                    console.log(`[PHOTO_DEBUG] Foto aggiunta e classi aggiornate per ${personName}.`); // Debug
                 } else {
-                    console.warn(`[PHOTO_DEBUG] Container o persona non corrispondente per ${personName}. La foto non verrà inserita.`); // Debug
+                    console.warn(`[PHOTO_DEBUG] Container o persona non corrispondente per ${personName}. La foto non verrà inserita.`);
                 }
             };
             
             img.onerror = function() {
-                console.error(`[PHOTO_DEBUG] ERRORE: Impossibile caricare la foto per ${personName} da: ${imageUrl}. Verifica permessi di Drive o link.`, this); // Debug
+                console.error(`[PHOTO_DEBUG] ERRORE: Impossibile caricare la foto per ${personName} da: ${imageUrl}. Lascio il placeholder vuoto.`);
                 const container = document.getElementById('person-container');
                 if (container) {
                     container.classList.remove('has-photo');
-                    container.classList.add('no-photo');
-                    console.log(`[PHOTO_DEBUG] Ripristinato layout 'no-photo' per ${personName}.`); // Debug
+                    container.classList.add('no-photo'); // Assicurati che le classi siano corrette
                 }
-                // Potresti aggiungere un fallback qui, come un'icona di persona
-                // const fallbackIcon = document.createElement('div');
-                // fallbackIcon.className = 'current-person-photo';
-                // fallbackIcon.textContent = person.gender === 'M' ? '👨' : '👩';
-                // container.insertBefore(fallbackIcon, container.firstChild);
+                // Il placeholderElement rimane nel DOM come il "quadratino vuoto"
+                if (placeholderElement) {
+                    placeholderElement.textContent = '❓'; // Puoi cambiare l'icona se vuoi indicare un errore
+                    placeholderElement.style.background = 'var(--accent-color)'; // O un colore diverso
+                    placeholderElement.style.color = 'white';
+                }
             };
             
             // Avvia il caricamento dell'immagine impostando la sorgente
@@ -2964,7 +2935,7 @@
         function updateBreadcrumb() {
             const breadcrumb = document.getElementById('breadcrumb');
             
-            // Funzione helper per estrarre il nome corretto (gestisce doppi nomi)
+            // Funzione helper per estrarre il nome corretto (gestisce doppi nomi e prefissi)
             function getDisplayName(fullName) {
                 const nameInfo = parseFullName(fullName);
                 if (nameInfo.prefix) {
@@ -3453,16 +3424,17 @@
             const events = [];
             const addedMarriages = new Set(); // Per evitare duplicazioni matrimoni
 
-            // Funzione helper per estrarre il nome corretto (gestisce doppi nomi)
-            function getDisplayNameForChronology(fullName) { // Rinomina per evitare conflitti
+            // Funzione helper per estrarre il nome corretto per la cronologia
+            function getDisplayNameForChronology(fullName) { 
                 const nameInfo = parseFullName(fullName);
                 if (nameInfo.prefix) {
                     return `${nameInfo.prefix} ${nameInfo.firstName}`;
                 }
+                // Se ha un cognome, usiamo nome e cognome
                 if (nameInfo.lastName) {
                     return `${nameInfo.firstName} ${nameInfo.lastName}`;
                 }
-                return nameInfo.firstName;
+                return nameInfo.firstName; // Altrimenti solo il nome
             }
 
             // Funzione helper per correggere articoli e preposizioni
@@ -3506,10 +3478,10 @@
                 
                 // Correggi il genere nei rapporti di parentela
                 let correctedRelationship = relationship;
-                if (relationship.includes('(figlio di') && targetPerson.gender === 'F') {
-                    correctedRelationship = relationship.replace('(figlio di', '(figlia di');
-                } else if (relationship.includes('(figlia di') && targetPerson.gender === 'M') {
-                    correctedRelationship = relationship.replace('(figlia di', '(figlio di');
+                if (correctedRelationship.includes('(figlio di') && targetPerson.gender === 'F') {
+                    correctedRelationship = correctedRelationship.replace('(figlio di', '(figlia di');
+                } else if (correctedRelationship.includes('(figlia di') && targetPerson.gender === 'M') {
+                    correctedRelationship = correctedRelationship.replace('(figlia di', '(figlio di');
                 }
                 
                 // Correggi "materno/materna" e "paterno/paterna"
@@ -3979,8 +3951,9 @@
             if (nameInfo.prefix) {
                 return `${nameInfo.prefix} ${nameInfo.firstName}`; // Es. "Nonno Giovanni"
             }
+            // Se ha un cognome, mostriamo "Nome Cognome"
             if (nameInfo.lastName) {
-                return `${nameInfo.firstName} ${nameInfo.lastName}`; // Es. "Maria Grazia Mazzarisi"
+                return `${nameInfo.firstName} ${nameInfo.lastName}`;
             }
             return nameInfo.firstName; // Nome singolo
         }
@@ -4204,7 +4177,7 @@
                 summary += `</div>`;
             }
 
-            return summary;
+            return textSummary.trim(); // Rimuovi l'ultimo \n\n
         }
 
         // Genera versione testo per WhatsApp (senza HTML)
