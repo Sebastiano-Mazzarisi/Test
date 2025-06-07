@@ -255,11 +255,19 @@
             box-shadow: var(--shadow);
             border: 3px solid var(--secondary-color);
             display: grid;
-            grid-template-columns: 1fr auto;
             gap: 20px;
             align-items: start;
             width: 100%;
             min-height: 200px;
+            transition: grid-template-columns 0.3s ease;
+        }
+
+        .current-person.has-photo {
+            grid-template-columns: auto 1fr auto;
+        }
+
+        .current-person.no-photo {
+            grid-template-columns: 1fr auto;
         }
 
         .current-person.celebration {
@@ -268,8 +276,47 @@
             box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
         }
 
+        .current-person-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid var(--border-color);
+            box-shadow: var(--shadow);
+            flex-shrink: 0;
+            background: var(--light-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: var(--text-secondary);
+        }
+
+        .current-person-photo.loading {
+            background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
+                        linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #f0f0f0 75%), 
+                        linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            animation: photoLoading 1s linear infinite;
+        }
+
+        @keyframes photoLoading {
+            0% { background-position: 0 0, 0 10px, 10px -10px, -10px 0px; }
+            100% { background-position: 20px 20px, 20px 30px, 30px 10px, 10px 20px; }
+        }
+
+        .current-person-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
         .current-person-content {
             min-width: 0;
+            flex: 1;
         }
 
         .current-person-buttons {
@@ -673,8 +720,14 @@
             .current-person {
                 padding: 16px;
                 min-height: 180px;
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr !important;
                 gap: 15px;
+            }
+
+            .current-person-photo {
+                width: 80px;
+                height: 80px;
+                margin: 0 auto;
             }
             
             .current-person-buttons {
@@ -827,8 +880,20 @@
             .current-person {
                 padding: 25px;
                 min-height: 220px;
-                grid-template-columns: 1fr auto;
                 gap: 25px;
+            }
+            
+            .current-person.has-photo {
+                grid-template-columns: auto 1fr auto;
+            }
+            
+            .current-person.no-photo {
+                grid-template-columns: 1fr auto;
+            }
+            
+            .current-person-photo {
+                width: 90px;
+                height: 90px;
             }
             
             .current-person-buttons {
@@ -854,8 +919,20 @@
             .current-person {
                 padding: 30px;
                 min-height: 240px;
-                grid-template-columns: 1fr auto;
                 gap: 30px;
+            }
+            
+            .current-person.has-photo {
+                grid-template-columns: auto 1fr auto;
+            }
+            
+            .current-person.no-photo {
+                grid-template-columns: 1fr auto;
+            }
+            
+            .current-person-photo {
+                width: 100px;
+                height: 100px;
             }
             
             .current-person-buttons {
@@ -1718,17 +1795,14 @@
                 <div class="age-chart-title">Grafico delle Età</div>
                 <div class="age-chart-subtitle">Distribuzione delle età dei membri della famiglia</div>
                 <div class="age-legend">
-                    <div class="age-legend-item">
-                        <div style="width: 30px; height: 12px; border-radius: 6px; background: linear-gradient(to right, var(--secondary-color) 40%, var(--warning-color) 40% 70%, #bdc3c7 70%);"></div>
-                        <span>Blu = anni vissuti, Arancione = oltre la media</span>
-                    </div>
+                    <div style="width: 30px; height: 12px; border-radius: 6px; background: linear-gradient(to right, var(--secondary-color) 40%, var(--warning-color) 40% 70%, #bdc3c7 70%);"></div>
+                    <span>Blu = anni vissuti, Arancione = oltre la media</span>
                 </div>
             </div>
             <div class="age-chart-container" id="ageChartContainer">
             </div>
         </div>
 
-        <!-- Finestra modale per il sunto -->
         <div class="modal-overlay" id="summaryModal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1737,13 +1811,11 @@
                 </div>
                 <div class="modal-body">
                     <div class="summary-content" id="summaryContent">
-                        <!-- Il contenuto del sunto verrà inserito qui -->
-                    </div>
+                        </div>
                 </div>
             </div>
         </div>
 
-        <!-- Finestra modale per celebrazioni -->
         <div class="modal-overlay" id="celebrationModal">
             <div class="celebration-modal">
                 <div class="celebration-icon" id="celebrationIcon">🎂</div>
@@ -1788,7 +1860,8 @@
                 parents: ["Nonno Giovanni Pricci", "Angelina Gasparro"],
                 generation: 2,
                 gender: "M",
-                pdfLink: "https://drive.google.com/file/d/1SvUaQVnipFWQEgbbK9EhlIyoyXYoDKrz/preview"
+                pdfLink: "https://drive.google.com/file/d/1SvUaQVnipFWQEgbbK9EhlIyoyXYoDKrz/preview",
+                photoLink: "https://drive.google.com/uc?export=view&id=1N1ELCSVGzKcXtn4PyRNBJ7rp4F4a6qXH" // Aggiunto per testing
             },
             "Teresa Grilletti": {
                 birth: "05/03/1937",
@@ -1860,7 +1933,8 @@
                 siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Vanna Pricci", "Giovanni Pricci", "Giuseppe Pricci", "Tiziana Pricci"],
                 generation: 3,
                 gender: "F",
-                pdfLink: "https://drive.google.com/file/d/1RCsFaWZ9E698snnWBka6UkSSJ6N01s4h/preview"
+                pdfLink: "https://drive.google.com/file/d/1RCsFaWZ9E698snnWBka6UkSSJ6N01s4h/preview",
+                photoLink: "https://drive.google.com/uc?export=view&id=1N1ELCSVGzKcXtn4PyRNBJ7rp4F4a6qXH"
             },
             "Sebastiano Mazzarisi": {
                 birth: "07/05/1957",
@@ -2150,6 +2224,41 @@
         let isLoading = false;
         let currentView = "person"; // "person", "all-people", "generations", "marriages", "age-chart"
 
+        // Funzione helper per convertire i link di Google Drive in URL diretti per le immagini
+        function convertGoogleDriveLink(shareUrl) {
+            if (!shareUrl) return null;
+            
+            // Se è già nel formato corretto, restituiscilo così com'è
+            if (shareUrl.includes('uc?export=view&id=')) {
+                return shareUrl;
+            }
+            
+            // Estrae l'ID del file dall'URL di condivisione
+            let fileId = null;
+            
+            // Formato: https://drive.google.com/file/d/FILE_ID/view?usp=sharing o ?usp=drive_link
+            // Ho aggiunto `(?:sharing|drive_link)` per coprire entrambi i casi
+            let match = shareUrl.match(/\/file\/d\/([a-zA-Z0-9-_]+)\/view\?usp=(?:sharing|drive_link)/);
+            if (match && match[1]) {
+                fileId = match[1];
+            }
+            
+            // Formato alternativo: https://drive.google.com/open?id=FILE_ID
+            if (!fileId) {
+                match = shareUrl.match(/[?&]id=([a-zA-Z0-9-_]+)/);
+                if (match && match[1]) {
+                    fileId = match[1];
+                }
+            }
+            
+            if (fileId) {
+                return `https://drive.google.com/uc?export=view&id=${fileId}`;
+            }
+            
+            // Se non riusciamo a convertire, restituiamo l'URL originale
+            return shareUrl;
+        }
+
         // Funzioni utili
         function calculateAge(birthDate, deathDate = null) {
             const birth = new Date(birthDate.split('/').reverse().join('-'));
@@ -2160,6 +2269,39 @@
         function formatDate(dateString) {
             if (!dateString) return '';
             return dateString;
+        }
+
+        // Nuova funzione per scomporre il nome completo
+        function parseFullName(fullName) {
+            const parts = fullName.split(' ');
+            let firstName = '';
+            let lastName = '';
+            let prefix = ''; // Per gestire "Nonno", "Nonna", ecc.
+
+            // Gestione dei prefissi (es. "Nonno", "Nonna")
+            if (parts[0] === "Nonno" || parts[0] === "Nonna") {
+                prefix = parts[0];
+                parts.shift(); // Rimuove il prefisso dalla lista delle parti
+            }
+
+            // Caso di nomi composti che iniziano con "Maria" o altri doppi nomi
+            if (parts[0] === "Maria" && parts.length > 2) {
+                firstName = `${parts[0]} ${parts[1]}`; // Maria Grazia, Maria Antonietta
+                lastName = parts.slice(2).join(' ');
+            } else if (parts.length > 1) {
+                firstName = parts[0];
+                lastName = parts.slice(1).join(' ');
+            } else {
+                firstName = parts[0];
+                lastName = ''; // Se c'è solo una parola, è il nome (o cognome se non c'è nome)
+            }
+
+            return {
+                prefix: prefix,
+                firstName: firstName,
+                lastName: lastName,
+                fullName: fullName // Manteniamo anche il nome completo originale
+            };
         }
 
         function createPersonCard(personName, relationship = "") {
@@ -2233,8 +2375,10 @@
             `;
 
             const currentPersonSection = document.getElementById('currentPersonSection');
+            
+            // Prima rendiamo senza foto, poi controlliamo se possiamo caricare l'immagine
             currentPersonSection.innerHTML = `
-                <div class="current-person ${celebrationClass}">
+                <div class="current-person ${celebrationClass} no-photo" id="person-container">
                     <div class="current-person-content">
                         <div class="current-person-header">
                             <div class="current-person-name">${currentPerson}</div>
@@ -2280,6 +2424,70 @@
                     </div>
                 </div>
             `;
+
+            // Se c'è un link foto, prova a caricarla
+            if (person.photoLink) {
+                tryLoadPhoto(person.photoLink, currentPerson);
+            }
+        }
+
+        function tryLoadPhoto(photoLink, personName) {
+            const imageUrl = convertGoogleDriveLink(photoLink) || photoLink;
+            console.log(`[PHOTO_DEBUG] Tentativo di caricare la foto per ${personName} da: ${imageUrl}`); // Debug
+            const img = new Image();
+            
+            // Imposta attributi CORS per facilitare l'embedding da altri domini (spesso necessario per Google Drive)
+            img.crossOrigin = "anonymous"; // Importante per gestire eventuali problemi CORS
+
+            img.onload = function() {
+                console.log(`[PHOTO_DEBUG] Foto caricata con successo per ${personName}.`); // Debug
+                const container = document.getElementById('person-container');
+                
+                // Controllo per assicurarsi che il container esista e che la persona visualizzata sia ancora quella corretta
+                if (container && container.querySelector('.current-person-name').textContent === personName) {
+                    // Rimuovi eventuali foto placeholder o precedenti immagini
+                    let existingPhoto = container.querySelector('.current-person-photo');
+                    if (existingPhoto) {
+                        existingPhoto.remove();
+                        console.log(`[PHOTO_DEBUG] Rimossa foto esistente per ${personName}.`); // Debug
+                    }
+
+                    // Crea l'elemento foto
+                    const photoElement = document.createElement('img');
+                    photoElement.src = imageUrl;
+                    photoElement.alt = `Foto di ${personName}`;
+                    photoElement.className = 'current-person-photo';
+                    photoElement.loading = 'lazy'; // Ottimizzazione caricamento
+                    
+                    // Inserisci la foto come primo elemento del container
+                    container.insertBefore(photoElement, container.firstChild);
+                    
+                    // Applica le classi CSS per il layout con foto
+                    container.classList.remove('no-photo');
+                    container.classList.add('has-photo');
+                    console.log(`[PHOTO_DEBUG] Foto aggiunta e classi aggiornate per ${personName}.`); // Debug
+                } else {
+                    console.warn(`[PHOTO_DEBUG] Container o persona non corrispondente per ${personName}. La foto non verrà inserita.`); // Debug
+                }
+            };
+            
+            img.onerror = function() {
+                console.error(`[PHOTO_DEBUG] ERRORE: Impossibile caricare la foto per ${personName} da: ${imageUrl}. Verifica permessi di Drive o link.`, this); // Debug
+                const container = document.getElementById('person-container');
+                if (container) {
+                    container.classList.remove('has-photo');
+                    container.classList.add('no-photo');
+                    console.log(`[PHOTO_DEBUG] Ripristinato layout 'no-photo' per ${personName}.`); // Debug
+                }
+                // Potresti aggiungere un fallback qui, come un'icona di persona
+                // const fallbackIcon = document.createElement('div');
+                // fallbackIcon.className = 'current-person-photo';
+                // fallbackIcon.textContent = person.gender === 'M' ? '👨' : '👩';
+                // container.insertBefore(fallbackIcon, container.firstChild);
+            };
+            
+            // Avvia il caricamento dell'immagine impostando la sorgente
+            img.src = imageUrl;
         }
 
         // FUNZIONE POTENZIATA: Gestisce tutti i 17 gradi di parentela
@@ -2758,13 +2966,11 @@
             
             // Funzione helper per estrarre il nome corretto (gestisce doppi nomi)
             function getDisplayName(fullName) {
-                const nameParts = fullName.split(' ');
-                // Se inizia con "Maria" e ha almeno 3 parti (Maria + secondo nome + cognome)
-                if (nameParts[0] === 'Maria' && nameParts.length >= 3) {
-                    return `${nameParts[0]} ${nameParts[1]}`;
+                const nameInfo = parseFullName(fullName);
+                if (nameInfo.prefix) {
+                    return nameInfo.firstName; // Se c'è un prefisso, usa solo il nome
                 }
-                // Altrimenti solo il primo nome
-                return nameParts[0];
+                return nameInfo.firstName; // Altrimenti usa il primo nome
             }
             
             // Breadcrumb sempre visibile
@@ -2945,23 +3151,30 @@
             
             // Ordina le persone per cognome e nome
             const sortedPeople = Object.entries(familyData).sort((a, b) => {
-                const nameA = a[0].split(' ');
-                const nameB = b[0].split(' ');
-                const lastNameA = nameA[nameA.length - 1];
-                const lastNameB = nameB[nameB.length - 1];
-                
-                if (lastNameA !== lastNameB) {
-                    return lastNameA.localeCompare(lastNameB);
+                const nameInfoA = parseFullName(a[0]);
+                const nameInfoB = parseFullName(b[0]);
+
+                // Ordina per cognome
+                if (nameInfoA.lastName !== nameInfoB.lastName) {
+                    return nameInfoA.lastName.localeCompare(nameInfoB.lastName);
                 }
-                return nameA[0].localeCompare(nameB[0]);
+                // Poi per nome (inclusi i prefissi nel nome)
+                let fullNameA = nameInfoA.firstName;
+                if (nameInfoA.prefix) fullNameA = `${nameInfoA.prefix} ${fullNameA}`;
+                let fullNameB = nameInfoB.firstName;
+                if (nameInfoB.prefix) fullNameB = `${nameInfoB.prefix} ${fullNameB}`;
+
+                return fullNameA.localeCompare(fullNameB);
             });
             
             let html = '';
             
             sortedPeople.forEach(([name, person]) => {
-                const nameParts = name.split(' ');
-                const firstName = nameParts[0];
-                const lastName = nameParts.slice(1).join(' ');
+                const nameInfo = parseFullName(name);
+                const displayFirstName = nameInfo.firstName;
+                const displayLastName = nameInfo.lastName;
+                const displayPrefix = nameInfo.prefix;
+
                 const age = calculateAge(person.birth, person.death);
                 const ageText = person.death ? `${age} anni (†)` : `${age} anni`;
                 const deceasedClass = person.death ? 'deceased' : '';
@@ -2978,10 +3191,21 @@
                     celebrationIcon = ' 🎊';
                 }
                 
+                let displayNameForList = '';
+                if (displayLastName) {
+                    displayNameForList = `${displayLastName.toUpperCase()}, ${displayFirstName}`;
+                } else {
+                    displayNameForList = displayFirstName; // Per casi con solo un nome/cognome singolo
+                }
+
+                if (displayPrefix) {
+                    displayNameForList += ` (${displayPrefix})`; // Aggiungi il prefisso in parentesi
+                }
+
                 html += `
                     <div class="person-button ${deceasedClass} ${celebrationClass}" onclick="selectPersonFromList('${name}')">
                         <div class="person-button-name">
-                            ${lastName.toUpperCase()}, ${firstName}${celebrationIcon}
+                            ${displayNameForList}${celebrationIcon}
                         </div>
                         <div class="person-button-details">
                             <div class="person-button-birth">
@@ -3230,14 +3454,15 @@
             const addedMarriages = new Set(); // Per evitare duplicazioni matrimoni
 
             // Funzione helper per estrarre il nome corretto (gestisce doppi nomi)
-            function getDisplayName(fullName) {
-                const nameParts = fullName.split(' ');
-                // Se inizia con "Maria" e ha almeno 3 parti (Maria + secondo nome + cognome)
-                if (nameParts[0] === 'Maria' && nameParts.length >= 3) {
-                    return `${nameParts[0]} ${nameParts[1]}`;
+            function getDisplayNameForChronology(fullName) { // Rinomina per evitare conflitti
+                const nameInfo = parseFullName(fullName);
+                if (nameInfo.prefix) {
+                    return `${nameInfo.prefix} ${nameInfo.firstName}`;
                 }
-                // Altrimenti solo il primo nome
-                return nameParts[0];
+                if (nameInfo.lastName) {
+                    return `${nameInfo.firstName} ${nameInfo.lastName}`;
+                }
+                return nameInfo.firstName;
             }
 
             // Funzione helper per correggere articoli e preposizioni
@@ -3312,7 +3537,7 @@
                         const marriageRelationship = correctMarriageArticle(correctedRelationship);
                         events.push({
                             date: targetPerson.marriage,
-                            description: `Matrimonio ${marriageRelationship} <span class='clickable-person' onclick="goToPerson('${targetPersonName}')">${getDisplayName(targetPersonName)}</span> con <span class='clickable-person' onclick="goToPerson('${targetPerson.spouse}')">${targetPerson.spouse}</span>`,
+                            description: `Matrimonio ${marriageRelationship} <span class='clickable-person' onclick="goToPerson('${targetPersonName}')">${getDisplayNameForChronology(targetPersonName)}</span> con <span class='clickable-person' onclick="goToPerson('${targetPerson.spouse}')">${targetPerson.spouse}</span>`,
                             isTargetPersonBirth: false
                         });
                     }
@@ -3436,7 +3661,7 @@
                             addedMarriages.add(marriageKey);
                             events.push({
                                 date: parent1.marriage,
-                                description: `Matrimonio dei genitori <span class='clickable-person' onclick="goToPerson('${person.parents[0]}')">${getDisplayName(person.parents[0])}</span> e <span class='clickable-person' onclick="goToPerson('${person.parents[1]}')">${getDisplayName(person.parents[1])}</span>`,
+                                description: `Matrimonio dei genitori <span class='clickable-person' onclick="goToPerson('${person.parents[0]}')">${getDisplayNameForChronology(person.parents[0])}</span> e <span class='clickable-person' onclick="goToPerson('${person.parents[1]}')">${getDisplayNameForChronology(person.parents[1])}</span>`,
                                 isTargetPersonBirth: false
                             });
                         }
@@ -3473,7 +3698,7 @@
                                 uncleData.children.forEach(cousinName => {
                                     const cousinData = familyData[cousinName];
                                     const relation = cousinData.gender === 'M' ? 'il cugino' : 'la cugina';
-                                    addPersonEvents(cousinName, `${relation} (figlio di ${getDisplayName(uncleName)})`);
+                                    addPersonEvents(cousinName, `${relation} (figlio di ${getDisplayNameForChronology(uncleName)})`);
                                 });
                             }
                         });
@@ -3527,7 +3752,7 @@
                         siblingData.children.forEach(nephewName => {
                             const nephewData = familyData[nephewName];
                             const relation = nephewData.gender === 'M' ? 'il nipote' : 'la nipote';
-                            addPersonEvents(nephewName, `${relation} (figlio di ${getDisplayName(siblingName)})`);
+                            addPersonEvents(nephewName, `${relation} (figlio di ${getDisplayNameForChronology(siblingName)})`);
                         });
                     }
                 });
@@ -3541,7 +3766,7 @@
                         childData.children.forEach(grandchildName => {
                             const grandchildData = familyData[grandchildName];
                             const relation = grandchildData.gender === 'M' ? 'il nipote' : 'la nipote';
-                            addPersonEvents(grandchildName, `${relation} (figlio di ${getDisplayName(childName)})`);
+                            addPersonEvents(grandchildName, `${relation} (figlio di ${getDisplayNameForChronology(childName)})`);
                         });
                     }
                 });
@@ -3561,7 +3786,7 @@
                                         cousinData.children.forEach(secondCousinName => {
                                             const secondCousinData = familyData[secondCousinName];
                                             const relation = secondCousinData.gender === 'M' ? 'il cugino di secondo grado' : 'la cugina di secondo grado';
-                                            addPersonEvents(secondCousinName, `${relation} (figlio di ${getDisplayName(cousinName)})`);
+                                            addPersonEvents(secondCousinName, `${relation} (figlio di ${getDisplayNameForChronology(cousinName)})`);
                                         });
                                     }
                                 });
@@ -3582,7 +3807,7 @@
                                 nephewData.children.forEach(greatNephewName => {
                                     const greatNephewData = familyData[greatNephewName];
                                     const relation = greatNephewData.gender === 'M' ? 'il pronipote' : 'la pronipote';
-                                    addPersonEvents(greatNephewName, `${relation} (figlio di ${getDisplayName(nephewName)})`);
+                                    addPersonEvents(greatNephewName, `${relation} (figlio di ${getDisplayNameForChronology(nephewName)})`);
                                 });
                             }
                         });
@@ -3601,7 +3826,7 @@
                                 grandchildData.children.forEach(greatGrandchildName => {
                                     const greatGrandchildData = familyData[greatGrandchildName];
                                     const relation = greatGrandchildData.gender === 'M' ? 'il bisnipote' : 'la bisnipote';
-                                    addPersonEvents(greatGrandchildName, `${relation} (figlio di ${getDisplayName(grandchildName)})`);
+                                    addPersonEvents(greatGrandchildName, `${relation} (figlio di ${getDisplayNameForChronology(grandchildName)})`);
                                 });
                             }
                         });
@@ -3748,15 +3973,16 @@
             document.body.style.overflow = 'auto';
         }
 
-        // Funzione helper per estrarre il nome corretto (già definita sopra ma ripetuta per chiarezza)
+        // Funzione helper per estrarre il nome corretto per il sunto HTML
         function getDisplayNameForSummary(fullName) {
-            const nameParts = fullName.split(' ');
-            // Se inizia con "Maria" e ha almeno 3 parti (Maria + secondo nome + cognome)
-            if (nameParts[0] === 'Maria' && nameParts.length >= 3) {
-                return `${nameParts[0]} ${nameParts[1]}`;
+            const nameInfo = parseFullName(fullName);
+            if (nameInfo.prefix) {
+                return `${nameInfo.prefix} ${nameInfo.firstName}`; // Es. "Nonno Giovanni"
             }
-            // Altrimenti solo il primo nome
-            return nameParts[0];
+            if (nameInfo.lastName) {
+                return `${nameInfo.firstName} ${nameInfo.lastName}`; // Es. "Maria Grazia Mazzarisi"
+            }
+            return nameInfo.firstName; // Nome singolo
         }
 
         function generateSummary(personName) {
@@ -3768,8 +3994,13 @@
                 return `<span class="summary-person-link" onclick="goToPersonFromSummary('${name}')">${name}</span>`;
             }
 
-            function createPersonLinkWithShortName(name) {
-                return `<span class="summary-person-link" onclick="goToPersonFromSummary('${name}')">${getDisplayNameForSummary(name)}</span>`;
+            function createPersonLinkWithShortName(name) { // Usata per nomi brevi nel sunto
+                const nameInfo = parseFullName(name);
+                let displayName = nameInfo.firstName;
+                if (nameInfo.prefix) {
+                    displayName = `${nameInfo.prefix} ${nameInfo.firstName}`; // Es. "Nonno Giovanni"
+                }
+                return `<span class="summary-person-link" onclick="goToPersonFromSummary('${name}')">${displayName}</span>`;
             }
 
             // Determina i termini corretti in base al genere
@@ -3981,22 +4212,27 @@
             const person = familyData[personName];
             let textSummary = '';
 
-            // Funzione helper per nomi senza link
-            function getShortName(name) {
-                return getDisplayNameForSummary(name);
-            }
-
-            // Funzione helper per aggiungere anno di nascita
-            function getNameWithYear(name) {
+            // Funzione helper per nomi senza link e con anno di nascita
+            function formatPersonForTextSummary(name, includeYear = true, useFirstNameOnly = false) {
                 if (!familyData[name]) return name;
-                const birthYear = familyData[name].birth.split('/')[2];
-                return `${getShortName(name)} (${birthYear})`;
-            }
+                const nameInfo = parseFullName(name);
+                const personData = familyData[name];
 
-            function getFullNameWithYear(name) {
-                if (!familyData[name]) return name;
-                const birthYear = familyData[name].birth.split('/')[2];
-                return `${name} (${birthYear})`;
+                let displayPart;
+                if (useFirstNameOnly) {
+                    displayPart = nameInfo.firstName;
+                    if (nameInfo.prefix) {
+                        displayPart = `${nameInfo.prefix} ${nameInfo.firstName}`; // "Nonno Giovanni"
+                    }
+                } else {
+                    displayPart = name; // Nome completo originale
+                }
+
+                if (includeYear) {
+                    const birthYear = personData.birth.split('/')[2];
+                    return `${displayPart} (${birthYear})`;
+                }
+                return displayPart;
             }
 
             // Determina i termini corretti in base al genere
@@ -4031,12 +4267,12 @@
 
             // MATRIMONIO
             if (person.marriage && person.spouse) {
-                textSummary += `💒 ${genderTerms.sposato} il ${formatDate(person.marriage)} con ${getFullNameWithYear(person.spouse)}\n\n`;
+                textSummary += `💒 ${genderTerms.sposato} il ${formatDate(person.marriage)} con ${formatPersonForTextSummary(person.spouse, true, false)}\n\n`;
             }
 
             // GENITORI
             if (person.parents && person.parents.length > 0) {
-                textSummary += `👫 ${genderTerms.figlio} di: ${person.parents.map(parent => getFullNameWithYear(parent)).join(' e ')}\n\n`;
+                textSummary += `👫 ${genderTerms.figlio} di: ${person.parents.map(parent => formatPersonForTextSummary(parent, true, false)).join(' e ')}\n\n`;
             }
 
             // NONNI
@@ -4047,7 +4283,6 @@
                     if (parentData.parents) {
                         parentData.parents.forEach(grandparentName => {
                             const grandparentData = familyData[grandparentName];
-                            // Determina il lato in base al genere del genitore, non alla posizione nell'array
                             const side = parentData.gender === 'M' ? 'paterni' : 'materni';
                             grandparents.push({name: grandparentName, side, gender: grandparentData.gender});
                         });
@@ -4060,22 +4295,22 @@
                 const maternalGrandparents = grandparents.filter(g => g.side === 'materni');
                 
                 if (paternalGrandparents.length > 0) {
-                    textSummary += `👴👵 ${genderTerms.nipotePaterno} di: ${paternalGrandparents.map(g => getFullNameWithYear(g.name)).join(' e ')}\n`;
+                    textSummary += `👴👵 ${genderTerms.nipotePaterno} di: ${paternalGrandparents.map(g => formatPersonForTextSummary(g.name, true, false)).join(' e ')}\n`;
                 }
                 if (maternalGrandparents.length > 0) {
-                    textSummary += `👴👵 ${genderTerms.nipoteMaterno} di: ${maternalGrandparents.map(g => getFullNameWithYear(g.name)).join(' e ')}\n`;
+                    textSummary += `👴👵 ${genderTerms.nipoteMaterno} di: ${maternalGrandparents.map(g => formatPersonForTextSummary(g.name, true, false)).join(' e ')}\n`;
                 }
                 textSummary += '\n';
             }
 
             // FIGLI
             if (person.children && person.children.length > 0) {
-                textSummary += `👶 ${genderTerms.genitore} di: ${person.children.map(child => getNameWithYear(child)).join(', ')}\n\n`;
+                textSummary += `👶 ${genderTerms.genitore} di: ${person.children.map(child => formatPersonForTextSummary(child, true, true)).join(', ')}\n\n`;
             }
 
             // FRATELLI/SORELLE
             if (person.siblings && person.siblings.length > 0) {
-                textSummary += `👫 ${genderTerms.fratello} di: ${person.siblings.map(sibling => getNameWithYear(sibling)).join(', ')}\n\n`;
+                textSummary += `👫 ${genderTerms.fratello} di: ${person.siblings.map(sibling => formatPersonForTextSummary(sibling, true, true)).join(', ')}\n\n`;
             }
 
             // ZII/ZIE (Nipoti dei fratelli/sorelle)
@@ -4092,7 +4327,7 @@
             }
 
             if (nephews.length > 0) {
-                textSummary += `👦👧 ${genderTerms.zio} di: ${nephews.map(nephew => getNameWithYear(nephew)).join(', ')}\n\n`;
+                textSummary += `👦👧 ${genderTerms.zio} di: ${nephews.map(nephew => formatPersonForTextSummary(nephew, true, true)).join(', ')}\n\n`;
             }
 
             // PROZIO/PROZIA (Figli dei nipoti - pronipoti)
@@ -4107,7 +4342,7 @@
             });
 
             if (greatNephews.length > 0) {
-                textSummary += `👶 ${genderTerms.prozio} di: ${greatNephews.map(gn => getNameWithYear(gn)).join(', ')}\n\n`;
+                textSummary += `👶 ${genderTerms.prozio} di: ${greatNephews.map(gn => formatPersonForTextSummary(gn, true, true)).join(', ')}\n\n`;
             }
 
             // NIPOTI DIRETTI (figli dei propri figli)
@@ -4124,7 +4359,7 @@
             }
 
             if (directGrandchildren.length > 0) {
-                textSummary += `👧👦 ${genderTerms.nonno} di: ${directGrandchildren.map(gc => getNameWithYear(gc)).join(', ')}\n\n`;
+                textSummary += `👧👦 ${genderTerms.nonno} di: ${directGrandchildren.map(gc => formatPersonForTextSummary(gc, true, true)).join(', ')}\n\n`;
             }
 
             // ZII E ZIE (fratelli/sorelle dei genitori)
@@ -4141,7 +4376,7 @@
             }
 
             if (unclesAunts.length > 0) {
-                textSummary += `👨‍👩‍👦 *Nipote* di: ${unclesAunts.map(ua => getNameWithYear(ua)).join(', ')}\n\n`;
+                textSummary += `👨‍👩‍👦 *Nipote* di: ${unclesAunts.map(ua => formatPersonForTextSummary(ua, true, true)).join(', ')}\n\n`;
             }
 
             // CUGINI (figli degli zii)
@@ -4156,19 +4391,19 @@
             });
 
             if (cousins.length > 0) {
-                textSummary += `👥 ${genderTerms.cugino} di: ${cousins.map(c => getNameWithYear(c)).join(', ')}\n\n`;
+                textSummary += `👥 ${genderTerms.cugino} di: ${cousins.map(c => formatPersonForTextSummary(c, true, true)).join(', ')}\n\n`;
             }
 
             // SUOCERI (se sposato)
             if (person.spouse && familyData[person.spouse] && familyData[person.spouse].parents) {
                 const inLaws = familyData[person.spouse].parents;
-                textSummary += `👨‍👩‍👦 ${genderTerms.genero} di: ${inLaws.map(il => getFullNameWithYear(il)).join(' e ')}\n\n`;
+                textSummary += `👨‍👩‍👦 ${genderTerms.genero} di: ${inLaws.map(il => formatPersonForTextSummary(il, true, false)).join(' e ')}\n\n`;
             }
 
             // COGNATI (fratelli/sorelle del coniuge)
             if (person.spouse && familyData[person.spouse] && familyData[person.spouse].siblings) {
                 const broInLaws = familyData[person.spouse].siblings;
-                textSummary += `👫 ${genderTerms.cognato} di: ${broInLaws.map(bil => getNameWithYear(bil)).join(', ')}\n\n`;
+                textSummary += `👫 ${genderTerms.cognato} di: ${broInLaws.map(bil => formatPersonForTextSummary(bil, true, true)).join(', ')}\n\n`;
             }
 
             return textSummary.trim(); // Rimuovi l'ultimo \n\n
