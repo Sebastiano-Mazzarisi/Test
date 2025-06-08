@@ -638,8 +638,8 @@
         }
 
         .person-card-photo {
-            width: 150px;
-            height: 150px;
+            width: 140px;
+            height: 140px;
             border-radius: 12px;
             object-fit: cover;
             border: 2px solid var(--border-color);
@@ -651,6 +651,8 @@
             color: var(--text-secondary);
             flex-shrink: 0;
             overflow: hidden;
+            max-width: 140px;
+            max-height: 140px;
         }
 
         .person-card-photo img {
@@ -660,6 +662,7 @@
             border-radius: 10px;
             max-width: 100%;
             max-height: 100%;
+            display: block;
         }
 
         .person-card::before {
@@ -759,9 +762,11 @@
             }
 
             .person-card-photo {
-                width: 120px;
-                height: 120px;
+                width: 100px;
+                height: 100px;
                 margin: 0 auto;
+                max-width: 100px;
+                max-height: 100px;
             }
         }
 
@@ -1321,8 +1326,8 @@
         }
 
         .person-button-photo {
-            width: 150px;
-            height: 150px;
+            width: 140px;
+            height: 140px;
             border-radius: 12px;
             object-fit: cover;
             border: 2px solid var(--border-color);
@@ -1334,6 +1339,8 @@
             color: var(--text-secondary);
             flex-shrink: 0;
             overflow: hidden;
+            max-width: 140px;
+            max-height: 140px;
         }
 
         .person-button-photo img {
@@ -1343,6 +1350,7 @@
             border-radius: 10px;
             max-width: 100%;
             max-height: 100%;
+            display: block;
         }
 
         .person-button:hover {
@@ -1492,8 +1500,8 @@
         }
 
         .marriage-person-photo {
-            width: 150px;
-            height: 150px;
+            width: 140px;
+            height: 140px;
             border-radius: 12px;
             object-fit: cover;
             border: 2px solid var(--border-color);
@@ -1505,6 +1513,8 @@
             color: var(--text-secondary);
             flex-shrink: 0;
             overflow: hidden;
+            max-width: 140px;
+            max-height: 140px;
         }
 
         .marriage-person-photo img {
@@ -1514,6 +1524,7 @@
             border-radius: 10px;
             max-width: 100%;
             max-height: 100%;
+            display: block;
         }
 
         .marriage-person-content {
@@ -1739,9 +1750,11 @@
 
             .person-button-photo,
             .marriage-person-photo {
-                width: 120px;
-                height: 120px;
+                width: 100px;
+                height: 100px;
                 margin: 0 auto;
+                max-width: 100px;
+                max-height: 100px;
             }
 
             .marriage-couple {
@@ -1871,6 +1884,9 @@
                 <button class="nav-btn home" onclick="goToPerson('Luigi Pricci')" title="Home">
                     🏠
                 </button>
+                <button class="nav-btn search-toggle" onclick="toggleSearch()" title="Cerca">
+                    🔍
+                </button>
                 <button class="nav-btn back" onclick="goBack()" title="Indietro">
                     ←
                 </button>
@@ -1885,9 +1901,6 @@
                 </button>
                 <button class="nav-btn clickable" onclick="showAgeChart()">
                     Età Media
-                </button>
-                <button class="nav-btn search-toggle" onclick="toggleSearch()" title="Cerca">
-                    🔍
                 </button>
             </div>
             <div class="search-container" id="searchContainer" style="display: none;">
@@ -2495,7 +2508,7 @@
                         </div>
                         <div class="click-hint">Tocca per esplorare</div>
                     </div>
-                    ${createPhotoElement(person.photoLink, personName, 'person-card-photo', '150px')}
+                    ${createPhotoElement(person.photoLink, personName, 'person-card-photo', '140px')}
                 </div>
             `;
         }
@@ -3363,7 +3376,7 @@
                                 ` : ''}
                             </div>
                         </div>
-                        ${createPhotoElement(person.photoLink, name, 'person-button-photo', '150px')}
+                        ${createPhotoElement(person.photoLink, name, 'person-button-photo', '140px')}
                     </div>
                 `;
             });
@@ -3445,7 +3458,7 @@
                                                     ` : ''}
                                                 </div>
                                             </div>
-                                            ${createPhotoElement(person.photoLink, name, 'person-button-photo', '150px')}
+                                            ${createPhotoElement(person.photoLink, name, 'person-button-photo', '140px')}
                                         </div>
                                     `;
                                 }).join('')}
@@ -3504,7 +3517,7 @@
                         </div>
                         <div class="marriage-couple">
                             <div class="marriage-person" onclick="selectPersonFromList('${marriage.husband.name}')">
-                                ${createPhotoElement(marriage.husband.data.photoLink, marriage.husband.name, 'marriage-person-photo', '150px')}
+                                ${createPhotoElement(marriage.husband.data.photoLink, marriage.husband.name, 'marriage-person-photo', '140px')}
                                 <div class="marriage-person-content">
                                     <div class="marriage-person-name">${marriage.husband.name}</div>
                                     <div class="marriage-person-age">${husbandAgeAtMarriage} anni</div>
@@ -3512,7 +3525,7 @@
                             </div>
                             <div class="marriage-heart">💕</div>
                             <div class="marriage-person" onclick="selectPersonFromList('${marriage.wife.name}')">
-                                ${createPhotoElement(marriage.wife.data.photoLink, marriage.wife.name, 'marriage-person-photo', '150px')}
+                                ${createPhotoElement(marriage.wife.data.photoLink, marriage.wife.name, 'marriage-person-photo', '140px')}
                                 <div class="marriage-person-content">
                                     <div class="marriage-person-name">${marriage.wife.name}</div>
                                     <div class="marriage-person-age">${wifeAgeAtMarriage} anni</div>
@@ -3984,10 +3997,207 @@
                 summary += `</div>`;
             }
 
+            // NONNI
+            const grandparents = [];
+            if (person.parents) {
+                person.parents.forEach(parentName => {
+                    const parentData = familyData[parentName];
+                    if (parentData.parents) {
+                        parentData.parents.forEach(grandparentName => {
+                            const grandparentData = familyData[grandparentName];
+                            const side = parentData.gender === 'M' ? 'paterni' : 'materni';
+                            grandparents.push({name: grandparentName, side, gender: grandparentData.gender});
+                        });
+                    }
+                });
+            }
+
+            if (grandparents.length > 0) {
+                const paternalGrandparents = grandparents.filter(g => g.side === 'paterni');
+                const maternalGrandparents = grandparents.filter(g => g.side === 'materni');
+                
+                summary += `<div class="summary-section">`;
+                summary += `<div class="summary-value">`;
+                
+                if (paternalGrandparents.length > 0) {
+                    summary += `${genderTerms.nipotePaterno} di: ${paternalGrandparents.map(g => createPersonLink(g.name)).join(' e ')}`;
+                }
+                if (maternalGrandparents.length > 0) {
+                    if (paternalGrandparents.length > 0) summary += '<br>';
+                    summary += `${genderTerms.nipoteMaterno} di: ${maternalGrandparents.map(g => createPersonLink(g.name)).join(' e ')}`;
+                }
+                
+                summary += `</div></div>`;
+            }
+
+            // FRATELLI/SORELLE
+            if (person.siblings && person.siblings.length > 0) {
+                summary += `<div class="summary-section">`;
+                summary += `<div class="summary-value">${genderTerms.fratello} di: ${person.siblings.map(sibling => createPersonLinkWithShortName(sibling)).join(', ')}</div>`;
+                summary += `</div>`;
+            }
+
             // FIGLI
             if (person.children && person.children.length > 0) {
                 summary += `<div class="summary-section">`;
                 summary += `<div class="summary-value">${genderTerms.genitore} di: ${person.children.map(child => createPersonLinkWithShortName(child)).join(', ')}</div>`;
+                summary += `</div>`;
+            }
+
+            // NIPOTI DIRETTI (figli dei propri figli)
+            const directGrandchildren = [];
+            if (person.children) {
+                person.children.forEach(childName => {
+                    const childData = familyData[childName];
+                    if (childData.children) {
+                        childData.children.forEach(grandchildName => {
+                            directGrandchildren.push(grandchildName);
+                        });
+                    }
+                });
+            }
+
+            if (directGrandchildren.length > 0) {
+                summary += `<div class="summary-section">`;
+                summary += `<div class="summary-value">${genderTerms.nonno} di: ${directGrandchildren.map(gc => createPersonLinkWithShortName(gc)).join(', ')}</div>`;
+                summary += `</div>`;
+            }
+
+            // ZII E ZIE (fratelli/sorelle dei genitori)
+            const unclesAunts = [];
+            if (person.parents) {
+                person.parents.forEach(parentName => {
+                    const parentData = familyData[parentName];
+                    if (parentData.siblings) {
+                        parentData.siblings.forEach(uncleName => {
+                            unclesAunts.push(uncleName);
+                        });
+                    }
+                });
+            }
+
+            if (unclesAunts.length > 0) {
+                summary += `<div class="summary-section">`;
+                summary += `<div class="summary-value">Nipote di: ${unclesAunts.map(ua => createPersonLinkWithShortName(ua)).join(', ')}</div>`;
+                summary += `</div>`;
+            }
+
+            // NIPOTI ACQUISITI (figli dei fratelli/sorelle) - ZII/ZIE
+            const acquiredNephews = [];
+            if (person.siblings) {
+                person.siblings.forEach(siblingName => {
+                    const siblingData = familyData[siblingName];
+                    if (siblingData.children) {
+                        siblingData.children.forEach(nephewName => {
+                            acquiredNephews.push(nephewName);
+                        });
+                    }
+                });
+            }
+
+            if (acquiredNephews.length > 0) {
+                summary += `<div class="summary-section">`;
+                summary += `<div class="summary-value">${genderTerms.zio} di: ${acquiredNephews.map(an => createPersonLinkWithShortName(an)).join(', ')}</div>`;
+                summary += `</div>`;
+            }
+
+            // PRONIPOTI (figli dei nipoti acquisiti)
+            const greatNephews = [];
+            acquiredNephews.forEach(nephewName => {
+                const nephewData = familyData[nephewName];
+                if (nephewData.children) {
+                    nephewData.children.forEach(greatNephewName => {
+                        greatNephews.push(greatNephewName);
+                    });
+                }
+            });
+
+            if (greatNephews.length > 0) {
+                summary += `<div class="summary-section">`;
+                summary += `<div class="summary-value">${genderTerms.prozio} di: ${greatNephews.map(gn => createPersonLinkWithShortName(gn)).join(', ')}</div>`;
+                summary += `</div>`;
+            }
+
+            // CUGINI (figli degli zii)
+            const cousins = [];
+            unclesAunts.forEach(uncleName => {
+                const uncleData = familyData[uncleName];
+                if (uncleData.children) {
+                    uncleData.children.forEach(cousinName => {
+                        cousins.push(cousinName);
+                    });
+                }
+            });
+
+            if (cousins.length > 0) {
+                summary += `<div class="summary-section">`;
+                summary += `<div class="summary-value">${genderTerms.cugino} di: ${cousins.map(c => createPersonLinkWithShortName(c)).join(', ')}</div>`;
+                summary += `</div>`;
+            }
+
+            // CUGINI DI SECONDO GRADO (figli dei cugini)
+            const secondCousins = [];
+            cousins.forEach(cousinName => {
+                const cousinData = familyData[cousinName];
+                if (cousinData.children) {
+                    cousinData.children.forEach(secondCousinName => {
+                        secondCousins.push(secondCousinName);
+                    });
+                }
+            });
+
+            if (secondCousins.length > 0) {
+                summary += `<div class="summary-section">`;
+                summary += `<div class="summary-value">Cugino di 2° grado di: ${secondCousins.map(sc => createPersonLinkWithShortName(sc)).join(', ')}</div>`;
+                summary += `</div>`;
+            }
+
+            // SUOCERI (se sposato)
+            if (person.spouse && familyData[person.spouse] && familyData[person.spouse].parents) {
+                const inLaws = familyData[person.spouse].parents;
+                summary += `<div class="summary-section">`;
+                summary += `<div class="summary-value">${genderTerms.genero} di: ${inLaws.map(il => createPersonLink(il)).join(' e ')}</div>`;
+                summary += `</div>`;
+            }
+
+            // COGNATI (fratelli/sorelle del coniuge)
+            if (person.spouse && familyData[person.spouse] && familyData[person.spouse].siblings) {
+                const broInLaws = familyData[person.spouse].siblings;
+                summary += `<div class="summary-section">`;
+                summary += `<div class="summary-value">${genderTerms.cognato} di: ${broInLaws.map(bil => createPersonLinkWithShortName(bil)).join(', ')}</div>`;
+                summary += `</div>`;
+            }
+
+            // ZII/ZIE ACQUISITI (coniugi degli zii)
+            const acquiredUnclesAunts = [];
+            unclesAunts.forEach(uncleName => {
+                const uncleData = familyData[uncleName];
+                if (uncleData.spouse) {
+                    const spouseData = familyData[uncleData.spouse];
+                    acquiredUnclesAunts.push(uncleData.spouse);
+                }
+            });
+
+            if (acquiredUnclesAunts.length > 0) {
+                summary += `<div class="summary-section">`;
+                summary += `<div class="summary-value">Nipote acquisito di: ${acquiredUnclesAunts.map(aua => createPersonLinkWithShortName(aua)).join(', ')}</div>`;
+                summary += `</div>`;
+            }
+
+            // BISNIPOTI (figli dei nipoti diretti)
+            const greatGrandchildren = [];
+            directGrandchildren.forEach(grandchildName => {
+                const grandchildData = familyData[grandchildName];
+                if (grandchildData.children) {
+                    grandchildData.children.forEach(greatGrandchildName => {
+                        greatGrandchildren.push(greatGrandchildName);
+                    });
+                }
+            });
+
+            if (greatGrandchildren.length > 0) {
+                summary += `<div class="summary-section">`;
+                summary += `<div class="summary-value">Bisnonno di: ${greatGrandchildren.map(ggc => createPersonLinkWithShortName(ggc)).join(', ')}</div>`;
                 summary += `</div>`;
             }
 
@@ -4029,7 +4239,16 @@
                 sposato: isMale ? '*Sposato*' : '*Sposata*',
                 nato: isMale ? 'Nato' : 'Nata',
                 deceduto: isMale ? '*Deceduto*' : '*Deceduta*',
-                genitore: isMale ? '*Padre*' : '*Madre*'
+                genitore: isMale ? '*Padre*' : '*Madre*',
+                fratello: isMale ? '*Fratello*' : '*Sorella*',
+                zio: isMale ? '*Zio*' : '*Zia*',
+                nonno: isMale ? '*Nonno*' : '*Nonna*',
+                prozio: isMale ? '*Prozio*' : '*Prozia*',
+                cugino: isMale ? '*Cugino*' : '*Cugina*',
+                genero: isMale ? '*Genero*' : '*Nuora*',
+                cognato: isMale ? '*Cognato*' : '*Cognata*',
+                nipotePaterno: isMale ? '*Nipote paterno*' : '*Nipote paterna*',
+                nipoteMaterno: isMale ? '*Nipote materno*' : '*Nipote materna*'
             };
 
             // INFORMAZIONI BASILARI
@@ -4053,9 +4272,185 @@
                 textSummary += `👫 ${genderTerms.figlio} di: ${person.parents.map(parent => formatPersonForTextSummary(parent, true, false)).join(' e ')}\n\n`;
             }
 
+            // NONNI
+            const grandparents = [];
+            if (person.parents) {
+                person.parents.forEach(parentName => {
+                    const parentData = familyData[parentName];
+                    if (parentData.parents) {
+                        parentData.parents.forEach(grandparentName => {
+                            const grandparentData = familyData[grandparentName];
+                            const side = parentData.gender === 'M' ? 'paterni' : 'materni';
+                            grandparents.push({name: grandparentName, side, gender: grandparentData.gender});
+                        });
+                    }
+                });
+            }
+
+            if (grandparents.length > 0) {
+                const paternalGrandparents = grandparents.filter(g => g.side === 'paterni');
+                const maternalGrandparents = grandparents.filter(g => g.side === 'materni');
+                
+                if (paternalGrandparents.length > 0) {
+                    textSummary += `👴👵 ${genderTerms.nipotePaterno} di: ${paternalGrandparents.map(g => formatPersonForTextSummary(g.name, true, false)).join(' e ')}\n`;
+                }
+                if (maternalGrandparents.length > 0) {
+                    textSummary += `👴👵 ${genderTerms.nipoteMaterno} di: ${maternalGrandparents.map(g => formatPersonForTextSummary(g.name, true, false)).join(' e ')}\n`;
+                }
+                textSummary += '\n';
+            }
+
+            // FRATELLI/SORELLE
+            if (person.siblings && person.siblings.length > 0) {
+                textSummary += `👫 ${genderTerms.fratello} di: ${person.siblings.map(sibling => formatPersonForTextSummary(sibling, true, true)).join(', ')}\n\n`;
+            }
+
             // FIGLI
             if (person.children && person.children.length > 0) {
                 textSummary += `👶 ${genderTerms.genitore} di: ${person.children.map(child => formatPersonForTextSummary(child, true, true)).join(', ')}\n\n`;
+            }
+
+            // NIPOTI DIRETTI (figli dei propri figli)
+            const directGrandchildren = [];
+            if (person.children) {
+                person.children.forEach(childName => {
+                    const childData = familyData[childName];
+                    if (childData.children) {
+                        childData.children.forEach(grandchildName => {
+                            directGrandchildren.push(grandchildName);
+                        });
+                    }
+                });
+            }
+
+            if (directGrandchildren.length > 0) {
+                textSummary += `👧👦 ${genderTerms.nonno} di: ${directGrandchildren.map(gc => formatPersonForTextSummary(gc, true, true)).join(', ')}\n\n`;
+            }
+
+            // ZII E ZIE (fratelli/sorelle dei genitori)
+            const unclesAunts = [];
+            if (person.parents) {
+                person.parents.forEach(parentName => {
+                    const parentData = familyData[parentName];
+                    if (parentData.siblings) {
+                        parentData.siblings.forEach(uncleName => {
+                            unclesAunts.push(uncleName);
+                        });
+                    }
+                });
+            }
+
+            if (unclesAunts.length > 0) {
+                textSummary += `👨‍👩‍👦 *Nipote* di: ${unclesAunts.map(ua => formatPersonForTextSummary(ua, true, true)).join(', ')}\n\n`;
+            }
+
+            // NIPOTI ACQUISITI (figli dei fratelli/sorelle) - ZII/ZIE
+            const acquiredNephews = [];
+            if (person.siblings) {
+                person.siblings.forEach(siblingName => {
+                    const siblingData = familyData[siblingName];
+                    if (siblingData.children) {
+                        siblingData.children.forEach(nephewName => {
+                            acquiredNephews.push(nephewName);
+                        });
+                    }
+                });
+            }
+
+            if (acquiredNephews.length > 0) {
+                textSummary += `👦👧 ${genderTerms.zio} di: ${acquiredNephews.map(an => formatPersonForTextSummary(an, true, true)).join(', ')}\n\n`;
+            }
+
+            // PRONIPOTI (figli dei nipoti acquisiti)
+            const greatNephews = [];
+            acquiredNephews.forEach(nephewName => {
+                const nephewData = familyData[nephewName];
+                if (nephewData.children) {
+                    nephewData.children.forEach(greatNephewName => {
+                        greatNephews.push(greatNephewName);
+                    });
+                }
+            });
+
+            if (greatNephews.length > 0) {
+                textSummary += `👶 ${genderTerms.prozio} di: ${greatNephews.map(gn => formatPersonForTextSummary(gn, true, true)).join(', ')}\n\n`;
+            }
+
+            // CUGINI (figli degli zii)
+            const cousins = [];
+            unclesAunts.forEach(uncleName => {
+                const uncleData = familyData[uncleName];
+                if (uncleData.children) {
+                    uncleData.children.forEach(cousinName => {
+                        cousins.push(cousinName);
+                    });
+                }
+            });
+
+            if (cousins.length > 0) {
+                textSummary += `👥 ${genderTerms.cugino} di: ${cousins.map(c => formatPersonForTextSummary(c, true, true)).join(', ')}\n\n`;
+            }
+
+            // CUGINI DI SECONDO GRADO (figli dei cugini)
+            const secondCousins = [];
+            cousins.forEach(cousinName => {
+                const cousinData = familyData[cousinName];
+                if (cousinData.children) {
+                    cousinData.children.forEach(secondCousinName => {
+                        secondCousins.push(secondCousinName);
+                    });
+                }
+            });
+
+            if (secondCousins.length > 0) {
+                textSummary += `👥 *Cugino di 2° grado* di: ${secondCousins.map(sc => formatPersonForTextSummary(sc, true, true)).join(', ')}\n\n`;
+            }
+
+            // SUOCERI (se sposato)
+            if (person.spouse && familyData[person.spouse] && familyData[person.spouse].parents) {
+                const inLaws = familyData[person.spouse].parents;
+                textSummary += `👨‍👩‍👦 ${genderTerms.genero} di: ${inLaws.map(il => formatPersonForTextSummary(il, true, false)).join(' e ')}\n\n`;
+            }
+
+            // COGNATI (fratelli/sorelle del coniuge)
+            if (person.spouse && familyData[person.spouse] && familyData[person.spouse].siblings) {
+                const broInLaws = familyData[person.spouse].siblings;
+                textSummary += `👫 ${genderTerms.cognato} di: ${broInLaws.map(bil => formatPersonForTextSummary(bil, true, true)).join(', ')}\n\n`;
+            }
+
+            // ZII/ZIE ACQUISITI (coniugi degli zii)
+            const acquiredUnclesAunts = [];
+            unclesAunts.forEach(uncleName => {
+                const uncleData = familyData[uncleName];
+                if (uncleData.spouse) {
+                    acquiredUnclesAunts.push(uncleData.spouse);
+                }
+            });
+
+            if (acquiredUnclesAunts.length > 0) {
+                textSummary += `👨‍👩‍👦 *Nipote acquisito* di: ${acquiredUnclesAunts.map(aua => formatPersonForTextSummary(aua, true, true)).join(', ')}\n\n`;
+            }
+
+            // BISNIPOTI (figli dei nipoti diretti)
+            const greatGrandchildren = [];
+            if (person.children) {
+                person.children.forEach(childName => {
+                    const childData = familyData[childName];
+                    if (childData.children) {
+                        childData.children.forEach(grandchildName => {
+                            const grandchildData = familyData[grandchildName];
+                            if (grandchildData.children) {
+                                grandchildData.children.forEach(greatGrandchildName => {
+                                    greatGrandchildren.push(greatGrandchildName);
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+
+            if (greatGrandchildren.length > 0) {
+                textSummary += `👶 *Bisnonno* di: ${greatGrandchildren.map(ggc => formatPersonForTextSummary(ggc, true, true)).join(', ')}\n\n`;
             }
 
             return textSummary.trim();
