@@ -2,7 +2,9 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Gestionale Orari Palestra JoyFit - Fixed</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -83,16 +85,165 @@ label[for="file"], button {
 
 
 @media (max-width: 480px) {
+    body {
+        padding: 10px 5px;
+    }
+    
     label[for="file"], button {
-        font-size: 13px;
+        font-size: 14px;
         min-width: auto;
+        padding: 10px 8px;
+        height: auto;
+        line-height: 1.2;
     }
 
     #main {
-        margin: 15px auto;
-        padding: 15px 10px;
+        margin: 10px auto;
+        padding: 15px 8px;
+        border-radius: 8px;
+    }
+    
+    h1 {
+        font-size: 20px;
+        margin-bottom: 15px;
+    }
+    
+    /* Campo titolo ottimizzato */
+    #titleInput {
+        width: 95% !important;
+        font-size: 14px !important;
+        padding: 6px 10px !important;
+    }
+    
+    /* Tabella più compatta su iPhone */
+    .tabella {
+        font-size: 12px;
+        width: 100%;
+        overflow-x: auto;
+        display: block;
+        white-space: nowrap;
+    }
+    
+    .tabella thead, .tabella tbody, .tabella tr {
+        display: block;
+    }
+    
+    .tabella th, .tabella td {
+        font-size: 11px;
+        padding: 3px 4px;
+        border: 1px solid #f0e7bb;
+        display: inline-block;
+        width: auto;
+        min-width: 50px;
+        text-align: center;
+        vertical-align: top;
+    }
+    
+    /* Colonne specifiche per iPhone */
+    .tabella th:nth-child(1), .tabella td:nth-child(1) { min-width: 45px; }
+    .tabella th:nth-child(2), .tabella td:nth-child(2) { min-width: 80px; }
+    .tabella th:nth-child(3), .tabella td:nth-child(3) { min-width: 70px; }
+    .tabella th:nth-child(4), .tabella td:nth-child(4) { min-width: 35px; }
+    .tabella th:nth-child(5), .tabella td:nth-child(5) { min-width: 30px; }
+    
+    /* Tabs ottimizzate */
+    .tabs-container {
+        width: calc(100% - 10px) !important;
+        margin: 20px 5px 0 5px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .tab {
+        padding: 8px 6px;
+        font-size: 11px;
+        min-width: 45px;
+        flex: none;
+    }
+    
+    /* Form di editing ottimizzato */
+    #editForm {
+        max-width: 95% !important;
+        padding: 15px 10px !important;
+        margin: 15px auto !important;
+    }
+    
+    #editForm h3 {
+        font-size: 16px !important;
+        padding: 8px !important;
+        margin-bottom: 15px !important;
+    }
+    
+    #editForm > div:first-of-type {
+        display: block !important;
+        grid-template-columns: none !important;
+    }
+    
+    #editForm > div:first-of-type > div {
+        margin-bottom: 10px;
+    }
+    
+    #editForm select, #editForm input {
+        font-size: 14px !important;
+        padding: 8px !important;
+    }
+    
+    /* Sezioni info ottimizzate */
+    .info-sections {
+        grid-template-columns: 1fr !important;
+        gap: 10px;
+        margin: 15px 5px 0 5px;
+    }
+    
+    .info-section {
+        padding: 10px;
+    }
+    
+    .info-section .section-title {
+        font-size: 13px;
+        padding: 6px 8px;
+        margin: -10px -10px 8px -10px;
+    }
+    
+    .info-section textarea {
+        font-size: 12px;
+        padding: 5px;
+        min-height: 80px;
+    }
+    
+    /* Pulsante elimina ottimizzato */
+    .tabella .del {
+        width: 26px !important;
+        height: 26px !important;
+        font-size: 12px !important;
+        touch-action: manipulation;
+    }
+    
+    /* Miglioramenti touch */
+    button, .tab, .tabella tr {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+    }
+    
+    /* Messaggi ottimizzati */
+    .message-container {
+        margin-top: 10px;
+        font-size: 14px;
+    }
+    
+    #filenameDisplay {
+        font-size: 12px !important;
+        margin-top: 8px !important;
     }
 }
+
+
+
+
+
+
+
+
 
 label[for="file"] {
     background: #f7efd3;
@@ -436,6 +587,29 @@ button.save.has-changes {
     box-shadow: 0 0 0 1px #dc3545 !important;
 }
 
+/* Supporto touch generale */
+* {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+input, textarea {
+    -webkit-user-select: text;
+    -khtml-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}
+
+/* Smooth scrolling per iOS */
+.tabs-container, .tabella {
+    -webkit-overflow-scrolling: touch;
+}
+
 
 </style>
 </head>
@@ -459,9 +633,8 @@ button.save.has-changes {
         <input type="text" id="titleInput" placeholder="Inserisci il titolo della pagina" 
                style="padding: 8px 16px; border-radius: 6px; border: 2px solid #f0e7bb; 
                       font-size: 16px; width: 500px; max-width: 90%;"
-               onchange="updateTitle(this.value)">
+               onchange="updateTitle(this.value)" disabled>
     </div>
-
 
     <div id="controls">
         <div class="buttons-container">
@@ -697,6 +870,7 @@ document.getElementById('file').addEventListener('change', function(evt) {
                 startAutoChangeDetection();
                 renderAll();
                 document.getElementById('savebtn').disabled = false;
+                document.getElementById('titleInput').disabled = false;
                 document.getElementById('addbtn').disabled = false;
                 document.getElementById('pdfbtn').disabled = false;
                 document.getElementById('riepilogobtn').disabled = false;
@@ -1425,23 +1599,7 @@ async function generatePDF() {
                             }
                         }
 
-                        // DRAW COLORED SQUARE WITH INSTRUCTOR LETTER
-                        const coloreIstruttore = getColoreIstruttore(nomeIstruttore);
 
-                        doc.setFillColor(coloreIstruttore[0], coloreIstruttore[1], coloreIstruttore[2]);
-                        doc.setDrawColor(0, 0, 0);
-                        doc.setLineWidth(0.3);
-                        doc.rect(quadratinoX, quadratinoY, quadratinoSize, quadratinoSize, 'FD');
-
-                        doc.setFont("helvetica", "bold");
-                        doc.setFontSize(7);
-                        doc.setTextColor(255, 255, 255);
-
-                        const letteraWidth = doc.getTextWidth(letteraIstruttore);
-                        const letteraX = quadratinoX + (quadratinoSize - letteraWidth) / 2;
-                        const letteraY = quadratinoY + quadratinoSize / 2 + 1;
-
-                        doc.text(letteraIstruttore, letteraX, letteraY);
                     }
                 }
             }
@@ -1501,7 +1659,7 @@ async function generatePDF() {
         const salaFitnessTableHeight = y2_after_table1 - y2_table1;
 
         if (logoData && logoData.data) {
-            const logoPdfWidth = 30;
+            const logoPdfWidth = 50;
             const aspectRatio = logoData.width && logoData.height ? logoData.width / logoData.height : 1;
             const logoPdfHeight = logoData.height ? logoPdfWidth / aspectRatio : logoPdfWidth;
 
@@ -1801,46 +1959,24 @@ async function riepilogo() {
                         doc.setLineWidth(0.25);
                         doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'S');
 
-                        // DRAW COLORED SQUARE IN INSTRUCTOR COLUMN
-                        const nomeIstruttore = listaOreIstruttori[data.row.index].istr;
-                        const letteraIstruttore = nomeIstruttore.charAt(0).toUpperCase();
-                        const coloreIstruttore = getColoreIstruttore(nomeIstruttore);
 
-                        // Square dimensions (same as in hours table)
-                        const quadratinoSize = 3.6;
-                        const margineLaterale = 2;
-                        const spazioDopoQuadratino = 2;
 
-                        // Square position (left in cell)
-                        const quadratinoX = data.cell.x + data.cell.padding('left') + margineLaterale;
-                        const quadratinoY = data.cell.y + (data.cell.height - quadratinoSize) / 2; // Vertically centered
 
-                        // Draw the colored square
-                        doc.setFillColor(coloreIstruttore[0], coloreIstruttore[1], coloreIstruttore[2]);
-                        doc.setDrawColor(0, 0, 0);
-                        doc.setLineWidth(0.3);
-                        doc.rect(quadratinoX, quadratinoY, quadratinoSize, quadratinoSize, 'FD');
 
-                        // Draw the letter in the square
-                        doc.setFont("helvetica", "bold");
-                        doc.setFontSize(7);
-                        doc.setTextColor(255, 255, 255);
 
-                        const letteraWidth = doc.getTextWidth(letteraIstruttore);
-                        const letteraX = quadratinoX + (quadratinoSize - letteraWidth) / 2;
-                        const letteraY = quadratinoY + quadratinoSize / 2 + 1;
+                        // Draw instructor name only
+const nomeIstruttore = listaOreIstruttori[data.row.index].istr;
 
-                        doc.text(letteraIstruttore, letteraX, letteraY);
+doc.setFont("helvetica", "bold");
+doc.setFontSize(8);
+doc.setTextColor(0, 0, 0);
 
-                        // Draw instructor name after the square
-                        doc.setFont("helvetica", "bold");
-                        doc.setFontSize(8);
-                        doc.setTextColor(0, 0, 0);
+const nomeX = data.cell.x + data.cell.padding('left');
+const nomeY = data.cell.y + data.cell.height / 2 + 1.5; // Vertically centered
 
-                        const nomeX = quadratinoX + quadratinoSize + spazioDopoQuadratino;
-                        const nomeY = data.cell.y + data.cell.height / 2 + 1.5; // Vertically centered
+doc.text(nomeIstruttore, nomeX, nomeY);
 
-                        doc.text(nomeIstruttore, nomeX, nomeY);
+
                     }
 
                     if (data.column.index === 3 && data.row.index < listaOreIstruttori.length) {
