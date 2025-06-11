@@ -1,465 +1,2357 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Palestra Joy Fit</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+<meta charset="UTF-8">
+
+<title>Gestionale Orari Palestra JoyFit - Fixed</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+<style>
+body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 20px; }
+#main {
+    max-width: 1400px;
+    margin: 30px auto;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    padding: 38px 34px;
+}
+h1 { text-align: center; margin-bottom: 22px; color: #333; }
+#controls {
+    text-align: center;
+    margin: 15px 0 34px 0;
+}
+
+.buttons-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+input[type="file"] { display: none; }
+label[for="file"], button {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    box-sizing: border-box;
+    height: 36px;
+    line-height: 20px;
+    vertical-align: middle;
+    border: none;
+    text-decoration: none;
+    color: #fff;
+    white-space: nowrap;
+    min-width: 120px;
+}
+
+
+
+
+
+
+@media (max-width: 768px) {
+    .buttons-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    label[for="file"], button {
+        width: 100%;
+        max-width: 250px;
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+
+    #main {
+        padding: 20px 15px;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+}
+
+
+
+
+
+
+@media (max-width: 480px) {
+    label[for="file"], button {
+        font-size: 13px;
+        min-width: auto;
+    }
+
+    #main {
+        margin: 15px auto;
+        padding: 15px 10px;
+    }
+}
+
+label[for="file"] {
+    background: #f7efd3;
+    color: #444;
+    border: 2px solid #f0e7bb;
+}
+button { background: #3e7847; }
+button.edit { background: #e1c67a; color: #333;}
+button.del { background: #bc4848; color: white;}
+button.save { background: #4CAF50; color: white; }
+button.add { background: #1976d2; color: white; }
+button.pdf { background: #FF9800; color: white; }
+button.riepilogo { background: #009688; color: white; }
+button:disabled { background: #ccc; cursor: not-allowed;}
+
+.message-container {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.msgok { color:#1b8b2d; font-weight:bold; font-size:18px;}
+.msger { color:#a62c2c; font-weight:bold; font-size:18px;}
+
+.section-title {
+    background:#fffad5;
+    font-weight:bold;
+    padding:10px 0 6px 10px;
+    margin-top:30px;
+    border-radius:8px 8px 0 0;
+    font-size:24px;
+    text-align: center;
+    color: #555;
+}
+.tabella {
+    border-collapse: collapse;
+    margin: 0 auto 16px auto;
+    background: #fff; /* Bianco per il fondo dati */
+    width: auto; /* Cambiato da 100% a auto per compattare */
+    max-width: 800px; /* Larghezza massima per compattare - uguale alle linguette */
+    overflow-x: auto;
+}
+
+.tabella th {
+    background: #fffad5; /* Cambiato da #f7efd3 a #fffad5 per uniformità */
+    font-size: 18px; /* Ridotto da 21px */
+    border: 1.7px solid #f0e7bb;
+    padding: 6px 10px; /* Ridotto padding */
+    text-align: center; /* CENTRATI come richiesto */
+}
+
+.tabella td {
+    border: 1.3px solid #f0e7bb;
+    padding: 6px 10px; /* Ridotto padding */
+    font-size: 16px; /* Ridotto da 19px */
+    vertical-align: top;
+}
+
+/* Colonne specifiche per compattare */
+.tabella th:nth-child(1), /* Orario */
+.tabella td:nth-child(1) {
+    width: 80px;
+}
+
+.tabella th:nth-child(2), /* Corso */
+.tabella td:nth-child(2) {
+    width: 140px;
+}
+
+.tabella th:nth-child(3), /* Istruttore */
+.tabella td:nth-child(3) {
+    width: 120px;
+}
+
+.tabella th:nth-child(4), /* Sala */
+.tabella td:nth-child(4) {
+    width: 60px;
+    text-align: center;
+}
+
+.tabella th:nth-child(5), /* Azioni */
+.tabella td:nth-child(5) {
+    width: 50px; /* Molto stretta */
+    text-align: center;
+    padding: 4px; /* Padding ridotto per la colonna azioni */
+}
+
+
+
+
+/* Pulsante cestino con fondo bianco e cornice rossa */
+.tabella .del {
+    width: 24px !important;
+    height: 24px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 4px !important;
+    font-size: 12px !important;
+    min-width: unset !important;
+    background: white !important;
+    border: 2px solid #dc3545 !important;
+    color: #dc3545 !important;
+    line-height: 1 !important;
+}
+
+.tabella .del:hover {
+    background: #dc3545 !important;
+    color: white !important;
+}
+
+
+
+
+@media (max-width: 768px) {
+    .tabella .del {
+        width: 22px !important;
+        height: 22px !important;
+        font-size: 11px !important;
+        background: white !important;
+        border: 2px solid #dc3545 !important;
+        color: #dc3545 !important;
+    }
+    
+    .tabella .del:hover {
+        background: #dc3545 !important;
+        color: white !important;
+    }
+}
+
+
+
+@media (max-width: 768px) {
+    .tabella {
+        font-size: 14px;
+        max-width: 100%;
+    }
+
+    .tabella th {
+        font-size: 14px; /* Ridotto da 16px */
+        padding: 4px 6px; /* Ridotto padding */
+    }
+
+    .tabella td {
+        padding: 4px 6px; /* Ridotto padding */
+        font-size: 13px; /* Ridotto da 14px */
+    }
+    
+    /* Colonne responsive più compatte */
+    .tabella th:nth-child(1), .tabella td:nth-child(1) { width: 60px; }
+    .tabella th:nth-child(2), .tabella td:nth-child(2) { width: 100px; }
+    .tabella th:nth-child(3), .tabella td:nth-child(3) { width: 80px; }
+    .tabella th:nth-child(4), .tabella td:nth-child(4) { width: 40px; }
+    .tabella th:nth-child(5), .tabella td:nth-child(5) { width: 35px; }
+    
+    .tabella .del {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+    background: white !important;
+    border: 2px solid #dc3545 !important;
+    color: #dc3545 !important;
+}
+
+.tabella .del:hover {
+    background: #dc3545 !important;
+    color: white !important;
+}
+
+
+}
+
+.tabella th {
+    background: #f7efd3;
+    font-size: 21px;
+    border: 1.7px solid #f0e7bb;
+    padding: 8px 13px;
+    text-align: left;
+}
+.tabella td {
+    border: 1.3px solid #f0e7bb;
+    padding: 8px 13px;
+    font-size: 19px;
+    vertical-align: top;
+}
+.tabella tr {
+    cursor: pointer;
+}
+.tabella tr:hover {
+    background-color: #f0f8ff !important;
+}
+tr.oraerr { background:#ffe6e6;}
+.tabella input[type="time"],
+.tabella input[type="text"] {
+    font-size:18px;
+    padding: 3px 8px;
+    border-radius:4px;
+    border: 1px solid #ccc;
+    width: calc(100% - 18px);
+    box-sizing: border-box;
+    margin: 0;
+    display: block;
+}
+.tabella input[type="time"] { width: 120px; display: inline-block; }
+.tabella td:nth-child(5) input[type="text"] { width: 80px; }
+textarea {
+    font-size: 14px; /* Ridotto da 18px */
+    width: 100%;
+    border-radius: 6px;
+    padding: 8px; /* Ridotto da 10px */
+    margin: 5px 0 15px 0; /* Ridotto margin bottom */
+    display: block;
+    border: 1px solid #ccc;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+/* Container compatto per le sezioni info */
+.info-sections {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 1000px;
+    margin: 20px auto 0 auto;
+}
+
+.info-section {
+    background: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+}
+
+.info-section .section-title {
+    background: #fffad5;
+    font-weight: bold;
+    padding: 8px 12px;
+    margin: -15px -15px 10px -15px;
+    border-radius: 8px 8px 0 0;
+    font-size: 16px; /* Ridotto da 24px */
+    text-align: center;
+    color: #555;
+}
+
+.info-section textarea {
+    margin: 0;
+    font-size: 13px; /* Più piccolo per le sezioni info */
+}
+
+@media (max-width: 768px) {
+    .info-sections {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        margin: 15px 10px 0 10px;
+    }
+    
+    .info-section {
+        padding: 12px;
+    }
+    
+    .info-section .section-title {
+        margin: -12px -12px 8px -12px;
+        font-size: 14px;
+        padding: 6px 10px;
+    }
+    
+    textarea {
+        font-size: 12px;
+        padding: 6px;
+    }
+}
+
+/* Stili per le linguette giorni - APPROCCIO DINAMICO */
+.tabs-container {
+    display: flex;
+    justify-content: center;
+    margin: 30px auto 0 auto;
+    border-bottom: 2px solid #f0e7bb;
+    /* Larghezza impostata dinamicamente da JavaScript */
+}
+
+.tab {
+    flex: 1; /* Distribuisce uniformemente */
+    padding: 12px 8px;
+    background: #f9f9f9;
+    border: 2px solid #f0e7bb;
+    border-bottom: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    color: #666;
+    margin: 0;
+    border-radius: 8px 8px 0 0;
+    transition: all 0.3s ease;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.tab:hover {
+    background: #f0f8ff;
+    color: #333;
+}
+
+.tab.active {
+    background: #fff;
+    color: #333;
+    border-bottom: 2px solid #fff;
+    margin-bottom: -2px;
+    position: relative;
+    z-index: 1;
+}
+
+
+@media (max-width: 768px) {
+    .tabs-container {
+        width: calc(100% - 20px) !important;
+        margin: 30px 10px 0 10px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+    }
+    
+    .tab {
+        padding: 10px 8px;
+        font-size: 12px;
+        flex: none;
+        min-width: 60px;
+        display: inline-block;
+    }
+}
+
+
+/* SISTEMA RILEVAMENTO MODIFICHE */
+.unsaved-indicator {
+    display: none;
+}
+
+button.save.has-changes { 
+    border: 2px solid #dc3545 !important;
+    box-shadow: 0 0 0 1px #dc3545 !important;
+}
+
+
+</style>
 </head>
+<body>
+<div id="main">
 
-<body onload="if (!sessionStorage.getItem('reloaded')) { sessionStorage.setItem('reloaded', 'true'); location.reload(); }">
-    <!-- Contatore visite -->
-    <div class="flex justify-center items-center mt-4">
-        <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=sebastiano-mazzarisi.github.io/Test/Palestra.html&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=visits&edge_flat=false" alt="Contatore Visite">
+    <h1 id="pageTitle">Gestionale Orari Palestra JoyFit</h1>
+
+<!-- INDICATORE MODIFICHE NON SALVATE -->
+<div id="unsavedIndicator" class="unsaved-indicator">
+    ⚠️ Ci sono modifiche non salvate! Clicca "💾 Salva Orari" per salvare i cambiamenti.
+</div>
+    
+
+
+
+
+
+<!-- Campo per modificare il titolo -->
+    <div style="text-align: center; margin: 10px 0 20px 0;">
+        <input type="text" id="titleInput" placeholder="Inserisci il titolo della pagina" 
+               style="padding: 8px 16px; border-radius: 6px; border: 2px solid #f0e7bb; 
+                      font-size: 16px; width: 500px; max-width: 90%;"
+               onchange="updateTitle(this.value)">
     </div>
 
-    <div id="root"></div>
 
-    <div class="flex justify-center items-center">
-        <a href="https://drive.google.com/file/d/1PEzkHGNAlzCcZl_vNdcMvYXUOmfOBNkG/view?usp=drive_link" target="_blank">
-            <img src="https://sebastiano-mazzarisi.github.io/Test/JoyFit.jpg"/>
-        </a>
+    <div id="controls">
+        <div class="buttons-container">
+            <label for="file">📄 Carica orari</label>
+            <input type="file" id="file" accept=".txt">
+            <button onclick="saveTXT()" class="save" id="savebtn" disabled>💾 Salva Orari</button>
+            <button onclick="addCorso()" class="add" id="addbtn" disabled>+ Aggiungi Corso</button>
+            <button onclick="generatePDF()" class="pdf" id="pdfbtn" disabled>⎙ Genera PDF</button>
+            <button onclick="riepilogo()" class="riepilogo" id="riepilogobtn" disabled>📋 Riepilogo</button>
+
+        </div>
+        <div class="message-container">
+            <span id="msg"></span>
+        </div>
+        <div id="filenameDisplay" style="text-align: center; margin-top: 10px; color: #555;"></div>
     </div>
+    <div id="tabelle"></div>
+</div>
+<script>
+let dati = {
+    giorni: [],
+    orari: [],
+    segreteria: [],
+    orari_fitness: [],
+    note: [],
+    recapiti: [],
+    info: {}
+};
+let giorniOrder = [];
+let currentFileName = "Orari-JoyFit-TMP.txt";
+let corsiDisponibili = [];
+let istruttoriDisponibili = [];
+let saleDisponibili = [];
+let currentSelectedDay = "Lunedì"; // Giorno attualmente selezionato
+let currentEditIndex = -1;
+
+
+// SISTEMA DI CONTROLLO MODIFICHE MIGLIORATO
+let hasUnsavedChanges = false;
+let originalData = null;
+let autoSaveCheckInterval = null;
+
+
+
+// SISTEMA DI CONTROLLO MODIFICHE - NUOVE FUNZIONI
+function saveOriginalData() {
+    originalData = JSON.stringify(dati);
+    hasUnsavedChanges = false;
+    updateUIForChanges();
+    console.log("✅ Dati originali salvati");
+}
+
+
+
+function markAsModified() {
+    if (!hasUnsavedChanges) {
+        hasUnsavedChanges = true;
+        console.log("⚠️ Dati modificati - non salvati");
+        updateUIForChanges();
+        // Rimosso messaggio automatico
+    }
+}
+
+
+
+function checkForUnsavedChanges() {
+    if (!originalData) return false;
+    return JSON.stringify(dati) !== originalData;
+}
+
+
+
+function updateUIForChanges() {
+    const saveBtn = document.getElementById('savebtn');
+    
+    if (hasUnsavedChanges || checkForUnsavedChanges()) {
+        if (saveBtn && !saveBtn.disabled) {
+            saveBtn.classList.add('has-changes');
+        }
+    } else {
+        if (saveBtn) {
+            saveBtn.classList.remove('has-changes');
+        }
+    }
+}
+
+
+
+function startAutoChangeDetection() {
+    if (autoSaveCheckInterval) {
+        clearInterval(autoSaveCheckInterval);
+    }
+    
+    autoSaveCheckInterval = setInterval(() => {
+        if (originalData && checkForUnsavedChanges() && !hasUnsavedChanges) {
+            hasUnsavedChanges = true;
+            updateUIForChanges();
+            console.log("🔍 Modifiche rilevate automaticamente");
+        }
+    }, 2000);
+}
 
 
 
 
-    <div class="flex justify-center items-center mt-8">
-        <a href="https://drive.google.com/file/d/1HYr_KA5qAuac9RYuHs5K7zah2r5JNRlc/view?usp=drive_link" target="_blank">
-          <button class="text-white font-bold py-2 px-4 rounded" style="background-color: rgba(252,196,37,255);">
-              Scarica orario corsi
-          </button>
-        </a>
-    </div>
+function proposeAutoSave(actionName, callback) {
+    if (hasUnsavedChanges || checkForUnsavedChanges()) {
+        const userChoice = confirm(
+            `🚨 ATTENZIONE: Hai modifiche non salvate!\n\n` +
+            `Prima di ${actionName}, vuoi salvare i cambiamenti?\n\n` +
+            `• OK = Salva automaticamente e continua\n` +
+            `• Annulla = Continua senza salvare (le modifiche andranno perse)`
+        );
+        
+        if (userChoice) {
+            saveTXT();
+            setTimeout(() => {
+                if (callback) callback();
+            }, 500);
+            return true;
+        } else {
+            // Rimosso messaggio automatico
+            if (callback) callback();
+            return false;
+        }
 
-    <script type="text/babel">
-        const gymData = {
-            istruttori: {
-                "Antonella": ["Pilates"],
-                "Checco": ["Funzionale"],
-                "Matteo": ["Calisthenics Junior", "Calisthenics"],
-                "Mimmo": ["Slow Fit"],
-                "Mirella": ["Pilates"],
-                "Sabrina": ["Aerea Kids"],
-                "Titti": ["Body Sculpt"],
-                "Roberta": ["Postural/Pilates", "Power/Pilates"],
-                "Rosilenia": ["Functional Kids"],
-                "Saverio C.": ["Defence System", "Krav Maga"]
+    }
+    
+    if (callback) callback();
+    return false;
+}
+
+function showMessage(text, className = "msgok", duration = 3000) {
+    const msgElement = document.getElementById('msg');
+    if (msgElement) {
+        msgElement.textContent = text;
+        msgElement.className = className;
+        
+        setTimeout(() => {
+            msgElement.textContent = '';
+            msgElement.className = '';
+        }, duration);
+    }
+}
+
+
+
+
+// Avviso prima di chiudere/ricaricare la pagina
+window.addEventListener('beforeunload', function(e) {
+    if (hasUnsavedChanges || checkForUnsavedChanges()) {
+        e.preventDefault();
+        e.returnValue = 'Hai modifiche non salvate. Sei sicuro di voler uscire?';
+        return 'Hai modifiche non salvate. Sei sicuro di voler uscire?';
+    }
+});
+
+
+
+function updateTitle(newTitle) {
+    if (newTitle.trim()) {
+        dati.info.Nome = newTitle.trim();
+        markAsModified();
+
+        document.getElementById('pageTitle').textContent = newTitle.trim();
+        document.title = newTitle.trim();
+    }
+}
+
+function loadTitle() {
+    if (dati.info && dati.info.Nome) {
+        const title = dati.info.Nome;
+        document.getElementById('pageTitle').textContent = title;
+        document.getElementById('titleInput').value = title;
+        document.title = title;
+    } else {
+        const defaultTitle = "Gestionale Orari Palestra JoyFit";
+        document.getElementById('pageTitle').textContent = defaultTitle;
+        document.getElementById('titleInput').value = defaultTitle;
+        document.title = defaultTitle;
+        dati.info.Nome = defaultTitle;
+    }
+}
+
+
+
+
+// Mappatura giorni per le linguette
+const giorniAbbreviazioni = {
+    "Lunedì": "Lun",
+    "Martedì": "Mar", 
+    "Mercoledì": "Mer",
+    "Giovedì": "Gio",
+    "Venerdì": "Ven",
+    "Sabato": "Sab"
+};
+
+// Funzione HELPER per caricare un'immagine da un URL e convertirla in Base64
+function getBase64ImageFromURL(url) {
+    return new Promise((resolve, reject) => {
+        let img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = () => {
+            let canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            let ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            let dataURL = canvas.toDataURL('image/jpeg');
+            resolve({
+                data: dataURL,
+                width: img.width,
+                height: img.height
+            });
+        };
+        img.onerror = reject;
+        img.src = url;
+    });
+}
+
+document.getElementById('file').addEventListener('change', function(evt) {
+    const file = evt.target.files[0];
+    if (!file) return;
+    currentFileName = file.name;
+
+    const loadNewFile = () => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                parseTXT(e.target.result);
+                loadTitle();
+                saveOriginalData();
+                startAutoChangeDetection();
+                renderAll();
+                document.getElementById('savebtn').disabled = false;
+                document.getElementById('addbtn').disabled = false;
+                document.getElementById('pdfbtn').disabled = false;
+                document.getElementById('riepilogobtn').disabled = false;
+                document.getElementById('filenameDisplay').textContent = currentFileName;
+                console.log("File caricato e bottoni attivati.");
+            } catch (error) {
+                showMessage("❌ Errore durante il caricamento del file", "msger");
+                console.error("Errore durante parsing:", error);
+            }
+        };
+        reader.onerror = () => {
+            showMessage("❌ Impossibile leggere il file", "msger");
+        };
+        reader.readAsText(file, 'UTF-8');
+    };
+
+    // Avviso solo se ci sono modifiche non salvate
+    if (hasUnsavedChanges || checkForUnsavedChanges()) {
+        proposeAutoSave("caricare un nuovo file", loadNewFile);
+    } else {
+        loadNewFile();
+    }
+});
+
+
+
+function parseTXT(txt) {
+    dati = { giorni: [], orari: [], segreteria: [], orari_fitness: [], note: [], recapiti: [], info: {} };
+    giorniOrder = [];
+    corsiDisponibili = [];
+    istruttoriDisponibili = [];
+    saleDisponibili = [];
+
+    let lines = txt.split('\n');
+    let currentSection = "";
+    for(let rawLine of lines){
+        let line = rawLine.trim();
+        if(line.startsWith("[") && line.endsWith("]")){
+            currentSection = line.replace(/[\[\]]/g,"").toLowerCase();
+            if (currentSection === 'info') dati.info = {};
+            continue;
+        }
+        if(line.startsWith("#")) continue; // Salta solo i commenti, non le righe vuote
+
+
+
+
+
+        switch(currentSection){
+            case 'info':
+                let infoParts = line.split("=");
+                if(infoParts.length === 2) dati.info[infoParts[0].trim()] = infoParts[1].trim();
+                break;
+            case 'giorni':
+                if(line) { // Solo per giorni, salta righe vuote
+                    dati.giorni.push(line);
+                    giorniOrder.push(line);
+                }
+                break;
+            case 'orari':
+                let parts = line.split(";");
+                if(parts.length < 1) continue;
+                const gg = parts[0] ? parts[0].trim() : '';
+                const hh = parts[1] ? formatTimeForInput(parts[1].trim()) : '';
+                const cc = parts[2] ? parts[2].trim() : '';
+                const ii = parts[3] ? parts[3].trim() : '';
+                const ss = parts[4] ? parts[4].trim() : '';
+
+                dati.orari.push({giorno: gg, oraInizio: hh, corso: cc, istruttore: ii, sala: ss});
+
+                if (cc && !corsiDisponibili.includes(cc)) corsiDisponibili.push(cc);
+                if (ii && !istruttoriDisponibili.includes(ii)) istruttoriDisponibili.push(ii);
+                if (ss && !saleDisponibili.includes(ss)) saleDisponibili.push(ss);
+                break;
+            case 'segreteria': dati.segreteria.push(line); break; // Mantiene righe vuote
+            case 'orari sala fitness': dati.orari_fitness.push(line); break; // Mantiene righe vuote
+            case 'note': dati.note.push(line); break; // Mantiene righe vuote
+            case 'recapiti': dati.recapiti.push(line); break; // Mantiene righe vuote
+        }
+
+
+
+
+
+    }
+    if(!dati.giorni.length) {
+        dati.giorni = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
+        giorniOrder = [...dati.giorni];
+    }
+    corsiDisponibili.sort();
+    istruttoriDisponibili.sort();
+    saleDisponibili.sort();
+}
+
+function formatTimeForInput(timeStr) {
+    if (!timeStr) return '';
+    const parts = timeStr.split(':');
+    if (parts.length === 2) {
+        const hh = parts[0].padStart(2, '0');
+        const mm = parts[1].padStart(2, '0');
+        if (/^\d{2}$/.test(hh) && /^\d{2}$/.test(mm) && parseInt(hh,10) >= 0 && parseInt(hh,10) <= 23 && parseInt(mm,10) >= 0 && parseInt(mm,10) <= 59) {
+            return `${hh}:${mm}`;
+        }
+    }
+    return '';
+}
+
+function timeToMinutes(timeStr) {
+    if (!timeStr || !timeStr.includes(':')) return NaN;
+    const parts = timeStr.split(':');
+    const h = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10);
+    if (isNaN(h) || isNaN(m)) return NaN;
+    return h * 60 + m;
+}
+
+function checkInvalidTimes() {
+    let invalidIndexes = [];
+    dati.orari.forEach((corso, index) => {
+        if (corso.oraInizio) {
+            const minuti = timeToMinutes(corso.oraInizio);
+            if (isNaN(minuti)) return;
+            const orario0700 = 7 * 60;
+            const orario2030 = 20 * 60 + 30;
+            if (minuti < orario0700 || minuti > orario2030) {
+                invalidIndexes.push(index);
+            }
+        }
+    });
+    return invalidIndexes;
+}
+
+function checkOverlaps() {
+    let overlaps = [];
+    let gruppi = {};
+    dati.orari.forEach((corso, index) => {
+        if (!corso.sala || corso.sala.trim() === '' || !corso.giorno || !corso.oraInizio) return;
+        let chiave = `${corso.giorno}_${corso.sala}`;
+        if (!gruppi[chiave]) gruppi[chiave] = [];
+        gruppi[chiave].push({ corso, index });
+    });
+    Object.values(gruppi).forEach(gruppo => {
+        if (gruppo.length < 2) return;
+        gruppo.sort((a, b) => {
+            const tA = timeToMinutes(a.corso.oraInizio); const tB = timeToMinutes(b.corso.oraInizio);
+            if(isNaN(tA) && isNaN(tB)) return 0; if(isNaN(tA)) return 1; if(isNaN(tB)) return -1;
+            return tA - tB;
+        });
+        for (let i = 0; i < gruppo.length; i++) {
+            for (let j = i + 1; j < gruppo.length; j++) {
+                let orario1Start = timeToMinutes(gruppo[i].corso.oraInizio);
+                let orario2Start = timeToMinutes(gruppo[j].corso.oraInizio);
+                if (isNaN(orario1Start) || isNaN(orario2Start)) continue;
+                if (Math.abs(orario1Start - orario2Start) < 60) {
+                    overlaps.push(gruppo[i].index); overlaps.push(gruppo[j].index);
+                }
+            }
+        }
+    });
+    return [...new Set(overlaps)];
+}
+
+function renderAll(){
+    let tabsHtml = "";
+    
+    // Crea le linguette per i giorni
+    tabsHtml += `<div class="tabs-container" id="tabsContainer">`;
+    giorniOrder.forEach(giorno => {
+        const abbr = giorniAbbreviazioni[giorno] || giorno.substring(0, 3);
+        const activeClass = giorno === currentSelectedDay ? 'active' : '';
+        tabsHtml += `<div class="tab ${activeClass}" onclick="selectDay('${giorno}')">${abbr}</div>`;
+    });
+    tabsHtml += `</div>`;
+
+    // Filtra gli orari per il giorno selezionato
+    const orariGiornoCorrente = dati.orari.filter(corso => corso.giorno === currentSelectedDay);
+    
+    tabsHtml += `<table class="tabella" id="mainTable">
+        <thead>
+            <tr>
+                <th>Orario</th>
+                <th>Corso</th>
+                <th>Istruttore</th>
+                <th>Sala</th>
+                <th></th> </tr>
+        </thead>
+        <tbody>`;
+        
+    if (orariGiornoCorrente.length === 0) {
+        tabsHtml += `<tr><td colspan="5" style="color:#999;text-align:center;">(nessun corso per ${currentSelectedDay})</td></tr>`;
+    } else {
+        const overlappingIndexes = checkOverlaps();
+        const invalidTimeIndexes = checkInvalidTimes();
+
+        // Ordina gli orari del giorno per orario
+        const sortedOrariGiorno = orariGiornoCorrente.map((corso, localIndex) => {
+            // Trova l'indice originale nell'array completo
+            const originalIndex = dati.orari.findIndex(c => 
+                c.giorno === corso.giorno && 
+                c.oraInizio === corso.oraInizio && 
+                c.corso === corso.corso && 
+                c.istruttore === corso.istruttore &&
+                c.sala === corso.sala
+            );
+            return { ...corso, originalIndex };
+        }).sort((a, b) => {
+            if (!a.oraInizio || !b.oraInizio) {
+                if (!a.oraInizio && !b.oraInizio) return 0;
+                return !a.oraInizio ? 1 : -1;
+            }
+            return a.oraInizio.localeCompare(b.oraInizio);
+        });
+
+        sortedOrariGiorno.forEach((corso) => {
+            let style = '';
+            
+            const hasOverlap = overlappingIndexes.includes(corso.originalIndex);
+            const hasInvalidTime = invalidTimeIndexes.includes(corso.originalIndex);
+
+            if (hasOverlap || hasInvalidTime) {
+                style += 'background:#ffaaaa;';
+            }
+
+            tabsHtml += `
+                <tr data-original-index="${corso.originalIndex}" style="${style}" onclick="editCorso(${corso.originalIndex})">
+                    <td>${corso.oraInizio || ''}</td>
+                    <td>${corso.corso || ''}</td>
+                    <td>${corso.istruttore || ''}</td>
+                    <td style="text-align:center;">${corso.sala || ''}</td>
+                    <td style="text-align:center;">
+                        <button class="del" onclick="event.stopPropagation(); deleteCorsoRow(${corso.originalIndex})">✕</button>
+                    </td>
+                </tr>`;
+        });
+    }
+    tabsHtml += `</tbody></table>`;
+
+    tabsHtml += `
+    <div id="editForm" style="display:none; background:#f9f9f9; padding:20px; border-radius:8px; margin:20px auto; border:2px solid #ddd; max-width:500px; width:fit-content;">
+        <h3 style="margin-top:0; text-align:center; background:#fffad5; padding:12px; border-radius:6px; margin-bottom:20px;">Aggiungi Nuovo Corso</h3>
+        
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-bottom:15px;">
+            <div>
+                <label style="display:block; margin-bottom:5px; font-weight:bold;">Giorno:</label>
+                <select id="editGiorno" style="width:100%; padding:5px; font-size:14px; border:1px solid #ccc; border-radius:4px;">
+                    ${giorniOrder.map(g => `<option value="${g}">${g}</option>`).join('')}
+                </select>
+            </div>
+            <div>
+                <label style="display:block; margin-bottom:5px; font-weight:bold;">Ora:</label>
+                <input type="time" id="editOrario" style="width:100%; padding:5px; font-size:14px; border:1px solid #ccc; border-radius:4px;">
+            </div>
+            <div>
+                <label style="display:block; margin-bottom:5px; font-weight:bold;">Sala:</label>
+                <select id="editSala" style="width:100%; padding:5px; font-size:14px; border:1px solid #ccc; border-radius:4px;">
+                    ${saleDisponibili.map(s => `<option value="${s}">${s}</option>`).join('')}
+                    <option value="__nuovo__">+ Nuova sala</option>
+                </select>
+                <input type="text" id="editSalaNuovo" placeholder="Nome nuova sala" style="width:100%; padding:5px; font-size:14px; margin-top:5px; display:none; border:1px solid #ccc; border-radius:4px;">
+            </div>
+        </div>
+        
+        <div style="margin-bottom:15px;">
+            <label style="display:block; margin-bottom:5px; font-weight:bold;">Istruttore:</label>
+            <select id="editIstruttore" style="width:100%; padding:5px; font-size:14px; border:1px solid #ccc; border-radius:4px;">
+                ${istruttoriDisponibili.map(i => `<option value="${i}">${i}</option>`).join('')}
+                <option value="__nuovo__">+ Nuovo istruttore</option>
+            </select>
+            <input type="text" id="editIstruttoreNuovo" placeholder="Nome nuovo istruttore" style="width:100%; padding:5px; font-size:14px; margin-top:5px; display:none; border:1px solid #ccc; border-radius:4px;">
+        </div>
+        
+        <div style="margin-bottom:20px;">
+            <label style="display:block; margin-bottom:5px; font-weight:bold;">Corso:</label>
+            <select id="editCorso" style="width:100%; padding:5px; font-size:14px; border:1px solid #ccc; border-radius:4px;">
+                ${corsiDisponibili.map(c => `<option value="${c}">${c}</option>`).join('')}
+                <option value="__nuovo__">+ Nuovo corso</option>
+            </select>
+            <input type="text" id="editCorsoNuovo" placeholder="Nome nuovo corso" style="width:100%; padding:5px; font-size:14px; margin-top:5px; display:none; border:1px solid #ccc; border-radius:4px;">
+        </div>
+        
+
+
+        <div style="text-align:center; display:flex; justify-content:center; gap:10px; flex-wrap:nowrap;">
+            <button onclick="saveEdit()" class="save" style="padding:8px 16px; min-width:100px;">💾 Salva</button>
+            <button onclick="cancelEdit()" class="del" style="padding:8px 16px; min-width:100px;">❌ Annulla</button>
+        </div>
+
+
+
+
+    </div>`;
+
+    tabsHtml += `
+    <div class="info-sections">
+        <div class="info-section">
+            <div class="section-title">Orari Segreteria</div>
+            <textarea id="segBox" rows="10" onchange="updateTextBox('segreteria', this.value)">${dati.segreteria.join('\n')}</textarea>
+        </div>
+        
+        <div class="info-section">
+            <div class="section-title">Orari Sala Fitness</div>
+            <textarea id="fitBox" rows="10" onchange="updateTextBox('orari_fitness', this.value)">${dati.orari_fitness.join('\n')}</textarea>
+        </div>
+        
+        <div class="info-section">
+            <div class="section-title">Contatti</div>
+            <textarea id="recBox" rows="8" onchange="updateTextBox('recapiti', this.value)">${dati.recapiti.join('\n')}</textarea>
+        </div>
+        
+        <div class="info-section">
+            <div class="section-title">Note</div>
+            <textarea id="noteBox" rows="8" onchange="updateTextBox('note', this.value)">${dati.note.join('\n')}</textarea>
+        </div>
+    </div>`;
+        
+    document.getElementById('tabelle').innerHTML = tabsHtml;
+
+    // ALLINEAMENTO DINAMICO: misura la tabella e applica la stessa larghezza alle linguette
+    setTimeout(() => {
+        const table = document.getElementById('mainTable');
+        const tabsContainer = document.getElementById('tabsContainer');
+        if (table && tabsContainer) {
+            const tableWidth = table.offsetWidth;
+            tabsContainer.style.width = tableWidth + 'px';
+            console.log(`Tabella: ${tableWidth}px, Linguette: ${tableWidth}px - ALLINEATE!`);
+        }
+    }, 100); // Piccolo delay per assicurarsi che la tabella sia renderizzata
+
+    if (document.getElementById('editCorso')) {
+        document.getElementById('editCorso').addEventListener('change', function() {
+            document.getElementById('editCorsoNuovo').style.display = this.value === '__nuovo__' ? 'block' : 'none';
+        });
+    }
+    if (document.getElementById('editIstruttore')) {
+        document.getElementById('editIstruttore').addEventListener('change', function() {
+            document.getElementById('editIstruttoreNuovo').style.display = this.value === '__nuovo__' ? 'block' : 'none';
+        });
+    }
+    if (document.getElementById('editSala')) {
+        document.getElementById('editSala').addEventListener('change', function() {
+            document.getElementById('editSalaNuovo').style.display = this.value === '__nuovo__' ? 'block' : 'none';
+        });
+    }
+}
+
+function selectDay(giorno) {
+    currentSelectedDay = giorno;
+    renderAll();
+}
+
+function editCorso(index) {
+    currentEditIndex = index;
+    const corso = dati.orari[index];
+    document.getElementById('editGiorno').value = corso.giorno;
+    document.getElementById('editOrario').value = corso.oraInizio;
+    document.getElementById('editCorso').value = corso.corso;
+    document.getElementById('editIstruttore').value = corso.istruttore;
+    document.getElementById('editSala').value = corso.sala;
+    document.getElementById('editCorsoNuovo').style.display = 'none';
+    document.getElementById('editIstruttoreNuovo').style.display = 'none';
+    document.getElementById('editSalaNuovo').style.display = 'none';
+    document.getElementById('editForm').style.display = 'block';
+    document.getElementById('editForm').scrollIntoView({ behavior: 'smooth' });
+    // Aggiorna il titolo con sfondo giallo
+    const titleElement = document.getElementById('editForm').querySelector('h3');
+    titleElement.textContent = 'Modifica Corso';
+    titleElement.style.background = '#fffad5';
+}
+
+function saveEdit() {
+    let giorno = document.getElementById('editGiorno').value;
+    let orarioInizio = document.getElementById('editOrario').value;
+    let corso = document.getElementById('editCorso').value;
+    let istruttore = document.getElementById('editIstruttore').value;
+    let sala = document.getElementById('editSala').value;
+    if (corso === '__nuovo__') {
+        corso = document.getElementById('editCorsoNuovo').value.trim();
+        if (!corso) { alert('Inserisci il nome del nuovo corso'); return; }
+    }
+    if (istruttore === '__nuovo__') {
+        istruttore = document.getElementById('editIstruttoreNuovo').value.trim();
+        if (!istruttore) { alert('Inserisci il nome del nuovo istruttore'); return; }
+    }
+    if (sala === '__nuovo__') {
+        sala = document.getElementById('editSalaNuovo').value.trim();
+        if (!sala) { alert('Inserisci il nome della nuova sala'); return; }
+    }
+    const newCorsoData = { giorno: giorno, oraInizio: orarioInizio, corso: corso, istruttore: istruttore, sala: sala };
+
+    markAsModified();
+    if (currentEditIndex === -1) {
+        dati.orari.push(newCorsoData);
+    } else {
+        dati.orari[currentEditIndex] = newCorsoData;
+    }
+    if (corso && !corsiDisponibili.includes(corso)) { corsiDisponibili.push(corso); corsiDisponibili.sort(); }
+    if (istruttore && !istruttoriDisponibili.includes(istruttore)) { istruttoriDisponibili.push(istruttore); istruttoriDisponibili.sort(); }
+    if (sala && !saleDisponibili.includes(sala)) { saleDisponibili.push(sala); saleDisponibili.sort(); }
+    
+    // Se il giorno è cambiato durante la modifica, aggiorna il tab attivo
+    currentSelectedDay = giorno;
+    
+    cancelEdit();
+    renderAll();
+}
+
+function cancelEdit() {
+    currentEditIndex = -1;
+    document.getElementById('editForm').style.display = 'none';
+    document.getElementById('editCorsoNuovo').value = '';
+    document.getElementById('editIstruttoreNuovo').value = '';
+    document.getElementById('editSalaNuovo').value = '';
+}
+
+function deleteCorsoRow(index) {
+    if (confirm('Sei sicuro di voler eliminare questo corso?')) {
+        if (confirm('CONFERMA DEFINITIVA: Questa azione è irreversibile. Eliminare?')) {
+            dati.orari.splice(index, 1);
+            markAsModified(); // ✅ RILEVA MODIFICHE
+            showMessage('🗑️ Corso eliminato', 'msgok'); // ✅ MESSAGGIO
+            renderAll();
+        }
+    }
+}
+
+function updateTextBox(sectionName, value) {
+    dati[sectionName] = value.split('\n');
+    markAsModified();
+}
+
+function addCorso(){
+    currentEditIndex = -1;
+    document.getElementById('editGiorno').value = currentSelectedDay; // Preseleziona il giorno attivo
+    document.getElementById('editOrario').value = "09:00";
+    document.getElementById('editCorso').value = corsiDisponibili.length > 0 ? corsiDisponibili[0] : '__nuovo__';
+    document.getElementById('editIstruttore').value = istruttoriDisponibili.length > 0 ? istruttoriDisponibili[0] : '__nuovo__';
+    document.getElementById('editSala').value = saleDisponibili.length > 0 ? saleDisponibili[0] : '__nuovo__';
+    document.getElementById('editCorsoNuovo').style.display = document.getElementById('editCorso').value === '__nuovo__' ? 'block' : 'none';
+    document.getElementById('editIstruttoreNuovo').style.display = document.getElementById('editIstruttore').value === '__nuovo__' ? 'block' : 'none';
+    document.getElementById('editSalaNuovo').style.display = document.getElementById('editSala').value === '__nuovo__' ? 'block' : 'none';
+    document.getElementById('editCorsoNuovo').value = '';
+    document.getElementById('editIstruttoreNuovo').value = '';
+    document.getElementById('editSalaNuovo').value = '';
+    document.getElementById('editForm').style.display = 'block';
+    document.getElementById('editForm').scrollIntoView({ behavior: 'smooth' });
+    // Aggiorna il titolo con sfondo giallo
+    const titleElement = document.getElementById('editForm').querySelector('h3');
+    titleElement.textContent = 'Aggiungi Nuovo Corso';
+    titleElement.style.background = '#fffad5';
+}
+
+function saveTXT(){
+    let txtContent = "";
+    if (Object.keys(dati.info).length > 0) {
+        txtContent += "[INFO]\n";
+        for (const key in dati.info) { txtContent += `${key}=${dati.info[key]}\n`; }
+        txtContent += "\n";
+    }
+    txtContent += "[GIORNI]\n" + dati.giorni.join("\n") + "\n\n";
+    txtContent += "[ORARI]\n";
+    const sortedOrari = [...dati.orari].sort((a, b) => {
+        const dayOrderA = giorniOrder.indexOf(a.giorno);
+        const dayOrderB = giorniOrder.indexOf(b.giorno);
+        if (dayOrderA !== dayOrderB) return dayOrderA - dayOrderB;
+        if (!a.oraInizio || !b.oraInizio) return 0;
+        return a.oraInizio.localeCompare(b.oraInizio);
+    });
+    sortedOrari.forEach(o => { txtContent += `${o.giorno};${o.oraInizio};${o.corso};${o.istruttore};${o.sala}\n`; });
+    txtContent += "\n[SEGRETERIA]\n" + dati.segreteria.join("\n") + "\n\n";
+    txtContent += "[ORARI SALA FITNESS]\n" + dati.orari_fitness.join("\n") + "\n\n";
+    txtContent += "[NOTE]\n" + dati.note.join("\n") + "\n\n";
+    txtContent += "[RECAPITI]\n" + dati.recapiti.join("\n") + "\n";
+    
+    const blob = new Blob([txtContent], {type: 'text/plain;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = currentFileName.replace(".txt", "-mod.txt");
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    
+    // ✅ RESETTA STATO MODIFICHE DOPO SALVATAGGIO
+    saveOriginalData();
+    // File salvato con successo (messaggio rimosso per discrezione)
+    console.log("File salvato e stato resettato.");
+
+}
+
+// SISTEMA COLORI PER ISTRUTTORI - DEFINITO GLOBALMENTE
+const coloriIstruttori = new Map();
+const coloriDisponibili = [
+    [255, 107, 107], // Rosso chiaro
+    [54, 162, 235],  // Blu
+    [255, 206, 86],  // Giallo
+    [75, 192, 192],  // Turchese
+    [153, 102, 255], // Viola
+    [255, 159, 64],  // Arancione
+    [199, 199, 199], // Grigio
+    [83, 102, 255],  // Blu scuro
+    [255, 99, 132],  // Rosa
+    [54, 235, 162],  // Verde acqua
+    [235, 54, 162],  // Magenta
+    [162, 235, 54],  // Verde lime
+    [235, 162, 54],  // Oro
+    [162, 54, 235],  // Indigo
+    [54, 235, 235],  // Ciano
+    [235, 235, 54]   // Giallo lime
+];
+
+// Funzione globale per ottenere colore dell'istruttore
+function getColoreIstruttore(nomeIstruttore) {
+    if (!coloriIstruttori.has(nomeIstruttore)) {
+        const indiceColore = coloriIstruttori.size % coloriDisponibili.length;
+        coloriIstruttori.set(nomeIstruttore, coloriDisponibili[indiceColore]);
+    }
+    return coloriIstruttori.get(nomeIstruttore);
+}
+
+async function generatePDF() {
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const marginLeft = 10;
+        const marginRight = 10;
+        const marginTop = 10;
+        const marginBottom = 10;
+
+        let logoData = null;
+        try {
+            logoData = await getBase64ImageFromURL('https://sebastiano-mazzarisi.github.io/Test/JoyFit.jpg');
+        } catch (e) {
+            console.error("Impossibile caricare il logo dall'URL:", e);
+        }
+
+        let currentY = marginTop;
+
+        // SISTEMA COLORI PER CORSI - DICHIARATO ALL'INIZIO
+        const coloriCorsi = new Map();
+        // coloriDisponibili è già definito globalmente, lo riusiamo o ne definiamo uno specifico se necessario
+        // Per coerenza con l'originale, lascio questa dichiarazione qui, ma potresti voler riutilizzare 'coloriDisponibili'
+        // se i colori dei corsi devono essere gli stessi degli istruttori.
+        /*
+        const coloriDisponibiliPerCorsi = [
+            [255, 107, 107], // Rosso chiaro
+            [54, 162, 235],  // Blu
+            [255, 206, 86],  // Giallo
+            [75, 192, 192],  // Turchese
+            [153, 102, 255], // Viola
+            [255, 159, 64],  // Arancione
+            [199, 199, 199], // Grigio
+            [83, 102, 255],  // Blu scuro
+            [255, 99, 132],  // Rosa
+            [54, 235, 162],  // Verde acqua
+            [235, 54, 162],  // Magenta
+            [162, 235, 54],  // Verde lime
+            [235, 162, 54],  // Oro
+            [162, 54, 235],  // Indigo
+            [54, 235, 235],  // Ciano
+            [235, 235, 54]   // Giallo lime
+        ];
+        */
+
+        // Funzione per ottenere colore del corso (usa coloriDisponibili globali)
+        function getColoreCorso(nomeCorso) {
+            if (!coloriCorsi.has(nomeCorso)) {
+                const indiceColore = coloriCorsi.size % coloriDisponibili.length;
+                coloriCorsi.set(nomeCorso, coloriDisponibili[indiceColore]);
+            }
+            return coloriCorsi.get(nomeCorso);
+        }
+
+        doc.setFontSize(18);
+        doc.setFont("helvetica", "bold");
+
+
+        const titleToPrint = dati.info && dati.info.Nome ? dati.info.Nome : "Palestra Joy Fit Putignano - Orario Corsi";
+        doc.text(titleToPrint, pageWidth / 2, currentY, { align: 'center' });
+
+        currentY += 10;
+
+        const giorni = giorniOrder;
+        const orariPerGiorno = giorni.map(g =>
+            dati.orari.filter(o => o.giorno === g)
+                    .sort((a, b) => (a.oraInizio || "").localeCompare(b.oraInizio || ""))
+        );
+        const maxRows = Math.max(...orariPerGiorno.map(o => o.length), 0);
+        const head = [giorni];
+
+        // Prepara i dati della tabella con contenuto personalizzato
+        const body = [];
+        for (let r = 0; r < maxRows; r++) {
+            const row = [];
+            for (let c = 0; c < giorni.length; c++) {
+                const slot = orariPerGiorno[c] ? orariPerGiorno[c][r] : undefined;
+                if (slot) {
+                    let sala = slot.sala ? ` [${slot.sala}]` : "";
+                    row.push({
+                        content: `${slot.oraInizio} ${slot.corso} (${slot.istruttore})${sala}`,
+                        orario: slot.oraInizio,
+                        corso: slot.corso,
+                        istruttore: slot.istruttore,
+                        sala: slot.sala
+                    });
+                } else {
+                    row.push("");
+                }
+            }
+            body.push(row);
+        }
+
+        doc.autoTable({
+            startY: currentY,
+            head: head,
+            body: body.map(row => row.map(cell => typeof cell === 'string' ? cell : '')), // Only strings for the body
+            theme: "grid",
+            margin: { left: marginLeft + 2, right: marginRight - 5 }, // Table moved +5 pixels to the right compared to the previous position
+            columnStyles: {
+                0: { cellWidth: 32 }, // Colonna Lunedì - larghezza fissa 32mm
+                1: { cellWidth: 32 }, // Colonna Martedì - larghezza fissa 32mm
+                2: { cellWidth: 32 }, // Colonna Mercoledì - larghezza fissa 32mm
+                3: { cellWidth: 32 }, // Colonna Giovedì - larghezza fissa 32mm
+                4: { cellWidth: 32 }, // Colonna Venerdì - larghezza fissa 32mm
+                5: { cellWidth: 32 }  // Colonna Sabato - larghezza fissa 32mm
             },
-            corsi: {
-                "Aerea Kids": [
-                    {giorno: "Lunedì", ora: "17:00", istruttore: "Sabrina"},
-                    {giorno: "Mercoledì", ora: "17:00", istruttore: "Sabrina"}
-                ],
-                "Body Sculpt": [
-                    {giorno: "Lunedì", ora: "09:15", istruttore: "Titti"},
-                    {giorno: "Lunedì", ora: "19:30", istruttore: "Titti"},
-                    {giorno: "Mercoledì", ora: "18:30", istruttore: "Titti"},
-                    {giorno: "Giovedì", ora: "09:15", istruttore: "Titti"},
-                    {giorno: "Venerdì", ora: "19:30", istruttore: "Titti"},
-                    {giorno: "Sabato", ora: "09:00", istruttore: "Titti"}
-                ],
-                "Calisthenics": [
-                    {giorno: "Martedì", ora: "20:15", istruttore: "Matteo"},
-                    {giorno: "Giovedì", ora: "20:15", istruttore: "Matteo"},
-                    {giorno: "Venerdì", ora: "20:15", istruttore: "Matteo"}
-                ],
-                "Calisthenics Junior": [
-                    {giorno: "Martedì", ora: "18:00", istruttore: "Matteo"},
-                    {giorno: "Giovedì", ora: "18:00", istruttore: "Matteo"}
-                ],
-                "Defence System": [
-                    {giorno: "Lunedì", ora: "18:00", istruttore: "Saverio C."},
-                    {giorno: "Mercoledì", ora: "18:00", istruttore: "Saverio C."}
-                ],
-                "Functional Kids": [
-                    {giorno: "Martedì", ora: "16:30", istruttore: "Rosilenia"},
-                    {giorno: "Venerdì", ora: "16:30", istruttore: "Rosilenia"}
-                ],
-                "Funzionale": [
-                    {giorno: "Lunedì", ora: "13:30", istruttore: "Checco"},
-                    {giorno: "Lunedì", ora: "14:30", istruttore: "Checco"},
-                    {giorno: "Martedì", ora: "19:15", istruttore: "Checco"},
-                    {giorno: "Giovedì", ora: "13:30", istruttore: "Checco"},
-                    {giorno: "Giovedì", ora: "14:30", istruttore: "Checco"},
-                    {giorno: "Giovedì", ora: "19:15", istruttore: "Checco"},
-                    {giorno: "Sabato", ora: "11:00", istruttore: "Checco"}
-                ],
-                "Krav Maga": [
-                    {giorno: "Lunedì", ora: "20:00", istruttore: "Saverio C."},
-                    {giorno: "Mercoledì", ora: "20:00", istruttore: "Saverio C."}
-                ],
-                "Pilates": [
-                    {giorno: "Lunedì", ora: "07:30", istruttore: "Mirella"},
-                    {giorno: "Lunedì", ora: "17:15", istruttore: "Antonella"},
-                    {giorno: "Lunedì", ora: "18:15", istruttore: "Antonella"},
-                    {giorno: "Lunedì", ora: "19:15", istruttore: "Antonella"},
-                    {giorno: "Mercoledì", ora: "07:00", istruttore: "Mirella"},
-                    {giorno: "Giovedì", ora: "17:15", istruttore: "Antonella"},
-                    {giorno: "Giovedì", ora: "18:15", istruttore: "Antonella"},
-                    {giorno: "Giovedì", ora: "19:15", istruttore: "Antonella"},
-                    {giorno: "Venerdì", ora: "07:00", istruttore: "Mirella"}
-                ],
-                "Postural/Pilates": [
-                    {giorno: "Martedì", ora: "09:00", istruttore: "Roberta"},
-                    {giorno: "Venerdì", ora: "09:00", istruttore: "Roberta"}
-                ],
-                "Power/Pilates": [
-                    {giorno: "Martedì", ora: "10:00", istruttore: "Roberta"},
-                    {giorno: "Venerdì", ora: "10:00", istruttore: "Roberta"}
-                ],
-                "Slow Fit": [
-                    {giorno: "Martedì", ora: "18:30", istruttore: "Mimmo"},
-                    {giorno: "Martedì", ora: "19:30", istruttore: "Mimmo"},
-                    {giorno: "Venerdì", ora: "18:30", istruttore: "Mimmo"},
-                    {giorno: "Venerdì", ora: "19:30", istruttore: "Mimmo"}
-                ]
+            styles: {
+                font: "helvetica",
+                fontSize: 9.5,
+                cellPadding: { top: 1.2, right: 1, bottom: 1.2, left: 1 },
+                overflow: "linebreak",
+                valign: "top",
+                halign: "left",
+                lineWidth: 0.25,
+                lineColor: [0, 0, 0],
+                minCellHeight: 13 // Height set to 13 pixels
             },
-            orari: {
-                appuntamento: [
-                    "Personal Training",
-                    "Pilates Reformer",
-                    "Rieducazione Funzionale",
-                    "Lezioni private di Krav Maga",
-                    "Lezioni private di Calisthenics"
-                ],                
-                segreteria: [
-                    "Lunedì: 08:00 - 12:00, 16:00 - 20:00",
-                    "Martedì: 08:00 - 12:00, 16:00 - 20:00",
-                    "Mercoledì: 16:00 - 20:00",
-                    "Giovedì: 08:00 - 12:00, 16:00 - 20:00",
-                    "Venerdì: 08:00 - 12:00, 16:00 - 20:00",
-                    "Sabato: 09:00 - 12:00"
-                ],
-                salaFitness: [
-                    "Lunedì: 07:00 - 21:00",
-                    "Martedì: 07:00 - 21:00",
-                    "Mercoledì: 07:00 - 21:00",
-                    "Giovedì: 07:00 - 21:00",
-                    "Venerdì: 07:00 - 21:00",
-                    "Sabato: 09:00 - 12:00, 15:00 - 18:00",
-                    "Domenica: chiuso"
-                ]
+            headStyles: {
+                fillColor: [247, 239, 211],
+                textColor: 40,
+                fontSize: 11.5,
+                fontStyle: "bold",
+                halign: "center",
+                valign: "middle",
+                lineWidth: 0.25,
+                lineColor: [0, 0, 0],
+                minCellHeight: 8 // Reduced height for header cells
+            },
+            rowPageBreak: 'avoid',
+            // SOLUZIONE FIX: Utilizzare didDrawCell esclusivamente per il disegno personalizzato
+            didDrawCell: function(data) {
+                if (data.section === 'body' && data.row.index < body.length && data.column.index < body[data.row.index].length) {
+                    const cellData = body[data.row.index][data.column.index];
+
+                    if (cellData && typeof cellData === 'object' && cellData.orario) {
+                        // Clears the cell completely before redrawing
+                        doc.setFillColor(255, 255, 255);
+                        doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F');
+
+                        // Redraws the border
+                        doc.setDrawColor(0, 0, 0);
+                        doc.setLineWidth(0.25);
+                        doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'S');
+
+                        const orario = cellData.orario;
+                        let restoTesto = cellData.content.substring(orario.length);
+                        restoTesto = restoTesto.replace(/\n/g, ' ').trim();
+
+                        // Extract instructor name for color
+                        const istruttoreMatch = restoTesto.match(/\(([^)]+)\)/);
+                        const nomeIstruttore = istruttoreMatch ? istruttoreMatch[1].trim() : 'Default';
+                        const letteraIstruttore = nomeIstruttore.charAt(0).toUpperCase();
+
+                        // Calculate square dimensions
+                        const quadratinoSize = 3.6;
+                        const margineDalBordo = 1;
+                        const quadratinoX = data.cell.x + data.cell.width - quadratinoSize - margineDalBordo;
+                        const quadratinoY = data.cell.y + margineDalBordo;
+
+                        // Draw time in bold
+                        doc.setFont("helvetica", "bold");
+                        doc.setFontSize(9.5);
+                        doc.setTextColor(0, 0, 0);
+                        const spazioDopoOrario = " ";
+                        const orarioConSpazio = orario + spazioDopoOrario;
+                        doc.text(orarioConSpazio, data.cell.x + data.cell.padding('left'), data.cell.y + data.cell.padding('top') + 3);
+
+                        // Calculate width of time + space
+                        const orarioWidth = doc.getTextWidth(orarioConSpazio);
+
+                        // Draw the rest of the text in normal font
+                        doc.setFont("helvetica", "normal");
+                        doc.setFontSize(9.5);
+
+                        // Calculate available space for text considering the square
+                        const spazioRiservatoQuadratino = quadratinoSize + margineDalBordo + 1;
+                        const maxWidth = data.cell.width - data.cell.padding('horizontal') - spazioRiservatoQuadratino;
+                        const availableWidthPrimaRiga = maxWidth - orarioWidth;
+
+                        // Break text to fit in cell
+                        const lines = doc.splitTextToSize(restoTesto, maxWidth);
+
+                        let yOffset = 3;
+
+                        // First line: on the same line as the time
+                        if (lines.length > 0) {
+                            const primaRigaWidth = doc.getTextWidth(lines[0]);
+
+                            if (primaRigaWidth <= availableWidthPrimaRiga) {
+                                doc.text(lines[0], data.cell.x + data.cell.padding('left') + orarioWidth, data.cell.y + data.cell.padding('top') + yOffset);
+
+                                for (let i = 1; i < lines.length; i++) {
+                                    yOffset += 3.5;
+                                    doc.text(lines[i], data.cell.x + data.cell.padding('left'), data.cell.y + data.cell.padding('top') + yOffset);
+                                }
+                            } else {
+                                for (let i = 0; i < lines.length; i++) {
+                                    if (i === 0) {
+                                        yOffset += 3.5;
+                                    } else {
+                                        yOffset += 3.5;
+                                    }
+                                    doc.text(lines[i], data.cell.x + data.cell.padding('left'), data.cell.y + data.cell.padding('top') + yOffset);
+                                }
+                            }
+                        }
+
+                        // DRAW COLORED SQUARE WITH INSTRUCTOR LETTER
+                        const coloreIstruttore = getColoreIstruttore(nomeIstruttore);
+
+                        doc.setFillColor(coloreIstruttore[0], coloreIstruttore[1], coloreIstruttore[2]);
+                        doc.setDrawColor(0, 0, 0);
+                        doc.setLineWidth(0.3);
+                        doc.rect(quadratinoX, quadratinoY, quadratinoSize, quadratinoSize, 'FD');
+
+                        doc.setFont("helvetica", "bold");
+                        doc.setFontSize(7);
+                        doc.setTextColor(255, 255, 255);
+
+                        const letteraWidth = doc.getTextWidth(letteraIstruttore);
+                        const letteraX = quadratinoX + (quadratinoSize - letteraWidth) / 2;
+                        const letteraY = quadratinoY + quadratinoSize / 2 + 1;
+
+                        doc.text(letteraIstruttore, letteraX, letteraY);
+                    }
+                }
+            }
+        });
+
+        currentY = doc.lastAutoTable.finalY + 10;
+
+        const columnCount = 3;
+        const columnGutter = 5;
+        const totalWidth = pageWidth - marginLeft - marginRight;
+        const totalGutterWidth = columnGutter * (columnCount - 1);
+        const columnWidth = (totalWidth - totalGutterWidth) / columnCount;
+
+        const xCol1 = marginLeft;
+        const xCol2 = xCol1 + columnWidth + columnGutter;
+        const xCol3_start = xCol2 + columnWidth + columnGutter;
+
+        let y1_table1 = currentY;
+        let y2_table1 = currentY;
+
+        const gialloChiaro = [247, 239, 211];
+
+        const createInfoTable = (title, data, startY, startX, width) => {
+            if (!data || data.length === 0 || data.join("").trim() === "") return startY;
+
+            doc.autoTable({
+                head: [[title]],
+                body: [[data.join('\n').replace(/\n/g, '\n')]],
+                startY: startY,
+                margin: { left: startX },
+                tableWidth: width,
+                theme: 'grid',
+                styles: {
+                    font: "helvetica",
+                    fontSize: 9.5,
+                    cellPadding: 2,
+                    valign: 'top',
+                    lineWidth: 0.25,
+                    lineColor: [0, 0, 0]
+                },
+                headStyles: {
+                    fillColor: gialloChiaro,
+                    textColor: 40,
+                    fontStyle: 'bold',
+                    fontSize: 11,
+                    halign: 'center',
+                    cellPadding: { top: 1.5, right: 2.5, bottom: 1.5, left: 2.5 },
+                    lineWidth: 0.25,
+                    lineColor: [0, 0, 0]
+                }
+            });
+            return doc.lastAutoTable.finalY;
+        };
+
+        const y1_after_table1 = createInfoTable("Orari Segreteria", dati.segreteria, y1_table1, xCol1, columnWidth);
+        const y2_after_table1 = createInfoTable("Orari Sala Fitness", dati.orari_fitness, y2_table1, xCol2, columnWidth);
+        const salaFitnessTableHeight = y2_after_table1 - y2_table1;
+
+        if (logoData && logoData.data) {
+            const logoPdfWidth = 30;
+            const aspectRatio = logoData.width && logoData.height ? logoData.width / logoData.height : 1;
+            const logoPdfHeight = logoData.height ? logoPdfWidth / aspectRatio : logoPdfWidth;
+
+            const logoX = xCol3_start + (columnWidth / 2) - (logoPdfWidth / 2);
+            const logoY_centered = y2_table1 + (salaFitnessTableHeight / 2) - (logoPdfHeight / 2);
+
+            doc.addImage(logoData.data, 'JPEG', logoX, logoY_centered, logoPdfWidth, logoPdfHeight);
+        }
+
+        const nextYForRow2 = Math.max(y1_after_table1, y2_after_table1) + 5;
+
+        createInfoTable("Contatti", dati.recapiti, nextYForRow2, xCol1, columnWidth);
+        createInfoTable("Note", dati.note, nextYForRow2, xCol2, columnWidth);
+
+        const numPages = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= numPages; i++) {
+            doc.setPage(i);
+            doc.setFontSize(9);
+            doc.setFont("helvetica", "normal");
+            const today = new Date();
+            const dd = String(today.getDate()).padStart(2, '0');
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const yy = today.getFullYear();
+            const formattedDate = dd + '/' + mm + '/' + yy;
+            const footerText = "Data ultimo aggiornamento: " + formattedDate;
+            const textWidth = doc.getTextWidth(footerText);
+            const xCentered = (pageWidth - textWidth) / 2;
+            doc.text(footerText, xCentered, pageHeight - 7);
+        }
+
+        doc.save(currentFileName.replace(".txt", "-orari-completo.pdf"));
+    } catch (e) {
+        alert("Errore durante la generazione del PDF: " + e.message);
+        console.error("Errore durante generatePDF():", e);
+    }
+}
+
+async function riepilogo() {
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 10;
+        const monthlyFactor = 52 / 12;
+
+        let y_position = 12;
+
+        doc.setFontSize(16);
+        doc.setFont("helvetica", "bold");
+        const titleForReport = dati.info && dati.info.Nome ? `${dati.info.Nome} - Riepilogo Attività` : "Riepilogo Attività";
+        doc.text(titleForReport, pageWidth / 2, y_position, { align: 'center' });
+        y_position += 12;
+
+        let giorni = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
+        const gialloChiaro = [247,239,211];
+        const verdeTenue  = [235, 247, 235];
+
+        const commonTableStyles = {
+            fontSize: 8,
+            cellPadding: 0.8,
+            valign: "middle",
+            halign: "center",
+            lineWidth: 0.25,
+            lineColor: [0, 0, 0]
+        };
+        const commonHeadStyles = {
+            fillColor: gialloChiaro,
+            textColor: 40,
+            fontStyle: "bold",
+            fontSize: 8.5,
+            cellPadding: {top: 1, right: 0.8, bottom: 1, left: 0.8},
+            lineWidth: 0.25,
+            lineColor: [0, 0, 0]
+        };
+        const spaceAfterTable = 8;
+
+        // TABELLA 1: Corso-Istruttore
+        let table1_dataRowsObjects = [];
+        let sommaMeseNonArrotondatoTotaleTab1 = 0;
+        let totaliGiorniOreTab1 = [0,0,0,0,0,0];
+
+        let uniqueCourseInstructorRoomCombos = new Set();
+        dati.orari.forEach(o => {
+            if(o.corso && o.istruttore && o.sala) {
+                 uniqueCourseInstructorRoomCombos.add(`${o.corso}#${o.istruttore}#${o.sala}`);
+            }
+        });
+
+        uniqueCourseInstructorRoomCombos.forEach(comboKey => {
+            const [corsoKey, istruttoreKey, salaKey] = comboKey.split('#');
+            let rowData = {
+                corsoIstruttoreSala: `${corsoKey} - ${istruttoreKey} [${salaKey}]`,
+                corso: corsoKey,
+                istruttore: istruttoreKey,
+                sala: salaKey,
+                oreGiorni: [0,0,0,0,0,0],
+                sett: 0,
+                mese: 0,
+                meseNonArrotondato: 0.0
+            };
+            let totaleSettimanaCorsoNonArrotondato = 0;
+
+            for (let g = 0; g < giorni.length; g++) {
+                let slots = dati.orari.filter(o => o.corso === corsoKey && o.istruttore === istruttoreKey && o.sala === salaKey && o.giorno === giorni[g]);
+                slots.sort((s1, s2) => {
+                    const t1 = timeToMinutes(s1.oraInizio); const t2 = timeToMinutes(s2.oraInizio);
+                    if(isNaN(t1) && isNaN(t2)) return 0; if(isNaN(t1)) return 1; if(isNaN(t2)) return -1;
+                    return t1 - t2;
+                });
+                let sommaOreGiornoNonArrotondate = 0;
+                for (let i = 0; i < slots.length; i++) {
+                    let inizio = slots[i].oraInizio;
+                    let fine = i + 1 < slots.length ? slots[i+1].oraInizio : null;
+                    let durata = 1.0;
+                    if (inizio && inizio.includes(':')) {
+                        if (fine && fine.includes(':')) {
+                            let h1 = parseInt(inizio.split(":")[0],10), m1 = parseInt(inizio.split(":")[1],10);
+                            let h2 = parseInt(fine.split(":")[0],10), m2 = parseInt(fine.split(":")[1],10);
+                            if(!isNaN(h1) && !isNaN(m1) && !isNaN(h2) && !isNaN(m2)){
+                                let deltaMinuti = (h2 * 60 + m2) - (h1 * 60 + m1);
+                                if (deltaMinuti > 0 && deltaMinuti <= 180 && deltaMinuti >= 50) durata = deltaMinuti / 60;
+                            }
+                        }
+                    } else {
+                        durata = 0;
+                    }
+                    sommaOreGiornoNonArrotondate += durata;
+                }
+                rowData.oreGiorni[g] = Math.round(sommaOreGiornoNonArrotondate);
+                if (rowData.oreGiorni[g] > 0) totaliGiorniOreTab1[g] += rowData.oreGiorni[g];
+                totaleSettimanaCorsoNonArrotondato += sommaOreGiornoNonArrotondate;
+            }
+            rowData.sett = Math.round(totaleSettimanaCorsoNonArrotondato);
+            rowData.meseNonArrotondato = totaleSettimanaCorsoNonArrotondato * monthlyFactor;
+            rowData.mese = Math.round(rowData.meseNonArrotondato);
+            sommaMeseNonArrotondatoTotaleTab1 += rowData.meseNonArrotondato;
+            table1_dataRowsObjects.push(rowData);
+        });
+
+        let sommaFinaleSettimanaTab1 = 0; totaliGiorniOreTab1.forEach(o => sommaFinaleSettimanaTab1 += o);
+        table1_dataRowsObjects.sort((a, b) => b.mese - a.mese || a.corsoIstruttoreSala.localeCompare(b.corsoIstruttoreSala));
+
+        const getMinMaxForBarScaling_full = (dataRows, valueKey) => {
+            let minVal = Infinity, maxVal = 0;
+            let hasPositive = false;
+            dataRows.forEach(row => {
+                const val = row[valueKey];
+                if (typeof val === 'number' && val > 0) {
+                    hasPositive = true;
+                    if (val < minVal) minVal = val;
+                    if (val > maxVal) maxVal = val;
+                }
+            });
+            if (!hasPositive) return { min: 0, max: 0 };
+            if (minVal === Infinity) minVal = maxVal;
+            return { min: minVal, max: maxVal };
+        };
+
+        const { min: minMeseTab1, max: maxMeseTab1 } = getMinMaxForBarScaling_full(table1_dataRowsObjects, 'mese');
+        const body_tab1_final = table1_dataRowsObjects.map(row => [row.corsoIstruttoreSala, ...row.oreGiorni.map(o => o > 0 ? o : ""), row.sett, row.mese, ""]);
+        let totaliRigaTab1 = ["Totale ore", ...totaliGiorniOreTab1.map(v => v > 0 ? v : ""), sommaFinaleSettimanaTab1, Math.round(sommaMeseNonArrotondatoTotaleTab1), ""];
+        body_tab1_final.push(totaliRigaTab1);
+
+        const table1ColumnStyles = {
+            0: { cellWidth: 60, fontStyle: 'bold', halign: 'left' },
+            1: { cellWidth: 7 },  2: { cellWidth: 7 }, 3: { cellWidth: 7 },
+            4: { cellWidth: 7 },  5: { cellWidth: 7 }, 6: { cellWidth: 7 },
+            7: { cellWidth: 12 }, 8: { cellWidth: 12 },
+            9: { cellWidth: 'auto'}
+        };
+
+        // Prepara array body con stili espliciti per la riga totali
+        const body_tab1_final_with_styles = body_tab1_final.map((row, index) => {
+            if (index === body_tab1_final.length - 1) {
+                // Ultima riga (totali) - applica stili speciali SOLO alle prime 9 colonne (esclude grafici)
+                return row.map((cell, colIndex) => {
+                    if (colIndex <= 8) { // Excludes the last column (index 9)
+                        return {
+                            content: cell,
+                            styles: {
+                                fillColor: verdeTenue,
+                                fontStyle: 'bold',
+                                textColor: [0,70,0]
+                            }
+                        };
+                    }
+                    return cell; // Last column normal
+                });
+            }
+            return row;
+        });
+
+        doc.autoTable({
+            startY: y_position,
+            head: [["Corso - Istruttore [Sala]", "L", "M", "M", "G", "V", "S", "Sett.", "Mese", ""]],
+            body: body_tab1_final_with_styles,
+            theme: "grid",
+            margin: {left: margin, right: margin},
+            styles: commonTableStyles,
+            columnStyles: table1ColumnStyles,
+            headStyles: {...commonHeadStyles, fontSize: 9, cellPadding: {top: 1.2, right: 1, bottom: 1.2, left: 1} },
+            didDrawCell: function (data) {
+                if (data.cell.section === 'head' && data.column.index === 0) { data.cell.styles.halign = 'left'; data.cell.styles.fontSize = 10;}
+                if (data.row.section !== 'head') {
+                    if (data.column.index === 9 && data.row.index < table1_dataRowsObjects.length) {
+                        const meseValue = table1_dataRowsObjects[data.row.index].mese;
+                        if (meseValue > 0) {
+                            const minBarWidthMM = 15, cellPaddingVal = data.cell.padding('horizontal') / 2 || 0.8, maxBarDrawableWidth = data.cell.width - (cellPaddingVal * 2); let barWidth;
+                            if (maxMeseTab1 === 0 || maxMeseTab1 < minMeseTab1) barWidth = 0;
+                            else if (maxMeseTab1 === minMeseTab1) barWidth = maxBarDrawableWidth;
+                            else if (meseValue <= minMeseTab1) barWidth = minBarWidthMM;
+                            else if (meseValue >= maxMeseTab1) barWidth = maxBarDrawableWidth;
+                            else barWidth = minBarWidthMM + ((meseValue - minMeseTab1) / (maxMeseTab1 - minMeseTab1)) * (maxBarDrawableWidth - minBarWidthMM);
+                            barWidth = Math.max(0, Math.min(barWidth, maxBarDrawableWidth));
+                            if (barWidth > 0) { doc.setFillColor(76, 175, 80); doc.rect(data.cell.x + cellPaddingVal, data.cell.y + data.cell.height / 2 - 1.2, barWidth, 2.4, 'F'); }
+                        }
+                    }
+                }
+            }
+        });
+        y_position = doc.lastAutoTable.finalY + spaceAfterTable;
+
+        // TABELLA 2: ISTRUTTORI
+        let uniqueIstruttori = [...new Set(table1_dataRowsObjects.filter(r => r.istruttore).map(r => r.istruttore))];
+        let listaOreIstruttori = [];
+        let granTotaleOreMeseIstruttori = 0;
+
+        uniqueIstruttori.forEach(istr => {
+            let oreMesePerQuestoIstruttore = 0;
+            table1_dataRowsObjects.forEach(row => {
+                if (row.istruttore === istr) {
+                    oreMesePerQuestoIstruttore += row.mese;
+                }
+            });
+            if (oreMesePerQuestoIstruttore > 0) {
+                 listaOreIstruttori.push({ istr: istr, oreMese: oreMesePerQuestoIstruttore });
+            }
+        });
+        listaOreIstruttori.sort((a, b) => b.oreMese - a.oreMese || a.istr.localeCompare(b.istr));
+        listaOreIstruttori.forEach(item => granTotaleOreMeseIstruttori += item.oreMese);
+
+        const {min: minOreMeseIstr, max: maxOreMeseIstr } = getMinMaxForBarScaling_full(listaOreIstruttori, 'oreMese');
+
+        let istruttoriBody = listaOreIstruttori.map(o => {
+            const percent = granTotaleOreMeseIstruttori > 0 ? Math.round(o.oreMese / granTotaleOreMeseIstruttori * 100) : 0;
+            return [o.istr, o.oreMese, percent + "%", ""];
+        });
+        istruttoriBody.push(["Totale ore", granTotaleOreMeseIstruttori, granTotaleOreMeseIstruttori > 0 ? "100%" : "0%", ""]);
+
+        const tableIstruttoriColumnStyles = {
+            0: { cellWidth: 55, fontStyle: 'bold', halign: 'left' },
+            1: { cellWidth: 25 }, 2: { cellWidth: 15 },
+            3: { cellWidth: 'auto' }
+        };
+        // Prepara array body con stili per riga totali
+        const istruttoriBody_with_styles = istruttoriBody.map((row, index) => {
+            if (index === istruttoriBody.length - 1) {
+                // Ultima riga (totali) - esclude l'ultima colonna (grafici)
+                return row.map((cell, colIndex) => {
+                    if (colIndex <= 2) { // Only first 3 columns (Name, Hours, %)
+                        return {
+                            content: cell,
+                            styles: {
+                                fillColor: verdeTenue,
+                                fontStyle: 'bold',
+                                textColor: [0,70,0]
+                            }
+                        };
+                    }
+                    return cell; // Last column normal
+                });
+            }
+            return row;
+        });
+
+        doc.autoTable({
+            startY: y_position,
+            head: [["Istruttore", "Ore mese", "%", ""]],
+            body: istruttoriBody_with_styles,
+            theme: "grid",
+            tableWidth: pageWidth - 2 * margin,
+            margin: {left: margin, right: margin},
+            styles: commonTableStyles,
+            columnStyles: tableIstruttoriColumnStyles,
+            headStyles: commonHeadStyles,
+            didDrawCell: function (data) {
+                if (data.cell.section === 'head' && data.column.index === 0) { data.cell.styles.halign = 'left';data.cell.styles.fontSize = 10;}
+                if(data.row.section !== 'head'){
+                    if (data.column.index === 0 && data.row.index < listaOreIstruttori.length) {
+                        // Clears the cell completely before redrawing
+                        doc.setFillColor(255, 255, 255);
+                        doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F');
+
+                        // Redraws the border
+                        doc.setDrawColor(0, 0, 0);
+                        doc.setLineWidth(0.25);
+                        doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'S');
+
+                        // DRAW COLORED SQUARE IN INSTRUCTOR COLUMN
+                        const nomeIstruttore = listaOreIstruttori[data.row.index].istr;
+                        const letteraIstruttore = nomeIstruttore.charAt(0).toUpperCase();
+                        const coloreIstruttore = getColoreIstruttore(nomeIstruttore);
+
+                        // Square dimensions (same as in hours table)
+                        const quadratinoSize = 3.6;
+                        const margineLaterale = 2;
+                        const spazioDopoQuadratino = 2;
+
+                        // Square position (left in cell)
+                        const quadratinoX = data.cell.x + data.cell.padding('left') + margineLaterale;
+                        const quadratinoY = data.cell.y + (data.cell.height - quadratinoSize) / 2; // Vertically centered
+
+                        // Draw the colored square
+                        doc.setFillColor(coloreIstruttore[0], coloreIstruttore[1], coloreIstruttore[2]);
+                        doc.setDrawColor(0, 0, 0);
+                        doc.setLineWidth(0.3);
+                        doc.rect(quadratinoX, quadratinoY, quadratinoSize, quadratinoSize, 'FD');
+
+                        // Draw the letter in the square
+                        doc.setFont("helvetica", "bold");
+                        doc.setFontSize(7);
+                        doc.setTextColor(255, 255, 255);
+
+                        const letteraWidth = doc.getTextWidth(letteraIstruttore);
+                        const letteraX = quadratinoX + (quadratinoSize - letteraWidth) / 2;
+                        const letteraY = quadratinoY + quadratinoSize / 2 + 1;
+
+                        doc.text(letteraIstruttore, letteraX, letteraY);
+
+                        // Draw instructor name after the square
+                        doc.setFont("helvetica", "bold");
+                        doc.setFontSize(8);
+                        doc.setTextColor(0, 0, 0);
+
+                        const nomeX = quadratinoX + quadratinoSize + spazioDopoQuadratino;
+                        const nomeY = data.cell.y + data.cell.height / 2 + 1.5; // Vertically centered
+
+                        doc.text(nomeIstruttore, nomeX, nomeY);
+                    }
+
+                    if (data.column.index === 3 && data.row.index < listaOreIstruttori.length) {
+                        const oreMeseValue = listaOreIstruttori[data.row.index].oreMese;
+                        if (oreMeseValue > 0) {
+                            const minBarWidthMM = 15, cellPaddingVal = data.cell.padding('horizontal') / 2 || 0.8, maxBarDrawableWidth = data.cell.width - (cellPaddingVal * 2); let barWidth;
+                            if (maxOreMeseIstr === 0 || maxOreMeseIstr < minOreMeseIstr) barWidth = 0;
+                            else if (maxOreMeseIstr === minOreMeseIstr) barWidth = maxBarDrawableWidth;
+                            else if (oreMeseValue <= minOreMeseIstr) barWidth = minBarWidthMM;
+                            else if (oreMeseValue >= maxOreMeseIstr) barWidth = maxBarDrawableWidth;
+                            else barWidth = minBarWidthMM + ((oreMeseValue - minOreMeseIstr) / (maxOreMeseIstr - minOreMeseIstr)) * (maxBarDrawableWidth - minBarWidthMM);
+                            barWidth = Math.max(0, Math.min(barWidth, maxBarDrawableWidth));
+                            if (barWidth > 0) { doc.setFillColor(76, 175, 80); doc.rect(data.cell.x + cellPaddingVal, data.cell.y + data.cell.height / 2 - 1.2, barWidth, 2.4, 'F');}
+                        }
+                    }
+                }
+            }
+        });
+        y_position = doc.lastAutoTable.finalY + spaceAfterTable;
+
+        // TABELLA 3: UTILIZZO SALE
+        let uniqueSale = [...new Set(table1_dataRowsObjects.filter(r => r.sala).map(r => r.sala))];
+        let tableSaleBodyData = [];
+        let granTotaleOreMeseSale = 0;
+
+        uniqueSale.forEach(s => {
+            let oreMesePerQuestaSala = 0;
+            table1_dataRowsObjects.forEach(row => {
+                if (row.sala === s) {
+                    oreMesePerQuestaSala += row.mese;
+                }
+            });
+            if (oreMesePerQuestaSala > 0) {
+                tableSaleBodyData.push({ sala: `Sala ${s}`, oreMese: oreMesePerQuestaSala });
+            }
+        });
+        tableSaleBodyData.sort((a,b) => b.oreMese - a.oreMese || a.sala.localeCompare(b.sala));
+        tableSaleBodyData.forEach(item => granTotaleOreMeseSale += item.oreMese);
+
+        const {min: minOreMeseSale, max: maxOreMeseSale } = getMinMaxForBarScaling_full(tableSaleBodyData, 'oreMese');
+
+        let tableSaleBodyFinal = tableSaleBodyData.map(item => {
+            const percent = granTotaleOreMeseSale > 0 ? Math.round((item.oreMese / granTotaleOreMeseSale) * 100) : 0;
+            return [item.sala, item.oreMese, percent + "%", ""];
+        });
+        tableSaleBodyFinal.push(["Totale Ore Sale", granTotaleOreMeseSale, granTotaleOreMeseSale > 0 ? "100%" : "0%", ""]);
+
+        const tableSaleColumnStyles = {
+            0: { cellWidth: 55, fontStyle: 'bold', halign: 'left'},
+            1: { cellWidth: 25 }, 2: { cellWidth: 15 },
+            3: { cellWidth: 'auto'}
+        };
+
+        // Prepara array body con stili per riga totali
+        const tableSaleBodyFinal_with_styles = tableSaleBodyFinal.map((row, index) => {
+            if (index === tableSaleBodyFinal.length - 1) {
+                // Ultima riga (totali) - esclude l'ultima colonna (grafici)
+                return row.map((cell, colIndex) => {
+                    if (colIndex <= 2) { // Only first 3 columns (Name, Hours, %)
+                        return {
+                            content: cell,
+                            styles: {
+                                fillColor: verdeTenue,
+                                fontStyle: 'bold',
+                                textColor: [0,70,0]
+                            }
+                        };
+                    }
+                    return cell; // Last column normal
+                });
+            }
+            return row;
+        });
+
+        doc.autoTable({
+            startY: y_position,
+            head: [["Utilizzo Sale", "Ore Mese", "%", ""]],
+            body: tableSaleBodyFinal_with_styles,
+            theme: "grid",
+            tableWidth: pageWidth - 2 * margin,
+            margin: {left: margin, right: margin},
+            styles: commonTableStyles,
+            columnStyles: tableSaleColumnStyles,
+            headStyles: commonHeadStyles,
+            didDrawCell: function (data) {
+                if (data.cell.section === 'head' && data.column.index === 0) { data.cell.styles.halign = 'left';data.cell.styles.fontSize = 10;}
+                if(data.row.section !== 'head'){
+                     if (data.column.index === 3 && data.row.index < tableSaleBodyData.length) {
+                        const oreMeseValue = tableSaleBodyData[data.row.index].oreMese;
+                        if (oreMeseValue > 0) {
+                            const minBarWidthMM = 15, cellPaddingVal = data.cell.padding('horizontal') / 2 || 0.8, maxBarDrawableWidth = data.cell.width - (cellPaddingVal * 2); let barWidth;
+                            if (maxOreMeseSale === 0 || maxOreMeseSale < minOreMeseSale) barWidth = 0;
+                            else if (maxOreMeseSale === minOreMeseSale) barWidth = maxBarDrawableWidth;
+                            else if (oreMeseValue <= minOreMeseSale) barWidth = minBarWidthMM;
+                            else if (oreMeseValue >= maxOreMeseSale) barWidth = maxBarDrawableWidth;
+                            else barWidth = minBarWidthMM + ((oreMeseValue - minOreMeseSale) / (maxOreMeseSale - minOreMeseSale)) * (maxBarDrawableWidth - minBarWidthMM);
+                            barWidth = Math.max(0, Math.min(barWidth, maxBarDrawableWidth));
+                            if (barWidth > 0) { doc.setFillColor(76, 175, 80); doc.rect(data.cell.x + cellPaddingVal, data.cell.y + data.cell.height / 2 - 1.2, barWidth, 2.4, 'F'); }
+                        }
+                    }
+                }
+             }
+        });
+        y_position = doc.lastAutoTable.finalY + spaceAfterTable;
+
+        // TABELLA 4: Distribuzione Giornaliera
+        let oreSettimanaliPerGiorno = [0,0,0,0,0,0];
+        dati.orari.forEach(o => {
+            if (o.giorno && o.oraInizio && o.oraInizio.includes(':')) {
+                const giornoIndex = giorni.indexOf(o.giorno);
+                if (giornoIndex !== -1) {
+                    oreSettimanaliPerGiorno[giornoIndex]++;
+                }
+            }
+        });
+
+        let tableGiorniData = [];
+        let sommaOreMeseNonArrotondateGiorni = 0;
+        for(let i=0; i < giorni.length; i++) {
+            const oreMeseNonArrotondateGiorno = oreSettimanaliPerGiorno[i] * monthlyFactor;
+            const oreMeseGiornoArrotondate = Math.round(oreMeseNonArrotondateGiorno);
+            tableGiorniData.push({
+                giorno: giorni[i],
+                oreMese: oreMeseGiornoArrotondate,
+                oreMeseNonArrotondate: oreMeseNonArrotondateGiorno
+            });
+            sommaOreMeseNonArrotondateGiorni += oreMeseNonArrotondateGiorno;
+        }
+
+        const {min: minOreMeseGiorni, max: maxOreMeseGiorni } = getMinMaxForBarScaling_full(tableGiorniData, 'oreMese');
+        tableGiorniData = tableGiorniData.map(item => ({ ...item, perc: (sommaOreMeseNonArrotondateGiorni > 0 ? Math.round((item.oreMeseNonArrotondate / sommaOreMeseNonArrotondateGiorni) * 100) : 0) + "%" }));
+        tableGiorniData.sort((a,b) => b.oreMese - a.oreMese || a.giorno.localeCompare(b.giorno) );
+
+        let tableGiorniBodyFinal = tableGiorniData.map(row => [row.giorno, row.oreMese, row.perc, ""]);
+        tableGiorniBodyFinal.push(["Totale Ore", Math.round(sommaOreMeseNonArrotondateGiorni), Math.round(sommaOreMeseNonArrotondateGiorni) > 0 ? "100%" : "0%", ""]);
+
+        const tableGiorniColumnStyles = {
+            0: { cellWidth: 55, fontStyle: 'bold', halign: 'left'},
+            1: { cellWidth: 25 }, 2: { cellWidth: 15 },
+            3: { cellWidth: 'auto'}
+        };
+        // Prepara array body con stili per riga totali
+        const tableGiorniBodyFinal_with_styles = tableGiorniBodyFinal.map((row, index) => {
+            if (index === tableGiorniBodyFinal.length - 1) {
+                // Ultima riga (totali) - esclude l'ultima colonna (grafici)
+                return row.map((cell, colIndex) => {
+                    if (colIndex <= 2) { // Only first 3 columns (Name, Hours, %)
+                        return {
+                            content: cell,
+                            styles: {
+                                fillColor: verdeTenue,
+                                fontStyle: 'bold',
+                                textColor: [0,70,0]
+                            }
+                        };
+                    }
+                    return cell; // Last column normal
+                });
+            }
+            return row;
+        });
+
+        doc.autoTable({
+            startY: y_position,
+            head: [["Distribuzione Giornaliera", "Ore Mese", "%", ""]],
+            body: tableGiorniBodyFinal_with_styles,
+            theme: "grid",
+            tableWidth: pageWidth - 2 * margin,
+            margin: {left: margin, right: margin},
+            styles: commonTableStyles,
+            columnStyles: tableGiorniColumnStyles,
+            headStyles: commonHeadStyles,
+            didDrawCell: function (data) {
+                 if (data.cell.section === 'head' && data.column.index === 0) { data.cell.styles.halign = 'left';data.cell.styles.fontSize = 10;}
+                if(data.row.section !== 'head'){
+                    if (data.column.index === 3 && data.row.index < tableGiorniData.length) {
+                        const oreMeseValue = tableGiorniData[data.row.index].oreMese;
+                        if (oreMeseValue > 0) {
+                            const minBarWidthMM = 15, cellPaddingVal = data.cell.padding('horizontal') / 2 || 0.8, maxBarDrawableWidth = data.cell.width - (cellPaddingVal * 2); let barWidth;
+                            if (maxOreMeseGiorni === 0 || maxOreMeseGiorni < minOreMeseGiorni) barWidth = 0;
+                            else if (maxOreMeseGiorni === minOreMeseGiorni) barWidth = maxBarDrawableWidth;
+                            else if (oreMeseValue <= minOreMeseGiorni) barWidth = minBarWidthMM;
+                            else if (oreMeseValue >= maxOreMeseGiorni) barWidth = maxBarDrawableWidth;
+                            else barWidth = minBarWidthMM + ((oreMeseValue - minOreMeseGiorni) / (maxOreMeseGiorni - minOreMeseGiorni)) * (maxBarDrawableWidth - minBarWidthMM);
+                            barWidth = Math.max(0, Math.min(barWidth, maxBarDrawableWidth));
+                            if (barWidth > 0) { doc.setFillColor(76, 175, 80); doc.rect(data.cell.x + cellPaddingVal, data.cell.y + data.cell.height / 2 - 1.2, barWidth, 2.4, 'F'); }
+                        }
+                    }
+                }
+            }
+        });
+
+        // PAGINA 2: GRAFICO OCCUPAZIONE SALE CON FUMETTI DINAMICI
+        doc.addPage();
+        let yGraf = 12;
+        const pageTopMarginGantt = 12;
+        const pageBottomMarginGantt = 10;
+        const interlineaGanttConfig = parseFloat(dati.info.InterlineaGantt);
+        const spazioFissoDopoBloccoGiorno = !isNaN(interlineaGanttConfig) ? interlineaGanttConfig : 15;
+
+        doc.setFontSize(15); doc.setFont("helvetica", "bold");
+
+
+
+        const titleForOccupancy = dati.info && dati.info.Nome ? `${dati.info.Nome} - Occupazione Sale` : "Occupazione Sale per Giorno e Orario";
+        doc.text(titleForOccupancy, pageWidth / 2, yGraf, { align: 'center' });
+
+
+        yGraf += 15;
+
+        const saleUnichePerGrafico = [...new Set(dati.orari.map(o => o.sala).filter(s => s && s.trim() !== '' && s.trim() !== 'F'))].sort();
+        const giorniPerGrafico = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
+
+        const ganttVisualStartTime = timeToMinutes("07:00");
+        const ganttVisualEndTime = timeToMinutes("21:30");
+        const ganttTotalDurationMinutes = ganttVisualEndTime - ganttVisualStartTime;
+
+        const bWGraf = pageWidth - 2 * margin - 50;
+        const bHGraf = 6;
+        const spazSaleGraf = 10;
+
+        const findFreePosition = (fumettoX, fumettoWidth, fumettoHeight, barCenterY, barHeight, minY, maxY, occupiedAreasThisDay, preferredDirection) => {
+            const marginBetweenLevels = 1.5;
+            const livelli = 6;
+            let levelsOffsets = [];
+            for (let k = 0; k < livelli; k++) {
+                levelsOffsets.push((fumettoHeight / 2) + marginBetweenLevels + (fumettoHeight + marginBetweenLevels) * k);
+            }
+
+            const checkOverlap = (x, y, w, h, areas) => {
+                const padding = 0.3;
+                for (const area of areas) {
+                    if (!(x + w + padding < area.x || x - padding > area.x + area.width ||
+                          y + h + padding < area.y || y - padding > area.y + area.height)) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+
+            const barTop = barCenterY - barHeight / 2;
+            const barBottom = barCenterY + barHeight / 2;
+
+            if (preferredDirection === 'above') {
+                for (const offset of levelsOffsets) {
+                    const testY_fumetto_center = barTop - offset;
+                    const testY_fumetto_top = testY_fumetto_center - fumettoHeight / 2;
+                    if (!checkOverlap(fumettoX, testY_fumetto_top, fumettoWidth, fumettoHeight, occupiedAreasThisDay)) {
+                        return testY_fumetto_center;
+                    }
+                }
+                const fallbackY = barTop - livelli * (fumettoHeight + marginBetweenLevels);
+                return fallbackY;
+            } else {
+                for (const offset of levelsOffsets) {
+                    const testY_fumetto_center = barBottom + offset;
+                    const testY_fumetto_top = testY_fumetto_center - fumettoHeight / 2;
+                    if (!checkOverlap(fumettoX, testY_fumetto_top, fumettoWidth, fumettoHeight, occupiedAreasThisDay)) {
+                        return testY_fumetto_center;
+                    }
+                }
+                return barBottom + livelli * (fumettoHeight + marginBetweenLevels);
             }
         };
 
-        function App() {
-            const [view, setView] = React.useState('welcome');
-            const [selectedInstructor, setSelectedInstructor] = React.useState(null);
-            const [selectedCourse, setSelectedCourse] = React.useState(null);
-            const [selectedDay, setSelectedDay] = React.useState(null);
+        giorniPerGrafico.forEach((gg, gIdx) => {
+            let yGrafInizioGiornoCorrente;
+            let areeOccupateQuestoGiorno = [];
+            let fumettiDelGiorno = [];
 
-            // Calcolo delle quantità
-            const courseCount = Object.keys(gymData.corsi).length; // 11
-            const instructorCount = Object.keys(gymData.istruttori).length; // 10
-            const daysOfWeek = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
-            const daysCount = daysOfWeek.length; // 6
+            const altezzaMinimaStimataPerSalaSingolaConFumetti = spazSaleGraf + (4 * 2) + (1.5 * 2);
+            const altezzaStimataBloccoGiorno = 6 + (saleUnichePerGrafico.length * spazSaleGraf) + (saleUnichePerGrafico.length > 0 ? altezzaMinimaStimataPerSalaSingolaConFumetti : 0) + spazioFissoDopoBloccoGiorno;
 
-            const renderWelcome = () => {
-                const menuButtons = [
-                    { label: 'Giorni', view: 'giorni', count: daysCount },
-                    { label: 'Corsi', view: 'corsi', count: courseCount },
-                    { label: 'Istruttori', view: 'istruttori', count: instructorCount },
-                    { label: 'Orari', view: 'orari', count: null }
-                ];
+            if (gIdx > 0 && yGraf + altezzaStimataBloccoGiorno > pageHeight - pageBottomMarginGantt ) {
+                doc.addPage();
+                yGraf = pageTopMarginGantt;
+                doc.setFontSize(15); doc.setFont("helvetica", "bold");
 
-                return (
-                    <div className="text-center">
-                        <h1 className="text-3xl font-bold mb-4">Benvenuto in Joy Fit</h1>
-                        <p className="mb-4"></p>
-                        <div className="flex flex-col items-center space-y-2">
-                            {menuButtons.map(button => (
-                                <button
-                                    key={button.label}
-                                    onClick={() => setView(button.view)}
-                                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                                >
-                                    {button.label}{button.count !== null ? ` [${button.count}]` : ''}
-                                </button>
-                            ))}
-                        </div>
-                        <div className="mt-8">
-                            <button
-                                onClick={() => window.close()}
-                                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                            >
-                                Esci
-                            </button>
-                        </div>
-                    </div>
+                const titleForContinuation = dati.info && dati.info.Nome ? `${dati.info.Nome} - Occupazione Sale (cont.)` : "Occupazione Sale per Giorno e Orario (cont.)";
+                doc.text(titleForContinuation, pageWidth / 2, yGraf, { align: 'center' });
+
+                yGraf += 15;
+            }
+            yGrafInizioGiornoCorrente = yGraf;
+            doc.setFontSize(12); doc.setFont("helvetica", "bold"); doc.text(gg, margin, yGraf); yGraf += 4;
+            yGrafInizioGiornoCorrente = yGraf;
+
+            let yPosMaxPerSaleQuestoGiorno = yGraf;
+
+            saleUnichePerGrafico.forEach((ss) => {
+                let yRigaSala = yGraf;
+                doc.setFontSize(8); doc.setFont("helvetica", "normal");
+
+                // Calculate percentage of occupation for this specific day
+                // Simplified available hours based on fitness room
+                const oreDisponibiliPerGiorno = {
+                    "Lunedì": 14,    // standard hours for both rooms
+                    "Martedì": 14,   // standard hours for both rooms
+                    "Mercoledì": 14, // standard hours for both rooms
+                    "Giovedì": 14,   // standard hours for both rooms
+                    "Venerdì": 14,   // standard hours for both rooms
+                    "Sabato": 6      // reduced hours (3+3) for both rooms
+                };
+
+                const orePossibili = oreDisponibiliPerGiorno[gg] || 0;
+
+                // Count courses in this room on this day
+                const corsiGiornoSala = dati.orari.filter(o =>
+                    o.giorno === gg &&
+                    o.sala === ss &&
+                    o.oraInizio &&
+                    o.oraInizio.includes(':')
                 );
-            };
 
-            const renderInstructors = () => {
-                const instructors = Object.keys(gymData.istruttori);
+                const oreOccupate = corsiGiornoSala.length; // Each course = 1 hour
+                const percentualeGiorno = orePossibili > 0 ? Math.round((oreOccupate / orePossibili) * 100) : 0;
 
-                // Calcola il numero di sessioni per ogni istruttore
-                const instructorSessionsCount = instructors.map(instructor => {
-                    let count = 0;
-                    gymData.istruttori[instructor].forEach(course => {
-                        count += gymData.corsi[course].filter(session => session.istruttore === instructor).length;
-                    });
-                    return { instructor, count };
-                });
+                // Debug: show calculation in console
+                console.log(`${gg} Sala ${ss}: ${oreOccupate}/${orePossibili} ore = ${percentualeGiorno}%`);
 
-                return (
-                    <div className="text-center">
-                        <h2 className="text-2xl font-bold mb-4">Istruttori</h2>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            {instructorSessionsCount.map(item => (
-                                <button
-                                    key={item.instructor}
-                                    onClick={() => setSelectedInstructor(item.instructor)}
-                                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-                                >
-                                    {item.instructor} [{item.count}]
-                                </button>
-                            ))}
-                        </div>
-                        <button onClick={() => setView('welcome')} className="mt-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                            Torna indietro
-                        </button>
-                    </div>
-                );
-            };
+                const nomeSalaConDettagli = `Sala ${ss} (${percentualeGiorno}%)`;
+                doc.text(nomeSalaConDettagli, margin + 5, yRigaSala + 4);
 
-            const renderInstructorCourses = () => (
-                <div className="text-center">
-                    <h2 className="text-2xl font-bold mb-4">Corsi di {selectedInstructor}</h2>
-                    <ul className="list-disc list-inside">
-                        {gymData.istruttori[selectedInstructor].map(course => (
-                            <li key={course} className="mb-2">
-                                <strong>{course}</strong>
-                                <ul className="list-none pl-4">
-                                    {gymData.corsi[course]
-                                        .filter(session => session.istruttore === selectedInstructor)
-                                        .map((session, index) => (
-                                            <li key={index}>
-                                                {session.giorno} alle {session.ora}
-                                            </li>
-                                        ))}
-                                </ul>
-                            </li>
-                        ))}
-                    </ul>
-                    <button onClick={() => setSelectedInstructor(null)} className="mt-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                        Torna agli istruttori
-                    </button>
-                </div>
-            );
+                const timelineStartX = margin + 40;
+                const timelineStartY = yRigaSala - 1;
+                doc.setDrawColor(200, 200, 200);
 
-            const renderCourses = () => {
-                const courses = Object.keys(gymData.corsi);
 
-                // Calcola il numero di sessioni per ogni corso
-                const courseSessionsCount = courses.map(course => {
-                    const count = gymData.corsi[course].length;
-                    return { course, count };
-                });
 
-                return (
-                    <div className="text-center">
-                        <h2 className="text-2xl font-bold mb-4">Seleziona un Corso</h2>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            {courseSessionsCount.map(item => (
-                                <button
-                                    key={item.course}
-                                    onClick={() => setSelectedCourse(item.course)}
-                                    className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
-                                >
-                                    {item.course} [{item.count}]
-                                </button>
-                            ))}
-                        </div>
-                        <button onClick={() => setView('welcome')} className="mt-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                            Torna indietro
-                        </button>
-                    </div>
-                );
-            };
 
-            const renderCourseDetails = () => (
-                <div className="text-center">
-                    <h2 className="text-2xl font-bold mb-4">Dettagli del Corso: {selectedCourse}</h2>
-                    <ul className="list-disc list-inside">
-                        {gymData.corsi[selectedCourse].map((session, index) => (
-                            <li key={index}>
-                                {session.giorno} alle {session.ora} ({session.istruttore})
-                            </li>
-                        ))}
-                    </ul>
-                    <button onClick={() => setSelectedCourse(null)} className="mt-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                        Torna ai corsi
-                    </button>
-                </div>
-            );
+                doc.setLineWidth(0.1);
+                doc.rect(timelineStartX, timelineStartY, bWGraf, bHGraf, 'S');
 
-            const renderDays = () => {
-                const days = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
-
-                // Calcola il numero di sessioni per ogni giorno
-                const daySessionsCount = days.map(day => {
-                    let count = 0;
-                    Object.values(gymData.corsi).forEach(courseSessions => {
-                        count += courseSessions.filter(session => session.giorno === day).length;
-                    });
-                    return { day, count };
-                });
-
-                return (
-                    <div className="text-center">
-                        <h2 className="text-2xl font-bold mb-4">Seleziona un Giorno</h2>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            {daySessionsCount.map(item => (
-                                <button
-                                    key={item.day}
-                                    onClick={() => setSelectedDay(item.day)}
-                                    className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
-                                >
-                                    {item.day} [{item.count}]
-                                </button>
-                            ))}
-                        </div>
-                        <button onClick={() => setView('welcome')} className="mt-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                            Torna indietro
-                        </button>
-                    </div>
-                );
-            };
-
-            const renderDayCourses = () => {
-                const daySessions = [];
-                Object.keys(gymData.corsi).forEach(courseName => {
-                    gymData.corsi[courseName].forEach(session => {
-                        if (session.giorno === selectedDay) {
-                            daySessions.push({
-                                courseName,
-                                ...session
-                            });
+                doc.setFillColor(220, 220, 220);
+                if (gg === "Sabato") {
+                    const sabSlots = [ {start: "09:00", end: "12:00"}, {start: "15:00", end: "18:00"} ];
+                    sabSlots.forEach(slot => {
+                        let sStart = timeToMinutes(slot.start);
+                        let sEnd = timeToMinutes(slot.end);
+                        if (!isNaN(sStart) && !isNaN(sEnd) && sStart < ganttVisualEndTime && sEnd > ganttVisualStartTime) {
+                            let x = timelineStartX + (Math.max(0, sStart - ganttVisualStartTime) / ganttTotalDurationMinutes) * bWGraf;
+                            let w = ((Math.min(sEnd, ganttVisualEndTime) - Math.max(sStart, ganttVisualStartTime)) / ganttTotalDurationMinutes) * bWGraf;
+                            if (w > 0) doc.rect(x, timelineStartY, w, bHGraf, 'F');
                         }
                     });
+                } else {
+                    let dayStartMins = timeToMinutes("07:00");
+                    let dayEndMins = timeToMinutes("21:30");
+                     if (!isNaN(dayStartMins) && !isNaN(dayEndMins) && dayStartMins < ganttVisualEndTime && dayEndMins > ganttVisualStartTime) {
+                       let x = timelineStartX + (Math.max(0, dayStartMins - ganttVisualStartTime) / ganttTotalDurationMinutes) * bWGraf;
+                       let w = ((Math.min(dayEndMins, ganttVisualEndTime) - Math.max(dayStartMins, ganttVisualStartTime)) / ganttTotalDurationMinutes) * bWGraf;
+                       if (w > 0) doc.rect(x, timelineStartY, w, bHGraf, 'F');
+                   }
+                }
+
+                doc.setDrawColor(0, 0, 0);
+                doc.setLineWidth(0.2);
+
+                doc.setFillColor(34,139,34);
+
+                const corsiGS = dati.orari.filter(o => o.giorno === gg && o.sala === ss && o.oraInizio);
+                corsiGS.sort((a,b) => (a.oraInizio||"").localeCompare(b.oraInizio||""));
+
+                corsiGS.forEach((cGraf) => {
+                    const mins = timeToMinutes(cGraf.oraInizio);
+                    if (isNaN(mins)) return;
+                    if (mins >= ganttVisualStartTime && mins < ganttVisualEndTime) {
+                        const offX = ((mins - ganttVisualStartTime) / ganttTotalDurationMinutes) * bWGraf;
+                        const wCorso = (60 / ganttTotalDurationMinutes) * bWGraf;
+                        const barX = margin + 40 + offX;
+                        const barActualY = yRigaSala - 1;
+                        doc.rect(barX, barActualY, wCorso, bHGraf, 'FD');
+
+                        // Aggiungi l'orario dentro il rettangolino
+                        doc.setFont("helvetica", "bold");
+                        doc.setFontSize(6);
+                        doc.setTextColor(255, 255, 255);
+                        
+                        const orarioTesto = cGraf.oraInizio || "";
+                        if (orarioTesto) {
+                            const textX = barX + (wCorso / 2);
+                            const textY = barActualY + (bHGraf / 2) + 1;
+                            doc.text(orarioTesto, textX, textY, { align: 'center' });
+                        }
+                        
+                        // Reimposta il colore verde per il prossimo rettangolo
+                        doc.setFillColor(34,139,34);
+
+
+
+
+                        // MAIN MODIFICATION: DYNAMIC SPEECH BUBBLES
+                        const testoCorso = cGraf.corso || "";
+                        if(testoCorso){
+                            const fumettoHeight = 4;
+                            doc.setFontSize(6);
+                            // DYNAMIC WIDTH CALCULATION
+                            const testoWidth = doc.getTextWidth(testoCorso);
+                            const fumettoWidth = testoWidth + 3; // 3mm padding
+
+                            let fumettoDrawX = barX + (wCorso/2) - (fumettoWidth/2);
+
+                            if (fumettoDrawX < margin) fumettoDrawX = margin;
+                            if (fumettoDrawX + fumettoWidth > pageWidth - margin) fumettoDrawX = pageWidth - margin - fumettoWidth;
+
+                            let fumettoCenterY = null;
+                            if (String(ss) === '1') {
+                                fumettoCenterY = findFreePosition(fumettoDrawX, fumettoWidth, fumettoHeight, barActualY + bHGraf/2, bHGraf, yGrafInizioGiornoCorrente, pageHeight - pageBottomMarginGantt, areeOccupateQuestoGiorno, 'above');
+                            } else {
+                                fumettoCenterY = findFreePosition(fumettoDrawX, fumettoWidth, fumettoHeight, barActualY + bHGraf/2, bHGraf, yGrafInizioGiornoCorrente, pageHeight - pageBottomMarginGantt, areeOccupateQuestoGiorno, 'below');
+                            }
+
+                            if (fumettoCenterY !== null) {
+                                areeOccupateQuestoGiorno.push({x: fumettoDrawX, y: fumettoCenterY - fumettoHeight/2, width: fumettoWidth, height: fumettoHeight});
+
+                                let lineaStartYpos, lineaEndYpos;
+                                if (fumettoCenterY < barActualY + bHGraf/2) {
+                                    lineaStartYpos = barActualY;
+                                    lineaEndYpos = fumettoCenterY + fumettoHeight/2;
+                                } else {
+                                    lineaStartYpos = barActualY + bHGraf;
+                                    lineaEndYpos = fumettoCenterY - fumettoHeight/2;
+                                }
+
+                                fumettiDelGiorno.push({
+                                    testo: testoCorso,
+                                    xRect: fumettoDrawX,
+                                    yRect: fumettoCenterY - fumettoHeight/2,
+                                    width: fumettoWidth,
+                                    height: fumettoHeight + 0.5,
+                                    xText: fumettoDrawX + fumettoWidth/2,
+                                    yText: fumettoCenterY + 1.0,
+                                    lineaStartX: barX + wCorso/2,
+                                    lineaStartY: lineaStartYpos,
+                                    lineaEndX: fumettoDrawX + fumettoWidth/2,
+                                    lineaEndY: lineaEndYpos
+                                });
+
+
+
+                            }
+                        }
+                    }
                 });
+                yGraf += spazSaleGraf;
+                yPosMaxPerSaleQuestoGiorno = Math.max(yPosMaxPerSaleQuestoGiorno, yGraf);
+            });
 
-                // Ordina i corsi per ora crescente
-                daySessions.sort((a, b) => {
-                    const [hourA, minuteA] = a.ora.split(':').map(Number);
-                    const [hourB, minuteB] = b.ora.split(':').map(Number);
-                    return hourA * 60 + minuteA - (hourB * 60 + minuteB);
-                });
+            let maxYConFumetti = yPosMaxPerSaleQuestoGiorno;
+            fumettiDelGiorno.forEach(f => {
+                maxYConFumetti = Math.max(maxYConFumetti, f.yRect + f.height);
+            });
 
-                return (
-                    <div className="text-center">
-                        <h2 className="text-2xl font-bold mb-4">Corsi del {selectedDay}</h2>
-                        {daySessions.length > 0 ? (
-                            <ul className="list-disc list-inside">
-                                {daySessions.map((session, index) => (
-                                    <li key={index}>
-                                        {session.ora} - {session.courseName} ({session.istruttore})
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <p>Nessun corso disponibile per questo giorno.</p>
-                        )}
-                        <button onClick={() => setSelectedDay(null)} className="mt-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                            Torna ai giorni
-                        </button>
-                    </div>
-                );
-            };
+            fumettiDelGiorno.forEach(fumetto => {
+                doc.setDrawColor(76,175,80); doc.setLineWidth(0.2);
+                doc.line(fumetto.lineaStartX, fumetto.lineaStartY, fumetto.lineaEndX, fumetto.lineaEndY);
 
-            const renderOrari = () => (
-                <div className="text-center">
-                    <h2 className="text-2xl font-bold mb-4">Orari</h2>
+                doc.setFillColor(255,255,240);
+                doc.setDrawColor(76,175,80);
+                doc.setLineWidth(0.2);
+                doc.rect(fumetto.xRect, fumetto.yRect, fumetto.width, fumetto.height, 'FD');
 
-                    <h3 className="text-xl font-bold mb-2">Su appuntamento</h3>
-                    <ul className="list-disc list-inside">
-                        {gymData.orari.appuntamento.map((orario, index) => (
-                            <li key={index} className={index === gymData.orari.appuntamento.length - 1 ? "mb-4" : ""}>{orario}</li>
-                        ))}
-                    </ul>
+                doc.setFontSize(6); doc.setTextColor(0,0,0);
+                doc.text(fumetto.testo, fumetto.xText, fumetto.yText, { align: 'center' });
+            });
 
-                    <h3 className="text-xl font-bold mb-2">Orario Segreteria</h3>
-                    <ul className="list-disc list-inside">
-                        {gymData.orari.segreteria.map((orario, index) => (
-                            <li key={index}>{orario}</li>
-                        ))}
-                    </ul>
+            yGraf = maxYConFumetti;
+            if (saleUnichePerGrafico.length === 0 && giorniPerGrafico.length > 0) {
+                 yGraf = Math.max(yGraf, yGrafInizioGiornoCorrente + spazSaleGraf);
+            }
+            yGraf += spazioFissoDopoBloccoGiorno;
+        });
 
-                    <h3 className="text-xl font-bold mt-4 mb-2">Orario Sala Fitness</h3>
-                    <ul className="list-disc list-inside">
-                        {gymData.orari.salaFitness.map((orario, index) => (
-                            <li key={index}>{orario}</li>
-                        ))}
-                    </ul>
-                    <button onClick={() => setView('welcome')} className="mt-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                        Torna indietro
-                    </button>
-                </div>
-            );
-
-            const renderView = () => {
-                if (view === 'welcome') return renderWelcome();
-                if (view === 'istruttori') {
-                    return selectedInstructor ? renderInstructorCourses() : renderInstructors();
-                }
-                if (view === 'corsi') {
-                    return selectedCourse ? renderCourseDetails() : renderCourses();
-                }
-                if (view === 'orari') return renderOrari();
-                if (view === 'giorni') {
-                    return selectedDay ? renderDayCourses() : renderDays();
-                }
-                return <div>Contenuto per {view} in arrivo...</div>;
-            };
-
-            return (
-                <div className="container mx-auto p-4">
-                    {renderView()}
-                </div>
-            );
+        const numPagesRiepilogo = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= numPagesRiepilogo; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setFont("helvetica", "normal");
+            const today = new Date();
+            const dd = String(today.getDate()).padStart(2, '0');
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const yy = today.getFullYear();
+            const formattedDate = dd + '/' + mm + '/' + yy;
+            const footerTextRiepilogo = "Generato il: " + formattedDate + " - Pagina " + i + " di " + numPagesRiepilogo;
+            const textWidthRiepilogo = doc.getTextWidth(footerTextRiepilogo);
+            const xCenteredRiepilogo = (pageWidth - textWidthRiepilogo) / 2;
+            doc.text(footerTextRiepilogo, xCenteredRiepilogo, pageHeight - 5);
         }
 
-        ReactDOM.render(<App />, document.getElementById('root'));
-    </script>
+        doc.save("Riepilogo-Corsi-Istruttori.pdf");
+    } catch (e) {
+        alert("Si è verificato un errore imprevisto durante la generazione del PDF Riepilogo:\n" + e.message + "\n\nControlla la console (F12) per i dettagli.");
+        console.error("Errore critico in riepilogo():", e);
+    }
+}
 
-
-
-    <!-- Pulsanti per avviare e fermare la musica -->
+// ✅ INIZIALIZZAZIONE SISTEMA AL CARICAMENTO PAGINA
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("🚀 Sistema di controllo modifiche inizializzato");
     
+    if (dati.orari.length > 0) {
+        saveOriginalData();
+        startAutoChangeDetection();
+    }
+    
+    // Sistema pronto (messaggio rimosso per discrezione)
+});
 
-<div class="flex justify-center items-center mt-4 space-x-4">
-    <button onclick="playAudio()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-        Info
-    </button>
-    <button onclick="stopAudio()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-        Pausa
-    </button>
-</div>
-
-
-    <audio id="background-music" loop>
-        <source src="https://sebastiano-mazzarisi.github.io/Test/Corsi.mp3" type="audio/mpeg">
-        Il tuo browser non supporta l'elemento audio.
-    </audio>
-
-    <script>
-        function playAudio() {
-            var audio = document.getElementById("background-music");
-            audio.play();
-        }
-
-        function stopAudio() {
-            var audio = document.getElementById("background-music");
-            audio.pause();
-  //          audio.currentTime = 0; // Riporta l'audio all'inizio
-        }
-    </script>
-
-
+// Test di debug
+console.log("Script caricato correttamente");
+</script>
 
 </body>
 </html>
