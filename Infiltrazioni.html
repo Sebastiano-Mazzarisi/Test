@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cronologia Infiltrazioni</title>
+    
+    <meta property="og:title" content="Cronologia Dettagliata delle Infiltrazioni">
+    <meta property="og:description" content="Riepilogo di tutti gli eventi relativi al problema delle infiltrazioni.">
+    <meta property="og:image" content="https://TUO_USERNAME.github.io/cronologia-infiltrazioni/icona-goccia.png"> 
+    <link rel="icon" type="image/png" href="https://TUO_USERNAME.github.io/cronologia-infiltrazioni/icona-goccia.png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #004a8c; /* Blu istituzionale */
+            --secondary-color: #007bff; /* Blu più acceso */
+            --background-color: #f4f7f9;
+            --card-bg-color: #ffffff;
+            --text-color: #333;
+            --light-text-color: #666;
+            --border-color: #e0e0e0;
+            --highlight-yellow: #fffbe6; /* Giallo tenue */
+        }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 25px;
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-weight: 700;
+            font-size: 2.2em;
+        }
+
+        header #involved-parties {
+            background-color: var(--card-bg-color);
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            text-align: left;
+            display: inline-block;
+            border: 1px solid var(--border-color);
+        }
+        
+        header #involved-parties h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        header #involved-parties p {
+            margin: 0;
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            background-color: var(--primary-color);
+            padding: 12px 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1em;
+            padding: 8px 15px;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        nav a:hover, nav a:focus {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .year-section {
+            padding-top: 70px;
+            margin-top: -70px;
+        }
+
+        .year-title {
+            text-align: center;
+            font-size: 3em;
+            color: var(--secondary-color);
+            margin: 50px 0;
+            font-weight: 700; /* MODIFICA ANNI IN GRASSETTO */
+        }
+
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 100%;
+            background-color: var(--border-color);
+        }
+
+        .month-container {
+            margin-bottom: 50px;
+        }
+        
+        .month-title {
+            font-weight: 700;
+            background-color: var(--highlight-yellow);
+            color: #5c533a;
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 1px solid #ede8d5;
+            position: relative;
+            z-index: 1;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 40px;
+        }
+
+        .event-card {
+            padding: 20px 25px;
+            background-color: var(--card-bg-color);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            position: relative;
+            width: 43%;
+            margin-bottom: 25px;
+            border: 1px solid #eee;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+        
+        .event-card::after {
+            content: '';
+            position: absolute;
+            top: 22px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: var(--background-color);
+            border: 4px solid var(--secondary-color);
+            z-index: 1;
+        }
+
+        .event-left { left: 0; }
+        .event-left::after { right: -31px; }
+        .event-right { left: 57%; }
+        .event-right::after { left: -29px; }
+
+        .event-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 12px;
+        }
+
+        .event-icon {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            background-color: #eaf5ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .event-icon svg {
+            width: 22px;
+            height: 22px;
+            stroke: var(--secondary-color);
+            stroke-width: 2;
+        }
+
+        .event-date {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1.1em;
+        }
+
+        .event-description { color: var(--light-text-color); }
+
+        @media (max-width: 768px) {
+            .timeline::before { left: 20px; }
+            .event-card { width: auto; margin-left: 55px; }
+            .event-left, .event-right { left: 0; }
+            .event-card::after { left: -42px; }
+            .month-title { left: 0; transform: none; margin-left: 45px; }
+        }
+        
+        @media (max-width: 480px) {
+            header h1 { font-size: 1.8em; }
+            nav { gap: 10px; }
+            nav a { font-size: 1em; padding: 6px 10px; }
+            .container { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <svg width="0" height="0" style="display:none;">
+        <defs>
+            <symbol id="icon-leak" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 0 0 7 -7c0 -2 -1 -3.7 -3 -5.5s-3.5 -4 -4 -6c-.5 2 -2 4.3 -4 6s-3 3.5 -3 5.5a7 7 0 0 0 7 7z" /></symbol>
+            <symbol id="icon-warning" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01m-6.51 4h13.02c1.32 0 2.22 -1.35 1.7 -2.55l-6.51 -11.41c-.52 -1.2 -2.88 -1.2 -3.4 0l-6.51 11.41c-.52 1.2 .38 2.55 1.7 2.55z" /></symbol>
+            <symbol id="icon-tools" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7l-9 9m-4-5l5 5m6 -13l-4 4m6 0l-1.5 1.5" /><path d="M3 21l4 -4" /><path d="M17 3l4 4" /></symbol>
+            <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7" /><line x1="21" y1="21" x2="15" y2="15" /></symbol>
+            <symbol id="icon-doc" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /></symbol>
+            <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5l10 -10" /></symbol>
+            <symbol id="icon-team" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4" /><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /><path d="M21 21v-2a4 4 0 0 0 -3 -3.85" /></symbol>
+        </defs>
+    </svg>
+
+    <header>
+        <div class="container">
+            <h1>Cronologia Dettagliata delle Infiltrazioni Interne</h1>
+            <div id="involved-parties">
+                <h3>Persone Coinvolte</h3>
+                <p>
+                    <strong>Sebastiano Mazzarisi:</strong> Proprietario dell'immobile<br>
+                    <strong>Gianfranco Mezzapesa:</strong> Amministratore di Condominio<br>
+                    <strong>Piero Russo:</strong> Direttore dei lavori<br>
+                    <strong>Valerio Carrieri:</strong> Responsabile per conto di "Ciccimarra"
+                </p>
+            </div>
+        </div>
+    </header>
+
+    <nav>
+        <a href="#year-2023">2023</a>
+        <a href="#year-2024">2024</a>
+        <a href="#year-2025">2025</a>
+    </nav>
+
+    <main class="container">
+        
+        <section id="year-2023" class="year-section">
+            <h2 class="year-title">2023</h2>
+            <div class="timeline">
+                <div class="month-container">
+                    <div class="month-title">Maggio</div>
+                    <div class="event-card event-left">
+                        <div class="event-header"><div class="event-icon"><svg><use xlink:href="#icon-warning"></use></svg></div><div class="event-date">13 maggio 2023</div></div>
+                        <div class="event-description">Durante i lavori del superbonus, Sebastiano riscontra "almeno una decina di litri di acqua sporca" all'interno dell'appartamento, denunciando la mancata protezione del solaio.</div>
+                    </div>
+                </div>
+                <div class="month-container">
+                    <div class="month-title">Luglio</div>
+                     <div class="event-card event-right">
+                        <div class="event-header"><div class="event-icon"><svg><use xlink:href="#icon-leak"></use></svg></div><div class="event-date">12 luglio 2023</div></div>
+                        <div class="event-description">Sebastiano conferma che il soffitto della camera da letto continua a gocciolare, e che di fatto non ha mai smesso.</div>
+                    </div>
+                </div>
+                <div class="month-container">
+                    <div class="month-title">Novembre</div>
+                    <div class="event-card event-left">
+                        <div class="event-header"><div class="event-icon"><svg><use xlink:href="#icon-leak"></use></svg></div><div class="event-date">27 novembre 2023</div></div>
+                        <div class="event-description">Si documentano nuove infiltrazioni in salotto e camera da letto. Viene chiesto formalmente di bloccare tutti i pagamenti all'impresa.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="year-2024" class="year-section">
+            <h2 class="year-title">2024</h2>
+            <div class="timeline">
+                <div class="month-container">
+                    <div class="month-title">Aprile</div>
+                    <div class="event-card event-left">
+                        <div class="event-header"><div class="event-icon"><svg><use xlink:href="#icon-warning"></use></svg></div><div class="event-date">20 aprile 2024</div></div>
+                        <div class="event-description">Il problema si ripresenta in forma grave con "nuovamente l’acqua nel lampadario". Viene inviata una PEC formale. Valerio Carrieri interviene, ma non riesce a individuare l'origine della perdita.</div>
+                    </div>
+                </div>
+                <div class="month-container">
+                    <div class="month-title">Maggio</div>
+                    <div class="event-card event-right">
+                        <div class="event-header"><div class="event-icon"><svg><use xlink:href="#icon-doc"></use></svg></div><div class="event-date">13 maggio 2024</div></div>
+                        <div class="event-description">Viene inviata una seconda PEC di sollecito riguardo le infiltrazioni.</div>
+                    </div>
+                    <div class="event-card event-left">
+                        <div class="event-header"><div class="event-icon"><svg><use xlink:href="#icon-search"></use></svg></div><div class="event-date">27-28 maggio 2024</div></div>
+                        <div class="event-description">Una prova di allagamento controllato rivela il problema: dopo ore, una telecamera rileva il soffitto gocciolare, confermando una piccola fessura.</div>
+                    </div>
+                </div>
+                <div class="month-container">
+                    <div class="month-title">Giugno</div>
+                    <div class="event-card event-right">
+                        <div class="event-header"><div class="event-icon"><svg><use xlink:href="#icon-search"></use></svg></div><div class="event-date">19 giugno 2024</div></div>
+                        <div class="event-description">Un tecnico specializzato, con un "termo monitor", individua un punto a bassa temperatura sul terrazzo, probabile origine dell'infiltrazione.</div>
+                    </div>
+                </div>
+                <div class="month-container">
+                    <div class="month-title">Agosto</div>
+                    <div class="event-card event-left">
+                        <div class="event-header"><div class="event-icon"><svg><use xlink:href="#icon-warning"></use></svg></div><div class="event-date">23 agosto 2024</div></div>
+                        <div class="event-description">La situazione peggiora drasticamente: l'acqua entra "a pioggia da TUTTO il soffitto", dopo che le indicazioni del tecnico specializzato erano state ignorate.</div>
+                    </div>
+                </div>
+                <div class="month-container">
+                    <div class="month-title">Ottobre</div>
+                    <div class="event-card event-right">
+                        <div class="event-header"><div class="event-icon"><svg><use xlink:href="#icon-check"></use></svg></div><div class="event-date">30 ottobre 2024</div></div>
+                        <div class="event-description">Una prova di allagamento di quattro ore non produce alcuna infiltrazione, suggerendo che il problema sia stato finalmente risolto.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="year-2025" class="year-section">
+            <h2 class="year-title">2025</h2>
+            <div class="timeline">
+                <div class="month-container">
+                    <div class="month-title">Gennaio</div>
+                     <div class="event-card event-left">
+                        <div class="event-header"><div class="event-icon"><svg><use xlink:href="#icon-warning"></use></svg></div><div class="event-date">17-20 gennaio 2025</div></div>
+                        <div class="event-description">Il problema delle infiltrazioni si ripresenta. Si torna a monitorare la situazione con telecamera e secchio.</div>
+                    </div>
+                </div>
+                <div class="month-container">
+                    <div class="month-title">Maggio</div>
+                    <div class="event-card event-right">
+                        <div class="event-header"><div class="event-icon"><svg><use xlink:href="#icon-leak"></use></svg></div><div class="event-date">31 maggio 2025</div></div>
+                        <div class="event-description">L'infiltrazione ricompare. Nonostante l'assenza di pioggia, il soffitto continua a gocciolare, indicando la presenza di acqua stagnante nella struttura.</div>
+                    </div>
+                </div>
+                <div class="month-container">
+                    <div class="month-title">Giugno</div>
+                     <div class="event-card event-left">
+                        <div class="event-header"><div class="event-icon"><svg><use xlink:href="#icon-team"></use></svg></div><div class="event-date">9 giugno 2025</div></div>
+                        <div class="event-description">I lavori vengono coordinati direttamente dal titolare dell'impresa, Gianluigi Ciccimarra. Viene effettuata una nuova prova intensiva. Fino a sera, non si manifesta "nemmeno una goccia".</div>
+                    </div>
+                     <div class="event-card event-right">
+                        <div class="event-header"><div class="event-icon"><svg><use xlink:href="#icon-tools"></use></svg></div><div class="event-date">12 giugno 2025</div></div>
+                        <div class="event-description">Le operazioni di test e monitoraggio per identificare la causa del problema persistente continuano.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
