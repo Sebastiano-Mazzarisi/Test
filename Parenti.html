@@ -4,17 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relazioni di Parentela - Famiglia Pricci</title>
-
-<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Parenti.png">
-
-<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Parenti.png">
-
-<meta property="og:title" content="Calcolatore di Parentela">
-<meta property="og:description" content="Scopri le relazioni di parentela della famiglia Pricci">
-<meta property="og:image" content="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Parenti.png">
-<meta property="og:url" content="https://sebastiano-mazzarisi.github.io/Test/Parenti.html">
-<meta property="og:type" content="website">
-
+    
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Parenti.png">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Parenti.png">
+    <meta property="og:title" content="Calcolatore di Parentela">
+    <meta property="og:description" content="Scopri le relazioni di parentela della famiglia Pricci">
+    <meta property="og:image" content="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Parenti.png">
+    <meta property="og:url" content="https://sebastiano-mazzarisi.github.io/Test/Parenti.html">
+    <meta property="og:type" content="website">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
 
@@ -130,7 +127,7 @@
             font-size: 1.3rem;
             font-weight: 500;
             color: var(--text-color); 
-            line-height: 1.7; 
+            line-height: 1.5; 
             text-align: center;
         }
 
@@ -582,33 +579,62 @@
             return null;
         }
 
-        function buildDetailedPath(startName, endName, connection) {
-            if (!connection || !connection.through_marriage) return null;
-            const throughSpouse = connection.through_marriage;
-            const startPerson = familyData[startName];
-            const endPerson = familyData[endName];
-            const spousePerson = familyData[throughSpouse];
-            if (!startPerson || !endPerson || !spousePerson) return null;
+        function findFullPath(startName, endName) {
+            if (startName === endName) return null;
+            const queue = [[startName]];
+            const visited = new Set([startName]);
 
-            let path;
-            const bloodConnection = connection.reverse ? findBloodConnection(startName, throughSpouse) : findBloodConnection(throughSpouse, endName);
-            if (!bloodConnection) return null;
+            while (queue.length > 0) {
+                const path = queue.shift();
+                const currentName = path[path.length - 1];
 
-            const rel = connectionToRelationship(bloodConnection, 
-                connection.reverse ? startPerson.gender : spousePerson.gender,
-                connection.reverse ? spousePerson.gender : endPerson.gender);
-            if (!rel) return null;
+                if (currentName === endName) return path;
 
-            if (connection.reverse) {
-                const link1 = rel.forward;
-                const link2 = spousePerson.gender === 'M' ? 'marito di' : 'moglie di';
-                path = `${startName} è ${link1} di ${throughSpouse}, che è ${link2} ${endName}`;
-            } else {
-                const link1 = startPerson.gender === 'M' ? 'marito di' : 'moglie di';
-                const link2 = rel.forward;
-                path = `${startName} è ${link1} ${throughSpouse}, che è ${link2} di ${endName}`;
+                const currentData = familyData[currentName];
+                const connections = [
+                    ...(currentData.parents || []),
+                    ...(currentData.children || []),
+                    ...(currentData.siblings || []),
+                    ...(currentData.spouse ? [currentData.spouse] : [])
+                ];
+
+                for (const connectionName of connections) {
+                    if (!visited.has(connectionName)) {
+                        visited.add(connectionName);
+                        const newPath = [...path, connectionName];
+                        queue.push(newPath);
+                    }
+                }
             }
-            return path;
+            return null;
+        }
+        
+        function buildDescriptivePath(pathArray) {
+            if (!pathArray || pathArray.length < 2) return null;
+            const segments = [];
+            for (let i = 0; i < pathArray.length - 1; i++) {
+                const from = pathArray[i];
+                const to = pathArray[i+1];
+                const fromData = familyData[from];
+                
+                let rel = "→"; // Fallback
+                if (fromData.spouse === to) {
+                    rel = fromData.gender === 'M' ? 'marito di' : 'moglie di';
+                } else if (fromData.children?.includes(to)) {
+                    rel = fromData.gender === 'M' ? 'padre di' : 'madre di';
+                } else if (fromData.siblings?.includes(to)) {
+                    rel = fromData.gender === 'M' ? 'fratello di' : 'sorella di';
+                } else if (fromData.parents?.includes(to)) {
+                     rel = fromData.gender === 'M' ? 'figlio di' : 'figlia di';
+                }
+                
+                if (i === 0) {
+                    segments.push(`${from} (${rel}) ${to}`);
+                } else {
+                    segments.push(`(${rel}) ${to}`);
+                }
+            }
+            return segments.join(', ');
         }
         
         function getRelationship(startName, endName) {
@@ -628,10 +654,12 @@
             const relationship = connectionToRelationship(connection, startPerson.gender, endPerson.gender);
             if (!relationship) return null;
             
+            const path = findFullPath(startName, endName);
+
             return {
                 a_to_b: `<span class="relationship-term">${relationship.forward}</span>`,
                 b_to_a: `<span class="relationship-term">${relationship.backward}</span>`,
-                path: buildDetailedPath(startName, endName, connection)
+                path: buildDescriptivePath(path)
             };
         }
         
@@ -777,9 +805,9 @@
             }
             fullResult += `<br><br>${result2}`;
             
-            const reversePath = getRelationship(personB_name, personA_name)?.path;
-            if (reversePath && reversePath !== relationship.path) {
-                 fullResult += `<br><small style="color: #666; line-height: 1.4; display: block; margin-top: 5px;">${reversePath}</small>`;
+            const reverseRelationship = getRelationship(personB_name, personA_name);
+            if (reverseRelationship?.path && reverseRelationship.path !== relationship.path) {
+                 fullResult += `<br><small style="color: #666; line-height: 1.4; display: block; margin-top: 5px;">${reverseRelationship.path}</small>`;
             }
             
             resultsText.innerHTML = fullResult;
