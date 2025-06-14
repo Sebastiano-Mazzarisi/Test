@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relazioni di Parentela - Famiglia Pricci</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
+        :root {
+            --primary-blue: #0a3d91;
+            --light-blue: #f8faff; 
+            --garnet-red: #9D2235; 
+            --straw-yellow: #fefce8;
+            --light-green-highlight: #f0fff4; 
+            --green-border: #a3d9b1;
+            --warning-red: #c53030;
+            --background-color: #f0f4f8;
+            --text-color: #1c2a38;
+            --card-bg: #ffffff;
+            --border-color: #d1d9e6;
+            --shadow-color: rgba(10, 61, 145, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .hidden { display: none !important; }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px var(--shadow-color);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            color: var(--primary-blue);
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            color: #555;
+            margin-top: 5px;
+        }
+
+        #results-container {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 10px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            background-color: var(--light-blue);
+            border: 2px solid var(--primary-blue);
+            border-radius: 16px;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            min-height: 140px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(10, 61, 145, 0.1);
+        }
+        
+        .photo-display {
+            width: 100px;
+            height: 100px;
+            flex-shrink: 0;
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            transform: scale(0);
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .photo-display.visible {
+             transform: scale(1);
+             opacity: 1;
+        }
+
+        .photo-display img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid var(--primary-blue);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        #results-text-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            flex-grow: 1;
+        }
+
+        #results-container p {
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: var(--text-color); 
+            line-height: 1.7; 
+            text-align: center;
+        }
+
+        #info-button {
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+        }
+        #info-button:hover {
+            background-color: #083175;
+        }
+        
+        #results-container strong { color: var(--primary-blue); }
+        .relationship-term { color: var(--garnet-red); font-weight: 700; }
+        #results-container p.placeholder { color: #5a7a9e; font-size: 1.2rem; line-height: 1.6; }
+        #results-container p.warning { color: var(--warning-red); font-weight: 700; font-size: 1.1rem; line-height: 1.6; }
+
+        #people-grid {
+            padding-top: 10px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 20px;
+        }
+
+        .person-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            border: 4px solid transparent;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 16px var(--shadow-color);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .person-card.relative-highlight .card-relationship-text {
+            color: var(--garnet-red);
+        }
+        
+        .person-card.relative-highlight {
+            background-color: var(--light-green-highlight);
+            border-color: var(--green-border);
+        }
+        
+        .person-card.deceased::after {
+            content: '†';
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 1.2rem;
+            color: #888;
+        }
+
+        .person-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(10, 61, 145, 0.15);
+        }
+
+        .person-card.selected {
+            border-color: var(--primary-blue);
+            background-color: var(--straw-yellow);
+            box-shadow: 0 0 0 4px rgba(10, 61, 145, 0.2);
+            transform: scale(1.05);
+        }
+
+        .person-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 10px auto;
+            object-fit: cover;
+            background-color: #e0e0e0;
+            border: 3px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: #aaa;
+        }
+
+        .person-name {
+            font-weight: 500;
+            font-size: 1rem;
+            color: var(--text-color);
+            flex-grow: 1;
+        }
+        
+        .card-relationship-text {
+            font-size: 0.8rem;
+            font-weight: 700;
+            font-style: italic;
+            color: var(--garnet-red);
+            margin-top: 4px;
+            height: 1.2rem;
+            line-height: 1.2rem;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        .modal-header h2 {
+            color: var(--primary-blue);
+            font-size: 1.5rem;
+        }
+        .modal-close-btn {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            width: 28px;
+            height: 28px;
+            font-size: 1.6rem;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+        .modal-close-btn:hover {
+            background-color: #083175;
+        }
+        .modal-body ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .modal-body li {
+            padding: 4px 0;
+            font-size: 0.95rem;
+        }
+        
+        @media (max-width: 768px) {
+             header h1 { font-size: 1.8rem; }
+            #results-container { 
+                top: 5px; 
+                padding: 10px; 
+                gap: 10px; 
+                flex-direction: column;
+                min-height: auto;
+            }
+            #results-container p { font-size: 1.1rem; line-height: 1.5; }
+             .photo-display { width: 80px; height: 80px; }
+            #people-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 15px; }
+            .person-photo { width: 70px; height: 70px; }
+            .person-name { font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Calcolatore di Parentela</h1>
+            <p>Seleziona due membri della famiglia Pricci per scoprire la loro relazione.</p>
+        </header>
+
+        <section id="results-container" class="hidden">
+            <div id="person1-photo-display" class="photo-display"></div>
+            <div id="results-text-wrapper">
+                <p id="results-text" class="placeholder">In attesa della selezione...</p>
+                <button id="info-button" class="hidden">Info</button>
+            </div>
+            <div id="person2-photo-display" class="photo-display"></div>
+        </section>
+
+        <main id="people-grid"></main>
+
+        <div id="info-modal-overlay" class="modal-overlay hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modal-title"></h2>
+                    <button class="modal-close-btn">&times;</button>
+                </div>
+                <div id="modal-body" class="modal-body"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const familyData = {
+            "Nonno Giovanni Pricci": { birth: "01/01/1909", death: "01/01/1944", spouse: "Angelina Gasparro", children: ["Luigi Pricci"], parents: [], siblings: [], gender: "M", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Nonno%20Giovanni%20Pricci.jpg" },
+            "Angelina Gasparro": { birth: "05/06/1909", death: "16/07/2001", spouse: "Nonno Giovanni Pricci", children: ["Luigi Pricci"], parents: [], siblings: [], gender: "F", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Angelina%20Gasparro.jpg" },
+            "Luigi Pricci": { birth: "16/11/1933", death: null, spouse: "Teresa Grilletti", children: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Pricci", "Giuseppe Pricci", "Tiziana Pricci"], parents: ["Nonno Giovanni Pricci", "Angelina Gasparro"], siblings: [], gender: "M", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Luigi%20Pricci.jpg" },
+            "Teresa Grilletti": { birth: "05/03/1937", death: null, spouse: "Luigi Pricci", children: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Pricci", "Giuseppe Pricci", "Tiziana Pricci"], parents: [], siblings: [], gender: "F", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Teresa%20Grilletti.jpg" },
+            "Angela Pricci": { birth: "13/01/1957", death: null, spouse: "Onofrio Lorusso", children: ["Benny Lorusso", "Cinzia Lorusso"], parents: ["Luigi Pricci", "Teresa Grilletti"], siblings: ["Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Pricci", "Giuseppe Pricci", "Tiziana Pricci"], gender: "F", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Angela%20Pricci.jpg" },
+            "Onofrio Lorusso": { birth: "05/08/1951", death: null, spouse: "Angela Pricci", children: ["Benny Lorusso", "Cinzia Lorusso"], parents:[], siblings:[], gender: "M", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Onofrio%20Lorusso.jpg" },
+            "Maria Antonietta Pricci": { birth: "21/05/1958", death: null, spouse: "Saverio Chiarappa", children: ["Martino Chiarappa", "Cristiano Chiarappa"], parents: ["Luigi Pricci", "Teresa Grilletti"], siblings: ["Angela Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Pricci", "Giuseppe Pricci", "Tiziana Pricci"], gender: "F", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Maria%20Antonietta%20Pricci.jpg" },
+            "Saverio Chiarappa": { birth: "26/11/1951", death: null, spouse: "Maria Antonietta Pricci", children: ["Martino Chiarappa", "Cristiano Chiarappa"], parents:[], siblings:[], gender: "M", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Saverio%20Chiarappa.jpg" },
+            "Marica Pricci": { birth: "12/04/1961", death: null, spouse: "Sebastiano Mazzarisi", children: ["Maria Grazia Mazzarisi", "Onofrio Mazzarisi", "Teresa Mazzarisi"], parents: ["Luigi Pricci", "Teresa Grilletti"], siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Vanna Pricci", "Giovanni Pricci", "Giuseppe Pricci", "Tiziana Pricci"], gender: "F", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Marica%20Pricci.jpg" },
+            "Sebastiano Mazzarisi": { birth: "07/05/1957", death: null, spouse: "Marica Pricci", children: ["Maria Grazia Mazzarisi", "Onofrio Mazzarisi", "Teresa Mazzarisi"], parents:[], siblings:[], gender: "M", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Sebastiano%20Mazzarisi.jpg" },
+            "Vanna Pricci": { birth: "11/09/1963", death: null, spouse: "Domenico Lefemine", children: ["Flavia Lefemine", "Francesco Lefemine"], parents: ["Luigi Pricci", "Teresa Grilletti"], siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Giovanni Pricci", "Giuseppe Pricci", "Tiziana Pricci"], gender: "F", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Vanna%20Pricci.jpg" },
+            "Domenico Lefemine": { birth: "06/02/1957", death: null, spouse: "Vanna Pricci", children: ["Flavia Lefemine", "Francesco Lefemine"], parents:[], siblings:[], gender: "M", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Domenico%20Lefemine.jpg" },
+            "Giovanni Pricci": { birth: "24/10/1964", death: null, spouse: "Rosa Bianco", children: [], parents: ["Luigi Pricci", "Teresa Grilletti"], siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giuseppe Pricci", "Tiziana Pricci"], gender: "M", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Giovanni%20Pricci.jpg" },
+            "Rosa Bianco": { birth: "02/09/1971", death: null, spouse: "Giovanni Pricci", children: [], parents:[], siblings:[], gender: "F", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Rosa%20Bianco.jpg" },
+            "Giuseppe Pricci": { birth: "12/08/1968", death: null, spouse: "Anna Trivisani", children: ["Gilda Pricci", "Asia Pricci"], parents: ["Luigi Pricci", "Teresa Grilletti"], siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Pricci", "Tiziana Pricci"], gender: "M", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Giuseppe%20Pricci.jpg" },
+            "Anna Trivisani": { birth: "12/07/1969", death: null, spouse: "Giuseppe Pricci", children: ["Gilda Pricci", "Asia Pricci"], parents:[], siblings:[], gender: "F", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Anna%20Trivisani.jpg" },
+            "Tiziana Pricci": { birth: "27/06/1972", death: null, spouse: "Riccardo Dalena", children: [], parents: ["Luigi Pricci", "Teresa Grilletti"], siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Pricci", "Giuseppe Pricci"], gender: "F", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Tiziana%20Pricci.jpg" },
+            "Riccardo Dalena": { birth: "11/04/1973", death: null, spouse: "Tiziana Pricci", children: [], parents:[], siblings:[], gender: "M", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Riccardo%20Dalena.jpg" },
+            "Benny Lorusso": { birth: "17/11/1975", death: null, spouse: "Genny Lepore", children: ["Alessandro Lorusso", "Alice Lorusso", "Nina Lorusso"], parents: ["Onofrio Lorusso", "Angela Pricci"], siblings: ["Cinzia Lorusso"], generation: 4, gender: "M", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Benny%20Lorusso.jpg" },
+            "Genny Lepore": { birth: "04/07/1975", death: null, spouse: "Benny Lorusso", children: ["Alessandro Lorusso", "Alice Lorusso", "Nina Lorusso"], parents:[], siblings:[], generation: 4, gender: "F", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Genny%20Lepore.jpg" },
+            "Cinzia Lorusso": { birth: "06/04/1980", death: null, spouse: "Gianni Rotondi", children: ["Nicoletta Rotondi"], parents: ["Onofrio Lorusso", "Angela Pricci"], siblings: ["Benny Lorusso"], generation: 4, gender: "F", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Cinzia%20Lorusso.jpg" },
+            "Gianni Rotondi": { birth: "08/03/1974", death: null, spouse: "Cinzia Lorusso", children: ["Nicoletta Rotondi"], parents:[], siblings:[], generation: 4, gender: "M", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Gianni%20Rotondi.jpg" },
+            "Martino Chiarappa": { birth: "24/05/1997", death: null, spouse: null, children: [], parents: ["Saverio Chiarappa", "Maria Antonietta Pricci"], siblings: ["Cristiano Chiarappa"], generation: 4, gender: "M", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Martino%20Chiarappa.jpg" },
+            "Cristiano Chiarappa": { birth: "20/06/2001", death: null, spouse: null, children: [], parents: ["Saverio Chiarappa", "Maria Antonietta Pricci"], siblings: ["Martino Chiarappa"], generation: 4, gender: "M", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Cristiano%20Chiarappa.jpg" },
+            "Maria Grazia Mazzarisi": { birth: "21/01/1989", death: null, spouse: null, children: [], parents: ["Sebastiano Mazzarisi", "Marica Pricci"], siblings: ["Onofrio Mazzarisi", "Teresa Mazzarisi"], generation: 4, gender: "F", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Maria%20Grazia%20Mazzarisi.jpg" },
+            "Onofrio Mazzarisi": { birth: "05/06/1992", death: null, spouse: null, children: [], parents: ["Sebastiano Mazzarisi", "Marica Pricci"], siblings: ["Maria Grazia Mazzarisi", "Teresa Mazzarisi"], generation: 4, gender: "M", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Onofrio%20Mazzarisi.jpg" },
+            "Teresa Mazzarisi": { birth: "01/04/1994", death: null, spouse: null, children: [], parents: ["Sebastiano Mazzarisi", "Marica Pricci"], siblings: ["Maria Grazia Mazzarisi", "Onofrio Mazzarisi"], generation: 4, gender: "F", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Teresa%20Mazzarisi.jpg" },
+            "Flavia Lefemine": { birth: "16/11/1996", death: null, spouse: null, children: [], parents: ["Domenico Lefemine", "Vanna Pricci"], siblings: ["Francesco Lefemine"], generation: 4, gender: "F", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Flavia%20Lefemine.jpg" },
+            "Francesco Lefemine": { birth: "20/03/2000", death: null, spouse: null, children: [], parents: ["Domenico Lefemine", "Vanna Pricci"], siblings: ["Flavia Lefemine"], generation: 4, gender: "M", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Francesco%20Lefemine.jpg" },
+            "Gilda Pricci": { birth: "29/06/2004", death: null, spouse: null, children: [], parents: ["Giuseppe Pricci", "Anna Trivisani"], siblings: ["Asia Pricci"], generation: 4, gender: "F", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Gilda%20Pricci.jpg" },
+            "Asia Pricci": { birth: "07/06/2006", death: null, spouse: null, children: [], parents: ["Giuseppe Pricci", "Anna Trivisani"], siblings: ["Gilda Pricci"], generation: 4, gender: "F", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Asia%20Pricci.jpg" },
+            "Alessandro Lorusso": { birth: "17/07/2010", death: null, spouse: null, children: [], parents: ["Benny Lorusso", "Genny Lepore"], siblings: ["Alice Lorusso", "Nina Lorusso"], generation: 5, gender: "M", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Alessandro%20Lorusso.jpg" },
+            "Alice Lorusso": { birth: "20/07/2013", death: null, spouse: null, children: [], parents: ["Benny Lorusso", "Genny Lepore"], siblings: ["Alessandro Lorusso", "Nina Lorusso"], generation: 5, gender: "F", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Alice%20Lorusso.jpg" },
+            "Nina Lorusso": { birth: "29/11/2015", death: null, spouse: null, children: [], parents: ["Benny Lorusso", "Genny Lepore"], siblings: ["Alessandro Lorusso", "Alice Lorusso"], generation: 5, gender: "F", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Nina%20Lorusso.jpg" },
+            "Nicoletta Rotondi": { birth: "12/02/2019", death: null, spouse: null, children: [], parents: ["Gianni Rotondi", "Cinzia Lorusso"], siblings: [], generation: 5, gender: "F", photoLink: "https://sebastiano-mazzarisi.github.io/Test/FotoP/Nicoletta%20Rotondi.jpg" }
+        };
+
+        // --- VARIABILI DOM E STATO ---
+        const peopleGrid = document.getElementById('people-grid');
+        const resultsContainer = document.getElementById('results-container');
+        const resultsText = document.getElementById('results-text');
+        const photoDisplay1 = document.getElementById('person1-photo-display');
+        const photoDisplay2 = document.getElementById('person2-photo-display');
+        const infoButton = document.getElementById('info-button');
+        const infoModalOverlay = document.getElementById('info-modal-overlay');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+        const modalCloseBtn = document.querySelector('.modal-close-btn');
+        let selectedPeople = [];
+        
+        function calculateGeneration(personName) {
+            if (!familyData[personName]) return 0;
+            const person = familyData[personName];
+            if (person.generation) return person.generation;
+
+            if (personName === 'Nonno Giovanni Pricci' || personName === 'Angelina Gasparro') return 1;
+            if (personName === 'Luigi Pricci' || personName === 'Teresa Grilletti') return 2;
+            
+            if (!person.parents || person.parents.length === 0) return 0;
+            
+            for (const parent of person.parents) {
+                 if (familyData[parent]) {
+                    const parentGen = calculateGeneration(parent);
+                    if (parentGen > 0) return parentGen + 1;
+                 }
+            }
+            return 0;
+        }
+        
+        function findBloodConnection(person1, person2) {
+            const person1Data = familyData[person1];
+            const person2Data = familyData[person2];
+            if (!person1Data || !person2Data) return null;
+
+            if (person1Data.children?.includes(person2)) return { type: 'parent_child', direction: 'down' };
+            if (person2Data.children?.includes(person1)) return { type: 'parent_child', direction: 'up' };
+            if (person1Data.siblings?.includes(person2)) return { type: 'sibling' };
+            if (person1Data.siblings?.some(sib => familyData[sib]?.children?.includes(person2))) return { type: 'uncle_nephew', direction: 'down' };
+            if (person2Data.siblings?.some(sib => familyData[sib]?.children?.includes(person1))) return { type: 'uncle_nephew', direction: 'up' };
+            
+            if (person1Data.siblings) {
+                for (const sibling of person1Data.siblings) {
+                    if (familyData[sibling]?.children?.some(nephew => familyData[nephew]?.children?.includes(person2))) {
+                        return { type: 'great_uncle_nephew', direction: 'down' };
+                    }
+                }
+            }
+            if (person2Data.siblings) {
+                for (const sibling of person2Data.siblings) {
+                    if (familyData[sibling]?.children?.some(nephew => familyData[nephew]?.children?.includes(person1))) {
+                        return { type: 'great_uncle_nephew', direction: 'up' };
+                    }
+                }
+            }
+
+            const p1_parents = person1Data.parents || [];
+            const p2_parents = person2Data.parents || [];
+            const getGrandparents = (parents) => [].concat(...parents.map(p => familyData[p]?.parents || []));
+            const p1_grandparents = getGrandparents(p1_parents);
+            const p2_grandparents = getGrandparents(p2_parents);
+
+            if (p1_parents.length > 0 && p2_parents.length > 0) {
+                if (p1_parents.some(p1p => familyData[p1p]?.siblings?.some(sib => p2_parents.includes(sib)))) {
+                    return { type: 'cousin' };
+                }
+            }
+            
+            if (p1_grandparents.length > 0 && p2_grandparents.length > 0) {
+                if (p1_grandparents.some(p1gp => familyData[p1gp]?.siblings?.some(sib => p2_grandparents.includes(sib)))) {
+                    return { type: 'second_cousin' };
+                }
+            }
+
+            if (p1_grandparents.length > 0 && p2_parents.length > 0) {
+                if (p1_grandparents.some(p1gp => familyData[p1gp]?.siblings?.some(sib => p2_parents.includes(sib)))) {
+                    return { type: 'second_cousin' };
+                }
+            }
+            if (p2_grandparents.length > 0 && p1_parents.length > 0) {
+                if (p2_grandparents.some(p2gp => familyData[p2gp]?.siblings?.some(sib => p1_parents.includes(sib)))) {
+                    return { type: 'second_cousin' };
+                }
+            }
+
+            const isDirectDescendant = (ancestorName, descendantName) => {
+                let queue = [descendantName];
+                while (queue.length > 0) {
+                    let current = queue.shift();
+                    if (current === ancestorName) return true;
+                    familyData[current]?.parents?.forEach(p => queue.push(p));
+                }
+                return false;
+            };
+
+            if (isDirectDescendant(person1, person2)) {
+                const genDiff = calculateGeneration(person2) - calculateGeneration(person1);
+                if (genDiff === 2) return { type: 'grandparent_grandchild', direction: 'down' };
+                if (genDiff === 3) return { type: 'great_grandparent_grandchild', direction: 'down' };
+                if (genDiff === 4) return { type: 'great_great_grandparent_grandchild', direction: 'down' };
+            }
+            if (isDirectDescendant(person2, person1)) {
+                const genDiff = calculateGeneration(person1) - calculateGeneration(person2);
+                if (genDiff === 2) return { type: 'grandparent_grandchild', direction: 'up' };
+                if (genDiff === 3) return { type: 'great_grandparent_grandchild', direction: 'up' };
+                if (genDiff === 4) return { type: 'great_great_grandparent_grandchild', direction: 'up' };
+            }
+            return null;
+        }
+
+        function findAffinityConnection(person1, person2) {
+            const person1Data = familyData[person1];
+            const person2Data = familyData[person2];
+            if (!person1Data || !person2Data) return null;
+
+            if (person1Data.spouse) {
+                const connection = findBloodConnection(person1Data.spouse, person2);
+                if (connection) return { ...connection, through_marriage: person1Data.spouse };
+            }
+
+            if (person2Data.spouse) {
+                const connection = findBloodConnection(person1, person2Data.spouse);
+                if (connection) return { ...connection, through_marriage: person2Data.spouse, reverse: true };
+            }
+            
+            if (person1Data.spouse) {
+                if (familyData[person1Data.spouse]?.siblings?.some(sib => familyData[sib]?.spouse === person2)) {
+                    return { type: 'sibling', through_marriage: person1Data.spouse };
+                }
+            }
+
+            if (person2Data.spouse) {
+                 if (familyData[person2Data.spouse]?.siblings?.some(sib => familyData[sib]?.spouse === person1)) {
+                     return { type: 'sibling', through_marriage: person2Data.spouse, reverse: true };
+                 }
+            }
+
+            if (person1Data.spouse && person2Data.spouse) {
+                const connection = findBloodConnection(person1Data.spouse, person2Data.spouse);
+                if (connection) {
+                    return { ...connection, through_marriage: person1Data.spouse };
+                }
+            }
+            return null;
+        }
+        
+        function connectionToRelationship(connection, startGender, endGender) {
+            if (!connection) return null;
+            const isAcquired = !!connection.through_marriage;
+
+            switch (connection.type) {
+                case 'spouse':
+                    return { forward: startGender === 'M' ? 'marito' : 'moglie', backward: endGender === 'M' ? 'marito' : 'moglie' };
+                case 'parent_child':
+                    if (connection.direction === 'down') {
+                        return isAcquired ? { forward: startGender === 'M' ? 'suocero' : 'suocera', backward: endGender === 'M' ? 'genero' : 'nuora' } 
+                                          : { forward: startGender === 'M' ? 'padre' : 'madre', backward: endGender === 'M' ? 'figlio' : 'figlia' };
+                    } else {
+                        return isAcquired ? { forward: startGender === 'M' ? 'genero' : 'nuora', backward: endGender === 'M' ? 'suocero' : 'suocera' } 
+                                          : { forward: startGender === 'M' ? 'figlio' : 'figlia', backward: endGender === 'M' ? 'padre' : 'madre' };
+                    }
+                case 'sibling':
+                    return isAcquired ? { forward: startGender === 'M' ? 'cognato' : 'cognata', backward: endGender === 'M' ? 'cognato' : 'cognata' } 
+                                      : { forward: startGender === 'M' ? 'fratello' : 'sorella', backward: endGender === 'M' ? 'fratello' : 'sorella' };
+                case 'uncle_nephew':
+                    const uncleTerm = startGender === 'M' ? 'zio' : 'zia';
+                    const reverseUncleTerm = endGender === 'M' ? 'zio' : 'zia';
+                    return connection.direction === 'down' ? { forward: uncleTerm, backward: 'nipote' } : { forward: 'nipote', backward: reverseUncleTerm };
+                case 'great_uncle_nephew':
+                    const greatUncleTerm = startGender === 'M' ? 'prozio' : 'prozia';
+                    const reverseGreatUncleTerm = endGender === 'M' ? 'prozio' : 'prozia';
+                    return connection.direction === 'down' ? { forward: greatUncleTerm, backward: 'pronipote' } : { forward: 'pronipote', backward: reverseGreatUncleTerm };
+                case 'grandparent_grandchild':
+                    return connection.direction === 'down' ? { forward: startGender === 'M' ? 'nonno' : 'nonna', backward: 'nipote' } : { forward: 'nipote', backward: endGender === 'M' ? 'nonno' : 'nonna' };
+                case 'great_grandparent_grandchild':
+                    return connection.direction === 'down' ? { forward: startGender === 'M' ? 'bisnonno' : 'bisnonna', backward: 'pronipote' } : { forward: 'pronipote', backward: endGender === 'M' ? 'bisnonno' : 'bisnonna' };
+                case 'great_great_grandparent_grandchild':
+                     return connection.direction === 'down' ? { forward: startGender === 'M' ? 'trisnonno' : 'trisnonna', backward: 'trisnipote' } : { forward: 'trisnipote', backward: endGender === 'M' ? 'trisnonno' : 'trisnonna' };
+                case 'cousin':
+                    return { forward: startGender === 'M' ? 'cugino' : 'cugina', backward: endGender === 'M' ? 'cugino' : 'cugina' };
+                case 'second_cousin':
+                    return { forward: startGender === 'M' ? 'procugino' : 'procugina', backward: endGender === 'M' ? 'procugino' : 'procugina' };
+            }
+            return null;
+        }
+
+        function buildDetailedPath(startName, endName, connection) {
+            if (!connection || !connection.through_marriage) return null;
+            const throughSpouse = connection.through_marriage;
+            const startPerson = familyData[startName];
+            const endPerson = familyData[endName];
+            const spousePerson = familyData[throughSpouse];
+            if (!startPerson || !endPerson || !spousePerson) return null;
+
+            let path;
+            const bloodConnection = connection.reverse ? findBloodConnection(startName, throughSpouse) : findBloodConnection(throughSpouse, endName);
+            if (!bloodConnection) return null;
+
+            const rel = connectionToRelationship(bloodConnection, 
+                connection.reverse ? startPerson.gender : spousePerson.gender,
+                connection.reverse ? spousePerson.gender : endPerson.gender);
+            if (!rel) return null;
+
+            if (connection.reverse) {
+                const link1 = rel.forward;
+                const link2 = spousePerson.gender === 'M' ? 'marito di' : 'moglie di';
+                path = `${startName} (${link1}) ${throughSpouse} (${link2}) ${endName}`;
+            } else {
+                const link1 = startPerson.gender === 'M' ? 'marito di' : 'moglie di';
+                const link2 = rel.forward;
+                path = `${startName} (${link1}) ${throughSpouse}, che è ${link2} ${endName}`;
+            }
+            return path;
+        }
+        
+        function getRelationship(startName, endName) {
+            if (startName === endName) return null;
+            const startPerson = familyData[startName];
+            const endPerson = familyData[endName];
+            if (!startPerson || !endPerson) return null;
+
+            if (startPerson.spouse === endName) {
+                const rel = connectionToRelationship({ type: 'spouse' }, startPerson.gender, endPerson.gender);
+                return { a_to_b: `<span class="relationship-term">${rel.forward}</span>`, b_to_a: `<span class="relationship-term">${rel.backward}</span>` };
+            }
+            
+            let connection = findBloodConnection(startName, endName) || findAffinityConnection(startName, endName);
+            if (!connection) return null;
+            
+            const relationship = connectionToRelationship(connection, startPerson.gender, endPerson.gender);
+            if (!relationship) return null;
+            
+            return {
+                a_to_b: `<span class="relationship-term">${relationship.forward}</span>`,
+                b_to_a: `<span class="relationship-term">${relationship.backward}</span>`,
+                path: buildDetailedPath(startName, endName, connection)
+            };
+        }
+        
+        function renderPeople() {
+            const getSortKey = (name) => {
+                const person = familyData[name];
+                const gen = calculateGeneration(name) || getGenerationFromBirth(person.birth);
+                const date = new Date(person.birth.split('/').reverse().join('-')).getTime();
+                return `${String(gen).padStart(2, '0')}-${date}`;
+            };
+            const sortedNames = Object.keys(familyData).sort((a, b) => getSortKey(a).localeCompare(getSortKey(b)));
+            
+            for (const name of sortedNames) {
+                const data = familyData[name];
+                const card = document.createElement('div');
+                card.className = 'person-card';
+                if(data.death) card.classList.add('deceased');
+                card.dataset.name = name;
+                card.addEventListener('click', () => handlePersonClick(name, card));
+                const photo = document.createElement('img');
+                photo.className = 'person-photo';
+                photo.src = data.photoLink;
+                photo.alt = `Foto di ${name}`;
+                photo.onerror = function() { this.outerHTML = `<div class="person-photo">${name.split(' ').map(n=>n[0]).join('')}</div>`; };
+                const nameEl = document.createElement('div');
+                nameEl.className = 'person-name';
+                nameEl.textContent = name;
+                const relText = document.createElement('div');
+                relText.className = 'card-relationship-text';
+                relText.textContent = data.birth;
+                card.append(photo, nameEl, relText);
+                peopleGrid.appendChild(card);
+            }
+        }
+        
+        function getGenerationFromBirth(birthDate) {
+            const year = parseInt(birthDate.split('/')[2]);
+            if (year < 1920) return 1; if (year < 1950) return 2; if (year < 1980) return 3; if (year < 2010) return 4; return 5;
+        }
+        
+        function handlePhotoClick(name) {
+            document.querySelector(`.person-card[data-name="${name}"]`)?.click();
+        }
+
+        function handlePersonClick(name, cardElement) {
+            const index = selectedPeople.indexOf(name);
+            if (index > -1) {
+                selectedPeople.splice(index, 1);
+                cardElement.classList.remove('selected');
+            } else {
+                if (selectedPeople.length >= 2) {
+                    const firstSelected = selectedPeople.shift();
+                    document.querySelector(`.person-card[data-name="${firstSelected}"]`)?.classList.remove('selected');
+                }
+                selectedPeople.push(name);
+                cardElement.classList.add('selected');
+            }
+            updateHighlights();
+            updatePhotoDisplay();
+            updateResults();
+        }
+
+        function clearHighlights() {
+            document.querySelectorAll('.person-card').forEach(card => {
+                card.classList.remove('relative-highlight');
+                const relText = card.querySelector('.card-relationship-text');
+                if (relText) relText.textContent = familyData[card.dataset.name].birth;
+            });
+        }
+
+        function updateHighlights() {
+            clearHighlights();
+            infoButton.classList.add('hidden');
+            if (selectedPeople.length !== 1) return;
+            
+            infoButton.classList.remove('hidden');
+            const selectedName = selectedPeople[0];
+            
+            for (const otherName in familyData) {
+                if (otherName === selectedName) continue;
+                const relationship = getRelationship(otherName, selectedName);
+                if (relationship) {
+                    const card = document.querySelector(`[data-name="${otherName}"]`);
+                    if (card) {
+                        card.classList.add('relative-highlight');
+                        const relTextDiv = card.querySelector('.card-relationship-text');
+                        if(relTextDiv) {
+                            const tempDiv = document.createElement('div');
+                            tempDiv.innerHTML = relationship.a_to_b;
+                            let displayText = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                            relTextDiv.textContent = displayText.charAt(0).toUpperCase() + displayText.slice(1);
+                        }
+                    }
+                }
+            }
+        }
+        
+        function updatePhotoDisplay() {
+            resultsContainer.classList.toggle('hidden', selectedPeople.length === 0);
+            const displays = [photoDisplay1, photoDisplay2];
+            displays.forEach((display, index) => {
+                display.innerHTML = '';
+                display.classList.remove('visible');
+                if (selectedPeople[index]) {
+                    const personName = selectedPeople[index];
+                    const personData = familyData[personName];
+                    if (personData) {
+                        display.innerHTML = `<img src="${personData.photoLink}" alt="${personName}" onclick="handlePhotoClick('${personName}')" />`;
+                        setTimeout(() => display.classList.add('visible'), 50);
+                    }
+                }
+            });
+        }
+
+        function updateResults() {
+            if (selectedPeople.length === 0) {
+                 resultsText.innerHTML = 'In attesa della selezione...';
+                 resultsText.className = 'placeholder';
+                 return;
+            }
+            if (selectedPeople.length === 1) {
+                resultsText.innerHTML = `<strong>${selectedPeople[0]}</strong> selezionato...`;
+                resultsText.className = '';
+                return;
+            }
+            
+            resultsText.className = '';
+            const [personA_name, personB_name] = selectedPeople;
+            const relationship = getRelationship(personA_name, personB_name);
+            
+            if (!relationship) {
+                resultsText.innerHTML = `Nessun legame di parentela noto tra <strong>${personA_name}</strong> e <strong>${personB_name}</strong>.`;
+                resultsText.className = 'placeholder';
+                return;
+            }
+
+            const result1 = `<strong>${personA_name}</strong> è ${relationship.a_to_b} di <strong>${personB_name}</strong>`;
+            const result2 = `<strong>${personB_name}</strong> è ${relationship.b_to_a} di <strong>${personA_name}</strong>`;
+            
+            let fullResult = result1;
+            if (relationship.path) {
+                fullResult += `<br><small style="color: #666; line-height: 1.4; display: block; margin-top: 5px;">${relationship.path}</small>`;
+            }
+            fullResult += `<br><br>${result2}`;
+            
+            resultsText.innerHTML = fullResult;
+        }
+        
+        infoButton.addEventListener('click', () => {
+            if (selectedPeople.length !== 1) return;
+            const selectedName = selectedPeople[0];
+            const selectedPersonData = familyData[selectedName];
+            if (!selectedPersonData) return;
+
+            const orderedNames = Array.from(document.querySelectorAll('#people-grid .person-card')).map(card => card.dataset.name);
+            const selectedBirthYear = selectedPersonData.birth.split('/')[2];
+            
+            let htmlList = `<ul style="list-style-type: none; padding: 0;">`;
+            let clipboardText = `${selectedName} (${selectedBirthYear})\n---\n`;
+            let counter = 1;
+
+            for (const otherName of orderedNames) {
+                if (otherName === selectedName) continue;
+                const otherPersonData = familyData[otherName];
+                if (!otherPersonData) continue;
+
+                const relationship = getRelationship(otherName, selectedName);
+                let relationshipTerm = "Sconosciuta";
+
+                if (relationship?.a_to_b) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = relationship.a_to_b;
+                    relationshipTerm = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                    relationshipTerm = relationshipTerm.charAt(0).toUpperCase() + relationshipTerm.slice(1);
+                }
+                
+                const otherBirthYear = otherPersonData.birth.split('/')[2];
+                htmlList += `<li>${counter}) <strong>${otherName}</strong>: ${relationshipTerm} (${otherBirthYear})</li>`;
+                clipboardText += `${counter}) *${otherName}*: ${relationshipTerm} (${otherBirthYear})\n`;
+                counter++;
+            }
+            htmlList += `</ul>`;
+
+            modalTitle.textContent = `Relazioni per ${selectedName}`;
+            modalBody.innerHTML = htmlList;
+
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(clipboardText).catch(err => console.error("Impossibile copiare negli appunti:", err));
+            }
+            
+            infoModalOverlay.classList.remove('hidden');
+        });
+
+        function closeModal() {
+            infoModalOverlay.classList.add('hidden');
+        }
+        
+        modalCloseBtn.addEventListener('click', closeModal);
+        infoModalOverlay.addEventListener('click', (e) => {
+            if (e.target === infoModalOverlay) closeModal();
+        });
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !infoModalOverlay.classList.contains('hidden')) closeModal();
+        });
+        
+        window.handlePhotoClick = handlePhotoClick;
+
+        document.addEventListener('DOMContentLoaded', renderPeople);
+
+    </script>
+</body>
+</html>
