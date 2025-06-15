@@ -184,7 +184,7 @@
         #close-photo-info {
             font-size: 0.8rem;
             color: #555;
-            margin-top: -5px; /* Adjust vertical spacing */
+            margin-top: -5px;
             text-align: center;
         }
         
@@ -395,15 +395,19 @@
             word-wrap: break-word;
         }
         
-        /* NEW STYLES FOR INSTALL PROMPT */
+        /* STYLES FOR INSTALL PROMPT - MODIFIED */
+        @keyframes bounce-up-down {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
         #install-prompt-ios {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
             padding: 15px;
-            background-color: var(--light-blue);
-            border-top: 1px solid var(--border-color);
+            background-color: var(--straw-yellow); /* MODIFIED */
+            border-top: 1px solid #e0dcb7; /* Darker yellow border */
             box-shadow: 0 -4px 12px rgba(0,0,0,0.08);
             z-index: 1500;
             transition: transform 0.3s ease-in-out;
@@ -419,7 +423,7 @@
             max-width: 600px;
             margin: 0 auto;
             text-align: center;
-            font-size: 0.95rem;
+            font-size: 1.05rem; /* MODIFIED */
             color: var(--text-color);
         }
         .install-prompt-icon {
@@ -427,6 +431,9 @@
             width: 1.5em;
             vertical-align: middle;
             margin: 0 2px;
+        }
+        #install-share-icon { /* NEW */
+            animation: bounce-up-down 1.5s infinite ease-in-out;
         }
         .install-prompt-close {
             background: transparent;
@@ -455,6 +462,7 @@
             .install-prompt-content {
                 flex-direction: column;
                 gap: 10px;
+                font-size: 0.95rem; /* Adjust font for mobile */
             }
             .install-prompt-close {
                 position: absolute;
@@ -478,8 +486,8 @@
     <div class="install-prompt-content">
         <p>
             Per un'esperienza migliore, installa l'app! Tocca
-            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWFjdGlvbiI+PHBhdGggZD0iTTQgMTJ2OGEyIDIgMCAwIDAgMiAyaDEyYTIgMiAwIDAgMCAyLTJ2LTgiLz48cG9seWxpbmUgcG9pbnRzPSIxNiA2IDEyIDIgOCA2Ii8+PGxpbmUgeDE9IjEyIiB4Mj0iMTIiIHkxPSIyIiB5Mj0iMTUiLz48L3N2Zz4=" alt="Icona Condividi" class="install-prompt-icon">
-            e poi "Aggiungi a schermata Home"
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWFjdGlvbiI+PHBhdGggZD0iTTQgMTJ2OGEyIDIgMCAwIDAgMiAyaDEyYTIgMiAwIDAgMCAyLTJ2LTgiLz48cG9seWxpbmUgcG9pbnRzPSIxNiA2IDEyIDIgOCA2Ii8+PGxpbmUgeDE9IjEyIiB4Mj0iMTIiIHkxPSIyIiB5Mj0iMTUiLz48L3N2Zz4=" alt="Icona Condividi" class="install-prompt-icon" id="install-share-icon">
+            e poi "<strong>Aggiungi alla schermata Home</strong>"
         </p>
         <button id="install-prompt-close" title="Chiudi">&times;</button>
     </div>
@@ -589,8 +597,8 @@
         const imageButton = document.getElementById('image-button');
         const prevPersonBtn = document.getElementById('prev-person');
         const nextPersonBtn = document.getElementById('next-person');
-        const installPrompt = document.getElementById('install-prompt-ios'); // NEW
-        const installPromptClose = document.getElementById('install-prompt-close'); // NEW
+        const installPrompt = document.getElementById('install-prompt-ios');
+        const installPromptClose = document.getElementById('install-prompt-close');
         
         let selectedPeople = [];
         let sortedPeopleNames = [];
@@ -1170,7 +1178,6 @@
             if (e.key === 'Escape' && !infoModalOverlay.classList.contains('hidden')) closeModal();
         });
         
-        // --- NEW SCRIPT for Install Prompt ---
         function showInstallPrompt() {
             const isIos = /iPhone|iPad|iPod/i.test(navigator.userAgent);
             const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator.standalone);
@@ -1189,7 +1196,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             renderPeople();
-            showInstallPrompt(); // Call the function to check if the prompt should be shown
+            showInstallPrompt();
 
             const sw = './sw.js';
             if ('serviceWorker' in navigator) {
