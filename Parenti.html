@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relazioni di Parentela - Famiglia Pricci</title>
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Parenti.png">
     <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Parenti.png">
     <meta property="og:title" content="Calcolatore di Parentela">
@@ -12,9 +14,7 @@
     <meta property="og:image" content="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Parenti.png">
     <meta property="og:url" content="https://sebastiano-mazzarisi.github.io/Test/Parenti.html">
     <meta property="og:type" content="website">
-
     <link rel="manifest" href="manifest.json">
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
 
@@ -183,7 +183,7 @@
         
         .person-card.relative-highlight {
             background-color: var(--light-green-highlight);
-            border-color: var(--green-border);
+            border-color: var(--green-border); 
         }
         
         .person-card.deceased::after {
@@ -254,12 +254,13 @@
         }
         .modal-content {
             background: white;
-            padding: 25px;
+            padding: 0;
             border-radius: 16px;
             max-width: 500px;
             width: 90%;
             max-height: 80vh;
-            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
         .modal-header {
@@ -267,38 +268,91 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 15px;
-            margin-bottom: 15px;
+            padding: 15px 25px;
+            flex-shrink: 0;
         }
         .modal-header h2 {
             color: var(--primary-blue);
             font-size: 1.5rem;
+            margin: 0;
         }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .modal-action-btn,
         .modal-close-btn {
-            background: var(--primary-blue);
-            color: white;
-            border: none;
+            background: transparent;
+            color: var(--primary-blue);
+            border: 2px solid var(--primary-blue);
             border-radius: 6px;
-            width: 28px;
-            height: 28px;
+            width: 32px;
+            height: 32px;
             font-size: 1.6rem;
             line-height: 1;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background-color 0.2s;
+            transition: all 0.2s;
         }
+        .modal-action-btn:hover,
         .modal-close-btn:hover {
-            background-color: #083175;
+            background-color: var(--primary-blue);
+            color: white;
         }
-        .modal-body ul {
-            list-style-type: none;
-            padding: 0;
+        .modal-body {
+            overflow-y: auto;
+            padding: 25px;
         }
-        .modal-body li {
-            padding: 4px 0;
+        
+        .timeline-container {
+            position: relative;
+            padding-left: 30px; 
+        }
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            bottom: 10px;
+            width: 4px;
+            background-color: var(--border-color);
+            border-radius: 4px;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: -20px;
+            top: 5px;
+            width: 13px;
+            height: 13px;
+            background-color: var(--primary-blue);
+            border-radius: 50%;
+            border: 2px solid var(--card-bg);
+        }
+        .timeline-content {
+            background-color: var(--light-blue);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        .timeline-content h3 {
+            margin: 0 0 8px 0;
+            color: var(--primary-blue);
+            font-size: 1.2rem;
+        }
+        .timeline-content p {
+            margin: 0;
             font-size: 0.95rem;
+            line-height: 1.5;
+            word-wrap: break-word;
         }
         
         @media (max-width: 768px) {
@@ -341,7 +395,10 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 id="modal-title"></h2>
-                    <button class="modal-close-btn">&times;</button>
+                    <div class="modal-actions">
+                        <button id="image-button" class="modal-action-btn" title="Salva come Immagine">📸</button>
+                        <button class="modal-close-btn">&times;</button>
+                    </div>
                 </div>
                 <div id="modal-body" class="modal-body"></div>
             </div>
@@ -387,14 +444,16 @@
             "Nicoletta Rotondi": { birth: "12/02/2019", death: null, spouse: null, children: [], parents: ["Gianni Rotondi", "Cinzia Lorusso"], siblings: [], generation: 5, gender: "F" }
         };
 
+        // Aggiunge dinamicamente il nome e il link della foto a ogni oggetto persona
         (function() {
             for (const name in familyData) {
+                familyData[name].name = name;
                 const photoName = name.replace(/ /g, '%20');
                 familyData[name].photoLink = `https://sebastiano-mazzarisi.github.io/Test/FotoP/${photoName}.jpg`;
             }
         })();
 
-        // --- VARIABILI DOM E STATO ---
+        // --- Sezione Variabili Globali e Selettori DOM ---
         const peopleGrid = document.getElementById('people-grid');
         const resultsContainer = document.getElementById('results-container');
         const resultsText = document.getElementById('results-text');
@@ -405,11 +464,13 @@
         const modalTitle = document.getElementById('modal-title');
         const modalBody = document.getElementById('modal-body');
         const modalCloseBtn = document.querySelector('.modal-close-btn');
+        const imageButton = document.getElementById('image-button');
         let selectedPeople = [];
         
+        // --- Sezione Funzioni di Calcolo Parentela ---
         function calculateGeneration(personName) {
-            if (!familyData[personName]) return 0;
             const person = familyData[personName];
+            if (!person) return 0;
             if (person.generation) return person.generation;
 
             if (personName === 'Nonno Giovanni Pricci' || personName === 'Angelina Gasparro') return 1;
@@ -437,20 +498,8 @@
             if (person1Data.siblings?.some(sib => familyData[sib]?.children?.includes(person2))) return { type: 'uncle_nephew', direction: 'down' };
             if (person2Data.siblings?.some(sib => familyData[sib]?.children?.includes(person1))) return { type: 'uncle_nephew', direction: 'up' };
             
-            if (person1Data.siblings) {
-                for (const sibling of person1Data.siblings) {
-                    if (familyData[sibling]?.children?.some(nephew => familyData[nephew]?.children?.includes(person2))) {
-                        return { type: 'great_uncle_nephew', direction: 'down' };
-                    }
-                }
-            }
-            if (person2Data.siblings) {
-                for (const sibling of person2Data.siblings) {
-                    if (familyData[sibling]?.children?.some(nephew => familyData[nephew]?.children?.includes(person1))) {
-                        return { type: 'great_uncle_nephew', direction: 'up' };
-                    }
-                }
-            }
+            if (person1Data.siblings?.some(sib => familyData[sib]?.children?.some(nephew => familyData[nephew]?.children?.includes(person2)))) return { type: 'great_uncle_nephew', direction: 'down' };
+            if (person2Data.siblings?.some(sib => familyData[sib]?.children?.some(nephew => familyData[nephew]?.children?.includes(person1)))) return { type: 'great_uncle_nephew', direction: 'up' };
 
             const p1_parents = person1Data.parents || [];
             const p2_parents = person2Data.parents || [];
@@ -458,28 +507,9 @@
             const p1_grandparents = getGrandparents(p1_parents);
             const p2_grandparents = getGrandparents(p2_parents);
 
-            if (p1_parents.length > 0 && p2_parents.length > 0) {
-                if (p1_parents.some(p1p => familyData[p1p]?.siblings?.some(sib => p2_parents.includes(sib)))) {
-                    return { type: 'cousin' };
-                }
-            }
-            
-            if (p1_grandparents.length > 0 && p2_grandparents.length > 0) {
-                if (p1_grandparents.some(p1gp => familyData[p1gp]?.siblings?.some(sib => p2_grandparents.includes(sib)))) {
-                    return { type: 'second_cousin' };
-                }
-            }
-
-            if (p1_grandparents.length > 0 && p2_parents.length > 0) {
-                if (p1_grandparents.some(p1gp => familyData[p1gp]?.siblings?.some(sib => p2_parents.includes(sib)))) {
-                    return { type: 'second_cousin' };
-                }
-            }
-            if (p2_grandparents.length > 0 && p1_parents.length > 0) {
-                if (p2_grandparents.some(p2gp => familyData[p2gp]?.siblings?.some(sib => p1_parents.includes(sib)))) {
-                    return { type: 'second_cousin' };
-                }
-            }
+            if (p1_parents.length > 0 && p2_parents.length > 0 && p1_parents.some(p1p => familyData[p1p]?.siblings?.some(sib => p2_parents.includes(sib)))) return { type: 'cousin' };
+            if (p1_grandparents.length > 0 && p2_grandparents.length > 0 && p1_grandparents.some(p1gp => familyData[p1gp]?.siblings?.some(sib => p2_grandparents.includes(sib)))) return { type: 'second_cousin' };
+            if ((p1_grandparents.length > 0 && p2_parents.length > 0 && p1_grandparents.some(p1gp => familyData[p1gp]?.siblings?.some(sib => p2_parents.includes(sib)))) || (p2_grandparents.length > 0 && p1_parents.length > 0 && p2_grandparents.some(p2gp => familyData[p2gp]?.siblings?.some(sib => p1_parents.includes(sib))))) return { type: 'second_cousin' };
 
             const isDirectDescendant = (ancestorName, descendantName) => {
                 let queue = [descendantName];
@@ -515,29 +545,19 @@
                 const connection = findBloodConnection(person1Data.spouse, person2);
                 if (connection) return { ...connection, through_marriage: person1Data.spouse };
             }
-
             if (person2Data.spouse) {
                 const connection = findBloodConnection(person1, person2Data.spouse);
                 if (connection) return { ...connection, through_marriage: person2Data.spouse, reverse: true };
             }
-            
-            if (person1Data.spouse) {
-                if (familyData[person1Data.spouse]?.siblings?.some(sib => familyData[sib]?.spouse === person2)) {
-                    return { type: 'sibling', through_marriage: person1Data.spouse };
-                }
+            if (person1Data.spouse && familyData[person1Data.spouse]?.siblings?.some(sib => familyData[sib]?.spouse === person2)) {
+                return { type: 'sibling', through_marriage: person1Data.spouse };
             }
-
-            if (person2Data.spouse) {
-                 if (familyData[person2Data.spouse]?.siblings?.some(sib => familyData[sib]?.spouse === person1)) {
-                     return { type: 'sibling', through_marriage: person2Data.spouse, reverse: true };
-                 }
+            if (person2Data.spouse && familyData[person2Data.spouse]?.siblings?.some(sib => familyData[sib]?.spouse === person1)) {
+                 return { type: 'sibling', through_marriage: person2Data.spouse, reverse: true };
             }
-
             if (person1Data.spouse && person2Data.spouse) {
                 const connection = findBloodConnection(person1Data.spouse, person2Data.spouse);
-                if (connection) {
-                    return { ...connection, through_marriage: person1Data.spouse };
-                }
+                if (connection) return { ...connection, through_marriage: person1Data.spouse };
             }
             return null;
         }
@@ -561,13 +581,9 @@
                     return isAcquired ? { forward: startGender === 'M' ? 'cognato' : 'cognata', backward: endGender === 'M' ? 'cognato' : 'cognata' } 
                                       : { forward: startGender === 'M' ? 'fratello' : 'sorella', backward: endGender === 'M' ? 'fratello' : 'sorella' };
                 case 'uncle_nephew':
-                    const uncleTerm = startGender === 'M' ? 'zio' : 'zia';
-                    const reverseUncleTerm = endGender === 'M' ? 'zio' : 'zia';
-                    return connection.direction === 'down' ? { forward: uncleTerm, backward: 'nipote' } : { forward: 'nipote', backward: reverseUncleTerm };
+                    return connection.direction === 'down' ? { forward: startGender === 'M' ? 'zio' : 'zia', backward: 'nipote' } : { forward: 'nipote', backward: endGender === 'M' ? 'zio' : 'zia' };
                 case 'great_uncle_nephew':
-                    const greatUncleTerm = startGender === 'M' ? 'prozio' : 'prozia';
-                    const reverseGreatUncleTerm = endGender === 'M' ? 'prozio' : 'prozia';
-                    return connection.direction === 'down' ? { forward: greatUncleTerm, backward: 'pronipote' } : { forward: 'pronipote', backward: reverseGreatUncleTerm };
+                    return connection.direction === 'down' ? { forward: startGender === 'M' ? 'prozio' : 'prozia', backward: 'pronipote' } : { forward: 'pronipote', backward: endGender === 'M' ? 'prozio' : 'prozia' };
                 case 'grandparent_grandchild':
                     return connection.direction === 'down' ? { forward: startGender === 'M' ? 'nonno' : 'nonna', backward: 'nipote' } : { forward: 'nipote', backward: endGender === 'M' ? 'nonno' : 'nonna' };
                 case 'great_grandparent_grandchild':
@@ -581,7 +597,7 @@
             }
             return null;
         }
-
+        
         function findFullPath(startName, endName) {
             if (startName === endName) return null;
             const queue = [[startName]];
@@ -594,6 +610,8 @@
                 if (currentName === endName) return path;
 
                 const currentData = familyData[currentName];
+                if (!currentData) continue;
+
                 const connections = [
                     ...(currentData.parents || []),
                     ...(currentData.children || []),
@@ -602,7 +620,7 @@
                 ];
 
                 for (const connectionName of connections) {
-                    if (!visited.has(connectionName)) {
+                    if (connectionName && !visited.has(connectionName)) {
                         visited.add(connectionName);
                         const newPath = [...path, connectionName];
                         queue.push(newPath);
@@ -620,7 +638,7 @@
                 const to = pathArray[i+1];
                 const fromData = familyData[from];
                 
-                let rel = "→"; // Fallback
+                let rel = "→";
                 if (fromData.spouse === to) {
                     rel = fromData.gender === 'M' ? 'marito di' : 'moglie di';
                 } else if (fromData.children?.includes(to)) {
@@ -648,7 +666,10 @@
 
             if (startPerson.spouse === endName) {
                 const rel = connectionToRelationship({ type: 'spouse' }, startPerson.gender, endPerson.gender);
-                return { a_to_b: `<span class="relationship-term">${rel.forward}</span>`, b_to_a: `<span class="relationship-term">${rel.backward}</span>` };
+                return { 
+                    a_to_b: `<span class="relationship-term">${rel.forward}</span>`, 
+                    b_to_a: `<span class="relationship-term">${rel.backward}</span>`
+                };
             }
             
             let connection = findBloodConnection(startName, endName) || findAffinityConnection(startName, endName);
@@ -657,15 +678,15 @@
             const relationship = connectionToRelationship(connection, startPerson.gender, endPerson.gender);
             if (!relationship) return null;
             
-            const path = findFullPath(startName, endName);
-
             return {
                 a_to_b: `<span class="relationship-term">${relationship.forward}</span>`,
                 b_to_a: `<span class="relationship-term">${relationship.backward}</span>`,
-                path: buildDescriptivePath(path)
+                path_a_to_b: buildDescriptivePath(findFullPath(startName, endName)),
+                path_b_to_a: buildDescriptivePath(findFullPath(endName, startName))
             };
         }
         
+        // --- Sezione Funzioni UI (Interfaccia Utente) ---
         function renderPeople() {
             const getSortKey = (name) => {
                 const person = familyData[name];
@@ -677,6 +698,7 @@
             
             for (const name of sortedNames) {
                 const data = familyData[name];
+                data.name = name;
                 const card = document.createElement('div');
                 card.className = 'person-card';
                 if(data.death) card.classList.add('deceased');
@@ -803,14 +825,13 @@
             const result2 = `<strong>${personB_name}</strong> è ${relationship.b_to_a} di <strong>${personA_name}</strong>`;
             
             let fullResult = result1;
-            if (relationship.path) {
-                fullResult += `<br><small style="color: #666; line-height: 1.4; display: block; margin-top: 5px;">${relationship.path}</small>`;
+            if (relationship.path_a_to_b) {
+                fullResult += `<br><small style="color: #666; line-height: 1.4; display: block; margin-top: 5px;">${relationship.path_a_to_b}</small>`;
             }
             fullResult += `<br><br>${result2}`;
             
-            const reverseRelationship = getRelationship(personB_name, personA_name);
-            if (reverseRelationship?.path && reverseRelationship.path !== relationship.path) {
-                 fullResult += `<br><small style="color: #666; line-height: 1.4; display: block; margin-top: 5px;">${reverseRelationship.path}</small>`;
+            if (relationship.path_b_to_a && relationship.path_b_to_a !== relationship.path_a_to_b) {
+                 fullResult += `<br><small style="color: #666; line-height: 1.4; display: block; margin-top: 5px;">${relationship.path_b_to_a}</small>`;
             }
             
             resultsText.innerHTML = fullResult;
@@ -825,33 +846,81 @@
             const orderedNames = Array.from(document.querySelectorAll('#people-grid .person-card')).map(card => card.dataset.name);
             const selectedBirthYear = selectedPersonData.birth.split('/')[2];
             
-            let htmlList = `<ul style="list-style-type: none; padding: 0;">`;
-            let clipboardText = `${selectedName} (${selectedBirthYear})\n---\n`;
-            let counter = 1;
-
+            const groupMap = {
+                'Nonno': 'Nonni', 'Nonna': 'Nonni',
+                'Suocero': 'Suoceri', 'Suocera': 'Suoceri',
+                'Marito': 'Marito', 'Moglie': 'Moglie',
+                'Padre': 'Genitori', 'Madre': 'Genitori',
+                'Figlio': 'Figli', 'Figlia': 'Figli',
+                'Fratello': 'Fratelli', 'Sorella': 'Fratelli',
+                'Cognato': 'Cognati', 'Cognata': 'Cognati',
+                'Zio': 'Zii', 'Zia': 'Zii',
+                'Nipote': 'Nipoti',
+                'Cugino': 'Cugini', 'Cugina': 'Cugini',
+                'Prozio': 'Prozii', 'Prozia': 'Prozii',
+                'Pronipote': 'Pronipoti',
+                'Procugino': 'Procugini', 'Procugina': 'Procugini',
+                'Trisnonno': 'Trisnonni', 'Trisnonna': 'Trisnonni',
+                'Trisnipote': 'Trisnipoti'
+            };
+            
+            const groupedRelatives = {};
             for (const otherName of orderedNames) {
                 if (otherName === selectedName) continue;
-                const otherPersonData = familyData[otherName];
-                if (!otherPersonData) continue;
-
                 const relationship = getRelationship(otherName, selectedName);
-                let relationshipTerm = "Sconosciuta";
-
                 if (relationship?.a_to_b) {
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = relationship.a_to_b;
-                    relationshipTerm = (tempDiv.textContent || tempDiv.innerText || "").trim();
-                    relationshipTerm = relationshipTerm.charAt(0).toUpperCase() + relationshipTerm.slice(1);
+                    let term = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                    if(term) {
+                        term = term.charAt(0).toUpperCase() + term.slice(1);
+                        const group = groupMap[term] || term;
+                        if (!groupedRelatives[group]) {
+                            groupedRelatives[group] = [];
+                        }
+                        groupedRelatives[group].push(familyData[otherName]);
+                    }
                 }
-                
-                const otherBirthYear = otherPersonData.birth.split('/')[2];
-                htmlList += `<li>${counter}) <strong>${otherName}</strong>: ${relationshipTerm} (${otherBirthYear})</li>`;
-                clipboardText += `${counter}) *${otherName}*: ${relationshipTerm} (${otherBirthYear})\n`;
-                counter++;
             }
-            htmlList += `</ul>`;
 
-            modalTitle.textContent = `Relazioni per ${selectedName}`;
+            for (const groupName in groupedRelatives) {
+                groupedRelatives[groupName].sort((a, b) => {
+                    const dateA = new Date(a.birth.split('/').reverse().join('-'));
+                    const dateB = new Date(b.birth.split('/').reverse().join('-'));
+                    return dateA - dateB;
+                });
+            }
+
+            if (groupedRelatives['Fratelli'] && groupedRelatives['Fratelli'].every(person => person.gender === 'F')) {
+                groupedRelatives['Sorelle'] = groupedRelatives['Fratelli'];
+                delete groupedRelatives['Fratelli'];
+            }
+            
+            const groupOrder = ['Trisnonni', 'Bisnonni', 'Nonni', 'Suoceri', 'Genitori', 'Marito', 'Moglie', 'Figli', 'Fratelli', 'Sorelle', 'Prozii', 'Zii', 'Cognati', 'Cugini', 'Procugini', 'Nipoti', 'Pronipoti', 'Trisnipoti'];
+
+            let htmlList = `<div class="timeline-container">`;
+            let clipboardText = `${selectedName} (${selectedBirthYear})\n---\n`;
+
+            for (const groupName of groupOrder) {
+                if (groupedRelatives[groupName]) {
+                    const peopleInGroup = groupedRelatives[groupName];
+                    const firstNames = peopleInGroup.map(person => person.name.split(' ')[0]).join(', ');
+                    const fullNames = peopleInGroup.map(person => person.name).join(', ');
+
+                    clipboardText += `- ${groupName}: ${firstNames}\n`;
+                    htmlList += `
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h3>${groupName}</h3>
+                                <p>${fullNames}</p>
+                            </div>
+                        </div>`;
+                }
+            }
+            htmlList += `</div>`;
+
+            modalTitle.textContent = selectedName;
             modalBody.innerHTML = htmlList;
 
             if (navigator.clipboard) {
@@ -865,7 +934,46 @@
             infoModalOverlay.classList.add('hidden');
         }
         
+        function generateImage() {
+            const elementToCapture = document.querySelector("#info-modal-overlay .modal-content");
+            const selectedName = selectedPeople[0] || 'parentela';
+            
+            if (elementToCapture) {
+                // Salva gli stili originali
+                const originalStyles = {
+                    maxHeight: elementToCapture.style.maxHeight,
+                    overflow: elementToCapture.style.overflow
+                };
+                
+                // Modifica temporaneamente gli stili per catturare tutto il contenuto
+                elementToCapture.style.maxHeight = 'none';
+                elementToCapture.style.overflow = 'visible';
+                
+                html2canvas(elementToCapture, { 
+                    scale: 2, 
+                    useCORS: true,
+                    backgroundColor: '#ffffff' // Sfondo bianco per il JPG
+                }).then(canvas => {
+                    // Ripristina gli stili originali
+                    elementToCapture.style.maxHeight = originalStyles.maxHeight;
+                    elementToCapture.style.overflow = originalStyles.overflow;
+
+                    // Crea e scarica l'immagine
+                    const link = document.createElement('a');
+                    link.download = `parentela-${selectedName.replace(/ /g, '_')}.jpg`;
+                    link.href = canvas.toDataURL('image/jpeg', 0.95);
+                    link.click();
+                }).catch(err => {
+                    console.error("Errore durante la creazione dell'immagine:", err);
+                    // Assicurati di ripristinare gli stili anche in caso di errore
+                    elementToCapture.style.maxHeight = originalStyles.maxHeight;
+                    elementToCapture.style.overflow = originalStyles.overflow;
+                });
+            }
+        }
+        
         modalCloseBtn.addEventListener('click', closeModal);
+        imageButton.addEventListener('click', generateImage);
         infoModalOverlay.addEventListener('click', (e) => {
             if (e.target === infoModalOverlay) closeModal();
         });
@@ -878,19 +986,5 @@
         document.addEventListener('DOMContentLoaded', renderPeople);
 
     </script>
-
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').then(registration => {
-        console.log('ServiceWorker registrato con successo:', registration);
-      }).catch(error => {
-        console.log('Registrazione ServiceWorker fallita:', error);
-      });
-    });
-  }
-</script>
-
-
 </body>
 </html>
