@@ -396,7 +396,7 @@
                 <div class="modal-header">
                     <h2 id="modal-title"></h2>
                     <div class="modal-actions">
-                        <button id="image-button" class="modal-action-btn" title="Salva come Immagine">📸</button>
+                        <button id="image-button" class="modal-action-btn" title="Salva o Condividi Immagine">📸</button>
                         <button class="modal-close-btn">&times;</button>
                     </div>
                 </div>
@@ -936,40 +936,59 @@
         
         function generateImage() {
             const elementToCapture = document.querySelector("#info-modal-overlay .modal-content");
+            const modalBodyEl = document.querySelector("#info-modal-overlay .modal-body");
             const selectedName = selectedPeople[0] || 'parentela';
             
-            if (elementToCapture) {
-                // Salva gli stili originali
-                const originalStyles = {
-                    maxHeight: elementToCapture.style.maxHeight,
-                    overflow: elementToCapture.style.overflow
-                };
-                
-                // Modifica temporaneamente gli stili per catturare tutto il contenuto
-                elementToCapture.style.maxHeight = 'none';
-                elementToCapture.style.overflow = 'visible';
-                
-                html2canvas(elementToCapture, { 
-                    scale: 2, 
-                    useCORS: true,
-                    backgroundColor: '#ffffff' // Sfondo bianco per il JPG
-                }).then(canvas => {
-                    // Ripristina gli stili originali
-                    elementToCapture.style.maxHeight = originalStyles.maxHeight;
-                    elementToCapture.style.overflow = originalStyles.overflow;
+            if (!elementToCapture || !modalBodyEl) return;
+            
+            // Salva gli stili originali per ripristinarli dopo
+            const originalStyles = {
+                maxHeight: elementToCapture.style.maxHeight,
+                overflowY: modalBodyEl.style.overflowY,
+                alignItems: infoModalOverlay.style.alignItems
+            };
 
-                    // Crea e scarica l'immagine
-                    const link = document.createElement('a');
-                    link.download = `parentela-${selectedName.replace(/ /g, '_')}.jpg`;
-                    link.href = canvas.toDataURL('image/jpeg', 0.95);
-                    link.click();
-                }).catch(err => {
-                    console.error("Errore durante la creazione dell'immagine:", err);
-                    // Assicurati di ripristinare gli stili anche in caso di errore
-                    elementToCapture.style.maxHeight = originalStyles.maxHeight;
-                    elementToCapture.style.overflow = originalStyles.overflow;
-                });
-            }
+            // Modifica temporaneamente gli stili per catturare tutto il contenuto
+            elementToCapture.style.maxHeight = 'none';
+            modalBodyEl.style.overflowY = 'visible';
+            infoModalOverlay.style.alignItems = 'flex-start'; // Allinea in alto per catturare dall'inizio
+
+            html2canvas(elementToCapture, { 
+                scale: 2, 
+                useCORS: true,
+                backgroundColor: '#ffffff'
+            }).then(canvas => {
+                const fileName = `parentela-${selectedName.replace(/ /g, '_')}.jpg`;
+                const file = new File([],""); // Placeholder per la condivisione
+
+                // Converte il canvas in un blob per la condivisione
+                canvas.toBlob(function(blob) {
+                    const file = new File([blob], fileName, { type: 'image/jpeg' });
+                    // Controlla se l'API di condivisione è disponibile (su mobile)
+                    if (navigator.share && navigator.canShare({ files: [file] })) {
+                        navigator.share({
+                            files: [file],
+                            title: `Parentela di ${selectedName}`,
+                        }).catch(err => {
+                             if (err.name !== 'AbortError') console.error("Errore di condivisione:", err)
+                        });
+                    } else {
+                        // Fallback per desktop: download diretto
+                        const link = document.createElement('a');
+                        link.download = fileName;
+                        link.href = canvas.toDataURL('image/jpeg', 0.95);
+                        link.click();
+                    }
+                }, 'image/jpeg', 0.95);
+
+            }).catch(err => {
+                console.error("Errore durante la creazione dell'immagine:", err);
+            }).finally(() => {
+                // Ripristina sempre gli stili originali
+                elementToCapture.style.maxHeight = originalStyles.maxHeight;
+                modalBodyEl.style.overflowY = originalStyles.overflowY;
+                infoModalOverlay.style.alignItems = originalStyles.alignItems;
+            });
         }
         
         modalCloseBtn.addEventListener('click', closeModal);
@@ -983,8 +1002,13 @@
         
         window.handlePhotoClick = handlePhotoClick;
 
-        document.addEventListener('DOMContentLoaded', renderPeople);
-
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPeople();
+            const sw = './sw.js';
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register(sw).then(() => console.log('ServiceWorker registrato')).catch(err => console.error('Registrazione ServiceWorker fallita:', err));
+            }
+        });
     </script>
 </body>
 </html>
