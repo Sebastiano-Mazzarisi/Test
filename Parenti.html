@@ -82,7 +82,7 @@
             z-index: 1000;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
             gap: 15px;
             background-color: var(--light-blue);
             border: 2px solid var(--primary-blue);
@@ -92,6 +92,36 @@
             min-height: 140px;
             transition: all 0.3s ease;
             box-shadow: 0 8px 24px rgba(10, 61, 145, 0.1);
+        }
+        
+        .nav-arrow {
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 28px;
+            font-weight: bold;
+            line-height: 32px;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+            padding-bottom: 4px; /* Optical alignment */
+        }
+
+        .nav-arrow:hover {
+            background-color: #083175;
+        }
+
+        .photo-navigation-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
         }
         
         .photo-display {
@@ -124,6 +154,7 @@
             align-items: center;
             gap: 10px;
             flex-grow: 1;
+            min-width: 200px;
         }
 
         #results-container p {
@@ -148,6 +179,14 @@
         }
         #info-button:hover {
             background-color: #083175;
+        }
+
+        /* NEW STYLE for the new text */
+        #close-photo-info {
+            font-size: 0.8rem;
+            color: #555;
+            margin-top: -5px; /* Adjust vertical spacing */
+            text-align: center;
         }
         
         #results-container strong { color: var(--primary-blue); }
@@ -229,14 +268,15 @@
             flex-grow: 1;
         }
         
+        /* MODIFIED relationship text style */
         .card-relationship-text {
-            font-size: 0.8rem;
+            font-size: 0.9rem; /* Increased from 0.8rem */
             font-weight: 700;
             font-style: italic;
             color: var(--garnet-red);
             margin-top: 4px;
-            height: 1.2rem;
-            line-height: 1.2rem;
+            height: 1.4rem; /* Increased from 1.2rem */
+            line-height: 1.4rem; /* Increased from 1.2rem */
         }
 
         .modal-overlay {
@@ -338,20 +378,12 @@
             border: 2px solid var(--card-bg);
         }
 
-
-
-
-
-.timeline-content {
-    background-color: var(--light-blue);
-    padding: 15px;
-    border-radius: 8px;
-    border: 2.5px solid #7a92b7;
-}
-
-
-
-
+        .timeline-content {
+            background-color: var(--light-blue);
+            padding: 15px;
+            border-radius: 8px;
+            border: 2.5px solid #7a92b7;
+        }
 
         .timeline-content h3 {
             margin: 0 0 8px 0;
@@ -381,35 +413,16 @@
             .person-name { font-size: 0.85rem; }
         }
 
-
-
-.modal-action-btn svg {
-    color: #0a3d91;           /* Colore blu scuro da fermo */
-    transition: color 0.2s;
-}
-.modal-action-btn:hover svg {
-    color: #fff;              /* Colore bianco quando passi sopra */
-}
-
-
-
-
-
-
-
+        .modal-action-btn svg {
+            color: #0a3d91;
+            transition: color 0.2s;
+        }
+        .modal-action-btn:hover svg {
+            color: #fff;
+        }
     </style>
 </head>
 <body>
-
-
-
-
-
-
-
-
-
-
 
 <div class="container">
     <header>
@@ -418,10 +431,15 @@
     </header>
 
     <section id="results-container" class="hidden">
-        <div id="person1-photo-display" class="photo-display"></div>
+        <div class="photo-navigation-wrapper">
+            <button id="prev-person" class="nav-arrow hidden">‹</button>
+            <div id="person1-photo-display" class="photo-display"></div>
+            <button id="next-person" class="nav-arrow hidden">›</button>
+        </div>
         <div id="results-text-wrapper">
             <p id="results-text" class="placeholder">In attesa della selezione...</p>
             <button id="info-button" class="hidden">Info</button>
+            <small id="close-photo-info" class="hidden">Cliccare sulla foto per chiuderla</small>
         </div>
         <div id="person2-photo-display" class="photo-display"></div>
     </section>
@@ -447,16 +465,6 @@
         </div>
     </div>
 </div>
-
-
-
-
-
-
-
-
-
-
 
     <script>
         const familyData = {
@@ -497,7 +505,6 @@
             "Nicoletta Rotondi": { birth: "12/02/2019", death: null, spouse: null, children: [], parents: ["Gianni Rotondi", "Cinzia Lorusso"], siblings: [], generation: 5, gender: "F" }
         };
 
-        // Aggiunge dinamicamente il nome e il link della foto a ogni oggetto persona
         (function() {
             for (const name in familyData) {
                 familyData[name].name = name;
@@ -513,13 +520,18 @@
         const photoDisplay1 = document.getElementById('person1-photo-display');
         const photoDisplay2 = document.getElementById('person2-photo-display');
         const infoButton = document.getElementById('info-button');
+        const closePhotoInfo = document.getElementById('close-photo-info'); // NEW
         const infoModalOverlay = document.getElementById('info-modal-overlay');
         const modalTitle = document.getElementById('modal-title');
         const modalBody = document.getElementById('modal-body');
         const modalCloseBtn = document.querySelector('.modal-close-btn');
         const imageButton = document.getElementById('image-button');
-        let selectedPeople = [];
+        const prevPersonBtn = document.getElementById('prev-person');
+        const nextPersonBtn = document.getElementById('next-person');
         
+        let selectedPeople = [];
+        let sortedPeopleNames = [];
+
         // --- Sezione Funzioni di Calcolo Parentela ---
         function calculateGeneration(personName) {
             const person = familyData[personName];
@@ -747,9 +759,9 @@
                 const date = new Date(person.birth.split('/').reverse().join('-')).getTime();
                 return `${String(gen).padStart(2, '0')}-${date}`;
             };
-            const sortedNames = Object.keys(familyData).sort((a, b) => getSortKey(a).localeCompare(getSortKey(b)));
+            sortedPeopleNames = Object.keys(familyData).sort((a, b) => getSortKey(a).localeCompare(getSortKey(b)));
             
-            for (const name of sortedNames) {
+            for (const name of sortedPeopleNames) {
                 const data = familyData[name];
                 data.name = name;
                 const card = document.createElement('div');
@@ -781,7 +793,18 @@
         }
         
         function handlePhotoClick(name) {
-            document.querySelector(`.person-card[data-name="${name}"]`)?.click();
+            // This function now also deselects the person if they are the only one selected
+            const index = selectedPeople.indexOf(name);
+            if (index > -1 && selectedPeople.length === 1) {
+                selectedPeople.splice(index, 1);
+                document.querySelector(`.person-card[data-name="${name}"]`)?.classList.remove('selected');
+            } else {
+                 document.querySelector(`.person-card[data-name="${name}"]`)?.click();
+                 return; // Let the main click handler do the work
+            }
+            updateHighlights();
+            updatePhotoDisplay();
+            updateResults();
         }
 
         function handlePersonClick(name, cardElement) {
@@ -812,10 +835,15 @@
 
         function updateHighlights() {
             clearHighlights();
-            infoButton.classList.add('hidden');
-            if (selectedPeople.length !== 1) return;
+            const singleSelection = selectedPeople.length === 1;
             
-            infoButton.classList.remove('hidden');
+            infoButton.classList.toggle('hidden', !singleSelection);
+            closePhotoInfo.classList.toggle('hidden', !singleSelection); // NEW
+            prevPersonBtn.classList.toggle('hidden', !singleSelection);
+            nextPersonBtn.classList.toggle('hidden', !singleSelection);
+
+            if (!singleSelection) return;
+            
             const selectedName = selectedPeople[0];
             
             for (const otherName in familyData) {
@@ -847,6 +875,7 @@
                     const personName = selectedPeople[index];
                     const personData = familyData[personName];
                     if (personData) {
+                        // MODIFIED to attach the deselect handler to the photo
                         display.innerHTML = `<img src="${personData.photoLink}" alt="${personName}" onclick="handlePhotoClick('${personName}')" />`;
                         setTimeout(() => display.classList.add('visible'), 50);
                     }
@@ -997,17 +1026,15 @@
             
             if (!elementToCapture || !modalBodyEl) return;
             
-            // Salva gli stili originali per ripristinarli dopo
             const originalStyles = {
                 maxHeight: elementToCapture.style.maxHeight,
                 overflowY: modalBodyEl.style.overflowY,
                 alignItems: infoModalOverlay.style.alignItems
             };
 
-            // Modifica temporaneamente gli stili per catturare tutto il contenuto
             elementToCapture.style.maxHeight = 'none';
             modalBodyEl.style.overflowY = 'visible';
-            infoModalOverlay.style.alignItems = 'flex-start'; // Allinea in alto per catturare dall'inizio
+            infoModalOverlay.style.alignItems = 'flex-start';
 
             html2canvas(elementToCapture, { 
                 scale: 2, 
@@ -1015,12 +1042,10 @@
                 backgroundColor: '#ffffff'
             }).then(canvas => {
                 const fileName = `parentela-${selectedName.replace(/ /g, '_')}.jpg`;
-                const file = new File([],""); // Placeholder per la condivisione
+                const file = new File([],"");
 
-                // Converte il canvas in un blob per la condivisione
                 canvas.toBlob(function(blob) {
                     const file = new File([blob], fileName, { type: 'image/jpeg' });
-                    // Controlla se l'API di condivisione è disponibile (su mobile)
                     if (navigator.share && navigator.canShare({ files: [file] })) {
                         navigator.share({
                             files: [file],
@@ -1029,7 +1054,6 @@
                              if (err.name !== 'AbortError') console.error("Errore di condivisione:", err)
                         });
                     } else {
-                        // Fallback per desktop: download diretto
                         const link = document.createElement('a');
                         link.download = fileName;
                         link.href = canvas.toDataURL('image/jpeg', 0.95);
@@ -1040,15 +1064,44 @@
             }).catch(err => {
                 console.error("Errore durante la creazione dell'immagine:", err);
             }).finally(() => {
-                // Ripristina sempre gli stili originali
                 elementToCapture.style.maxHeight = originalStyles.maxHeight;
                 modalBodyEl.style.overflowY = originalStyles.overflowY;
                 infoModalOverlay.style.alignItems = originalStyles.alignItems;
             });
         }
         
+        function navigatePerson(direction) {
+            if (selectedPeople.length !== 1) return;
+            const currentName = selectedPeople[0];
+            const currentIndex = sortedPeopleNames.indexOf(currentName);
+            if (currentIndex === -1) return;
+
+            let newIndex = currentIndex + direction;
+
+            if (newIndex >= sortedPeopleNames.length) newIndex = 0;
+            if (newIndex < 0) newIndex = sortedPeopleNames.length - 1;
+
+            const newPersonName = sortedPeopleNames[newIndex];
+            
+            const currentCard = document.querySelector('.person-card.selected');
+            const newPersonCard = document.querySelector(`.person-card[data-name="${newPersonName}"]`);
+
+            if (currentCard) currentCard.classList.remove('selected');
+            if (newPersonCard) newPersonCard.classList.add('selected');
+
+            selectedPeople = [newPersonName];
+
+            updateHighlights();
+            updatePhotoDisplay();
+            updateResults();
+        }
+
+        // --- Event Listeners ---
         modalCloseBtn.addEventListener('click', closeModal);
         imageButton.addEventListener('click', generateImage);
+        prevPersonBtn.addEventListener('click', () => navigatePerson(-1));
+        nextPersonBtn.addEventListener('click', () => navigatePerson(1));
+
         infoModalOverlay.addEventListener('click', (e) => {
             if (e.target === infoModalOverlay) closeModal();
         });
@@ -1056,7 +1109,8 @@
             if (e.key === 'Escape' && !infoModalOverlay.classList.contains('hidden')) closeModal();
         });
         
-        window.handlePhotoClick = handlePhotoClick;
+        // This is now only attached to the img element inside the photo-display div
+        // window.handlePhotoClick = handlePhotoClick;
 
         document.addEventListener('DOMContentLoaded', () => {
             renderPeople();
