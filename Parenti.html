@@ -181,7 +181,6 @@
             background-color: #083175;
         }
 
-        /* NEW STYLE for the new text */
         #close-photo-info {
             font-size: 0.8rem;
             color: #555;
@@ -268,15 +267,14 @@
             flex-grow: 1;
         }
         
-        /* MODIFIED relationship text style */
         .card-relationship-text {
-            font-size: 0.9rem; /* Increased from 0.8rem */
+            font-size: 0.9rem;
             font-weight: 700;
             font-style: italic;
             color: var(--garnet-red);
             margin-top: 4px;
-            height: 1.4rem; /* Increased from 1.2rem */
-            line-height: 1.4rem; /* Increased from 1.2rem */
+            height: 1.4rem;
+            line-height: 1.4rem;
         }
 
         .modal-overlay {
@@ -397,8 +395,51 @@
             word-wrap: break-word;
         }
         
+        /* NEW STYLES FOR INSTALL PROMPT */
+        #install-prompt-ios {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 15px;
+            background-color: var(--light-blue);
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.08);
+            z-index: 1500;
+            transition: transform 0.3s ease-in-out;
+        }
+        #install-prompt-ios.hidden {
+            transform: translateY(100%);
+        }
+        .install-prompt-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+            font-size: 0.95rem;
+            color: var(--text-color);
+        }
+        .install-prompt-icon {
+            height: 1.5em;
+            width: 1.5em;
+            vertical-align: middle;
+            margin: 0 2px;
+        }
+        .install-prompt-close {
+            background: transparent;
+            border: none;
+            font-size: 1.8rem;
+            line-height: 1;
+            color: #888;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+
         @media (max-width: 768px) {
-             header h1 { font-size: 1.8rem; }
+            header h1 { font-size: 1.8rem; }
             #results-container { 
                 top: 5px; 
                 padding: 10px; 
@@ -407,10 +448,19 @@
                 min-height: auto;
             }
             #results-container p { font-size: 1.1rem; line-height: 1.5; }
-             .photo-display { width: 80px; height: 80px; }
+            .photo-display { width: 80px; height: 80px; }
             #people-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 15px; }
             .person-photo { width: 70px; height: 70px; }
             .person-name { font-size: 0.85rem; }
+            .install-prompt-content {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .install-prompt-close {
+                position: absolute;
+                top: 5px;
+                right: 5px;
+            }
         }
 
         .modal-action-btn svg {
@@ -423,6 +473,17 @@
     </style>
 </head>
 <body>
+
+<div id="install-prompt-ios" class="hidden">
+    <div class="install-prompt-content">
+        <p>
+            Per un'esperienza migliore, installa l'app! Tocca
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWFjdGlvbiI+PHBhdGggZD0iTTQgMTJ2OGEyIDIgMCAwIDAgMiAyaDEyYTIgMiAwIDAgMCAyLTJ2LTgiLz48cG9seWxpbmUgcG9pbnRzPSIxNiA2IDEyIDIgOCA2Ii8+PGxpbmUgeDE9IjEyIiB4Mj0iMTIiIHkxPSIyIiB5Mj0iMTUiLz48L3N2Zz4=" alt="Icona Condividi" class="install-prompt-icon">
+            e poi "Aggiungi a schermata Home"
+        </p>
+        <button id="install-prompt-close" title="Chiudi">&times;</button>
+    </div>
+</div>
 
 <div class="container">
     <header>
@@ -520,7 +581,7 @@
         const photoDisplay1 = document.getElementById('person1-photo-display');
         const photoDisplay2 = document.getElementById('person2-photo-display');
         const infoButton = document.getElementById('info-button');
-        const closePhotoInfo = document.getElementById('close-photo-info'); // NEW
+        const closePhotoInfo = document.getElementById('close-photo-info');
         const infoModalOverlay = document.getElementById('info-modal-overlay');
         const modalTitle = document.getElementById('modal-title');
         const modalBody = document.getElementById('modal-body');
@@ -528,6 +589,8 @@
         const imageButton = document.getElementById('image-button');
         const prevPersonBtn = document.getElementById('prev-person');
         const nextPersonBtn = document.getElementById('next-person');
+        const installPrompt = document.getElementById('install-prompt-ios'); // NEW
+        const installPromptClose = document.getElementById('install-prompt-close'); // NEW
         
         let selectedPeople = [];
         let sortedPeopleNames = [];
@@ -793,14 +856,13 @@
         }
         
         function handlePhotoClick(name) {
-            // This function now also deselects the person if they are the only one selected
             const index = selectedPeople.indexOf(name);
             if (index > -1 && selectedPeople.length === 1) {
                 selectedPeople.splice(index, 1);
                 document.querySelector(`.person-card[data-name="${name}"]`)?.classList.remove('selected');
             } else {
                  document.querySelector(`.person-card[data-name="${name}"]`)?.click();
-                 return; // Let the main click handler do the work
+                 return;
             }
             updateHighlights();
             updatePhotoDisplay();
@@ -838,7 +900,7 @@
             const singleSelection = selectedPeople.length === 1;
             
             infoButton.classList.toggle('hidden', !singleSelection);
-            closePhotoInfo.classList.toggle('hidden', !singleSelection); // NEW
+            closePhotoInfo.classList.toggle('hidden', !singleSelection);
             prevPersonBtn.classList.toggle('hidden', !singleSelection);
             nextPersonBtn.classList.toggle('hidden', !singleSelection);
 
@@ -875,7 +937,6 @@
                     const personName = selectedPeople[index];
                     const personData = familyData[personName];
                     if (personData) {
-                        // MODIFIED to attach the deselect handler to the photo
                         display.innerHTML = `<img src="${personData.photoLink}" alt="${personName}" onclick="handlePhotoClick('${personName}')" />`;
                         setTimeout(() => display.classList.add('visible'), 50);
                     }
@@ -1109,11 +1170,27 @@
             if (e.key === 'Escape' && !infoModalOverlay.classList.contains('hidden')) closeModal();
         });
         
-        // This is now only attached to the img element inside the photo-display div
-        // window.handlePhotoClick = handlePhotoClick;
+        // --- NEW SCRIPT for Install Prompt ---
+        function showInstallPrompt() {
+            const isIos = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator.standalone);
+            const isDismissed = localStorage.getItem('installPromptDismissed') === 'true';
+
+            if (isIos && !isInStandaloneMode && !isDismissed) {
+                installPrompt.classList.remove('hidden');
+            }
+        }
+
+        installPromptClose.addEventListener('click', () => {
+            installPrompt.classList.add('hidden');
+            localStorage.setItem('installPromptDismissed', 'true');
+        });
+
 
         document.addEventListener('DOMContentLoaded', () => {
             renderPeople();
+            showInstallPrompt(); // Call the function to check if the prompt should be shown
+
             const sw = './sw.js';
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register(sw).then(() => console.log('ServiceWorker registrato')).catch(err => console.error('Registrazione ServiceWorker fallita:', err));
