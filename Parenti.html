@@ -110,7 +110,7 @@
             align-items: center;
             justify-content: center;
             transition: background-color 0.2s;
-            padding-bottom: 4px; /* Optical alignment */
+            padding-bottom: 4px;
         }
 
         .nav-arrow:hover {
@@ -179,6 +179,20 @@
         }
         #info-button:hover {
             background-color: #083175;
+        }
+
+        .kinship-degree-info {
+            background-color: transparent;
+            color: var(--primary-blue);
+            border: 1px solid var(--primary-blue);
+            border-radius: 8px;
+            padding: 5px 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: default;
+            display: block;
+            width: fit-content;
+            margin: 15px auto 15px auto;
         }
 
         #close-photo-info {
@@ -395,7 +409,6 @@
             word-wrap: break-word;
         }
         
-        /* STYLES FOR INSTALL PROMPT - MODIFIED */
         @keyframes bounce-up-down {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-4px); }
@@ -406,8 +419,8 @@
             left: 0;
             right: 0;
             padding: 15px;
-            background-color: var(--straw-yellow); /* MODIFIED */
-            border-top: 1px solid #e0dcb7; /* Darker yellow border */
+            background-color: var(--straw-yellow);
+            border-top: 1px solid #e0dcb7;
             box-shadow: 0 -4px 12px rgba(0,0,0,0.08);
             z-index: 1500;
             transition: transform 0.3s ease-in-out;
@@ -423,7 +436,7 @@
             max-width: 600px;
             margin: 0 auto;
             text-align: center;
-            font-size: 1.05rem; /* MODIFIED */
+            font-size: 1.05rem;
             color: var(--text-color);
         }
         .install-prompt-icon {
@@ -432,7 +445,7 @@
             vertical-align: middle;
             margin: 0 2px;
         }
-        #install-share-icon { /* NEW */
+        #install-share-icon {
             animation: bounce-up-down 1.5s infinite ease-in-out;
         }
         .install-prompt-close {
@@ -462,7 +475,7 @@
             .install-prompt-content {
                 flex-direction: column;
                 gap: 10px;
-                font-size: 0.95rem; /* Adjust font for mobile */
+                font-size: 0.95rem;
             }
             .install-prompt-close {
                 position: absolute;
@@ -487,7 +500,7 @@
         <p>
             Per un'esperienza migliore, installa l'app! Tocca
             <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWFjdGlvbiI+PHBhdGggZD0iTTQgMTJ2OGEyIDIgMCAwIDAgMiAyaDEyYTIgMiAwIDAgMCAyLTJ2LTgiLz48cG9seWxpbmUgcG9pbnRzPSIxNiA2IDEyIDIgOCA2Ii8+PGxpbmUgeDE9IjEyIiB4Mj0iMTIiIHkxPSIyIiB5Mj0iMTUiLz48L3N2Zz4=" alt="Icona Condividi" class="install-prompt-icon" id="install-share-icon">
-            e poi "<strong>Aggiungi alla schermata Home</strong>"
+            e poi "<strong>Aggiungi a schermata Home</strong>"
         </p>
         <button id="install-prompt-close" title="Chiudi">&times;</button>
     </div>
@@ -973,16 +986,25 @@
                 resultsText.className = 'placeholder';
                 return;
             }
-
+            
             const result1 = `<strong>${personA_name}</strong> è ${relationship.a_to_b} di <strong>${personB_name}</strong>`;
             const result2 = `<strong>${personB_name}</strong> è ${relationship.b_to_a} di <strong>${personA_name}</strong>`;
             
+            let degreeHTML = '';
+            const path = findFullPath(personA_name, personB_name);
+            if (path && path.length > 1) {
+                const degree = path.length - 1;
+                degreeHTML = `<div class="kinship-degree-info">Parentela di ${degree}° grado</div>`;
+            }
+
             let fullResult = result1;
             if (relationship.path_a_to_b) {
                 fullResult += `<br><small style="color: #666; line-height: 1.4; display: block; margin-top: 5px;">${relationship.path_a_to_b}</small>`;
             }
-            fullResult += `<br><br>${result2}`;
             
+            fullResult += degreeHTML;
+            fullResult += result2; // MODIFIED: removed <br>
+
             if (relationship.path_b_to_a && relationship.path_b_to_a !== relationship.path_a_to_b) {
                  fullResult += `<br><small style="color: #666; line-height: 1.4; display: block; margin-top: 5px;">${relationship.path_b_to_a}</small>`;
             }
@@ -1000,21 +1022,7 @@
             const selectedBirthYear = selectedPersonData.birth.split('/')[2];
             
             const groupMap = {
-                'Nonno': 'Nonni', 'Nonna': 'Nonni',
-                'Suocero': 'Suoceri', 'Suocera': 'Suoceri',
-                'Marito': 'Marito', 'Moglie': 'Moglie',
-                'Padre': 'Genitori', 'Madre': 'Genitori',
-                'Figlio': 'Figli', 'Figlia': 'Figli',
-                'Fratello': 'Fratelli', 'Sorella': 'Fratelli',
-                'Cognato': 'Cognati', 'Cognata': 'Cognati',
-                'Zio': 'Zii', 'Zia': 'Zii',
-                'Nipote': 'Nipoti',
-                'Cugino': 'Cugini', 'Cugina': 'Cugini',
-                'Prozio': 'Prozii', 'Prozia': 'Prozii',
-                'Pronipote': 'Pronipoti',
-                'Procugino': 'Procugini', 'Procugina': 'Procugini',
-                'Trisnonno': 'Trisnonni', 'Trisnonna': 'Trisnonni',
-                'Trisnipote': 'Trisnipoti'
+                'Nonno': 'Nonni', 'Nonna': 'Nonni', 'Suocero': 'Suoceri', 'Suocera': 'Suoceri', 'Marito': 'Marito', 'Moglie': 'Moglie', 'Padre': 'Genitori', 'Madre': 'Genitori', 'Figlio': 'Figli', 'Figlia': 'Figli', 'Fratello': 'Fratelli', 'Sorella': 'Fratelli', 'Cognato': 'Cognati', 'Cognata': 'Cognati', 'Zio': 'Zii', 'Zia': 'Zii', 'Nipote': 'Nipoti', 'Cugino': 'Cugini', 'Cugina': 'Cugini', 'Prozio': 'Prozii', 'Prozia': 'Prozii', 'Pronipote': 'Pronipoti', 'Procugino': 'Procugini', 'Procugina': 'Procugini', 'Trisnonno': 'Trisnonni', 'Trisnonna': 'Trisnonni', 'Trisnipote': 'Trisnipoti'
             };
             
             const groupedRelatives = {};
@@ -1032,7 +1040,6 @@
                             groupedRelatives[group] = [];
                         }
                         groupedRelatives[group].push({ name: otherName, gender: familyData[otherName].gender, birth: familyData[otherName].birth });
-
                     }
                 }
             }
@@ -1165,6 +1172,16 @@
             updateResults();
         }
 
+        function showInstallPrompt() {
+            const isIos = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator.standalone);
+            const isDismissed = localStorage.getItem('installPromptDismissed') === 'true';
+
+            if (isIos && !isInStandaloneMode && !isDismissed) {
+                installPrompt.classList.remove('hidden');
+            }
+        }
+
         // --- Event Listeners ---
         modalCloseBtn.addEventListener('click', closeModal);
         imageButton.addEventListener('click', generateImage);
@@ -1178,21 +1195,10 @@
             if (e.key === 'Escape' && !infoModalOverlay.classList.contains('hidden')) closeModal();
         });
         
-        function showInstallPrompt() {
-            const isIos = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-            const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator.standalone);
-            const isDismissed = localStorage.getItem('installPromptDismissed') === 'true';
-
-            if (isIos && !isInStandaloneMode && !isDismissed) {
-                installPrompt.classList.remove('hidden');
-            }
-        }
-
         installPromptClose.addEventListener('click', () => {
             installPrompt.classList.add('hidden');
             localStorage.setItem('installPromptDismissed', 'true');
         });
-
 
         document.addEventListener('DOMContentLoaded', () => {
             renderPeople();
