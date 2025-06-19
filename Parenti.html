@@ -70,7 +70,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 15px;
+            gap: 10px;
         }
 
         header h1 {
@@ -100,6 +100,10 @@
             font-size: 1.1rem;
             color: #555;
             margin-top: 5px;
+        }
+        
+        .main-actions {
+            display: none; 
         }
 
         #results-container {
@@ -354,9 +358,23 @@
         }
         #tree-modal-body {
             flex-grow: 1;
-            overflow: auto;
-            padding: 0;
+            overflow-y: auto; 
+            overflow-x: hidden;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
         }
+        #tree-modal-body svg {
+            display: block;
+            width: 100%;
+            height: auto;
+            cursor: grab;
+        }
+        #tree-modal-body svg.panning {
+            cursor: grabbing;
+        }
+
         .modal-header {
             display: flex;
             justify-content: space-between;
@@ -397,6 +415,14 @@
             background-color: var(--primary-blue);
             color: white;
         }
+        #reset-selection-btn {
+            padding: 0; /* Override padding for icon-only button */
+        }
+        #reset-selection-btn svg {
+            width: 22px; /* Adjust icon size */
+            height: 22px;
+        }
+
         .modal-body {
             overflow-y: auto;
             padding: 25px;
@@ -453,7 +479,6 @@
             word-wrap: break-word;
         }
 
-        /* Stili per la tabella dei compleanni */
         @keyframes flash-red {
             0%, 100% { background-color: var(--light-warning-red); }
             50% { background-color: var(--light-warning-red-pulse); }
@@ -492,7 +517,6 @@
             background-color: var(--straw-yellow);
         }
 
-        /* Stili per il modal del percorso di parentela */
         .path-box {
             background-color: var(--light-blue);
             border: 1px solid var(--border-color);
@@ -515,34 +539,89 @@
             flex-shrink: 0;
         }
         
-        /* Stili per l'albero genealogico */
         .tree-node rect {
             fill: var(--card-bg);
-            stroke: var(--primary-blue);
             stroke-width: 2px;
             rx: 8;
         }
+        .tree-node.male rect {
+            stroke: var(--primary-blue);
+        }
+        .tree-node.female rect {
+            stroke: var(--garnet-red);
+        }
         .tree-node.deceased rect {
             stroke-dasharray: 4 2;
-            stroke: #888;
+            opacity: 0.7;
         }
-        .tree-node text {
+        .tree-node foreignObject {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .tree-node .node-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; 
+            padding-top: 5px;
+        }
+        .tree-node .node-photo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+            background-color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #aaa;
+            margin-bottom: 2px;
+            flex-shrink: 0;
+        }
+        .tree-node .node-photo.initials {
+             background-color: #ccc;
+             color: #666;
+             font-weight: bold;
+        }
+        .tree-node .text-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            line-height: 1.1;
+            margin-top: 2px;
+        }
+        .tree-node .person-full-name-tree,
+        .tree-node .birth-date-tree {
             font-family: 'Inter', sans-serif;
-            font-size: 14px;
             fill: var(--text-color);
             pointer-events: none;
+            text-anchor: middle;
+            font-size: 10px;
         }
+        .tree-node .person-full-name-tree {
+            font-weight: 600;
+            white-space: normal;
+            word-break: break-word;
+            line-height: 1.1em;
+            max-height: 2.2em;
+        }
+        .tree-node .birth-date-tree {
+            fill: #555;
+            font-size: 9px;
+        }
+
         .tree-link {
             fill: none;
             stroke: var(--text-color);
             stroke-width: 1.5px;
         }
-        .marriage-link {
-            fill: none;
-            stroke: var(--garnet-red);
-            stroke-width: 1.5px;
-        }
-
 
         @keyframes bounce-up-down {
             0%, 100% { transform: translateY(0); }
@@ -593,6 +672,26 @@
             padding: 0 5px;
         }
 
+        #copy-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.75);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            z-index: 3000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            font-weight: 600;
+        }
+        #copy-toast.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
         @media (max-width: 768px) {
             header h1 { font-size: 1.8rem; }
             #results-container { 
@@ -626,6 +725,10 @@
         .modal-action-btn:hover svg {
             color: #fff;
         }
+        
+        .family-list-report {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -649,11 +752,17 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
             </button>
             <button id="tree-view-btn" class="header-icon-btn" title="Albero Genealogico">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10v.2A3 3 0 0 1 7 13v5H4"/><path d="M14 10v.2A3 3 0 0 0 17 13v5h3"/><path d="M12 10V7a3 3 0 0 0-3-3H7"/><path d="M12 10V7a3 3 0 0 1 3-3h2"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-network"><rect x="16" y="3" width="4" height="4" rx="1"></rect><rect x="4" y="3" width="4" height="4" rx="1"></rect><rect x="4" y="17" width="4" height="4" rx="1"></rect><rect x="16" y="17" width="4" height="4" rx="1"></rect><path d="M6 7v4a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V7"></path><path d="M12 12v9"></path></svg>
+            </button>
+            <button id="reset-selection-btn" class="modal-close-btn" title="Deseleziona Tutto">
+                &times;
             </button>
         </div>
         <p>Seleziona due membri della famiglia Pricci per scoprire la loro relazione.</p>
     </header>
+
+    <div class="main-actions">
+    </div>
 
     <section id="results-container" class="hidden">
         <div class="photo-navigation-wrapper">
@@ -676,12 +785,8 @@
             <div class="modal-header">
                 <h2 id="modal-title"></h2>
                 <div class="modal-actions">
-                    <button id="image-button" class="modal-action-btn" title="Salva o Condividi Immagine">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;">
-                           <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-                           <polyline points="16 6 12 2 8 6"></polyline>
-                           <line x1="12" y1="15" x2="12" y2="2"></line>
-                        </svg>
+                    <button id="info-copy-btn" class="modal-action-btn" title="Copia contenuto">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
                     </button>
                     <button class="modal-close-btn">&times;</button>
                 </div>
@@ -695,12 +800,8 @@
             <div class="modal-header">
                 <h2>Elenco cronologico nell'anno</h2>
                  <div class="modal-actions">
-                    <button id="birthday-share-btn" class="modal-action-btn" title="Salva o Condividi Elenco">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;">
-                           <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-                           <polyline points="16 6 12 2 8 6"></polyline>
-                           <line x1="12" y1="15" x2="12" y2="2"></line>
-                        </svg>
+                    <button id="birthday-copy-btn" class="modal-action-btn" title="Copia contenuto">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
                     </button>
                     <button class="modal-close-btn birthday-modal-close">&times;</button>
                 </div>
@@ -714,12 +815,8 @@
             <div class="modal-header">
                 <h2 id="path-modal-title">Dettaglio Parentela</h2>
                  <div class="modal-actions">
-                    <button id="path-share-btn" class="modal-action-btn" title="Salva o Condividi Percorso">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;">
-                           <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-                           <polyline points="16 6 12 2 8 6"></polyline>
-                           <line x1="12" y1="15" x2="12" y2="2"></line>
-                        </svg>
+                    <button id="path-copy-btn" class="modal-action-btn" title="Copia contenuto">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
                     </button>
                     <button class="modal-close-btn path-modal-close">&times;</button>
                 </div>
@@ -731,8 +828,14 @@
     <div id="tree-modal-overlay" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="tree-modal-title">Albero genealogico</h2>
+                <h2 id="tree-modal-title">Albero genealogico Famiglia Pricci</h2>
                  <div class="modal-actions">
+                    <button id="tree-reset-zoom-btn" class="modal-action-btn" title="Adatta alla finestra">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-expand"><path d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8"/><path d="M3 16.2V21m0 0h4.8M3 21l6-6"/><path d="M21 7.8V3m0 0h-4.8M21 3l-6 6"/><path d="M3 7.8V3m0 0h4.8M3 3l6 6"/></svg>
+                    </button>
+                    <button id="tree-copy-btn" class="modal-action-btn" title="Copia contenuto">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                    </button>
                     <button class="modal-close-btn tree-modal-close">&times;</button>
                 </div>
             </div>
@@ -740,6 +843,7 @@
         </div>
     </div>
 </div>
+<div id="copy-toast"></div>
 
     <script>
         const familyData = {
@@ -784,7 +888,7 @@
             for (const name in familyData) {
                 familyData[name].name = name;
                 const photoName = name.replace(/ /g, '%20');
-                familyData[name].photoLink = `https://sebastiano-mazzarisi.github.io/Test/FotoP/${photoName}.jpg`;
+                familyData[name].photoLink = `https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/FotoP/${photoName}.jpg`;
             }
         })();
 
@@ -800,50 +904,91 @@
         const modalTitle = document.getElementById('modal-title');
         const modalBody = document.getElementById('modal-body');
         const infoModalCloseBtn = document.querySelector('#info-modal-overlay .modal-close-btn');
-        const imageButton = document.getElementById('image-button');
+        const infoCopyBtn = document.getElementById('info-copy-btn');
         const prevPersonBtn = document.getElementById('prev-person');
         const nextPersonBtn = document.getElementById('next-person');
         const installPrompt = document.getElementById('install-prompt-ios');
         const installPromptClose = document.getElementById('install-prompt-close');
         
-        // Elementi per modal compleanni
         const birthdayListBtn = document.getElementById('birthday-list-btn');
         const birthdayModalOverlay = document.getElementById('birthday-modal-overlay');
         const birthdayModalBody = document.getElementById('birthday-modal-body');
-        const birthdayShareBtn = document.getElementById('birthday-share-btn');
+        const birthdayCopyBtn = document.getElementById('birthday-copy-btn');
         const birthdayModalCloseBtn = document.querySelector('#birthday-modal-overlay .modal-close-btn');
         
-        // Elementi per modal percorso parentela
         const pathModalOverlay = document.getElementById('path-modal-overlay');
         const pathModalBody = document.getElementById('path-modal-body');
-        const pathShareBtn = document.getElementById('path-share-btn');
+        const pathCopyBtn = document.getElementById('path-copy-btn');
         const pathModalCloseBtn = document.querySelector('#path-modal-overlay .modal-close-btn');
 
-        // Elementi per modal albero genealogico
         const treeViewBtn = document.getElementById('tree-view-btn');
         const treeModalOverlay = document.getElementById('tree-modal-overlay');
         const treeModalBody = document.getElementById('tree-modal-body');
         const treeModalCloseBtn = document.querySelector('#tree-modal-overlay .modal-close-btn');
+        const treeCopyBtn = document.getElementById('tree-copy-btn');
+        const treeResetZoomBtn = document.getElementById('tree-reset-zoom-btn');
+        const resetSelectionBtn = document.getElementById('reset-selection-btn');
         
         let selectedPeople = [];
         let sortedPeopleNames = [];
 
-        // --- Sezione Funzioni di Calcolo Parentela ---
-        function calculateGeneration(personName, visited = new Set()) {
-            if (visited.has(personName)) return 99; // Evita loop infiniti
-            visited.add(personName);
+        let currentTreeX = 0, currentTreeY = 0, currentTreeWidth = 0, currentTreeHeight = 0;
+        let initialTreeWidth = 0, initialTreeHeight = 0;
+        let isPanning = false;
+        let startPanX = 0, startPanY = 0;
+        let svgTreeElement = null;
 
+        const groupMap = {
+            'Nonno': 'Nonni', 'Nonna': 'Nonni', 'Suocero': 'Suoceri', 'Suocera': 'Suoceri', 
+            'Marito': 'Marito', 'Moglie': 'Moglie', 'Padre': 'Genitori', 'Madre': 'Genitori', 
+            'Figlio': 'Figli', 'Figlia': 'Figli', 'Genero': 'Generi', 'Nuora': 'Nuore',
+            'Fratello': 'Fratelli', 'Sorella': 'Fratelli', 'Cognato': 'Cognati', 'Cognata': 'Cognati', 
+            'Zio': 'Zii', 'Zia': 'Zii', 'Nipote': 'Nipoti', 'Cugino': 'Cugini', 'Cugina': 'Cugini', 
+            'Prozio': 'Prozii', 'Prozia': 'Prozii', 'Pronipote': 'Pronipoti', 
+            'Procugino': 'Procugini', 'Procugina': 'Procugini', 'Trisnonno': 'Trisnonni', 
+            'Trisnonna': 'Trisnonni', 'Trisnipote': 'Trisnipoti'
+        };
+        
+        function parseDate(dateStr) {
+            const parts = dateStr.split('/');
+            return new Date(parts[2], parts[1] - 1, parts[0]);
+        }
+
+        function getInitials(name) {
+            const parts = name.split(' ');
+            if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+            return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+        }
+
+        function getEmojiForPerson(person) {
+            if (!person || !person.birth) return '';
+            const birthDate = parseDate(person.birth);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+
+            if (person.death) {
+                const deathDate = parseDate(person.death);
+                age = deathDate.getFullYear() - birthDate.getFullYear();
+                const m2 = deathDate.getMonth() - birthDate.getMonth();
+                if (m2 < 0 || (m2 === 0 && deathDate.getDate() < birthDate.getDate())) age--;
+            }
+
+            if (age >= 65) return person.gender === 'M' ? '👴' : '👵';
+            if (age >= 18) return person.gender === 'M' ? '👨' : '👩';
+            return person.gender === 'M' ? '👦' : '👧';
+        };
+        
+        function calculateGeneration(personName, visited = new Set()) {
+            if (visited.has(personName)) return 99;
+            visited.add(personName);
             const person = familyData[personName];
             if (!person) return 1;
-            
-            // Assegna generazione fissa ai capostipiti e ai loro coniugi
             if (personName === 'Nonno Giovanni Pricci' || personName === 'Angelina Gasparro') return 1;
-            
             const spouse = person.spouse ? familyData[person.spouse] : null;
             if (spouse && (spouse.name === 'Nonno Giovanni Pricci' || spouse.name === 'Angelina Gasparro')) return 1;
-
             if (!person.parents || person.parents.length === 0) return 1;
-            
             const parentGenerations = person.parents.map(p => calculateGeneration(p, new Set(visited)));
             return Math.max(...parentGenerations) + 1;
         }
@@ -858,7 +1003,6 @@
             if (person1Data.siblings?.includes(person2)) return { type: 'sibling' };
             if (person1Data.siblings?.some(sib => familyData[sib]?.children?.includes(person2))) return { type: 'uncle_nephew', direction: 'down' };
             if (person2Data.siblings?.some(sib => familyData[sib]?.children?.includes(person1))) return { type: 'uncle_nephew', direction: 'up' };
-            
             if (person1Data.siblings?.some(sib => familyData[sib]?.children?.some(nephew => familyData[nephew]?.children?.includes(person2)))) return { type: 'great_uncle_nephew', direction: 'down' };
             if (person2Data.siblings?.some(sib => familyData[sib]?.children?.some(nephew => familyData[nephew]?.children?.includes(person1)))) return { type: 'great_uncle_nephew', direction: 'up' };
 
@@ -868,9 +1012,9 @@
             const p1_grandparents = getGrandparents(p1_parents);
             const p2_grandparents = getGrandparents(p2_parents);
 
-            if (p1_parents.length > 0 && p2_parents.length > 0 && p1_parents.some(p1p => familyData[p1p]?.siblings?.some(sib => p2_parents.includes(sib)))) return { type: 'cousin' };
-            if (p1_grandparents.length > 0 && p2_grandparents.length > 0 && p1_grandparents.some(p1gp => familyData[p1gp]?.siblings?.some(sib => p2_grandparents.includes(sib)))) return { type: 'second_cousin' };
-            if ((p1_grandparents.length > 0 && p2_parents.length > 0 && p1_grandparents.some(p1gp => familyData[p1gp]?.siblings?.some(sib => p2_parents.includes(sib)))) || (p2_grandparents.length > 0 && p1_parents.length > 0 && p2_grandparents.some(p2gp => familyData[p2gp]?.siblings?.some(sib => p1_parents.includes(sib))))) return { type: 'second_cousin' };
+            if (p1_parents.some(p1p => familyData[p1p]?.siblings?.some(sib => p2_parents.includes(sib)))) return { type: 'cousin' };
+            if (p1_grandparents.some(p1gp => familyData[p1gp]?.siblings?.some(sib => p2_grandparents.includes(sib)))) return { type: 'second_cousin' };
+            if (p1_grandparents.some(p1gp => familyData[p1gp]?.siblings?.some(sib => p2_parents.includes(sib))) || p2_grandparents.some(p2gp => familyData[p2gp]?.siblings?.some(sib => p1_parents.includes(sib)))) return { type: 'second_cousin' };
 
             const isDirectDescendant = (ancestorName, descendantName) => {
                 let queue = [descendantName];
@@ -926,35 +1070,21 @@
         function connectionToRelationship(connection, startGender, endGender) {
             if (!connection) return null;
             const isAcquired = !!connection.through_marriage;
+            const dir = connection.direction;
 
             switch (connection.type) {
-                case 'spouse':
-                    return { forward: startGender === 'M' ? 'marito' : 'moglie', backward: endGender === 'M' ? 'marito' : 'moglie' };
+                case 'spouse': return { forward: startGender === 'M' ? 'marito' : 'moglie', backward: endGender === 'M' ? 'marito' : 'moglie' };
                 case 'parent_child':
-                    if (connection.direction === 'down') {
-                        return isAcquired ? { forward: startGender === 'M' ? 'suocero' : 'suocera', backward: endGender === 'M' ? 'genero' : 'nuora' } 
-                                          : { forward: startGender === 'M' ? 'padre' : 'madre', backward: endGender === 'M' ? 'figlio' : 'figlia' };
-                    } else {
-                        return isAcquired ? { forward: startGender === 'M' ? 'genero' : 'nuora', backward: endGender === 'M' ? 'suocero' : 'suocera' } 
-                                          : { forward: startGender === 'M' ? 'figlio' : 'figlia', backward: endGender === 'M' ? 'padre' : 'madre' };
-                    }
-                case 'sibling':
-                    return isAcquired ? { forward: startGender === 'M' ? 'cognato' : 'cognata', backward: endGender === 'M' ? 'cognato' : 'cognata' } 
-                                      : { forward: startGender === 'M' ? 'fratello' : 'sorella', backward: endGender === 'M' ? 'fratello' : 'sorella' };
-                case 'uncle_nephew':
-                    return connection.direction === 'down' ? { forward: startGender === 'M' ? 'zio' : 'zia', backward: 'nipote' } : { forward: 'nipote', backward: endGender === 'M' ? 'zio' : 'zia' };
-                case 'great_uncle_nephew':
-                    return connection.direction === 'down' ? { forward: startGender === 'M' ? 'prozio' : 'prozia', backward: 'pronipote' } : { forward: 'pronipote', backward: endGender === 'M' ? 'prozio' : 'prozia' };
-                case 'grandparent_grandchild':
-                    return connection.direction === 'down' ? { forward: startGender === 'M' ? 'nonno' : 'nonna', backward: 'nipote' } : { forward: 'nipote', backward: endGender === 'M' ? 'nonno' : 'nonna' };
-                case 'great_grandparent_grandchild':
-                    return connection.direction === 'down' ? { forward: startGender === 'M' ? 'bisnonno' : 'bisnonna', backward: 'pronipote' } : { forward: 'pronipote', backward: endGender === 'M' ? 'bisnonno' : 'bisnonna' };
-                case 'great_great_grandparent_grandchild':
-                     return connection.direction === 'down' ? { forward: startGender === 'M' ? 'trisnonno' : 'trisnonna', backward: 'trisnipote' } : { forward: 'trisnipote', backward: endGender === 'M' ? 'trisnonno' : 'trisnonna' };
-                case 'cousin':
-                    return { forward: startGender === 'M' ? 'cugino' : 'cugina', backward: endGender === 'M' ? 'cugino' : 'cugina' };
-                case 'second_cousin':
-                    return { forward: startGender === 'M' ? 'procugino' : 'procugina', backward: endGender === 'M' ? 'procugino' : 'procugina' };
+                    if (dir === 'down') return isAcquired ? { forward: startGender==='M'?'suocero':'suocera', backward: endGender==='M'?'genero':'nuora' } : { forward: startGender==='M'?'padre':'madre', backward: endGender==='M'?'figlio':'figlia' };
+                    else return isAcquired ? { forward: startGender==='M'?'genero':'nuora', backward: endGender==='M'?'suocero':'suocera' } : { forward: startGender==='M'?'figlio':'figlia', backward: endGender==='M'?'padre':'madre' };
+                case 'sibling': return isAcquired ? { forward: startGender==='M'?'cognato':'cognata', backward: endGender==='M'?'cognato':'cognata' } : { forward: startGender==='M'?'fratello':'sorella', backward: endGender==='M'?'fratello':'sorella' };
+                case 'uncle_nephew': return dir === 'down' ? { forward: startGender==='M'?'zio':'zia', backward: 'nipote' } : { forward: 'nipote', backward: endGender==='M'?'zio':'zia' };
+                case 'great_uncle_nephew': return dir === 'down' ? { forward: startGender==='M'?'prozio':'prozia', backward: 'pronipote' } : { forward: 'pronipote', backward: endGender==='M'?'prozio':'prozia' };
+                case 'grandparent_grandchild': return dir === 'down' ? { forward: startGender==='M'?'nonno':'nonna', backward: 'nipote' } : { forward: 'nipote', backward: endGender==='M'?'nonno':'nonna' };
+                case 'great_grandparent_grandchild': return dir === 'down' ? { forward: startGender==='M'?'bisnonno':'bisnonna', backward: 'pronipote' } : { forward: 'pronipote', backward: endGender==='M'?'bisnonno':'bisnonna' };
+                case 'great_great_grandparent_grandchild': return dir === 'down' ? { forward: startGender==='M'?'trisnonno':'trisnonna', backward: 'trisnipote' } : { forward: 'trisnipote', backward: endGender==='M'?'trisnonno':'trisnonna' };
+                case 'cousin': return { forward: startGender==='M'?'cugino':'cugina', backward: endGender==='M'?'cugino':'cugina' };
+                case 'second_cousin': return { forward: startGender==='M'?'procugino':'procugina', backward: endGender==='M'?'procugino':'procugina' };
             }
             return null;
         }
@@ -963,28 +1093,17 @@
             if (startName === endName) return null;
             const queue = [[startName]];
             const visited = new Set([startName]);
-
             while (queue.length > 0) {
                 const path = queue.shift();
                 const currentName = path[path.length - 1];
-
                 if (currentName === endName) return path;
-
                 const currentData = familyData[currentName];
                 if (!currentData) continue;
-
-                const connections = [
-                    ...(currentData.parents || []),
-                    ...(currentData.children || []),
-                    ...(currentData.siblings || []),
-                    ...(currentData.spouse ? [currentData.spouse] : [])
-                ];
-
+                const connections = [...(currentData.parents || []), ...(currentData.children || []), ...(currentData.siblings || []), ...(currentData.spouse ? [currentData.spouse] : [])];
                 for (const connectionName of connections) {
                     if (connectionName && !visited.has(connectionName)) {
                         visited.add(connectionName);
-                        const newPath = [...path, connectionName];
-                        queue.push(newPath);
+                        queue.push([...path, connectionName]);
                     }
                 }
             }
@@ -1006,37 +1125,20 @@
             const startPerson = familyData[startName];
             const endPerson = familyData[endName];
             if (!startPerson || !endPerson) return null;
-
             if (startPerson.spouse === endName) {
                 const rel = connectionToRelationship({ type: 'spouse' }, startPerson.gender, endPerson.gender);
-                return { 
-                    a_to_b: `<span class="relationship-term">${rel.forward}</span>`, 
-                    b_to_a: `<span class="relationship-term">${rel.backward}</span>`
-                };
+                return { a_to_b: `<span class="relationship-term">${rel.forward}</span>`, b_to_a: `<span class="relationship-term">${rel.backward}</span>` };
             }
-            
             let connection = findBloodConnection(startName, endName) || findAffinityConnection(startName, endName);
             if (!connection) return null;
-            
             const relationship = connectionToRelationship(connection, startPerson.gender, endPerson.gender);
             if (!relationship) return null;
-            
-            return {
-                a_to_b: `<span class="relationship-term">${relationship.forward}</span>`,
-                b_to_a: `<span class="relationship-term">${relationship.backward}</span>`
-            };
+            return { a_to_b: `<span class="relationship-term">${relationship.forward}</span>`, b_to_a: `<span class="relationship-term">${relationship.backward}</span>` };
         }
         
-        // --- Sezione Funzioni UI (Interfaccia Utente) ---
         function renderPeople() {
-            const getSortKey = (name) => {
-                const person = familyData[name];
-                const gen = calculateGeneration(name) || getGenerationFromBirth(person.birth);
-                const date = new Date(person.birth.split('/').reverse().join('-')).getTime();
-                return `${String(gen).padStart(2, '0')}-${date}`;
-            };
-            sortedPeopleNames = Object.keys(familyData).sort((a, b) => getSortKey(a).localeCompare(getSortKey(b)));
-            
+            sortedPeopleNames = Object.keys(familyData).sort((a, b) => parseDate(familyData[a].birth).getTime() - parseDate(familyData[b].birth).getTime());
+            peopleGrid.innerHTML = '';
             for (const name of sortedPeopleNames) {
                 const data = familyData[name];
                 data.name = name;
@@ -1049,9 +1151,7 @@
                 photo.className = 'person-photo';
                 photo.src = data.photoLink;
                 photo.alt = `Foto di ${name}`;
-
-                photo.onerror = function() { this.outerHTML = `<div class="person-photo">${name.split(' ').map(n=>n[0]).join('')}</div>`; };
-
+                photo.onerror = function() { this.outerHTML = `<div class="person-photo">${getInitials(name)}</div>`; };
                 const nameEl = document.createElement('div');
                 nameEl.className = 'person-name';
                 nameEl.textContent = name;
@@ -1061,11 +1161,6 @@
                 card.append(photo, nameEl, relText);
                 peopleGrid.appendChild(card);
             }
-        }
-        
-        function getGenerationFromBirth(birthDate) {
-            const year = parseInt(birthDate.split('/')[2]);
-            if (year < 1920) return 1; if (year < 1950) return 2; if (year < 1980) return 3; if (year < 2010) return 4; return 5;
         }
         
         function handlePhotoClick(name) {
@@ -1117,10 +1212,15 @@
             prevPersonBtn.classList.toggle('hidden', !singleSelection);
             nextPersonBtn.classList.toggle('hidden', !singleSelection);
 
-            if (!singleSelection) return;
+            if (!singleSelection) {
+                document.querySelectorAll('.person-card').forEach(card => {
+                    const relText = card.querySelector('.card-relationship-text');
+                    if (relText) relText.textContent = familyData[card.dataset.name].birth;
+                });
+                return;
+            }
             
             const selectedName = selectedPeople[0];
-            
             for (const otherName in familyData) {
                 if (otherName === selectedName) continue;
                 const relationship = getRelationship(otherName, selectedName);
@@ -1142,15 +1242,19 @@
         
         function updatePhotoDisplay() {
             resultsContainer.classList.toggle('hidden', selectedPeople.length === 0);
-            const displays = [photoDisplay1, photoDisplay2];
-            displays.forEach((display, index) => {
+            [photoDisplay1, photoDisplay2].forEach((display, index) => {
                 display.innerHTML = '';
                 display.classList.remove('visible');
                 if (selectedPeople[index]) {
                     const personName = selectedPeople[index];
                     const personData = familyData[personName];
                     if (personData) {
-                        display.innerHTML = `<img src="${personData.photoLink}" alt="${personName}" onclick="handlePhotoClick('${personName}')" />`;
+                        const img = document.createElement('img');
+                        img.src = personData.photoLink;
+                        img.alt = `Foto di ${personName}`;
+                        img.onclick = () => handlePhotoClick(personName);
+                        img.onerror = function() { this.outerHTML = `<div class="person-photo" onclick="handlePhotoClick('${personName}')">${getInitials(personName)}</div>`; };
+                        display.appendChild(img);
                         setTimeout(() => display.classList.add('visible'), 50);
                     }
                 }
@@ -1168,9 +1272,7 @@
             }
             if (selectedPeople.length === 1) {
                 const personName = selectedPeople[0];
-                const personData = familyData[personName];
-                const selectionText = personData.gender === 'F' ? 'selezionata...' : 'selezionato...';
-                resultsText.innerHTML = `<strong>${personName}</strong> ${selectionText}`;
+                resultsText.innerHTML = `<strong>${personName}</strong> ${familyData[personName].gender === 'F' ? 'selezionata...' : 'selezionato...'}`;
                 return;
             }
             
@@ -1178,13 +1280,11 @@
             const relationship = getRelationship(personA_name, personB_name);
             
             if (!relationship) {
-                resultsText.innerHTML = `Nessun legame di parentela noto tra <strong>${personA_name}</strong> e <strong>${personB_name}</strong>.`;
+                resultsText.innerHTML = `Nessun legame noto tra <strong>${personA_name}</strong> e <strong>${personB_name}</strong>.`;
                 return;
             }
             
-            const result1 = `<strong>${personA_name}</strong> è ${relationship.a_to_b} di <strong>${personB_name}</strong>`;
-            const result2 = `<br><strong>${personB_name}</strong> è ${relationship.b_to_a} di <strong>${personA_name}</strong>`;
-            resultsText.innerHTML = result1 + result2;
+            resultsText.innerHTML = `<strong>${personA_name}</strong> è ${relationship.a_to_b} di <strong>${personB_name}</strong><br><strong>${personB_name}</strong> è ${relationship.b_to_a} di <strong>${personA_name}</strong>`;
 
             const path = findFullPath(personA_name, personB_name);
             if (path && path.length > 1) {
@@ -1204,47 +1304,35 @@
             const selectedPersonData = familyData[selectedName];
             if (!selectedPersonData) return;
 
-            const orderedNames = Array.from(document.querySelectorAll('#people-grid .person-card')).map(card => card.dataset.name);
-            
-            const groupMap = {
-                'Nonno': 'Nonni', 'Nonna': 'Nonni', 'Suocero': 'Suoceri', 'Suocera': 'Suoceri', 'Marito': 'Marito', 'Moglie': 'Moglie', 'Padre': 'Genitori', 'Madre': 'Genitori', 'Figlio': 'Figli', 'Figlia': 'Figli', 'Fratello': 'Fratelli', 'Sorella': 'Fratelli', 'Cognato': 'Cognati', 'Cognata': 'Cognati', 'Zio': 'Zii', 'Zia': 'Zii', 'Nipote': 'Nipoti', 'Cugino': 'Cugini', 'Cugina': 'Cugini', 'Prozio': 'Prozii', 'Prozia': 'Prozii', 'Pronipote': 'Pronipoti', 'Procugino': 'Procugini', 'Procugina': 'Procugini', 'Trisnonno': 'Trisnonni', 'Trisnonna': 'Trisnonni', 'Trisnipote': 'Trisnipoti'
-            };
-            
             const groupedRelatives = {};
-            for (const otherName of orderedNames) {
+            for (const otherName in familyData) {
                 if (otherName === selectedName) continue;
                 const relationship = getRelationship(otherName, selectedName);
                 if (relationship?.a_to_b) {
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = relationship.a_to_b;
-                    let term = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                    let term = (tempDiv.textContent || "").trim();
                     if(term) {
                         term = term.charAt(0).toUpperCase() + term.slice(1);
                         const group = groupMap[term] || term;
-                        if (!groupedRelatives[group]) {
-                            groupedRelatives[group] = [];
-                        }
-                        groupedRelatives[group].push({ name: otherName, gender: familyData[otherName].gender, birth: familyData[otherName].birth });
+                        if (!groupedRelatives[group]) groupedRelatives[group] = [];
+                        groupedRelatives[group].push(familyData[otherName]);
                     }
                 }
             }
-
+            
             for (const groupName in groupedRelatives) {
-                groupedRelatives[groupName].sort((a, b) => {
-                    const dateA = new Date(a.birth.split('/').reverse().join('-'));
-                    const dateB = new Date(b.birth.split('/').reverse().join('-'));
-                    return dateA - dateB;
-                });
+                groupedRelatives[groupName].sort((a,b) => parseDate(a.birth) - parseDate(b.birth));
             }
 
-            if (groupedRelatives['Fratelli'] && groupedRelatives['Fratelli'].every(person => person.gender === 'F')) {
+            if (groupedRelatives['Fratelli'] && groupedRelatives['Fratelli'].every(p => p.gender === 'F')) {
                 groupedRelatives['Sorelle'] = groupedRelatives['Fratelli'];
                 delete groupedRelatives['Fratelli'];
             }
             
-            const groupOrder = ['Trisnonni', 'Bisnonni', 'Nonni', 'Suoceri', 'Genitori', 'Marito', 'Moglie', 'Figli', 'Fratelli', 'Sorelle', 'Prozii', 'Zii', 'Cognati', 'Cugini', 'Procugini', 'Nipoti', 'Pronipoti', 'Trisnipoti'];
+            const groupOrder = ['Trisnonni','Bisnonni','Nonni','Suoceri','Genitori','Marito','Moglie','Figli','Generi','Nuore','Fratelli','Sorelle','Prozii','Zii','Cognati','Cugini','Procugini','Nipoti','Pronipoti','Trisnipoti'];
             
-            const emptyRow = `<div class="timeline-item" style="margin-bottom: -10px;"><div class="timeline-dot" style="visibility: hidden;"></div></div>`;
+            const emptyRow = `<div class="timeline-item" style="margin-bottom:-10px;"><div class="timeline-dot" style="visibility:hidden;"></div></div>`;
             let htmlList = `<div class="timeline-container">${emptyRow}`;
 
             for (const groupName of groupOrder) {
@@ -1255,47 +1343,16 @@
                         const lastName = nameParts.pop();
                         const firstName = nameParts.join(' ');
                         const birthYear = person.birth.split('/')[2];
-                        if (firstName) {
-                            return `<strong>${firstName}</strong> ${lastName} (${birthYear})`;
-                        } else {
-                            return `<strong>${lastName}</strong> (${birthYear})`;
-                        }
+                        return `<strong>${firstName || lastName}</strong> ${firstName ? lastName : ''} (${birthYear})`;
                     }).join(', ');
-
-                    htmlList += `
-                        <div class="timeline-item">
-                            <div class="timeline-dot"></div>
-                            <div class="timeline-content">
-                                <h3>${groupName}</h3>
-                                <p>${fullNames}</p>
-                            </div>
-                        </div>`;
+                    
+                    htmlList += `<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><h3>${groupName} (${peopleInGroup.length})</h3><p>${fullNames}</p></div></div>`;
                 }
             }
             htmlList += `${emptyRow}</div>`;
 
             modalTitle.textContent = `${selectedName} (${selectedPersonData.birth})`;
             modalBody.innerHTML = htmlList;
-            
-            let clipboardText = `*${selectedName}* (${selectedPersonData.birth})\n`;
-            for (const groupName of groupOrder) {
-                if (groupedRelatives[groupName]) {
-                    const peopleInGroup = groupedRelatives[groupName];
-                    const peopleList = peopleInGroup.map(person => {
-                        const birthYear = person.birth.split('/')[2];
-                        return `${person.name} (${birthYear})`;
-                    }).join('\n');
-                    
-                    clipboardText += '---\n';
-                    clipboardText += `*${groupName}*:\n`;
-                    clipboardText += `${peopleList}\n`;
-                }
-            }
-
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(clipboardText).catch(err => console.error("Impossibile copiare negli appunti:", err));
-            }
-            
             infoModalOverlay.classList.remove('hidden');
         });
 
@@ -1303,98 +1360,187 @@
             modal.classList.add('hidden');
         }
         
-        function generateImage(elementToCapture, modalActions, fileNamePrefix = 'parentela') {
-             const modalBodyEl = elementToCapture.querySelector(".modal-body");
-            
-            if (!elementToCapture || !modalBodyEl || !modalActions) return;
-            
-            const originalStyles = {
-                maxHeight: elementToCapture.style.maxHeight,
-                overflowY: modalBodyEl.style.overflowY,
-                alignItems: elementToCapture.closest('.modal-overlay').style.alignItems,
-                actionsDisplay: modalActions.style.display
-            };
-            
-            modalActions.style.display = 'none';
-            elementToCapture.style.maxHeight = 'none';
-            modalBodyEl.style.overflowY = 'visible';
-            elementToCapture.closest('.modal-overlay').style.alignItems = 'flex-start';
+        function generatePathDescriptionText(path, from, to) {
+            let text = '';
+            if (path.length > 2) {
+                for (let i = 0; i < path.length - 1; i++) {
+                    const p1 = path[i];
+                    const p2 = path[i + 1];
+                    text += `${p1} ${getImmediateRelationship(p1, p2)} ${p2}\n`;
+                }
+            }
+            const finalRelData = getRelationship(from, to);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = finalRelData.a_to_b;
+            const cleanRel = (tempDiv.textContent || tempDiv.innerText || "").trim();
+            text += `${from} è ${cleanRel} di ${to}`;
+            return text;
+        }
+        
+        function copyModalContentToClipboard(modalId) {
+            let textToCopy = '';
+            const modalElement = document.getElementById(modalId);
+            const fiftyHyphens = '-'.repeat(50);
 
-            html2canvas(elementToCapture, { 
-                scale: 1.2, 
-                useCORS: true,
-                backgroundColor: '#ffffff'
-            }).then(canvas => {
-                const fileName = `${fileNamePrefix}.jpg`;
+            if (modalId === 'info-modal-overlay') {
+                const modalTitleEl = modalElement.querySelector('#modal-title');
+                if (!modalTitleEl || !modalTitleEl.textContent) return;
+                
+                const selectedName = modalTitleEl.textContent.split(' (')[0];
+                const selectedPersonData = familyData[selectedName];
+                if (!selectedPersonData) return;
 
-                canvas.toBlob(function(blob) {
-                    const file = new File([blob], fileName, { type: 'image/jpeg' });
-                    if (navigator.share && navigator.canShare({ files: [file] })) {
-                        navigator.share({
-                            files: [file],
-                            title: `Parentela`,
-                        }).catch(err => {
-                             if (err.name !== 'AbortError') console.error("Errore di condivisione:", err)
-                        });
-                    } else {
-                        const link = document.createElement('a');
-                        link.download = fileName;
-                        link.href = canvas.toDataURL('image/jpeg', 0.85);
-                        link.click();
+                const mainPersonEmoji = getEmojiForPerson(selectedPersonData);
+                textToCopy = `${fiftyHyphens}\n${mainPersonEmoji} ${selectedName} (${selectedPersonData.birth})\n${fiftyHyphens}\n`;
+
+                const groupedRelatives = {};
+                for (const otherName in familyData) {
+                    if (otherName === selectedName) continue;
+                    const relationship = getRelationship(otherName, selectedName);
+                    if (relationship?.a_to_b) {
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = relationship.a_to_b;
+                        let term = (tempDiv.textContent || "").trim();
+                        if (term) {
+                            term = term.charAt(0).toUpperCase() + term.slice(1);
+                            const group = groupMap[term] || term;
+                            if (!groupedRelatives[group]) groupedRelatives[group] = [];
+                            groupedRelatives[group].push(familyData[otherName]);
+                        }
                     }
-                }, 'image/jpeg', 0.85);
+                }
+                 for (const groupName in groupedRelatives) {
+                     groupedRelatives[groupName].sort((a, b) => parseDate(a.birth) - parseDate(b.birth));
+                 }
+                if (groupedRelatives['Fratelli'] && groupedRelatives['Fratelli'].every(p => p.gender === 'F')) {
+                    groupedRelatives['Sorelle'] = groupedRelatives['Fratelli'];
+                    delete groupedRelatives['Fratelli'];
+                }
 
+                const copyGroupOrder = ['Marito','Moglie','Figli','Generi','Nuore','Nipoti','Pronipoti','Trisnipoti'];
+                copyGroupOrder.forEach(groupName => {
+                    if (groupedRelatives[groupName]) {
+                        const peopleInGroup = groupedRelatives[groupName];
+                        textToCopy += `\n${groupName} (${peopleInGroup.length}):\n`;
+                        peopleInGroup.forEach(person => {
+                            const emoji = getEmojiForPerson(person);
+                            const birthYear = person.birth.split('/')[2];
+                            textToCopy += `${emoji} ${person.name} (${birthYear})\n`;
+                        });
+                    }
+                });
+
+            } else if (modalId === 'birthday-modal-overlay') {
+                const today = new Date();
+                const formattedDate = today.toLocaleDateString('it-IT');
+                textToCopy = `${fiftyHyphens}\n📅 Compleanni ad oggi:\n${formattedDate}\n${fiftyHyphens}\n`;
+                
+                const peopleWithBirthdays = Object.keys(familyData).filter(name => !familyData[name].death).map(name => {
+                    const person = familyData[name];
+                    return { ...person, age: calculateAge(person.birth), delta: calculateBirthdayDelta(person.birth) };
+                }).sort((a,b) => parseDate(a.birth).getMonth() - parseDate(b.birth).getMonth() || parseDate(a.birth).getDate() - parseDate(b.birth).getDate());
+
+                const monthNames = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
+                let currentMonthIdx = -1;
+
+                peopleWithBirthdays.forEach((person, index) => {
+                    const personMonth = parseDate(person.birth).getMonth();
+                    if (personMonth !== currentMonthIdx) {
+                        currentMonthIdx = personMonth;
+                        textToCopy += `\n📅 ${monthNames[currentMonthIdx].toUpperCase()}\n${fiftyHyphens}\n`;
+                    }
+                    
+                    const emoji = getEmojiForPerson(person);
+                    textToCopy += `${emoji} ${person.name} (${person.birth})\n`;
+                    textToCopy += `Età: ${person.age} - ${person.delta.text}\n`;
+
+                    const nextPerson = peopleWithBirthdays[index + 1];
+                    if (nextPerson && parseDate(nextPerson.birth).getMonth() === currentMonthIdx) {
+                        textToCopy += '---\n';
+                    }
+                });
+
+
+            } else if (modalId === 'path-modal-overlay') {
+                const pathModalBodyEl = modalElement.querySelector('#path-modal-body');
+                const personA = pathModalBodyEl.dataset.personA;
+                const personB = pathModalBodyEl.dataset.personB;
+                
+                if (personA && personB) {
+                    const pathAToB = findFullPath(personA, personB);
+                    const degree = pathAToB.length - 1;
+                    const emojiA = getEmojiForPerson(familyData[personA]);
+                    const emojiB = getEmojiForPerson(familyData[personB]);
+                    
+                    textToCopy = `${fiftyHyphens}\n`;
+                    textToCopy += `${emojiA} ${personA}\n`;
+                    textToCopy += `è parente di ${degree}° grado con\n`;
+                    textToCopy += `${emojiB} ${personB}\n`;
+                    textToCopy += `${fiftyHyphens}\n\n`;
+                    textToCopy += generatePathDescriptionText(pathAToB, personA, personB);
+                    textToCopy += `\n\n`;
+                    textToCopy += generatePathDescriptionText(findFullPath(personB, personA), personB, personA);
+                }
+            } else if (modalId === 'tree-modal-overlay') {
+                const rawTreeText = `Nonno Giovanni Pricci (1909-1944) - Angelina Gasparro (1909-2001)
+│
+└── Luigi Pricci (1933) - Teresa Grilletti (1937)
+    │
+    ├── Angela Pricci (1957) - Onofrio Lorusso (1951)
+    │   │
+    │   ├── Benny Lorusso (1975) - Genny Lepore (1975)
+    │   │   │
+    │   │   ├── Alessandro Lorusso (2010)
+    │   │   ├── Alice Lorusso (2013)
+    │   │   └── Nina Lorusso (2015)
+    │   │
+    │   └── Cinzia Lorusso (1980) - Gianni Rotondi (1974)
+    │       │
+    │       └── Nicoletta Rotondi (2019)
+    │
+    ├── Maria Antonietta Pricci (1958) - Saverio Chiarappa (1951)
+    │   │
+    │   ├── Martino Chiarappa (1997)
+    │   └── Cristiano Chiarappa (2001)
+    │
+    ├── Marica Pricci (1961) - Sebastiano Mazzarisi (1957)
+    │   │
+    │   ├── Maria Grazia Mazzarisi (1989)
+    │   ├── Onofrio Mazzarisi (1992)
+    │   └── Teresa Mazzarisi (1994)
+    │
+    ├── Vanna Pricci (1963) - Domenico Lefemine (1957)
+    │   │
+    │   ├── Flavia Lefemine (1996)
+    │   └── Francesco Lefemine (2000)
+    │
+    ├── Giovanni Pricci (1964) - Rosa Bianco (1971)
+    │
+    ├── Giuseppe Pricci (1968) - Anna Trivisani (1969)
+    │   │
+    │   ├── Gilda Pricci (2004)
+    │   └── Asia Pricci (2006)
+    │
+    └── Tiziana Pricci (1972) - Riccardo Dalena (1973)`;
+                textToCopy = rawTreeText;
+            }
+
+            navigator.clipboard.writeText(textToCopy.trim() + '\n\n').then(() => {
+                const toast = document.getElementById('copy-toast');
+                toast.textContent = 'Copiato!';
+                toast.classList.add('show');
+                setTimeout(() => { toast.classList.remove('show'); }, 1000);
             }).catch(err => {
-                console.error("Errore durante la creazione dell'immagine:", err);
-            }).finally(() => {
-                elementToCapture.style.maxHeight = originalStyles.maxHeight;
-                modalBodyEl.style.overflowY = originalStyles.overflowY;
-                elementToCapture.closest('.modal-overlay').style.alignItems = originalStyles.alignItems;
-                modalActions.style.display = originalStyles.actionsDisplay;
+                console.error('Errore durante la copia:', err);
             });
         }
         
-        function navigatePerson(direction) {
-            if (selectedPeople.length !== 1) return;
-            const currentName = selectedPeople[0];
-            const currentIndex = sortedPeopleNames.indexOf(currentName);
-            if (currentIndex === -1) return;
-
-            let newIndex = currentIndex + direction;
-
-            if (newIndex >= sortedPeopleNames.length) newIndex = 0;
-            if (newIndex < 0) newIndex = sortedPeopleNames.length - 1;
-
-            const newPersonName = sortedPeopleNames[newIndex];
-            
-            const currentCard = document.querySelector('.person-card.selected');
-            const newPersonCard = document.querySelector(`.person-card[data-name="${newPersonName}"]`);
-
-            if (currentCard) currentCard.classList.remove('selected');
-            if (newPersonCard) newPersonCard.classList.add('selected');
-
-            selectedPeople = [newPersonName];
-
-            updateHighlights();
-            updatePhotoDisplay();
-            updateResults();
-        }
-
-        // --- Funzioni per la nuova lista compleanni ---
-
-        function parseDate(dateStr) { // "dd/mm/yyyy"
-            const parts = dateStr.split('/');
-            return new Date(parts[2], parts[1] - 1, parts[0]);
-        }
-
         function calculateAge(birthDateStr) {
             const birthDate = parseDate(birthDateStr);
             const today = new Date();
             let age = today.getFullYear() - birthDate.getFullYear();
             const m = today.getMonth() - birthDate.getMonth();
-            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-                age--;
-            }
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
             return age;
         }
 
@@ -1402,214 +1548,119 @@
             const today = new Date();
             today.setHours(0, 0, 0, 0); 
             const birthDate = parseDate(birthDateStr);
-
             const birthdayThisYear = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
-            
-            const oneDay = 1000 * 60 * 60 * 24;
-            const diffDays = Math.round((birthdayThisYear - today) / oneDay);
+            const diffDays = Math.round((birthdayThisYear - today) / (1000*60*60*24));
 
-            if (diffDays === 0) {
-                return { text: "Oggi!", isToday: true, hasCompleted: true, isUpcoming: false };
-            } else if (diffDays > 0) {
-                return { text: `Mancano ${diffDays} giorni`, isToday: false, hasCompleted: false, isUpcoming: true };
-            } else {
-                const daysPassed = Math.abs(diffDays);
-                return { text: `Passati da ${daysPassed} giorni`, isToday: false, hasCompleted: true, isUpcoming: false };
-            }
+            if (diffDays === 0) return { text: "Oggi!", isToday: true };
+            if (diffDays > 0) return { text: `Mancano ${diffDays} giorni`, isUpcoming: true };
+            return { text: `Passati da ${Math.abs(diffDays)} giorni`, hasCompleted: true };
         }
         
         function showBirthdayList() {
-            const peopleWithBirthdays = Object.keys(familyData)
-                .filter(name => familyData[name].death === null)
-                .map(name => {
-                    const person = familyData[name];
-                    const birthDate = parseDate(person.birth);
-                    return {
-                        name: name,
-                        birth: person.birth,
-                        month: birthDate.getMonth(),
-                        day: birthDate.getDate(),
-                        age: calculateAge(person.birth),
-                        delta: calculateBirthdayDelta(person.birth)
-                    };
-            });
+            const peopleWithBirthdays = Object.keys(familyData).filter(name => !familyData[name].death).map(name => {
+                const person = familyData[name];
+                return { name, ...person, age: calculateAge(person.birth), delta: calculateBirthdayDelta(person.birth) };
+            }).sort((a,b) => parseDate(a.birth).getMonth() - parseDate(b.birth).getMonth() || parseDate(a.birth).getDate() - parseDate(b.birth).getDate());
 
-            peopleWithBirthdays.sort((a, b) => {
-                if (a.month < b.month) return -1;
-                if (a.month > b.month) return 1;
-                return a.day - b.day;
-            });
-
-            const monthNames = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
+            const monthNames = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
             const today = new Date();
-            const formattedDate = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
-            
+            const formattedDate = today.toLocaleDateString('it-IT');
             let currentMonthIdx = -1;
-            let tableHTML = `<table class="birthday-table">
-                                <thead>
-                                    <tr>
-                                        <th>Nominativo</th>
-                                        <th>Nascita</th>
-                                        <th>Età</th>
-                                        <th>${formattedDate}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>`;
+            let tableHTML = `<table class="birthday-table"><thead><tr><th>Nominativo</th><th>Nascita</th><th>Età</th><th>${formattedDate}</th></tr></thead><tbody>`;
             
-            let todayRowId = null;
-            let currentMonthHeaderId = `month-header-${today.getMonth()}`;
-
             peopleWithBirthdays.forEach(person => {
-                if (person.month !== currentMonthIdx) {
-                    currentMonthIdx = person.month;
-                    const monthId = `month-header-${currentMonthIdx}`;
-                    tableHTML += `<tr class="month-header" id="${monthId}"><td colspan="4">${monthNames[currentMonthIdx]}</td></tr>`;
+                const personMonth = parseDate(person.birth).getMonth();
+                if (personMonth !== currentMonthIdx) {
+                    currentMonthIdx = personMonth;
+                    tableHTML += `<tr class="month-header" id="month-header-${currentMonthIdx}"><td colspan="4">${monthNames[currentMonthIdx]}</td></tr>`;
                 }
-                
-                let highlightClass = '';
-                if (person.delta.isToday) {
-                    highlightClass = 'birthday-today';
-                } else if (person.delta.isUpcoming) {
-                    highlightClass = 'birthday-upcoming';
-                } else if (person.delta.hasCompleted) {
-                    highlightClass = 'birthday-completed';
-                }
-
-                const rowId = person.delta.isToday ? `id="birthday-row-${person.name.replace(/ /g, '-')}"` : '';
-                if(person.delta.isToday) {
-                    todayRowId = `birthday-row-${person.name.replace(/ /g, '-')}`;
-                }
-
-                tableHTML += `<tr class="${highlightClass}" ${rowId}>
-                                <td>${person.name}</td>
-                                <td>${person.birth}</td>
-                                <td>${person.age}</td>
-                                <td>${person.delta.text}</td>
-                              </tr>`;
+                let c = '';
+                if (person.delta.isToday) c = 'birthday-today';
+                else if (person.delta.isUpcoming) c = 'birthday-upcoming';
+                else if (person.delta.hasCompleted) c = 'birthday-completed';
+                tableHTML += `<tr class="${c}" ${person.delta.isToday ? `id="birthday-row-${person.name.replace(/ /g,'-')}"`:''}><td>${person.name}</td><td>${person.birth}</td><td>${person.age}</td><td>${person.delta.text}</td></tr>`;
             });
-
             tableHTML += `</tbody></table>`;
             birthdayModalBody.innerHTML = tableHTML;
             birthdayModalOverlay.classList.remove('hidden');
 
             setTimeout(() => {
-                const targetRow = document.getElementById(todayRowId) || document.getElementById(currentMonthHeaderId);
-                if(targetRow) {
-                    targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
+                const todayRow = document.querySelector('.birthday-today');
+                const target = todayRow || document.getElementById(`month-header-${today.getMonth()}`);
+                if(target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 100);
         }
 
-        // --- Funzioni per il nuovo percorso di parentela ---
         function generatePathDescription(path, from, to) {
-            const steps = [];
-            for (let i = 0; i < path.length - 1; i++) {
-                const p1 = path[i];
-                const p2 = path[i + 1];
-                const rel = getImmediateRelationship(p1, p2);
-                steps.push(`<p>${p1} ${rel} ${p2}</p>`);
+            let steps = '';
+            if (path.length > 2) {
+                steps = path.slice(0, -1).map((p, i) => `<p>${p} ${getImmediateRelationship(p, path[i + 1])} ${path[i + 1]}</p>`).join('');
             }
-            
-            const finalRelData = getRelationship(from, to);
+            const finalRel = getRelationship(from, to);
             const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = finalRelData.a_to_b;
-            const cleanRel = tempDiv.textContent || tempDiv.innerText;
-            const conclusion = `<p><strong>${from} è ${cleanRel} di ${to}</strong></p>`;
-            
-            return steps.join('') + conclusion;
+            tempDiv.innerHTML = finalRel.a_to_b;
+            const cleanRel = tempDiv.textContent || "";
+            return steps + `<p><strong>${from} è ${cleanRel} di ${to}</strong></p>`;
         }
 
         function showKinshipPath(personA, personB) {
             const pathAToB = findFullPath(personA, personB);
-            const pathBToA = findFullPath(personB, personA);
-            const degree = pathAToB.length - 1;
-
-            const pathDescAToB = generatePathDescription(pathAToB, personA, personB);
-            const pathDescBToA = generatePathDescription(pathBToA, personB, personA);
-            
-            const photoA = familyData[personA].photoLink;
-            const photoB = familyData[personB].photoLink;
-
-            let html = `
-                <div class="path-box" style="display: flex; align-items: center; justify-content: space-around; gap: 10px;">
-                    <img src="${photoA}" alt="${personA}" class="path-photo">
-                    <div>
-                        <p><strong>${personA}</strong> è</p>
-                        <p>parente di ${degree}° grado</p>
-                        <p>con <strong>${personB}</strong></p>
-                    </div>
-                    <img src="${photoB}" alt="${personB}" class="path-photo">
+            const html = `
+                <div class="path-box" style="display:flex;align-items:center;justify-content:space-around;gap:10px;">
+                    <img src="${familyData[personA].photoLink}" alt="${personA}" class="path-photo" onerror="this.outerHTML='<div class=&quot;path-photo&quot;>${getInitials(personA)}</div>';">
+                    <div><p><strong>${personA}</strong> è</p><p>parente di ${pathAToB.length - 1}° grado</p><p>con <strong>${personB}</strong></p></div>
+                    <img src="${familyData[personB].photoLink}" alt="${personB}" class="path-photo" onerror="this.outerHTML='<div class=&quot;path-photo&quot;>${getInitials(personB)}</div>';">
                 </div>
-                <div class="path-box" style="text-align: left;">
-                    ${pathDescAToB}
-                </div>
-                <div class="path-box" style="text-align: left;">
-                    ${pathDescBToA}
-                </div>
-            `;
+                <div class="path-box" style="text-align:left;">${generatePathDescription(pathAToB, personA, personB)}</div>
+                <div class="path-box" style="text-align:left;">${generatePathDescription(findFullPath(personB, personA), personB, personA)}</div>`;
             
             pathModalBody.innerHTML = html;
+            pathModalBody.dataset.personA = personA;
+            pathModalBody.dataset.personB = personB;
             pathModalOverlay.classList.remove('hidden');
         }
         
-        // --- Funzioni per l'albero genealogico ---
         function drawHorizontalTree() {
             treeModalBody.innerHTML = ""; 
             const svgNS = "http://www.w3.org/2000/svg";
-            const svg = document.createElementNS(svgNS, "svg");
+            svgTreeElement = document.createElementNS(svgNS, "svg");
 
-            const NODE_WIDTH = 160, NODE_HEIGHT = 40, V_SPACING_COUPLE = 2, H_SPACING = 180, V_SPACING_UNIT = 20, PADDING = 50;
-
-            const positions = new Map();
-            const subtreeHeights = new Map();
+            const NODE_WIDTH = 180, NODE_HEIGHT = 80, V_SPACING_COUPLE = 2, H_SPACING = 90, V_SPACING_UNIT = 20, PADDING = 20;
+            const positions = new Map(), subtreeHeights = new Map();
             const rootId = 'Nonno Giovanni Pricci';
             
-            // Calcola ricorsivamente l'altezza verticale di ogni sotto-albero
             function calculateSubtreeHeight(personId) {
                 if (subtreeHeights.has(personId)) return subtreeHeights.get(personId);
                 const person = familyData[personId];
                 const nodeHeight = person.spouse ? (NODE_HEIGHT * 2 + V_SPACING_COUPLE) : NODE_HEIGHT;
-
-                if (!person.children || person.children.length === 0) {
+                if (!person.children?.length) {
                     subtreeHeights.set(personId, nodeHeight);
                     return nodeHeight;
                 }
                 let childrenBlockHeight = -V_SPACING_UNIT;
-                const sortedChildren = person.children.slice().sort((a,b) => parseDate(familyData[a].birth) - parseDate(familyData[b].birth));
-                sortedChildren.forEach(childId => {
-                    childrenBlockHeight += calculateSubtreeHeight(childId) + V_SPACING_UNIT;
-                });
-                
+                person.children.slice().sort((a,b) => parseDate(familyData[a].birth) - parseDate(familyData[b].birth))
+                    .forEach(childId => { childrenBlockHeight += calculateSubtreeHeight(childId) + V_SPACING_UNIT; });
                 const finalHeight = Math.max(nodeHeight, childrenBlockHeight);
                 subtreeHeights.set(personId, finalHeight);
                 return finalHeight;
             }
 
-            // Dispone ricorsivamente i nodi
             function layoutTree(personId, currentX, currentY) {
                 const person = familyData[personId];
-                const spouseId = person.spouse;
-                const coupleHeight = spouseId ? (NODE_HEIGHT * 2 + V_SPACING_COUPLE) : NODE_HEIGHT;
-                const subtreeHeight = subtreeHeights.get(personId);
-                
-                const y = currentY + (subtreeHeight / 2) - (coupleHeight / 2);
-
+                const coupleHeight = person.spouse ? (NODE_HEIGHT * 2 + V_SPACING_COUPLE) : NODE_HEIGHT;
+                const y = currentY + (subtreeHeights.get(personId) / 2) - (coupleHeight / 2);
                 positions.set(personId, { x: currentX, y: y });
-                if (spouseId && familyData[spouseId]) {
-                    positions.set(spouseId, { x: currentX, y: y + NODE_HEIGHT + V_SPACING_COUPLE });
-                }
-
-                if (person.children && person.children.length > 0) {
+                if (person.spouse) positions.set(person.spouse, { x: currentX, y: y + NODE_HEIGHT + V_SPACING_COUPLE });
+                if (person.children?.length) {
                     let childY = currentY;
-                    const sortedChildren = person.children.slice().sort((a,b) => parseDate(familyData[a].birth) - parseDate(familyData[b].birth));
-                    sortedChildren.forEach(childId => {
-                        layoutTree(childId, currentX + NODE_WIDTH + H_SPACING, childY);
-                        childY += subtreeHeights.get(childId) + V_SPACING_UNIT;
-                    });
+                    person.children.slice().sort((a,b) => parseDate(familyData[a].birth) - parseDate(familyData[b].birth))
+                        .forEach(childId => {
+                            layoutTree(childId, currentX + NODE_WIDTH + H_SPACING, childY);
+                            childY += subtreeHeights.get(childId) + V_SPACING_UNIT;
+                        });
                 }
             }
             
-            // Avvia il processo
             calculateSubtreeHeight(rootId);
             layoutTree(rootId, PADDING, PADDING);
             
@@ -1618,89 +1669,136 @@
                 if(pos.x > maxX) maxX = pos.x;
                 if(pos.y > maxY) maxY = pos.y;
             }
-            const totalWidth = maxX + NODE_WIDTH + PADDING;
-            const totalHeight = maxY + NODE_HEIGHT + PADDING;
-            svg.setAttribute("width", totalWidth);
-            svg.setAttribute("height", totalHeight);
+            initialTreeWidth = currentTreeWidth = maxX + NODE_WIDTH + PADDING;
+            initialTreeHeight = currentTreeHeight = maxY + NODE_HEIGHT + PADDING;
+            currentTreeX = 0; currentTreeY = 0;
+
+            svgTreeElement.setAttribute("viewBox", `0 0 ${currentTreeWidth} ${currentTreeHeight}`);
             
-            // Disegna i collegamenti
             for(const personId in familyData) {
-                 const pos = positions.get(personId);
-                 const person = familyData[personId];
-                 if(!pos) continue;
+                 const pos = positions.get(personId), person = familyData[personId];
+                 if(!pos || !person.children?.length) continue;
+                 const spousePos = person.spouse ? positions.get(person.spouse) : null;
+                 const parentMidY = spousePos ? (pos.y + spousePos.y + NODE_HEIGHT)/2 : pos.y + NODE_HEIGHT/2;
+                 const connectorX = pos.x + NODE_WIDTH + H_SPACING / 2;
+                 const outLine = document.createElementNS(svgNS, 'line');
+                 outLine.setAttribute('x1', pos.x + NODE_WIDTH);
+                 outLine.setAttribute('y1', parentMidY);
+                 outLine.setAttribute('x2', connectorX);
+                 outLine.setAttribute('y2', parentMidY);
+                 outLine.setAttribute('class', 'tree-link');
+                 svgTreeElement.appendChild(outLine);
 
-                 // Link matrimonio
-                 if(person.spouse && positions.has(person.spouse) && person.name < person.spouse) {
-                    const spousePos = positions.get(person.spouse);
-                    const line = document.createElementNS(svgNS, 'line');
-                    line.setAttribute('x1', pos.x + NODE_WIDTH / 2);
-                    line.setAttribute('y1', pos.y + NODE_HEIGHT);
-                    line.setAttribute('x2', spousePos.x + NODE_WIDTH / 2);
-                    line.setAttribute('y2', spousePos.y);
-                    line.setAttribute('class', 'marriage-link');
-                    svg.appendChild(line);
-                 }
-
-                 // Link figli
-                 if(person.children && person.children.length > 0) {
-                     const spousePos = person.spouse ? positions.get(person.spouse) : null;
-                     const parentMidY = spousePos ? (pos.y + spousePos.y + NODE_HEIGHT)/2 : pos.y + NODE_HEIGHT/2;
-                     const connectorX = pos.x + NODE_WIDTH + H_SPACING / 2;
-                     
-                     const outLine = document.createElementNS(svgNS, 'line');
-                     outLine.setAttribute('x1', pos.x + NODE_WIDTH);
-                     outLine.setAttribute('y1', parentMidY);
-                     outLine.setAttribute('x2', connectorX);
-                     outLine.setAttribute('y2', parentMidY);
-                     outLine.setAttribute('class', 'tree-link');
-                     svg.appendChild(outLine);
-
-                     person.children.forEach(childId => {
-                         const childPos = positions.get(childId);
-                         if (childPos) {
-                            const childLine = document.createElementNS(svgNS, 'path');
-                            childLine.setAttribute('d', `M${connectorX},${parentMidY} L ${connectorX},${childPos.y + NODE_HEIGHT/2} L ${childPos.x},${childPos.y + NODE_HEIGHT/2}`);
-                            childLine.setAttribute('class', 'tree-link');
-                            svg.appendChild(childLine);
-                         }
-                     });
-                 }
+                 person.children.forEach(childId => {
+                     const childPos = positions.get(childId);
+                     if (childPos) {
+                        const childLine = document.createElementNS(svgNS, 'path');
+                        childLine.setAttribute('d', `M${connectorX},${parentMidY} L ${connectorX},${childPos.y + NODE_HEIGHT/2} L ${childPos.x},${childPos.y + NODE_HEIGHT/2}`);
+                        childLine.setAttribute('class', 'tree-link');
+                        svgTreeElement.appendChild(childLine);
+                     }
+                 });
             }
 
-            // Disegna i nodi
             for(const personId in familyData) {
-                const pos = positions.get(personId);
-                 const person = familyData[personId];
-                 if(!pos) continue;
-                 
+                const pos = positions.get(personId), person = familyData[personId];
+                if(!pos) continue;
                 const g = document.createElementNS(svgNS, "g");
-                g.setAttribute("class", `tree-node ${person.death ? 'deceased' : ''}`);
+                g.setAttribute("class", `tree-node ${person.gender==='M'?'male':'female'} ${person.death?'deceased':''}`);
                 g.setAttribute("transform", `translate(${pos.x},${pos.y})`);
-
                 const rect = document.createElementNS(svgNS, "rect");
                 rect.setAttribute("width", NODE_WIDTH);
                 rect.setAttribute("height", NODE_HEIGHT);
                 g.appendChild(rect);
-
-                const text = document.createElementNS(svgNS, "text");
-                text.setAttribute("x", NODE_WIDTH / 2);
-                text.setAttribute("y", NODE_HEIGHT / 2 + 5); 
-                text.setAttribute("text-anchor", "middle");
-                text.textContent = personId;
-                
-                g.appendChild(text);
-                svg.appendChild(g);
+                const fObj = document.createElementNS(svgNS, "foreignObject");
+                fObj.setAttribute("width", NODE_WIDTH); fObj.setAttribute("height", NODE_HEIGHT);
+                const div = document.createElement('div');
+                div.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+                div.className = 'node-content';
+                const photoImg = document.createElement('img');
+                photoImg.className = 'node-photo';
+                photoImg.src = person.photoLink;
+                photoImg.alt = `Foto di ${personId}`;
+                photoImg.onerror = function() { 
+                    const initialDiv = document.createElement('div');
+                    initialDiv.className = 'node-photo initials';
+                    initialDiv.textContent = getInitials(personId);
+                    this.replaceWith(initialDiv);
+                };
+                div.appendChild(photoImg);
+                const textContentDiv = document.createElement('div');
+                textContentDiv.className = 'text-content';
+                textContentDiv.innerHTML = `<span class="person-full-name-tree">${personId}</span><span class="birth-date-tree">${person.birth}</span>`;
+                div.appendChild(textContentDiv);
+                fObj.appendChild(div);
+                g.appendChild(fObj);
+                svgTreeElement.appendChild(g);
             }
             
-            treeModalBody.appendChild(svg);
+            treeModalBody.appendChild(svgTreeElement);
             treeModalOverlay.classList.remove('hidden');
+            setupTreePanZoom(svgTreeElement);
+        }
+
+        function setupTreePanZoom(svgElement) {
+            function applyViewBox() {
+                svgElement.setAttribute('viewBox', `${currentTreeX} ${currentTreeY} ${currentTreeWidth} ${currentTreeHeight}`);
+            }
+
+            svgElement.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                
+                if (e.shiftKey) {
+                    // ZOOM LOGIC
+                    const rect = svgElement.getBoundingClientRect();
+                    const svgMouseX = currentTreeX + (e.clientX - rect.left) * currentTreeWidth / rect.width;
+                    const svgMouseY = currentTreeY + (e.clientY - rect.top) * currentTreeHeight / rect.height;
+                    const zoomFactor = e.deltaY < 0 ? 0.9 : 1.1;
+                    let newWidth = currentTreeWidth * zoomFactor;
+                    newWidth = Math.max(initialTreeWidth / 5, Math.min(initialTreeWidth * 5, newWidth));
+                    let newHeight = newWidth * (initialTreeHeight / initialTreeWidth);
+                    currentTreeX = svgMouseX - (e.clientX - rect.left) * newWidth / rect.width;
+                    currentTreeY = svgMouseY - (e.clientY - rect.top) * newHeight / rect.height;
+                    currentTreeWidth = newWidth;
+                    currentTreeHeight = newHeight;
+                } else {
+                    // VERTICAL PAN LOGIC
+                    const panFactor = 1; 
+                    currentTreeY += e.deltaY * panFactor;
+                }
+
+                applyViewBox();
+            });
+
+            svgElement.addEventListener('mousedown', (e) => {
+                if (e.button !== 0) return;
+                isPanning = true;
+                startPanX = e.clientX;
+                startPanY = e.clientY;
+                svgElement.classList.add('panning');
+            });
+            const stopPanning = () => { isPanning = false; svgElement.classList.remove('panning'); };
+            svgElement.addEventListener('mousemove', (e) => {
+                if (!isPanning) return;
+                currentTreeX -= (e.clientX - startPanX) * currentTreeWidth / svgElement.getBoundingClientRect().width;
+                currentTreeY -= (e.clientY - startPanY) * currentTreeHeight / svgElement.getBoundingClientRect().height;
+                startPanX = e.clientX;
+                startPanY = e.clientY;
+                applyViewBox();
+            });
+            svgElement.addEventListener('mouseup', stopPanning);
+            svgElement.addEventListener('mouseleave', stopPanning);
+            treeResetZoomBtn.addEventListener('click', () => {
+                currentTreeX = 0; currentTreeY = 0;
+                currentTreeWidth = initialTreeWidth; currentTreeHeight = initialTreeHeight;
+                applyViewBox();
+            });
         }
 
         function showInstallPrompt() {
             const isIos = /iPhone|iPad|iPod/i.test(navigator.userAgent);
             const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator.standalone);
             const isDismissed = localStorage.getItem('installPromptDismissed') === 'true';
-
             if (isIos && !isInStandaloneMode && !isDismissed) {
                 installPrompt.classList.remove('hidden');
             }
@@ -1708,58 +1806,38 @@
 
         // --- Event Listeners ---
         infoModalCloseBtn.addEventListener('click', () => closeModal(infoModalOverlay));
-        imageButton.addEventListener('click', () => {
-            const element = document.querySelector("#info-modal-overlay .modal-content");
-            const actions = element.querySelector('.modal-actions');
-            const fileName = `parentela-${selectedPeople[0].replace(/ /g, '_')}`;
-            generateImage(element, actions, fileName);
-        });
-        prevPersonBtn.addEventListener('click', () => navigatePerson(-1));
-        nextPersonBtn.addEventListener('click', () => navigatePerson(1));
-
-        infoModalOverlay.addEventListener('click', (e) => {
-            if (e.target === infoModalOverlay) closeModal(infoModalOverlay);
-        });
+        infoCopyBtn.addEventListener('click', () => copyModalContentToClipboard('info-modal-overlay'));
+        prevPersonBtn.addEventListener('click', () => { if (selectedPeople.length === 1) { const idx = sortedPeopleNames.indexOf(selectedPeople[0]); const newIdx = (idx - 1 + sortedPeopleNames.length) % sortedPeopleNames.length; document.querySelector(`[data-name="${sortedPeopleNames[newIdx]}"]`).click(); } });
+        nextPersonBtn.addEventListener('click', () => { if (selectedPeople.length === 1) { const idx = sortedPeopleNames.indexOf(selectedPeople[0]); const newIdx = (idx + 1) % sortedPeopleNames.length; document.querySelector(`[data-name="${sortedPeopleNames[newIdx]}"]`).click(); } });
+        infoModalOverlay.addEventListener('click', (e) => { if (e.target === infoModalOverlay) closeModal(infoModalOverlay); });
         
-        // Listeners per modal compleanni
         birthdayListBtn.addEventListener('click', showBirthdayList);
         birthdayModalCloseBtn.addEventListener('click', () => closeModal(birthdayModalOverlay));
-        birthdayShareBtn.addEventListener('click', () => {
-            const element = document.querySelector("#birthday-modal-overlay .modal-content");
-            const actions = element.querySelector('.modal-actions');
-            generateImage(element, actions, 'elenco-compleanni');
-        });
-        birthdayModalOverlay.addEventListener('click', (e) => {
-             if (e.target === birthdayModalOverlay) closeModal(birthdayModalOverlay);
-        });
+        birthdayCopyBtn.addEventListener('click', () => copyModalContentToClipboard('birthday-modal-overlay'));
+        birthdayModalOverlay.addEventListener('click', (e) => { if (e.target === birthdayModalOverlay) closeModal(birthdayModalOverlay); });
 
-        // Listeners per modal percorso parentela
         pathModalCloseBtn.addEventListener('click', () => closeModal(pathModalOverlay));
-        pathShareBtn.addEventListener('click', () => {
-            const element = document.querySelector("#path-modal-overlay .modal-content");
-            const actions = element.querySelector('.modal-actions');
-            const fileName = `percorso-parentela-${selectedPeople[0].replace(/ /g, '_')}-e-${selectedPeople[1].replace(/ /g, '_')}`;
-            generateImage(element, actions, fileName);
-        });
-        pathModalOverlay.addEventListener('click', (e) => {
-             if (e.target === pathModalOverlay) closeModal(pathModalOverlay);
-        });
+        pathCopyBtn.addEventListener('click', () => copyModalContentToClipboard('path-modal-overlay'));
+        pathModalOverlay.addEventListener('click', (e) => { if (e.target === pathModalOverlay) closeModal(pathModalOverlay); });
         
-        // Listener per albero genealogico
         treeViewBtn.addEventListener('click', drawHorizontalTree); 
         treeModalCloseBtn.addEventListener('click', () => closeModal(treeModalOverlay));
-        treeModalOverlay.addEventListener('click', (e) => {
-             if (e.target === treeModalOverlay) closeModal(treeModalOverlay);
+        treeCopyBtn.addEventListener('click', () => copyModalContentToClipboard('tree-modal-overlay'));
+        treeModalOverlay.addEventListener('click', (e) => { if (e.target === treeModalOverlay) closeModal(treeModalOverlay); });
+
+        resetSelectionBtn.addEventListener('click', () => {
+            selectedPeople.forEach(name => {
+                document.querySelector(`.person-card[data-name="${name}"]`)?.classList.remove('selected');
+            });
+            selectedPeople = [];
+            updateHighlights();
+            updatePhotoDisplay();
+            updateResults();
+            resultsContainer.classList.add('hidden');
         });
 
-
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                if (!infoModalOverlay.classList.contains('hidden')) closeModal(infoModalOverlay);
-                if (!birthdayModalOverlay.classList.contains('hidden')) closeModal(birthdayModalOverlay);
-                if (!pathModalOverlay.classList.contains('hidden')) closeModal(pathModalOverlay);
-                if (!treeModalOverlay.classList.contains('hidden')) closeModal(treeModalOverlay);
-            }
+            if (e.key === 'Escape') [infoModalOverlay, birthdayModalOverlay, pathModalOverlay, treeModalOverlay].forEach(m => { if (!m.classList.contains('hidden')) closeModal(m); });
         });
         
         installPromptClose.addEventListener('click', () => {
@@ -1770,10 +1848,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             renderPeople();
             showInstallPrompt();
-
-            const sw = './sw.js';
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register(sw).then(() => console.log('ServiceWorker registrato')).catch(err => console.error('Registrazione ServiceWorker fallita:', err));
+                navigator.serviceWorker.register('./sw.js').catch(err => console.error('Registrazione ServiceWorker fallita:', err));
             }
         });
     </script>
