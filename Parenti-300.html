@@ -1,0 +1,1959 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relazioni di Parentela - Famiglia Pricci</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Parenti.png">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Parenti.png">
+    <meta property="og:title" content="Calcolatore di Parentela">
+    <meta property="og:description" content="Scopri le relazioni di parentela della famiglia Pricci">
+    <meta property="og:image" content="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Parenti.png">
+    <meta property="og:url" content="https://sebastiano-mazzarisi.github.io/Test/Parenti.html">
+    <meta property="og:type" content="website">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
+        :root {
+            --primary-blue: #0a3d91;
+            --light-blue: #f8faff; 
+            --garnet-red: #9D2235; 
+            --straw-yellow: #fefce8;
+            --light-green-highlight: #f0fff4; 
+            --green-border: #a3d9b1;
+            --warning-red: #c53030;
+            --light-warning-red: rgba(197, 48, 48, 0.1);
+            --light-warning-red-pulse: rgba(197, 48, 48, 0.25);
+            --background-color: #f0f4f8;
+            --text-color: #1c2a38;
+            --card-bg: #ffffff;
+            --border-color: #d1d9e6;
+            --shadow-color: rgba(10, 61, 145, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .hidden { display: none !important; }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px var(--shadow-color);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .header-title-container {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        header h1 {
+            color: var(--primary-blue);
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .header-icon-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            color: var(--primary-blue);
+            transition: color 0.2s;
+        }
+        .header-icon-btn:hover {
+            color: #083175;
+        }
+        .header-icon-btn svg {
+             width: 28px;
+             height: 28px;
+        }
+
+
+        header p {
+            font-size: 1.1rem;
+            color: #555;
+            margin-top: 5px;
+        }
+        
+        .main-actions {
+            display: none; 
+        }
+
+        #results-container {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 10px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            background-color: var(--light-blue);
+            border: 2px solid var(--primary-blue);
+            border-radius: 16px;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            min-height: 140px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(10, 61, 145, 0.1);
+        }
+        
+        .photo-navigation-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        
+        .photo-display {
+            width: 100px;
+            height: 100px;
+            flex-shrink: 0;
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            transform: scale(0);
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .photo-display.visible {
+             transform: scale(1);
+             opacity: 1;
+        }
+
+        .photo-display img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid var(--primary-blue);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        #results-text-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            flex-grow: 1;
+            min-width: 200px;
+        }
+
+        #results-container p {
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: var(--text-color); 
+            line-height: 1.5; 
+            text-align: center;
+        }
+
+        #info-button {
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+        }
+        #info-button:hover {
+            background-color: #083175;
+        }
+
+        .kinship-degree-info, #show-path-btn {
+            background-color: transparent;
+            color: var(--primary-blue);
+            border: 1px solid var(--primary-blue);
+            border-radius: 8px;
+            padding: 5px 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: block;
+            width: fit-content;
+            margin: 10px auto 0 auto;
+            font-family: inherit;
+        }
+         #show-path-btn:hover {
+            background-color: var(--light-blue);
+         }
+
+        #close-photo-info {
+            font-size: 0.8rem;
+            color: #555;
+            margin-top: -5px;
+            text-align: center;
+        }
+        
+        #results-container strong { color: var(--primary-blue); }
+        .relationship-term { color: var(--garnet-red); font-weight: 700; }
+        #results-container p.placeholder { color: #5a7a9e; font-size: 1.2rem; line-height: 1.6; }
+        #results-container p.warning { color: var(--warning-red); font-weight: 700; font-size: 1.1rem; line-height: 1.6; }
+
+        #people-grid {
+            padding-top: 10px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 20px;
+        }
+
+        .person-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            border: 4px solid var(--border-color);
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 16px var(--shadow-color);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .person-card.relative-highlight .card-relationship-text {
+            color: var(--garnet-red);
+        }
+        
+        .person-card.relative-highlight {
+            background-color: var(--light-green-highlight);
+            border-color: var(--green-border); 
+        }
+        
+        .person-card.deceased::after {
+            content: '†';
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 1.2rem;
+            color: #888;
+        }
+
+        .person-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(10, 61, 145, 0.15);
+        }
+
+        .person-card.selected {
+            border-color: var(--primary-blue);
+            background-color: var(--straw-yellow);
+            box-shadow: 0 0 0 4px rgba(10, 61, 145, 0.2);
+            transform: scale(1.05);
+        }
+
+        .person-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 10px auto;
+            object-fit: cover;
+            background-color: #e0e0e0;
+            border: 3px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: #aaa;
+        }
+
+        .person-name {
+            font-weight: 500;
+            font-size: 1rem;
+            color: var(--text-color);
+            flex-grow: 1;
+        }
+        
+        .card-relationship-text {
+            font-size: 0.9rem;
+            font-weight: 700;
+            font-style: italic;
+            color: var(--garnet-red);
+            margin-top: 4px;
+            height: 1.4rem;
+            line-height: 1.4rem;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .modal-content {
+            background: white;
+            padding: 0;
+            border-radius: 16px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        #tree-modal-overlay .modal-content {
+            max-width: 95vw;
+            width: 95vw;
+            max-height: 95vh;
+            height: 95vh;
+        }
+        #tree-modal-body {
+            flex-grow: 1;
+            overflow-y: auto; 
+            overflow-x: hidden;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 0;
+        }
+        #tree-modal-body svg {
+            display: block;
+            width: 100%;
+            height: auto;
+            cursor: grab;
+        }
+        #tree-modal-body svg.panning {
+            cursor: grabbing;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 25px;
+            flex-shrink: 0;
+        }
+        .modal-header h2 {
+            color: var(--primary-blue);
+            font-size: 1.7rem;
+            margin: 0;
+            line-height: 1.2;
+            padding-top: 5px; 
+        }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .modal-action-btn,
+        .modal-close-btn {
+            background: transparent;
+            color: var(--primary-blue);
+            border: 2px solid var(--primary-blue);
+            border-radius: 6px;
+            width: 32px;
+            height: 32px;
+            font-size: 1.6rem;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .modal-action-btn:hover,
+        .modal-close-btn:hover {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+        #reset-selection-btn {
+            padding: 0; 
+        }
+        #reset-selection-btn svg {
+            width: 22px; 
+            height: 22px;
+        }
+
+        .modal-body {
+            overflow-y: auto;
+            padding: 25px;
+        }
+        
+        .timeline-container {
+            position: relative;
+            padding-left: 30px; 
+        }
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            bottom: 10px;
+            width: 4px;
+            background-color: var(--border-color);
+            border-radius: 4px;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: -20px;
+            top: 5px;
+            width: 13px;
+            height: 13px;
+            background-color: var(--primary-blue);
+            border-radius: 50%;
+            border: 2px solid var(--card-bg);
+        }
+
+        .timeline-content {
+            background-color: var(--light-blue);
+            padding: 15px;
+            border-radius: 8px;
+            border: 2.5px solid #7a92b7;
+        }
+
+        .timeline-content h3 {
+            margin: 0 0 8px 0;
+            color: var(--primary-blue);
+            font-size: 1.2rem;
+        }
+        .timeline-content p {
+            margin: 0;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        @keyframes flash-red {
+            0%, 100% { background-color: var(--light-warning-red); }
+            50% { background-color: var(--light-warning-red-pulse); }
+        }
+        .birthday-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .birthday-table th, .birthday-table td {
+            padding: 8px 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .birthday-table th {
+            font-weight: 700;
+            color: var(--primary-blue);
+            background-color: var(--light-blue);
+        }
+        .birthday-table .month-header td {
+            background-color: var(--primary-blue);
+            color: white;
+            font-weight: 700;
+            text-align: center;
+            font-size: 1rem;
+            padding: 6px;
+        }
+        .birthday-table .birthday-today {
+            animation: flash-red 1.5s infinite ease-in-out;
+            font-weight: 700;
+        }
+        .birthday-table .birthday-completed {
+            background-color: var(--light-green-highlight);
+        }
+        .birthday-table .birthday-upcoming {
+            background-color: var(--straw-yellow);
+        }
+
+        .path-box {
+            background-color: var(--light-blue);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+         .path-box p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin: 0;
+         }
+        .path-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary-blue);
+            flex-shrink: 0;
+        }
+        
+        .tree-node rect {
+            fill: var(--card-bg);
+            stroke-width: 2px;
+            rx: 8;
+        }
+        .tree-node.male rect {
+            stroke: var(--primary-blue);
+        }
+        .tree-node.female rect {
+            stroke: var(--garnet-red);
+        }
+        .tree-node.deceased rect {
+            stroke-dasharray: 4 2;
+            opacity: 0.7;
+        }
+        .tree-node foreignObject {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .tree-node .node-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; 
+            padding-top: 5px;
+        }
+        .tree-node .node-photo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+            background-color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #aaa;
+            margin-bottom: 2px;
+            flex-shrink: 0;
+        }
+        .tree-node .node-photo.initials {
+             background-color: #ccc;
+             color: #666;
+             font-weight: bold;
+        }
+        .tree-node .text-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            line-height: 1.1;
+            margin-top: 2px;
+        }
+        .tree-node .person-full-name-tree,
+        .tree-node .birth-date-tree {
+            font-family: 'Inter', sans-serif;
+            fill: var(--text-color);
+            pointer-events: none;
+            text-anchor: middle;
+            font-size: 10px;
+        }
+        .tree-node .person-full-name-tree {
+            font-weight: 600;
+            white-space: normal;
+            word-break: break-word;
+            line-height: 1.1em;
+            max-height: 2.2em;
+        }
+        .tree-node .birth-date-tree {
+            fill: #555;
+            font-size: 9px;
+        }
+
+        .tree-link {
+            fill: none;
+            stroke: var(--text-color);
+            stroke-width: 1.5px;
+        }
+
+        @keyframes bounce-up-down {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+        #install-prompt-ios {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 15px;
+            background-color: var(--straw-yellow);
+            border-top: 1px solid #e0dcb7;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.08);
+            z-index: 1500;
+            transition: transform 0.3s ease-in-out;
+        }
+        #install-prompt-ios.hidden {
+            transform: translateY(100%);
+        }
+        .install-prompt-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+            font-size: 1.05rem;
+            color: var(--text-color);
+        }
+        .install-prompt-icon {
+            height: 1.5em;
+            width: 1.5em;
+            vertical-align: middle;
+            margin: 0 2px;
+        }
+        #install-share-icon {
+            animation: bounce-up-down 1.5s infinite ease-in-out;
+        }
+        .install-prompt-close {
+            background: transparent;
+            border: none;
+            font-size: 1.8rem;
+            line-height: 1;
+            color: #888;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+
+        #copy-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.75);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            z-index: 3000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            font-weight: 600;
+        }
+        #copy-toast.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.8rem; }
+            #results-container { 
+                top: 5px; 
+                padding: 10px; 
+                gap: 10px; 
+                flex-direction: column;
+                min-height: auto;
+            }
+            #results-container p { font-size: 1.1rem; line-height: 1.5; }
+            .photo-display { width: 80px; height: 80px; }
+            #people-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 15px; }
+            .person-photo { width: 70px; height: 70px; }
+            .person-name { font-size: 0.85rem; }
+            .install-prompt-content {
+                flex-direction: column;
+                gap: 10px;
+                font-size: 0.95rem;
+            }
+            .install-prompt-close {
+                position: absolute;
+                top: 5px;
+                right: 5px;
+            }
+        }
+
+        .modal-action-btn svg {
+            color: #0a3d91;
+            transition: color 0.2s;
+        }
+        .modal-action-btn:hover svg {
+            color: #fff;
+        }
+        
+        .family-list-report {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="install-prompt-ios" class="hidden">
+    <div class="install-prompt-content">
+        <p>
+            Per un'esperienza migliore, installa l'app! Tocca
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWFjdGlvbiI+PHBhdGggZD0iTTQgMTJ2OGEyIDIgMCAwIDAgMiAyaDEyYTIgMiAwIDAgMCAyLTJ2LTgiLz48cG9seWxpbmUgcG9pbnRzPSIxNiA2IDEyIDIgOCA2Ii8+PGxpbmUgeDE9IjEyIiB4Mj0iMTIiIHkxPSIyIiB5Mj0iMTUiLz48L3N2Zz4=" alt="Icona Condividi" class="install-prompt-icon" id="install-share-icon">
+            e poi "<strong>Aggiungi a schermata Home</strong>"
+        </p>
+        <button id="install-prompt-close" title="Chiudi">&times;</button>
+    </div>
+</div>
+
+<div class="container">
+    <header>
+        <div class="header-title-container">
+            <h1>Calcolatore di Parentela</h1>
+            <button id="birthday-list-btn" class="header-icon-btn" title="Elenco Cronologico Compleanni">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            </button>
+            <button id="tree-view-btn" class="header-icon-btn" title="Albero Genealogico">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-network"><rect x="16" y="3" width="4" height="4" rx="1"></rect><rect x="4" y="3" width="4" height="4" rx="1"></rect><rect x="4" y="17" width="4" height="4" rx="1"></rect><rect x="16" y="17" width="4" height="4" rx="1"></rect><path d="M6 7v4a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V7"></path><path d="M12 12v9"></path></svg>
+            </button>
+            <button id="reset-selection-btn" class="modal-close-btn" title="Deseleziona Tutto">
+                &times;
+            </button>
+        </div>
+        <p>Seleziona due membri della famiglia Pricci per scoprire la loro relazione.</p>
+    </header>
+
+    <div class="main-actions">
+    </div>
+
+    <section id="results-container" class="hidden">
+        <div class="photo-navigation-wrapper">
+            <div id="person1-photo-display" class="photo-display"></div>
+        </div>
+        <div id="results-text-wrapper">
+            <p id="results-text" class="placeholder">In attesa della selezione...</p>
+            <button id="info-button" class="hidden">Info</button>
+            <small id="close-photo-info" class="hidden">Cliccare sulla foto per chiuderla</small>
+        </div>
+        <div id="person2-photo-display" class="photo-display"></div>
+    </section>
+
+    <main id="people-grid"></main>
+
+    <div id="info-modal-overlay" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title"></h2>
+                <div class="modal-actions">
+                    <button id="info-copy-btn" class="modal-action-btn" title="Copia contenuto">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                    </button>
+                    <button class="modal-close-btn">&times;</button>
+                </div>
+            </div>
+            <div id="modal-body" class="modal-body"></div>
+        </div>
+    </div>
+    
+    <div id="birthday-modal-overlay" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Elenco cronologico nell'anno</h2>
+                 <div class="modal-actions">
+                    <button id="birthday-copy-btn" class="modal-action-btn" title="Copia contenuto">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                    </button>
+                    <button class="modal-close-btn birthday-modal-close">&times;</button>
+                </div>
+            </div>
+            <div id="birthday-modal-body" class="modal-body"></div>
+        </div>
+    </div>
+
+    <div id="path-modal-overlay" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="path-modal-title">Dettaglio Parentela</h2>
+                 <div class="modal-actions">
+                    <button id="path-copy-btn" class="modal-action-btn" title="Copia contenuto">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                    </button>
+                    <button class="modal-close-btn path-modal-close">&times;</button>
+                </div>
+            </div>
+            <div id="path-modal-body" class="modal-body"></div>
+        </div>
+    </div>
+
+    <div id="tree-modal-overlay" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="tree-modal-title">Albero genealogico Famiglia Pricci</h2>
+                 <div class="modal-actions">
+                    <button id="tree-reset-zoom-btn" class="modal-action-btn" title="Adatta alla finestra">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-expand"><path d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8"/><path d="M3 16.2V21m0 0h4.8M3 21l6-6"/><path d="M21 7.8V3m0 0h-4.8M21 3l-6 6"/><path d="M3 7.8V3m0 0h4.8M3 3l6 6"/></svg>
+                    </button>
+                    <button id="tree-copy-btn" class="modal-action-btn" title="Copia contenuto">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                    </button>
+                    <button class="modal-close-btn tree-modal-close">&times;</button>
+                </div>
+            </div>
+            <div id="tree-modal-body" class="modal-body"></div>
+        </div>
+    </div>
+</div>
+<div id="copy-toast"></div>
+
+    <script>
+        const familyData = {
+            "Nonno Giovanni Pricci": { birth: "01/01/1909", death: "01/01/1944", spouse: "Angelina Gasparro", children: ["Luigi Pricci"], parents: [], siblings: [], gender: "M" },
+            "Angelina Gasparro": { birth: "05/06/1909", death: "16/07/2001", spouse: "Nonno Giovanni Pricci", children: ["Luigi Pricci"], parents: [], siblings: [], gender: "F" },
+            "Luigi Pricci": { birth: "16/11/1933", death: null, spouse: "Teresa Grilletti", children: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Pricci", "Giuseppe Pricci", "Tiziana Pricci"], parents: ["Nonno Giovanni Pricci", "Angelina Gasparro"], siblings: [], gender: "M" },
+            "Teresa Grilletti": { birth: "05/03/1937", death: null, spouse: "Luigi Pricci", children: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Pricci", "Giuseppe Pricci", "Tiziana Pricci"], parents: [], siblings: [], gender: "F" },
+            "Angela Pricci": { birth: "13/01/1957", death: null, spouse: "Onofrio Lorusso", children: ["Benny Lorusso", "Cinzia Lorusso"], parents: ["Luigi Pricci", "Teresa Grilletti"], siblings: ["Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Pricci", "Giuseppe Pricci", "Tiziana Pricci"], gender: "F" },
+            "Onofrio Lorusso": { birth: "05/08/1951", death: null, spouse: "Angela Pricci", children: ["Benny Lorusso", "Cinzia Lorusso"], parents:[], siblings:[], gender: "M" },
+            "Maria Antonietta Pricci": { birth: "21/05/1958", death: null, spouse: "Saverio Chiarappa", children: ["Martino Chiarappa", "Cristiano Chiarappa"], parents: ["Luigi Pricci", "Teresa Grilletti"], siblings: ["Angela Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Pricci", "Giuseppe Pricci", "Tiziana Pricci"], gender: "F" },
+            "Saverio Chiarappa": { birth: "26/11/1951", death: null, spouse: "Maria Antonietta Pricci", children: ["Martino Chiarappa", "Cristiano Chiarappa"], parents:[], siblings:[], gender: "M" },
+            "Marica Pricci": { birth: "12/04/1961", death: null, spouse: "Sebastiano Mazzarisi", children: ["Maria Grazia Mazzarisi", "Onofrio Mazzarisi", "Teresa Mazzarisi"], parents: ["Luigi Pricci", "Teresa Grilletti"], siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Vanna Pricci", "Giovanni Pricci", "Giuseppe Pricci", "Tiziana Pricci"], gender: "F" },
+            "Sebastiano Mazzarisi": { birth: "07/05/1957", death: null, spouse: "Marica Pricci", children: ["Maria Grazia Mazzarisi", "Onofrio Mazzarisi", "Teresa Mazzarisi"], parents:[], siblings:[], gender: "M" },
+            "Vanna Pricci": { birth: "11/09/1963", death: null, spouse: "Domenico Lefemine", children: ["Flavia Lefemine", "Francesco Lefemine"], parents: ["Luigi Pricci", "Teresa Grilletti"], siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Giovanni Pricci", "Giuseppe Pricci", "Tiziana Pricci"], gender: "F" },
+            "Domenico Lefemine": { birth: "06/02/1957", death: null, spouse: "Vanna Pricci", children: ["Flavia Lefemine", "Francesco Lefemine"], parents:[], siblings:[], gender: "M" },
+            "Giovanni Pricci": { birth: "24/10/1964", death: null, spouse: "Rosa Bianco", children: [], parents: ["Luigi Pricci", "Teresa Grilletti"], siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giuseppe Pricci", "Tiziana Pricci"], gender: "M" },
+            "Rosa Bianco": { birth: "02/09/1971", death: null, spouse: "Giovanni Pricci", children: [], parents:[], siblings:[], gender: "F" },
+            "Giuseppe Pricci": { birth: "12/08/1968", death: null, spouse: "Anna Trivisani", children: ["Gilda Pricci", "Asia Pricci"], parents: ["Luigi Pricci", "Teresa Grilletti"], siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Pricci", "Tiziana Pricci"], gender: "M" },
+            "Anna Trivisani": { birth: "12/07/1969", death: null, spouse: "Giuseppe Pricci", children: ["Gilda Pricci", "Asia Pricci"], parents:[], siblings:[], gender: "F" },
+            "Tiziana Pricci": { birth: "27/06/1972", death: null, spouse: "Riccardo Dalena", children: [], parents: ["Luigi Pricci", "Teresa Grilletti"], siblings: ["Angela Pricci", "Maria Antonietta Pricci", "Marica Pricci", "Vanna Pricci", "Giovanni Pricci", "Giuseppe Pricci"], gender: "F" },
+            "Riccardo Dalena": { birth: "11/04/1973", death: null, spouse: "Tiziana Pricci", children: [], parents:[], siblings:[], gender: "M" },
+            "Benny Lorusso": { birth: "17/11/1975", death: null, spouse: "Genny Lepore", children: ["Alessandro Lorusso", "Alice Lorusso", "Nina Lorusso"], parents: ["Onofrio Lorusso", "Angela Pricci"], siblings: ["Cinzia Lorusso"], gender: "M" },
+            "Genny Lepore": { birth: "04/07/1975", death: null, spouse: "Benny Lorusso", children: ["Alessandro Lorusso", "Alice Lorusso", "Nina Lorusso"], parents:[], siblings:[], gender: "F" },
+            "Cinzia Lorusso": { birth: "06/04/1980", death: null, spouse: "Gianni Rotondi", children: ["Nicoletta Rotondi"], parents: ["Onofrio Lorusso", "Angela Pricci"], siblings: ["Benny Lorusso"], gender: "F" },
+            "Gianni Rotondi": { birth: "08/03/1974", death: null, spouse: "Cinzia Lorusso", children: ["Nicoletta Rotondi"], parents:[], siblings:[], gender: "M" },
+            "Martino Chiarappa": { birth: "24/05/1997", death: null, spouse: null, children: [], parents: ["Saverio Chiarappa", "Maria Antonietta Pricci"], siblings: ["Cristiano Chiarappa"], gender: "M" },
+            "Cristiano Chiarappa": { birth: "20/06/2001", death: null, spouse: null, children: [], parents: ["Saverio Chiarappa", "Maria Antonietta Pricci"], siblings: ["Martino Chiarappa"], gender: "M" },
+            "Maria Grazia Mazzarisi": { birth: "21/01/1989", death: null, spouse: null, children: [], parents: ["Sebastiano Mazzarisi", "Marica Pricci"], siblings: ["Onofrio Mazzarisi", "Teresa Mazzarisi"], gender: "F" },
+            "Onofrio Mazzarisi": { birth: "05/06/1992", death: null, spouse: null, children: [], parents: ["Sebastiano Mazzarisi", "Marica Pricci"], siblings: ["Maria Grazia Mazzarisi", "Teresa Mazzarisi"], gender: "M" },
+            "Teresa Mazzarisi": { birth: "01/04/1994", death: null, spouse: null, children: [], parents: ["Sebastiano Mazzarisi", "Marica Pricci"], siblings: ["Maria Grazia Mazzarisi", "Onofrio Mazzarisi"], gender: "F" },
+            "Flavia Lefemine": { birth: "16/11/1996", death: null, spouse: null, children: [], parents: ["Domenico Lefemine", "Vanna Pricci"], siblings: ["Francesco Lefemine"], gender: "F" },
+            "Francesco Lefemine": { birth: "20/03/2000", death: null, spouse: null, children: [], parents: ["Domenico Lefemine", "Vanna Pricci"], siblings: ["Flavia Lefemine"], gender: "M" },
+            "Gilda Pricci": { birth: "29/06/2004", death: null, spouse: null, children: [], parents: ["Giuseppe Pricci", "Anna Trivisani"], siblings: ["Asia Pricci"], gender: "F" },
+            "Asia Pricci": { birth: "07/06/2006", death: null, spouse: null, children: [], parents: ["Giuseppe Pricci", "Anna Trivisani"], siblings: ["Gilda Pricci"], gender: "F" },
+            "Alessandro Lorusso": { birth: "17/07/2010", death: null, spouse: null, children: [], parents: ["Benny Lorusso", "Genny Lepore"], siblings: ["Alice Lorusso", "Nina Lorusso"], gender: "M" },
+            "Alice Lorusso": { birth: "20/07/2013", death: null, spouse: null, children: [], parents: ["Benny Lorusso", "Genny Lepore"], siblings: ["Alessandro Lorusso", "Nina Lorusso"], gender: "F" },
+            "Nina Lorusso": { birth: "29/11/2015", death: null, spouse: null, children: [], parents: ["Benny Lorusso", "Genny Lepore"], siblings: ["Alessandro Lorusso", "Alice Lorusso"], gender: "F" },
+            "Nicoletta Rotondi": { birth: "12/02/2019", death: null, spouse: null, children: [], parents: ["Gianni Rotondi", "Cinzia Lorusso"], siblings: [], gender: "F" }
+        };
+
+        (function() {
+            // Popola i dati con nomi e link foto
+            for (const name in familyData) {
+                familyData[name].name = name;
+                const photoName = name.replace(/ /g, '%20');
+                familyData[name].photoLink = `https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/FotoP/${photoName}.jpg`;
+            }
+            // Calcola dinamicamente le generazioni per la logica di parentela
+            let changed;
+            do {
+                changed = false;
+                for (const name in familyData) {
+                    const person = familyData[name];
+                    if (person.generation) continue;
+
+                    let baseGeneration = -1;
+                    if (person.parents && person.parents.length > 0) {
+                        const parentGen = familyData[person.parents[0]].generation;
+                        if(parentGen) {
+                           baseGeneration = parentGen + 1;
+                        }
+                    } else if (person.spouse && familyData[person.spouse].generation) {
+                        baseGeneration = familyData[person.spouse].generation;
+                    } else if (name === 'Nonno Giovanni Pricci' || name === 'Angelina Gasparro') {
+                        baseGeneration = 1;
+                    }
+                    
+                    if(baseGeneration > 0) {
+                        person.generation = baseGeneration;
+                        changed = true;
+                    }
+                }
+            } while (changed);
+        })();
+
+        // --- Sezione Variabili Globali e Selettori DOM ---
+        const peopleGrid = document.getElementById('people-grid');
+        const resultsContainer = document.getElementById('results-container');
+        const resultsText = document.getElementById('results-text');
+        const photoDisplay1 = document.getElementById('person1-photo-display');
+        const photoDisplay2 = document.getElementById('person2-photo-display');
+        const infoButton = document.getElementById('info-button');
+        const closePhotoInfo = document.getElementById('close-photo-info');
+        const infoModalOverlay = document.getElementById('info-modal-overlay');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+        const infoModalCloseBtn = document.querySelector('#info-modal-overlay .modal-close-btn');
+        const infoCopyBtn = document.getElementById('info-copy-btn');
+        const installPrompt = document.getElementById('install-prompt-ios');
+        const installPromptClose = document.getElementById('install-prompt-close');
+        
+        const birthdayListBtn = document.getElementById('birthday-list-btn');
+        const birthdayModalOverlay = document.getElementById('birthday-modal-overlay');
+        const birthdayModalBody = document.getElementById('birthday-modal-body');
+        const birthdayCopyBtn = document.getElementById('birthday-copy-btn');
+        const birthdayModalCloseBtn = document.querySelector('#birthday-modal-overlay .modal-close-btn');
+        
+        const pathModalOverlay = document.getElementById('path-modal-overlay');
+        const pathModalBody = document.getElementById('path-modal-body');
+        const pathCopyBtn = document.getElementById('path-copy-btn');
+        const pathModalCloseBtn = document.querySelector('#path-modal-overlay .modal-close-btn');
+
+        const treeViewBtn = document.getElementById('tree-view-btn');
+        const treeModalOverlay = document.getElementById('tree-modal-overlay');
+        const treeModalBody = document.getElementById('tree-modal-body');
+        const treeModalCloseBtn = document.querySelector('#tree-modal-overlay .modal-close-btn');
+        const treeCopyBtn = document.getElementById('tree-copy-btn');
+        const treeResetZoomBtn = document.getElementById('tree-reset-zoom-btn');
+        const resetSelectionBtn = document.getElementById('reset-selection-btn');
+        
+        let selectedPeople = [];
+        let sortedPeopleNames = [];
+
+        let currentTreeX = 0, currentTreeY = 0, currentTreeWidth = 0, currentTreeHeight = 0;
+        let initialTreeWidth = 0, initialTreeHeight = 0;
+        let isPanning = false;
+        let startPanX = 0, startPanY = 0;
+        let svgTreeElement = null;
+
+        const groupMap = {
+            'Nonno': 'Nonni', 'Nonna': 'Nonni',
+            'Bisnonno': 'Bisnonni', 'Bisnonna': 'Bisnonni',
+            'Trisnonno': 'Trisnonni', 'Trisnonna': 'Trisnonni',
+            'Suocero': 'Suoceri', 'Suocera': 'Suoceri', 
+            'Marito': 'Marito', 'Moglie': 'Moglie', 
+            'Padre': 'Genitori', 'Madre': 'Genitori', 
+            'Figlio': 'Figli', 'Figlia': 'Figli', 
+            'Genero': 'Generi', 'Nuora': 'Nuore',
+            'Fratello': 'Fratelli', 'Sorella': 'Fratelli', 
+            'Cognato': 'Cognati', 'Cognata': 'Cognati', 
+            'Zio': 'Zii', 'Zia': 'Zii', 
+            'Prozio': 'Prozii', 'Prozia': 'Prozii',
+            'Nipote': 'Nipoti', 
+            'Pronipote': 'Pronipoti',
+            'Trisnipote': 'Trisnipoti',
+            'Cugino': 'Cugini', 'Cugina': 'Cugini',
+            'Procugino': 'Procugini', 'Procugina': 'Procugini'
+        };
+        
+        function parseDate(dateStr) {
+            const parts = dateStr.split('/');
+            return new Date(parts[2], parts[1] - 1, parts[0]);
+        }
+
+        function getInitials(name) {
+            const parts = name.split(' ');
+            if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+            return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+        }
+
+        function getEmojiForPerson(person) {
+            if (!person || !person.birth) return '';
+            const birthDate = parseDate(person.birth);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+
+            if (person.death) {
+                const deathDate = parseDate(person.death);
+                age = deathDate.getFullYear() - birthDate.getFullYear();
+                const m2 = deathDate.getMonth() - birthDate.getMonth();
+                if (m2 < 0 || (m2 === 0 && deathDate.getDate() < birthDate.getDate())) age--;
+            }
+
+            if (age >= 65) return person.gender === 'M' ? '👴' : '👵';
+            if (age >= 18) return person.gender === 'M' ? '👨' : '👩';
+            return person.gender === 'M' ? '👦' : '👧';
+        };
+        
+        // --- ALGORITMO DI PARENTELA (Versione stabile basata sul file di riferimento) ---
+        
+        const relationshipCache = new Map();
+
+        function findBloodConnection(person1, person2) {
+            const person1Data = familyData[person1];
+            const person2Data = familyData[person2];
+            if (!person1Data || !person2Data) return null;
+
+            if (person1Data.children?.includes(person2)) return { type: 'parent_child', direction: 'down' };
+            if (person2Data.children?.includes(person1)) return { type: 'parent_child', direction: 'up' };
+            if (person1Data.siblings?.includes(person2)) return { type: 'sibling' };
+            if (person1Data.siblings?.some(sib => familyData[sib]?.children?.includes(person2))) return { type: 'uncle_nephew', direction: 'down' };
+            if (person2Data.siblings?.some(sib => familyData[sib]?.children?.includes(person1))) return { type: 'uncle_nephew', direction: 'up' };
+            if (person1Data.siblings?.some(sib => familyData[sib]?.children?.some(nephew => familyData[nephew]?.children?.includes(person2)))) return { type: 'great_uncle_nephew', direction: 'down' };
+            if (person2Data.siblings?.some(sib => familyData[sib]?.children?.some(nephew => familyData[nephew]?.children?.includes(person1)))) return { type: 'great_uncle_nephew', direction: 'up' };
+
+            const p1_parents = person1Data.parents || [];
+            const p2_parents = person2Data.parents || [];
+            const getGrandparents = (parents) => [].concat(...parents.map(p => familyData[p]?.parents || []));
+            const p1_grandparents = getGrandparents(p1_parents);
+            const p2_grandparents = getGrandparents(p2_parents);
+
+            if (p1_parents.some(p1p => familyData[p1p]?.siblings?.includes(p2_parents.find(p2p => familyData[p1p]?.siblings.includes(p2p))))) return { type: 'cousin' };
+            if (p1_grandparents.some(p1gp => familyData[p1gp]?.siblings?.some(sib => p2_grandparents.includes(sib)))) return { type: 'second_cousin' };
+            if (p1_grandparents.some(p1gp => familyData[p1gp]?.siblings?.some(sib => p2_parents.includes(sib))) || p2_grandparents.some(p2gp => familyData[p2gp]?.siblings?.some(sib => p1_parents.includes(sib)))) return { type: 'second_cousin' };
+
+            const isDirectDescendant = (ancestorName, descendantName) => {
+                let queue = [descendantName];
+                const checked = new Set();
+                while (queue.length > 0) {
+                    let current = queue.shift();
+                    if(checked.has(current)) continue;
+                    checked.add(current);
+                    if (current === ancestorName) return true;
+                    familyData[current]?.parents?.forEach(p => queue.push(p));
+                }
+                return false;
+            };
+
+            if (isDirectDescendant(person1, person2)) {
+                const genDiff = familyData[person2].generation - familyData[person1].generation;
+                if (genDiff === 2) return { type: 'grandparent_grandchild', direction: 'down' };
+                if (genDiff === 3) return { type: 'great_grandparent_grandchild', direction: 'down' };
+                if (genDiff === 4) return { type: 'great_great_grandparent_grandchild', direction: 'down' };
+            }
+            if (isDirectDescendant(person2, person1)) {
+                const genDiff = familyData[person1].generation - familyData[person2].generation;
+                if (genDiff === 2) return { type: 'grandparent_grandchild', direction: 'up' };
+                if (genDiff === 3) return { type: 'great_grandparent_grandchild', direction: 'up' };
+                if (genDiff === 4) return { type: 'great_great_grandparent_grandchild', direction: 'up' };
+            }
+            return null;
+        }
+
+        function findAffinityConnection(person1, person2) {
+            const person1Data = familyData[person1];
+            const person2Data = familyData[person2];
+            if (!person1Data || !person2Data) return null;
+
+            if (person1Data.spouse) {
+                const connection = findBloodConnection(person1Data.spouse, person2);
+                if (connection) return { ...connection, through_marriage: true };
+            }
+            if (person2Data.spouse) {
+                const connection = findBloodConnection(person1, person2Data.spouse);
+                if (connection) return { ...connection, through_marriage: true, reverse: true };
+            }
+            if (person1Data.spouse && familyData[person1Data.spouse]?.siblings?.some(sib => familyData[sib]?.spouse === person2)) {
+                return { type: 'sibling', through_marriage: true };
+            }
+            if (person2Data.spouse && familyData[person2Data.spouse]?.siblings?.some(sib => familyData[sib]?.spouse === person1)) {
+                 return { type: 'sibling', through_marriage: true, reverse: true };
+            }
+            if (person1Data.spouse && person2Data.spouse) {
+                const connection = findBloodConnection(person1Data.spouse, person2Data.spouse);
+                if (connection) return { ...connection, through_marriage: true };
+            }
+            return null;
+        }
+        
+        function connectionToRelationship(connection, startGender, endGender) {
+            if (!connection) return null;
+            const isAcquired = !!connection.through_marriage;
+            const dir = connection.direction;
+            let [forward, backward] = [null, null];
+
+            switch (connection.type) {
+                case 'parent_child':
+                    [forward, backward] = (dir === 'down') 
+                        ? (isAcquired ? ['suocero', 'genero'] : ['padre', 'figlio'])
+                        : (isAcquired ? ['genero', 'suocero'] : ['figlio', 'padre']);
+                    break;
+                case 'sibling':
+                    [forward, backward] = isAcquired ? ['cognato', 'cognato'] : ['fratello', 'fratello'];
+                    break;
+                case 'uncle_nephew':
+                    [forward, backward] = (dir === 'down') ? ['zio', 'nipote'] : ['nipote', 'zio'];
+                    break;
+                case 'great_uncle_nephew':
+                     [forward, backward] = (dir === 'down') ? ['prozio', 'pronipote'] : ['pronipote', 'prozio'];
+                    break;
+                case 'grandparent_grandchild':
+                    [forward, backward] = (dir === 'down') ? ['nonno', 'nipote'] : ['nipote', 'nonno'];
+                    break;
+                case 'great_grandparent_grandchild':
+                     [forward, backward] = (dir === 'down') ? ['bisnonno', 'pronipote'] : ['pronipote', 'bisnonno'];
+                    break;
+                case 'great_great_grandparent_grandchild':
+                    [forward, backward] = (dir === 'down') ? ['trisnonno', 'trisnipote'] : ['trisnipote', 'trisnonno'];
+                    break;
+                case 'cousin': [forward, backward] = ['cugino', 'cugino']; break;
+                case 'second_cousin': [forward, backward] = ['procugino', 'procugino']; break;
+            }
+
+            if (connection.reverse) [forward, backward] = [backward, forward];
+            
+            const genderize = (term, gender) => {
+                if (!term) return term;
+                if (gender === 'F') {
+                    if (term === 'fratello') return 'sorella';
+                    if (term === 'genero') return 'nuora';
+                    if (term.endsWith('o')) return term.slice(0, -1) + 'a';
+                }
+                return term;
+            };
+
+            if (!forward || !backward) return null;
+
+            return {
+                forward: genderize(forward, startGender),
+                backward: genderize(backward, endGender)
+            };
+        }
+        
+        function getRelationship(startName, endName) {
+            const cacheKey = `${startName}|${endName}`;
+            if (relationshipCache.has(cacheKey)) return relationshipCache.get(cacheKey);
+
+            const startPerson = familyData[startName];
+            const endPerson = familyData[endName];
+            if (!startPerson || !endPerson || startName === endName) return null;
+
+            if (startPerson.spouse === endName) {
+                const result = {
+                    a_to_b: `<span class="relationship-term">${startPerson.gender === 'M' ? 'marito' : 'moglie'}</span>`,
+                    b_to_a: `<span class="relationship-term">${endPerson.gender === 'M' ? 'marito' : 'moglie'}</span>`
+                };
+                relationshipCache.set(cacheKey, result);
+                return result;
+            }
+
+            const connection = findBloodConnection(startName, endName) || findAffinityConnection(startName, endName);
+            if (!connection) return null;
+            
+            const relationship = connectionToRelationship(connection, startPerson.gender, endPerson.gender);
+            if (!relationship) return null;
+            
+            const result = {
+                a_to_b: `<span class="relationship-term">${relationship.forward}</span>`,
+                b_to_a: `<span class="relationship-term">${relationship.backward}</span>`
+            };
+            relationshipCache.set(cacheKey, result);
+            return result;
+        }
+        
+        // --- FINE ALGORITMO DI PARENTELA ---
+
+        function findFullPath(startName, endName) {
+            if (startName === endName) return null;
+            const queue = [[startName]];
+            const visited = new Set([startName]);
+            while (queue.length > 0) {
+                const path = queue.shift();
+                const currentName = path[path.length - 1];
+                if (currentName === endName) return path;
+                const currentData = familyData[currentName];
+                if (!currentData) continue;
+                const connections = new Set();
+                (currentData.parents || []).forEach(p => connections.add(p));
+                (currentData.children || []).forEach(p => connections.add(p));
+                (currentData.siblings || []).forEach(p => connections.add(p));
+                if(currentData.spouse) connections.add(currentData.spouse);
+
+                for (const connectionName of connections) {
+                    if (connectionName && !visited.has(connectionName)) {
+                        visited.add(connectionName);
+                        queue.push([...path, connectionName]);
+                    }
+                }
+            }
+            return null;
+        }
+        
+        function getImmediateRelationship(p1, p2) {
+            const d1 = familyData[p1];
+            if (!d1) return "ha un legame con";
+            if (d1.spouse === p2) return d1.gender === 'M' ? "è marito di" : "è moglie di";
+            if (d1.children?.includes(p2)) return d1.gender === 'M' ? "è padre di" : "è madre di";
+            if (d1.parents?.includes(p2)) return d1.gender === 'M' ? "è figlio di" : "è figlia di";
+            if (d1.siblings?.includes(p2)) return d1.gender === 'M' ? "è fratello di" : "è sorella di";
+            return "ha un legame con";
+        }
+        
+        function renderPeople() {
+            sortedPeopleNames = Object.keys(familyData).sort((a, b) => parseDate(familyData[a].birth).getTime() - parseDate(familyData[b].birth).getTime());
+            peopleGrid.innerHTML = '';
+            for (const name of sortedPeopleNames) {
+                const data = familyData[name];
+                data.name = name;
+                const card = document.createElement('div');
+                card.className = 'person-card';
+                if(data.death) card.classList.add('deceased');
+                card.dataset.name = name;
+                card.addEventListener('click', () => handlePersonClick(name, card));
+                const photo = document.createElement('img');
+                photo.className = 'person-photo';
+                photo.src = data.photoLink;
+                photo.alt = `Foto di ${name}`;
+                photo.onerror = function() { this.outerHTML = `<div class="person-photo">${getInitials(name)}</div>`; };
+                const nameEl = document.createElement('div');
+                nameEl.className = 'person-name';
+                nameEl.textContent = name;
+                const relText = document.createElement('div');
+                relText.className = 'card-relationship-text';
+                relText.textContent = data.birth;
+                card.append(photo, nameEl, relText);
+                peopleGrid.appendChild(card);
+            }
+        }
+        
+        function handlePhotoClick(name) {
+            const index = selectedPeople.indexOf(name);
+            if (index > -1 && selectedPeople.length === 1) {
+                selectedPeople.splice(index, 1);
+                document.querySelector(`.person-card[data-name="${name}"]`)?.classList.remove('selected');
+            } else {
+                 document.querySelector(`.person-card[data-name="${name}"]`)?.click();
+                 return;
+            }
+            updateHighlights();
+            updatePhotoDisplay();
+            updateResults();
+        }
+
+        function handlePersonClick(name, cardElement) {
+            const index = selectedPeople.indexOf(name);
+            if (index > -1) {
+                selectedPeople.splice(index, 1);
+                cardElement.classList.remove('selected');
+            } else {
+                if (selectedPeople.length >= 2) {
+                    const firstSelected = selectedPeople.shift();
+                    document.querySelector(`.person-card[data-name="${firstSelected}"]`)?.classList.remove('selected');
+                }
+                selectedPeople.push(name);
+                cardElement.classList.add('selected');
+            }
+            updateHighlights();
+            updatePhotoDisplay();
+            updateResults();
+        }
+
+        function clearHighlights() {
+            document.querySelectorAll('.person-card').forEach(card => {
+                card.classList.remove('relative-highlight');
+                const relText = card.querySelector('.card-relationship-text');
+                if (relText) relText.textContent = familyData[card.dataset.name].birth;
+            });
+        }
+
+        function updateHighlights() {
+            clearHighlights();
+            const singleSelection = selectedPeople.length === 1;
+            
+            infoButton.classList.toggle('hidden', !singleSelection);
+            closePhotoInfo.classList.toggle('hidden', !singleSelection);
+            
+            if (!singleSelection) {
+                return;
+            }
+            
+            const selectedName = selectedPeople[0];
+            for (const otherName in familyData) {
+                if (otherName === selectedName) continue;
+                const relationship = getRelationship(otherName, selectedName);
+                if (relationship) {
+                    const card = document.querySelector(`[data-name="${otherName}"]`);
+                    if (card) {
+                        card.classList.add('relative-highlight');
+                        const relTextDiv = card.querySelector('.card-relationship-text');
+                        if(relTextDiv) {
+                            const tempDiv = document.createElement('div');
+                            tempDiv.innerHTML = relationship.a_to_b;
+                            let displayText = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                            relTextDiv.textContent = displayText.charAt(0).toUpperCase() + displayText.slice(1);
+                        }
+                    }
+                }
+            }
+        }
+        
+        function updatePhotoDisplay() {
+            resultsContainer.classList.toggle('hidden', selectedPeople.length === 0);
+            [photoDisplay1, photoDisplay2].forEach((display, index) => {
+                display.innerHTML = '';
+                display.classList.remove('visible');
+                if (selectedPeople[index]) {
+                    const personName = selectedPeople[index];
+                    const personData = familyData[personName];
+                    if (personData) {
+                        const img = document.createElement('img');
+                        img.src = personData.photoLink;
+                        img.alt = `Foto di ${personName}`;
+                        img.onclick = () => handlePhotoClick(personName);
+                        img.onerror = function() { this.outerHTML = `<div class="person-photo" onclick="handlePhotoClick('${personName}')">${getInitials(personName)}</div>`; };
+                        display.appendChild(img);
+                        setTimeout(() => display.classList.add('visible'), 50);
+                    }
+                }
+            });
+        }
+
+        function updateResults() {
+            const resultsTextWrapper = document.getElementById('results-text-wrapper');
+            const existingBtn = document.getElementById('show-path-btn');
+            if(existingBtn) existingBtn.remove();
+
+            if (selectedPeople.length === 0) {
+                 resultsText.innerHTML = 'In attesa della selezione...';
+                 return;
+            }
+            if (selectedPeople.length === 1) {
+                const personName = selectedPeople[0];
+                resultsText.innerHTML = `<strong>${personName}</strong> ${familyData[personName].gender === 'F' ? 'selezionata...' : 'selezionato...'}`;
+                return;
+            }
+            
+            const [personA_name, personB_name] = selectedPeople;
+            const relationship = getRelationship(personA_name, personB_name);
+            
+            if (!relationship) {
+                resultsText.innerHTML = `Nessun legame noto tra <strong>${personA_name}</strong> e <strong>${personB_name}</strong>.`;
+                return;
+            }
+            
+            resultsText.innerHTML = `<strong>${personA_name}</strong> è ${relationship.a_to_b} di <strong>${personB_name}</strong><br><strong>${personB_name}</strong> è ${relationship.b_to_a} di <strong>${personA_name}</strong>`;
+
+            const path = findFullPath(personA_name, personB_name);
+            if (path && path.length > 2) {
+                const pathBtn = document.createElement('button');
+                pathBtn.id = 'show-path-btn';
+                pathBtn.className = 'kinship-degree-info';
+                pathBtn.textContent = `Dettagli Parentela`;
+                pathBtn.addEventListener('click', () => showKinshipPath(personA_name, personB_name));
+                resultsTextWrapper.appendChild(pathBtn);
+            }
+        }
+        
+        infoButton.addEventListener('click', () => {
+            if (selectedPeople.length !== 1) return;
+            const selectedName = selectedPeople[0];
+
+            const groupedRelatives = {};
+            for (const otherName in familyData) {
+                if (otherName === selectedName) continue;
+                const relationship = getRelationship(otherName, selectedName);
+                if (relationship?.a_to_b) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = relationship.a_to_b;
+                    let term = (tempDiv.textContent || "").trim();
+                    if(term) {
+                        term = term.charAt(0).toUpperCase() + term.slice(1);
+                        const group = groupMap[term] || term;
+                        if (!groupedRelatives[group]) groupedRelatives[group] = [];
+                        groupedRelatives[group].push(familyData[otherName]);
+                    }
+                }
+            }
+            
+            for (const groupName in groupedRelatives) {
+                groupedRelatives[groupName].sort((a,b) => parseDate(a.birth).getTime() - parseDate(b.birth).getTime());
+            }
+
+            if (groupedRelatives['Fratelli'] && groupedRelatives['Fratelli'].every(p => p.gender === 'F')) {
+                groupedRelatives['Sorelle'] = groupedRelatives['Fratelli'];
+                delete groupedRelatives['Fratelli'];
+            }
+            
+            const groupOrder = ['Trisnonni','Bisnonni','Nonni','Suoceri','Genitori','Marito','Moglie','Figli','Generi','Nuore','Fratelli','Sorelle','Prozii','Zii','Cognati','Cugini','Procugini','Nipoti','Pronipoti','Trisnipoti'];
+            
+            let htmlList = `<div class="timeline-container">`;
+            for (const groupName of groupOrder) {
+                if (groupedRelatives[groupName]) {
+                    const peopleInGroup = groupedRelatives[groupName];
+                    const fullNames = peopleInGroup.map(person => {
+                        const nameParts = person.name.split(' ');
+                        const lastName = nameParts.pop();
+                        const firstName = nameParts.join(' ');
+                        const birthYear = person.birth.split('/')[2];
+                        return `<strong>${firstName || lastName}</strong> ${firstName ? lastName : ''} (${birthYear})`;
+                    }).join(', ');
+                    
+                    htmlList += `<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><h3>${groupName} (${peopleInGroup.length})</h3><p>${fullNames}</p></div></div>`;
+                }
+            }
+            htmlList += `</div>`;
+
+            modalTitle.textContent = `${selectedName} (${familyData[selectedName].birth})`;
+            modalBody.innerHTML = htmlList;
+            infoModalOverlay.classList.remove('hidden');
+        });
+
+        function closeModal(modal) {
+            modal.classList.add('hidden');
+        }
+        
+        function generatePathDescriptionText(path, from, to) {
+            let text = '';
+            if (path.length > 2) {
+                for (let i = 0; i < path.length - 1; i++) {
+                    const p1 = path[i];
+                    const p2 = path[i + 1];
+                    text += `${p1} ${getImmediateRelationship(p1, p2)} ${p2}\n`;
+                }
+            }
+            const finalRelData = getRelationship(from, to);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = finalRelData.a_to_b;
+            const cleanRel = (tempDiv.textContent || tempDiv.innerText || "").trim();
+            text += `${from} è ${cleanRel} di ${to}`;
+            return text;
+        }
+        
+        function copyModalContentToClipboard(modalId) {
+            let textToCopy = '';
+            const modalElement = document.getElementById(modalId);
+            const thirtyHyphens = '-'.repeat(30);
+
+            if (modalId === 'info-modal-overlay') {
+                const modalTitleEl = modalElement.querySelector('#modal-title');
+                if (!modalTitleEl || !modalTitleEl.textContent) return;
+                
+                const selectedName = modalTitleEl.textContent.split(' (')[0];
+                const selectedPersonData = familyData[selectedName];
+                if (!selectedPersonData) return;
+
+                const mainPersonEmoji = getEmojiForPerson(selectedPersonData);
+                textToCopy = `${thirtyHyphens}\n${mainPersonEmoji} ${selectedName} (${selectedPersonData.birth})\n${thirtyHyphens}\n`;
+
+                const groupedRelatives = {};
+                for (const otherName in familyData) {
+                    if (otherName === selectedName) continue;
+                    const relationship = getRelationship(otherName, selectedName);
+                    if (relationship?.a_to_b) {
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = relationship.a_to_b;
+                        let term = (tempDiv.textContent || "").trim();
+                        if (term) {
+                            term = term.charAt(0).toUpperCase() + term.slice(1);
+                            const group = groupMap[term] || term;
+                            if (!groupedRelatives[group]) groupedRelatives[group] = [];
+                            groupedRelatives[group].push(familyData[otherName]);
+                        }
+                    }
+                }
+                 for (const groupName in groupedRelatives) {
+                     groupedRelatives[groupName].sort((a, b) => parseDate(a.birth) - parseDate(b.birth));
+                 }
+                if (groupedRelatives['Fratelli'] && groupedRelatives['Fratelli'].every(p => p.gender === 'F')) {
+                    groupedRelatives['Sorelle'] = groupedRelatives['Fratelli'];
+                    delete groupedRelatives['Fratelli'];
+                }
+
+                const copyGroupOrder = ['Marito','Moglie','Figli','Generi','Nuore','Nipoti','Pronipoti','Trisnipoti'];
+                copyGroupOrder.forEach(groupName => {
+                    if (groupedRelatives[groupName]) {
+                        const peopleInGroup = groupedRelatives[groupName];
+                        textToCopy += `\n${groupName} (${peopleInGroup.length}):\n`;
+                        peopleInGroup.forEach(person => {
+                            const emoji = getEmojiForPerson(person);
+                            const birthYear = person.birth.split('/')[2];
+                            textToCopy += `${emoji} ${person.name} (${birthYear})\n`;
+                        });
+                    }
+                });
+
+            } else if (modalId === 'birthday-modal-overlay') {
+                const today = new Date();
+                const formattedDate = today.toLocaleDateString('it-IT');
+                textToCopy = `${thirtyHyphens}\n📅 Compleanni ad oggi:\n${formattedDate}\n${thirtyHyphens}\n`;
+                
+                const peopleWithBirthdays = Object.keys(familyData).filter(name => !familyData[name].death).map(name => {
+                    const person = familyData[name];
+                    return { ...person, age: calculateAge(person.birth), delta: calculateBirthdayDelta(person.birth) };
+                }).sort((a,b) => parseDate(a.birth).getMonth() - parseDate(b.birth).getMonth() || parseDate(a.birth).getDate() - parseDate(b.birth).getDate());
+
+                const monthNames = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
+                let currentMonthIdx = -1;
+
+                peopleWithBirthdays.forEach((person, index) => {
+                    const personMonth = parseDate(person.birth).getMonth();
+                    if (personMonth !== currentMonthIdx) {
+                        currentMonthIdx = personMonth;
+                        textToCopy += `\n📅 ${monthNames[currentMonthIdx].toUpperCase()}\n${thirtyHyphens}\n`;
+                    }
+                    
+                    const emoji = getEmojiForPerson(person);
+                    textToCopy += `${emoji} ${person.name} (${person.birth})\n`;
+                    textToCopy += `Età: ${person.age} - ${person.delta.text}\n`;
+
+                    const nextPerson = peopleWithBirthdays[index + 1];
+                    if (nextPerson && parseDate(nextPerson.birth).getMonth() === currentMonthIdx) {
+                        textToCopy += '---\n';
+                    }
+                });
+
+
+            } else if (modalId === 'path-modal-overlay') {
+                const pathModalBodyEl = modalElement.querySelector('#path-modal-body');
+                const personA = pathModalBodyEl.dataset.personA;
+                const personB = pathModalBodyEl.dataset.personB;
+                
+                if (personA && personB) {
+                    const pathAToB = findFullPath(personA, personB);
+                    const degree = pathAToB ? pathAToB.length - 1 : '?';
+                    const emojiA = getEmojiForPerson(familyData[personA]);
+                    const emojiB = getEmojiForPerson(familyData[personB]);
+                    
+                    textToCopy = `${thirtyHyphens}\n`;
+                    textToCopy += `${emojiA} ${personA}\n`;
+                    textToCopy += `è parente di ${degree}° grado con\n`;
+                    textToCopy += `${emojiB} ${personB}\n`;
+                    textToCopy += `${thirtyHyphens}\n`;
+                    if(pathAToB) textToCopy += generatePathDescriptionText(pathAToB, personA, personB);
+                }
+} else if (modalId === 'tree-modal-overlay') {
+    const rawTreeText = `Nonno Giovanni Pricci (1909-1944)
+Angelina Gasparro (1909-2001)
+│
+└── Luigi Pricci (1933)
+    │Teresa Grilletti (1937)
+    │
+    ├── Angela Pricci (1957)
+    │   │Onofrio Lorusso (1951)
+    │   │
+    │   ├── Benny Lorusso (1975)
+    │   │   │Genny Lepore (1975)
+    │   │   │
+    │   │   ├── Alessandro Lorusso (2010)
+    │   │   ├── Alice Lorusso (2013)
+    │   │   └── Nina Lorusso (2015)
+    │   │
+    │   └── Cinzia Lorusso (1980)
+    │       │Gianni Rotondi (1974)
+    │       │
+    │       └── Nicoletta Rotondi (2019)
+    │
+    ├── Maria Antonietta Pricci (1958)
+    │   │Saverio Chiarappa (1951)
+    │   │
+    │   ├── Martino Chiarappa (1997)
+    │   └── Cristiano Chiarappa (2001)
+    │
+    ├── Marica Pricci (1961)
+    │   │Sebastiano Mazzarisi (1957)
+    │   │
+    │   ├── Maria Grazia Mazzarisi (1989)
+    │   ├── Onofrio Mazzarisi (1992)
+    │   └── Teresa Mazzarisi (1994)
+    │
+    ├── Vanna Pricci (1963)
+    │   │Domenico Lefemine (1957)
+    │   │
+    │   ├── Flavia Lefemine (1996)
+    │   └── Francesco Lefemine (2000)
+    │
+    ├── Giovanni Pricci (1964)
+    │   │Rosa Bianco (1971)
+    │
+    ├── Giuseppe Pricci (1968)
+    │   │Anna Trivisani (1969)
+    │   │
+    │   ├── Gilda Pricci (2004)
+    │   └── Asia Pricci (2006)
+    │
+    └── Tiziana Pricci (1972)
+        │Riccardo Dalena (1973)`;
+    textToCopy = rawTreeText;
+}
+
+            navigator.clipboard.writeText(textToCopy.trim() + '\n\n').then(() => {
+                const toast = document.getElementById('copy-toast');
+                toast.textContent = 'Copiato!';
+                toast.classList.add('show');
+                setTimeout(() => { toast.classList.remove('show'); }, 1000);
+            }).catch(err => {
+                console.error('Errore durante la copia:', err);
+            });
+        }
+        
+        function calculateAge(birthDateStr) {
+            const birthDate = parseDate(birthDateStr);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+            return age;
+        }
+
+        function calculateBirthdayDelta(birthDateStr) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); 
+            const birthDate = parseDate(birthDateStr);
+            const birthdayThisYear = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+            const diffDays = Math.round((birthdayThisYear - today) / (1000*60*60*24));
+
+            if (diffDays === 0) return { text: "Oggi!", isToday: true };
+            if (diffDays > 0) return { text: `Mancano ${diffDays} giorni`, isUpcoming: true };
+            return { text: `Passati da ${Math.abs(diffDays)} giorni`, hasCompleted: true };
+        }
+        
+        function showBirthdayList() {
+            const peopleWithBirthdays = Object.keys(familyData).filter(name => !familyData[name].death).map(name => {
+                const person = familyData[name];
+                return { name, ...person, age: calculateAge(person.birth), delta: calculateBirthdayDelta(person.birth) };
+            }).sort((a,b) => parseDate(a.birth).getMonth() - parseDate(b.birth).getMonth() || parseDate(a.birth).getDate() - parseDate(b.birth).getDate());
+
+            const monthNames = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
+            const today = new Date();
+            const formattedDate = today.toLocaleDateString('it-IT');
+            let currentMonthIdx = -1;
+            let tableHTML = `<table class="birthday-table"><thead><tr><th>Nominativo</th><th>Nascita</th><th>Età</th><th>${formattedDate}</th></tr></thead><tbody>`;
+            
+            peopleWithBirthdays.forEach(person => {
+                const personMonth = parseDate(person.birth).getMonth();
+                if (personMonth !== currentMonthIdx) {
+                    currentMonthIdx = personMonth;
+                    tableHTML += `<tr class="month-header" id="month-header-${currentMonthIdx}"><td colspan="4">${monthNames[currentMonthIdx]}</td></tr>`;
+                }
+                let c = '';
+                if (person.delta.isToday) c = 'birthday-today';
+                else if (person.delta.isUpcoming) c = 'birthday-upcoming';
+                else if (person.delta.hasCompleted) c = 'birthday-completed';
+                tableHTML += `<tr class="${c}" ${person.delta.isToday ? `id="birthday-row-${person.name.replace(/ /g,'-')}"`:''}><td>${person.name}</td><td>${person.birth}</td><td>${person.age}</td><td>${person.delta.text}</td></tr>`;
+            });
+            tableHTML += `</tbody></table>`;
+            birthdayModalBody.innerHTML = tableHTML;
+            birthdayModalOverlay.classList.remove('hidden');
+
+            setTimeout(() => {
+                const todayRow = document.querySelector('.birthday-today');
+                const target = todayRow || document.getElementById(`month-header-${today.getMonth()}`);
+                if(target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
+
+        function generatePathDescription(path, from, to) {
+            let steps = '';
+            if (path.length > 2) {
+                steps = path.slice(0, -1).map((p, i) => `<p>${p} ${getImmediateRelationship(p, path[i + 1])} ${path[i + 1]}</p>`).join('');
+            }
+            const finalRel = getRelationship(from, to);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = finalRel.a_to_b;
+            const cleanRel = tempDiv.textContent || "";
+            return steps + `<p><strong>${from} è ${cleanRel} di ${to}</strong></p>`;
+        }
+
+        function showKinshipPath(personA, personB) {
+            const pathAToB = findFullPath(personA, personB);
+            const degree = pathAToB ? pathAToB.length - 1 : '?';
+            const photoA = familyData[personA].photoLink;
+            const photoB = familyData[personB].photoLink;
+
+            const html = `
+                <div class="path-box" style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                    <div style="display: flex; justify-content: center; gap: 20px;">
+                        <img src="${photoA}" alt="${personA}" class="path-photo" onerror="this.outerHTML='<div class=&quot;path-photo&quot;>${getInitials(personA)}</div>';">
+                        <img src="${photoB}" alt="${personB}" class="path-photo" onerror="this.outerHTML='<div class=&quot;path-photo&quot;>${getInitials(personB)}</div>';">
+                    </div>
+                    <div style="text-align: center;">
+                        <p><strong>${personA}</strong> è</p>
+                        <p>parente di ${degree}° grado</p>
+                        <p>con <strong>${personB}</strong></p>
+                    </div>
+                </div>
+                ${pathAToB ? `<div class="path-box" style="text-align:left;">${generatePathDescription(pathAToB, personA, personB)}</div>` : ''}
+                `;
+            
+            pathModalBody.innerHTML = html;
+            pathModalBody.dataset.personA = personA;
+            pathModalBody.dataset.personB = personB;
+            pathModalOverlay.classList.remove('hidden');
+        }
+        
+        function drawHorizontalTree() {
+            treeModalBody.innerHTML = ""; 
+            const svgNS = "http://www.w3.org/2000/svg";
+            svgTreeElement = document.createElementNS(svgNS, "svg");
+
+            const NODE_WIDTH = 180, NODE_HEIGHT = 80, V_SPACING_COUPLE = 2, H_SPACING = 90, V_SPACING_UNIT = 20, PADDING = 20;
+            const positions = new Map(), subtreeHeights = new Map();
+            const rootId = 'Nonno Giovanni Pricci';
+            
+            function calculateSubtreeHeight(personId) {
+                if (subtreeHeights.has(personId)) return subtreeHeights.get(personId);
+                const person = familyData[personId];
+                const nodeHeight = person.spouse ? (NODE_HEIGHT * 2 + V_SPACING_COUPLE) : NODE_HEIGHT;
+                if (!person.children?.length) {
+                    subtreeHeights.set(personId, nodeHeight);
+                    return nodeHeight;
+                }
+                let childrenBlockHeight = -V_SPACING_UNIT;
+                person.children.slice().sort((a,b) => parseDate(familyData[a].birth) - parseDate(familyData[b].birth))
+                    .forEach(childId => { childrenBlockHeight += calculateSubtreeHeight(childId) + V_SPACING_UNIT; });
+                const finalHeight = Math.max(nodeHeight, childrenBlockHeight);
+                subtreeHeights.set(personId, finalHeight);
+                return finalHeight;
+            }
+
+            function layoutTree(personId, currentX, currentY) {
+                const person = familyData[personId];
+                const coupleHeight = person.spouse ? (NODE_HEIGHT * 2 + V_SPACING_COUPLE) : NODE_HEIGHT;
+                const y = currentY + (subtreeHeights.get(personId) / 2) - (coupleHeight / 2);
+                positions.set(personId, { x: currentX, y: y });
+                if (person.spouse) positions.set(person.spouse, { x: currentX, y: y + NODE_HEIGHT + V_SPACING_COUPLE });
+                if (person.children?.length) {
+                    let childY = currentY;
+                    person.children.slice().sort((a,b) => parseDate(familyData[a].birth) - parseDate(familyData[b].birth))
+                        .forEach(childId => {
+                            layoutTree(childId, currentX + NODE_WIDTH + H_SPACING, childY);
+                            childY += subtreeHeights.get(childId) + V_SPACING_UNIT;
+                        });
+                }
+            }
+            
+            calculateSubtreeHeight(rootId);
+            layoutTree(rootId, PADDING, PADDING);
+            
+            let maxX = 0, maxY = 0;
+            for(const pos of positions.values()) {
+                if(pos.x > maxX) maxX = pos.x;
+                if(pos.y > maxY) maxY = pos.y;
+            }
+            initialTreeWidth = currentTreeWidth = maxX + NODE_WIDTH + PADDING;
+            initialTreeHeight = currentTreeHeight = maxY + NODE_HEIGHT + PADDING;
+            currentTreeX = 0; currentTreeY = 0;
+
+            svgTreeElement.setAttribute("viewBox", `0 0 ${currentTreeWidth} ${currentTreeHeight}`);
+            
+            for(const personId in familyData) {
+                 const pos = positions.get(personId), person = familyData[personId];
+                 if(!pos || !person.children?.length) continue;
+                 const spousePos = person.spouse ? positions.get(person.spouse) : null;
+                 const parentMidY = spousePos ? (pos.y + spousePos.y + NODE_HEIGHT)/2 : pos.y + NODE_HEIGHT/2;
+                 const connectorX = pos.x + NODE_WIDTH + H_SPACING / 2;
+                 const outLine = document.createElementNS(svgNS, 'line');
+                 outLine.setAttribute('x1', pos.x + NODE_WIDTH);
+                 outLine.setAttribute('y1', parentMidY);
+                 outLine.setAttribute('x2', connectorX);
+                 outLine.setAttribute('y2', parentMidY);
+                 outLine.setAttribute('class', 'tree-link');
+                 svgTreeElement.appendChild(outLine);
+
+                 person.children.forEach(childId => {
+                     const childPos = positions.get(childId);
+                     if (childPos) {
+                        const childLine = document.createElementNS(svgNS, 'path');
+                        childLine.setAttribute('d', `M${connectorX},${parentMidY} L ${connectorX},${childPos.y + NODE_HEIGHT/2} L ${childPos.x},${childPos.y + NODE_HEIGHT/2}`);
+                        childLine.setAttribute('class', 'tree-link');
+                        svgTreeElement.appendChild(childLine);
+                     }
+                 });
+            }
+
+            for(const personId in familyData) {
+                const pos = positions.get(personId), person = familyData[personId];
+                if(!pos) continue;
+                const g = document.createElementNS(svgNS, "g");
+                g.setAttribute("class", `tree-node ${person.gender==='M'?'male':'female'} ${person.death?'deceased':''}`);
+                g.setAttribute("transform", `translate(${pos.x},${pos.y})`);
+                const rect = document.createElementNS(svgNS, "rect");
+                rect.setAttribute("width", NODE_WIDTH);
+                rect.setAttribute("height", NODE_HEIGHT);
+                g.appendChild(rect);
+                const fObj = document.createElementNS(svgNS, "foreignObject");
+                fObj.setAttribute("width", NODE_WIDTH); fObj.setAttribute("height", NODE_HEIGHT);
+                const div = document.createElement('div');
+                div.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+                div.className = 'node-content';
+                const photoImg = document.createElement('img');
+                photoImg.className = 'node-photo';
+                photoImg.src = person.photoLink;
+                photoImg.alt = `Foto di ${personId}`;
+                photoImg.onerror = function() { 
+                    const initialDiv = document.createElement('div');
+                    initialDiv.className = 'node-photo initials';
+                    initialDiv.textContent = getInitials(personId);
+                    this.replaceWith(initialDiv);
+                };
+                div.appendChild(photoImg);
+                const textContentDiv = document.createElement('div');
+                textContentDiv.className = 'text-content';
+                textContentDiv.innerHTML = `<span class="person-full-name-tree">${personId}</span><span class="birth-date-tree">${person.birth}</span>`;
+                div.appendChild(textContentDiv);
+                fObj.appendChild(div);
+                g.appendChild(fObj);
+                svgTreeElement.appendChild(g);
+            }
+            
+            treeModalBody.appendChild(svgTreeElement);
+            treeModalOverlay.classList.remove('hidden');
+            setupTreePanZoom(svgTreeElement);
+        }
+
+        function setupTreePanZoom(svgElement) {
+            function applyViewBox() {
+                svgElement.setAttribute('viewBox', `${currentTreeX} ${currentTreeY} ${currentTreeWidth} ${currentTreeHeight}`);
+            }
+
+            svgElement.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                
+                if (e.shiftKey) {
+                    // ZOOM LOGIC
+                    const rect = svgElement.getBoundingClientRect();
+                    const svgMouseX = currentTreeX + (e.clientX - rect.left) * currentTreeWidth / rect.width;
+                    const svgMouseY = currentTreeY + (e.clientY - rect.top) * currentTreeHeight / rect.height;
+                    const zoomFactor = e.deltaY < 0 ? 0.9 : 1.1;
+                    let newWidth = currentTreeWidth * zoomFactor;
+                    let newHeight = currentTreeHeight * zoomFactor;
+                    currentTreeX = svgMouseX - (svgMouseX - currentTreeX) * zoomFactor;
+                    currentTreeY = svgMouseY - (svgMouseY - currentTreeY) * zoomFactor;
+                    currentTreeWidth = newWidth;
+                    currentTreeHeight = newHeight;
+                } else {
+                    // VERTICAL PAN LOGIC
+                    const panFactor = 1; 
+                    currentTreeY += e.deltaY * panFactor;
+                }
+
+                applyViewBox();
+            });
+
+            svgElement.addEventListener('mousedown', (e) => {
+                if (e.button !== 0) return;
+                isPanning = true;
+                startPanX = e.clientX;
+                startPanY = e.clientY;
+                svgElement.classList.add('panning');
+            });
+            const stopPanning = () => { isPanning = false; svgElement.classList.remove('panning'); };
+            svgElement.addEventListener('mousemove', (e) => {
+                if (!isPanning) return;
+                currentTreeX -= (e.clientX - startPanX) * currentTreeWidth / svgElement.getBoundingClientRect().width;
+                currentTreeY -= (e.clientY - startPanY) * currentTreeHeight / svgElement.getBoundingClientRect().height;
+                startPanX = e.clientX;
+                startPanY = e.clientY;
+                applyViewBox();
+            });
+            svgElement.addEventListener('mouseup', stopPanning);
+            svgElement.addEventListener('mouseleave', stopPanning);
+            treeResetZoomBtn.addEventListener('click', () => {
+                currentTreeX = 0; currentTreeY = 0;
+                currentTreeWidth = initialTreeWidth; currentTreeHeight = initialTreeHeight;
+                applyViewBox();
+            });
+        }
+
+        function showInstallPrompt() {
+            const isIos = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator.standalone);
+            const isDismissed = localStorage.getItem('installPromptDismissed') === 'true';
+            if (isIos && !isInStandaloneMode && !isDismissed) {
+                installPrompt.classList.remove('hidden');
+            }
+        }
+        
+        /** Esegue un test completo per verificare che ogni persona abbia 34 relazioni trovate. */
+        function runDiagnostics() {
+            console.log("--- Esecuzione Diagnostica Parentela ---");
+            let allPassed = true;
+            for (const personName in familyData) {
+                let foundRelatives = 0;
+                let missingRelatives = [];
+                relationshipCache.clear();
+                
+                for (const otherName in familyData) {
+                    if (personName === otherName) continue;
+                    const relationship = getRelationship(otherName, personName);
+                    if (relationship) {
+                        foundRelatives++;
+                    } else {
+                        missingRelatives.push(otherName);
+                    }
+                }
+                
+                if (foundRelatives === 34) {
+                    console.log(`✅ OK: ${personName} - Trovati ${foundRelatives}/34 parenti.`);
+                } else {
+                    console.error(`❌ ERRORE: ${personName} - Trovati solo ${foundRelatives}/34 parenti.`);
+                    if(missingRelatives.length > 0) {
+                       console.error(`   Parenti mancanti per ${personName}:`, missingRelatives);
+                    }
+                    allPassed = false;
+                }
+            }
+            
+            if(allPassed) {
+                console.log("--- Diagnostica Completata: Tutti i test sono passati! ---");
+            } else {
+                console.error("--- Diagnostica Completata: Rilevati errori. Aprire la lista per i dettagli. ---");
+            }
+        }
+
+        // --- Event Listeners ---
+        infoModalCloseBtn.addEventListener('click', () => closeModal(infoModalOverlay));
+        infoCopyBtn.addEventListener('click', () => copyModalContentToClipboard('info-modal-overlay'));
+        infoModalOverlay.addEventListener('click', (e) => { if (e.target === infoModalOverlay) closeModal(infoModalOverlay); });
+        
+        birthdayListBtn.addEventListener('click', showBirthdayList);
+        birthdayModalCloseBtn.addEventListener('click', () => closeModal(birthdayModalOverlay));
+        birthdayCopyBtn.addEventListener('click', () => copyModalContentToClipboard('birthday-modal-overlay'));
+        birthdayModalOverlay.addEventListener('click', (e) => { if (e.target === birthdayModalOverlay) closeModal(birthdayModalOverlay); });
+
+        pathModalCloseBtn.addEventListener('click', () => closeModal(pathModalOverlay));
+        pathCopyBtn.addEventListener('click', () => copyModalContentToClipboard('path-modal-overlay'));
+        pathModalOverlay.addEventListener('click', (e) => { if (e.target === pathModalOverlay) closeModal(pathModalOverlay); });
+        
+        treeViewBtn.addEventListener('click', drawHorizontalTree); 
+        treeModalCloseBtn.addEventListener('click', () => closeModal(treeModalOverlay));
+        treeCopyBtn.addEventListener('click', () => copyModalContentToClipboard('tree-modal-overlay'));
+        treeModalOverlay.addEventListener('click', (e) => { if (e.target === treeModalOverlay) closeModal(treeModalOverlay); });
+
+        resetSelectionBtn.addEventListener('click', () => {
+            selectedPeople.forEach(name => {
+                document.querySelector(`.person-card[data-name="${name}"]`)?.classList.remove('selected');
+            });
+            selectedPeople = [];
+            relationshipCache.clear();
+            updateHighlights();
+            updatePhotoDisplay();
+            updateResults();
+            resultsContainer.classList.add('hidden');
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') [infoModalOverlay, birthdayModalOverlay, pathModalOverlay, treeModalOverlay].forEach(m => { if (!m.classList.contains('hidden')) closeModal(m); });
+        });
+        
+        installPromptClose.addEventListener('click', () => {
+            installPrompt.classList.add('hidden');
+            localStorage.setItem('installPromptDismissed', 'true');
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPeople();
+            runDiagnostics(); // Esegue il test di verifica al caricamento della pagina
+            showInstallPrompt();
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.error('Registrazione ServiceWorker fallita:', err));
+            }
+        });
+    </script>
+</body>
+</html>
