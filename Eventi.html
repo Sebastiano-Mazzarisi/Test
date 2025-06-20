@@ -4,20 +4,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=no">
   <title>Prossimi eventi</title>
-
-<!-- Open Graph tags per anteprima WhatsApp/Facebook/Telegram -->
-<meta property="og:title" content="Prossimi eventi di famiglia">
-<meta property="og:description" content="Scopri tutti i prossimi compleanni, onomastici e anniversari!">
-<meta property="og:image" content="https://sebastiano-mazzarisi.github.io/Test/Eventi.png">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://sebastiano-mazzarisi.github.io/Test/Eventi.html">
-
-<!-- Twitter card opzionale, per copertura massima -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Prossimi eventi di famiglia">
-<meta name="twitter:description" content="Scopri tutti i prossimi compleanni, onomastici e anniversari!">
-<meta name="twitter:image" content="https://sebastiano-mazzarisi.github.io/Test/Eventi.png">
-
+  
+  <!-- Favicon per browser -->
+  <link rel="icon" type="image/png" href="https://sebastiano-mazzarisi.github.io/Test/Eventi.png">
+  
+  <!-- Icona per la schermata Home iOS -->
+  <link rel="apple-touch-icon" href="https://sebastiano-mazzarisi.github.io/Test/Eventi.png">
+  
+  <!-- Open Graph / Social preview (WhatsApp, Facebook, Telegram) -->
+  <meta property="og:title" content="Prossimi eventi di famiglia">
+  <meta property="og:description" content="Scopri tutti i prossimi compleanni, onomastici e anniversari!">
+  <meta property="og:image" content="https://sebastiano-mazzarisi.github.io/Test/Eventi.png">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://sebastiano-mazzarisi.github.io/Test/Eventi.html">
+  
+  <!-- Twitter card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Prossimi eventi di famiglia">
+  <meta name="twitter:description" content="Scopri tutti i prossimi compleanni, onomastici e anniversari!">
+  <meta name="twitter:image" content="https://sebastiano-mazzarisi.github.io/Test/Eventi.png">
 
   <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
@@ -111,9 +116,9 @@
       color: #8B0000;
     }
     .image-container img {
-      height: auto; /* Modificato: l'altezza si adatta alla larghezza */
-      width: 100%; /* Modificato: l'immagine occupa il 100% della larghezza del contenitore */
-      max-width: 300px; /* Aggiunto: Limita la larghezza massima dell'immagine */
+      height: auto;
+      width: 100%;
+      max-width: 300px;
       border: 4px solid #B4A28C; 
       background: white; 
       margin: 10px auto; 
@@ -153,7 +158,7 @@
   <canvas id="confetti-canvas"></canvas>
 
   <ul id="eventi-lista">
-    </ul>
+  </ul>
 
   <script>
     let descrizioniMap = new Map();
@@ -250,46 +255,48 @@
       return frammenti;
     }
 
-function leggiTesto(nominativo) {
-  const nomeNormalizzato = gestisciEccezioni(nominativo);
-  console.log("Cercando descrizione per:", nomeNormalizzato);
-  console.log("Descrizioni disponibili:", Array.from(descrizioniMap.keys()));
+    function leggiTesto(nominativo) {
+      try {
+        const nomeNormalizzato = gestisciEccezioni(nominativo);
+        console.log("Cercando descrizione per:", nomeNormalizzato);
+        console.log("Descrizioni disponibili:", Array.from(descrizioniMap.keys()));
 
-  const descrizione = descrizioniMap.get(nomeNormalizzato);
-  console.log("Descrizione trovata:", descrizione);
+        const descrizione = descrizioniMap.get(nomeNormalizzato);
+        console.log("Descrizione trovata:", descrizione);
 
-  // Applica la correzione di pronuncia
-  const testoDaLeggere = correggiPronuncia(descrizione || nominativo);
-  console.log("Testo che verrà letto:", testoDaLeggere);
+        const testoDaLeggere = correggiPronuncia(descrizione || nominativo);
+        console.log("Testo che verrà letto:", testoDaLeggere);
 
-  // Ferma qualsiasi sintesi vocale in corso
-  responsiveVoice.cancel();
+        responsiveVoice.cancel();
 
-  const frammenti = dividiTestoInFrammentiPerFrasi(testoDaLeggere);
-  console.log("Frammenti da leggere:", frammenti);
+        const frammenti = dividiTestoInFrammentiPerFrasi(testoDaLeggere);
+        console.log("Frammenti da leggere:", frammenti);
 
-  let currentIndex = 0;
-  
-  function playNextFragment() {
-    if (currentIndex < frammenti.length) {
-      // Rilevamento dispositivo mobile
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      
-      responsiveVoice.speak(correggiPronuncia(frammenti[currentIndex]), "Italian Female", {
-        rate: isMobile ? 1.01 : 1.15,  // Velocità ridotta per dispositivi mobili
-        volume: 1,
-        onend: () => {
-          currentIndex++;
+        let currentIndex = 0;
+        
+        function playNextFragment() {
           if (currentIndex < frammenti.length) {
-            setTimeout(playNextFragment, 5);
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            responsiveVoice.speak(correggiPronuncia(frammenti[currentIndex]), "Italian Female", {
+              rate: isMobile ? 1.01 : 1.15,
+              volume: 1,
+              onend: () => {
+                currentIndex++;
+                if (currentIndex < frammenti.length) {
+                  setTimeout(playNextFragment, 5);
+                }
+              }
+            });
           }
         }
-      });
-    }
-  }
 
-  playNextFragment();
-}
+        playNextFragment();
+      } catch (error) {
+        console.error("Errore nella lettura del testo:", error);
+      }
+    }
+
     function mostraAlert(nome) {
       if (!descrizioniMap.size) {
         console.log("Ricarico le descrizioni...");
@@ -317,7 +324,9 @@ function leggiTesto(nominativo) {
         const righe = text.split("\n").filter(riga => riga.trim() !== "");
         righe.forEach(riga => {
           const [anno, nome] = riga.split(",");
-          nomiAnniversari[anno.trim()] = nome.trim();
+          if (anno && nome) {
+            nomiAnniversari[anno.trim()] = nome.trim();
+          }
         });
       } catch (err) {
         console.error('Errore nel caricamento dei nomi degli anniversari:', err);
@@ -325,22 +334,42 @@ function leggiTesto(nominativo) {
     }
 
     async function caricaEventiDaCSV(url) {
-      const response = await fetch(url);
-      const csvText = await response.text();
-      const righe = csvText
-        .split("\n")
-        .filter(riga => riga.trim() !== "")
-        .map(riga => riga.split(","));
-      const [intestazioni, ...dati] = righe;
-      return dati.map(riga => {
-        return intestazioni.reduce((acc, colonna, index) => {
-          acc[colonna.trim()] = riga[index]?.trim();
-          return acc;
-        }, {});
-      });
+      try {
+        const response = await fetch(url);
+        const csvText = await response.text();
+        const righe = csvText
+          .split("\n")
+          .filter(riga => riga.trim() !== "")
+          .map(riga => riga.split(","));
+        const [intestazioni, ...dati] = righe;
+        
+        if (!intestazioni || intestazioni.length === 0) {
+          console.error('Intestazioni CSV mancanti');
+          return [];
+        }
+        
+        return dati.map(riga => {
+          const evento = intestazioni.reduce((acc, colonna, index) => {
+            acc[colonna.trim()] = riga[index]?.trim() || '';
+            return acc;
+          }, {});
+          
+          // Verifica che l'evento abbia i campi necessari
+          if (!evento.Nominativo || !evento.Tipo || !evento.Data) {
+            console.warn('Evento incompleto:', evento);
+          }
+          
+          return evento;
+        }).filter(evento => evento.Nominativo && evento.Tipo && evento.Data);
+      } catch (error) {
+        console.error('Errore nel caricamento del CSV:', error);
+        return [];
+      }
     }
 
     function correggiLink(link) {
+      if (!link) return '';
+      
       if (link.includes("drive.google.com")) {
         const fileIdMatch = link.match(/\bid=([^&]+)/);
         if (fileIdMatch) {
@@ -365,11 +394,14 @@ function leggiTesto(nominativo) {
     }
 
     function parseDataMMGG(data) {
+      if (!data) return null;
       const [giorno, mese] = data.split("/").map(Number);
+      if (!giorno || !mese) return null;
       return new Date(2000, mese - 1, giorno);
     }
 
     function calcolaGiorniMancanti(dataEvento, oggiMMGG) {
+      if (!dataEvento || !oggiMMGG) return 0;
       const diff = dataEvento - oggiMMGG;
       return diff >= 0
         ? Math.ceil(diff / (1000 * 60 * 60 * 24))
@@ -377,11 +409,11 @@ function leggiTesto(nominativo) {
     }
 
     function calcolaEta(evento) {
-      if (evento.Tipo !== "Compleanno" && evento.Tipo !== "Anniversario") return null;
+      if (!evento || (evento.Tipo !== "Compleanno" && evento.Tipo !== "Anniversario")) return null;
 
       let annoNascita = parseInt(evento.Anno);
       if (isNaN(annoNascita)) {
-        const parti = evento.Data.split("/");
+        const parti = evento.Data ? evento.Data.split("/") : [];
         if (parti.length === 3) {
           const maybeYear = parseInt(parti[2]);
           if (!isNaN(maybeYear)) {
@@ -394,12 +426,10 @@ function leggiTesto(nominativo) {
       const oggi = getDataCorrente();
       const annoCorrente = oggi.getFullYear();
       
-      // La semplice differenza tra anno corrente e anno di nascita
-      // è l'età che la persona compirà o ha già compiuto nell'anno corrente.
       return annoCorrente - annoNascita;
     }
 
-   function ordinaPerData(eventi) {
+    function ordinaPerData(eventi) {
       const oggi = getDataCorrente();
       const oggiMMGG = new Date(2000, oggi.getMonth(), oggi.getDate());
 
@@ -407,10 +437,12 @@ function leggiTesto(nominativo) {
         .filter(e => e.Data)
         .map(e => {
           const dataEvento = parseDataMMGG(e.Data);
+          if (!dataEvento) return null;
           const giorniMancanti = calcolaGiorniMancanti(dataEvento, oggiMMGG);
           const eta = calcolaEta(e);
           return { ...e, dataEvento, giorniMancanti, eta };
         })
+        .filter(e => e !== null && e.dataEvento !== null)
         .sort((a, b) => {
           const diffA = a.dataEvento - oggiMMGG;
           const diffB = b.dataEvento - oggiMMGG;
@@ -432,25 +464,33 @@ function leggiTesto(nominativo) {
     }
 
     function suonaBeepSingolo() {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(500, ctx.currentTime);
-      osc.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.2);
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(500, ctx.currentTime);
+        osc.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.2);
+      } catch (error) {
+        console.error("Errore nel suono:", error);
+      }
     }
 
     function suonaTreBeep() {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      for (let i = 0; i < 3; i++) {
-        const startTime = ctx.currentTime + i * 0.5;
-        const osc = ctx.createOscillator();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(500, startTime);
-        osc.connect(ctx.destination);
-        osc.start(startTime);
-        osc.stop(startTime + 0.2);
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        for (let i = 0; i < 3; i++) {
+          const startTime = ctx.currentTime + i * 0.5;
+          const osc = ctx.createOscillator();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(500, startTime);
+          osc.connect(ctx.destination);
+          osc.start(startTime);
+          osc.stop(startTime + 0.2);
+        }
+      } catch (error) {
+        console.error("Errore nel suono:", error);
       }
     }
 
@@ -481,6 +521,8 @@ function leggiTesto(nominativo) {
                       "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
 
     function costruisciDataEventoGGMM(evento) {
+      if (!evento || !evento.dataEvento) return { giornoSettimana: '', giornoDelMese: '', nomeMese: '', annoVero: '' };
+      
       const baseDate = getDataCorrente();
       const currentYear = baseDate.getFullYear();
 
@@ -501,6 +543,8 @@ function leggiTesto(nominativo) {
     }
 
     function sistemaNominativo(evento) {
+      if (!evento || !evento.Nominativo) return '';
+      
       let nominativo = evento.Nominativo.trim();
       if (evento.Tipo === "Anniversario") {
         if (nominativo.startsWith("AM ")) {
@@ -522,171 +566,187 @@ function leggiTesto(nominativo) {
       }
     }
 
-function costruisciTestoLettura(evento) {
-  const nominativoLetto = sistemaNominativo(evento);
-  const { giornoSettimana, giornoDelMese, nomeMese, annoVero } = costruisciDataEventoGGMM(evento);
+    function costruisciTestoLettura(evento) {
+      try {
+        const nominativoLetto = sistemaNominativo(evento);
+        const { giornoSettimana, giornoDelMese, nomeMese, annoVero } = costruisciDataEventoGGMM(evento);
 
-  let quandoBase;
-  if (evento.giorniMancanti === 0) {
-    quandoBase = "oggi";
-  } else if (evento.giorniMancanti === 1) {
-    quandoBase = "domani";
-  } else {
-    quandoBase = `Tra ${evento.giorniMancanti} giorni`;
-  }
+        let quandoBase;
+        if (evento.giorniMancanti === 0) {
+          quandoBase = "oggi";
+        } else if (evento.giorniMancanti === 1) {
+          quandoBase = "domani";
+        } else {
+          quandoBase = `Tra ${evento.giorniMancanti} giorni`;
+        }
 
-  const dataCompleta = `${quandoBase}, ${giornoSettimana} ${giornoDelMese} ${nomeMese}`;
+        const dataCompleta = `${quandoBase}, ${giornoSettimana} ${giornoDelMese} ${nomeMese}`;
 
-  let testoFinale = '';
+        let testoFinale = '';
 
-  if (evento.Tipo === "Compleanno") {
-    const eta = evento.eta || 0;
-    if (evento.giorniMancanti === 0) {
-      testoFinale = `${dataCompleta} ${annoVero}, ${nominativoLetto} compie ${eta} anni. Auguri di buon compleanno!`;
-    } else {
-      testoFinale = `${dataCompleta} ${annoVero}, ${nominativoLetto} compirà ${eta} anni.`;
-    }
-  } else if (evento.Tipo === "Onomastico") {
-    if (evento.giorniMancanti === 0) {
-      testoFinale = `${dataCompleta} ${annoVero}, è l'onomastico di ${nominativoLetto}. Auguri a ${nominativoLetto}!`;
-    } else {
-      testoFinale = `${dataCompleta} ${annoVero}, sarà l'onomastico di ${nominativoLetto}.`;
-    }
-  } else if (evento.Tipo === "Anniversario") {
-    const anni = evento.eta || 0;
-    const nomeAnniv = nomiAnniversari[anni] || "";
+        if (evento.Tipo === "Compleanno") {
+          const eta = evento.eta || 0;
+          if (evento.giorniMancanti === 0) {
+            testoFinale = `${dataCompleta} ${annoVero}, ${nominativoLetto} compie ${eta} anni. Auguri di buon compleanno!`;
+          } else {
+            testoFinale = `${dataCompleta} ${annoVero}, ${nominativoLetto} compirà ${eta} anni.`;
+          }
+        } else if (evento.Tipo === "Onomastico") {
+          if (evento.giorniMancanti === 0) {
+            testoFinale = `${dataCompleta} ${annoVero}, è l'onomastico di ${nominativoLetto}. Auguri a ${nominativoLetto}!`;
+          } else {
+            testoFinale = `${dataCompleta} ${annoVero}, sarà l'onomastico di ${nominativoLetto}.`;
+          }
+        } else if (evento.Tipo === "Anniversario") {
+          const anni = evento.eta || 0;
+          const nomeAnniv = nomiAnniversari[anni] || "";
 
-    let testoIniziale = (evento.giorniMancanti === 0)
-      ? "è l'anniversario di matrimonio di"
-      : "sarà l'anniversario di matrimonio di";
+          let testoIniziale = (evento.giorniMancanti === 0)
+            ? "è l'anniversario di matrimonio di"
+            : "sarà l'anniversario di matrimonio di";
 
-    let verbo = (evento.giorniMancanti === 0)
-      ? "festeggiano"
-      : "festeggeranno";
+          let verbo = (evento.giorniMancanti === 0)
+            ? "festeggiano"
+            : "festeggeranno";
 
-    if (nomeAnniv) {
-      testoFinale = `${dataCompleta} ${annoVero}, ${testoIniziale} ${nominativoLetto} che ${verbo} le ${nomeAnniv}, cioè ${anni} anni insieme.`;
-    } else {
-      testoFinale = `${dataCompleta} ${annoVero}, ${testoIniziale} ${nominativoLetto}, cioè ${anni} anni insieme.`;
-    }
-  } else {
-    testoFinale = `Evento non riconosciuto per ${nominativoLetto}`;
-  }
+          if (nomeAnniv) {
+            testoFinale = `${dataCompleta} ${annoVero}, ${testoIniziale} ${nominativoLetto} che ${verbo} le ${nomeAnniv}, cioè ${anni} anni insieme.`;
+          } else {
+            testoFinale = `${dataCompleta} ${annoVero}, ${testoIniziale} ${nominativoLetto}, cioè ${anni} anni insieme.`;
+          }
+        } else {
+          testoFinale = `Evento non riconosciuto per ${nominativoLetto}`;
+        }
 
-  // Correggi la pronuncia del testo finale
-  testoFinale = correggiPronuncia(testoFinale);
+        testoFinale = correggiPronuncia(testoFinale);
 
-  // Ferma qualsiasi sintesi vocale in corso
-  responsiveVoice.cancel();
+        responsiveVoice.cancel();
 
-  const frammenti = dividiTestoInFrammentiPerFrasi(testoFinale);
-  let currentIndex = 0;
+        const frammenti = dividiTestoInFrammentiPerFrasi(testoFinale);
+        let currentIndex = 0;
 
-  function playNextFragment() {
-    if (currentIndex < frammenti.length) {
-      // Rilevamento dispositivo mobile
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      
-      responsiveVoice.speak(correggiPronuncia(frammenti[currentIndex]), "Italian Female", {
-        rate: isMobile ? 1.01 : 1.15,  // Velocità ridotta per dispositivi mobili
-        volume: 1,
-        onend: () => {
-          currentIndex++;
+        function playNextFragment() {
           if (currentIndex < frammenti.length) {
-            setTimeout(playNextFragment, 5);
-          } else if (evento.giorniMancanti === 0) {
-            setTimeout(suonaTreBeep, 15);
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            responsiveVoice.speak(correggiPronuncia(frammenti[currentIndex]), "Italian Female", {
+              rate: isMobile ? 1.01 : 1.15,
+              volume: 1,
+              onend: () => {
+                currentIndex++;
+                if (currentIndex < frammenti.length) {
+                  setTimeout(playNextFragment, 5);
+                } else if (evento.giorniMancanti === 0) {
+                  setTimeout(suonaTreBeep, 15);
+                }
+              }
+            });
           }
         }
-      });
-    }
-  }
 
-  playNextFragment();
-  return testoFinale;
-}
+        playNextFragment();
+        return testoFinale;
+      } catch (error) {
+        console.error("Errore nella costruzione del testo:", error);
+        return '';
+      }
+    }
 
     function aggiornaEventi(eventi) {
       const lista = document.getElementById('eventi-lista');
       lista.innerHTML = '';
 
       eventi.forEach(evento => {
-        const classeTipo = evento.Tipo.toLowerCase();
-        const li = document.createElement('li');
-        li.classList.add(classeTipo);
+        try {
+          // Controlli di sicurezza
+          if (!evento || !evento.Tipo || !evento.Nominativo) {
+            console.error('Evento non valido:', evento);
+            return;
+          }
+          
+          const classeTipo = evento.Tipo.toLowerCase();
+          const li = document.createElement('li');
+          li.classList.add(classeTipo);
 
-        const imgSrc = evento.Link ? correggiLink(evento.Link) : `${evento.Nominativo}.JPG`;
+          const imgSrc = evento.Link ? correggiLink(evento.Link) : `${evento.Nominativo}.JPG`;
 
-        const { giornoSettimana, giornoDelMese, nomeMese, annoVero } = costruisciDataEventoGGMM(evento);
-        const dataFormattataUI = `${giornoSettimana} ${giornoDelMese} ${nomeMese} ${annoVero}`;
+          const { giornoSettimana, giornoDelMese, nomeMese, annoVero } = costruisciDataEventoGGMM(evento);
+          const dataFormattataUI = `${giornoSettimana} ${giornoDelMese} ${nomeMese} ${annoVero}`;
 
-        let tipoEventoText = "";
-        if (evento.Tipo === "Compleanno" || evento.Tipo === "Anniversario") {
-          if (evento.eta) {
-            let giorniText;
-            if (evento.giorniMancanti === 0) {
-              giorniText = "oggi";
-            } else if (evento.giorniMancanti === 1) {
-              giorniText = "domani";
+          let tipoEventoText = "";
+          if (evento.Tipo === "Compleanno" || evento.Tipo === "Anniversario") {
+            if (evento.eta) {
+              let giorniText;
+              if (evento.giorniMancanti === 0) {
+                giorniText = "oggi";
+              } else if (evento.giorniMancanti === 1) {
+                giorniText = "domani";
+              } else {
+                giorniText = `tra ${evento.giorniMancanti} giorni`;
+              }
+              tipoEventoText = `${evento.eta}° ${evento.Tipo} ${giorniText}`;
             } else {
-              giorniText = `tra ${evento.giorniMancanti} giorni`;
+              tipoEventoText = `${evento.Tipo} in ${evento.giorniMancanti} giorni`;
             }
-            // Qui usiamo direttamente evento.eta che ora è corretto
-            tipoEventoText = `${evento.eta}° ${evento.Tipo} ${giorniText}`;
-          } else {
-            tipoEventoText = `${evento.Tipo} in ${evento.giorniMancanti} giorni`;
+          } else if (evento.Tipo === "Onomastico") {
+            if (evento.giorniMancanti === 0) {
+              tipoEventoText = "Onomastico oggi";
+            } else if (evento.giorniMancanti === 1) {
+              tipoEventoText = "Onomastico domani";
+            } else {
+              tipoEventoText = `Onomastico tra ${evento.giorniMancanti} giorni`;
+            }
           }
-        } else if (evento.Tipo === "Onomastico") {
-          if (evento.giorniMancanti === 0) {
-            tipoEventoText = "Onomastico oggi";
-          } else if (evento.giorniMancanti === 1) {
-            tipoEventoText = "Onomastico domani";
-          } else {
-            tipoEventoText = `Onomastico tra ${evento.giorniMancanti} giorni`;
+
+          let nomeAnniversarioHtml = "";
+          if (evento.Tipo === "Anniversario" && evento.eta) {
+            const nomeAnniversario = nomiAnniversari[evento.eta];
+            if (nomeAnniversario) {
+              nomeAnniversarioHtml = `${nomeAnniversario}<br>`;
+            }
           }
+
+          // Escape del nominativo per evitare problemi con apostrofi
+          const nominativoEscaped = evento.Nominativo.replace(/'/g, "\\'");
+
+          li.innerHTML = `
+            <a href="javascript:void(0)" onclick="mostraAlert('${nominativoEscaped}')" style="text-decoration:none; color: inherit;">
+              <strong>${evento.Nominativo}</strong>
+            </a>
+            <br>
+            <span class="tipo-evento">${tipoEventoText}</span><br>
+            ${dataFormattataUI}<br>
+            ${nomeAnniversarioHtml ? nomeAnniversarioHtml : ""}
+            <div class="image-container">
+              <img
+                src="${imgSrc}"
+                alt="${evento.Tipo} di ${evento.Nominativo}"
+                onerror="
+                  this.onerror=null;
+                  this.src='default-thumbnail.jpg';
+                  const errorMessage = document.createElement('div');
+                  errorMessage.className = 'error-message';
+                  errorMessage.innerText = 'Immagine non disponibile';
+                  this.parentElement.appendChild(errorMessage);
+                "
+              >
+            </div>
+          `;
+          lista.appendChild(li);
+
+          const imgElement = li.querySelector('img');
+          if (imgElement) {
+            imgElement.addEventListener('click', () => {
+              if (evento.giorniMancanti === 0) {
+                suonaBeepSingolo();
+                lanciaCoriandoli10s();
+              }
+              costruisciTestoLettura(evento);
+            });
+          }
+        } catch (error) {
+          console.error('Errore nell\'aggiornamento dell\'evento:', error, evento);
         }
-
-        let nomeAnniversarioHtml = "";
-        if (evento.Tipo === "Anniversario" && evento.eta) {
-          const nomeAnniversario = nomiAnniversari[evento.eta];
-          if (nomeAnniversario) {
-            nomeAnniversarioHtml = `${nomeAnniversario}<br>`;
-          }
-        }
-
-        li.innerHTML = `
-          <a href="javascript:void(0)" onclick="mostraAlert('${evento.Nominativo}')" style="text-decoration:none; color: inherit;">
-            <strong>${evento.Nominativo}</strong>
-          </a>
-          <br>
-          <span class="tipo-evento">${tipoEventoText}</span><br>
-          ${dataFormattataUI}<br>
-          ${nomeAnniversarioHtml ? nomeAnniversarioHtml : ""}
-          <div class="image-container">
-            <img
-              src="${imgSrc}"
-              alt="${evento.Tipo} di ${evento.Nominativo}"
-              onerror="
-                this.onerror=null;
-                this.src='default-thumbnail.jpg';
-                const errorMessage = document.createElement('div');
-                errorMessage.className = 'error-message';
-                errorMessage.innerText = 'Immagine non disponibile';
-                this.parentElement.appendChild(errorMessage);
-              "
-            >
-          </div>
-        `;
-        lista.appendChild(li);
-
-        const imgElement = li.querySelector('img');
-        imgElement.addEventListener('click', () => {
-          if (evento.giorniMancanti === 0) {
-            suonaBeepSingolo();
-            lanciaCoriandoli10s();
-          }
-          costruisciTestoLettura(evento);
-        });
       });
     }
 
@@ -743,12 +803,18 @@ function costruisciTestoLettura(evento) {
     caricaNomiAnniversari().then(() => {
       aggiornaDataOggi();
       caricaEventiDaCSV('https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/refs/heads/main/Eventi-Link.csv')
-        .then(eventi => ordinaPerData(eventi))
-        .then(aggiornaEventi)
+        .then(eventi => {
+          console.log("Eventi caricati:", eventi);
+          return ordinaPerData(eventi);
+        })
+        .then(eventiOrdinati => {
+          console.log("Eventi ordinati:", eventiOrdinati);
+          aggiornaEventi(eventiOrdinati);
+        })
         .catch(err => console.error('Errore nel caricamento degli eventi:', err));
     });
 
-// Carica le descrizioni all'avvio
+    // Carica le descrizioni all'avvio
     caricaDescrizioni();
   </script>
 </body>
