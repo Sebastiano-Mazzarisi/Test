@@ -75,7 +75,34 @@
       color: #666;
       font-size: 1em;
       margin-bottom: 30px;
+      position: relative; /* Mantienilo se vuoi che la stella lampeggiante rimanga relativa al li */
+      /* Rimosso padding-right perché l'icona non sarà più posizionata assolutamente qui */
     }
+    /* Stili per l'icona "i" */
+    .info-icon {
+      /* Rimosso position: absolute; top; right; transform; */
+      display: inline-flex; /* Per allinearsi con il testo e usare flex per centrare il contenuto */
+      justify-content: center;
+      align-items: center;
+      margin-left: 8px; /* Spazio tra il testo della data e l'icona */
+      font-size: 1.2em; /* Dimensione dell'icona */
+      color: #333; /* Colore del testo dell'icona (più scuro per leggibilità su sfondo giallo) */
+      cursor: pointer; /* Indica che è cliccabile */
+      background-color: #FFFFE0; /* Sfondo giallo pastello */
+      border: 1px solid #999; /* Bordo un po' più scuro */
+      border-radius: 50%; /* Forma circolare */
+      width: 1.5em; /* Larghezza del cerchio */
+      height: 1.5em; /* Altezza del cerchio */
+      box-sizing: border-box; /* Include padding e border nella width/height */
+      line-height: 1; /* Assicura che il testo sia centrato verticalmente nel cerchio */
+      vertical-align: middle; /* Allinea verticalmente con il testo circostante */
+    }
+    .info-icon:hover {
+      color: #000;
+      border-color: #444;
+      background-color: #FFD700; /* Giallo più scuro al hover */
+    }
+
     ul {
       list-style-type: none;
       padding: 0;
@@ -220,6 +247,46 @@
       }
     }
 
+    /* Stili per il pop-up */
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000; /* Assicura che sia sopra tutto */
+      display: none; /* Nascosto di default */
+    }
+
+    .popup-content {
+      background-color: white;
+      padding: 25px;
+      border-radius: 10px;
+      text-align: center;
+      position: relative;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .popup-close-button {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      background: none;
+      border: none;
+      font-size: 1.5em;
+      cursor: pointer;
+      color: #333;
+    }
+
+    .popup-close-button:hover {
+      color: #000;
+    }
   </style>
 </head>
 
@@ -230,12 +297,24 @@
     <button id="cambia-data">Cambia data</button>
     <button id="reset-data">Torna alla data reale</button>
   </div>
-  <div id="oggi"></div>
+  <div id="oggi">
+    <span id="data-corrente-testo"></span>
+    <span class="info-icon" id="info-icon">ⓘ</span> </div>
 
   <canvas id="confetti-canvas"></canvas>
 
   <ul id="eventi-lista">
   </ul>
+
+  <div id="bookmarkPopup" class="popup-overlay">
+    <div class="popup-content">
+      <button class="popup-close-button" id="popup-close-button">[X]</button>
+      <h2>Istruzioni per l'installazione del segnalibro</h2>
+      <p>Per un'esperienza ottimale, aggiungi questa pagina alla schermata Home del tuo dispositivo.</p>
+      <p>Su iOS: Clicca sull'icona "Condividi" (il quadrato con la freccia in alto) e poi "Aggiungi alla schermata Home".</p>
+      <p>Su Android: Clicca sul menu (i tre puntini in alto a destra) e poi "Aggiungi a schermata Home".</p>
+    </div>
+  </div>
 
   <script>
     let descrizioniMap = new Map();
@@ -549,7 +628,7 @@
       const nomeGiorno = giorniSettimana[oggi.getDay()];
       const nomeMese = mesi[oggi.getMonth()];
       const dataOggi = `${nomeGiorno} ${oggi.getDate()} ${nomeMese} ${oggi.getFullYear()}`;
-      document.getElementById('oggi').innerText = `Oggi: ${dataOggi}`;
+      document.getElementById('data-corrente-testo').innerText = `Oggi: ${dataOggi}`; // Aggiornato ID
     }
 
     function suonaBeepSingolo() {
@@ -903,7 +982,25 @@
       aggiornaDataOggi();
     }
 
-    // Aggiungi event listener solo se NON è mobile
+    // Funzioni per la gestione del pop-up del segnalibro
+    function showBookmarkPopup() {
+        document.getElementById('bookmarkPopup').style.display = 'flex';
+    }
+
+    function hideBookmarkPopup() {
+        document.getElementById('bookmarkPopup').style.display = 'none';
+        localStorage.setItem('bookmarkInstructionsShown', 'true'); // Memorizza che il pop-up è stato mostrato
+    }
+
+    function checkBookmarkAndShowPopup() {
+        // Mostra il pop-up solo su mobile e se non è mai stato mostrato prima
+        if (isMobile && localStorage.getItem('bookmarkInstructionsShown') !== 'true') {
+            // Piccolo ritardo per permettere al CSS di caricarsi e alla pagina di stabilizzarsi
+            setTimeout(showBookmarkPopup, 1000); 
+        }
+    }
+
+    // Aggiungi event listener al titolo (solo se NON è mobile)
     if (!isMobile) {
       document.getElementById('titolo').addEventListener('click', promptData);
       document.addEventListener('keydown', event => {
@@ -927,6 +1024,12 @@
         console.log("Funzionalità di modifica data disabilitata su mobile.");
     }
 
+    // Event listener per il pulsante di chiusura del pop-up
+    document.getElementById('popup-close-button').addEventListener('click', hideBookmarkPopup);
+
+    // Event listener per l'icona "i" (sempre attiva, mostra il pop-up manualmente)
+    document.getElementById('info-icon').addEventListener('click', showBookmarkPopup);
+
 
     // Avvio
     caricaNomiAnniversari().then(() => {
@@ -941,6 +1044,10 @@
           aggiornaEventi(eventiOrdinati);
         })
         .catch(err => console.error('Errore nel caricamento degli eventi:', err));
+    })
+    .finally(() => {
+        // Controlla e mostra il pop-up del segnalibro dopo che tutto è caricato
+        checkBookmarkAndShowPopup(); 
     });
 
     // Carica le descrizioni all'avvio
