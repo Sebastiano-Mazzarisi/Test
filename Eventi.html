@@ -201,6 +201,31 @@
         border-color: #999;
     }
 
+    /* Stili per le barre divisorie per anno */
+    .year-divider {
+      width: 100%;
+      max-width: 1200px;
+      margin: 30px auto 20px auto;
+      position: relative;
+      height: 3px;
+      background-color: #F0E68C; /* Giallo paglierino */
+      border-radius: 2px;
+      flex-basis: 100%; /* Forza la barra a occupare l'intera larghezza, andando a capo */
+    }
+    
+    .year-label {
+      position: absolute;
+      right: 0;
+      top: -12px;
+      background-color: #F0E68C; /* Giallo paglierino */
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-weight: bold;
+      font-size: 0.9em;
+      color: #333;
+      border: 1px solid #DAA520;
+    }
+
     ul {
       list-style-type: none;
       padding: 0;
@@ -469,7 +494,7 @@
 
   <div id="search-container">
     <div id="search-input-wrapper">
-        <input type="text" id="searchInput" placeholder="Cerca per nominativo...">
+        <input type="text" id="searchInput" placeholder="Cerca eventi...">
         <div id="event-counter" class="search-addon">0/0</div>
         <button id="clear-search-button" title="Cancella ricerca">×</button>
     </div>
@@ -627,8 +652,15 @@ function parseData(dataStr) {
 
 function calcolaGiorni(dataEvento, oggi) {
   if (!dataEvento || !oggi) return 0;
-  const diff = dataEvento - oggi;
-  return diff >= 0 ? Math.ceil(diff / (1000 * 60 * 60 * 24)) : Math.ceil((diff + 365 * 24 * 60 * 60 * 1000) / (1000 * 60 * 60 * 24));
+  
+  // Normalizza entrambe le date a mezzanotte per confronto preciso
+  const oggiNormalizzato = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate());
+  const eventoNormalizzato = new Date(dataEvento.getFullYear(), dataEvento.getMonth(), dataEvento.getDate());
+  
+  const diff = eventoNormalizzato - oggiNormalizzato;
+  const giorni = Math.round(diff / (1000 * 60 * 60 * 24));
+  
+  return giorni >= 0 ? giorni : giorni + 365;
 }
 
 function calcolaAnni(evento) {
@@ -647,7 +679,12 @@ function getDataCompleta(evento) {
   const parti = evento.Data.split("/").map(Number);
   
   let dataEvento = new Date(annoCorrente, parti[1] - 1, parti[0]);
-  if (dataEvento < oggi) {
+  
+  // Normalizza la data di oggi a mezzanotte per il confronto
+  const oggiSenzaOra = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate());
+  
+  // Se la data è già passata quest'anno (ma non oggi), usa l'anno prossimo
+  if (dataEvento < oggiSenzaOra) {
     dataEvento.setFullYear(annoCorrente + 1);
   }
   
@@ -664,20 +701,30 @@ function getDataCompleta(evento) {
 
 function ordinaEventi(eventi) {
   const oggi = getDataOdierna();
-  const oggiRef = new Date(2000, oggi.getMonth(), oggi.getDate());
   
   return eventi.filter(e => e.Data).map(e => {
     const dataEvento = parseData(e.Data);
     if (!dataEvento) return null;
-    const giorni = calcolaGiorni(dataEvento, oggiRef);
+    
+    // Usa l'anno corrente o prossimo per il calcolo
+    const annoCorrente = oggi.getFullYear();
+    let dataEventoCompleta = new Date(annoCorrente, dataEvento.getMonth(), dataEvento.getDate());
+    
+    // Normalizza la data di oggi a mezzanotte per il confronto
+    const oggiSenzaOra = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate());
+    
+    // Se la data è già passata quest'anno (ma non oggi), usa l'anno prossimo
+    if (dataEventoCompleta < oggiSenzaOra) {
+      dataEventoCompleta.setFullYear(annoCorrente + 1);
+    }
+    
+    const giorni = calcolaGiorni(dataEventoCompleta, oggiSenzaOra);
     const anni = calcolaAnni(e);
-    return { ...e, dataEvento, giorni, anni };
+    
+    return { ...e, dataEvento: dataEventoCompleta, giorni, anni };
   }).filter(e => e?.dataEvento).sort((a, b) => {
-    const diffA = a.dataEvento - oggiRef;
-    const diffB = b.dataEvento - oggiRef;
-    const tA = diffA >= 0 ? diffA : diffA + 365 * 24 * 60 * 60 * 1000;
-    const tB = diffB >= 0 ? diffB : diffB + 365 * 24 * 60 * 60 * 1000;
-    return tA - tB;
+    // Ordina per giorni mancanti
+    return a.giorni - b.giorni;
   });
 }
 
@@ -776,6 +823,13 @@ function creaElementoEvento(evento) {
   return li;
 }
 
+function creaBarraAnno(anno) {
+  const barra = document.createElement('div');
+  barra.className = 'year-divider';
+  barra.innerHTML = `<div class="year-label">${anno}</div>`;
+  return barra;
+}
+
 function mostraEventi(eventi, termine = '') {
   const lista = document.getElementById('eventi-lista');
   const contatore = document.getElementById('event-counter');
@@ -788,13 +842,38 @@ function mostraEventi(eventi, termine = '') {
   let elementiFiltrati = elementiLi;
   
   if (termine.trim()) {
-    // Ricerca avanzata: ogni parola deve essere presente nel testo completo
-    const parole = termine.toLowerCase().trim().split(/\s+/); // Divide per spazi multipli
+    // Ricerca avanzata: separa parole positive e negative
+    const termini = termine.toLowerCase().trim().split(/\s+/); // Divide per spazi multipli
+    
+    // Separa parole da includere (+) e da escludere (-)
+    const parolePositive = [];
+    const paroleNegative = [];
+    
+    termini.forEach(parola => {
+      if (parola.startsWith('-') && parola.length > 1) {
+        // Parola da escludere (rimuove il - iniziale)
+        paroleNegative.push(parola.substring(1));
+      } else if (parola.startsWith('-') && parola.length === 1) {
+        // Solo il simbolo -, lo ignoriamo
+        return;
+      } else {
+        // Parola da includere
+        parolePositive.push(parola);
+      }
+    });
     
     elementiFiltrati = elementiLi.filter(li => {
       const testoCompleto = li.testoCompleto;
-      // Tutte le parole devono essere presenti nel testo completo
-      return parole.every(parola => testoCompleto.includes(parola));
+      
+      // Tutte le parole positive devono essere presenti
+      const contienePositive = parolePositive.length === 0 || 
+                              parolePositive.every(parola => testoCompleto.includes(parola));
+      
+      // Nessuna delle parole negative deve essere presente
+      const nonContieneNegative = paroleNegative.length === 0 || 
+                                 paroleNegative.every(parola => !testoCompleto.includes(parola));
+      
+      return contienePositive && nonContieneNegative;
     });
     
     contatore.textContent = `${elementiFiltrati.length}/${tuttiGliEventi.length}`;
@@ -804,18 +883,44 @@ function mostraEventi(eventi, termine = '') {
     btnCancella.style.display = 'none';
   }
   
-  // Pulisce la lista e aggiunge gli elementi filtrati
+  // Pulisce la lista
   lista.innerHTML = '';
-  elementiFiltrati.forEach(li => {
-    lista.appendChild(li);
-  });
   
   if (elementiFiltrati.length === 0) {
     messaggioFine.style.display = 'block';
     messaggioFine.textContent = 'Nessun evento trovato.';
+    return;
   } else {
     messaggioFine.style.display = 'none';
   }
+  
+  // Raggruppa eventi per anno
+  const eventiPerAnno = {};
+  elementiFiltrati.forEach(li => {
+    // Estrae l'anno dall'elemento li
+    const annoMatch = li.innerHTML.match(/(\d{4})/);
+    const anno = annoMatch ? annoMatch[1] : 'Sconosciuto';
+    
+    if (!eventiPerAnno[anno]) {
+      eventiPerAnno[anno] = [];
+    }
+    eventiPerAnno[anno].push(li);
+  });
+  
+  // Ordina gli anni
+  const anniOrdinati = Object.keys(eventiPerAnno).sort();
+  
+  // Aggiunge eventi raggruppati per anno con barre divisorie
+  anniOrdinati.forEach((anno, index) => {
+    // Aggiunge la barra divisoria dell'anno
+    const barra = creaBarraAnno(anno);
+    lista.appendChild(barra);
+    
+    // Aggiunge tutti gli eventi di questo anno mantenendo il layout originale
+    eventiPerAnno[anno].forEach(li => {
+      lista.appendChild(li);
+    });
+  });
 }
 
 function cancellaCerca() {
@@ -888,50 +993,55 @@ function nascondiAlbero() {
 
 function caricaAlbero() {
   const contenuto = document.getElementById('treeContent');
-  contenuto.textContent = `
-Albero Genealogico Famiglia Pricci-Lorusso
-
-Ramo Pricci:
-├── Pricci Luigi (1933) ♂
-│   ├── Pricci Angela (1957) ♀ ═══ Lorusso Onofrio (1951) ♂
-│   │   ├── Lorusso Benny (1975) ♂ ═══ Lepore Genny (1975) ♀
-│   │   │   ├── Lorusso Alessandro (2010) ♂
-│   │   │   └── Lorusso Alice (2013) ♀
-│   │   └── Lorusso Cinzia (1980) ♀ ═══ Rotondi Gianni (1974) ♂
-│   │       ├── Rotondi Nina (2015) ♀
-│   │       └── Rotondi Nicoletta (2019) ♀
+  contenuto.textContent = `Luigi Pricci (1933)
+│Teresa Grilletti (1937)
+│
+├── Angela Pricci (1957)
+│   │Onofrio Lorusso (1951)
 │   │
-│   ├── Pricci Marica (1961) ♀ ═══ Mazzarisi Nino (1957) ♂
-│   │   ├── Mazzarisi Maria Grazia (1989) ♀
-│   │   ├── Mazzarisi Onofrio (1992) ♂
-│   │   └── Mazzarisi Teresa (1994) ♀
+│   ├── Benny Lorusso (1975)
+│   │   │Genny Lepore (1975)
+│   │   │
+│   │   ├── Alessandro Lorusso (2010)
+│   │   ├── Alice Lorusso (2013)
+│   │   └── Nina Lorusso (2015)
 │   │
-│   ├── Pricci Vanna (1963) ♀ ═══ Lefemine Domenico (1957) ♂
-│   │   ├── Lefemine Flavia (1996) ♀
-│   │   └── Lefemine Francesco (2000) ♂
+│   └── Cinzia Lorusso (1980)
+│       │Gianni Rotondi (1974)
+│       │
+│       └── Nicoletta Rotondi (2019)
+│
+├── Maria Antonietta Pricci (1958)
+│   │Saverio Chiarappa (1951)
 │   │
-│   ├── Pricci Giovanni (1964) ♂ ═══ Bianco Rosa (1971) ♀
-│   │   ├── Pricci Asia (2006) ♀
-│   │   └── Pricci Gilda (2004) ♀
+│   ├── Martino Chiarappa (1997)
+│   └── Cristiano Chiarappa (2001)
+│
+├── Marica Pricci (1961)
+│   │Nino Mazzarisi (1957)
 │   │
-│   ├── Pricci Giuseppe (1968) ♂ ═══ Trivisani Anna (1969) ♀
+│   ├── Maria Grazia Mazzarisi (1989)
+│   ├── Onofrio Mazzarisi (1992)
+│   └── Teresa Mazzarisi (1994)
+│
+├── Vanna Pricci (1963)
+│   │Domenico Lefemine (1957)
 │   │
-│   ├── Pricci Tiziana (1972) ♀ ═══ Dalena Riccardo (1973) ♂
+│   ├── Flavia Lefemine (1996)
+│   └── Francesco Lefemine (2000)
+│
+├── Giovanni Pricci (1964)
+│   │Rosa Bianco (1971)
+│
+├── Giuseppe Pricci (1968)
+│   │Anna Trivisani (1969)
 │   │
-│   └── Pricci Maria Antonietta (1958) ♀ ═══ Chiarappa Saverio (1951) ♂
-│       ├── Chiarappa Martino (1997) ♂
-│       └── Chiarappa Cristiano (2001) ♂
-
-Altri membri della famiglia:
-└── Grilletti Teresa (1937) ♀
-
-Legenda:
-♂ = Maschio    ♀ = Femmina    ═══ = Matrimonio
-(Anno) = Anno di nascita
-
-Note: Albero genealogico delle famiglie Pricci-Lorusso
-Generato automaticamente - Versione offline
-  `;
+│   ├── Gilda Pricci (2004)
+│   └── Asia Pricci (2006)
+│
+└── Tiziana Pricci (1972)
+    │Riccardo Dalena (1973)
+`;
 }
 
 function mostraConferma() {
