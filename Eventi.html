@@ -74,7 +74,7 @@
       text-align: center;
       color: #666;
       font-size: 1em;
-      margin-bottom: 15px; /* Ridotto margine per il campo di ricerca */
+      margin-bottom: 15px; 
       position: relative; /* Contenitore per le icone */
     }
 
@@ -129,7 +129,7 @@
 
     /* Stili specifici per l'icona Albero (eredita da action-button, non ha override di background) */
     .tree-icon {
-      margin-right: 8px; /* Spazio tra l'icona Albero e il testo/altra icona */
+      margin-right: 8px; /* Spazio tra l'icona Albero e il testo/altra icone */
     }
     
     /* Stili specifici per l'icona Info (eredita da action-button) */
@@ -140,19 +140,17 @@
     /* Stili per il campo di ricerca */
     #search-container {
       text-align: center;
-      margin-bottom: 30px; /* Spazio sotto il campo di ricerca */
-      /* Nuove regole per allineare la larghezza */
-      display: flex; /* Usa flexbox per il contenitore */
-      justify-content: center; /* Centra il contenuto (l'input) */
-      width: 100%; /* Occupa tutta la larghezza disponibile */
+      margin-bottom: 30px; 
+      position: relative; /* Contenitore relativo per il centraggio dell'input */
+    }
+    #search-input-wrapper { /* Wrapper per contenere input e contatore */
+        display: inline-block; /* Permette il centraggio via text-align sul genitore */
+        position: relative; /* Per posizionare il contatore al suo interno */
+        width: 330px; /* Larghezza fissa per l'input per allineamento */
+        max-width: 90%; /* Limite massimo per la responsività */
     }
     #searchInput {
-      /* Calcola la larghezza basandosi sugli elementi della riga precedente */
-      /* 1.5em (width icona A) + 8px (margin-right A) + larghezza testo data (stimata a 150px) + 8px (margin-left i) + 1.5em (width icona i) */
-      /* Ho stimato la larghezza del testo data a circa 150px-180px in base al font-size di 1em per #oggi */
-      width: calc(1.5em + 8px + 180px + 8px + 1.5em); 
-      max-width: 90%; /* Limite massimo per evitare che diventi troppo largo su schermi grandi */
-      min-width: 250px; /* Larghezza minima per la leggibilità */
+      width: 100%; /* Occupa tutta la larghezza del wrapper */
       padding: 10px 15px;
       border: 1px solid #ccc;
       border-radius: 5px;
@@ -160,21 +158,46 @@
       box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
       outline: none;
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      box-sizing: border-box; /* Include padding e border nel calcolo della larghezza */
+      padding-right: 70px; /* Spazio sufficiente per i numerini */
     }
     #searchInput:focus {
       border-color: #888;
       box-shadow: inset 0 1px 3px rgba(0,0,0,0.1), 0 0 8px rgba(136, 136, 136, 0.6);
     }
 
+    /* Stili per il contatore degli eventi */
+    #event-counter {
+        position: absolute; 
+        right: 10px; /* A 10px dal bordo destro del #searchInput */
+        top: 50%; 
+        transform: translateY(-50%);
+        padding: 5px 8px; 
+        background-color: white; 
+        border: 1px solid black; 
+        border-radius: 5px;
+        font-size: 0.9em;
+        color: #555;
+        white-space: nowrap; 
+        box-sizing: border-box;
+        line-height: 1; 
+        cursor: default; 
+        /* display: block; */// Assicurati che sia block o inline-block, ma absolute lo rende flex per default
+    }
+    /* Non ci sono più stili per clear-search-button perché è stato rimosso */
+
+
     ul {
       list-style-type: none;
       padding: 0;
+      max-width: 600px; 
+      margin: 0 auto; 
     }
     li {
       margin-bottom: 25px;
       padding: 20px;
       border-radius: 10px;
-      border: 1px solid #000; /* Bordo predefinito del box evento - rimane fisso */
+      border: 1px solid #000; 
       box-shadow: 4px 4px 12px rgba(0,0,0,0.3);
       text-align: center;
       line-height: 1.6;
@@ -188,6 +211,10 @@
     }
     li.anniversario {
       background-color: #fff0f0;
+    }
+    /* Solo l'ombra pulsante per il li, nessun bordo che si allarga/restringe sul li stesso */
+    .evento-oggi {
+      animation: pulseGlowYellowLi 2s ease-in-out infinite; /* Animazione per l'ombra del LI */
     }
     strong {
       font-size: 1.5em;
@@ -204,30 +231,39 @@
     .anniversario strong {
       color: #8B0000;
     }
+    
+    /* Cornice e ombre applicate direttamente all'img */
     .image-container img {
       height: auto;
       width: 100%;
       max-width: 300px;
-      /* Border base per tutte le immagini. L'animazione lo sovrascriverà per oggi. */
-      border: 3px solid #B4A28C; 
+      border: 3px solid #B4A28C; /* Border base per tutte le immagini. */
       background: white; 
       margin: 10px auto; 
       display: block; 
-      box-shadow: 4px 4px 12px rgba(0,0,0,0.3);
-      /* Aggiunta di 'outline' alla transizione */
-      transition: transform 0.3s ease, box-shadow 0.3s ease, border-width 0.3s ease, border-color 0.3s ease, outline 0.3s ease; 
-      
-      /* Aggiunte queste due proprietà per gestire lo "stretching" del bordo */
-      box-sizing: border-box; /* Include padding e border nella width/height */
-      padding: 0; /* Assicurati che non ci sia padding che influenzi la dimensione */
+      box-shadow: 4px 4px 12px rgba(0,0,0,0.3); /* Ombra per tutte le immagini */
+      transition: transform 0.3s ease, border-width 0.3s ease, border-color 0.3s ease, outline 0.3s ease; 
+      box-sizing: border-box; 
+      padding: 0; 
+      object-fit: contain; /* Mantiene le proporzioni, non distorce. Aggiunge bande se necessarie */
+      min-height: 100px; /* Altezza minima del box immagine anche senza foto */
     }
     .image-container img:hover {
       transform: translateY(-5px); 
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); /* Ombra al hover */
     }
     .error-message {
       color: red;
       font-size: 0.9em;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 5px 10px;
+      border-radius: 5px;
+      white-space: nowrap; 
     }
     #confetti-canvas {
       position: fixed;
@@ -237,35 +273,6 @@
       height: 100vh;
       pointer-events: none;
       z-index: 9999;
-    }
-    
-    /* Solo l'ombra pulsante per il li, nessun bordo che si allarga/restringe sul li stesso */
-    .evento-oggi {
-      animation: pulseGlowYellowLi 2s ease-in-out infinite; /* Animazione per l'ombra del LI */
-    }
-    
-    /* Stili per il bordo giallo paglierino pulsante sull'immagine */
-    li.evento-oggi .image-container img {
-      border-color: #F0E68C; /* Colore iniziale del bordo giallo paglierino */
-      animation: pulseBorderYellow 1.5s ease-in-out infinite; /* Animazione dello spessore e colore del bordo */
-      box-shadow: 0 0 10px rgba(240, 230, 140, 0.6); /* Ombra iniziale per l'immagine più chiara */
-      outline: 1px solid #000; /* Cornice nera sottile sopra la cornice gialla */
-      outline-offset: 0px; /* Assicura che l'outline sia esattamente sul bordo */
-    }
-
-    @keyframes pulseBorderYellow {
-      0% {
-        border-width: 2px; /* Spessore iniziale */
-        border-color: #F0E68C; /* Giallo Paglierino */
-      }
-      50% {
-        border-width: 10px; /* Spessore massimo aumentato a 10px */
-        border-color: #FFFACD; /* Giallo Paglierino più chiaro */
-      }
-      100% {
-        border-width: 2px; /* Ritorno allo spessore iniziale */
-        border-color: #F0E68C; /* Giallo Paglierino */
-      }
     }
     
     /* Animazione per l'ombra del box LI (non dell'immagine) */
@@ -281,34 +288,65 @@
       }
     }
 
-    /* Stili per la stella lampeggiante */
-    .star-badge {
-      position: absolute; /* Posizionamento assoluto rispetto al li (che è relative) */
-      top: 5px; /* Sposta la stella leggermente dal bordo superiore del riquadro */
-      right: 5px; /* Sposta la stella leggermente dal bordo destro del riquadro */
-      font-size: 1.2em; /* Dimensione della stella ridotta a 1.2em */
-      color: gold; /* Colore base della stella */
-      text-shadow: 0 0 3px rgba(255, 215, 0, 0.6); /* Ombra più sottile e meno opaca */
-      animation: blinkStar 0.6s infinite alternate; /* Ciclo più veloce a 0.6s */
-      display: none; /* Nascosta di default */
-      z-index: 1; /* Assicura che sia sopra gli altri contenuti */
+    /* Bordo della foto (image-container img) per evento di oggi, STATICO e massimizzato */
+    li.evento-oggi .image-container img {
+      border-width: 10px; /* Ampiezza massima */
+      border-color: #FFFACD; /* Colore giallo Paglierino più chiaro */
+      box-shadow: 0 0 10px rgba(240, 230, 140, 0.6); 
+      outline: 1px solid #000; /* Cornice sottile sopra la cornice gialla */
+      outline-offset: 0px; 
+      /* Nessuna animazione di lampeggio qui */
     }
 
+    /* Stili per la stella gialla LAMPEGGIANTE (per eventi di oggi) */
+    .star-badge {
+      position: absolute; 
+      top: 5px; 
+      right: 5px; 
+      font-size: 1.2em; 
+      color: gold; 
+      text-shadow: 0 0 3px rgba(255, 215, 0, 0.6); 
+      animation: blinkStar 0.6s infinite alternate; /* Lampeggio */
+      display: none; /* Nascosta di default, mostrata da JS */
+      z-index: 1; 
+    }
     /* Mostra la stella solo per gli eventi di oggi */
     li.evento-oggi .star-badge {
         display: block;
     }
-
     @keyframes blinkStar {
       0% { 
-        opacity: 0.1; /* Quasi scomparsa */
-        color: gold; /* Colore iniziale */
+        opacity: 0.1; 
+        color: gold; 
       }
       100% { 
         opacity: 1; 
-        color: #DAA520; /* Giallo più scuro (Goldenrod) */
+        color: #DAA520; 
       }
     }
+
+    /* Stili per la freccia gialla (per eventi NON di oggi) */
+    .arrow-badge { /* Nuova classe per la freccia */
+      position: absolute; 
+      top: 5px; /* Stessa posizione top della stella */
+      right: 5px; /* Stessa posizione right della stella */
+      font-size: 1.2em; 
+      color: gold; /* Colore giallo */
+      text-shadow: 0 0 3px rgba(255, 215, 0, 0.6); 
+      cursor: pointer;
+      z-index: 1; 
+      text-decoration: none;
+      transition: transform 0.2s ease; /* Transizione leggera al hover */
+      display: none; /* Nascosta di default, mostrata da JS */
+    }
+    .arrow-badge:hover {
+        transform: scale(1.1); /* Leggero ingrandimento al hover */
+    }
+    /* Mostra la freccia solo per gli eventi NON di oggi */
+    li:not(.evento-oggi) .arrow-badge {
+        display: block;
+    }
+
 
     /* Stili per i pop-up generici (overlay e content) */
     .popup-overlay {
@@ -321,8 +359,8 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 10000; /* Assicura che sia sopra tutto */
-      display: none; /* Nascosto di default */
+      z-index: 10000; 
+      display: none; 
     }
 
     .popup-content {
@@ -331,9 +369,9 @@
       border-radius: 10px;
       text-align: center;
       position: relative;
-      width: 90%; /* Percentuale della larghezza del viewport */
-      max-width: fit-content; /* Si adatta al contenuto, stringendosi */
-      min-width: 300px; /* Larghezza minima per leggibilità */
+      width: 90%; 
+      max-width: fit-content; 
+      min-width: 300px; 
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
       display: flex;
       flex-direction: column;
@@ -348,22 +386,21 @@
 
     .popup-header h2 {
       margin: 0;
-      flex-grow: 1; /* Permette al titolo di occupare lo spazio disponibile */
+      flex-grow: 1; 
       text-align: center;
     }
 
     /* Stili specifici per il contenuto dell'Albero Genealogico */
     #treeContent {
-      font-family: 'Courier New', Courier, monospace; /* Carattere Courier */
-      white-space: pre; /* Mantiene la formattazione del testo pre-formattato, previene il wrap automatico */
-      text-align: left; /* Allinea il testo a sinistra */
-      overflow-x: auto; /* Aggiunge scroll orizzontale se il contenuto è troppo lungo */
-      overflow-y: auto; /* Aggiunge scroll verticale se il contenuto è troppo lungo */
-      max-height: 70vh; /* Altezza massima per il contenuto scrollabile */
-      font-size: clamp(0.7em, 3.5vw, 1em); /* Dimensionamento del font affinato */
-      line-height: 1; /* Interlinea impostata a 1 */
+      font-family: 'Courier New', Courier, monospace; 
+      white-space: pre; 
+      text-align: left; 
+      overflow-x: auto; 
+      overflow-y: auto; 
+      max-height: 80vh; /* Aumentato per ridurre scroll verticale */
+      font-size: clamp(0.7em, 3.5vw, 1em); 
+      line-height: 1; 
       margin-top: 10px;
-      /* padding: 0 5px; (Opzionale: piccolo padding interno per scrollbar estetica) */
     }
 
     /* Finestrella di conferma copia non bloccante */
@@ -372,15 +409,15 @@
         bottom: 20px;
         left: 50%;
         transform: translateX(-50%);
-        background-color: rgba(0, 123, 255, 0.85); /* Blu semi-trasparente */
+        background-color: rgba(0, 123, 255, 0.85); 
         color: white;
         padding: 10px 20px;
         border-radius: 5px;
         font-size: 1em;
         text-align: center;
-        z-index: 11000; /* Sopra a tutti i pop-up */
-        opacity: 0; /* Inizialmente nascosta */
-        pointer-events: none; /* Non blocca gli eventi del mouse */
+        z-index: 11000; 
+        opacity: 0; 
+        pointer-events: none; 
     }
     /* Animazioni per la finestra di conferma */
     @keyframes fadeIn {
@@ -398,6 +435,23 @@
         animation: fadeOut 0.3s forwards;
     }
 
+    /* Nuovi stili per Infinite Scrolling */
+    #loading-indicator {
+      text-align: center;
+      padding: 20px;
+      font-size: 1.2em;
+      color: #666;
+      display: none; 
+    }
+
+    #end-of-list-message {
+      text-align: center;
+      padding: 20px;
+      font-size: 1.2em;
+      color: #999;
+      display: none; 
+    }
+
   </style>
 </head>
 
@@ -413,13 +467,19 @@
     <span class="action-button info-icon" id="info-icon" data-tooltip="Informazioni">i</span> </div>
 
   <div id="search-container">
-    <input type="text" id="searchInput" placeholder="Cerca per nominativo...">
+    <div id="search-input-wrapper">
+        <input type="text" id="searchInput" placeholder="Cerca per nominativo...">
+        <div id="event-counter" class="search-addon">0/0</div> 
+        </div>
   </div>
 
   <canvas id="confetti-canvas"></canvas>
 
   <ul id="eventi-lista">
   </ul>
+
+  <div id="loading-indicator">Caricamento eventi...</div>
+  <div id="end-of-list-message">Non ci sono altri eventi da mostrare.</div>
 
   <div id="bookmarkPopup" class="popup-overlay">
     <div class="popup-content">
@@ -449,7 +509,30 @@
 
   <script>
     let descrizioniMap = new Map();
-    let allEventsData = []; // Variabile per memorizzare tutti gli eventi caricati
+    let allEventsData = []; // Variabile per memorizzare tutti gli eventi caricati dal CSV
+    let displayedEvents = []; // Eventi attualmente visualizzati (dopo filtro e ordinamento)
+
+    // --- NUOVE VARIABILI PER LA PAGINAZIONE E SCROLL INFINITO ---
+    const EVENTS_PER_LOAD = 5; // Quante immagini caricare per blocco
+    let currentStartIndex = 0; // Indice di partenza per il prossimo blocco di immagini
+    let isLoadingMore = false; // Flag per prevenire richieste multiple durante il caricamento
+    let hasMoreEvents = true; // Indica se ci sono ancora eventi da caricare
+
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const endOfListMessage = document.getElementById('end-of-list-message');
+    const eventiLista = document.getElementById('eventi-lista');
+    const searchInput = document.getElementById('searchInput'); // Ottieni il riferimento all'input
+    const eventCounterElement = document.getElementById('event-counter'); 
+    // const clearSearchButton = document.getElementById('clear-search-button'); // X Rimosso
+
+    let imageObserver = null; 
+    
+    // --- FUNZIONE PER IL PRECARICAMENTO DELLE IMMAGINI ---
+    function preloadImage(url) {
+        if (!url) return;
+        const img = new Image();
+        img.src = url;
+    }
 
     async function caricaDescrizioni() {
       try {
@@ -587,6 +670,7 @@
         }
 
         playNextFragment();
+        return testoFinale;
       } catch (error) {
         console.error("Errore nella costruzione del testo:", error);
         return '';
@@ -713,8 +797,10 @@
       } else if (link.includes("drive.usercontent.google.com")) {
         return link;
       }
+      // Per GitHub Pages, il percorso è già corretto se si usa il percorso relativo o assoluto del repo
+      // Non è una CDN, quindi non ci sono modifiche da fare per quel tipo di URL
       if (!link.startsWith('http://') && !link.startsWith('https://')) {
-        return link;
+        return link; // Assume che sia un percorso relativo valido
       }
       return link;
     }
@@ -979,12 +1065,11 @@
       }
     }
 
-    // Questa funzione ora accetta un array di eventi filtrati
-    function aggiornaEventi(eventsToDisplay) {
-      const lista = document.getElementById('eventi-lista');
-      lista.innerHTML = '';
+    // Questa funzione ora accetta un array di eventi da aggiungere alla lista
+    function aggiungiEventiAllaLista(eventsToAdd) {
+      const lista = document.getElementById('eventi-lista'); // Ottieni la lista una sola volta
 
-      eventsToDisplay.forEach(evento => {
+      eventsToAdd.forEach(evento => {
         try {
           // Controlli di sicurezza
           if (!evento || !evento.Tipo || !evento.Nominativo) {
@@ -996,12 +1081,18 @@
           const li = document.createElement('li');
           li.classList.add(classeTipo);
           
-          // Aggiungi classe evento-oggi se l'evento è oggi
+          // --- Gestione della stella o freccia in base all'evento di oggi ---
+          let iconHtml = '';
           if (evento.giorniMancanti === 0) {
-            li.classList.add('evento-oggi');
+              li.classList.add('evento-oggi'); // Classe per l'ombra del LI e bordo foto lampeggiante
+              iconHtml = `<span class="star-badge">⭐</span>`; // Stella lampeggiante
+          } else {
+              iconHtml = `<a href="#titolo" class="arrow-badge" title="Torna su">⬆️</a>`; // Freccia non lampeggiante
           }
 
-          const imgSrc = evento.Link ? correggiLink(evento.Link) : `${evento.Nominativo}.JPG`;
+          // Inizialmente usiamo un placeholder per il lazy loading
+          const imgSrcPlaceholder = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; // Immagine GIF 1x1 trasparente
+          const actualImgSrc = evento.Link ? correggiLink(evento.Link) : `${evento.Nominativo}.JPG`;
 
           const { giornoSettimana, giornoDelMese, nomeMese, annoVero } = costruisciDataEventoGGMM(evento);
           const dataFormattataUI = `${giornoSettimana} ${giornoDelMese} ${nomeMese} ${annoVero}`;
@@ -1043,7 +1134,7 @@
           const nominativoEscaped = evento.Nominativo.replace(/'/g, "\\'");
 
           li.innerHTML = `
-            <span class="star-badge">⭐</span> <a href="javascript:void(0)" onclick="mostraAlert('${nominativoEscaped}')" style="text-decoration:none; color: inherit;">
+            ${iconHtml} <a href="javascript:void(0)" onclick="mostraAlert('${nominativoEscaped}')" style="text-decoration:none; color: inherit;">
               <strong>${evento.Nominativo}</strong>
             </a>
             <br>
@@ -1052,11 +1143,13 @@
             ${nomeAnniversarioHtml ? nomeAnniversarioHtml : ""}
             <div class="image-container">
               <img
-                src="${imgSrc}"
+                src="${imgSrcPlaceholder}" 
+                data-src="${actualImgSrc}" 
                 alt="${evento.Tipo} di ${evento.Nominativo}"
                 onerror="
                   this.onerror=null;
-                  this.src='default-thumbnail.jpg';
+                  this.src='default-thumbnail.jpg'; /* Fallback a un'immagine generica */
+                  this.style.backgroundColor='#f0f0f0'; /* Applica grigio chiaro direttamente all'img */
                   const errorMessage = document.createElement('div');
                   errorMessage.className = 'error-message';
                   errorMessage.innerText = 'Immagine non disponibile';
@@ -1069,6 +1162,10 @@
 
           const imgElement = li.querySelector('img');
           if (imgElement) {
+            // Osserva l'immagine per il lazy loading
+            if (imageObserver) { // Assicurati che l'observer sia inizializzato
+                imageObserver.observe(imgElement);
+            }
             imgElement.addEventListener('click', () => {
               if (evento.giorniMancanti === 0) {
                 suonaBeepSingolo();
@@ -1082,6 +1179,93 @@
         }
       });
     }
+
+    // Modificata per gestire la paginazione
+    function filterAndDisplayEvents(events, searchTerm = '', append = false) {
+        const normalizedSearchTerm = searchTerm.toLowerCase().trim();
+        let filteredEvents = events;
+
+        if (normalizedSearchTerm) {
+            filteredEvents = events.filter(event => {
+                const nominativo = event.Nominativo || '';
+                return nominativo.toLowerCase().includes(normalizedSearchTerm);
+            });
+            eventCounterElement.textContent = `${filteredEvents.length}/${allEventsData.length}`; // Aggiorna contatore
+            eventCounterElement.style.display = 'block'; // Assicurati che il contatore sia visibile
+            // clearSearchButton.style.display = 'flex'; // La X è stata rimossa, non la mostriamo più qui
+        } else {
+            filteredEvents = events; // Se non c'è ricerca, mostra tutti gli eventi
+            eventCounterElement.textContent = `${allEventsData.length}/${allEventsData.length}`; // Aggiorna contatore
+            eventCounterElement.style.display = 'block'; // Assicurati che il contatore sia visibile anche senza ricerca
+            // clearSearchButton.style.display = 'none'; // La X è stata rimossa, non la nascondiamo più qui
+        }
+        
+        // Memorizza gli eventi filtrati globalmente per il caricamento infinito
+        displayedEvents = filteredEvents; 
+
+        if (!append) { // Se non è un'aggiunta, svuota la lista e resetta lo stato
+            eventiLista.innerHTML = '';
+            currentStartIndex = 0;
+            hasMoreEvents = true;
+            endOfListMessage.style.display = 'none'; // Nascondi messaggio di fine lista
+        }
+
+        loadMoreEvents(); // Inizia il caricamento del primo blocco o del blocco successivo
+    }
+
+    // --- NUOVA FUNZIONE: Carica più eventi in base alla paginazione ---
+    function loadMoreEvents() {
+        if (isLoadingMore || !hasMoreEvents) {
+            return;
+        }
+
+        isLoadingMore = true;
+        loadingIndicator.style.display = 'block'; // Mostra l'indicatore di caricamento
+
+        const eventsToLoad = displayedEvents.slice(currentStartIndex, currentStartIndex + EVENTS_PER_LOAD);
+        
+        if (eventsToLoad.length > 0) {
+            aggiungiEventiAllaLista(eventsToLoad);
+            currentStartIndex += eventsToLoad.length; // Aggiorna l'indice di partenza
+
+            // Precarica le immagini del prossimo blocco
+            const nextEventsToPreload = displayedEvents.slice(currentStartIndex, currentStartIndex + EVENTS_PER_LOAD);
+            nextEventsToPreload.forEach(event => {
+                const url = event.Link ? correggiLink(event.Link) : `${event.Nominativo}.JPG`;
+                preloadImage(url);
+            });
+            
+            if (currentStartIndex >= displayedEvents.length) {
+                hasMoreEvents = false;
+                endOfListMessage.style.display = 'block'; // Mostra messaggio di fine lista
+            }
+        } else {
+            hasMoreEvents = false;
+            endOfListMessage.style.display = 'block'; // Mostra messaggio di fine lista se non ci sono più eventi da caricare
+        }
+        
+        isLoadingMore = false;
+        loadingIndicator.style.display = 'none'; // Nasconde l'indicatore di caricamento
+    }
+
+    // --- NUOVA FUNZIONE: Gestore dello scroll per l'Infinite Scrolling ---
+    function handleScroll() {
+        // Se non ci sono più eventi o stiamo già caricando, esci
+        if (!hasMoreEvents || isLoadingMore) {
+            return;
+        }
+
+        // Calcola la distanza dal fondo della pagina
+        const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+        const clientHeight = document.documentElement.clientHeight || document.body.clientHeight;
+
+        // Se l'utente è vicino al fondo (es. 200px dalla fine)
+        if (scrollTop + clientHeight >= scrollHeight - 200) {
+            loadMoreEvents();
+        }
+    }
+
 
     function promptData() {
       // Disabilita la modifica data su mobile
@@ -1109,7 +1293,7 @@
       document.getElementById('reset-data').style.display = 'block';
 
       // Ricarica e filtra gli eventi con la nuova data (e l'attuale termine di ricerca)
-      const currentSearchTerm = document.getElementById('searchInput').value;
+      const currentSearchTerm = searchInput.value; // Usa searchInput.value
       caricaEventiDaCSV('https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/refs/heads/main/Eventi-Link.csv')
         .then(events => {
           const sortedEvents = ordinaPerData(events); // Ordina sempre tutti gli eventi
@@ -1129,7 +1313,7 @@
       document.getElementById('reset-data').style.display = 'none';
 
       // Ricarica e filtra gli eventi con la data reale (e l'attuale termine di ricerca)
-      const currentSearchTerm = document.getElementById('searchInput').value;
+      const currentSearchTerm = searchInput.value; // Usa searchInput.value
       caricaEventiDaCSV('https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/refs/heads/main/Eventi-Link.csv')
         .then(events => {
           const sortedEvents = ordinaPerData(events);
@@ -1137,20 +1321,6 @@
         });
 
       aggiornaDataOggi();
-    }
-
-    // Funzione principale per filtrare e visualizzare gli eventi
-    function filterAndDisplayEvents(events, searchTerm = '') {
-        const normalizedSearchTerm = searchTerm.toLowerCase().trim();
-        let filteredEvents = events;
-
-        if (normalizedSearchTerm) {
-            filteredEvents = events.filter(event => {
-                const nominativo = event.Nominativo || '';
-                return nominativo.toLowerCase().includes(normalizedSearchTerm);
-            });
-        }
-        aggiornaEventi(filteredEvents); // Chiamata per visualizzare gli eventi filtrati
     }
 
 
@@ -1261,11 +1431,13 @@
     }
 
     // Event listener per il campo di ricerca
-    document.getElementById('searchInput').addEventListener('input', (event) => {
+    searchInput.addEventListener('input', (event) => {
         const searchTerm = event.target.value;
         const sortedEvents = ordinaPerData(allEventsData); // Ri-ordina tutti i dati originali
         filterAndDisplayEvents(sortedEvents, searchTerm); // Filtra e visualizza
     });
+
+    /* La X è stata rimossa, quindi non ci sono più event listener per clearSearchButton */
 
 
     // Event listener per il pulsante di chiusura del pop-up del segnalibro
@@ -1284,23 +1456,69 @@
     document.getElementById('tree-copy-button').addEventListener('click', copyTreeToClipboard);
 
 
-    // Avvio
+    // --- INIZIALIZZAZIONE DELL'INTERSECTION OBSERVER PER IL LAZY LOADING ---
+    function initializeImageObserver() {
+        if ('IntersectionObserver' in window) {
+            imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        const dataSrc = img.getAttribute('data-src');
+                        if (dataSrc) {
+                            img.src = dataSrc; // Carica l'immagine reale
+                            img.removeAttribute('data-src'); // Rimuovi l'attributo data-src
+                            observer.unobserve(img); // Smetti di osservare questa immagine
+                        }
+                    }
+                });
+            }, { rootMargin: '0px 0px 200px 0px' }); // Carica quando l'immagine è 200px sotto il viewport
+        } else {
+            // Fallback per browser non compatibili (potresti caricare tutte le immagini immediatamente)
+            console.warn("Intersection Observer non supportato. Le immagini verranno caricate immediatamente.");
+            // Logica per caricare src direttamente se Intersection Observer non è supportato
+            document.querySelectorAll('.image-container img[data-src]').forEach(img => {
+                img.src = img.getAttribute('data-src');
+                img.removeAttribute('data-src');
+            });
+        }
+    }
+
+    // Funzione per scrollare all'inizio della pagina
+    function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+
+    // Avvio dell'applicazione
+    initializeImageObserver(); // Inizializza l'observer
     caricaNomiAnniversari().then(() => {
       aggiornaDataOggi();
       caricaEventiDaCSV('https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/refs/heads/main/Eventi-Link.csv')
         .then(events => {
           allEventsData = events; // Salva i dati originali appena caricati
           const sortedEvents = ordinaPerData(allEventsData); // Ordina la copia
-          filterAndDisplayEvents(sortedEvents, ''); // Mostra tutti gli eventi inizialmente
+          filterAndDisplayEvents(sortedEvents, ''); // Mostra i primi eventi inizialmente
         })
         .catch(err => console.error("Errore nel caricamento degli eventi iniziali:", err)); // Errore più specifico
     })
     .finally(() => {
-        // checkBookmarkAndShowPopup(); // Rimosso per disabilitare l'auto-visualizzazione
+        // Assicurati che il contatore sia aggiornato anche all'avvio.
+        // Questo sarà gestito dalla chiamata a `filterAndDisplayEvents` che fa parte della Promise chain.
+        // La X è stata rimossa, quindi non c'è più logica di visibilità per essa all'avvio.
     });
 
     // Carica le descrizioni all'avvio
     caricaDescrizioni();
+
+    // Aggiungi event listener per lo scroll infinito
+    window.addEventListener('scroll', handleScroll);
+    // Assicurati che un primo blocco sia caricato se la pagina è molto corta
+    window.addEventListener('load', () => {
+        if (document.body.scrollHeight <= window.innerHeight) {
+            loadMoreEvents();
+        }
+    });
+
   </script>
 </body>
 </html>
