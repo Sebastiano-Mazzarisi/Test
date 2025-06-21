@@ -5,20 +5,16 @@
   <meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=no">
   <title>Prossimi eventi</title>
   
-  <!-- Favicon per browser -->
   <link rel="icon" type="image/png" href="https://sebastiano-mazzarisi.github.io/Test/Eventi.png">
   
-  <!-- Icona per la schermata Home iOS -->
   <link rel="apple-touch-icon" href="https://sebastiano-mazzarisi.github.io/Test/Eventi.png">
   
-  <!-- Open Graph / Social preview (WhatsApp, Facebook, Telegram) -->
   <meta property="og:title" content="Prossimi eventi di famiglia">
   <meta property="og:description" content="Scopri tutti i prossimi compleanni, onomastici e anniversari!">
   <meta property="og:image" content="https://sebastiano-mazzarisi.github.io/Test/Eventi.png">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://sebastiano-mazzarisi.github.io/Test/Eventi.html">
   
-  <!-- Twitter card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Prossimi eventi di famiglia">
   <meta name="twitter:description" content="Scopri tutti i prossimi compleanni, onomastici e anniversari!">
@@ -39,8 +35,9 @@
       border-radius: 5px;
       display: inline-block;
     }
+    /* Pulsanti disabilitati di default, JavaScript li abiliterà su desktop */
     #reset-data, #cambia-data {
-      display: none !important;
+      display: none !important; 
       margin: 0 5px;
       padding: 5px 10px;
       color: white;
@@ -60,6 +57,7 @@
     #cambia-data:hover {
       background-color: #0000cc;
     }
+    /* Pulsanti data nascosti di default, JavaScript li mostrerà su desktop */
     .pulsanti-data {
       display: none !important;
       text-align: center;
@@ -86,10 +84,11 @@
       margin-bottom: 25px;
       padding: 20px;
       border-radius: 10px;
-      border: 1px solid #000;
+      border: 1px solid #000; /* Bordo predefinito del box evento - rimane fisso */
       box-shadow: 4px 4px 12px rgba(0,0,0,0.3);
       text-align: center;
       line-height: 1.6;
+      position: relative;
     }
     li.compleanno {
       background-color: #e6f3ff;
@@ -119,12 +118,18 @@
       height: auto;
       width: 100%;
       max-width: 300px;
-      border: 4px solid #B4A28C; 
+      /* Border base per tutte le immagini. L'animazione lo sovrascriverà per oggi. */
+      border: 3px solid #B4A28C; 
       background: white; 
       margin: 10px auto; 
       display: block; 
       box-shadow: 4px 4px 12px rgba(0,0,0,0.3);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      /* Aggiunta di 'outline' alla transizione */
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-width 0.3s ease, border-color 0.3s ease, outline 0.3s ease; 
+      
+      /* Aggiunte queste due proprietà per gestire lo "stretching" del bordo */
+      box-sizing: border-box; /* Include padding e border nella width/height */
+      padding: 0; /* Assicurati che non ci sia padding che influenzi la dimensione */
     }
     .image-container img:hover {
       transform: translateY(-5px); 
@@ -143,6 +148,78 @@
       pointer-events: none;
       z-index: 9999;
     }
+    
+    /* Solo l'ombra pulsante per il li, nessun bordo che si allarga/restringe sul li stesso */
+    .evento-oggi {
+      animation: pulseGlowYellowLi 2s ease-in-out infinite; /* Animazione per l'ombra del LI */
+    }
+    
+    /* Stili per il bordo giallo paglierino pulsante sull'immagine */
+    li.evento-oggi .image-container img {
+      border-color: #F0E68C; /* Colore iniziale del bordo giallo paglierino */
+      animation: pulseBorderYellow 1.5s ease-in-out infinite; /* Animazione dello spessore e colore del bordo */
+      box-shadow: 0 0 10px rgba(240, 230, 140, 0.6); /* Ombra iniziale per l'immagine più chiara */
+      outline: 1px solid #000; /* Cornice nera sottile sopra la cornice gialla */
+      outline-offset: 0px; /* Assicura che l'outline sia esattamente sul bordo */
+    }
+
+    @keyframes pulseBorderYellow {
+      0% {
+        border-width: 2px; /* Spessore iniziale */
+        border-color: #F0E68C; /* Giallo Paglierino */
+      }
+      50% {
+        border-width: 10px; /* Spessore massimo aumentato a 10px */
+        border-color: #FFFACD; /* Giallo Paglierino più chiaro */
+      }
+      100% {
+        border-width: 2px; /* Ritorno allo spessore iniziale */
+        border-color: #F0E68C; /* Giallo Paglierino */
+      }
+    }
+    
+    /* Animazione per l'ombra del box LI (non dell'immagine) */
+    @keyframes pulseGlowYellowLi {
+      0% {
+        box-shadow: 4px 4px 12px rgba(0,0,0,0.3), 0 0 10px rgba(240, 230, 140, 0.5); /* Giallo glow */
+      }
+      50% {
+        box-shadow: 4px 4px 12px rgba(0,0,0,0.3), 0 0 20px rgba(240, 230, 140, 0.8); /* Giallo glow più intenso */
+      }
+      100% {
+        box-shadow: 4px 4px 12px rgba(0,0,0,0.3), 0 0 10px rgba(240, 230, 140, 0.5); /* Giallo glow */
+      }
+    }
+
+    /* Stili per la stella lampeggiante */
+    .star-badge {
+      position: absolute; /* Posizionamento assoluto rispetto al li (che è relative) */
+      top: 5px; /* Sposta la stella leggermente dal bordo superiore del riquadro */
+      right: 5px; /* Sposta la stella leggermente dal bordo destro del riquadro */
+      font-size: 1.2em; /* Dimensione della stella ridotta a 1.2em */
+      color: gold; /* Colore base della stella */
+      text-shadow: 0 0 3px rgba(255, 215, 0, 0.6); /* Ombra più sottile e meno opaca */
+      animation: blinkStar 0.6s infinite alternate; /* Ciclo più veloce a 0.6s */
+      display: none; /* Nascosta di default */
+      z-index: 1; /* Assicura che sia sopra gli altri contenuti */
+    }
+
+    /* Mostra la stella solo per gli eventi di oggi */
+    li.evento-oggi .star-badge {
+        display: block;
+    }
+
+    @keyframes blinkStar {
+      0% { 
+        opacity: 0.1; /* Quasi scomparsa */
+        color: gold; /* Colore iniziale */
+      }
+      100% { 
+        opacity: 1; 
+        color: #DAA520; /* Giallo più scuro (Goldenrod) */
+      }
+    }
+
   </style>
 </head>
 
@@ -255,7 +332,16 @@
       return frammenti;
     }
 
+    // Rileva se è un dispositivo mobile
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
     function leggiTesto(nominativo) {
+      // Disabilita la lettura su mobile
+      if (isMobile) { 
+        console.log("Lettura disabilitata su dispositivo mobile.");
+        return; 
+      }
+
       try {
         const nomeNormalizzato = gestisciEccezioni(nominativo);
         console.log("Cercando descrizione per:", nomeNormalizzato);
@@ -276,8 +362,6 @@
         
         function playNextFragment() {
           if (currentIndex < frammenti.length) {
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            
             responsiveVoice.speak(correggiPronuncia(frammenti[currentIndex]), "Italian Female", {
               rate: isMobile ? 1.01 : 1.15,
               volume: 1,
@@ -298,6 +382,11 @@
     }
 
     function mostraAlert(nome) {
+      // Disabilita l'alert e la lettura su mobile
+      if (isMobile) {
+        console.log("Alert e lettura disabilitati su dispositivo mobile.");
+        return;
+      }
       if (!descrizioniMap.size) {
         console.log("Ricarico le descrizioni...");
         caricaDescrizioni().then(() => {
@@ -464,6 +553,9 @@
     }
 
     function suonaBeepSingolo() {
+      // Suono disabilitato su mobile per evitare problemi di autoplay audio
+      if (isMobile) return; 
+
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = ctx.createOscillator();
@@ -478,6 +570,9 @@
     }
 
     function suonaTreBeep() {
+      // Suono disabilitato su mobile per evitare problemi di autoplay audio
+      if (isMobile) return; 
+
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         for (let i = 0; i < 3; i++) {
@@ -495,6 +590,9 @@
     }
 
     function lanciaCoriandoli10s() {
+      // Coriandoli disabilitati su mobile per prestazioni
+      if (isMobile) return; 
+
       const end = Date.now() + 10 * 1000;
 
       (function frame() {
@@ -567,6 +665,12 @@
     }
 
     function costruisciTestoLettura(evento) {
+      // Disabilita la lettura su mobile
+      if (isMobile) {
+        console.log("Lettura del testo disabilitata su dispositivo mobile.");
+        return '';
+      }
+
       try {
         const nominativoLetto = sistemaNominativo(evento);
         const { giornoSettimana, giornoDelMese, nomeMese, annoVero } = costruisciDataEventoGGMM(evento);
@@ -627,8 +731,6 @@
 
         function playNextFragment() {
           if (currentIndex < frammenti.length) {
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            
             responsiveVoice.speak(correggiPronuncia(frammenti[currentIndex]), "Italian Female", {
               rate: isMobile ? 1.01 : 1.15,
               volume: 1,
@@ -636,8 +738,6 @@
                 currentIndex++;
                 if (currentIndex < frammenti.length) {
                   setTimeout(playNextFragment, 5);
-                } else if (evento.giorniMancanti === 0) {
-                  setTimeout(suonaTreBeep, 15);
                 }
               }
             });
@@ -667,6 +767,11 @@
           const classeTipo = evento.Tipo.toLowerCase();
           const li = document.createElement('li');
           li.classList.add(classeTipo);
+          
+          // Aggiungi classe evento-oggi se l'evento è oggi
+          if (evento.giorniMancanti === 0) {
+            li.classList.add('evento-oggi');
+          }
 
           const imgSrc = evento.Link ? correggiLink(evento.Link) : `${evento.Nominativo}.JPG`;
 
@@ -710,7 +815,7 @@
           const nominativoEscaped = evento.Nominativo.replace(/'/g, "\\'");
 
           li.innerHTML = `
-            <a href="javascript:void(0)" onclick="mostraAlert('${nominativoEscaped}')" style="text-decoration:none; color: inherit;">
+            <span class="star-badge">⭐</span> <a href="javascript:void(0)" onclick="mostraAlert('${nominativoEscaped}')" style="text-decoration:none; color: inherit;">
               <strong>${evento.Nominativo}</strong>
             </a>
             <br>
@@ -751,6 +856,11 @@
     }
 
     function promptData() {
+      // Disabilita la modifica data su mobile
+      if (isMobile) {
+        console.log("Modifica data disabilitata su dispositivo mobile.");
+        return;
+      }
       const dataString = prompt(
         "Inserisci la data nel formato DD/MM/YYYY:",
         dataSimulata
@@ -778,6 +888,11 @@
     }
 
     function resetData() {
+      // Disabilita il reset data su mobile
+      if (isMobile) {
+        console.log("Reset data disabilitato su dispositivo mobile.");
+        return;
+      }
       dataSimulata = null;
       document.getElementById('reset-data').style.display = 'none';
 
@@ -788,16 +903,30 @@
       aggiornaDataOggi();
     }
 
-    document.getElementById('titolo').addEventListener('click', promptData);
+    // Aggiungi event listener solo se NON è mobile
+    if (!isMobile) {
+      document.getElementById('titolo').addEventListener('click', promptData);
+      document.addEventListener('keydown', event => {
+        if (event.key === 'F2') {
+          event.preventDefault();
+          promptData();
+        }
+      });
+      document.getElementById('cambia-data').addEventListener('click', promptData);
+      document.getElementById('reset-data').addEventListener('click', resetData);
 
-    document.addEventListener('keydown', event => {
-      if (event.key === 'F2') {
-        event.preventDefault();
-        promptData();
+      // Mostra i pulsanti della data solo su desktop
+      document.querySelector('.pulsanti-data').style.display = 'block';
+      document.getElementById('cambia-data').style.display = 'block';
+      if (dataSimulata) { // Mostra reset solo se una data è già simulata
+        document.getElementById('reset-data').style.display = 'block';
       }
-    });
-    document.getElementById('cambia-data').addEventListener('click', promptData);
-    document.getElementById('reset-data').addEventListener('click', resetData);
+    } else {
+        // Nascondi il titolo h1 se la modifica della data è disabilitata (opzionale, per maggiore chiarezza)
+        document.getElementById('titolo').style.cursor = 'default';
+        console.log("Funzionalità di modifica data disabilitata su mobile.");
+    }
+
 
     // Avvio
     caricaNomiAnniversari().then(() => {
