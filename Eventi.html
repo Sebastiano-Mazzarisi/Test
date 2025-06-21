@@ -74,7 +74,7 @@
       text-align: center;
       color: #666;
       font-size: 1em;
-      margin-bottom: 30px;
+      margin-bottom: 15px; /* Ridotto margine per il campo di ricerca */
       position: relative; /* Contenitore per le icone */
     }
 
@@ -135,6 +135,35 @@
     /* Stili specifici per l'icona Info (eredita da action-button) */
     .info-icon {
       margin-left: 8px; /* Spazio tra il testo/altra icona e l'icona Info */
+    }
+
+    /* Stili per il campo di ricerca */
+    #search-container {
+      text-align: center;
+      margin-bottom: 30px; /* Spazio sotto il campo di ricerca */
+      /* Nuove regole per allineare la larghezza */
+      display: flex; /* Usa flexbox per il contenitore */
+      justify-content: center; /* Centra il contenuto (l'input) */
+      width: 100%; /* Occupa tutta la larghezza disponibile */
+    }
+    #searchInput {
+      /* Calcola la larghezza basandosi sugli elementi della riga precedente */
+      /* 1.5em (width icona A) + 8px (margin-right A) + larghezza testo data (stimata a 150px) + 8px (margin-left i) + 1.5em (width icona i) */
+      /* Ho stimato la larghezza del testo data a circa 150px-180px in base al font-size di 1em per #oggi */
+      width: calc(1.5em + 8px + 180px + 8px + 1.5em); 
+      max-width: 90%; /* Limite massimo per evitare che diventi troppo largo su schermi grandi */
+      min-width: 250px; /* Larghezza minima per la leggibilità */
+      padding: 10px 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1em;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    #searchInput:focus {
+      border-color: #888;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1), 0 0 8px rgba(136, 136, 136, 0.6);
     }
 
     ul {
@@ -383,6 +412,10 @@
     <span class="action-button tree-icon" id="tree-icon" data-tooltip="Albero genealogico">a</span> <span id="data-corrente-testo"></span>
     <span class="action-button info-icon" id="info-icon" data-tooltip="Informazioni">i</span> </div>
 
+  <div id="search-container">
+    <input type="text" id="searchInput" placeholder="Cerca per nominativo...">
+  </div>
+
   <canvas id="confetti-canvas"></canvas>
 
   <ul id="eventi-lista">
@@ -416,6 +449,7 @@
 
   <script>
     let descrizioniMap = new Map();
+    let allEventsData = []; // Variabile per memorizzare tutti gli eventi caricati
 
     async function caricaDescrizioni() {
       try {
@@ -555,6 +589,7 @@
         playNextFragment();
       } catch (error) {
         console.error("Errore nella costruzione del testo:", error);
+        return '';
       }
     }
 
@@ -599,6 +634,32 @@
       }
     }
 
+    // Qui la funzione ordinaPerData è stata corretta per accettare 'events' come parametro
+    function ordinaPerData(events) { // Aggiunto 'events' come parametro
+      const oggi = getDataCorrente();
+      const oggiMMGG = new Date(2000, oggi.getMonth(), oggi.getDate());
+
+      return events // Utilizza il parametro 'events'
+        .filter(e => e.Data)
+        .map(e => {
+          const dataEvento = parseDataMMGG(e.Data);
+          if (!dataEvento) return null;
+          const giorniMancanti = calcolaGiorniMancanti(dataEvento, oggiMMGG);
+          // L'età viene calcolata qui per poterla usare nella visualizzazione e nell'ordinamento
+          // Passiamo l'oggetto evento completo a calcolaEta
+          const eta = calcolaEta(e); 
+          return { ...e, dataEvento, giorniMancanti, eta };
+        })
+        .filter(e => e !== null && e.dataEvento !== null)
+        .sort((a, b) => {
+          const diffA = a.dataEvento - oggiMMGG;
+          const diffB = b.dataEvento - oggiMMGG;
+          const tA = (diffA >= 0 ? diffA : diffA + 365*24*60*60*1000);
+          const tB = (diffB >= 0 ? diffB : diffB + 365*24*60*60*1000);
+          return tA - tB;
+        });
+    }
+
     async function caricaEventiDaCSV(url) {
       try {
         const response = await fetch(url);
@@ -614,21 +675,24 @@
           return [];
         }
         
-        return dati.map(riga => {
+        const events = dati.map(riga => {
           const evento = intestazioni.reduce((acc, colonna, index) => {
             acc[colonna.trim()] = riga[index]?.trim() || '';
             return acc;
           }, {});
           
-          // Verifica che l'evento abbia i campi necessari
           if (!evento.Nominativo || !evento.Tipo || !evento.Data) {
             console.warn('Evento incompleto:', evento);
           }
           
           return evento;
         }).filter(evento => evento.Nominativo && evento.Tipo && evento.Data);
+        
+        allEventsData = events; // Memorizza tutti gli eventi
+        return events;
+
       } catch (error) {
-        console.error('Errore nel caricamento del CSV:', error);
+        console.error("Errore nel caricamento del CSV (Eventi-Link.csv):", error); // Dettaglio sull'errore
         return [];
       }
     }
@@ -663,7 +727,8 @@
       if (!data) return null;
       const [giorno, mese] = data.split("/").map(Number);
       if (!giorno || !mese) return null;
-      return new Date(2000, mese - 1, giorno);
+      // L'anno 2000 è un placeholder per il calcolo dei giorni mancanti nel ciclo annuale
+      return new Date(2000, mese - 1, giorno); 
     }
 
     function calcolaGiorniMancanti(dataEvento, oggiMMGG) {
@@ -675,47 +740,27 @@
     }
 
     function calcolaEta(evento) {
-      if (!evento || (evento.Tipo !== "Compleanno" && evento.Tipo !== "Anniversario")) return null;
+        if (!evento || (evento.Tipo !== "Compleanno" && evento.Tipo !== "Anniversario")) return null;
 
-      let annoNascita = parseInt(evento.Anno);
-      if (isNaN(annoNascita)) {
-        const parti = evento.Data ? evento.Data.split("/") : [];
-        if (parti.length === 3) {
-          const maybeYear = parseInt(parti[2]);
-          if (!isNaN(maybeYear)) {
-            annoNascita = maybeYear;
-          }
+        let annoNascita = parseInt(evento.Anno);
+        if (isNaN(annoNascita)) {
+            const parti = evento.Data ? evento.Data.split("/") : [];
+            if (parti.length === 3) {
+                const maybeYear = parseInt(parti[2]);
+                if (!isNaN(maybeYear)) {
+                    annoNascita = maybeYear;
+                }
+            }
         }
-      }
-      if (isNaN(annoNascita)) return null;
+        if (isNaN(annoNascita)) return null;
 
-      const oggi = getDataCorrente();
-      const annoCorrente = oggi.getFullYear();
-      
-      return annoCorrente - annoNascita;
-    }
+        // Recuperiamo l'anno effettivo dell'evento dalla funzione costruisciDataEventoGGMM
+        // che proietta l'evento all'anno corrente o successivo se già passato.
+        const { annoVero } = costruisciDataEventoGGMM(evento); 
+        
+        let eta = annoVero - annoNascita; // L'età è la differenza tra l'anno dell'evento e l'anno di nascita.
 
-    function ordinaPerData(eventi) {
-      const oggi = getDataCorrente();
-      const oggiMMGG = new Date(2000, oggi.getMonth(), oggi.getDate());
-
-      return eventi
-        .filter(e => e.Data)
-        .map(e => {
-          const dataEvento = parseDataMMGG(e.Data);
-          if (!dataEvento) return null;
-          const giorniMancanti = calcolaGiorniMancanti(dataEvento, oggiMMGG);
-          const eta = calcolaEta(e);
-          return { ...e, dataEvento, giorniMancanti, eta };
-        })
-        .filter(e => e !== null && e.dataEvento !== null)
-        .sort((a, b) => {
-          const diffA = a.dataEvento - oggiMMGG;
-          const diffB = b.dataEvento - oggiMMGG;
-          const tA = (diffA >= 0 ? diffA : diffA + 365*24*60*60*1000);
-          const tB = (diffB >= 0 ? diffB : diffB + 365*24*60*60*1000);
-          return tA - tB;
-        });
+        return eta;
     }
 
     function aggiornaDataOggi() {
@@ -726,7 +771,7 @@
       const nomeGiorno = giorniSettimana[oggi.getDay()];
       const nomeMese = mesi[oggi.getMonth()];
       const dataOggi = `${nomeGiorno} ${oggi.getDate()} ${nomeMese} ${oggi.getFullYear()}`;
-      document.getElementById('data-corrente-testo').innerText = `Oggi: ${dataOggi}`; // Aggiornato ID
+      document.getElementById('data-corrente-testo').innerText = `Oggi: ${dataOggi}`;
     }
 
     function suonaBeepSingolo() {
@@ -796,15 +841,19 @@
                       "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
 
     function costruisciDataEventoGGMM(evento) {
-      if (!evento || !evento.dataEvento) return { giornoSettimana: '', giornoDelMese: '', nomeMese: '', annoVero: '' };
-      
+      if (!evento || !evento.Data) return { giornoSettimana: '', giornoDelMese: '', nomeMese: '', annoVero: '' };
+
       const baseDate = getDataCorrente();
       const currentYear = baseDate.getFullYear();
 
-      const day = evento.dataEvento.getDate();
-      const month = evento.dataEvento.getMonth();
-      let eventDate = new Date(currentYear, month, day);
+      const partiDataEvento = evento.Data.split("/").map(Number);
+      const giornoEvento = partiDataEvento[0];
+      const meseEvento = partiDataEvento[1] - 1; // Mesi in JS sono 0-11
 
+      let eventDate = new Date(currentYear, meseEvento, giornoEvento);
+
+      // Se l'evento è già passato nell'anno corrente rispetto alla data di oggi, imposta l'anno al prossimo
+      // Questo assicura che gli eventi passati nell'anno corrente vengano visualizzati nel ciclo del prossimo anno
       if (eventDate < baseDate && (eventDate.getMonth() < baseDate.getMonth() || (eventDate.getMonth() === baseDate.getMonth() && eventDate.getDate() < baseDate.getDate()))) {
         eventDate.setFullYear(currentYear + 1);
       }
@@ -812,10 +861,11 @@
       const giornoSettimana = giorniSettimana[eventDate.getDay()];
       const giornoDelMese = eventDate.getDate();
       const nomeMese = mesiNome[eventDate.getMonth()];
-      const annoVero = eventDate.getFullYear();
+      const annoVero = eventDate.getFullYear(); // Questo è l'anno effettivo in cui si verifica l'evento
 
       return { giornoSettimana, giornoDelMese, nomeMese, annoVero };
     }
+
 
     function sistemaNominativo(evento) {
       if (!evento || !evento.Nominativo) return '';
@@ -929,11 +979,12 @@
       }
     }
 
-    function aggiornaEventi(eventi) {
+    // Questa funzione ora accetta un array di eventi filtrati
+    function aggiornaEventi(eventsToDisplay) {
       const lista = document.getElementById('eventi-lista');
       lista.innerHTML = '';
 
-      eventi.forEach(evento => {
+      eventsToDisplay.forEach(evento => {
         try {
           // Controlli di sicurezza
           if (!evento || !evento.Tipo || !evento.Nominativo) {
@@ -1057,9 +1108,13 @@
       dataSimulata = new Date(anno, mese - 1, giorno);
       document.getElementById('reset-data').style.display = 'block';
 
+      // Ricarica e filtra gli eventi con la nuova data (e l'attuale termine di ricerca)
+      const currentSearchTerm = document.getElementById('searchInput').value;
       caricaEventiDaCSV('https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/refs/heads/main/Eventi-Link.csv')
-        .then(eventi => ordinaPerData(eventi))
-        .then(aggiornaEventi);
+        .then(events => {
+          const sortedEvents = ordinaPerData(events); // Ordina sempre tutti gli eventi
+          filterAndDisplayEvents(sortedEvents, currentSearchTerm); // Filtra e mostra
+        });
 
       aggiornaDataOggi();
     }
@@ -1073,12 +1128,31 @@
       dataSimulata = null;
       document.getElementById('reset-data').style.display = 'none';
 
+      // Ricarica e filtra gli eventi con la data reale (e l'attuale termine di ricerca)
+      const currentSearchTerm = document.getElementById('searchInput').value;
       caricaEventiDaCSV('https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/refs/heads/main/Eventi-Link.csv')
-        .then(eventi => ordinaPerData(eventi))
-        .then(aggiornaEventi);
+        .then(events => {
+          const sortedEvents = ordinaPerData(events);
+          filterAndDisplayEvents(sortedEvents, currentSearchTerm);
+        });
 
       aggiornaDataOggi();
     }
+
+    // Funzione principale per filtrare e visualizzare gli eventi
+    function filterAndDisplayEvents(events, searchTerm = '') {
+        const normalizedSearchTerm = searchTerm.toLowerCase().trim();
+        let filteredEvents = events;
+
+        if (normalizedSearchTerm) {
+            filteredEvents = events.filter(event => {
+                const nominativo = event.Nominativo || '';
+                return nominativo.toLowerCase().includes(normalizedSearchTerm);
+            });
+        }
+        aggiornaEventi(filteredEvents); // Chiamata per visualizzare gli eventi filtrati
+    }
+
 
     // Funzioni per la gestione del pop-up del segnalibro
     function showBookmarkPopup() {
@@ -1090,13 +1164,12 @@
         localStorage.setItem('bookmarkInstructionsShown', 'true'); // Memorizza che il pop-up è stato mostrato
     }
 
-    function checkBookmarkAndShowPopup() {
-        // Mostra il pop-up solo su mobile e se non è mai stato mostrato prima
+    // La funzione checkBookmarkAndShowPopup non viene più chiamata all'avvio per disabilitare l'auto-visualizzazione
+    /* function checkBookmarkAndShowPopup() {
         if (isMobile && localStorage.getItem('bookmarkInstructionsShown') !== 'true') {
-            // Piccolo ritardo per permettere al CSS di caricarsi e alla pagina di stabilizzarsi
             setTimeout(showBookmarkPopup, 1000); 
         }
-    }
+    } */
 
     // Funzioni per la gestione del pop-up dell'Albero Genealogico
     async function showTreePopup() {
@@ -1187,6 +1260,14 @@
         console.log("Funzionalità di modifica data disabilitata su mobile.");
     }
 
+    // Event listener per il campo di ricerca
+    document.getElementById('searchInput').addEventListener('input', (event) => {
+        const searchTerm = event.target.value;
+        const sortedEvents = ordinaPerData(allEventsData); // Ri-ordina tutti i dati originali
+        filterAndDisplayEvents(sortedEvents, searchTerm); // Filtra e visualizza
+    });
+
+
     // Event listener per il pulsante di chiusura del pop-up del segnalibro
     document.getElementById('bookmark-close-button').addEventListener('click', hideBookmarkPopup);
 
@@ -1207,19 +1288,15 @@
     caricaNomiAnniversari().then(() => {
       aggiornaDataOggi();
       caricaEventiDaCSV('https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/refs/heads/main/Eventi-Link.csv')
-        .then(eventi => {
-          console.log("Eventi caricati:", eventi);
-          return ordinaPerData(eventi);
+        .then(events => {
+          allEventsData = events; // Salva i dati originali appena caricati
+          const sortedEvents = ordinaPerData(allEventsData); // Ordina la copia
+          filterAndDisplayEvents(sortedEvents, ''); // Mostra tutti gli eventi inizialmente
         })
-        .then(eventiOrdinati => {
-          console.log("Eventi ordinati:", eventiOrdinati);
-          aggiornaEventi(eventiOrdinati);
-        })
-        .catch(err => console.error('Errore nel caricamento degli eventi:', err));
+        .catch(err => console.error("Errore nel caricamento degli eventi iniziali:", err)); // Errore più specifico
     })
     .finally(() => {
-        // Controlla e mostra il pop-up del segnalibro dopo che tutto è caricato
-        checkBookmarkAndShowPopup(); 
+        // checkBookmarkAndShowPopup(); // Rimosso per disabilitare l'auto-visualizzazione
     });
 
     // Carica le descrizioni all'avvio
