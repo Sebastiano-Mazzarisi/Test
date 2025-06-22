@@ -122,11 +122,16 @@
     }
 
     .tree-icon {
-      margin-right: 8px;
+      margin-right: 4px;
+    }
+    
+    .datario-icon {
+      margin-left: 4px;
+      margin-right: 2px;
     }
     
     .info-icon {
-      margin-left: 8px;
+      margin-left: 2px;
     }
 
     /* Stili per il campo di ricerca */
@@ -323,7 +328,43 @@
       }
     }
 
-    /* Stili per la stella gialla LAMPEGGIANTE (per eventi di oggi) */
+    /* Badge per giorni mancanti */
+    .giorni-badge {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+      color: white;
+      font-weight: bold;
+      font-size: 1.1em;
+      padding: 4px 8px;
+      border-radius: 12px;
+      min-width: 20px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(255, 107, 107, 0.4);
+      z-index: 2;
+      line-height: 1;
+    }
+
+    .giorni-badge.oggi {
+      background: linear-gradient(135deg, #ffd93d, #ff6b6b);
+      animation: pulseBadge 1.5s ease-in-out infinite alternate;
+    }
+
+    .giorni-badge.domani {
+      background: linear-gradient(135deg, #74b9ff, #0984e3);
+    }
+
+    @keyframes pulseBadge {
+      0% { 
+        transform: scale(1);
+        box-shadow: 0 2px 6px rgba(255, 107, 107, 0.4);
+      }
+      100% { 
+        transform: scale(1.05);
+        box-shadow: 0 3px 8px rgba(255, 107, 107, 0.6);
+      }
+    }
     .star-badge {
       position: absolute; 
       top: 5px; 
@@ -427,6 +468,258 @@
       margin-top: 10px;
     }
 
+    /* Stili per la modalità datario */
+    #datario-container {
+      display: none;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 15px;
+    }
+
+    .datario-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .mese-container {
+      border: 2px solid #DAA520;
+      border-radius: 8px;
+      background-color: white;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .mese-container.passato {
+      background: linear-gradient(135deg, #f8f8f8 0%, #f5f5f5 100%);
+      border-color: #ccc;
+    }
+
+    .mese-container.corrente {
+      background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
+    }
+
+    .mese-container.passato.vuoto {
+      background: linear-gradient(135deg, #f5f5f5 0%, #f2f2f2 100%);
+      border-color: #bbb;
+    }
+
+    .mese-container.passato .mese-header {
+      background-color: #e8e8e8;
+      border-bottom-color: #ccc;
+      color: #666;
+    }
+
+    .evento-datario.passato {
+      background-color: rgba(248, 248, 248, 0.8);
+      padding: 2px 4px;
+      border-radius: 3px;
+      margin: 2px 0;
+    }
+
+    .evento-datario.oggi {
+      background-color: rgba(255, 235, 160, 0.5);
+      padding: 2px 4px;
+      border-radius: 3px;
+      margin: 2px 0;
+      border-left: 3px solid #DAA520;
+      font-weight: 500;
+    }
+
+    /* Separatore nel mese corrente tra eventi passati e futuri */
+    .separatore-giorni {
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, #DAA520 0%, #ddd 100%);
+      margin: 8px 0;
+      border-radius: 1px;
+      position: relative;
+    }
+
+    .separatore-giorni::after {
+      content: "oggi " attr(data-giorno);
+      position: absolute;
+      right: -2px;
+      top: -10px;
+      background-color: #DAA520;
+      color: white;
+      padding: 1px 4px;
+      border-radius: 2px;
+      font-size: 0.7em;
+      font-weight: bold;
+    }
+
+    .mese-header {
+      background-color: #F0E68C;
+      padding: 8px 12px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.1em;
+      color: #333;
+      border-bottom: 2px solid #DAA520;
+      border-radius: 6px 6px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mese-container.vuoto .mese-header {
+      background-color: #f0f0f0;
+      border-bottom-color: #ddd;
+      color: #999;
+    }
+
+    .mese-nome {
+      flex: 1;
+      text-align: center;
+    }
+
+    .mese-counter {
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+      font-weight: normal;
+      color: #666;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .mese-container.vuoto .mese-counter {
+      background-color: rgba(200, 200, 200, 0.5);
+      color: #999;
+    }
+
+    .mese-content {
+      padding: 12px;
+      font-size: 0.85em;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .mese-container.vuoto .mese-content {
+      background-color: #f8f8f8;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .evento-datario {
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+
+    .evento-datario.compleanno {
+      color: #00008B;
+    }
+
+    .evento-datario.onomastico {
+      color: #006400;
+    }
+
+    .evento-datario.anniversario {
+      color: #8B0000;
+    }
+
+    .giorno-numero {
+      font-weight: bold;
+    }
+
+    .anni-parentesi {
+      font-weight: normal;
+      color: #666;
+    }
+
+    /* Responsive per datario */
+    @media (max-width: 1200px) {
+      .datario-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .datario-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      
+      .mese-header {
+        font-size: 1em;
+        padding: 6px 8px;
+      }
+      
+      .mese-counter {
+        font-size: 0.8em;
+        padding: 1px 4px;
+      }
+      
+      .mese-content {
+        padding: 8px;
+        font-size: 0.8em;
+      }
+      
+      .evento-datario {
+        margin-bottom: 4px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      #datario-container {
+        padding: 10px;
+      }
+      
+      .datario-grid {
+        gap: 8px;
+      }
+      
+      .mese-container {
+        min-height: 160px;
+      }
+      
+      .mese-header {
+        font-size: 0.9em;
+        padding: 5px 6px;
+      }
+      
+      .mese-counter {
+        font-size: 0.75em;
+        padding: 1px 3px;
+      }
+      
+      .mese-content {
+        padding: 6px;
+        font-size: 0.75em;
+      }
+      
+      .evento-datario {
+        margin-bottom: 3px;
+        line-height: 1.2;
+      }
+    }
+
+    /* Stili per contenitori dinamici quando ci sono pochi eventi */
+    .datario-compatto .mese-container {
+      min-height: auto;
+    }
+
+    .datario-compatto .mese-content {
+      min-height: auto;
+      padding: 8px;
+    }
+
+    .datario-compatto .mese-container.vuoto {
+      min-height: 80px;
+    }
+
+    .datario-compatto .mese-container.vuoto .mese-content {
+      min-height: 40px;
+      padding: 4px;
+    }
+
     /* Finestrella di conferma copia non bloccante */
     #copyConfirmation {
         position: fixed;
@@ -489,6 +782,7 @@
   <div id="oggi">
     <span class="action-button tree-icon" id="tree-icon" data-tooltip="Albero genealogico">a</span> 
     <span id="data-corrente-testo"></span>
+    <span class="action-button datario-icon" id="datario-icon" data-tooltip="Modalità datario">d</span>
     <span class="action-button info-icon" id="info-icon" data-tooltip="Informazioni">i</span>
   </div>
 
@@ -499,6 +793,8 @@
         <button id="clear-search-button" title="Cancella ricerca">×</button>
     </div>
   </div>
+
+  <div id="datario-container"></div>
 
   <ul id="eventi-lista"></ul>
 
@@ -637,6 +933,7 @@ const nomiNozze = {
 let tuttiGliEventi = [];
 let dataPersonalizzata = null;
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+let modalitaDatario = false;
 
 // ===== FUNZIONI UTILITY =====
 function getDataOdierna() {
@@ -667,8 +964,25 @@ function calcolaAnni(evento) {
   if (!evento || (evento.Tipo !== "Compleanno" && evento.Tipo !== "Anniversario")) return null;
   const anno = parseInt(evento.Anno);
   if (isNaN(anno)) return null;
-  const { annoCorrente } = getDataCompleta(evento);
-  return annoCorrente - anno;
+  
+  const oggi = getDataOdierna();
+  const annoCorrente = oggi.getFullYear();
+  const parti = evento.Data.split("/").map(Number);
+  const giornoEvento = parti[0];
+  const meseEvento = parti[1];
+  
+  // Calcola gli anni base
+  let anni = annoCorrente - anno;
+  
+  // Se il compleanno/anniversario non è ancora arrivato quest'anno, sottrai 1
+  const dataEventoQuestAnno = new Date(annoCorrente, meseEvento - 1, giornoEvento);
+  const oggiNormalizzato = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate());
+  
+  if (dataEventoQuestAnno > oggiNormalizzato) {
+    anni = anni - 1;
+  }
+  
+  return anni;
 }
 
 function getDataCompleta(evento) {
@@ -730,9 +1044,9 @@ function ordinaEventi(eventi) {
 
 function aggiornaData() {
   const oggi = getDataOdierna();
-  const giorni = ["domenica", "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato"];
+  const giorni = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
   const mesi = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
-  const testo = `Oggi: ${giorni[oggi.getDay()]} ${oggi.getDate()} ${mesi[oggi.getMonth()]} ${oggi.getFullYear()}`;
+  const testo = `${giorni[oggi.getDay()]} ${oggi.getDate()} ${mesi[oggi.getMonth()]} ${oggi.getFullYear()}`;
   document.getElementById('data-corrente-testo').innerText = testo;
 }
 
@@ -756,11 +1070,20 @@ function creaElementoEvento(evento) {
   li.classList.add(evento.Tipo.toLowerCase());
   
   let icona = '';
+  let badgeGiorni = '';
+  
   if (evento.giorni === 0) {
     li.classList.add('evento-oggi');
     icona = '<span class="star-badge">⭐</span>';
+    badgeGiorni = '<div class="giorni-badge oggi">OGGI</div>';
   } else {
     icona = '<a href="#titolo" class="arrow-badge" title="Torna su">⬆️</a>';
+    // Aggiungi sempre il badge, ma sarà nascosto/mostrato dalla logica in mostraEventi
+    if (evento.giorni === 1) {
+      badgeGiorni = '<div class="giorni-badge domani">1</div>';
+    } else if (evento.giorni > 1) {
+      badgeGiorni = `<div class="giorni-badge">${evento.giorni}</div>`;
+    }
   }
   
   const { giornoSettimana, giorno, mese, annoCorrente } = getDataCompleta(evento);
@@ -801,6 +1124,7 @@ function creaElementoEvento(evento) {
   ].filter(t => t).join(' ').toLowerCase();
   
   li.innerHTML = `
+    ${badgeGiorni}
     ${icona}
     <a href="javascript:void(0)" onclick="clickEvento('${nomeEscaped}')" style="text-decoration:none; color: inherit;">
       <strong>${evento.Nominativo}</strong>
@@ -830,63 +1154,408 @@ function creaBarraAnno(anno) {
   return barra;
 }
 
-function mostraEventi(eventi, termine = '') {
-  const lista = document.getElementById('eventi-lista');
-  const contatore = document.getElementById('event-counter');
-  const btnCancella = document.getElementById('clear-search-button');
-  const messaggioFine = document.getElementById('end-of-list-message');
+function creaMeseDatario(mese, anno, eventi, termineRicerca = '') {
+  const nomiMesi = [
+    'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
+    'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'
+  ];
   
-  // Prima creiamo tutti gli elementi li
-  const elementiLi = eventi.map(evento => creaElementoEvento(evento));
+  const oggi = getDataOdierna();
+  const meseCorrente = oggi.getMonth();
+  const annoCorrente = oggi.getFullYear();
+  const giornoCorrente = oggi.getDate();
   
-  let elementiFiltrati = elementiLi;
+  // Determina se il mese è passato, corrente o futuro
+  let tipologiaMese = '';
+  if (anno < annoCorrente || (anno === annoCorrente && mese < meseCorrente)) {
+    tipologiaMese = 'passato';
+  } else if (anno === annoCorrente && mese === meseCorrente) {
+    tipologiaMese = 'corrente';
+  } else {
+    tipologiaMese = 'futuro';
+  }
   
-  if (termine.trim()) {
-    // Ricerca avanzata: separa parole positive e negative
-    const termini = termine.toLowerCase().trim().split(/\s+/); // Divide per spazi multipli
-    
-    // Separa parole da includere (+) e da escludere (-)
+  let eventiMese = eventi.filter(evento => {
+    if (!evento.Data) return false;
+    const parti = evento.Data.split("/").map(Number);
+    return parti[1] === (mese + 1); // mese è 0-based, parti[1] è 1-based
+  });
+  
+  // Applica filtro di ricerca se presente
+  if (termineRicerca.trim()) {
+    const termini = termineRicerca.toLowerCase().trim().split(/\s+/);
     const parolePositive = [];
     const paroleNegative = [];
     
     termini.forEach(parola => {
       if (parola.startsWith('-') && parola.length > 1) {
-        // Parola da escludere (rimuove il - iniziale)
         paroleNegative.push(parola.substring(1));
       } else if (parola.startsWith('-') && parola.length === 1) {
-        // Solo il simbolo -, lo ignoriamo
         return;
       } else {
-        // Parola da includere
         parolePositive.push(parola);
       }
     });
     
-    elementiFiltrati = elementiLi.filter(li => {
-      const testoCompleto = li.testoCompleto;
+    eventiMese = eventiMese.filter(evento => {
+      const testoCompleto = [
+        evento.Nominativo,
+        evento.Tipo,
+        evento.Data
+      ].filter(t => t).join(' ').toLowerCase();
       
-      // Tutte le parole positive devono essere presenti
       const contienePositive = parolePositive.length === 0 || 
                               parolePositive.every(parola => testoCompleto.includes(parola));
       
-      // Nessuna delle parole negative deve essere presente
+      const nonContieneNegative = paroleNegative.length === 0 || 
+                                 paroleNegative.every(parola => !testoCompleto.includes(parola));
+      
+      return contienePositive && nonContieneNegative;
+    });
+  }
+  
+  // Raggruppa eventi per giorno
+  const eventiPerGiorno = {};
+  eventiMese.forEach(evento => {
+    const parti = evento.Data.split("/").map(Number);
+    const giorno = parti[0];
+    if (!eventiPerGiorno[giorno]) {
+      eventiPerGiorno[giorno] = [];
+    }
+    eventiPerGiorno[giorno].push(evento);
+  });
+  
+  // Ordina i giorni
+  const giorniOrdinati = Object.keys(eventiPerGiorno).map(Number).sort((a, b) => a - b);
+  
+  let contenuto = '';
+  
+  // Se è il mese corrente, dobbiamo inserire il separatore tra passato/oggi e futuro
+  if (tipologiaMese === 'corrente') {
+    const giorniPassatiEOggi = giorniOrdinati.filter(g => g <= giornoCorrente);
+    const giorniFuturi = giorniOrdinati.filter(g => g > giornoCorrente);
+    
+    // Eventi passati e di oggi
+    giorniPassatiEOggi.forEach(giorno => {
+      eventiPerGiorno[giorno].forEach(evento => {
+        let nome = evento.Nominativo;
+        let anni = '';
+        
+        if (evento.Tipo === 'Compleanno' || evento.Tipo === 'Anniversario') {
+          const anniCalcolati = calcolaAnni(evento);
+          if (anniCalcolati !== null) {
+            anni = ` (${anniCalcolati})`;
+          }
+        }
+        
+        const classeTemporale = giorno === giornoCorrente ? ' oggi' : ' passato';
+        const classeEvento = evento.Tipo.toLowerCase();
+        contenuto += `<div class="evento-datario ${classeEvento}${classeTemporale}">
+          <span class="giorno-numero">${giorno})</span> ${nome}<span class="anni-parentesi">${anni}</span>
+        </div>`;
+      });
+    });
+    
+    // Separatore temporale (solo se ci sono eventi futuri)
+    if (giorniFuturi.length > 0 && giorniPassatiEOggi.length > 0) {
+      contenuto += `<div class="separatore-giorni" data-giorno="${giornoCorrente}"></div>`;
+    }
+    
+    // Eventi futuri
+    giorniFuturi.forEach(giorno => {
+      eventiPerGiorno[giorno].forEach(evento => {
+        let nome = evento.Nominativo;
+        let anni = '';
+        
+        if (evento.Tipo === 'Compleanno' || evento.Tipo === 'Anniversario') {
+          const anniCalcolati = calcolaAnni(evento);
+          if (anniCalcolati !== null) {
+            anni = ` (${anniCalcolati})`;
+          }
+        }
+        
+        const classeEvento = evento.Tipo.toLowerCase();
+        contenuto += `<div class="evento-datario ${classeEvento}">
+          <span class="giorno-numero">${giorno})</span> ${nome}<span class="anni-parentesi">${anni}</span>
+        </div>`;
+      });
+    });
+  } else {
+    // Per mesi completamente passati o futuri
+    giorniOrdinati.forEach(giorno => {
+      eventiPerGiorno[giorno].forEach(evento => {
+        let nome = evento.Nominativo;
+        let anni = '';
+        
+        if (evento.Tipo === 'Compleanno' || evento.Tipo === 'Anniversario') {
+          const anniCalcolati = calcolaAnni(evento);
+          if (anniCalcolati !== null) {
+            anni = ` (${anniCalcolati})`;
+          }
+        }
+        
+        const classeTemporale = tipologiaMese === 'passato' ? ' passato' : '';
+        const classeEvento = evento.Tipo.toLowerCase();
+        contenuto += `<div class="evento-datario ${classeEvento}${classeTemporale}">
+          <span class="giorno-numero">${giorno})</span> ${nome}<span class="anni-parentesi">${anni}</span>
+        </div>`;
+      });
+    });
+  }
+  
+  const numeroEventi = eventiMese.length;
+  let classiContainer = '';
+  
+  if (numeroEventi === 0) {
+    classiContainer += ' vuoto';
+  }
+  if (tipologiaMese === 'passato') {
+    classiContainer += ' passato';
+  } else if (tipologiaMese === 'corrente') {
+    classiContainer += ' corrente';
+  }
+  
+  return `
+    <div class="mese-container${classiContainer}">
+      <div class="mese-header">
+        <div class="mese-nome">${nomiMesi[mese]} ${anno}</div>
+        <div class="mese-counter">${numeroEventi}</div>
+      </div>
+      <div class="mese-content">
+        ${contenuto || '<div style="color: #bbb; font-style: italic; font-size: 0.9em;">Nessun evento</div>'}
+      </div>
+    </div>
+  `;
+}
+
+function mostraDatario() {
+  const oggi = getDataOdierna();
+  const annoCorrente = oggi.getFullYear();
+  const termineRicerca = document.getElementById('searchInput').value;
+  
+  const datarioContainer = document.getElementById('datario-container');
+  const eventiLista = document.getElementById('eventi-lista');
+  const searchContainer = document.getElementById('search-container');
+  
+  // Conta il numero totale di eventi che soddisfano la ricerca
+  let totalEventiVisibili = 0;
+  if (termineRicerca.trim()) {
+    const termini = termineRicerca.toLowerCase().trim().split(/\s+/);
+    const parolePositive = [];
+    const paroleNegative = [];
+    
+    termini.forEach(parola => {
+      if (parola.startsWith('-') && parola.length > 1) {
+        paroleNegative.push(parola.substring(1));
+      } else if (parola.startsWith('-') && parola.length === 1) {
+        return;
+      } else {
+        parolePositive.push(parola);
+      }
+    });
+    
+    totalEventiVisibili = tuttiGliEventi.filter(evento => {
+      const testoCompleto = [
+        evento.Nominativo,
+        evento.Tipo,
+        evento.Data
+      ].filter(t => t).join(' ').toLowerCase();
+      
+      const contienePositive = parolePositive.length === 0 || 
+                              parolePositive.every(parola => testoCompleto.includes(parola));
+      
+      const nonContieneNegative = paroleNegative.length === 0 || 
+                                 paroleNegative.every(parola => !testoCompleto.includes(parola));
+      
+      return contienePositive && nonContieneNegative;
+    }).length;
+  } else {
+    totalEventiVisibili = tuttiGliEventi.length;
+  }
+  
+  // Applica la classe compatta se ci sono pochi eventi
+  const classeCompatta = totalEventiVisibili <= 20 ? ' datario-compatto' : '';
+  datarioContainer.className = classeCompatta;
+  
+  let html = '';
+  
+  // Crea tutti i 12 mesi dell'anno corrente in gruppi di 4 (o 3 o 2 a seconda del responsive)
+  for (let i = 0; i < 12; i += 4) {
+    html += '<div class="datario-grid">';
+    for (let j = 0; j < 4 && (i + j) < 12; j++) {
+      const meseIndex = i + j;
+      html += creaMeseDatario(meseIndex, annoCorrente, tuttiGliEventi, termineRicerca);
+    }
+    html += '</div>';
+  }
+  
+  datarioContainer.innerHTML = html;
+  
+  // Aggiorna il contatore degli eventi in modalità datario
+  aggiornaContatoreDatario(termineRicerca);
+  
+  // Mostra il datario e la ricerca, nasconde la lista
+  datarioContainer.style.display = 'block';
+  eventiLista.style.display = 'none';
+  searchContainer.style.display = 'block';
+  
+  modalitaDatario = true;
+  
+  // Cambia l'icona e tooltip
+  const datarioIcon = document.getElementById('datario-icon');
+  datarioIcon.textContent = 'e';
+  datarioIcon.setAttribute('data-tooltip', 'Modalità elenco');
+}
+
+function aggiornaContatoreDatario(termineRicerca) {
+  const contatore = document.getElementById('event-counter');
+  const btnCancella = document.getElementById('clear-search-button');
+  
+  if (termineRicerca.trim()) {
+    // Conta gli eventi che soddisfano la ricerca
+    const termini = termineRicerca.toLowerCase().trim().split(/\s+/);
+    const parolePositive = [];
+    const paroleNegative = [];
+    
+    termini.forEach(parola => {
+      if (parola.startsWith('-') && parola.length > 1) {
+        paroleNegative.push(parola.substring(1));
+      } else if (parola.startsWith('-') && parola.length === 1) {
+        return;
+      } else {
+        parolePositive.push(parola);
+      }
+    });
+    
+    const eventiFiltrati = tuttiGliEventi.filter(evento => {
+      const testoCompleto = [
+        evento.Nominativo,
+        evento.Tipo,
+        evento.Data
+      ].filter(t => t).join(' ').toLowerCase();
+      
+      const contienePositive = parolePositive.length === 0 || 
+                              parolePositive.every(parola => testoCompleto.includes(parola));
+      
       const nonContieneNegative = paroleNegative.length === 0 || 
                                  paroleNegative.every(parola => !testoCompleto.includes(parola));
       
       return contienePositive && nonContieneNegative;
     });
     
-    contatore.textContent = `${elementiFiltrati.length}/${tuttiGliEventi.length}`;
+    contatore.textContent = `${eventiFiltrati.length}/${tuttiGliEventi.length}`;
     btnCancella.style.display = 'flex';
   } else {
     contatore.textContent = `${tuttiGliEventi.length}/${tuttiGliEventi.length}`;
     btnCancella.style.display = 'none';
   }
+}
+
+function mostraElenco() {
+  const datarioContainer = document.getElementById('datario-container');
+  const eventiLista = document.getElementById('eventi-lista');
+  const searchContainer = document.getElementById('search-container');
+  
+  // Nasconde il datario e mostra la lista
+  datarioContainer.style.display = 'none';
+  eventiLista.style.display = 'flex';
+  searchContainer.style.display = 'block';
+  
+  modalitaDatario = false;
+  
+  // Cambia l'icona e tooltip
+  const datarioIcon = document.getElementById('datario-icon');
+  datarioIcon.textContent = 'd';
+  datarioIcon.setAttribute('data-tooltip', 'Modalità datario');
+  
+  // Ricarica gli eventi nell'elenco
+  const eventiOrdinati = ordinaEventi(tuttiGliEventi);
+  const termineRicerca = document.getElementById('searchInput').value;
+  mostraEventi(eventiOrdinati, termineRicerca);
+}
+
+function toggleDatario() {
+  if (modalitaDatario) {
+    mostraElenco();
+  } else {
+    mostraDatario();
+  }
+}
+
+function mostraEventi(eventi, termine = '') {
+  const lista = document.getElementById('eventi-lista');
+  const contatore = document.getElementById('event-counter');
+  const btnCancella = document.getElementById('clear-search-button');
+  const messaggioFine = document.getElementById('end-of-list-message');
+  
+  // Filtra prima gli eventi originali per determinare i prossimi
+  let eventiFiltrati = eventi;
+  
+  if (termine.trim()) {
+    // Ricerca avanzata: separa parole positive e negative
+    const termini = termine.toLowerCase().trim().split(/\s+/);
+    const parolePositive = [];
+    const paroleNegative = [];
+    
+    termini.forEach(parola => {
+      if (parola.startsWith('-') && parola.length > 1) {
+        paroleNegative.push(parola.substring(1));
+      } else if (parola.startsWith('-') && parola.length === 1) {
+        return;
+      } else {
+        parolePositive.push(parola);
+      }
+    });
+    
+    eventiFiltrati = eventi.filter(evento => {
+      const testoCompleto = [
+        evento.Nominativo,
+        evento.Tipo,
+        evento.Data
+      ].filter(t => t).join(' ').toLowerCase();
+      
+      const contienePositive = parolePositive.length === 0 || 
+                              parolePositive.every(parola => testoCompleto.includes(parola));
+      
+      const nonContieneNegative = paroleNegative.length === 0 || 
+                                 paroleNegative.every(parola => !testoCompleto.includes(parola));
+      
+      return contienePositive && nonContieneNegative;
+    });
+    
+    contatore.textContent = `${eventiFiltrati.length}/${eventi.length}`;
+    btnCancella.style.display = 'flex';
+  } else {
+    contatore.textContent = `${eventi.length}/${eventi.length}`;
+    btnCancella.style.display = 'none';
+  }
+  
+  // Determina il numero di giorni del prossimo evento tra quelli filtrati
+  const giorniProssimoEvento = eventiFiltrati.length > 0 ? eventiFiltrati[0].giorni : -1;
+  
+  // Crea gli elementi li con la logica corretta dei badge
+  const elementiLi = eventiFiltrati.map(evento => {
+    const li = creaElementoEvento(evento);
+    
+    // Applica la logica del badge
+    const badgeElement = li.querySelector('.giorni-badge');
+    if (badgeElement && !badgeElement.classList.contains('oggi')) {
+      if (evento.giorni === giorniProssimoEvento && giorniProssimoEvento > 0) {
+        // Questo è uno dei prossimi eventi - mostra il badge
+        badgeElement.style.display = 'block';
+      } else {
+        // Non è il prossimo evento - nascondi il badge
+        badgeElement.style.display = 'none';
+      }
+    }
+    
+    return li;
+  });
   
   // Pulisce la lista
   lista.innerHTML = '';
   
-  if (elementiFiltrati.length === 0) {
+  if (elementiLi.length === 0) {
     messaggioFine.style.display = 'block';
     messaggioFine.textContent = 'Nessun evento trovato.';
     return;
@@ -896,7 +1565,7 @@ function mostraEventi(eventi, termine = '') {
   
   // Raggruppa eventi per anno
   const eventiPerAnno = {};
-  elementiFiltrati.forEach(li => {
+  elementiLi.forEach(li => {
     // Estrae l'anno dall'elemento li
     const annoMatch = li.innerHTML.match(/(\d{4})/);
     const anno = annoMatch ? annoMatch[1] : 'Sconosciuto';
@@ -927,8 +1596,13 @@ function cancellaCerca() {
   const input = document.getElementById('searchInput');
   input.value = '';
   document.getElementById('clear-search-button').style.display = 'none';
-  const eventiOrdinati = ordinaEventi(tuttiGliEventi);
-  mostraEventi(eventiOrdinati, '');
+  
+  if (modalitaDatario) {
+    mostraDatario(); // Ricarica il datario senza filtri
+  } else {
+    const eventiOrdinati = ordinaEventi(tuttiGliEventi);
+    mostraEventi(eventiOrdinati, '');
+  }
 }
 
 function clickEvento(nome) {
@@ -957,9 +1631,13 @@ function cambiaData() {
   document.getElementById('reset-data').style.display = 'block';
   
   aggiornaData();
-  const eventiOrdinati = ordinaEventi(tuttiGliEventi);
-  const termineRicerca = document.getElementById('searchInput').value;
-  mostraEventi(eventiOrdinati, termineRicerca);
+  if (modalitaDatario) {
+    mostraDatario();
+  } else {
+    const eventiOrdinati = ordinaEventi(tuttiGliEventi);
+    const termineRicerca = document.getElementById('searchInput').value;
+    mostraEventi(eventiOrdinati, termineRicerca);
+  }
 }
 
 function resetData() {
@@ -969,9 +1647,13 @@ function resetData() {
   document.getElementById('reset-data').style.display = 'none';
   
   aggiornaData();
-  const eventiOrdinati = ordinaEventi(tuttiGliEventi);
-  const termineRicerca = document.getElementById('searchInput').value;
-  mostraEventi(eventiOrdinati, termineRicerca);
+  if (modalitaDatario) {
+    mostraDatario();
+  } else {
+    const eventiOrdinati = ordinaEventi(tuttiGliEventi);
+    const termineRicerca = document.getElementById('searchInput').value;
+    mostraEventi(eventiOrdinati, termineRicerca);
+  }
 }
 
 function mostraPopupInfo() {
@@ -1021,8 +1703,8 @@ function caricaAlbero() {
 │   │Nino Mazzarisi (1957)
 │   │
 │   ├── Maria Grazia Mazzarisi (1989)
-│   ├── Onofrio Mazzarisi (1992)
-│   └── Teresa Mazzarisi (1994)
+   ├── Onofrio Mazzarisi (1992)
+   └── Teresa Mazzarisi (1994)
 │
 ├── Vanna Pricci (1963)
 │   │Domenico Lefemine (1957)
@@ -1109,8 +1791,12 @@ function inizializza() {
     }
     
     document.getElementById('searchInput').addEventListener('input', e => {
-      const eventiOrdinati = ordinaEventi(tuttiGliEventi);
-      mostraEventi(eventiOrdinati, e.target.value);
+      if (modalitaDatario) {
+        mostraDatario(); // Ricarica il datario con il nuovo filtro
+      } else {
+        const eventiOrdinati = ordinaEventi(tuttiGliEventi);
+        mostraEventi(eventiOrdinati, e.target.value);
+      }
     });
     
     document.getElementById('clear-search-button').addEventListener('click', cancellaCerca);
@@ -1119,6 +1805,7 @@ function inizializza() {
     document.getElementById('tree-close-button').addEventListener('click', nascondiAlbero);
     document.getElementById('tree-icon').addEventListener('click', mostraAlbero);
     document.getElementById('tree-copy-button').addEventListener('click', copiaAlbero);
+    document.getElementById('datario-icon').addEventListener('click', toggleDatario);
     
   } catch (error) {
     console.error("Errore inizializzazione:", error);
