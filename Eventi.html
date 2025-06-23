@@ -26,14 +26,12 @@
       background-color: #f0f0f0;
     }
     
-    /* Media query per schermi più grandi */
     @media (min-width: 768px) {
       body {
         margin: 10px;
       }
     }
     
-    /* Pulsanti disabilitati di default, JavaScript li abiliterà su desktop */
     #reset-data, #cambia-data {
       display: none !important; 
       margin: 0 5px;
@@ -56,7 +54,6 @@
       background-color: #0000cc;
     }
     
-    /* Pulsanti data nascosti di default, JavaScript li mostrerà su desktop */
     .pulsanti-data {
       display: none !important;
       text-align: center;
@@ -66,45 +63,60 @@
     h1 {
       color: #444;
       text-align: center;
-      margin-bottom: 5px;
-      font-size: 2.5em;
+      margin-top: 15px;
+      margin-bottom: 15px;
+      font-size: 3em;
       cursor: pointer;
     }
-    
-    #oggi {
-      text-align: center;
-      color: #666;
-      font-size: 1em;
-      margin-bottom: 15px; 
-      position: relative;
+
+    /* MODIFICA: Nuovo contenitore principale per tutti i controlli */
+    #main-controls-wrapper {
+        width: 95%;
+        max-width: 500px;
+        margin: 0 auto 25px auto;
+        display: flex;
+        flex-direction: column;
+        gap: 15px; /* Spazio tra il pulsante Datario e la barra di ricerca */
     }
 
-    /* Stili base per tutti i pulsanti uniformati */
+    /* Contenitore per il solo pulsante Datario/Elenco, per centrarlo */
+    #view-toggle-container {
+        text-align: center;
+    }
+
+    /* MODIFICA: Nuovo contenitore per la barra di ricerca e i pulsanti laterali */
+    #search-and-tools-container {
+        display: flex;
+        align-items: center;
+        gap: 10px; /* Spazio tra i pulsanti e la barra */
+    }
+
     .action-button {
       display: inline-flex;
       justify-content: center;
       align-items: center;
-      width: 1.5em; 
-      height: 1.5em; 
-      font-size: 1.2em; 
+      font-size: 1.1em;
+      font-weight: bold;
       color: #333; 
       cursor: pointer; 
-      border: 1px solid #999; 
-      border-radius: 3px; 
+      border: 2px solid #999;
+      border-radius: 8px;
       box-sizing: border-box; 
-      line-height: 1; 
-      vertical-align: middle; 
       background-color: #FFFFE0;
-      position: relative;
-      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+      transition: all 0.3s ease;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      padding: 8px 12px;
+      white-space: nowrap;
     }
-    .action-button:hover {
+    
+    .action-button:hover, .action-button:active {
       color: #000;
       border-color: #444;
       background-color: #FFD700;
+      transform: scale(1.05);
     }
 
-    /* Tooltip/Nuvola al hover */
     .action-button::after {
       content: attr(data-tooltip);
       position: absolute;
@@ -114,72 +126,54 @@
       white-space: nowrap;
       background-color: rgba(0, 0, 0, 0.8);
       color: white;
-      padding: 5px 8px;
-      border-radius: 4px;
-      font-size: 0.8em;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.9em;
       z-index: 10001;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
     }
 
-    .action-button:hover::after {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
+    @media (min-width: 768px) {
+      .action-button:hover::after {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
     }
 
-    .tree-icon {
-      margin-right: 4px;
-    }
-    
-    .datario-icon {
-      margin-left: 4px;
-      margin-right: 2px;
-    }
-    
-    .info-icon {
-      margin-left: 2px;
-    }
-
-    /* Stili per il campo di ricerca */
-    #search-container {
-      text-align: center;
-      margin-bottom: 15px; 
-      position: relative;
-    }
     #search-input-wrapper {
-        display: inline-block;
         position: relative;
-        width: 330px;
-        max-width: 90%;
+        flex-grow: 1; /* Il wrapper della ricerca occupa lo spazio rimanente */
     }
     #searchInput {
       width: 100%;
-      padding: 10px 15px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 1em;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+      padding: 12px 15px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      font-size: 1.2em;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
       outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      transition: all 0.3s ease;
       box-sizing: border-box;
-      padding-right: 105px;
+      padding-right: 90px;
+      -webkit-appearance: none;
+      height: 45px;
     }
     #searchInput:focus {
       border-color: #888;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1), 0 0 8px rgba(136, 136, 136, 0.6);
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1), 0 0 8px rgba(136, 136, 136, 0.6);
     }
 
-    /* Stili per il contatore degli eventi */
     #event-counter {
         position: absolute; 
-        right: 45px;
+        right: 10px;
         top: 50%; 
         transform: translateY(-50%);
-        padding: 5px 8px; 
+        padding: 6px 8px; 
         background-color: white; 
         border: 1px solid black; 
-        border-radius: 5px;
+        border-radius: 6px;
         font-size: 0.9em;
         color: #555;
         white-space: nowrap; 
@@ -188,255 +182,213 @@
         cursor: default; 
     }
 
-    /* Stili per il pulsante X di cancellazione */
     #clear-search-button {
         position: absolute;
-        right: 10px;
+        right: 65px;
         top: 50%;
         transform: translateY(-50%);
-        width: 25px;
-        height: 25px;
+        width: 30px;
+        height: 30px;
         border: 1px solid #ccc;
         background-color: white;
         color: black;
         border-radius: 50%;
         cursor: pointer;
-        font-size: 16px;
-        font-weight: normal; /* Rimosso grassetto */
+        font-size: 18px;
+        font-weight: normal;
         display: none;
         align-items: center;
         justify-content: center;
         line-height: 1;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
     }
-    #clear-search-button:hover {
+    #clear-search-button:hover, #clear-search-button:active {
         background-color: #f0f0f0;
         border-color: #999;
+        transform: translateY(-50%) scale(1.05);
     }
 
-    /* Stili per le barre divisorie per anno */
     .year-divider {
       width: 100%;
       max-width: 1200px;
-      margin: 15px auto 10px auto;
+      margin: 20px auto 15px auto;
       position: relative;
-      height: 3px;
-      background-color: #F0E68C; /* Giallo paglierino */
+      height: 4px;
+      background-color: #F0E68C;
       border-radius: 2px;
-      flex-basis: 100%; /* Forza la barra a occupare l'intera larghezza, andando a capo */
+      flex-basis: 100%;
     }
     
     .year-label {
       position: absolute;
       right: 0;
-      top: -12px;
-      background-color: #F0E68C; /* Giallo paglierino */
-      padding: 2px 8px;
-      border-radius: 3px;
+      top: -15px;
+      background-color: #F0E68C;
+      padding: 4px 12px;
+      border-radius: 6px;
       font-weight: bold;
-      font-size: 0.9em;
+      font-size: 1.1em;
       color: #333;
-      border: 1px solid #DAA520;
+      border: 2px solid #DAA520;
     }
 
     ul {
       list-style-type: none;
       padding: 0;
-      max-width: 1200px; 
+      width: 90%;
+      max-width: 500px;
       margin: 0 auto;
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 15px;
       justify-content: center;
     }
+    
     li {
-      flex: 1 1 calc(50% - 10px);
-      min-width: 220px;
-      max-width: 280px;
+      flex: none;
+      width: 100%;
       margin-bottom: 0;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #000; 
+      padding: 20px;
+      border-radius: 15px;
+      border: 3px solid #000; 
       box-shadow: 4px 4px 12px rgba(0,0,0,0.3);
       text-align: center;
-      line-height: 1.4;
       position: relative;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      font-size: 1.2em;
+      box-sizing: border-box;
+    }
+    
+    li strong,
+    li .tipo-evento,
+    li .data-evento,
+    li .nozze-evento {
+        display: block;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
     }
 
-    /* Media queries per responsive design */
-    @media (min-width: 768px) {
+    li .tipo-evento { margin-top: 4px; }
+    li .data-evento { margin-top: 6px; }
+    li .nozze-evento { margin-top: 4px; font-style: italic; color: #555; }
+    
+    @media (max-width: 480px) {
       li {
-        flex: 1 1 calc(33.333% - 10px);
-      }
-    }
-
-    @media (min-width: 1024px) {
-      li {
-        flex: 1 1 calc(25% - 10px);
-      }
-    }
-
-    @media (min-width: 1200px) {
-      li {
-        flex: 1 1 calc(20% - 10px);
-      }
-    }
-
-    @media (max-width: 600px) {
-      body {
-        margin: 3px;
+        padding: 15px;
+        font-size: 1.1em;
       }
       
-      ul {
-        gap: 5px;
+      li strong {
+        font-size: 1.4em;
+        display: block;
       }
       
-      li {
-        min-width: 120px;
-        padding: 10px;
-        font-size: 0.85em;
-      }
-      
-      strong {
-        font-size: 1.2em;
-      }
-      
-      #search-container {
-        margin-bottom: 10px;
-      }
-      
-      .year-divider {
-        margin: 10px auto 8px auto;
+      li .tipo-evento {
+        font-size: 1.0em;
+        display: block;
       }
     }
     
-    li.compleanno {
-      background-color: #e6f3ff;
-    }
-    li.onomastico {
-      background-color: #e6ffe6;
-    }
-    li.anniversario {
-      background-color: #fff0f0;
-    }
+    li.compleanno { background-color: #e6f3ff; }
+    li.onomastico { background-color: #e6ffe6; }
+    li.anniversario { background-color: #fff0f0; }
+    .evento-oggi { animation: pulseGlowYellowLi 2s ease-in-out infinite; }
+    .compleanno strong { color: #00008B; }
+    .onomastico strong { color: #006400; }
+    .anniversario strong { color: #8B0000; }
     
-    .evento-oggi {
-      animation: pulseGlowYellowLi 2s ease-in-out infinite;
-    }
-    strong {
-      font-size: 1.5em;
-    }
-    .tipo-evento {
-      color: #000;
-    }
-    .compleanno strong {
-      color: #00008B;
-    }
-    .onomastico strong {
-      color: #006400;
-    }
-    .anniversario strong {
-      color: #8B0000;
-    }
-    
-    /* Animazione per l'ombra del box LI */
     @keyframes pulseGlowYellowLi {
-      0% {
-        box-shadow: 4px 4px 12px rgba(0,0,0,0.3), 0 0 10px rgba(240, 230, 140, 0.5);
-      }
-      50% {
-        box-shadow: 4px 4px 12px rgba(0,0,0,0.3), 0 0 20px rgba(240, 230, 140, 0.8);
-      }
-      100% {
-        box-shadow: 4px 4px 12px rgba(0,0,0,0.3), 0 0 10px rgba(240, 230, 140, 0.5);
-      }
+      0% { box-shadow: 4px 4px 12px rgba(0,0,0,0.3), 0 0 10px rgba(240, 230, 140, 0.5); }
+      50% { box-shadow: 4px 4px 12px rgba(0,0,0,0.3), 0 0 20px rgba(240, 230, 140, 0.8); }
+      100% { box-shadow: 4px 4px 12px rgba(0,0,0,0.3), 0 0 10px rgba(240, 230, 140, 0.5); }
     }
 
-    /* Badge per giorni mancanti */
     .giorni-badge {
       position: absolute;
-      top: 5px;
-      left: 5px;
-      background: linear-gradient(135deg, #ff6b6b, #ee5a52);
-      color: white;
+      top: 8px;
+      left: 8px;
+      background: white;
+      color: black;
+      border: 1px solid #333;
       font-weight: bold;
       font-size: 1.1em;
-      padding: 4px 8px;
+      padding: 3px 7px;
       border-radius: 12px;
       min-width: 20px;
       text-align: center;
-      box-shadow: 0 2px 6px rgba(255, 107, 107, 0.4);
       z-index: 2;
       line-height: 1;
+      box-shadow: none;
     }
-
+    
     .giorni-badge.oggi {
       background: linear-gradient(135deg, #ffd93d, #ff6b6b);
+      border: 1px solid #000;
       animation: pulseBadge 1.5s ease-in-out infinite alternate;
     }
 
-    .giorni-badge.domani {
-      background: linear-gradient(135deg, #74b9ff, #0984e3);
+    .giorni-badge.prossimo {
+        background-color: #ff4757;
+        color: white;
+        border-color: #d63031;
     }
-
+    
     @keyframes pulseBadge {
-      0% { 
-        transform: scale(1);
-        box-shadow: 0 2px 6px rgba(255, 107, 107, 0.4);
-      }
-      100% { 
-        transform: scale(1.05);
-        box-shadow: 0 3px 8px rgba(255, 107, 107, 0.6);
-      }
+      0% { transform: scale(1); }
+      100% { transform: scale(1.08); }
     }
+    
     .star-badge {
       position: absolute; 
-      top: 5px; 
-      right: 5px; 
-      font-size: 1.2em; 
+      top: 8px; 
+      right: 8px; 
+      font-size: 1.4em; 
       color: gold; 
-      text-shadow: 0 0 3px rgba(255, 215, 0, 0.6); 
+      text-shadow: 0 0 4px rgba(255, 215, 0, 0.6); 
       animation: blinkStar 0.6s infinite alternate;
       display: none;
       z-index: 1; 
     }
     
-    li.evento-oggi .star-badge {
-        display: block;
-    }
+    li.evento-oggi .star-badge { display: block; }
+
     @keyframes blinkStar {
-      0% { 
-        opacity: 0.1; 
-        color: gold; 
-      }
-      100% { 
-        opacity: 1; 
-        color: #DAA520; 
-      }
+      0% { opacity: 0.1; color: gold; }
+      100% { opacity: 1; color: #DAA520; }
     }
 
-    /* Stili per la freccia gialla (per eventi NON di oggi) */
     .arrow-badge {
       position: absolute; 
-      top: 5px;
-      right: 5px;
-      font-size: 1.2em; 
+      top: 8px;
+      right: 8px;
+      font-size: 1.4em; 
       color: gold;
-      text-shadow: 0 0 3px rgba(255, 215, 0, 0.6); 
+      text-shadow: 0 0 4px rgba(255, 215, 0, 0.6); 
       cursor: pointer;
       z-index: 1; 
       text-decoration: none;
-      transition: transform 0.2s ease;
+      transition: transform 0.3s ease;
       display: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
-    .arrow-badge:hover {
-        transform: scale(1.1);
-    }
-    
-    li:not(.evento-oggi) .arrow-badge {
-        display: block;
+    .arrow-badge:hover, .arrow-badge:active { transform: scale(1.2); }
+    li:not(.evento-oggi) .arrow-badge { display: block; }
+
+    @media (max-width: 600px) {
+      .giorni-badge {
+        font-size: 1.2em;
+        padding: 4px 8px;
+        top: 12px;
+        left: 12px;
+      }
+      .star-badge { font-size: 1.6em; top: 12px; right: 12px; }
+      .arrow-badge { font-size: 1.6em; top: 12px; right: 12px; padding: 8px; margin: -8px; }
     }
 
-    /* Stili per i pop-up generici (overlay e content) */
     .popup-overlay {
       position: fixed;
       top: 0;
@@ -454,13 +406,13 @@
     .popup-content {
       background-color: white;
       padding: 25px;
-      border-radius: 10px;
+      border-radius: 15px;
       text-align: center;
       position: relative;
       width: 90%; 
       max-width: fit-content; 
       min-width: 300px; 
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
       display: flex;
       flex-direction: column;
     }
@@ -469,16 +421,23 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
 
     .popup-header h2 {
       margin: 0;
       flex-grow: 1; 
       text-align: center;
+      font-size: 1.4em;
+    }
+    
+    .popup-header .action-button {
+      font-size: 1.2em;
+      width: auto;
+      height: auto;
     }
 
-    /* Stili specifici per il contenuto dell'Albero Genealogico */
+    /* MODIFICA: Grassetto per l'albero genealogico */
     #treeContent {
       font-family: 'Courier New', Courier, monospace; 
       white-space: pre; 
@@ -486,311 +445,101 @@
       overflow-x: auto; 
       overflow-y: auto; 
       max-height: 80vh; 
-      font-size: clamp(0.7em, 3.5vw, 1em); 
-      line-height: 1; 
-      margin-top: 10px;
+      font-size: clamp(0.8em, 3.5vw, 1.1em); 
+      line-height: 1.2; 
+      margin-top: 15px;
+      font-weight: bold;
     }
 
-    /* Stili per la modalità datario */
     #datario-container {
       display: none;
-      max-width: 1400px;
+      width: 95%; /* Leggermente più largo per coerenza */
+      max-width: 500px;
       margin: 0 auto;
       padding: 5px;
     }
 
     .datario-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 30px; 
       margin-bottom: 15px;
     }
 
     .mese-container {
-      border: 2px solid #DAA520;
-      border-radius: 8px;
+      border: 3px solid #DAA520;
+      border-radius: 15px;
       background-color: white;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+      box-shadow: 4px 4px 12px rgba(0,0,0,0.3);
       min-height: 200px;
       display: flex;
       flex-direction: column;
-    }
-
-    .mese-container.passato {
-      background: linear-gradient(135deg, #f8f8f8 0%, #f5f5f5 100%);
-      border-color: #ccc;
-    }
-
-    .mese-container.corrente {
-      background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
-    }
-
-    .mese-container.passato.vuoto {
-      background: linear-gradient(135deg, #f5f5f5 0%, #f2f2f2 100%);
-      border-color: #bbb;
-    }
-
-    .mese-container.passato .mese-header {
-      background-color: #e8e8e8;
-      border-bottom-color: #ccc;
-      color: #666;
-    }
-
-    .evento-datario.passato {
-      background-color: rgba(248, 248, 248, 0.8);
-      padding: 2px 4px;
-      border-radius: 3px;
-      margin: 2px 0;
-    }
-
-    .evento-datario.oggi {
-      background-color: rgba(255, 235, 160, 0.5);
-      padding: 2px 4px;
-      border-radius: 3px;
-      margin: 2px 0;
-      border-left: 3px solid #DAA520;
-      font-weight: 500;
-    }
-
-    /* Separatore nel mese corrente tra eventi passati e futuri */
-    .separatore-giorni {
       width: 100%;
-      height: 2px;
-      background: linear-gradient(90deg, #DAA520 0%, #ddd 100%);
-      margin: 8px 0;
-      border-radius: 1px;
-      position: relative;
+      box-sizing: border-box;
     }
 
-    .separatore-giorni::after {
-      content: "oggi " attr(data-giorno);
-      position: absolute;
-      right: -2px;
-      top: -10px;
-      background-color: #DAA520;
-      color: white;
-      padding: 1px 4px;
-      border-radius: 2px;
-      font-size: 0.7em;
-      font-weight: bold;
+    .mese-container.passato .mese-header { background-color: #90EE90; border-bottom-color: #228B22; color: #000; }
+    .mese-container.corrente { background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%); }
+    .mese-container.passato.vuoto { background: linear-gradient(135deg, #f5f5f5 0%, #f2f2f2 100%); border-color: #bbb; }
+    .mese-container.passato .mese-header { background-color: #90EE90; border-bottom-color: #32CD32; color: #000; }
+    .mese-container.corrente .mese-header,
+    .mese-container:not(.passato):not(.corrente) .mese-header { background-color: #F0E68C; border-bottom-color: #DAA520; color: #000; }
+
+    .prossimo-evento-marker {
+        display: inline-block;
+        background-color: #ff4757;
+        color: white;
+        font-weight: bold;
+        font-size: 0.8em;
+        padding: 2px 7px;
+        border-radius: 10px;
+        margin-left: 8px;
+        vertical-align: middle;
+        box-shadow: 0 0 8px rgba(255, 71, 87, 0.7);
+        line-height: 1;
     }
+
+    .evento-datario.passato { background-color: rgba(230, 230, 230, 0.8); padding: 2px 4px; border-radius: 3px; margin: 2px 0; }
+    .evento-datario.oggi { background-color: rgba(255, 235, 160, 0.5); padding: 2px 4px; border-radius: 3px; margin: 2px 0; border-left: 3px solid #DAA520; font-weight: 500; }
+
+    .separatore-giorni { width: 100%; height: 4px; background: linear-gradient(90deg, #DAA520 0%, #ddd 100%); margin: 10px 0; border-radius: 2px; position: relative; }
+    .separatore-giorni::after { content: "oggi " attr(data-giorno); position: absolute; right: -2px; top: -12px; background-color: #DAA520; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; font-weight: bold; }
 
     .mese-header {
       background-color: #F0E68C;
-      padding: 8px 12px;
+      padding: 15px 10px;
       text-align: center;
       font-weight: bold;
-      font-size: 1.1em;
-      color: #333;
-      border-bottom: 2px solid #DAA520;
-      border-radius: 6px 6px 0 0;
+      font-size: 1.2em;
+      color: #000;
+      border-bottom: 3px solid #DAA520;
+      border-radius: 12px 12px 0 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-
-    .mese-container.vuoto .mese-header {
-      background-color: #f0f0f0;
-      border-bottom-color: #ddd;
-      color: #999;
-    }
-
-    .mese-nome {
-      flex: 1;
-      text-align: center;
-    }
-
-    .mese-counter {
-      background-color: rgba(255, 255, 255, 0.8);
-      padding: 2px 6px;
-      border-radius: 3px;
-      font-size: 0.9em;
-      font-weight: normal;
-      color: #666;
-      min-width: 20px;
-      text-align: center;
-    }
-
-    .mese-container.vuoto .mese-counter {
-      background-color: rgba(200, 200, 200, 0.5);
-      color: #999;
-    }
-
-    .mese-content {
-      padding: 12px;
-      font-size: 0.85em;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .mese-container.vuoto .mese-content {
-      background-color: #f8f8f8;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .evento-datario {
-      margin-bottom: 6px;
-      line-height: 1.3;
-    }
-
-    .evento-datario.compleanno {
-      color: #00008B;
-    }
-
-    .evento-datario.onomastico {
-      color: #006400;
-    }
-
-    .evento-datario.anniversario {
-      color: #8B0000;
-    }
-
-    .giorno-numero {
-      font-weight: bold;
-    }
-
-    .anni-parentesi {
-      font-weight: normal;
-      color: #666;
-    }
-
-    /* Responsive per datario */
-    @media (max-width: 1200px) {
-      .datario-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-      }
-    }
-
-    @media (max-width: 900px) {
-      .datario-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-      }
-      
-      .mese-header {
-        font-size: 1em;
-        padding: 6px 8px;
-      }
-      
-      .mese-counter {
-        font-size: 0.8em;
-        padding: 1px 4px;
-      }
-      
-      .mese-content {
-        padding: 8px;
-        font-size: 0.8em;
-      }
-      
-      .evento-datario {
-        margin-bottom: 4px;
-      }
-    }
-
-    @media (max-width: 600px) {
-      #datario-container {
-        padding: 5px;
-      }
-      
-      .datario-grid {
-        gap: 6px;
-      }
-      
-      .mese-container {
-        min-height: 160px;
-      }
-      
-      .mese-header {
-        font-size: 0.9em;
-        padding: 5px 6px;
-      }
-      
-      .mese-counter {
-        font-size: 0.75em;
-        padding: 1px 3px;
-      }
-      
-      .mese-content {
-        padding: 6px;
-        font-size: 0.75em;
-      }
-      
-      .evento-datario {
-        margin-bottom: 3px;
-        line-height: 1.2;
-      }
-    }
-
-    /* Stili per contenitori dinamici quando ci sono pochi eventi */
-    .datario-compatto .mese-container {
-      min-height: auto;
-    }
-
-    .datario-compatto .mese-content {
-      min-height: auto;
-      padding: 8px;
-    }
-
-    .datario-compatto .mese-container.vuoto {
-      min-height: 80px;
-    }
-
-    .datario-compatto .mese-container.vuoto .mese-content {
-      min-height: 40px;
-      padding: 4px;
-    }
-
-    /* Finestrella di conferma copia non bloccante */
-    #copyConfirmation {
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: rgba(0, 123, 255, 0.85); 
-        color: white;
-        padding: 10px 20px;
-        border-radius: 5px;
-        font-size: 1em;
-        text-align: center;
-        z-index: 11000; 
-        opacity: 0; 
-        pointer-events: none; 
-    }
     
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-        to { opacity: 1; transform: translateX(-50%) translateY(0); }
-    }
-    @keyframes fadeOut {
-        from { opacity: 1; transform: translateX(-50%) translateY(0); }
-        to { opacity: 0; transform: translateX(-50%) translateY(20px); }
-    }
-    .fade-in {
-        animation: fadeIn 0.3s forwards;
-    }
-    .fade-out {
-        animation: fadeOut 0.3s forwards;
-    }
+    .mese-header-arrow { font-size: 1.4em; color: #0984e3; cursor: pointer; padding: 0 10px; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+    .mese-header-arrow:hover { transform: scale(1.2); color: #0000cc; }
+    .mese-container.vuoto .mese-header { background-color: #f0f0f0; border-bottom-color: #ddd; color: #999; }
+    .mese-nome { flex: 1; text-align: center; font-size: 1.4em }
+    .mese-counter { background-color: rgba(255, 255, 255, 0.9); padding: 4px 8px; border-radius: 6px; font-size: 1em; font-weight: normal; color: #666; min-width: 24px; text-align: center; border: 1px solid #000; }
+    .mese-container.vuoto .mese-counter { background-color: rgba(200, 200, 200, 0.5); color: #999; }
+    .mese-content { padding: 16px; font-size: 1em; flex: 1; display: flex; flex-direction: column; }
+    .mese-container.vuoto .mese-content { background-color: #f8f8f8; justify-content: center; align-items: center; }
+    .evento-datario { margin-bottom: 8px; line-height: 1.4; font-size: 1.2em; }
+    .evento-datario.compleanno { color: #00008B; }
+    .evento-datario.onomastico { color: #006400; }
+    .evento-datario.anniversario { color: #8B0000; }
+    .giorno-numero { font-weight: bold; }
+    .anni-parentesi { font-weight: normal; color: #666; }
 
-    #loading-indicator {
-      text-align: center;
-      padding: 20px;
-      font-size: 1.2em;
-      color: #666;
-      display: none; 
-    }
-
-    #end-of-list-message {
-      text-align: center;
-      padding: 20px;
-      font-size: 1.2em;
-      color: #999;
-      display: none; 
-    }
-
+    #copyConfirmation { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background-color: rgba(0, 123, 255, 0.9); color: white; padding: 15px 25px; border-radius: 10px; font-size: 1.1em; text-align: center; z-index: 11000; opacity: 0; pointer-events: none; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+    @keyframes fadeOut { from { opacity: 1; transform: translateX(-50%) translateY(0); } to { opacity: 0; transform: translateX(-50%) translateY(20px); } }
+    .fade-in { animation: fadeIn 0.3s forwards; }
+    .fade-out { animation: fadeOut 0.3s forwards; }
+    #loading-indicator, #end-of-list-message { text-align: center; padding: 30px; font-size: 1.3em; color: #999; display: none; }
   </style>
 </head>
 
@@ -802,18 +551,18 @@
     <button id="reset-data">Torna alla data reale</button>
   </div>
   
-  <div id="oggi">
-    <span class="action-button tree-icon" id="tree-icon" data-tooltip="Albero genealogico">a</span> 
-    <span id="data-corrente-testo"></span>
-    <span class="action-button datario-icon" id="datario-icon" data-tooltip="Modalità datario">d</span>
-    <span class="action-button info-icon" id="info-icon" data-tooltip="Informazioni">i</span>
-  </div>
-
-  <div id="search-container">
-    <div id="search-input-wrapper">
-        <input type="text" id="searchInput" placeholder="Cerca eventi...">
-        <div id="event-counter" class="search-addon">0/0</div>
-        <button id="clear-search-button" title="Cancella ricerca">×</button>
+  <div id="main-controls-wrapper">
+    <div id="view-toggle-container">
+        <span class="action-button" id="datario-icon" data-tooltip="Modalità datario">Datario</span>
+    </div>
+    <div id="search-and-tools-container">
+        <span class="action-button" id="tree-icon" data-tooltip="Albero genealogico">Albero</span>
+        <div id="search-input-wrapper">
+            <input type="text" id="searchInput" placeholder="Cerca eventi...">
+            <div id="event-counter" class="search-addon">0/0</div>
+            <button id="clear-search-button" title="Cancella ricerca">×</button>
+        </div>
+        <span class="action-button" id="info-icon" data-tooltip="Informazioni">Info</span>
     </div>
   </div>
 
@@ -827,8 +576,8 @@
   <div id="bookmarkPopup" class="popup-overlay">
     <div class="popup-content">
       <div class="popup-header">
-        <h2>Istruzioni per il Segnalibro</h2>
-        <button class="action-button" id="bookmark-close-button" data-tooltip="Chiudi finestra">x</button>
+        <h2>Istruzioni</h2>
+        <span class="action-button" id="bookmark-close-button" data-tooltip="Chiudi finestra">Esci</span>
       </div>
       <p>Per un'esperienza ottimale, aggiungi questa pagina alla schermata Home del tuo dispositivo.</p>
       <p>Su iOS: Clicca sull'icona "Condividi" (il quadrato con la freccia in alto) e poi "Aggiungi alla schermata Home".</p>
@@ -839,11 +588,9 @@
   <div id="treePopup" class="popup-overlay">
     <div class="popup-content">
       <div class="popup-header">
-        <h2>Albero Genealogico</h2>
-        <div>
-          <button class="action-button" id="tree-copy-button" data-tooltip="Copia negli appunti">c</button>
-          <button class="action-button" id="tree-close-button" data-tooltip="Chiudi finestra">x</button>
-        </div>
+        <span class="action-button" id="tree-copy-button" data-tooltip="Copia negli appunti">Copia</span>
+        <h2>Albero</h2>
+        <span class="action-button" id="tree-close-button" data-tooltip="Chiudi finestra">Esci</span>
       </div>
       <pre id="treeContent">Caricamento albero...</pre>
     </div>
@@ -973,7 +720,6 @@ function parseData(dataStr) {
 function calcolaGiorni(dataEvento, oggi) {
   if (!dataEvento || !oggi) return 0;
   
-  // Normalizza entrambe le date a mezzanotte per confronto preciso
   const oggiNormalizzato = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate());
   const eventoNormalizzato = new Date(dataEvento.getFullYear(), dataEvento.getMonth(), dataEvento.getDate());
   
@@ -994,22 +740,15 @@ function calcolaAnni(evento) {
   const giornoEvento = parti[0];
   const meseEvento = parti[1];
   
-  // Determina l'anno per cui calcolare gli anni
-  // Se stiamo visualizzando un evento che si verifica nell'anno prossimo,
-  // dobbiamo usare l'anno prossimo per il calcolo
   let annoCalcolo = annoCorrente;
   
-  // Crea la data dell'evento nell'anno corrente
   const dataEventoQuestAnno = new Date(annoCorrente, meseEvento - 1, giornoEvento);
   const oggiNormalizzato = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate());
   
-  // Se l'evento è già passato quest'anno, per eventi futuri useremo l'anno prossimo
   if (dataEventoQuestAnno < oggiNormalizzato) {
-    // L'evento si verificherà l'anno prossimo
     annoCalcolo = annoCorrente + 1;
   }
   
-  // Calcola gli anni che si compiranno/sono stati compiuti
   let anni = annoCalcolo - anno;
   
   return anni;
@@ -1024,10 +763,8 @@ function getDataCompleta(evento) {
   
   let dataEvento = new Date(annoCorrente, parti[1] - 1, parti[0]);
   
-  // Normalizza la data di oggi a mezzanotte per il confronto
   const oggiSenzaOra = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate());
   
-  // Se la data è già passata quest'anno (ma non oggi), usa l'anno prossimo
   if (dataEvento < oggiSenzaOra) {
     dataEvento.setFullYear(annoCorrente + 1);
   }
@@ -1050,14 +787,11 @@ function ordinaEventi(eventi) {
     const dataEvento = parseData(e.Data);
     if (!dataEvento) return null;
     
-    // Usa l'anno corrente o prossimo per il calcolo
     const annoCorrente = oggi.getFullYear();
     let dataEventoCompleta = new Date(annoCorrente, dataEvento.getMonth(), dataEvento.getDate());
     
-    // Normalizza la data di oggi a mezzanotte per il confronto
     const oggiSenzaOra = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate());
     
-    // Se la data è già passata quest'anno (ma non oggi), usa l'anno prossimo
     if (dataEventoCompleta < oggiSenzaOra) {
       dataEventoCompleta.setFullYear(annoCorrente + 1);
     }
@@ -1067,17 +801,8 @@ function ordinaEventi(eventi) {
     
     return { ...e, dataEvento: dataEventoCompleta, giorni, anni };
   }).filter(e => e?.dataEvento).sort((a, b) => {
-    // Ordina per giorni mancanti
     return a.giorni - b.giorni;
   });
-}
-
-function aggiornaData() {
-  const oggi = getDataOdierna();
-  const giorni = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
-  const mesi = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
-  const testo = `${giorni[oggi.getDay()]} ${oggi.getDate()} ${mesi[oggi.getMonth()]} ${oggi.getFullYear()}`;
-  document.getElementById('data-corrente-testo').innerText = testo;
 }
 
 function suonaBeep() {
@@ -1095,7 +820,7 @@ function suonaBeep() {
   }
 }
 
-function creaElementoEvento(evento) {
+function creaElementoEvento(evento, prossimiGiorni) {
   const li = document.createElement('li');
   li.classList.add(evento.Tipo.toLowerCase());
   
@@ -1108,11 +833,12 @@ function creaElementoEvento(evento) {
     badgeGiorni = '<div class="giorni-badge oggi">OGGI</div>';
   } else {
     icona = '<a href="#titolo" class="arrow-badge" title="Torna su">⬆️</a>';
-    // Aggiungi sempre il badge, ma sarà nascosto/mostrato dalla logica in mostraEventi
-    if (evento.giorni === 1) {
-      badgeGiorni = '<div class="giorni-badge domani">1</div>';
-    } else if (evento.giorni > 1) {
-      badgeGiorni = `<div class="giorni-badge">${evento.giorni}</div>`;
+    if (evento.giorni > 0) {
+        const classiBadge = ['giorni-badge'];
+        if (evento.giorni === prossimiGiorni) {
+            classiBadge.push('prossimo');
+        }
+        badgeGiorni = `<div class="${classiBadge.join(' ')}">${evento.giorni}</div>`;
     }
   }
   
@@ -1142,34 +868,16 @@ function creaElementoEvento(evento) {
   
   const nomeEscaped = evento.Nominativo.replace(/'/g, "\\'");
   
-  // Creiamo il testo completo per la ricerca - questo sarà memorizzato come proprietà dell'elemento
-  const testoCompleto = [
-    evento.Nominativo,
-    evento.Tipo,
-    tipoTesto,
-    dataCompleta,
-    nomeNozze,
-    giornoSettimana,
-    giorno.toString(),
-    mese,
-    annoCorrente.toString(),
-    evento.Data // Include anche la data originale (es: "17/07")
-  ].filter(t => t).join(' ').toLowerCase();
-  
   li.innerHTML = `
     ${badgeGiorni}
     ${icona}
     <a href="javascript:void(0)" onclick="clickEvento('${nomeEscaped}')" style="text-decoration:none; color: inherit;">
       <strong>${evento.Nominativo}</strong>
+      <span class="tipo-evento">${tipoTesto}</span>
+      <span class="data-evento">${dataCompleta}</span>
+      ${nomeNozze ? `<span class="nozze-evento">${nomeNozze}</span>` : ''}
     </a>
-    <br>
-    <span class="tipo-evento">${tipoTesto}</span><br>
-    ${dataCompleta}<br>
-    ${nomeNozze ? nomeNozze + '<br>' : ''}
   `;
-  
-  // Memorizziamo il testo completo come proprietà dell'elemento per la ricerca
-  li.testoCompleto = testoCompleto;
   
   li.addEventListener('click', () => {
     if (evento.giorni === 0) {
@@ -1180,14 +888,33 @@ function creaElementoEvento(evento) {
   return li;
 }
 
-function creaBarraAnno(anno) {
+function creaBarraAnno(data) {
   const barra = document.createElement('div');
   barra.className = 'year-divider';
-  barra.innerHTML = `<div class="year-label">${anno}</div>`;
+  barra.innerHTML = `<div class="year-label">${data}</div>`;
   return barra;
 }
 
-function creaMeseDatario(mese, anno, eventi, termineRicerca = '') {
+function scrollMese(meseCliccato) {
+    const oggi = getDataOdierna();
+    const meseCorrente = oggi.getMonth();
+    let targetId;
+
+    if (meseCliccato == 0) { 
+        targetId = `mese-container-${meseCorrente}`;
+    } else if (meseCliccato > 0 && meseCliccato <= meseCorrente) { 
+        targetId = 'mese-container-0';
+    } else { 
+        targetId = `mese-container-${meseCorrente}`;
+    }
+
+    const targetElement = document.getElementById(targetId);
+    if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+function creaMeseDatario(mese, anno, eventi, termineRicerca = '', prossimiGiorniMancanti) {
   const nomiMesi = [
     'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
     'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'
@@ -1198,7 +925,6 @@ function creaMeseDatario(mese, anno, eventi, termineRicerca = '') {
   const annoCorrente = oggi.getFullYear();
   const giornoCorrente = oggi.getDate();
   
-  // Determina se il mese è passato, corrente o futuro
   let tipologiaMese = '';
   if (anno < annoCorrente || (anno === annoCorrente && mese < meseCorrente)) {
     tipologiaMese = 'passato';
@@ -1211,10 +937,9 @@ function creaMeseDatario(mese, anno, eventi, termineRicerca = '') {
   let eventiMese = eventi.filter(evento => {
     if (!evento.Data) return false;
     const parti = evento.Data.split("/").map(Number);
-    return parti[1] === (mese + 1); // mese è 0-based, parti[1] è 1-based
+    return parti[1] === (mese + 1);
   });
   
-  // Applica filtro di ricerca se presente
   if (termineRicerca.trim()) {
     const termini = termineRicerca.toLowerCase().trim().split(/\s+/);
     const parolePositive = [];
@@ -1247,113 +972,85 @@ function creaMeseDatario(mese, anno, eventi, termineRicerca = '') {
     });
   }
   
-  // Raggruppa eventi per giorno
-  const eventiPerGiorno = {};
-  eventiMese.forEach(evento => {
+  eventiMese = eventiMese.map(evento => {
     const parti = evento.Data.split("/").map(Number);
     const giorno = parti[0];
-    if (!eventiPerGiorno[giorno]) {
-      eventiPerGiorno[giorno] = [];
+    let dataEvento = new Date(annoCorrente, mese, giorno);
+    const oggiNormalizzato = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate());
+    let diff = dataEvento - oggiNormalizzato;
+    let giorniMancanti = Math.round(diff / (1000 * 60 * 60 * 24));
+    
+    if (giorniMancanti < 0) {
+      dataEvento.setFullYear(dataEvento.getFullYear() + 1);
+      diff = dataEvento - oggiNormalizzato;
+      giorniMancanti = Math.round(diff / (1000 * 60 * 60 * 24));
     }
-    eventiPerGiorno[giorno].push(evento);
-  });
-  
-  // Ordina i giorni
-  const giorniOrdinati = Object.keys(eventiPerGiorno).map(Number).sort((a, b) => a - b);
+    
+    return { ...evento, giorno: giorno, giorniMancanti: giorniMancanti };
+  }).sort((a, b) => a.giorno - b.giorno); 
   
   let contenuto = '';
   
-  // Se è il mese corrente, dobbiamo inserire il separatore tra passato/oggi e futuro
-  if (tipologiaMese === 'corrente') {
-    const giorniPassatiEOggi = giorniOrdinati.filter(g => g <= giornoCorrente);
-    const giorniFuturi = giorniOrdinati.filter(g => g > giornoCorrente);
+  const renderEvento = (evento) => {
+    let nome = evento.Nominativo;
+    let anni = '';
+    let suffissoOnomastico = '';
+
+    if (evento.Tipo === 'Compleanno' || evento.Tipo === 'Anniversario') {
+      const annoNascita = parseInt(evento.Anno);
+      if (!isNaN(annoNascita)) {
+        anni = ` (${anno - annoNascita})`;
+      }
+    }
     
-    // Eventi passati e di oggi
-    giorniPassatiEOggi.forEach(giorno => {
-      eventiPerGiorno[giorno].forEach(evento => {
-        let nome = evento.Nominativo;
-        let anni = '';
-        
-        if (evento.Tipo === 'Compleanno' || evento.Tipo === 'Anniversario') {
-          const annoNascita = parseInt(evento.Anno);
-          if (!isNaN(annoNascita)) {
-            // Per il datario, calcola sempre gli anni rispetto all'anno del mese visualizzato
-            anni = ` (${anno - annoNascita})`;
-          }
-        }
-        
-        const classeTemporale = giorno === giornoCorrente ? ' oggi' : ' passato';
-        const classeEvento = evento.Tipo.toLowerCase();
-        contenuto += `<div class="evento-datario ${classeEvento}${classeTemporale}">
-          <span class="giorno-numero">${giorno})</span> ${nome}<span class="anni-parentesi">${anni}</span>
-        </div>`;
-      });
+    const marcatoreProssimo = evento.giorniMancanti === prossimiGiorniMancanti ? `<span class="prossimo-evento-marker">${prossimiGiorniMancanti}</span>` : '';
+
+    const classeEvento = evento.Tipo.toLowerCase();
+    let classeTemporale = '';
+    
+    if (tipologiaMese === 'corrente') {
+        classeTemporale = evento.giorno === giornoCorrente ? ' oggi' : (evento.giorno < giornoCorrente ? ' passato' : '');
+    } else if (tipologiaMese === 'passato') {
+        classeTemporale = ' passato';
+    }
+
+    return `<div class="evento-datario ${classeEvento}${classeTemporale}">
+              <span class="giorno-numero">${evento.giorno})</span> ${nome}${suffissoOnomastico}<span class="anni-parentesi">${anni}</span>${marcatoreProssimo}
+            </div>`;
+  };
+  
+  if (tipologiaMese === 'corrente') {
+    const eventiPassatiEOggi = eventiMese.filter(e => e.giorno <= giornoCorrente);
+    const eventiFuturi = eventiMese.filter(e => e.giorno > giornoCorrente);
+    
+    eventiPassatiEOggi.forEach(evento => {
+      contenuto += renderEvento(evento);
     });
     
-    // Separatore temporale (solo se ci sono eventi futuri)
-    if (giorniFuturi.length > 0 && giorniPassatiEOggi.length > 0) {
+    if (eventiFuturi.length > 0 && eventiPassatiEOggi.length > 0) {
       contenuto += `<div class="separatore-giorni" data-giorno="${giornoCorrente}"></div>`;
     }
     
-    // Eventi futuri
-    giorniFuturi.forEach(giorno => {
-      eventiPerGiorno[giorno].forEach(evento => {
-        let nome = evento.Nominativo;
-        let anni = '';
-        
-        if (evento.Tipo === 'Compleanno' || evento.Tipo === 'Anniversario') {
-          const annoNascita = parseInt(evento.Anno);
-          if (!isNaN(annoNascita)) {
-            // Per il datario, calcola sempre gli anni rispetto all'anno del mese visualizzato
-            anni = ` (${anno - annoNascita})`;
-          }
-        }
-        
-        const classeEvento = evento.Tipo.toLowerCase();
-        contenuto += `<div class="evento-datario ${classeEvento}">
-          <span class="giorno-numero">${giorno})</span> ${nome}<span class="anni-parentesi">${anni}</span>
-        </div>`;
-      });
+    eventiFuturi.forEach(evento => {
+      contenuto += renderEvento(evento);
     });
   } else {
-    // Per mesi completamente passati o futuri
-    giorniOrdinati.forEach(giorno => {
-      eventiPerGiorno[giorno].forEach(evento => {
-        let nome = evento.Nominativo;
-        let anni = '';
-        
-        if (evento.Tipo === 'Compleanno' || evento.Tipo === 'Anniversario') {
-          const annoNascita = parseInt(evento.Anno);
-          if (!isNaN(annoNascita)) {
-            // Per il datario, calcola sempre gli anni rispetto all'anno del mese visualizzato
-            anni = ` (${anno - annoNascita})`;
-          }
-        }
-        
-        const classeTemporale = tipologiaMese === 'passato' ? ' passato' : '';
-        const classeEvento = evento.Tipo.toLowerCase();
-        contenuto += `<div class="evento-datario ${classeEvento}${classeTemporale}">
-          <span class="giorno-numero">${giorno})</span> ${nome}<span class="anni-parentesi">${anni}</span>
-        </div>`;
-      });
+    eventiMese.forEach(evento => {
+      contenuto += renderEvento(evento);
     });
   }
   
   const numeroEventi = eventiMese.length;
-  let classiContainer = '';
-  
-  if (numeroEventi === 0) {
-    classiContainer += ' vuoto';
-  }
-  if (tipologiaMese === 'passato') {
-    classiContainer += ' passato';
-  } else if (tipologiaMese === 'corrente') {
-    classiContainer += ' corrente';
-  }
-  
+  let classiContainer = (numeroEventi === 0) ? ' vuoto' : '';
+  classiContainer += (tipologiaMese === 'passato') ? ' passato' : (tipologiaMese === 'corrente' ? ' corrente' : '');
+
+  const iconaFreccia = (mese === 0) ? '⬇️' : '⬆️';
+  const frecciaNavigazione = `<span class="mese-header-arrow" onclick="scrollMese(${mese})">${iconaFreccia}</span>`;
+
   return `
-    <div class="mese-container${classiContainer}">
+    <div class="mese-container${classiContainer}" id="mese-container-${mese}">
       <div class="mese-header">
+        ${frecciaNavigazione}
         <div class="mese-nome">${nomiMesi[mese]} ${anno}</div>
         <div class="mese-counter">${numeroEventi}</div>
       </div>
@@ -1370,77 +1067,37 @@ function mostraDatario() {
   const termineRicerca = document.getElementById('searchInput').value;
   
   const datarioContainer = document.getElementById('datario-container');
-  const eventiLista = document.getElementById('eventi-lista');
-  const searchContainer = document.getElementById('search-container');
+  const datarioIcon = document.getElementById('datario-icon');
   
-  // Conta il numero totale di eventi che soddisfano la ricerca
-  let totalEventiVisibili = 0;
-  if (termineRicerca.trim()) {
-    const termini = termineRicerca.toLowerCase().trim().split(/\s+/);
-    const parolePositive = [];
-    const paroleNegative = [];
-    
-    termini.forEach(parola => {
-      if (parola.startsWith('-') && parola.length > 1) {
-        paroleNegative.push(parola.substring(1));
-      } else if (parola.startsWith('-') && parola.length === 1) {
-        return;
-      } else {
-        parolePositive.push(parola);
-      }
-    });
-    
-    totalEventiVisibili = tuttiGliEventi.filter(evento => {
-      const testoCompleto = [
-        evento.Nominativo,
-        evento.Tipo,
-        evento.Data
-      ].filter(t => t).join(' ').toLowerCase();
-      
-      const contienePositive = parolePositive.length === 0 || 
-                              parolePositive.every(parola => testoCompleto.includes(parola));
-      
-      const nonContieneNegative = paroleNegative.length === 0 || 
-                                 paroleNegative.every(parola => !testoCompleto.includes(parola));
-      
-      return contienePositive && nonContieneNegative;
-    }).length;
-  } else {
-    totalEventiVisibili = tuttiGliEventi.length;
+  datarioIcon.textContent = 'Elenco';
+
+  const eventiOrdinati = ordinaEventi(tuttiGliEventi);
+  let prossimiGiorniMancanti = -1;
+  const primoEventoProssimo = eventiOrdinati.find(e => e.giorni > 0);
+  if (primoEventoProssimo) {
+      prossimiGiorniMancanti = primoEventoProssimo.giorni;
   }
   
-  // Applica la classe compatta se ci sono pochi eventi
-  const classeCompatta = totalEventiVisibili <= 20 ? ' datario-compatto' : '';
-  datarioContainer.className = classeCompatta;
-  
-  let html = '';
-  
-  // Crea tutti i 12 mesi dell'anno corrente in gruppi di 4 (o 3 o 2 a seconda del responsive)
-  for (let i = 0; i < 12; i += 4) {
-    html += '<div class="datario-grid">';
-    for (let j = 0; j < 4 && (i + j) < 12; j++) {
-      const meseIndex = i + j;
-      html += creaMeseDatario(meseIndex, annoCorrente, tuttiGliEventi, termineRicerca);
-    }
-    html += '</div>';
+  // MODIFICA: Ricostruisce la griglia per garantire la spaziatura
+  let html = '<div class="datario-grid">';
+  for (let i = 0; i < 12; i++) {
+    html += creaMeseDatario(i, annoCorrente, tuttiGliEventi, termineRicerca, prossimiGiorniMancanti);
   }
-  
+  html += '</div>';
   datarioContainer.innerHTML = html;
   
-  // Aggiorna il contatore degli eventi in modalità datario
   aggiornaContatoreDatario(termineRicerca);
   
-  // Mostra il datario e la ricerca, nasconde la lista
+  document.getElementById('eventi-lista').style.display = 'none';
   datarioContainer.style.display = 'block';
-  eventiLista.style.display = 'none';
-  searchContainer.style.display = 'block';
-  
   modalitaDatario = true;
   
-  // Cambia l'icona e tooltip
-  const datarioIcon = document.getElementById('datario-icon');
-  datarioIcon.textContent = 'e';
-  datarioIcon.setAttribute('data-tooltip', 'Modalità elenco');
+  setTimeout(() => {
+    const meseCorrenteEl = document.querySelector('.mese-container.corrente');
+    if (meseCorrenteEl) {
+      meseCorrenteEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, 100);
 }
 
 function aggiornaContatoreDatario(termineRicerca) {
@@ -1448,7 +1105,6 @@ function aggiornaContatoreDatario(termineRicerca) {
   const btnCancella = document.getElementById('clear-search-button');
   
   if (termineRicerca.trim()) {
-    // Conta gli eventi che soddisfano la ricerca
     const termini = termineRicerca.toLowerCase().trim().split(/\s+/);
     const parolePositive = [];
     const paroleNegative = [];
@@ -1488,26 +1144,13 @@ function aggiornaContatoreDatario(termineRicerca) {
 }
 
 function mostraElenco() {
-  const datarioContainer = document.getElementById('datario-container');
-  const eventiLista = document.getElementById('eventi-lista');
-  const searchContainer = document.getElementById('search-container');
-  
-  // Nasconde il datario e mostra la lista
-  datarioContainer.style.display = 'none';
-  eventiLista.style.display = 'flex';
-  searchContainer.style.display = 'block';
-  
+  document.getElementById('datario-container').style.display = 'none';
+  document.getElementById('eventi-lista').style.display = 'flex';
   modalitaDatario = false;
   
-  // Cambia l'icona e tooltip
-  const datarioIcon = document.getElementById('datario-icon');
-  datarioIcon.textContent = 'd';
-  datarioIcon.setAttribute('data-tooltip', 'Modalità datario');
+  document.getElementById('datario-icon').textContent = 'Datario';
   
-  // Ricarica gli eventi nell'elenco
-  const eventiOrdinati = ordinaEventi(tuttiGliEventi);
-  const termineRicerca = document.getElementById('searchInput').value;
-  mostraEventi(eventiOrdinati, termineRicerca);
+  mostraEventi(tuttiGliEventi, document.getElementById('searchInput').value);
 }
 
 function toggleDatario() {
@@ -1524,11 +1167,10 @@ function mostraEventi(eventi, termine = '') {
   const btnCancella = document.getElementById('clear-search-button');
   const messaggioFine = document.getElementById('end-of-list-message');
   
-  // Filtra prima gli eventi originali per determinare i prossimi
-  let eventiFiltrati = eventi;
+  let eventiOrdinati = ordinaEventi(eventi);
+  let eventiFiltrati = eventiOrdinati;
   
   if (termine.trim()) {
-    // Ricerca avanzata: separa parole positive e negative
     const termini = termine.toLowerCase().trim().split(/\s+/);
     const parolePositive = [];
     const paroleNegative = [];
@@ -1543,7 +1185,7 @@ function mostraEventi(eventi, termine = '') {
       }
     });
     
-    eventiFiltrati = eventi.filter(evento => {
+    eventiFiltrati = eventiOrdinati.filter(evento => {
       const testoCompleto = [
         evento.Nominativo,
         evento.Tipo,
@@ -1558,71 +1200,57 @@ function mostraEventi(eventi, termine = '') {
       
       return contienePositive && nonContieneNegative;
     });
-    
-    contatore.textContent = `${eventiFiltrati.length}/${eventi.length}`;
-    btnCancella.style.display = 'flex';
-  } else {
-    contatore.textContent = `${eventi.length}/${eventi.length}`;
-    btnCancella.style.display = 'none';
   }
+
+  contatore.textContent = `${eventiFiltrati.length}/${eventi.length}`;
+  btnCancella.style.display = termine.trim() ? 'flex' : 'none';
   
-  // Determina il numero di giorni del prossimo evento tra quelli filtrati
-  const giorniProssimoEvento = eventiFiltrati.length > 0 ? eventiFiltrati[0].giorni : -1;
-  
-  // Crea gli elementi li con la logica corretta dei badge
-  const elementiLi = eventiFiltrati.map(evento => {
-    const li = creaElementoEvento(evento);
-    
-    // Applica la logica del badge
-    const badgeElement = li.querySelector('.giorni-badge');
-    if (badgeElement && !badgeElement.classList.contains('oggi')) {
-      if (evento.giorni === giorniProssimoEvento && giorniProssimoEvento > 0) {
-        // Questo è uno dei prossimi eventi - mostra il badge
-        badgeElement.style.display = 'block';
-      } else {
-        // Non è il prossimo evento - nascondi il badge
-        badgeElement.style.display = 'none';
-      }
-    }
-    
-    return li;
-  });
-  
-  // Pulisce la lista
   lista.innerHTML = '';
   
-  if (elementiLi.length === 0) {
+  if (eventiFiltrati.length === 0) {
     messaggioFine.style.display = 'block';
     messaggioFine.textContent = 'Nessun evento trovato.';
     return;
   } else {
     messaggioFine.style.display = 'none';
   }
-  
-  // Raggruppa eventi per anno
+
+  const primoEventoProssimo = eventiOrdinati.find(e => e.giorni > 0);
+  const prossimiGiorni = primoEventoProssimo ? primoEventoProssimo.giorni : -1;
+
   const eventiPerAnno = {};
-  elementiLi.forEach(li => {
-    // Estrae l'anno dall'elemento li
-    const annoMatch = li.innerHTML.match(/(\d{4})/);
-    const anno = annoMatch ? annoMatch[1] : 'Sconosciuto';
-    
+  eventiFiltrati.forEach(evento => {
+    const anno = evento.dataEvento.getFullYear();
     if (!eventiPerAnno[anno]) {
       eventiPerAnno[anno] = [];
     }
-    eventiPerAnno[anno].push(li);
+    eventiPerAnno[anno].push(evento);
   });
   
-  // Ordina gli anni
   const anniOrdinati = Object.keys(eventiPerAnno).sort();
   
-  // Aggiunge eventi raggruppati per anno con barre divisorie
-  anniOrdinati.forEach((anno, index) => {
-    // Aggiunge la barra divisoria dell'anno
-    const barra = creaBarraAnno(anno);
+  anniOrdinati.forEach((anno) => {
+    const eventiDellAnno = eventiPerAnno[anno];
+    const primoEventoDellAnno = eventiDellAnno[0];
+    const dataPrimoEvento = primoEventoDellAnno.dataEvento;
+    let dataFormattata;
+
+    const giorni = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
+    const giornoSettimana = giorni[dataPrimoEvento.getDay()];
+    const dataSemplice = `${String(dataPrimoEvento.getDate()).padStart(2, '0')}/${String(dataPrimoEvento.getMonth() + 1).padStart(2, '0')}/${dataPrimoEvento.getFullYear()}`;
+
+    // MODIFICA: Logica per cambiare formato della data del divisore se è oggi
+    if (primoEventoDellAnno.giorni === 0) {
+        dataFormattata = `Oggi ${giornoSettimana} ${dataSemplice}`;
+    } else {
+        dataFormattata = `${giornoSettimana} ${dataSemplice}`;
+    }
+    
+    const barra = creaBarraAnno(dataFormattata);
     lista.appendChild(barra);
     
-    // Aggiunge tutti gli eventi di questo anno mantenendo il layout originale
-    eventiPerAnno[anno].forEach(li => {
+    eventiDellAnno.forEach(evento => {
+      const li = creaElementoEvento(evento, prossimiGiorni);
       lista.appendChild(li);
     });
   });
@@ -1634,10 +1262,9 @@ function cancellaCerca() {
   document.getElementById('clear-search-button').style.display = 'none';
   
   if (modalitaDatario) {
-    mostraDatario(); // Ricarica il datario senza filtri
+    mostraDatario();
   } else {
-    const eventiOrdinati = ordinaEventi(tuttiGliEventi);
-    mostraEventi(eventiOrdinati, '');
+    mostraEventi(tuttiGliEventi, '');
   }
 }
 
@@ -1666,13 +1293,10 @@ function cambiaData() {
   dataPersonalizzata = new Date(parti[2], parti[1] - 1, parti[0]);
   document.getElementById('reset-data').style.display = 'block';
   
-  aggiornaData();
   if (modalitaDatario) {
     mostraDatario();
   } else {
-    const eventiOrdinati = ordinaEventi(tuttiGliEventi);
-    const termineRicerca = document.getElementById('searchInput').value;
-    mostraEventi(eventiOrdinati, termineRicerca);
+    mostraEventi(tuttiGliEventi, document.getElementById('searchInput').value);
   }
 }
 
@@ -1682,13 +1306,10 @@ function resetData() {
   dataPersonalizzata = null;
   document.getElementById('reset-data').style.display = 'none';
   
-  aggiornaData();
   if (modalitaDatario) {
     mostraDatario();
   } else {
-    const eventiOrdinati = ordinaEventi(tuttiGliEventi);
-    const termineRicerca = document.getElementById('searchInput').value;
-    mostraEventi(eventiOrdinati, termineRicerca);
+    mostraEventi(tuttiGliEventi, document.getElementById('searchInput').value);
   }
 }
 
@@ -1802,12 +1423,10 @@ function inizializza() {
   try {
     tuttiGliEventi = [...eventiData];
     
-    aggiornaData();
     document.getElementById('searchInput').value = '';
     document.getElementById('clear-search-button').style.display = 'none';
     
-    const eventiOrdinati = ordinaEventi(tuttiGliEventi);
-    mostraEventi(eventiOrdinati, '');
+    mostraEventi(tuttiGliEventi, '');
     
     // Event listeners
     if (!isMobile) {
@@ -1828,10 +1447,9 @@ function inizializza() {
     
     document.getElementById('searchInput').addEventListener('input', e => {
       if (modalitaDatario) {
-        mostraDatario(); // Ricarica il datario con il nuovo filtro
+        mostraDatario();
       } else {
-        const eventiOrdinati = ordinaEventi(tuttiGliEventi);
-        mostraEventi(eventiOrdinati, e.target.value);
+        mostraEventi(tuttiGliEventi, e.target.value);
       }
     });
     
