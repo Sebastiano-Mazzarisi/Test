@@ -1895,75 +1895,111 @@ function generaCalendario() {
 
 
 function condividiCalendario() {
-    // Controlla se la libreria PDF è stata caricata all'avvio della pagina
-    if (typeof window.jsPDF === 'undefined') {
+    if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF !== 'function') {
         return alert('ERRORE: La libreria per creare i PDF non è stata caricata.\nPer favore, ricarica la pagina e assicurati di essere connesso a internet.');
     }
 
     try {
-        // const { jsPDF } = window.jsPDF;
-        const pdf = new window.jsPDF.jsPDF('portrait', 'mm', 'a4');
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('portrait', 'mm', 'a4');
         const oggi = getDataOdierna();
         const anno = oggi.getFullYear();
 
-        pdf.setFontSize(36);
-        pdf.setFont('helvetica', 'bold');
-        pdf.text(anno.toString(), 105, 30, { align: 'center' });
-        pdf.setLineWidth(1);
-        pdf.line(20, 40, 190, 40);
+        // Layout parametri
+        const margineSinistra = 10;
+        const margineDestra = 10;
+        const margineSuperiore = 28;
+        const margineInferiore = 10;
+        const larghezzaPagina = 210;
+        const altezzaPagina = 297;
+        const colonne = 4;
+        const righe = 3;
+        const spazioColonna = 2.5;
+        const spazioRiga = 5;
+        const colWidth = (larghezzaPagina - margineSinistra - margineDestra - (colonne - 1) * spazioColonna) / colonne;
+const rowHeight = ((altezzaPagina - margineSuperiore - margineInferiore - (righe - 1) * spazioRiga) / righe) - 5;
+        const fasciaMeseAltezza = 8; // fascia per il mese
 
         const nomiMesi = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
-        const startX = 10, startY = 55, colWidth = 63, rowHeight = 50, marginX = 3, marginY = 3;
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(30);
+        pdf.setTextColor(0,0,0);
+        pdf.text(anno.toString(), larghezzaPagina / 2, 22, { align: 'center' });
+
+        // Prepara eventi splittati e calcola il massimo per ogni riga
+        let eventiSplittati = [];
+        let maxRighePerRiga = [0,0,0];
 
         for (let mese = 0; mese < 12; mese++) {
-            const col = mese % 3;
-            const row = Math.floor(mese / 3);
-            const x = startX + col * (colWidth + marginX);
-            const y = startY + row * (rowHeight + marginY);
-
-            pdf.setFillColor(240, 230, 140);
-            pdf.rect(x, y, colWidth, 15, 'F');
-            pdf.setDrawColor(218, 165, 32);
-            pdf.setLineWidth(0.5);
-            pdf.rect(x, y, colWidth, rowHeight);
-            pdf.setFontSize(11);
-            pdf.setFont('helvetica', 'bold');
-            pdf.setTextColor(0, 0, 0);
-            pdf.text(nomiMesi[mese], x + colWidth / 2, y + 10, { align: 'center' });
-
             const eventiMese = tuttiGliEventi
                 .filter(evento => evento.Data && parseInt(evento.Data.split('/')[1]) === mese + 1)
                 .sort((a, b) => parseInt(a.Data.split('/')[0]) - parseInt(b.Data.split('/')[0]));
 
-            let currentY = y + 20;
-            pdf.setFontSize(6);
-            pdf.setFont('helvetica', 'normal');
-
-            eventiMese.forEach(function(evento) {
-                if (currentY > y + rowHeight - 4) return;
+            let righeEvento = [];
+            eventiMese.forEach(evento => {
                 let anni = '';
                 if (evento.Tipo === 'Compleanno' || evento.Tipo === 'Anniversario') {
                     const annoNascita = parseInt(evento.Anno);
                     if (!isNaN(annoNascita)) anni = ' (' + (anno - annoNascita) + ')';
                 }
-                if (evento.Tipo === 'Compleanno') pdf.setTextColor(0, 0, 139);
-                else if (evento.Tipo === 'Onomastico') pdf.setTextColor(0, 100, 0);
-                else if (evento.Tipo === 'Anniversario') pdf.setTextColor(139, 0, 0);
-                
-                const nomeBreve = evento.Nominativo.length > 22 ? evento.Nominativo.substring(0, 22) + '…' : evento.Nominativo;
-                const testo = evento.Data.split('/')[0] + ') ' + nomeBreve + anni;
-                pdf.text(testo, x + 2, currentY);
-                currentY += 3.5;
+                const testo = evento.Data.split('/')[0] + ') ' + evento.Nominativo + anni;
+                const lines = pdf.splitTextToSize(testo, colWidth + 230);
+                lines.forEach(l => righeEvento.push(l));
             });
+            eventiSplittati.push(righeEvento);
+
+            let riga = Math.floor(mese / colonne);
+            if (righeEvento.length > maxRighePerRiga[riga]) maxRighePerRiga[riga] = righeEvento.length;
         }
 
+        for (let mese = 0; mese < 12; mese++) {
+            const col = mese % colonne;
+            const row = Math.floor(mese / colonne);
+            const x = margineSinistra + col * (colWidth + spazioColonna);
+            const y = margineSuperiore + row * (rowHeight + spazioRiga);
+
+// 1. Bordo della cella grande del mese (prima di tutto)
+pdf.setDrawColor(0,0,0);
+pdf.setLineWidth(0.1); // puoi aumentare lo spessore se vuoi
+pdf.rect(x, y, colWidth, rowHeight, 'D'); // 'D' = solo bordo, nessun riempimento
+
+// 2. Fascia mese colorata
+pdf.setFillColor(220, 220, 220);
+pdf.rect(x, y, colWidth, fasciaMeseAltezza, 'F');
+
+// 3. Cornice fascia mese (puoi anche toglierla se vuoi solo il bordo esterno)
+pdf.setDrawColor(0,0,0);
+pdf.rect(x, y, colWidth, fasciaMeseAltezza, 'D');
+
+
+            // Nome del mese: grassetto, più grande, centrato e nero
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(13); // bello visibile
+            pdf.setTextColor(0,0,0);
+            pdf.text(nomiMesi[mese], x + colWidth/2, y + fasciaMeseAltezza/2, { align: 'center', baseline: 'middle' });
+
+            // Eventi: font piccolo, nero, subito sotto la fascia
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(8.5);
+
+            let eventi = eventiSplittati[mese];
+            let maxRighe = maxRighePerRiga[row];
+            let startY = y + fasciaMeseAltezza + 1.3; // subito sotto la fascia
+            for (let i = 0; i < maxRighe; i++) {
+                if (eventi[i]) {
+                    pdf.text(eventi[i], x + 1, startY + i * 5.0, { baseline: 'top' });
+                }
+            }
+        }
+
+        // Salva/condividi
         const pdfBlob = pdf.output('blob');
         const fileName = 'Calendario_' + anno + '.pdf';
 
         if (navigator.share && isMobile) {
             const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                 navigator.share({
+                navigator.share({
                     title: 'Calendario ' + anno,
                     files: [file]
                 }).catch(err => {
@@ -1973,17 +2009,20 @@ function condividiCalendario() {
                     }
                 });
             } else {
-                 apriPDFPerStampa(pdfBlob, fileName);
+                apriPDFPerStampa(pdfBlob, fileName);
             }
         } else {
             apriPDFPerStampa(pdfBlob, fileName);
         }
-
-    } catch (error) {
-        console.error('Errore generazione PDF:', error);
-        alert('Errore durante la generazione del PDF: ' + error.message);
+    } catch (e) {
+        alert('Si è verificato un errore durante la generazione del PDF: ' + e.message);
     }
 }
+
+
+
+
+
 
 function apriPDFPerStampa(pdfBlob, fileName) {
   const url = URL.createObjectURL(pdfBlob);
