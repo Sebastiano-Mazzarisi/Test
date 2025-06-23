@@ -1,0 +1,2125 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Prossimi eventi</title>
+  
+  <link rel="icon" type="image/png" href="https://sebastiano-mazzarisi.github.io/Test/Eventi.png">
+  <link rel="apple-touch-icon" href="https://sebastiano-mazzarisi.github.io/Test/Eventi.png">
+  
+  <meta property="og:title" content="Prossimi eventi di famiglia">
+  <meta property="og:description" content="Scopri tutti i prossimi compleanni, onomastici e anniversari!">
+  <meta property="og:image" content="https://sebastiano-mazzarisi.github.io/Test/Eventi.png">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://sebastiano-mazzarisi.github.io/Test/Eventi.html">
+  
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Prossimi eventi di famiglia">
+  <meta name="twitter:description" content="Scopri tutti i prossimi compleanni, onomastici e anniversari!">
+  <meta name="twitter:image" content="https://sebastiano-mazzarisi.github.io/Test/Eventi.png">
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Eventi Famiglia">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      background-color: #f0f0f0;
+      min-height: 100vh;
+      padding-top: max(env(safe-area-inset-top), 10px);
+      padding-bottom: max(env(safe-area-inset-bottom), 10px);
+      padding-left: max(env(safe-area-inset-left), 5px);
+      padding-right: max(env(safe-area-inset-right), 5px);
+    }
+    
+    @media (min-width: 768px) {
+      body {
+        padding: 10px;
+      }
+    }
+    
+    #reset-data, #cambia-data {
+      display: none !important; 
+      margin: 0 5px;
+      padding: 5px 10px;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #reset-data {
+      background-color: #ff4444;
+    }
+    #reset-data:hover {
+      background-color: #cc0000;
+    }
+    #cambia-data {
+      background-color: #4444ff;
+    }
+    #cambia-data:hover {
+      background-color: #0000cc;
+    }
+    
+    .pulsanti-data {
+      display: none !important;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    
+    /* Contenitore principale per titolo e controlli */
+    #header-container {
+      width: 95%;
+      max-width: 500px;
+      margin: 15px auto 25px auto;
+      background-color: white;
+      border: 3px solid #DAA520;
+      border-radius: 15px;
+      box-shadow: 4px 4px 12px rgba(0,0,0,0.3);
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    #title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    #info-icon-header {
+      flex-shrink: 0;
+      margin-left: 15px;
+    }
+
+    h1 {
+      color: #444;
+      text-align: center;
+      margin: 0;
+      font-size: clamp(2em, 8vw, 3em);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      flex-grow: 1;
+    }
+
+    #main-controls-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    #view-toggle-container {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    #search-container {
+        width: 100%;
+    }
+
+    #search-input-wrapper {
+        position: relative;
+        width: 100%;
+    }
+
+    .action-button {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      font-size: clamp(0.9em, 4vw, 1.1em);
+      font-weight: bold;
+      color: #333; 
+      cursor: pointer; 
+      border: 2px solid #999;
+      border-radius: 8px;
+      box-sizing: border-box; 
+      background-color: #FFFFE0;
+      transition: all 0.3s ease;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      padding: 12px 16px;
+      white-space: nowrap;
+      min-height: 45px;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    
+    .action-button:hover, .action-button:active {
+      color: #000;
+      border-color: #444;
+      background-color: #FFD700;
+      transform: scale(1.02);
+    }
+
+    .action-button:active {
+      transform: scale(0.98);
+    }
+
+    /* Rimuovo i tooltip su mobile per evitare conflitti */
+    @media (min-width: 768px) {
+      .action-button::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%) translateY(-5px);
+        white-space: nowrap;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 0.9em;
+        z-index: 10001;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+      }
+
+      .action-button:hover::after {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+
+    #search-input-wrapper {
+        position: relative;
+        width: 100%;
+    }
+    
+    #searchInput {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      font-size: clamp(1em, 4vw, 1.2em);
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+      outline: none;
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+      padding-right: 90px;
+      -webkit-appearance: none;
+      height: 45px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    #searchInput:focus {
+      border-color: #888;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1), 0 0 8px rgba(136, 136, 136, 0.6);
+    }
+
+    #event-counter {
+        position: absolute; 
+        right: 10px;
+        top: 50%; 
+        transform: translateY(-50%);
+        padding: 6px 8px; 
+        background-color: white; 
+        border: 1px solid black; 
+        border-radius: 6px;
+        font-size: clamp(0.8em, 3vw, 0.9em);
+        color: #555;
+        white-space: nowrap; 
+        box-sizing: border-box;
+        line-height: 1; 
+        cursor: default;
+        user-select: none;
+        -webkit-user-select: none;
+    }
+
+    #clear-search-button {
+        position: absolute;
+        right: 65px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 30px;
+        height: 30px;
+        border: 1px solid #ccc;
+        background-color: white;
+        color: black;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: normal;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+    }
+    
+    #clear-search-button:hover, #clear-search-button:active {
+        background-color: #f0f0f0;
+        border-color: #999;
+        transform: translateY(-50%) scale(1.05);
+    }
+
+    #clear-search-button:active {
+        transform: translateY(-50%) scale(0.95);
+    }
+
+    .year-divider {
+      width: 100%;
+      max-width: 1200px;
+      margin: 20px auto 15px auto;
+      position: relative;
+      height: 4px;
+      background-color: #F0E68C;
+      border-radius: 2px;
+      flex-basis: 100%;
+    }
+    
+    .year-label {
+      position: absolute;
+      right: 0;
+      top: -15px;
+      background-color: #F0E68C;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: clamp(1em, 3.5vw, 1.1em);
+      color: #333;
+      border: 2px solid #DAA520;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+      width: 95%;
+      max-width: 500px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+    }
+    
+    li {
+      flex: none;
+      width: 100%;
+      margin-bottom: 0;
+      padding: 20px;
+      border-radius: 15px;
+      border: 3px solid #000; 
+      box-shadow: 4px 4px 12px rgba(0,0,0,0.3);
+      text-align: center;
+      position: relative;
+      -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+      touch-action: manipulation;
+      font-size: clamp(1.1em, 4vw, 1.2em);
+      box-sizing: border-box;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    li:active {
+      transform: scale(0.98);
+      transition: transform 0.1s ease;
+    }
+    
+    li strong,
+    li .tipo-evento,
+    li .data-evento,
+    li .nozze-evento {
+        display: block;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    li .tipo-evento { margin-top: 4px; }
+    li .data-evento { margin-top: 6px; }
+    li .nozze-evento { margin-top: 4px; font-style: italic; color: #555; }
+    
+    li strong {
+      font-size: clamp(1.3em, 5vw, 1.4em);
+      display: block;
+    }
+    
+    li .tipo-evento {
+      font-size: 1em; /* CAMBIATO da clamp(0.9em, 3.5vw, 1.0em) */
+      display: block;
+    }
+
+    li .data-evento {
+      font-size: 1em; /* AGGIUNTO */
+    }
+    
+    li.compleanno { background-color: #e6f3ff; }
+    li.onomastico { background-color: #e6ffe6; }
+    li.anniversario { background-color: #fff0f0; }
+    .evento-oggi { animation: pulseGlowYellowLi 2s ease-in-out infinite; }
+    .compleanno strong { color: #00008B; }
+    .onomastico strong { color: #006400; }
+    .anniversario strong { color: #8B0000; }
+    
+    @keyframes pulseGlowYellowLi {
+      0% { box-shadow: 4px 4px 12px rgba(0,0,0,0.3), 0 0 10px rgba(240, 230, 140, 0.5); }
+      50% { box-shadow: 4px 4px 12px rgba(0,0,0,0.3), 0 0 20px rgba(240, 230, 140, 0.8); }
+      100% { box-shadow: 4px 4px 12px rgba(0,0,0,0.3), 0 0 10px rgba(240, 230, 140, 0.5); }
+    }
+
+    .giorni-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: white;
+      color: black;
+      border: 1px solid #333;
+      font-weight: bold;
+      font-size: clamp(1em, 4vw, 1.1em);
+      padding: 4px 8px;
+      border-radius: 12px;
+      min-width: 20px;
+      text-align: center;
+      z-index: 2;
+      line-height: 1;
+      box-shadow: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    
+    .giorni-badge.oggi {
+      background: linear-gradient(135deg, #ffd93d, #ff6b6b);
+      border: 1px solid #000;
+      animation: pulseBadge 1.5s ease-in-out infinite alternate;
+    }
+
+    .giorni-badge.prossimo {
+        background-color: #ff4757;
+        color: white;
+        border-color: #d63031;
+    }
+    
+    @keyframes pulseBadge {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.08); }
+    }
+    
+    .star-badge {
+      position: absolute; 
+      top: 8px; 
+      right: 8px; 
+      font-size: clamp(1.3em, 5vw, 1.4em); 
+      color: gold; 
+      text-shadow: 0 0 4px rgba(255, 215, 0, 0.6); 
+      animation: blinkStar 0.6s infinite alternate;
+      display: none;
+      z-index: 1;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    
+    li.evento-oggi .star-badge { display: block; }
+
+    @keyframes blinkStar {
+      0% { opacity: 0.1; color: gold; }
+      100% { opacity: 1; color: #DAA520; }
+    }
+
+    .arrow-badge {
+      position: absolute; 
+      top: 8px;
+      right: 8px;
+      font-size: clamp(1.3em, 5vw, 1.4em); 
+      color: gold;
+      text-shadow: 0 0 4px rgba(255, 215, 0, 0.6); 
+      cursor: pointer;
+      z-index: 1; 
+      text-decoration: none;
+      transition: transform 0.3s ease;
+      display: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      padding: 8px;
+      margin: -8px;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    
+    .arrow-badge:hover, .arrow-badge:active { 
+      transform: scale(1.2); 
+    }
+    
+    .arrow-badge:active {
+      transform: scale(1.1);
+    }
+    
+    li:not(.evento-oggi) .arrow-badge { display: block; }
+
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000; 
+      display: none;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .popup-content {
+      background-color: white;
+      padding: 25px;
+      border-radius: 15px;
+      text-align: center;
+      position: relative;
+      width: 100%;
+      max-width: 90vw;
+      max-height: 90vh;
+      min-width: 280px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .popup-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-shrink: 0;
+    }
+
+    .popup-header h2 {
+      margin: 0;
+      flex-grow: 1; 
+      text-align: center;
+      font-size: clamp(1.2em, 5vw, 1.4em);
+    }
+    
+    .popup-header .action-button {
+      font-size: clamp(1em, 4vw, 1.2em);
+      width: auto;
+      height: auto;
+      padding: 8px 12px;
+    }
+
+    #treeContent {
+      font-family: 'Courier New', Courier, monospace; 
+      white-space: pre; 
+      text-align: left; 
+      overflow: auto;
+      max-height: 70vh;
+      font-size: clamp(0.7em, 3vw, 1em); 
+      line-height: 1.3; 
+      margin-top: 15px;
+      font-weight: bold;
+      -webkit-overflow-scrolling: touch;
+      padding: 10px;
+      background-color: #f8f8f8;
+      border-radius: 8px;
+    }
+
+    #datario-container {
+      display: none;
+      width: 95%;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 5px;
+    }
+
+    .datario-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 30px; 
+      margin-bottom: 15px;
+    }
+
+    .mese-container {
+      border: 3px solid #DAA520;
+      border-radius: 15px;
+      background-color: white;
+      box-shadow: 4px 4px 12px rgba(0,0,0,0.3);
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .mese-container.passato .mese-header { 
+      background-color: #90EE90; 
+      border-bottom-color: #228B22; 
+      color: #000; 
+    }
+    
+    .mese-container.corrente { 
+      background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%); 
+    }
+    
+    .mese-container.passato.vuoto { 
+      background: linear-gradient(135deg, #f5f5f5 0%, #f2f2f2 100%); 
+      border-color: #bbb; 
+    }
+    
+    .mese-container.passato .mese-header { 
+      background-color: #90EE90; 
+      border-bottom-color: #32CD32; 
+      color: #000; 
+    }
+    
+    .mese-container.corrente .mese-header,
+    .mese-container:not(.passato):not(.corrente) .mese-header { 
+      background-color: #F0E68C; 
+      border-bottom-color: #DAA520; 
+      color: #000; 
+    }
+
+    .prossimo-evento-marker {
+        display: inline-block;
+        background-color: #ff4757;
+        color: white;
+        font-weight: bold;
+        font-size: 0.8em;
+        padding: 2px 7px;
+        border-radius: 10px;
+        margin-left: 8px;
+        vertical-align: middle;
+        box-shadow: 0 0 8px rgba(255, 71, 87, 0.7);
+        line-height: 1;
+    }
+
+    .evento-datario.passato { 
+      background-color: rgba(230, 230, 230, 0.8); 
+      padding: 2px 4px; 
+      border-radius: 3px; 
+      margin: 2px 0; 
+    }
+    
+    .evento-datario.oggi { 
+      background-color: rgba(255, 235, 160, 0.5); 
+      padding: 2px 4px; 
+      border-radius: 3px; 
+      margin: 2px 0; 
+      border-left: 3px solid #DAA520; 
+      font-weight: 500; 
+    }
+
+    .separatore-giorni { 
+      width: 100%; 
+      height: 4px; 
+      background: linear-gradient(90deg, #DAA520 0%, #ddd 100%); 
+      margin: 10px 0; 
+      border-radius: 2px; 
+      position: relative; 
+    }
+    
+    .separatore-giorni::after { 
+      content: "oggi " attr(data-giorno); 
+      position: absolute; 
+      right: -2px; 
+      top: -12px; 
+      background-color: #DAA520; 
+      color: white; 
+      padding: 2px 6px; 
+      border-radius: 3px; 
+      font-size: 0.9em; 
+      font-weight: bold; 
+    }
+
+    .mese-header {
+      background-color: #F0E68C;
+      padding: 15px 10px;
+      text-align: center;
+      font-weight: bold;
+      font-size: clamp(1.1em, 4vw, 1.2em);
+      color: #000;
+      border-bottom: 3px solid #DAA520;
+      border-radius: 12px 12px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .mese-header-arrow { 
+      font-size: clamp(1.3em, 5vw, 1.4em); 
+      color: #0984e3; 
+      cursor: pointer; 
+      padding: 8px; 
+      -webkit-tap-highlight-color: transparent; 
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    
+    .mese-header-arrow:hover { 
+      transform: scale(1.2); 
+      color: #0000cc; 
+    }
+    
+    .mese-header-arrow:active {
+      transform: scale(1.1);
+    }
+    
+    .mese-container.vuoto .mese-header { 
+      background-color: #f0f0f0; 
+      border-bottom-color: #ddd; 
+      color: #999; 
+    }
+    
+    .mese-nome { 
+      flex: 1; 
+      text-align: center; 
+      font-size: clamp(1.2em, 4.5vw, 1.4em);
+    }
+    
+    .mese-counter { 
+      background-color: rgba(255, 255, 255, 0.9); 
+      padding: 4px 8px; 
+      border-radius: 6px; 
+      font-size: clamp(0.9em, 3.5vw, 1em); 
+      font-weight: normal; 
+      color: #666; 
+      min-width: 24px; 
+      text-align: center; 
+      border: 1px solid #000; 
+    }
+    
+    .mese-container.vuoto .mese-counter { 
+      background-color: rgba(200, 200, 200, 0.5); 
+      color: #999; 
+    }
+    
+    .mese-content { 
+      padding: 16px; 
+      font-size: clamp(1em, 3.5vw, 1em); 
+      flex: 1; 
+      display: flex; 
+      flex-direction: column; 
+    }
+    
+    .mese-container.vuoto .mese-content { 
+      background-color: #f8f8f8; 
+      justify-content: center; 
+      align-items: center; 
+    }
+    
+    .evento-datario { 
+      margin-bottom: 8px; 
+      line-height: 1.4; 
+      font-size: clamp(1.1em, 4vw, 1.2em); 
+    }
+    
+    .evento-datario.compleanno { color: #00008B; }
+    .evento-datario.onomastico { color: #006400; }
+    .evento-datario.anniversario { color: #8B0000; }
+    .giorno-numero { font-weight: bold; }
+    .anni-parentesi { font-weight: normal; color: #666; }
+
+    #copyConfirmation { 
+      position: fixed; 
+      bottom: 30px; 
+      left: 50%; 
+      transform: translateX(-50%); 
+      background-color: rgba(0, 123, 255, 0.9); 
+      color: white; 
+      padding: 15px 25px; 
+      border-radius: 10px; 
+      font-size: clamp(1em, 4vw, 1.1em); 
+      text-align: center; 
+      z-index: 11000; 
+      opacity: 0; 
+      pointer-events: none; 
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); 
+    }
+    
+    @keyframes fadeIn { 
+      from { 
+        opacity: 0; 
+        transform: translateX(-50%) translateY(20px); 
+      } 
+      to { 
+        opacity: 1; 
+        transform: translateX(-50%) translateY(0); 
+      } 
+    }
+    
+    @keyframes fadeOut { 
+      from { 
+        opacity: 1; 
+        transform: translateX(-50%) translateY(0); 
+      } 
+      to { 
+        opacity: 0; 
+        transform: translateX(-50%) translateY(20px); 
+      } 
+    }
+    
+    .fade-in { animation: fadeIn 0.3s forwards; }
+    .fade-out { animation: fadeOut 0.3s forwards; }
+    
+    #loading-indicator, #end-of-list-message { 
+      text-align: center; 
+      padding: 30px; 
+      font-size: clamp(1.2em, 4vw, 1.3em); 
+      color: #999; 
+      display: none; 
+    }
+
+    /* Miglioramenti per la scrollabilità su iOS */
+    * {
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Evita il bouncing su iOS quando si raggiunge il limite dello scroll */
+    body {
+      overflow-x: hidden;
+    }
+
+    /* Migliora l'aspetto degli input su iOS */
+    input[type="text"] {
+      -webkit-appearance: none;
+      -webkit-border-radius: 8px;
+    }
+
+    /* Nasconde la barra di zoom su iOS quando si fa tap su input */
+    @media screen and (max-width: 767px) {
+      input[type="text"] {
+        font-size: 16px;
+      }
+    }
+
+    /* Popup calendario */
+    #calendar-preview {
+      max-height: 80vh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      background-color: white;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+
+    .calendar-year-title {
+      text-align: center;
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 20px;
+      border-bottom: 3px solid #DAA520;
+      padding-bottom: 10px;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 15px;
+      width: 100%;
+    }
+
+    .calendar-month {
+      border: 2px solid #DAA520;
+      border-radius: 8px;
+      background-color: #fffef7;
+      height: 120px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .calendar-month-header {
+      background-color: #F0E68C;
+      padding: 8px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.1em;
+      color: #000;
+      border-bottom: 2px solid #DAA520;
+      border-radius: 6px 6px 0 0;
+    }
+
+    .calendar-month-content {
+      padding: 4px;
+      flex: 1;
+      font-size: 0.75em;
+      line-height: 1.1;
+      text-align: left;
+      overflow: hidden;
+    }
+
+    .calendar-event {
+      margin-bottom: 2px;
+      font-size: 0.7em;
+      line-height: 1.0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .calendar-event.compleanno { color: #00008B; }
+    .calendar-event.onomastico { color: #006400; }
+    .calendar-event.anniversario { color: #8B0000; }
+
+    .calendar-day-number {
+      font-weight: bold;
+      font-size: 0.8em;
+    }
+
+    @media (max-width: 600px) {
+      .calendar-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      
+      .calendar-year-title {
+        font-size: 2em;
+      }
+      
+      .calendar-month-header {
+        font-size: 1em;
+        padding: 6px;
+      }
+      
+      .calendar-event {
+        font-size: 0.7em;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="header-container">
+    <div id="title-row">
+      <h1 id="titolo">Prossimi eventi</h1>
+      <span class="action-button" id="info-icon-header" data-tooltip="Informazioni">Info</span>
+    </div>
+
+    <div class="pulsanti-data">
+      <button id="cambia-data">Cambia data</button>
+      <button id="reset-data">Torna alla data reale</button>
+    </div>
+    
+    <div id="main-controls-wrapper">
+      <div id="view-toggle-container">
+          <span class="action-button" id="tree-icon" data-tooltip="Albero genealogico">Albero</span>
+          <span class="action-button" id="datario-icon" data-tooltip="Modalità datario">Datario</span>
+          <span class="action-button" id="calendar-icon" data-tooltip="Calendario stampabile">Calendario</span>
+      </div>
+      <div id="search-container">
+          <div id="search-input-wrapper">
+              <input type="text" id="searchInput" placeholder="Cerca eventi..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+              <div id="event-counter" class="search-addon">0/0</div>
+              <button id="clear-search-button" title="Cancella ricerca">×</button>
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="datario-container"></div>
+
+  <ul id="eventi-lista"></ul>
+
+  <div id="loading-indicator">Caricamento eventi...</div>
+  <div id="end-of-list-message">Non ci sono altri eventi da mostrare.</div>
+
+  <div id="bookmarkPopup" class="popup-overlay">
+    <div class="popup-content">
+      <div class="popup-header">
+        <h2>Istruzioni</h2>
+        <span class="action-button" id="bookmark-close-button" data-tooltip="Chiudi finestra">Esci</span>
+      </div>
+      <div style="overflow-y: auto; -webkit-overflow-scrolling: touch;">
+        <p>Per un'esperienza ottimale, aggiungi questa pagina alla schermata Home del tuo dispositivo.</p>
+        <p><strong>Su iPhone/iPad:</strong> Clicca sull'icona "Condividi" (il quadrato con la freccia in alto) e poi "Aggiungi alla schermata Home".</p>
+        <p><strong>Su Android:</strong> Clicca sul menu (i tre puntini in alto a destra) e poi "Aggiungi a schermata Home".</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="calendarPopup" class="popup-overlay">
+    <div class="popup-content">
+      <div class="popup-header">
+        <span class="action-button" id="calendar-share-button" data-tooltip="Condividi/Stampa PDF">Condividi</span>
+        <h2>Calendario</h2>
+        <span class="action-button" id="calendar-close-button" data-tooltip="Chiudi finestra">Esci</span>
+      </div>
+      <div id="calendar-preview">
+        <div class="calendar-year-title">2025</div>
+        <div class="calendar-grid" id="calendar-grid">
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="treePopup" class="popup-overlay">
+    <div class="popup-content">
+      <div class="popup-header">
+        <span class="action-button" id="tree-copy-button" data-tooltip="Copia negli appunti">Copia</span>
+        <h2>Albero</h2>
+        <span class="action-button" id="tree-close-button" data-tooltip="Chiudi finestra">Esci</span>
+      </div>
+      <pre id="treeContent">Caricamento albero...</pre>
+    </div>
+  </div>
+
+  <div id="copyConfirmation">Copiato negli appunti!</div>
+
+<script>
+// ===== VARIABILI GLOBALI =====
+const eventiData = [
+  {"Nominativo": "AM Angela e Onofrio", "Tipo": "Anniversario", "Data": "09/08/1975", "Anno": "1975"},
+  {"Nominativo": "AM Anna e Giuseppe", "Tipo": "Anniversario", "Data": "09/07/1997", "Anno": "1997"},
+  {"Nominativo": "AM Antonietta e Saverio", "Tipo": "Anniversario", "Data": "09/09/2000", "Anno": "2000"},
+  {"Nominativo": "AM Cinzia e Gianni", "Tipo": "Anniversario", "Data": "13/09/2014", "Anno": "2014"},
+  {"Nominativo": "AM Genny e Benny", "Tipo": "Anniversario", "Data": "26/07/2008", "Anno": "2008"},
+  {"Nominativo": "AM Marica e Nino", "Tipo": "Anniversario", "Data": "04/07/1987", "Anno": "1987"},
+  {"Nominativo": "AM Rosa e Giovanni", "Tipo": "Anniversario", "Data": "29/12/2004", "Anno": "2004"},
+  {"Nominativo": "AM Teresa e Luigi", "Tipo": "Anniversario", "Data": "03/12/1956", "Anno": "1956"},
+  {"Nominativo": "AM Tiziana e Riccardo", "Tipo": "Anniversario", "Data": "04/10/2002", "Anno": "2002"},
+  {"Nominativo": "AM Vanna e Domenico", "Tipo": "Anniversario", "Data": "28/08/1991", "Anno": "1991"},
+  {"Nominativo": "Bianco Rosa", "Tipo": "Compleanno", "Data": "02/09/1971", "Anno": "1971"},
+  {"Nominativo": "Bianco Rosa", "Tipo": "Onomastico", "Data": "23/08", "Anno": ""},
+  {"Nominativo": "Chiarappa Cristiano", "Tipo": "Compleanno", "Data": "20/06/2001", "Anno": "2001"},
+  {"Nominativo": "Chiarappa Cristiano", "Tipo": "Onomastico", "Data": "07/04", "Anno": ""},
+  {"Nominativo": "Chiarappa Martino", "Tipo": "Compleanno", "Data": "24/05/1997", "Anno": "1997"},
+  {"Nominativo": "Chiarappa Martino", "Tipo": "Onomastico", "Data": "11/11", "Anno": ""},
+  {"Nominativo": "Chiarappa Saverio", "Tipo": "Compleanno", "Data": "26/11/1951", "Anno": "1951"},
+  {"Nominativo": "Chiarappa Saverio", "Tipo": "Onomastico", "Data": "03/12", "Anno": ""},
+  {"Nominativo": "Dalena Riccardo", "Tipo": "Compleanno", "Data": "11/04/1973", "Anno": "1973"},
+  {"Nominativo": "Dalena Riccardo", "Tipo": "Onomastico", "Data": "03/04", "Anno": ""},
+  {"Nominativo": "Grilletti Teresa", "Tipo": "Compleanno", "Data": "05/03/1937", "Anno": "1937"},
+  {"Nominativo": "Grilletti Teresa", "Tipo": "Onomastico", "Data": "15/10", "Anno": ""},
+  {"Nominativo": "Lefemine Domenico", "Tipo": "Compleanno", "Data": "06/02/1957", "Anno": "1957"},
+  {"Nominativo": "Lefemine Domenico", "Tipo": "Onomastico", "Data": "04/08", "Anno": ""},
+  {"Nominativo": "Lefemine Flavia", "Tipo": "Compleanno", "Data": "16/11/1996", "Anno": "1996"},
+  {"Nominativo": "Lefemine Flavia", "Tipo": "Onomastico", "Data": "07/05", "Anno": ""},
+  {"Nominativo": "Lefemine Francesco", "Tipo": "Compleanno", "Data": "20/03/2000", "Anno": "2000"},
+  {"Nominativo": "Lefemine Francesco", "Tipo": "Onomastico", "Data": "04/10", "Anno": ""},
+  {"Nominativo": "Lepore Genny", "Tipo": "Compleanno", "Data": "04/07/1975", "Anno": "1975"},
+  {"Nominativo": "Lepore Genny", "Tipo": "Onomastico", "Data": "11/04", "Anno": ""},
+  {"Nominativo": "Lorusso Alessandro", "Tipo": "Compleanno", "Data": "17/07/2010", "Anno": "2010"},
+  {"Nominativo": "Lorusso Alessandro", "Tipo": "Onomastico", "Data": "26/08", "Anno": ""},
+  {"Nominativo": "Lorusso Alice", "Tipo": "Compleanno", "Data": "20/07/2013", "Anno": "2013"},
+  {"Nominativo": "Lorusso Alice", "Tipo": "Onomastico", "Data": "13/06", "Anno": ""},
+  {"Nominativo": "Lorusso Benny", "Tipo": "Compleanno", "Data": "17/11/1975", "Anno": "1975"},
+  {"Nominativo": "Lorusso Benny", "Tipo": "Onomastico", "Data": "21/03", "Anno": ""},
+  {"Nominativo": "Lorusso Cinzia", "Tipo": "Compleanno", "Data": "06/04/1980", "Anno": "1980"},
+  {"Nominativo": "Lorusso Nina", "Tipo": "Compleanno", "Data": "29/11/2015", "Anno": "2015"},
+  {"Nominativo": "Lorusso Nina", "Tipo": "Onomastico", "Data": "15/12", "Anno": ""},
+  {"Nominativo": "Lorusso Onofrio", "Tipo": "Compleanno", "Data": "05/08/1951", "Anno": "1951"},
+  {"Nominativo": "Lorusso Onofrio", "Tipo": "Onomastico", "Data": "12/06", "Anno": ""},
+  {"Nominativo": "Mazzarisi Maria Grazia", "Tipo": "Compleanno", "Data": "21/01/1989", "Anno": "1989"},
+  {"Nominativo": "Mazzarisi Maria Grazia", "Tipo": "Onomastico", "Data": "12/09", "Anno": ""},
+  {"Nominativo": "Mazzarisi Nino", "Tipo": "Compleanno", "Data": "07/05/1957", "Anno": "1957"},
+  {"Nominativo": "Mazzarisi Nino", "Tipo": "Onomastico", "Data": "20/01", "Anno": ""},
+  {"Nominativo": "Mazzarisi Onofrio", "Tipo": "Compleanno", "Data": "05/06/1992", "Anno": "1992"},
+  {"Nominativo": "Mazzarisi Onofrio", "Tipo": "Onomastico", "Data": "12/06", "Anno": ""},
+  {"Nominativo": "Mazzarisi Teresa", "Tipo": "Compleanno", "Data": "01/04/1994", "Anno": "1994"},
+  {"Nominativo": "Mazzarisi Teresa", "Tipo": "Onomastico", "Data": "15/10", "Anno": ""},
+  {"Nominativo": "Pricci Angela", "Tipo": "Compleanno", "Data": "13/01/1957", "Anno": "1957"},
+  {"Nominativo": "Pricci Angela", "Tipo": "Onomastico", "Data": "02/08", "Anno": ""},
+  {"Nominativo": "Pricci Asia", "Tipo": "Compleanno", "Data": "07/06/2006", "Anno": "2006"},
+  {"Nominativo": "Pricci Asia", "Tipo": "Onomastico", "Data": "19/02", "Anno": ""},
+  {"Nominativo": "Pricci Gilda", "Tipo": "Compleanno", "Data": "29/06/2004", "Anno": "2004"},
+  {"Nominativo": "Pricci Gilda", "Tipo": "Onomastico", "Data": "13/02", "Anno": ""},
+  {"Nominativo": "Pricci Giovanni", "Tipo": "Compleanno", "Data": "24/10/1964", "Anno": "1964"},
+  {"Nominativo": "Pricci Giovanni", "Tipo": "Onomastico", "Data": "24/06", "Anno": ""},
+  {"Nominativo": "Pricci Giuseppe", "Tipo": "Compleanno", "Data": "12/08/1968", "Anno": "1968"},
+  {"Nominativo": "Pricci Giuseppe", "Tipo": "Onomastico", "Data": "19/03", "Anno": ""},
+  {"Nominativo": "Pricci Luigi", "Tipo": "Compleanno", "Data": "16/11/1933", "Anno": "1933"},
+  {"Nominativo": "Pricci Luigi", "Tipo": "Onomastico", "Data": "21/06", "Anno": ""},
+  {"Nominativo": "Pricci Maria Antonietta", "Tipo": "Compleanno", "Data": "21/05/1958", "Anno": "1958"},
+  {"Nominativo": "Pricci Maria Antonietta", "Tipo": "Onomastico", "Data": "13/06", "Anno": ""},
+  {"Nominativo": "Pricci Marica", "Tipo": "Compleanno", "Data": "12/04/1961", "Anno": "1961"},
+  {"Nominativo": "Pricci Marica", "Tipo": "Onomastico", "Data": "12/09", "Anno": ""},
+  {"Nominativo": "Pricci Tiziana", "Tipo": "Compleanno", "Data": "27/06/1972", "Anno": "1972"},
+  {"Nominativo": "Pricci Tiziana", "Tipo": "Onomastico", "Data": "03/03", "Anno": ""},
+  {"Nominativo": "Pricci Vanna", "Tipo": "Compleanno", "Data": "11/09/1963", "Anno": "1963"},
+  {"Nominativo": "Pricci Vanna", "Tipo": "Onomastico", "Data": "24/06", "Anno": ""},
+  {"Nominativo": "Rotondi Gianni", "Tipo": "Compleanno", "Data": "08/03/1974", "Anno": "1974"},
+  {"Nominativo": "Rotondi Gianni", "Tipo": "Onomastico", "Data": "24/06", "Anno": ""},
+  {"Nominativo": "Rotondi Nicoletta", "Tipo": "Compleanno", "Data": "12/02/2019", "Anno": "2019"},
+  {"Nominativo": "Rotondi Nicoletta", "Tipo": "Onomastico", "Data": "06/12", "Anno": ""},
+  {"Nominativo": "Trivisani Anna", "Tipo": "Compleanno", "Data": "12/07/1969", "Anno": "1969"},
+  {"Nominativo": "Trivisani Anna", "Tipo": "Onomastico", "Data": "26/07", "Anno": ""}
+];
+
+const nomiNozze = {
+  "1": "Nozze di Carta", "2": "Nozze di Cotone", "3": "Nozze di Cuoio", "4": "Nozze di Lino",
+  "5": "Nozze di Legno", "6": "Nozze di Ferro", "7": "Nozze di Lana", "8": "Nozze di Bronzo",
+  "9": "Nozze di Argilla", "10": "Nozze di Alluminio", "11": "Nozze di Acero", "12": "Nozze di Seta",
+  "13": "Nozze di Pizzo", "14": "Nozze di Avorio", "15": "Nozze di Cristallo", "16": "Nozze di Edera",
+  "17": "Nozze di Viola", "18": "Nozze di Quarzo", "19": "Nozze di Caprifoglio", "20": "Nozze di Porcellana",
+  "21": "Nozze di Rovere", "22": "Nozze di Rame", "23": "Nozze di Acqua", "24": "Nozze di Granito",
+  "25": "Nozze di Argento", "26": "Nozze di Rosa", "27": "Nozze di Gaietto", "28": "Nozze di Ambra",
+  "29": "Nozze di Velluto", "30": "Nozze di Perla", "31": "Nozze di Ebano", "32": "Nozze di Rame",
+  "33": "Nozze di Stagno", "34": "Nozze di Ampolla", "35": "Nozze di Corallo", "36": "Nozze di Silice",
+  "37": "Nozze di Pietra", "38": "Nozze di Giada", "39": "Nozze di Agata", "40": "Nozze di Rubino",
+  "41": "Nozze di Topazio", "42": "Nozze di Diaspro", "43": "Nozze di Opale", "44": "Nozze di Turchese",
+  "45": "Nozze di Zaffiro", "46": "Nozze di Perla", "47": "Nozze di Ametista", "48": "Nozze di Feldspato",
+  "49": "Nozze di Zircone", "50": "Nozze di Oro", "51": "Nozze di Camelia", "52": "Nozze di Tormalina",
+  "53": "Nozze di Ciliegio", "54": "Nozze di Zibellino", "55": "Nozze di Smeraldo", "56": "Nozze di Lapislazzuli",
+  "57": "Nozze di Azalea", "58": "Nozze di Acero", "59": "Nozze di Visone", "60": "Nozze di Diamante",
+  "61": "Nozze di Platano", "62": "Nozze di Avorio", "63": "Nozze di Giglio", "64": "Nozze di Astrakan",
+  "65": "Nozze di Platino", "66": "Nozze di Gelsomino", "67": "Nozze di Cincillà", "68": "Nozze di Granito",
+  "69": "Nozze di Melenzio", "70": "Nozze di Titanio", "75": "Nozze di Brillanti", "80": "Nozze di Quercia",
+  "85": "Nozze di Marmo", "90": "Nozze di Granito", "95": "Nozze di Onice", "100": "Nozze di Ossido"
+};
+
+let tuttiGliEventi = [];
+let dataPersonalizzata = null;
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+let modalitaDatario = false;
+
+// ===== FUNZIONI UTILITY =====
+function getDataOdierna() {
+  return dataPersonalizzata || new Date();
+}
+
+function parseData(dataStr) {
+  if (!dataStr) return null;
+  const parti = dataStr.split("/").map(Number);
+  if (parti.length < 2) return null;
+  return new Date(2000, parti[1] - 1, parti[0]);
+}
+
+function calcolaGiorni(dataEvento, oggi) {
+  if (!dataEvento || !oggi) return 0;
+  
+  const oggiNormalizzato = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate());
+  const eventoNormalizzato = new Date(dataEvento.getFullYear(), dataEvento.getMonth(), dataEvento.getDate());
+  
+  const diff = eventoNormalizzato - oggiNormalizzato;
+  const giorni = Math.round(diff / (1000 * 60 * 60 * 24));
+  
+  return giorni >= 0 ? giorni : giorni + 365;
+}
+
+function calcolaAnni(evento) {
+  if (!evento || (evento.Tipo !== "Compleanno" && evento.Tipo !== "Anniversario")) return null;
+  const anno = parseInt(evento.Anno);
+  if (isNaN(anno)) return null;
+  
+  const oggi = getDataOdierna();
+  const annoCorrente = oggi.getFullYear();
+  const parti = evento.Data.split("/").map(Number);
+  const giornoEvento = parti[0];
+  const meseEvento = parti[1];
+  
+  let annoCalcolo = annoCorrente;
+  
+  const dataEventoQuestAnno = new Date(annoCorrente, meseEvento - 1, giornoEvento);
+  const oggiNormalizzato = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate());
+  
+  if (dataEventoQuestAnno < oggiNormalizzato) {
+    annoCalcolo = annoCorrente + 1;
+  }
+  
+  let anni = annoCalcolo - anno;
+  
+  return anni;
+}
+
+function getDataCompleta(evento) {
+  if (!evento?.Data) return { giorno: '', mese: '', anno: '' };
+  
+  const oggi = getDataOdierna();
+  const annoCorrente = oggi.getFullYear();
+  const parti = evento.Data.split("/").map(Number);
+  
+  let dataEvento = new Date(annoCorrente, parti[1] - 1, parti[0]);
+  
+  const oggiSenzaOra = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate());
+  
+  if (dataEvento < oggiSenzaOra) {
+    dataEvento.setFullYear(annoCorrente + 1);
+  }
+  
+  const giorni = ["domenica", "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato"];
+  const mesi = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
+  
+  return {
+    giornoSettimana: giorni[dataEvento.getDay()],
+    giorno: dataEvento.getDate(),
+    mese: mesi[dataEvento.getMonth()],
+    annoCorrente: dataEvento.getFullYear()
+  };
+}
+
+function ordinaEventi(eventi) {
+  const oggi = getDataOdierna();
+  
+  return eventi.filter(e => e.Data).map(e => {
+    const dataEvento = parseData(e.Data);
+    if (!dataEvento) return null;
+    
+    const annoCorrente = oggi.getFullYear();
+    let dataEventoCompleta = new Date(annoCorrente, dataEvento.getMonth(), dataEvento.getDate());
+    
+    const oggiSenzaOra = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate());
+    
+    if (dataEventoCompleta < oggiSenzaOra) {
+      dataEventoCompleta.setFullYear(annoCorrente + 1);
+    }
+    
+    const giorni = calcolaGiorni(dataEventoCompleta, oggiSenzaOra);
+    const anni = calcolaAnni(e);
+    
+    return { ...e, dataEvento: dataEventoCompleta, giorni, anni };
+  }).filter(e => e?.dataEvento).sort((a, b) => {
+    return a.giorni - b.giorni;
+  });
+}
+
+function suonaBeep() {
+  if (isMobile) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(500, ctx.currentTime);
+    osc.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.2);
+  } catch (error) {
+    console.error("Errore audio:", error);
+  }
+}
+
+function creaElementoEvento(evento, prossimiGiorni) {
+  const li = document.createElement('li');
+  li.classList.add(evento.Tipo.toLowerCase());
+  
+  let icona = '';
+  let badgeGiorni = '';
+  
+  if (evento.giorni === 0) {
+    li.classList.add('evento-oggi');
+    icona = '<span class="star-badge">⭐</span>';
+    badgeGiorni = '<div class="giorni-badge oggi">OGGI</div>';
+  } else {
+    icona = '<a href="#titolo" class="arrow-badge" title="Torna su">⬆️</a>';
+    if (evento.giorni > 0) {
+        const classiBadge = ['giorni-badge'];
+        if (evento.giorni === prossimiGiorni) {
+            classiBadge.push('prossimo');
+        }
+        badgeGiorni = `<div class="${classiBadge.join(' ')}">${evento.giorni}</div>`;
+    }
+  }
+  
+  const { giornoSettimana, giorno, mese, annoCorrente } = getDataCompleta(evento);
+  const dataCompleta = `${giornoSettimana} ${giorno} ${mese} ${annoCorrente}`;
+  
+  let tipoTesto = "";
+  if (evento.Tipo === "Compleanno" || evento.Tipo === "Anniversario") {
+    if (evento.anni !== null && evento.anni !== undefined) {
+      const quando = evento.giorni === 0 ? "oggi" : evento.giorni === 1 ? "domani" : `tra ${evento.giorni} giorni`;
+      tipoTesto = `${evento.anni}° ${evento.Tipo} ${quando}`;
+    } else {
+      const quando = evento.giorni === 0 ? "oggi" : evento.giorni === 1 ? "domani" : `tra ${evento.giorni} giorni`;
+      tipoTesto = `${evento.Tipo} ${quando}`;
+    }
+  } else {
+    const quando = evento.giorni === 0 ? "oggi" : evento.giorni === 1 ? "domani" : `tra ${evento.giorni} giorni`;
+    tipoTesto = `Onomastico ${quando}`;
+  }
+  
+  let nomeNozze = "";
+  if (evento.Tipo === "Anniversario" && evento.anni !== null && evento.anni !== undefined) {
+    if (nomiNozze[evento.anni]) {
+      nomeNozze = `${nomiNozze[evento.anni]}`;
+    }
+  }
+  
+  const nomeEscaped = evento.Nominativo.replace(/'/g, "\\'");
+  
+  li.innerHTML = `
+    ${badgeGiorni}
+    ${icona}
+    <div onclick="clickEvento('${nomeEscaped}')" style="cursor: pointer;">
+      <strong>${evento.Nominativo}</strong>
+      <span class="tipo-evento">${tipoTesto}</span>
+      <span class="data-evento">${dataCompleta}</span>
+      ${nomeNozze ? `<span class="nozze-evento">${nomeNozze}</span>` : ''}
+    </div>
+  `;
+  
+  li.addEventListener('click', (e) => {
+    // Evita che il click su arrow-badge trigga anche questo evento
+    if (e.target.classList.contains('arrow-badge')) return;
+    
+    if (evento.giorni === 0) {
+      suonaBeep();
+      // Aggiungi feedback visivo per eventi di oggi
+      li.style.transform = 'scale(1.02)';
+      setTimeout(() => {
+        li.style.transform = '';
+      }, 200);
+    }
+  });
+  
+  return li;
+}
+
+function creaBarraAnno(data) {
+  const barra = document.createElement('div');
+  barra.className = 'year-divider';
+  barra.innerHTML = `<div class="year-label">${data}</div>`;
+  return barra;
+}
+
+function scrollMese(meseCliccato) {
+    const oggi = getDataOdierna();
+    const meseCorrente = oggi.getMonth();
+    let targetId;
+
+    if (meseCliccato == 0) { 
+        targetId = `mese-container-${meseCorrente}`;
+    } else if (meseCliccato > 0 && meseCliccato <= meseCorrente) { 
+        targetId = 'mese-container-0';
+    } else { 
+        targetId = `mese-container-${meseCorrente}`;
+    }
+
+    const targetElement = document.getElementById(targetId);
+    if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+function creaMeseDatario(mese, anno, eventi, termineRicerca = '', prossimiGiorniMancanti) {
+  const nomiMesi = [
+    'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
+    'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'
+  ];
+  
+  const oggi = getDataOdierna();
+  const meseCorrente = oggi.getMonth();
+  const annoCorrente = oggi.getFullYear();
+  const giornoCorrente = oggi.getDate();
+  
+  let tipologiaMese = '';
+  if (anno < annoCorrente || (anno === annoCorrente && mese < meseCorrente)) {
+    tipologiaMese = 'passato';
+  } else if (anno === annoCorrente && mese === meseCorrente) {
+    tipologiaMese = 'corrente';
+  } else {
+    tipologiaMese = 'futuro';
+  }
+  
+  let eventiMese = eventi.filter(evento => {
+    if (!evento.Data) return false;
+    const parti = evento.Data.split("/").map(Number);
+    return parti[1] === (mese + 1);
+  });
+  
+  if (termineRicerca.trim()) {
+    const termini = termineRicerca.toLowerCase().trim().split(/\s+/);
+    const parolePositive = [];
+    const paroleNegative = [];
+    
+    termini.forEach(parola => {
+      if (parola.startsWith('-') && parola.length > 1) {
+        paroleNegative.push(parola.substring(1));
+      } else if (parola.startsWith('-') && parola.length === 1) {
+        return;
+      } else {
+        parolePositive.push(parola);
+      }
+    });
+    
+    eventiMese = eventiMese.filter(evento => {
+      const testoCompleto = [
+        evento.Nominativo,
+        evento.Tipo,
+        evento.Data
+      ].filter(t => t).join(' ').toLowerCase();
+      
+      const contienePositive = parolePositive.length === 0 || 
+                              parolePositive.every(parola => testoCompleto.includes(parola));
+      
+      const nonContieneNegative = paroleNegative.length === 0 || 
+                                 paroleNegative.every(parola => !testoCompleto.includes(parola));
+      
+      return contienePositive && nonContieneNegative;
+    });
+  }
+
+  // Se durante la ricerca il mese non ha eventi, ritorna null per non mostrarlo
+  if (termineRicerca.trim() && eventiMese.length === 0) {
+    return null;
+  }
+  
+  eventiMese = eventiMese.map(evento => {
+    const parti = evento.Data.split("/").map(Number);
+    const giorno = parti[0];
+    let dataEvento = new Date(annoCorrente, mese, giorno);
+    const oggiNormalizzato = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate());
+    let diff = dataEvento - oggiNormalizzato;
+    let giorniMancanti = Math.round(diff / (1000 * 60 * 60 * 24));
+    
+    if (giorniMancanti < 0) {
+      dataEvento.setFullYear(dataEvento.getFullYear() + 1);
+      diff = dataEvento - oggiNormalizzato;
+      giorniMancanti = Math.round(diff / (1000 * 60 * 60 * 24));
+    }
+    
+    return { ...evento, giorno: giorno, giorniMancanti: giorniMancanti };
+  }).sort((a, b) => a.giorno - b.giorno); 
+  
+  let contenuto = '';
+  
+  const renderEvento = (evento) => {
+    let nome = evento.Nominativo;
+    let anni = '';
+    let suffissoOnomastico = '';
+
+    if (evento.Tipo === 'Compleanno' || evento.Tipo === 'Anniversario') {
+      const annoNascita = parseInt(evento.Anno);
+      if (!isNaN(annoNascita)) {
+        anni = ` (${anno - annoNascita})`;
+      }
+    }
+    
+    const marcatoreProssimo = evento.giorniMancanti === prossimiGiorniMancanti ? `<span class="prossimo-evento-marker">${prossimiGiorniMancanti}</span>` : '';
+
+    const classeEvento = evento.Tipo.toLowerCase();
+    let classeTemporale = '';
+    
+    if (tipologiaMese === 'corrente') {
+        classeTemporale = evento.giorno === giornoCorrente ? ' oggi' : (evento.giorno < giornoCorrente ? ' passato' : '');
+    } else if (tipologiaMese === 'passato') {
+        classeTemporale = ' passato';
+    }
+
+    return `<div class="evento-datario ${classeEvento}${classeTemporale}">
+              <span class="giorno-numero">${evento.giorno})</span> ${nome}${suffissoOnomastico}<span class="anni-parentesi">${anni}</span>${marcatoreProssimo}
+            </div>`;
+  };
+  
+  if (tipologiaMese === 'corrente') {
+    const eventiPassatiEOggi = eventiMese.filter(e => e.giorno <= giornoCorrente);
+    const eventiFuturi = eventiMese.filter(e => e.giorno > giornoCorrente);
+    
+    eventiPassatiEOggi.forEach(evento => {
+      contenuto += renderEvento(evento);
+    });
+    
+    if (eventiFuturi.length > 0 && eventiPassatiEOggi.length > 0) {
+      contenuto += `<div class="separatore-giorni" data-giorno="${giornoCorrente}"></div>`;
+    }
+    
+    eventiFuturi.forEach(evento => {
+      contenuto += renderEvento(evento);
+    });
+  } else {
+    eventiMese.forEach(evento => {
+      contenuto += renderEvento(evento);
+    });
+  }
+  
+  const numeroEventi = eventiMese.length;
+  let classiContainer = (numeroEventi === 0) ? ' vuoto' : '';
+  classiContainer += (tipologiaMese === 'passato') ? ' passato' : (tipologiaMese === 'corrente' ? ' corrente' : '');
+
+  const iconaFreccia = (mese === 0) ? '⬇️' : '⬆️';
+  const frecciaNavigazione = `<span class="mese-header-arrow" onclick="scrollMese(${mese})">${iconaFreccia}</span>`;
+
+  return `
+    <div class="mese-container${classiContainer}" id="mese-container-${mese}">
+      <div class="mese-header">
+        ${frecciaNavigazione}
+        <div class="mese-nome">${nomiMesi[mese]} ${anno}</div>
+        <div class="mese-counter">${numeroEventi}</div>
+      </div>
+      <div class="mese-content">
+        ${contenuto || '<div style="color: #bbb; font-style: italic; font-size: 0.9em;">Nessun evento</div>'}
+      </div>
+    </div>
+  `;
+}
+
+function mostraDatario() {
+  const oggi = getDataOdierna();
+  const annoCorrente = oggi.getFullYear();
+  const termineRicerca = document.getElementById('searchInput').value;
+  
+  const datarioContainer = document.getElementById('datario-container');
+  const datarioIcon = document.getElementById('datario-icon');
+  
+  datarioIcon.textContent = 'Elenco';
+
+  const eventiOrdinati = ordinaEventi(tuttiGliEventi);
+  let prossimiGiorniMancanti = -1;
+  const primoEventoProssimo = eventiOrdinati.find(e => e.giorni > 0);
+  if (primoEventoProssimo) {
+      prossimiGiorniMancanti = primoEventoProssimo.giorni;
+  }
+  
+  let html = '<div class="datario-grid">';
+  for (let i = 0; i < 12; i++) {
+    const meseHtml = creaMeseDatario(i, annoCorrente, tuttiGliEventi, termineRicerca, prossimiGiorniMancanti);
+    if (meseHtml !== null) {
+      html += meseHtml;
+    }
+  }
+  html += '</div>';
+  datarioContainer.innerHTML = html;
+  
+  aggiornaContatoreDatario(termineRicerca);
+  
+  document.getElementById('eventi-lista').style.display = 'none';
+  datarioContainer.style.display = 'block';
+  modalitaDatario = true;
+  
+  setTimeout(() => {
+    const meseCorrenteEl = document.querySelector('.mese-container.corrente');
+    if (meseCorrenteEl) {
+      meseCorrenteEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, 100);
+}
+
+function aggiornaContatoreDatario(termineRicerca) {
+  const contatore = document.getElementById('event-counter');
+  const btnCancella = document.getElementById('clear-search-button');
+  
+  if (termineRicerca.trim()) {
+    const termini = termineRicerca.toLowerCase().trim().split(/\s+/);
+    const parolePositive = [];
+    const paroleNegative = [];
+    
+    termini.forEach(parola => {
+      if (parola.startsWith('-') && parola.length > 1) {
+        paroleNegative.push(parola.substring(1));
+      } else if (parola.startsWith('-') && parola.length === 1) {
+        return;
+      } else {
+        parolePositive.push(parola);
+      }
+    });
+    
+    const eventiFiltrati = tuttiGliEventi.filter(evento => {
+      const testoCompleto = [
+        evento.Nominativo,
+        evento.Tipo,
+        evento.Data
+      ].filter(t => t).join(' ').toLowerCase();
+      
+      const contienePositive = parolePositive.length === 0 || 
+                              parolePositive.every(parola => testoCompleto.includes(parola));
+      
+      const nonContieneNegative = paroleNegative.length === 0 || 
+                                 paroleNegative.every(parola => !testoCompleto.includes(parola));
+      
+      return contienePositive && nonContieneNegative;
+    });
+    
+    contatore.textContent = `${eventiFiltrati.length}/${tuttiGliEventi.length}`;
+    btnCancella.style.display = 'flex';
+  } else {
+    contatore.textContent = `${tuttiGliEventi.length}/${tuttiGliEventi.length}`;
+    btnCancella.style.display = 'none';
+  }
+}
+
+function mostraElenco() {
+  document.getElementById('datario-container').style.display = 'none';
+  document.getElementById('eventi-lista').style.display = 'flex';
+  modalitaDatario = false;
+  
+  document.getElementById('datario-icon').textContent = 'Datario';
+  
+  mostraEventi(tuttiGliEventi, document.getElementById('searchInput').value);
+}
+
+function toggleDatario() {
+  if (modalitaDatario) {
+    mostraElenco();
+  } else {
+    mostraDatario();
+  }
+}
+
+function mostraEventi(eventi, termine = '') {
+  const lista = document.getElementById('eventi-lista');
+  const contatore = document.getElementById('event-counter');
+  const btnCancella = document.getElementById('clear-search-button');
+  const messaggioFine = document.getElementById('end-of-list-message');
+  
+  let eventiOrdinati = ordinaEventi(eventi);
+  let eventiFiltrati = eventiOrdinati;
+  
+  if (termine.trim()) {
+    const termini = termine.toLowerCase().trim().split(/\s+/);
+    const parolePositive = [];
+    const paroleNegative = [];
+    
+    termini.forEach(parola => {
+      if (parola.startsWith('-') && parola.length > 1) {
+        paroleNegative.push(parola.substring(1));
+      } else if (parola.startsWith('-') && parola.length === 1) {
+        return;
+      } else {
+        parolePositive.push(parola);
+      }
+    });
+    
+    eventiFiltrati = eventiOrdinati.filter(evento => {
+      const testoCompleto = [
+        evento.Nominativo,
+        evento.Tipo,
+        evento.Data
+      ].filter(t => t).join(' ').toLowerCase();
+      
+      const contienePositive = parolePositive.length === 0 || 
+                              parolePositive.every(parola => testoCompleto.includes(parola));
+      
+      const nonContieneNegative = paroleNegative.length === 0 || 
+                                 paroleNegative.every(parola => !testoCompleto.includes(parola));
+      
+      return contienePositive && nonContieneNegative;
+    });
+  }
+
+  contatore.textContent = `${eventiFiltrati.length}/${eventi.length}`;
+  btnCancella.style.display = termine.trim() ? 'flex' : 'none';
+  
+  lista.innerHTML = '';
+  
+  if (eventiFiltrati.length === 0) {
+    messaggioFine.style.display = 'block';
+    messaggioFine.textContent = 'Nessun evento trovato.';
+    return;
+  } else {
+    messaggioFine.style.display = 'none';
+  }
+
+  const primoEventoProssimo = eventiOrdinati.find(e => e.giorni > 0);
+  const prossimiGiorni = primoEventoProssimo ? primoEventoProssimo.giorni : -1;
+
+  const eventiPerAnno = {};
+  eventiFiltrati.forEach(evento => {
+    const anno = evento.dataEvento.getFullYear();
+    if (!eventiPerAnno[anno]) {
+      eventiPerAnno[anno] = [];
+    }
+    eventiPerAnno[anno].push(evento);
+  });
+  
+  const anniOrdinati = Object.keys(eventiPerAnno).sort();
+  
+  anniOrdinati.forEach((anno) => {
+    const eventiDellAnno = eventiPerAnno[anno];
+    const primoEventoDellAnno = eventiDellAnno[0];
+    const dataPrimoEvento = primoEventoDellAnno.dataEvento;
+    let dataFormattata;
+
+    const giorni = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
+    const giornoSettimana = giorni[dataPrimoEvento.getDay()];
+    const dataSemplice = `${String(dataPrimoEvento.getDate()).padStart(2, '0')}/${String(dataPrimoEvento.getMonth() + 1).padStart(2, '0')}/${dataPrimoEvento.getFullYear()}`;
+
+    if (primoEventoDellAnno.giorni === 0) {
+        dataFormattata = `Oggi ${giornoSettimana} ${dataSemplice}`;
+    } else {
+        dataFormattata = `${giornoSettimana} ${dataSemplice}`;
+    }
+    
+    const barra = creaBarraAnno(dataFormattata);
+    lista.appendChild(barra);
+    
+    eventiDellAnno.forEach(evento => {
+      const li = creaElementoEvento(evento, prossimiGiorni);
+      lista.appendChild(li);
+    });
+  });
+}
+
+function cancellaCerca() {
+  const input = document.getElementById('searchInput');
+  input.value = '';
+  input.blur(); // Rimuove il focus per nascondere la tastiera su mobile
+  document.getElementById('clear-search-button').style.display = 'none';
+  
+  if (modalitaDatario) {
+    mostraDatario();
+  } else {
+    mostraEventi(tuttiGliEventi, '');
+  }
+}
+
+function clickEvento(nome) {
+  console.log("Click su evento:", nome);
+  // Su mobile, potresti voler mostrare più dettagli o fare un'azione specifica
+  if (isMobile) {
+    // Feedback tattile leggero
+    if (navigator.vibrate) {
+      navigator.vibrate(50);
+    }
+  }
+}
+
+function cambiaData() {
+  if (isMobile) return;
+  
+  const dataStr = prompt(
+    "Inserisci la data nel formato DD/MM/YYYY:",
+    dataPersonalizzata ? 
+      `${dataPersonalizzata.getDate().toString().padStart(2, '0')}/${(dataPersonalizzata.getMonth() + 1).toString().padStart(2, '0')}/${dataPersonalizzata.getFullYear()}` :
+      new Date().toLocaleDateString('it-IT')
+  );
+  
+  if (dataStr === null) return;
+  
+  const parti = dataStr.split("/").map(n => parseInt(n.trim()));
+  if (parti.length !== 3 || parti[0] < 1 || parti[0] > 31 || parti[1] < 1 || parti[1] > 12 || parti[2] < 1900 || parti[2] > 2100) {
+    alert("Data non valida! Usa il formato DD/MM/YYYY");
+    return;
+  }
+  
+  dataPersonalizzata = new Date(parti[2], parti[1] - 1, parti[0]);
+  document.getElementById('reset-data').style.display = 'block';
+  
+  if (modalitaDatario) {
+    mostraDatario();
+  } else {
+    mostraEventi(tuttiGliEventi, document.getElementById('searchInput').value);
+  }
+}
+
+function resetData() {
+  if (isMobile) return;
+  
+  dataPersonalizzata = null;
+  document.getElementById('reset-data').style.display = 'none';
+  
+  if (modalitaDatario) {
+    mostraDatario();
+  } else {
+    mostraEventi(tuttiGliEventi, document.getElementById('searchInput').value);
+  }
+}
+
+function mostraPopupInfo() {
+  document.getElementById('bookmarkPopup').style.display = 'flex';
+}
+
+function nascondiPopupInfo() {
+  document.getElementById('bookmarkPopup').style.display = 'none';
+}
+
+function mostraAlbero() {
+  document.getElementById('treePopup').style.display = 'flex';
+  caricaAlbero();
+}
+
+function nascondiAlbero() {
+  document.getElementById('treePopup').style.display = 'none';
+}
+
+function caricaAlbero() {
+  const contenuto = document.getElementById('treeContent');
+  contenuto.textContent = `Luigi Pricci (1933)
+│Teresa Grilletti (1937)
+│
+├── Angela Pricci (1957)
+│   │Onofrio Lorusso (1951)
+│   │
+│   ├── Benny Lorusso (1975)
+│   │   │Genny Lepore (1975)
+│   │   │
+│   │   ├── Alessandro Lorusso (2010)
+│   │   ├── Alice Lorusso (2013)
+│   │   └── Nina Lorusso (2015)
+│   │
+│   └── Cinzia Lorusso (1980)
+│       │Gianni Rotondi (1974)
+│       │
+│       └── Nicoletta Rotondi (2019)
+│
+├── Maria Antonietta Pricci (1958)
+│   │Saverio Chiarappa (1951)
+│   │
+│   ├── Martino Chiarappa (1997)
+│   └── Cristiano Chiarappa (2001)
+│
+├── Marica Pricci (1961)
+│   │Nino Mazzarisi (1957)
+│   │
+│   ├── Maria Grazia Mazzarisi (1989)
+│   ├── Onofrio Mazzarisi (1992)
+│   └── Teresa Mazzarisi (1994)
+│
+├── Vanna Pricci (1963)
+│   │Domenico Lefemine (1957)
+│   │
+│   ├── Flavia Lefemine (1996)
+│   └── Francesco Lefemine (2000)
+│
+├── Giovanni Pricci (1964)
+│   │Rosa Bianco (1971)
+│
+├── Giuseppe Pricci (1968)
+│   │Anna Trivisani (1969)
+│   │
+│   ├── Gilda Pricci (2004)
+│   └── Asia Pricci (2006)
+│
+└── Tiziana Pricci (1972)
+    │Riccardo Dalena (1973)
+`;
+}
+
+function mostraConferma(messaggio) {
+  if (!messaggio) messaggio = 'Copiato negli appunti!';
+  const box = document.getElementById('copyConfirmation');
+  box.textContent = messaggio;
+  box.classList.remove('fade-out');
+  box.classList.add('fade-in');
+  setTimeout(function() {
+    box.classList.remove('fade-in');
+    box.classList.add('fade-out');
+  }, 2000);
+}
+
+function copiaAlbero() {
+  const contenuto = document.getElementById('treeContent');
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(contenuto.textContent).then(() => {
+      mostraConferma();
+    }).catch(err => {
+      console.error("Errore copia:", err);
+      alert("Impossibile copiare. Seleziona e copia manualmente.");
+    });
+  } else {
+    // Fallback per dispositivi meno recenti
+    const range = document.createRange();
+    range.selectNode(contenuto);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    try {
+      document.execCommand('copy');
+      mostraConferma();
+    } catch (err) {
+      console.error("Errore copia fallback:", err);
+      alert("Impossibile copiare. Seleziona e copia manualmente.");
+    }
+    window.getSelection().removeAllRanges();
+  }
+}
+
+// ===== FUNZIONI CALENDARIO =====
+function mostraCalendario() {
+  document.getElementById('calendarPopup').style.display = 'flex';
+  generaCalendario();
+}
+
+function nascondiCalendario() {
+  document.getElementById('calendarPopup').style.display = 'none';
+}
+
+function generaCalendario() {
+  const oggi = getDataOdierna();
+  const anno = oggi.getFullYear();
+  
+  document.querySelector('.calendar-year-title').textContent = anno;
+  
+  const nomiMesi = [
+    'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
+    'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'
+  ];
+  
+  const calendarGrid = document.getElementById('calendar-grid');
+  calendarGrid.innerHTML = '';
+  
+  for (let mese = 0; mese < 12; mese++) {
+    const eventiMese = tuttiGliEventi.filter(function(evento) {
+      if (!evento.Data) return false;
+      const parti = evento.Data.split("/").map(Number);
+      return parti[1] === (mese + 1);
+    });
+    
+    const eventiOrdinati = eventiMese.map(function(evento) {
+      const parti = evento.Data.split("/").map(Number);
+      return { ...evento, giorno: parti[0] };
+    }).sort(function(a, b) {
+      return a.giorno - b.giorno;
+    });
+    
+    const meseDiv = document.createElement('div');
+    meseDiv.className = 'calendar-month';
+    
+    let contenutoEventi = '';
+    eventiOrdinati.forEach(function(evento) {
+      let anni = '';
+      if (evento.Tipo === 'Compleanno' || evento.Tipo === 'Anniversario') {
+        const annoNascita = parseInt(evento.Anno);
+        if (!isNaN(annoNascita)) {
+          anni = ' (' + (anno - annoNascita) + ')';
+        }
+      }
+      
+      const nomeBreve = evento.Nominativo.length > 15 ? 
+        evento.Nominativo.substring(0, 15) + '...' : 
+        evento.Nominativo;
+        
+      contenutoEventi += '<div class="calendar-event ' + evento.Tipo.toLowerCase() + '">' +
+        '<span class="calendar-day-number">' + evento.giorno + ')</span> ' + nomeBreve + anni +
+      '</div>';
+    });
+    
+    meseDiv.innerHTML = 
+      '<div class="calendar-month-header">' + nomiMesi[mese] + '</div>' +
+      '<div class="calendar-month-content">' +
+        (contenutoEventi || '<div style="color: #bbb; font-style: italic;">Nessun evento</div>') +
+      '</div>';
+    
+    calendarGrid.appendChild(meseDiv);
+  }
+}
+
+
+
+
+
+
+function condividiCalendario() {
+    // Controlla se la libreria PDF è stata caricata all'avvio della pagina
+    if (typeof window.jsPDF === 'undefined') {
+        return alert('ERRORE: La libreria per creare i PDF non è stata caricata.\nPer favore, ricarica la pagina e assicurati di essere connesso a internet.');
+    }
+
+    try {
+        const { jsPDF } = window.jsPDF;
+        const pdf = new jsPDF('portrait', 'mm', 'a4');
+        const oggi = getDataOdierna();
+        const anno = oggi.getFullYear();
+
+        pdf.setFontSize(36);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(anno.toString(), 105, 30, { align: 'center' });
+        pdf.setLineWidth(1);
+        pdf.line(20, 40, 190, 40);
+
+        const nomiMesi = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+        const startX = 10, startY = 55, colWidth = 63, rowHeight = 50, marginX = 3, marginY = 3;
+
+        for (let mese = 0; mese < 12; mese++) {
+            const col = mese % 3;
+            const row = Math.floor(mese / 3);
+            const x = startX + col * (colWidth + marginX);
+            const y = startY + row * (rowHeight + marginY);
+
+            pdf.setFillColor(240, 230, 140);
+            pdf.rect(x, y, colWidth, 15, 'F');
+            pdf.setDrawColor(218, 165, 32);
+            pdf.setLineWidth(0.5);
+            pdf.rect(x, y, colWidth, rowHeight);
+            pdf.setFontSize(11);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(0, 0, 0);
+            pdf.text(nomiMesi[mese], x + colWidth / 2, y + 10, { align: 'center' });
+
+            const eventiMese = tuttiGliEventi
+                .filter(evento => evento.Data && parseInt(evento.Data.split('/')[1]) === mese + 1)
+                .sort((a, b) => parseInt(a.Data.split('/')[0]) - parseInt(b.Data.split('/')[0]));
+
+            let currentY = y + 20;
+            pdf.setFontSize(6);
+            pdf.setFont('helvetica', 'normal');
+
+            eventiMese.forEach(function(evento) {
+                if (currentY > y + rowHeight - 4) return;
+                let anni = '';
+                if (evento.Tipo === 'Compleanno' || evento.Tipo === 'Anniversario') {
+                    const annoNascita = parseInt(evento.Anno);
+                    if (!isNaN(annoNascita)) anni = ' (' + (anno - annoNascita) + ')';
+                }
+                if (evento.Tipo === 'Compleanno') pdf.setTextColor(0, 0, 139);
+                else if (evento.Tipo === 'Onomastico') pdf.setTextColor(0, 100, 0);
+                else if (evento.Tipo === 'Anniversario') pdf.setTextColor(139, 0, 0);
+                
+                const nomeBreve = evento.Nominativo.length > 22 ? evento.Nominativo.substring(0, 22) + '…' : evento.Nominativo;
+                const testo = evento.Data.split('/')[0] + ') ' + nomeBreve + anni;
+                pdf.text(testo, x + 2, currentY);
+                currentY += 3.5;
+            });
+        }
+
+        const pdfBlob = pdf.output('blob');
+        const fileName = 'Calendario_' + anno + '.pdf';
+
+        if (navigator.share && isMobile) {
+            const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                 navigator.share({
+                    title: 'Calendario ' + anno,
+                    files: [file]
+                }).catch(err => {
+                    if (err.name !== 'AbortError') {
+                        console.error("Errore condivisione:", err);
+                        apriPDFPerStampa(pdfBlob, fileName);
+                    }
+                });
+            } else {
+                 apriPDFPerStampa(pdfBlob, fileName);
+            }
+        } else {
+            apriPDFPerStampa(pdfBlob, fileName);
+        }
+
+    } catch (error) {
+        console.error('Errore generazione PDF:', error);
+        alert('Errore durante la generazione del PDF: ' + error.message);
+    }
+}
+
+function apriPDFPerStampa(pdfBlob, fileName) {
+  const url = URL.createObjectURL(pdfBlob);
+  const newWindow = window.open(url, '_blank');
+  if (!newWindow) {
+    alert("Il browser ha bloccato l'apertura di una nuova scheda. Disabilita il popup-blocker e riprova.");
+  }
+}
+
+function scaricaPDF(pdfBlob, fileName) {
+  const url = URL.createObjectURL(pdfBlob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+
+
+
+
+// ===== GESTIONE EVENTI TOUCH E MOBILE =====
+function gestisciTouchEvents() {
+  // Previeni il bounce scrolling su iOS
+  document.addEventListener('touchmove', function(e) {
+    if (e.target.closest('.popup-content') || e.target.closest('#treeContent')) {
+      // Permetti lo scroll all'interno dei popup
+      return;
+    }
+    // Permetti lo scroll normale della pagina
+  }, { passive: true });
+
+  // Gestisci il ridimensionamento della finestra (rotazione schermo)
+  window.addEventListener('resize', function() {
+    if (modalitaDatario) {
+      // Ricalcola il layout del datario dopo la rotazione
+      setTimeout(() => {
+        const meseCorrenteEl = document.querySelector('.mese-container.corrente');
+        if (meseCorrenteEl) {
+          meseCorrenteEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 300);
+    }
+  });
+
+  // Gestisci i popup su mobile
+  document.addEventListener('click', function(e) {
+    // Chiudi i popup se si clicca fuori
+    if (e.target.classList.contains('popup-overlay')) {
+      if (e.target.id === 'bookmarkPopup') {
+        nascondiPopupInfo();
+      } else if (e.target.id === 'treePopup') {
+        nascondiAlbero();
+      } else if (e.target.id === 'calendarPopup') {
+        nascondiCalendario();
+      }
+    }
+  });
+}
+
+// ===== INIZIALIZZAZIONE =====
+function inizializza() {
+  try {
+    tuttiGliEventi = [...eventiData];
+    
+    document.getElementById('searchInput').value = '';
+    document.getElementById('clear-search-button').style.display = 'none';
+    
+    mostraEventi(tuttiGliEventi, '');
+    
+    // Event listeners
+    if (!isMobile) {
+      document.getElementById('titolo').addEventListener('click', cambiaData);
+      document.addEventListener('keydown', e => {
+        if (e.key === 'F2') {
+          e.preventDefault();
+          cambiaData();
+        }
+      });
+      document.getElementById('cambia-data').addEventListener('click', cambiaData);
+      document.getElementById('reset-data').addEventListener('click', resetData);
+      document.querySelector('.pulsanti-data').style.display = 'block';
+      document.getElementById('cambia-data').style.display = 'block';
+    } else {
+      document.getElementById('titolo').style.cursor = 'default';
+      // Inizializza gestione eventi touch
+      gestisciTouchEvents();
+    }
+    
+    // Event listeners comuni
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', e => {
+      if (modalitaDatario) {
+        mostraDatario();
+      } else {
+        mostraEventi(tuttiGliEventi, e.target.value);
+      }
+    });
+
+    // Su mobile, nascondi la tastiera quando si preme "Cerca" o "Invio"
+    if (isMobile) {
+      searchInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === 'Search') {
+          e.target.blur();
+        }
+      });
+    }
+    
+    document.getElementById('clear-search-button').addEventListener('click', cancellaCerca);
+    document.getElementById('bookmark-close-button').addEventListener('click', nascondiPopupInfo);
+    document.getElementById('info-icon-header').addEventListener('click', mostraPopupInfo);
+    document.getElementById('tree-close-button').addEventListener('click', nascondiAlbero);
+    document.getElementById('tree-icon').addEventListener('click', mostraAlbero);
+    document.getElementById('tree-copy-button').addEventListener('click', copiaAlbero);
+    document.getElementById('datario-icon').addEventListener('click', toggleDatario);
+    document.getElementById('calendar-icon').addEventListener('click', mostraCalendario);
+    document.getElementById('calendar-close-button').addEventListener('click', nascondiCalendario);
+    document.getElementById('calendar-share-button').addEventListener('click', condividiCalendario);
+    
+    console.log('App inizializzata per:', isMobile ? 'Mobile' : 'Desktop');
+    
+  } catch (error) {
+    console.error("Errore inizializzazione:", error);
+  }
+}
+
+// Avvia l'applicazione quando il DOM è pronto
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', inizializza);
+} else {
+  inizializza();
+}
+</script>
+
+</body>
+</html>
