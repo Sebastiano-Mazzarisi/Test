@@ -28,6 +28,12 @@
   <style>
     * {
       box-sizing: border-box;
+      text-decoration: none;
+    }
+
+    button, span, div {
+      text-decoration: none !important;
+      outline: none !important;
     }
 
     body {
@@ -87,6 +93,8 @@
       box-shadow: 4px 4px 12px rgba(0,0,0,0.3);
       padding: 20px;
       box-sizing: border-box;
+      position: relative;
+      overflow: visible;
     }
 
     #title-row {
@@ -115,6 +123,8 @@
         display: flex;
         flex-direction: column;
         gap: 15px;
+        position: relative;
+        overflow: visible;
     }
 
 
@@ -124,35 +134,42 @@
     display: flex;
     flex-wrap: nowrap;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
     width: 100%;
     overflow-x: auto;
-    overflow-y: hidden;   /* aggiunto */
+    overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     max-width: 100%;
     box-sizing: border-box;
-    padding-right: 2px;
-    /* PROVA ANCHE overflow: hidden; SE NON RISOLVE  */
+    padding: 0;
 }
-
 
 #view-toggle-container .action-button {
     flex: 1 1 0;
-    min-width: 0;
-    max-width: 120px;   /* LIMITA LA LARGHEZZA MASSIMA DI OGNI BOTTONE */
-    padding: 8px 0;     /* PIÙ STRETTO */
+    min-width: 45px;
+    max-width: 55px;
+    width: 50px;
+    padding: 10px 8px;
     font-size: clamp(0.95em, 3.5vw, 1.1em);
     text-align: center;
     box-sizing: border-box;
+    position: relative;
 }
 
 
 
 
 @media (max-width: 480px) {
+    #view-toggle-container {
+        gap: 8px;
+    }
+    
     #view-toggle-container .action-button {
         font-size: 1em;
-        padding: 10px 0;
+        padding: 10px 6px;
+        min-width: 40px;
+        max-width: 50px;
+        width: 45px;
     }
 }
 
@@ -190,13 +207,27 @@
       min-height: 45px;
       user-select: none;
       -webkit-user-select: none;
+      text-decoration: none;
+      position: relative;
+      overflow: visible;
+    }
+    
+    .action-button::before {
+      display: none;
     }
     
 .action-button:hover, .action-button:active {
   color: #000;
   border-color: #444;
   background-color: #FFD700;
-  transform: scale(1.01); /* RIDOTTO AL MASSIMO */
+  transform: scale(1.01);
+  text-decoration: none;
+  outline: none;
+}
+
+.action-button:focus {
+  outline: none;
+  text-decoration: none;
 }
 
 
@@ -211,22 +242,24 @@
         position: absolute;
         bottom: 100%;
         left: 50%;
-        transform: translateX(-50%) translateY(-5px);
+        transform: translateX(-50%) translateY(-10px);
         white-space: nowrap;
         background-color: rgba(0, 0, 0, 0.8);
         color: white;
-        padding: 8px 12px;
-        border-radius: 6px;
-        font-size: 0.9em;
+        padding: 6px 10px;
+        border-radius: 4px;
+        font-size: 0.8em;
         z-index: 10001;
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+        visibility: hidden;
       }
 
       .action-button:hover::after {
         opacity: 1;
-        transform: translateX(-50%) translateY(0);
+        visibility: visible;
+        transform: translateX(-50%) translateY(-5px);
       }
     }
 
@@ -940,7 +973,6 @@
   <div id="header-container">
     <div id="title-row">
       <h1 id="titolo">Prossimi eventi</h1>
-      <span class="action-button" id="info-icon-header" data-tooltip="Informazioni">Info</span>
     </div>
 
     <div class="pulsanti-data">
@@ -950,9 +982,12 @@
     
     <div id="main-controls-wrapper">
       <div id="view-toggle-container">
-          <span class="action-button" id="tree-icon" data-tooltip="Albero genealogico">Albero</span>
-          <span class="action-button" id="datario-icon" data-tooltip="Modalità datario">Datario</span>
-          <span class="action-button" id="calendar-icon" data-tooltip="Calendario stampabile">Calendario</span>
+          <span class="action-button" id="tree-icon" data-tooltip="Albero genealogico">A</span>
+          <span class="action-button" id="datario-icon" data-tooltip="Modalità datario">D</span>
+          <span class="action-button" id="calendar-icon" data-tooltip="Calendario stampabile">C</span>
+          <span class="action-button" id="statistics-icon" data-tooltip="Statistiche">S</span>
+          <span class="action-button" id="info-icon-header" data-tooltip="Informazioni">i</span>
+          <span class="action-button" id="exit-icon" data-tooltip="Esci">E</span>
       </div>
       <div id="search-container">
           <div id="search-input-wrapper">
@@ -975,7 +1010,7 @@
     <div class="popup-content">
       <div class="popup-header">
         <h2>Istruzioni</h2>
-        <span class="action-button" id="bookmark-close-button" data-tooltip="Chiudi finestra">Esci</span>
+        <span class="action-button" id="bookmark-close-button" data-tooltip="Chiudi finestra">E</span>
       </div>
       <div style="overflow-y: auto; -webkit-overflow-scrolling: touch;">
         <p>Per un'esperienza ottimale, aggiungi questa pagina alla schermata Home del tuo dispositivo.</p>
@@ -990,7 +1025,7 @@
       <div class="popup-header">
         <span class="action-button" id="calendar-share-button" data-tooltip="Condividi/Stampa PDF">Condividi</span>
         <h2>Calendario</h2>
-        <span class="action-button" id="calendar-close-button" data-tooltip="Chiudi finestra">Esci</span>
+        <span class="action-button" id="calendar-close-button" data-tooltip="Chiudi finestra">E</span>
       </div>
       <div id="calendar-preview">
         <div class="calendar-year-title">2025</div>
@@ -1005,7 +1040,7 @@
       <div class="popup-header">
         <span class="action-button" id="tree-copy-button" data-tooltip="Copia negli appunti">Copia</span>
         <h2>Albero</h2>
-        <span class="action-button" id="tree-close-button" data-tooltip="Chiudi finestra">Esci</span>
+        <span class="action-button" id="tree-close-button" data-tooltip="Chiudi finestra">E</span>
       </div>
       <pre id="treeContent">Caricamento albero...</pre>
     </div>
@@ -1448,19 +1483,25 @@ function creaMeseDatario(mese, anno, eventi, termineRicerca = '', prossimiGiorni
   };
   
   if (tipologiaMese === 'corrente') {
-    const eventiPassatiEOggi = eventiMese.filter(e => e.giorno <= giornoCorrente);
+    const eventiPassati = eventiMese.filter(e => e.giorno < giornoCorrente);
+    const eventiDiOggi = eventiMese.filter(e => e.giorno === giornoCorrente);
     const eventiFuturi = eventiMese.filter(e => e.giorno > giornoCorrente);
-    
-    eventiPassatiEOggi.forEach(evento => {
-      contenuto += renderEvento(evento);
+
+    eventiPassati.forEach(evento => {
+        contenuto += renderEvento(evento);
+    });
+
+    // Aggiungi il separatore solo se ci sono eventi passati E eventi futuri/odierni
+    if (eventiPassati.length > 0 && (eventiDiOggi.length > 0 || eventiFuturi.length > 0)) {
+        contenuto += `<div class="separatore-giorni" data-giorno="${giornoCorrente}"></div>`;
+    }
+
+    eventiDiOggi.forEach(evento => {
+        contenuto += renderEvento(evento);
     });
     
-    if (eventiFuturi.length > 0 && eventiPassatiEOggi.length > 0) {
-      contenuto += `<div class="separatore-giorni" data-giorno="${giornoCorrente}"></div>`;
-    }
-    
     eventiFuturi.forEach(evento => {
-      contenuto += renderEvento(evento);
+        contenuto += renderEvento(evento);
     });
   } else {
     eventiMese.forEach(evento => {
@@ -1472,13 +1513,9 @@ function creaMeseDatario(mese, anno, eventi, termineRicerca = '', prossimiGiorni
   let classiContainer = (numeroEventi === 0) ? ' vuoto' : '';
   classiContainer += (tipologiaMese === 'passato') ? ' passato' : (tipologiaMese === 'corrente' ? ' corrente' : '');
 
-  const iconaFreccia = (mese === 0) ? '⬇️' : '⬆️';
-  const frecciaNavigazione = `<span class="mese-header-arrow" onclick="scrollMese(${mese})">${iconaFreccia}</span>`;
-
   return `
     <div class="mese-container${classiContainer}" id="mese-container-${mese}">
       <div class="mese-header">
-        ${frecciaNavigazione}
         <div class="mese-nome">${nomiMesi[mese]} ${anno}</div>
         <div class="mese-counter">${numeroEventi}</div>
       </div>
@@ -1497,7 +1534,7 @@ function mostraDatario() {
   const datarioContainer = document.getElementById('datario-container');
   const datarioIcon = document.getElementById('datario-icon');
   
-  datarioIcon.textContent = 'Elenco';
+  datarioIcon.textContent = 'E';
 
   const eventiOrdinati = ordinaEventi(tuttiGliEventi);
   let prossimiGiorniMancanti = -1;
@@ -1578,7 +1615,7 @@ function mostraElenco() {
   document.getElementById('eventi-lista').style.display = 'flex';
   modalitaDatario = false;
   
-  document.getElementById('datario-icon').textContent = 'Datario';
+  document.getElementById('datario-icon').textContent = 'D';
   
   mostraEventi(tuttiGliEventi, document.getElementById('searchInput').value);
 }
@@ -1648,40 +1685,38 @@ function mostraEventi(eventi, termine = '') {
   const primoEventoProssimo = eventiOrdinati.find(e => e.giorni > 0);
   const prossimiGiorni = primoEventoProssimo ? primoEventoProssimo.giorni : -1;
 
-  const eventiPerAnno = {};
+  let ultimoGiornoMostrato = null;
+  let ultimoMeseMostrato = null;
+  let oggiMostrato = false;
+  
   eventiFiltrati.forEach(evento => {
-    const anno = evento.dataEvento.getFullYear();
-    if (!eventiPerAnno[anno]) {
-      eventiPerAnno[anno] = [];
-    }
-    eventiPerAnno[anno].push(evento);
-  });
-  
-  const anniOrdinati = Object.keys(eventiPerAnno).sort();
-  
-  anniOrdinati.forEach((anno) => {
-    const eventiDellAnno = eventiPerAnno[anno];
-    const primoEventoDellAnno = eventiDellAnno[0];
-    const dataPrimoEvento = primoEventoDellAnno.dataEvento;
-    let dataFormattata;
-
-    const giorni = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
-    const giornoSettimana = giorni[dataPrimoEvento.getDay()];
-    const dataSemplice = `${String(dataPrimoEvento.getDate()).padStart(2, '0')}/${String(dataPrimoEvento.getMonth() + 1).padStart(2, '0')}/${dataPrimoEvento.getFullYear()}`;
-
-    if (primoEventoDellAnno.giorni === 0) {
-        dataFormattata = `Oggi ${giornoSettimana} ${dataSemplice}`;
-    } else {
-        dataFormattata = `${giornoSettimana} ${dataSemplice}`;
-    }
-    
-    const barra = creaBarraAnno(dataFormattata);
-    lista.appendChild(barra);
-    
-    eventiDellAnno.forEach(evento => {
+      const giornoCorrente = evento.dataEvento.toDateString(); // Es: "Fri Jun 27 2025"
+      const meseCorrente = evento.dataEvento.getMonth();
+      
+      // Mostra barra "Oggi" solo per il primo evento di oggi
+      if (evento.giorni === 0 && !oggiMostrato) {
+          const mesi = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
+          const giorniNomi = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
+          const giornoSettimana = giorniNomi[evento.dataEvento.getDay()];
+          const dataFormattata = `Oggi: ${giornoSettimana} ${evento.dataEvento.getDate()} ${mesi[evento.dataEvento.getMonth()]}`;
+          
+          const barra = creaBarraAnno(dataFormattata);
+          lista.appendChild(barra);
+          oggiMostrato = true;
+      }
+      // Mostra barra per inizio nuovo mese (solo se non è oggi)
+      else if (meseCorrente !== ultimoMeseMostrato && evento.giorni > 0) {
+          const mesi = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
+          const dataFormattata = `Inizio ${mesi[meseCorrente]}`;
+          
+          const barra = creaBarraAnno(dataFormattata);
+          lista.appendChild(barra);
+          ultimoMeseMostrato = meseCorrente;
+      }
+      
+      // Aggiungi l'elemento li dell'evento
       const li = creaElementoEvento(evento, prossimiGiorni);
       lista.appendChild(li);
-    });
   });
 }
 
@@ -1956,7 +1991,7 @@ function condividiCalendario() {
         const spazioColonna = 2.5;
         const spazioRiga = 5;
         const colWidth = (larghezzaPagina - margineSinistra - margineDestra - (colonne - 1) * spazioColonna) / colonne;
-const rowHeight = ((altezzaPagina - margineSuperiore - margineInferiore - (righe - 1) * spazioRiga) / righe) - 5;
+        const rowHeight = ((altezzaPagina - margineSuperiore - margineInferiore - (righe - 1) * spazioRiga) / righe) - 5;
         const fasciaMeseAltezza = 8; // fascia per il mese
 
         const nomiMesi = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
@@ -1997,33 +2032,32 @@ const rowHeight = ((altezzaPagina - margineSuperiore - margineInferiore - (righe
             const x = margineSinistra + col * (colWidth + spazioColonna);
             const y = margineSuperiore + row * (rowHeight + spazioRiga);
 
-// 1. Bordo della cella grande del mese (prima di tutto)
-pdf.setDrawColor(0,0,0);
-pdf.setLineWidth(0.1); // puoi aumentare lo spessore se vuoi
-pdf.rect(x, y, colWidth, rowHeight, 'D'); // 'D' = solo bordo, nessun riempimento
+            // Bordo della cella grande del mese
+            pdf.setDrawColor(0,0,0);
+            pdf.setLineWidth(0.1);
+            pdf.rect(x, y, colWidth, rowHeight, 'D');
 
-// 2. Fascia mese colorata
-pdf.setFillColor(240, 230, 140);
-pdf.rect(x, y, colWidth, fasciaMeseAltezza, 'F');
+            // Fascia mese colorata
+            pdf.setFillColor(240, 230, 140);
+            pdf.rect(x, y, colWidth, fasciaMeseAltezza, 'F');
 
-// 3. Cornice fascia mese (puoi anche toglierla se vuoi solo il bordo esterno)
-pdf.setDrawColor(0,0,0);
-pdf.rect(x, y, colWidth, fasciaMeseAltezza, 'D');
+            // Cornice fascia mese
+            pdf.setDrawColor(0,0,0);
+            pdf.rect(x, y, colWidth, fasciaMeseAltezza, 'D');
 
-
-            // Nome del mese: grassetto, più grande, centrato e nero
+            // Nome del mese
             pdf.setFont('helvetica', 'bold');
-            pdf.setFontSize(13); // bello visibile
+            pdf.setFontSize(13);
             pdf.setTextColor(0,0,0);
             pdf.text(nomiMesi[mese], x + colWidth/2, y + fasciaMeseAltezza/2, { align: 'center', baseline: 'middle' });
 
-            // Eventi: font piccolo, nero, subito sotto la fascia
+            // Eventi
             pdf.setFont('helvetica', 'normal');
             pdf.setFontSize(8.5);
 
             let eventi = eventiSplittati[mese];
             let maxRighe = maxRighePerRiga[row];
-            let startY = y + fasciaMeseAltezza + 1.3; // subito sotto la fascia
+            let startY = y + fasciaMeseAltezza + 1.3;
             for (let i = 0; i < maxRighe; i++) {
                 if (eventi[i]) {
                     pdf.text(eventi[i], x + 1, startY + i * 5.0, { baseline: 'top' });
@@ -2058,11 +2092,6 @@ pdf.rect(x, y, colWidth, fasciaMeseAltezza, 'D');
     }
 }
 
-
-
-
-
-
 function apriPDFPerStampa(pdfBlob, fileName) {
   const url = URL.createObjectURL(pdfBlob);
   const newWindow = window.open(url, '_blank');
@@ -2081,10 +2110,6 @@ function scaricaPDF(pdfBlob, fileName) {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 }
-
-
-
-
 
 // ===== GESTIONE EVENTI TOUCH E MOBILE =====
 function gestisciTouchEvents() {
@@ -2177,12 +2202,23 @@ function inizializza() {
     document.getElementById('bookmark-close-button').addEventListener('click', nascondiPopupInfo);
     document.getElementById('info-icon-header').addEventListener('click', mostraPopupInfo);
     document.getElementById('tree-close-button').addEventListener('click', nascondiAlbero);
-    document.getElementById('tree-icon').addEventListener('click', mostraAlbero);
+    // *** MODIFICA PRINCIPALE: Il pulsante Albero ora apre GitHub ***
+    document.getElementById('tree-icon').addEventListener('click', function() {
+      window.open('https://sebastiano-mazzarisi.github.io/Test/Albero.html', '_blank');
+    });
     document.getElementById('tree-copy-button').addEventListener('click', copiaAlbero);
     document.getElementById('datario-icon').addEventListener('click', toggleDatario);
     document.getElementById('calendar-icon').addEventListener('click', mostraCalendario);
     document.getElementById('calendar-close-button').addEventListener('click', nascondiCalendario);
     document.getElementById('calendar-share-button').addEventListener('click', condividiCalendario);
+    document.getElementById('statistics-icon').addEventListener('click', function() {
+      window.open('https://sebastiano-mazzarisi.github.io/Test/Statistiche.html', '_blank');
+    });
+    document.getElementById('exit-icon').addEventListener('click', function() {
+      if (confirm('Sei sicuro di voler uscire?')) {
+        window.close();
+      }
+    });
     
     console.log('App inizializzata per:', isMobile ? 'Mobile' : 'Desktop');
     
