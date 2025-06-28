@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Famiglia Pricci</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <!-- Chosen Palette: Warm Neutrals & Subtle Accents -->
+    <!-- Application Structure Plan: Ho optato per una struttura a dashboard con navigazione laterale. Questa scelta è motivata dalla natura multidimensionale dei dati (demografia, generazioni, matrimoni, nascite, cultura). Una dashboard consente di presentare i dati chiave in modo sintetico e visivo nella schermata principale ("Panoramica"), mentre le sezioni dedicate (raggiungibili tramite la navigazione) permettono un'analisi più approfondita e mirata. L'utente ha così una visione d'insieme immediata e la possibilità di esplorare i dettagli secondo i propri interessi. Le interazioni (hover sui grafici, selezione delle generazioni) sono pensate per rendere l'esplorazione dinamica e intuitiva, trasformando un'analisi statistica in una narrazione interattiva. -->
+    <!-- Visualization & Content Choices: 
+        - Panoramica (Goal: Informare): KPI (Key Performance Indicators) per dare un colpo d'occhio immediato sui numeri chiave (totale membri, età media, etc.). Grafico a Donut (Chart.js) per la distribuzione di genere e per le generazioni, ideali per mostrare proporzioni. Grafico a barre (Chart.js) per il calendario degli onomastici per una visualizzazione chiara e diretta.
+        - Generazioni (Goal: Comparare e Analizzare Cambiamenti): Grafico a barre (Chart.js) per confrontare la numerosità delle generazioni. Grafico a barre raggruppate (Chart.js) per l'età media alla genitorialità, per un confronto diretto.
+        - Matrimoni (Goal: Analizzare Relazioni): Grafico a barre raggruppate (Chart.js) per confrontare l'età al matrimonio di uomini e donne. Tabella interattiva (HTML/JS) per i dettagli delle singole unioni.
+        - Nascite (Goal: Analizzare Pattern): Grafico a barre (Chart.js) per la stagionalità delle nascite. Diagramma a barre (Chart.js) per il numero di figli per coppia, mostrando il cambiamento del tasso di fertilità.
+        - Dati (Goal: Organizzare): Tabella completa e ricercabile (HTML/JS) per dare accesso granulare a tutti i dati grezzi.
+        Tutte le visualizzazioni sono realizzate con Chart.js su Canvas per garantire interattività e responsività, evitando SVG/Mermaid. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDF9E4; 
+            color: #402E32;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Lora:ital,wght@0,400;0,700;1,400&display=swap');
+        h1, h2, h3 {
+            font-family: 'Lora', serif;
+            color: #9A3B3B;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        .nav-link.active {
+            background-color: #F8EAD8;
+            border-left-color: #9A3B3B;
+            color: #9A3B3B;
+            font-weight: 600;
+        }
+        .nav-link:not(.exit-link):hover {
+            background-color: #F8EAD8;
+            border-left-color: #C08261;
+        }
+        .kpi-card {
+            background-color: #F8EAD8;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .kpi-card:hover {
+            transform: translateY(-5px);
+        }
+        .chart-container {
+            position: relative;
+            background-color: #F8EAD8;
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            height: 350px;
+            max-height: 40vh;
+            width: 100%;
+            margin: auto;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+                max-height: 50vh;
+            }
+        }
+    </style>
+</head>
+<body class="flex min-h-screen">
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="bg-[#F6E9B2] w-64 p-4 flex flex-col fixed top-0 left-0 h-full transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out z-40">
+        <div>
+            <h1 class="text-2xl font-bold text-center mb-6">Famiglia Pricci</h1>
+            <nav>
+                <a href="#panoramica" class="nav-link block p-3 rounded-lg active">📊 Panoramica</a>
+                <a href="#generazioni" class="nav-link block p-3 rounded-lg">👨‍👩‍👧‍👦 Generazioni</a>
+                <a href="#matrimoni" class="nav-link block p-3 rounded-lg">⚭ Matrimoni</a>
+                <a href="#nascite" class="nav-link block p-3 rounded-lg">👶 Nascite</a>
+                <a href="#dati" class="nav-link block p-3 rounded-lg">📋 Dati Completi</a>
+            </nav>
+        </div>
+        <div class="mt-auto">
+            <a href="#" id="exit-btn" class="nav-link exit-link flex items-center p-3 rounded-lg text-red-700 hover:bg-red-100 hover:text-red-800 hover:border-l-red-700">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                <span>Esci</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Mobile Header -->
+    <header class="md:hidden bg-[#F6E9B2] p-4 fixed top-0 left-0 w-full z-30 flex justify-between items-center shadow-md">
+        <h1 class="text-xl font-bold">Famiglia Pricci</h1>
+        <button id="menu-btn" class="text-2xl p-2 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#9A3B3B] rounded-md">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 md:ml-64 p-4 md:p-8 pt-24 md:pt-8 bg-[#FDF9E4]">
+
+        <!-- Panoramica Section -->
+        <section id="panoramica" class="space-y-8">
+            <header>
+                <h2 class="text-3xl font-bold">Panoramica Demografica</h2>
+                <p class="mt-2 text-lg text-gray-600">Una visione d'insieme dei dati chiave che raccontano la storia della famiglia, partendo dai progenitori Luigi e Teresa.</p>
+            </header>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="kpi-card">
+                    <div class="text-4xl font-bold" id="total-members">33</div>
+                    <div class="text-sm mt-2">Membri Totali</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="text-4xl font-bold" id="avg-age">48.9</div>
+                    <div class="text-sm mt-2">Età Media (Anni)</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="text-4xl font-bold" id="time-span">86</div>
+                    <div class="text-sm mt-2">Arco Temporale (Anni)</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="text-4xl font-bold" id="median-birth-year">1974</div>
+                    <div class="text-sm mt-2">Anno Nascita Mediano</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="chart-container">
+                    <h3 class="text-xl font-bold text-center mb-2">Distribuzione per Genere</h3>
+                    <canvas id="gender-chart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 class="text-xl font-bold text-center mb-2">Composizione Generazionale</h3>
+                    <canvas id="generation-pie-chart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-container" style="max-width: 900px; height: 450px;">
+                 <h3 class="text-xl font-bold text-center mb-4">Calendario Sociale: Gli Onomastici</h3>
+                 <canvas id="onomastici-chart"></canvas>
+            </div>
+        </section>
+
+        <!-- Generazioni Section -->
+        <section id="generazioni" class="space-y-8 hidden">
+            <header>
+                <h2 class="text-3xl font-bold">Analisi Generazionale</h2>
+                <p class="mt-2 text-lg text-gray-600">Un confronto tra le generazioni per osservare l'evoluzione della famiglia, dalla sua espansione alla diversificazione.</p>
+            </header>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="chart-container">
+                    <h3 class="text-xl font-bold text-center mb-2">Numerosità delle Generazioni</h3>
+                    <canvas id="generation-bar-chart"></canvas>
+                </div>
+                 <div class="chart-container">
+                    <h3 class="text-xl font-bold text-center mb-2">Età Media alla Genitorialità</h3>
+                    <canvas id="parenting-age-chart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Matrimoni Section -->
+        <section id="matrimoni" class="space-y-8 hidden">
+             <header>
+                <h2 class="text-3xl font-bold">Statistiche Matrimoniali</h2>
+                <p class="mt-2 text-lg text-gray-600">Un'analisi delle unioni che hanno formato i nuclei familiari, esplorando le tempistiche e le dinamiche di coppia.</p>
+            </header>
+            <div class="chart-container mx-auto" style="max-width: 800px;">
+                <h3 class="text-xl font-bold text-center mb-2">Età Media al Matrimonio: Uomini vs Donne</h3>
+                <canvas id="marriage-age-chart"></canvas>
+            </div>
+            <div class="bg-[#F8EAD8] p-4 rounded-lg shadow-md">
+                 <h3 class="text-xl font-bold mb-4">Dettaglio delle Unioni</h3>
+                 <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="border-b-2 border-[#C08261]">
+                                <th class="p-2">Coppia</th>
+                                <th class="p-2">Data Matrimonio</th>
+                                <th class="p-2">Età Marito</th>
+                                <th class="p-2">Età Moglie</th>
+                                <th class="p-2">Diff. Età</th>
+                            </tr>
+                        </thead>
+                        <tbody id="marriage-table"></tbody>
+                    </table>
+                 </div>
+            </div>
+        </section>
+
+        <!-- Nascite Section -->
+        <section id="nascite" class="space-y-8 hidden">
+            <header>
+                <h2 class="text-3xl font-bold">Natalità e Fertilità</h2>
+                <p class="mt-2 text-lg text-gray-600">L'evoluzione dei modelli di procreazione, che rivela i cambiamenti più profondi nella storia della famiglia.</p>
+            </header>
+             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="chart-container">
+                    <h3 class="text-xl font-bold text-center mb-2">Distribuzione Mensile delle Nascite</h3>
+                    <canvas id="birth-month-chart"></canvas>
+                </div>
+                 <div class="chart-container">
+                    <h3 class="text-xl font-bold text-center mb-2">Numero di Figli per Coppia</h3>
+                    <canvas id="children-per-couple-chart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dati Completi Section -->
+        <section id="dati" class="space-y-8 hidden">
+            <header>
+                <h2 class="text-3xl font-bold">Esplora i Dati Completi</h2>
+                <p class="mt-2 text-lg text-gray-600">Cerca, filtra e ordina i dati anagrafici di tutti i membri della famiglia per un'analisi dettagliata.</p>
+            </header>
+            <div class="bg-[#F8EAD8] p-4 rounded-lg shadow-md">
+                <input type="text" id="search-input" class="w-full p-2 mb-4 border border-gray-300 rounded-lg" placeholder="Cerca per nome, cognome o anno di nascita...">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="border-b-2 border-[#C08261]">
+                            <tr>
+                                <th class="p-2 cursor-pointer" onclick="sortTable(0)">Cognome ↓</th>
+                                <th class="p-2 cursor-pointer" onclick="sortTable(1)">Nome ↓</th>
+                                <th class="p-2 cursor-pointer" onclick="sortTable(2)">Sesso ↓</th>
+                                <th class="p-2 cursor-pointer" onclick="sortTable(3)">Data Nascita ↓</th>
+                                <th class="p-2 cursor-pointer" onclick="sortTable(4)">Generazione ↓</th>
+                                <th class="p-2 cursor-pointer" onclick="sortTable(5)">Età ↓</th>
+                            </tr>
+                        </thead>
+                        <tbody id="full-data-table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const rawFamilyData = [
+                { id: 3, cognome: "Pricci", nome: "Luigi", sesso: "M", nascita: "1933-11-16", morte: null, gen: "G1" },
+                { id: 4, cognome: "Grilletti", nome: "Teresa", sesso: "F", nascita: "1937-03-05", morte: null, gen: "G1" },
+                { id: 5, cognome: "Lorusso", nome: "Onofrio", sesso: "M", nascita: "1951-08-05", morte: null, gen: "G2" },
+                { id: 6, cognome: "Chiarappa", nome: "Saverio", sesso: "M", nascita: "1951-11-26", morte: null, gen: "G2" },
+                { id: 7, cognome: "Pricci", nome: "Angela", sesso: "F", nascita: "1957-01-13", morte: null, gen: "G2" },
+                { id: 8, cognome: "Lefemine", nome: "Domenico", sesso: "M", nascita: "1957-02-06", morte: null, gen: "G2" },
+                { id: 9, cognome: "Mazzarisi", nome: "Sebastiano", sesso: "M", nascita: "1957-05-07", morte: null, gen: "G2" },
+                { id: 10, cognome: "Pricci", nome: "Maria Antonietta", sesso: "F", nascita: "1958-05-21", morte: null, gen: "G2" },
+                { id: 11, cognome: "Pricci", nome: "Marica", sesso: "F", nascita: "1961-04-12", morte: null, gen: "G2" },
+                { id: 12, cognome: "Pricci", nome: "Vanna", sesso: "F", nascita: "1963-09-11", morte: null, gen: "G2" },
+                { id: 13, cognome: "Pricci", nome: "Giovanni", sesso: "M", nascita: "1964-10-24", morte: null, gen: "G2" },
+                { id: 14, cognome: "Pricci", nome: "Giuseppe", sesso: "M", nascita: "1968-08-12", morte: null, gen: "G2" },
+                { id: 15, cognome: "Trivisani", nome: "Anna", sesso: "F", nascita: "1969-07-12", morte: null, gen: "G2" },
+                { id: 16, cognome: "Bianco", nome: "Rosa", sesso: "F", nascita: "1971-09-02", morte: null, gen: "G2" },
+                { id: 17, cognome: "Pricci", nome: "Tiziana", sesso: "F", nascita: "1972-06-27", morte: null, gen: "G2" },
+                { id: 18, cognome: "Dalena", nome: "Riccardo", sesso: "M", nascita: "1973-04-11", morte: null, gen: "G2" },
+                { id: 19, cognome: "Rotondi", nome: "Gianni", sesso: "M", nascita: "1974-03-08", morte: null, gen: "G3" },
+                { id: 20, cognome: "Lepore", nome: "Genny", sesso: "F", nascita: "1975-07-04", morte: null, gen: "G3" },
+                { id: 21, cognome: "Lorusso", nome: "Benny", sesso: "M", nascita: "1975-11-17", morte: null, gen: "G3" },
+                { id: 22, cognome: "Lorusso", nome: "Cinzia", sesso: "F", nascita: "1980-04-06", morte: null, gen: "G3" },
+                { id: 23, cognome: "Mazzarisi", nome: "Maria Grazia", sesso: "F", nascita: "1989-01-21", morte: null, gen: "G3" },
+                { id: 24, cognome: "Mazzarisi", nome: "Onofrio", sesso: "M", nascita: "1992-06-05", morte: null, gen: "G3" },
+                { id: 25, cognome: "Mazzarisi", nome: "Teresa", sesso: "F", nascita: "1994-04-01", morte: null, gen: "G3" },
+                { id: 26, cognome: "Lefemine", nome: "Flavia", sesso: "F", nascita: "1996-11-16", morte: null, gen: "G3" },
+                { id: 27, cognome: "Chiarappa", nome: "Martino", sesso: "M", nascita: "1997-05-24", morte: null, gen: "G3" },
+                { id: 28, cognome: "Lefemine", nome: "Francesco", sesso: "M", nascita: "2000-03-20", morte: null, gen: "G3" },
+                { id: 29, cognome: "Chiarappa", nome: "Cristiano", sesso: "M", nascita: "2001-06-20", morte: null, gen: "G3" },
+                { id: 30, cognome: "Pricci", nome: "Gilda", sesso: "F", nascita: "2004-06-29", morte: null, gen: "G3" },
+                { id: 31, cognome: "Pricci", nome: "Asia", sesso: "F", nascita: "2006-06-07", morte: null, gen: "G3" },
+                { id: 32, cognome: "Lorusso", nome: "Alessandro", sesso: "M", nascita: "2010-07-17", morte: null, gen: "G4" },
+                { id: 33, cognome: "Lorusso", nome: "Alice", sesso: "F", nascita: "2013-07-20", morte: null, gen: "G4" },
+                { id: 34, cognome: "Lorusso", nome: "Nina", sesso: "F", nascita: "2015-11-29", morte: null, gen: "G4" },
+                { id: 35, cognome: "Rotondi", nome: "Nicoletta", sesso: "F", nascita: "2019-02-12", morte: null, gen: "G4" }
+            ];
+
+            const familyData = JSON.parse(JSON.stringify(rawFamilyData));
+
+            const marriageData = [
+                { marito: "Luigi Pricci", moglie: "Teresa Grilletti", data: "1956-12-03" },
+                { marito: "Onofrio Lorusso", moglie: "Angela Pricci", data: "1975-08-09" },
+                { marito: "Sebastiano Mazzarisi", moglie: "Marica Pricci", data: "1987-07-04" },
+                { marito: "Domenico Lefemine", moglie: "Vanna Pricci", data: "1991-08-28" },
+                { marito: "Giuseppe Pricci", moglie: "Anna Trivisani", data: "1997-07-09" },
+                { marito: "Saverio Chiarappa", moglie: "Maria Antonietta Pricci", data: "2000-09-09" },
+                { marito: "Riccardo Dalena", moglie: "Tiziana Pricci", data: "2002-10-04" },
+                { marito: "Giovanni Pricci", moglie: "Rosa Bianco", data: "2004-12-29" },
+                { marito: "Benny Lorusso", moglie: "Genny Lepore", data: "2008-07-26" },
+                { marito: "Gianni Rotondi", moglie: "Cinzia Lorusso", data: "2014-09-13" }
+            ];
+
+            const onomasticiData = {
+                "Gennaio": { "20": ["Sebastiano Mazzarisi"] },
+                "Febbraio": { "13": ["Gilda Pricci"], "19": ["Asia Pricci"] },
+                "Marzo": { "3": ["Tiziana Pricci"], "19": ["Giuseppe Pricci"], "21": ["Benny Lorusso"] },
+                "Aprile": { "3": ["Riccardo Dalena"], "7": ["Cristiano Chiarappa"], "11": ["Genny Lepore"] },
+                "Maggio": { "7": ["Flavia Lefemine"] },
+                "Giugno": { "12": ["Onofrio Lorusso", "Onofrio Mazzarisi"], "13": ["Maria Antonietta Pricci", "Alice Lorusso", "Cinzia Lorusso"], "21": ["Luigi Pricci"], "24": ["Giovanni Pricci", "Vanna Pricci", "Gianni Rotondi"] },
+                "Luglio": { "26": ["Anna Trivisani"] },
+                "Agosto": { "2": ["Angela Pricci"], "4": ["Domenico Lefemine"], "23": ["Rosa Bianco"], "26": ["Alessandro Lorusso"] },
+                "Settembre": { "12": ["Marica Pricci", "Maria Grazia Mazzarisi"] },
+                "Ottobre": { "4": ["Francesco Lefemine"], "15": ["Teresa Grilletti", "Teresa Mazzarisi"] },
+                "Novembre": { "11": ["Martino Chiarappa"] },
+                "Dicembre": { "3": ["Saverio Chiarappa"], "6": ["Nicoletta Rotondi"], "15": ["Nina Lorusso"] }
+            };
+
+            const childrenData = [
+                { coppia: "Luigi & Teresa", figli: 7, gen: "G1" },
+                { coppia: "Onofrio & Angela", figli: 2, gen: "G2" },
+                { coppia: "Saverio & M.A.", figli: 2, gen: "G2" },
+                { coppia: "Sebastiano & Marica", figli: 3, gen: "G2" },
+                { coppia: "Domenico & Vanna", figli: 2, gen: "G2" },
+                { coppia: "Giuseppe & Anna", figli: 2, gen: "G2" },
+                { coppia: "Giovanni & Rosa", figli: 0, gen: "G2" },
+                { coppia: "Riccardo & Tiziana", figli: 0, gen: "G2" },
+                { coppia: "Benny & Genny", figli: 3, gen: "G3" },
+                { coppia: "Gianni & Cinzia", figli: 1, gen: "G3" }
+            ];
+
+            Chart.register(ChartDataLabels);
+            
+            const getAge = (birthDate, deathDate = null) => {
+                const start = new Date(birthDate);
+                const end = deathDate ? new Date(deathDate) : new Date();
+                let age = end.getFullYear() - start.getFullYear();
+                const m = end.getMonth() - start.getMonth();
+                if (m < 0 || (m === 0 && end.getDate() < start.getDate())) {
+                    age--;
+                }
+                return age;
+            };
+
+            const findPerson = (fullName) => {
+                const parts = fullName.split(' ');
+                const lastName = parts.pop();
+                const firstName = parts.join(' ');
+                return familyData.find(p => p.nome === firstName && p.cognome === lastName);
+            };
+
+            familyData.forEach(p => p.eta = getAge(p.nascita, p.morte));
+            
+            // KPI Cards
+            const totalMembers = familyData.length;
+            const totalAge = familyData.reduce((sum, p) => sum + p.eta, 0);
+            const birthYears = familyData.map(p => new Date(p.nascita).getFullYear()).sort();
+            document.getElementById('total-members').textContent = totalMembers;
+            document.getElementById('avg-age').textContent = (totalAge / totalMembers).toFixed(1);
+            document.getElementById('time-span').textContent = birthYears[birthYears.length - 1] - birthYears[0];
+            document.getElementById('median-birth-year').textContent = birthYears[Math.floor(birthYears.length / 2)];
+
+
+            // Chart Colors
+            const chartColors = {
+                primary: '#9A3B3B',
+                secondary: '#C08261',
+                accent: '#E2C799',
+                background: '#F8EAD8',
+                text: '#402E32'
+            };
+
+            const chartDefaultOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: chartColors.text,
+                            font: { family: "'Inter', sans-serif" }
+                        }
+                    },
+                    datalabels: {
+                        color: chartColors.text,
+                        font: {
+                            weight: 'bold'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: chartColors.text, font: { family: "'Inter', sans-serif" } },
+                        grid: { color: '#E2C79950' }
+                    },
+                    x: {
+                        ticks: { color: chartColors.text, font: { family: "'Inter', sans-serif" } },
+                        grid: { color: '#E2C79950' }
+                    }
+                }
+            };
+            
+            // Gender Chart
+            const maleCount = familyData.filter(p => p.sesso === 'M').length;
+            const femaleCount = familyData.filter(p => p.sesso === 'F').length;
+            new Chart(document.getElementById('gender-chart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Maschi', 'Femmine'],
+                    datasets: [{
+                        label: 'Distribuzione per Genere',
+                        data: [maleCount, femaleCount],
+                        backgroundColor: [chartColors.secondary, chartColors.primary],
+                        borderColor: chartColors.background,
+                        borderWidth: 4
+                    }]
+                },
+                options: { ...chartDefaultOptions, 
+                    scales: {},
+                    plugins: {
+                        ...chartDefaultOptions.plugins,
+                        datalabels: {
+                            color: '#FFFFFF',
+                             formatter: (value, ctx) => {
+                                const sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const percentage = (value * 100 / sum).toFixed(1) + '%';
+                                return percentage;
+                            },
+                            font: { weight: 'bold' }
+                        }
+                    } 
+                }
+            });
+
+            // Generation Pie Chart
+            const genCounts = familyData.reduce((acc, p) => {
+                acc[p.gen] = (acc[p.gen] || 0) + 1;
+                return acc;
+            }, {});
+            new Chart(document.getElementById('generation-pie-chart'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(genCounts).sort(),
+                    datasets: [{
+                        data: Object.keys(genCounts).sort().map(k => genCounts[k]),
+                        backgroundColor: [chartColors.primary, chartColors.secondary, chartColors.accent, '#A94438'],
+                        borderColor: chartColors.background,
+                        borderWidth: 4
+                    }]
+                },
+                options: { ...chartDefaultOptions, 
+                    scales: {},
+                    plugins: {
+                        ...chartDefaultOptions.plugins,
+                        datalabels: {
+                            color: '#FFFFFF',
+                            formatter: (value) => value,
+                            font: { weight: 'bold' }
+                        }
+                    }
+                }
+            });
+            
+            // Onomastici Chart
+            const onomasticiCounts = Object.keys(onomasticiData).map(month => {
+                 return Object.values(onomasticiData[month]).reduce((sum, arr) => sum + arr.length, 0);
+            });
+            new Chart(document.getElementById('onomastici-chart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(onomasticiData),
+                    datasets: [{
+                        label: 'Numero di Onomastici',
+                        data: onomasticiCounts,
+                        backgroundColor: chartColors.secondary
+                    }]
+                },
+                options: {
+                    ...chartDefaultOptions,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                            anchor: 'center',
+                            align: 'center',
+                            color: '#FFFFFF'
+                        }
+                    },
+                    scales: {
+                        y: { ticks: { stepSize: 1 } }
+                    }
+                }
+            });
+
+
+            // Generation Bar Chart
+             new Chart(document.getElementById('generation-bar-chart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(genCounts).sort(),
+                    datasets: [{
+                        label: 'Numero di Membri',
+                        data: Object.keys(genCounts).sort().map(k => genCounts[k]),
+                        backgroundColor: chartColors.secondary
+                    }]
+                },
+                options: {
+                    ...chartDefaultOptions,
+                    plugins: {
+                        ...chartDefaultOptions.plugins,
+                        datalabels: {
+                            anchor: 'center',
+                            align: 'center',
+                            color: '#FFFFFF'
+                        }
+                    }
+                }
+            });
+
+            // Parenting Age Chart
+            new Chart(document.getElementById('parenting-age-chart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Genitori G1', 'Genitori G2', 'Genitori G3'],
+                    datasets: [
+                        {
+                            label: 'Età Media Madri',
+                            data: [26.1, 28.4, 37.7],
+                            backgroundColor: chartColors.primary,
+                        },
+                        {
+                            label: 'Età Media Padri',
+                            data: [30.1, 30.8, 39.5],
+                            backgroundColor: chartColors.secondary,
+                        }
+                    ]
+                },
+                options: {
+                    ...chartDefaultOptions,
+                    plugins: {
+                        ...chartDefaultOptions.plugins,
+                        tooltip: {
+                            callbacks: {
+                                title: (context) => {
+                                    const label = context[0].label.replace('Genitori ', '');
+                                    return `Età media genitori ${label} alla nascita dei figli`
+                                }
+                            }
+                        },
+                        datalabels: {
+                           color: '#FFFFFF',
+                           anchor: 'center',
+                           align: 'center',
+                           formatter: (value) => value.toFixed(1)
+                        }
+                    }
+                }
+            });
+
+            // Marriage Age Chart
+            const marriageAges = marriageData.map(m => {
+                const maritoData = findPerson(m.marito);
+                const moglieData = findPerson(m.moglie);
+
+                if (!maritoData || !moglieData) {
+                    console.warn(`Dati non trovati per il matrimonio: ${m.marito} & ${m.moglie}`);
+                    return null;
+                }
+                return {
+                    maritoAge: getAge(maritoData.nascita, m.data),
+                    moglieAge: getAge(moglieData.nascita, m.data),
+                };
+            }).filter(Boolean);
+
+            const avgMaritoAge = marriageAges.length > 0 ? marriageAges.reduce((s, a) => s + a.maritoAge, 0) / marriageAges.length : 0;
+            const avgMoglieAge = marriageAges.length > 0 ? marriageAges.reduce((s, a) => s + a.moglieAge, 0) / marriageAges.length : 0;
+            
+            new Chart(document.getElementById('marriage-age-chart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Età Media al Matrimonio'],
+                    datasets: [
+                        { label: 'Uomini', data: [avgMaritoAge], backgroundColor: chartColors.secondary },
+                        { label: 'Donne', data: [avgMoglieAge], backgroundColor: chartColors.primary }
+                    ]
+                },
+                options: {
+                    ...chartDefaultOptions,
+                    plugins: {
+                        ...chartDefaultOptions.plugins,
+                        datalabels: {
+                           anchor: 'center',
+                           align: 'center',
+                           color: '#FFFFFF',
+                           formatter: (value) => value.toFixed(1)
+                        }
+                    }
+                }
+            });
+
+            // Marriage Table
+            const marriageTableBody = document.getElementById('marriage-table');
+            marriageData.forEach(m => {
+                const maritoData = findPerson(m.marito);
+                const moglieData = findPerson(m.moglie);
+                
+                if (!maritoData || !moglieData) return;
+
+                const maritoAge = getAge(maritoData.nascita, m.data);
+                const moglieAge = getAge(moglieData.nascita, m.data);
+                const diff = maritoAge - moglieAge;
+
+                const row = document.createElement('tr');
+                row.className = 'border-b border-[#E2C799]';
+                row.innerHTML = `
+                    <td class="p-2">${m.marito} & ${m.moglie}</td>
+                    <td class="p-2">${new Date(m.data).toLocaleDateString('it-IT')}</td>
+                    <td class="p-2">${maritoAge}</td>
+                    <td class="p-2">${moglieAge}</td>
+                    <td class="p-2">${diff > 0 ? '+' : ''}${diff}</td>
+                `;
+                marriageTableBody.appendChild(row);
+            });
+            
+            // Birth Month Chart
+            const birthMonths = familyData.map(p => new Date(p.nascita).getMonth());
+            const monthCounts = Array(12).fill(0);
+            birthMonths.forEach(m => monthCounts[m]++);
+            new Chart(document.getElementById('birth-month-chart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'],
+                    datasets: [{
+                        label: 'Numero di Nascite',
+                        data: monthCounts,
+                        backgroundColor: chartColors.accent,
+                        borderColor: chartColors.secondary,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...chartDefaultOptions,
+                    plugins: {
+                        ...chartDefaultOptions.plugins,
+                        datalabels: {
+                           anchor: 'center',
+                           align: 'center',
+                           color: chartColors.text
+                        }
+                    }
+                }
+            });
+
+            // Children per Couple Chart
+            new Chart(document.getElementById('children-per-couple-chart'), {
+                type: 'bar',
+                data: {
+                    labels: childrenData.map(c => c.coppia),
+                    datasets: [{
+                        label: 'Numero di Figli',
+                        data: childrenData.map(c => c.figli),
+                        backgroundColor: (context) => {
+                            const gen = childrenData[context.dataIndex].gen;
+                            return gen === 'G1' ? chartColors.primary : (gen === 'G2' ? chartColors.secondary : chartColors.accent);
+                        }
+                    }]
+                },
+                options: {
+                    ...chartDefaultOptions,
+                    plugins: {
+                         ...chartDefaultOptions.plugins,
+                         tooltip: {
+                             callbacks: {
+                                 afterLabel: (context) => `Genitori della ${childrenData[context.dataIndex].gen}`
+                             }
+                         },
+                         datalabels: {
+                            anchor: 'center',
+                            align: 'center',
+                            color: '#FFFFFF'
+                         }
+                    },
+                    scales: {
+                        y: { ticks: { stepSize: 1 } },
+                        x: { ticks: {
+                            callback: function(value, index, values) {
+                                const label = this.getLabelForValue(value);
+                                return label.length > 15 ? label.split(' & ') : label;
+                            }
+                        }}
+                    }
+                }
+            });
+
+            // Full Data Table
+            const fullDataTable = document.getElementById('full-data-table');
+            const searchInput = document.getElementById('search-input');
+            let currentSort = { column: 0, direction: 'asc' };
+
+            const populateTable = (data) => {
+                fullDataTable.innerHTML = '';
+                data.forEach(p => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-[#E2C799] hover:bg-[#F6E9B2]';
+                    row.innerHTML = `
+                        <td class="p-2">${p.cognome}</td>
+                        <td class="p-2">${p.nome}</td>
+                        <td class="p-2">${p.sesso}</td>
+                        <td class="p-2">${new Date(p.nascita).toLocaleDateString('it-IT')}</td>
+                        <td class="p-2">${p.gen}</td>
+                        <td class="p-2">${p.eta}</td>
+                    `;
+                    fullDataTable.appendChild(row);
+                });
+            };
+            
+            window.sortTable = (columnIndex) => {
+                const direction = (currentSort.column === columnIndex && currentSort.direction === 'asc') ? 'desc' : 'asc';
+                
+                const headers = [ 'cognome', 'nome', 'sesso', 'nascita', 'gen', 'eta'];
+                const key = headers[columnIndex];
+                
+                const sortedData = [...familyData].sort((a, b) => {
+                    const valA = a[key];
+                    const valB = b[key];
+                    if (valA < valB) return direction === 'asc' ? -1 : 1;
+                    if (valA > valB) return direction === 'asc' ? 1 : -1;
+                    return 0;
+                });
+                
+                currentSort = { column: columnIndex, direction };
+                populateTable(sortedData);
+                 
+                document.querySelectorAll('#dati thead th').forEach((th, i) => {
+                    th.textContent = th.textContent.replace(/[↑↓]/g, '').trim();
+                    if(i === columnIndex) {
+                         th.textContent += ` ${direction === 'asc' ? '↑' : '↓'}`;
+                    } else {
+                        th.textContent += ` ↓`;
+                    }
+                });
+            };
+
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredData = familyData.filter(p => 
+                    p.nome.toLowerCase().includes(searchTerm) ||
+                    p.cognome.toLowerCase().includes(searchTerm) ||
+                    p.nascita.startsWith(searchTerm)
+                );
+                populateTable(filteredData);
+            });
+            
+            // Navigation Logic
+            const sections = document.querySelectorAll('main section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.getElementById('menu-btn');
+
+            const activateLink = (hash) => {
+                navLinks.forEach(link => {
+                    if (link.hash === hash) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            };
+            
+            const showSection = (hash) => {
+                sections.forEach(section => {
+                    if ('#' + section.id === hash) {
+                        section.classList.remove('hidden');
+                    } else {
+                        section.classList.add('hidden');
+                    }
+                });
+                activateLink(hash);
+                window.scrollTo(0, 0);
+            };
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const hash = e.currentTarget.hash;
+                    history.pushState(null, '', hash);
+                    showSection(hash);
+                    if (window.innerWidth < 768) {
+                        sidebar.classList.add('-translate-x-full');
+                    }
+                });
+            });
+
+            menuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+            });
+
+            const exitBtn = document.getElementById('exit-btn');
+            exitBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.body.innerHTML = `
+                    <div class="w-screen h-screen flex items-center justify-center bg-[#FDF9E4]">
+                        <h1 class="text-4xl font-bold text-[#9A3B3B]">Arrivederci!</h1>
+                    </div>
+                `;
+            });
+            
+            // Initial load
+            const initialHash = window.location.hash || '#panoramica';
+            showSection(initialHash);
+            sortTable(0);
+        });
+    </script>
+</body>
+</ht
