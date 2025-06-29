@@ -127,56 +127,40 @@
         overflow: visible;
     }
 
-
-
-
-#view-toggle-container {
-    display: flex;
-    flex-wrap: nowrap;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    max-width: 100%;
-    box-sizing: border-box;
-    padding: 0;
-}
-
-#view-toggle-container .action-button {
-    flex: 1 1 0;
-    min-width: 45px;
-    max-width: 55px;
-    width: 50px;
-    padding: 10px 8px;
-    font-size: clamp(0.95em, 3.5vw, 1.1em);
-    text-align: center;
-    box-sizing: border-box;
-    position: relative;
-}
-
-
-
-
-@media (max-width: 480px) {
+    /* MODIFICA: Nuovo layout per i pulsanti su due righe */
     #view-toggle-container {
+        display: flex;
+        flex-direction: column;
         gap: 8px;
+        width: 100%;
     }
-    
-    #view-toggle-container .action-button {
-        font-size: 1em;
-        padding: 10px 6px;
-        min-width: 40px;
-        max-width: 50px;
-        width: 45px;
+
+    .button-row {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
     }
-}
 
+    .button-row .action-button {
+        flex: 1;
+        font-size: clamp(0.85em, 3.5vw, 1.0em);
+        padding: 10px 8px;
+        text-align: center;
+        box-sizing: border-box;
+        position: relative;
+    }
 
-
-
-
+    @media (max-width: 480px) {
+        .button-row {
+            gap: 8px;
+        }
+        
+        .button-row .action-button {
+            font-size: 0.8em;
+            padding: 10px 6px;
+        }
+    }
 
     #search-container {
         width: 100%;
@@ -229,7 +213,6 @@
   outline: none;
   text-decoration: none;
 }
-
 
     .action-button:active {
       transform: scale(0.98);
@@ -342,15 +325,53 @@
         transform: translateY(-50%) scale(0.95);
     }
 
+    /* MODIFICA: Nuovo layout per le barre con frecce */
     .year-divider {
       width: 100%;
       max-width: 1200px;
       margin: 20px auto 15px auto;
       position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-basis: 100%;
+    }
+
+    .divider-arrows {
+      display: flex;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+
+    .divider-arrow-btn {
+      background-color: #FFD700;
+      border: 2px solid #DAA520;
+      border-radius: 6px;
+      padding: 6px 8px;
+      cursor: pointer;
+      font-size: 1.2em;
+      transition: all 0.3s ease;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .divider-arrow-btn:hover, .divider-arrow-btn:active {
+      background-color: #FFE55C;
+      transform: scale(1.1);
+    }
+
+    .divider-arrow-btn:active {
+      transform: scale(0.95);
+    }
+
+    .divider-line {
+      flex-grow: 1;
+      position: relative;
       height: 4px;
       background-color: #F0E68C;
       border-radius: 2px;
-      flex-basis: 100%;
     }
     
     .year-label {
@@ -422,12 +443,12 @@
     }
     
     li .tipo-evento {
-      font-size: 1em; /* CAMBIATO da clamp(0.9em, 3.5vw, 1.0em) */
+      font-size: 1em;
       display: block;
     }
 
     li .data-evento {
-      font-size: 1em; /* AGGIUNTO */
+      font-size: 1em;
     }
     
     li.compleanno { background-color: #e6f3ff; }
@@ -502,35 +523,10 @@
       100% { opacity: 1; color: #DAA520; }
     }
 
+    /* MODIFICA: Nascondi completamente le vecchie frecce */
     .arrow-badge {
-      position: absolute; 
-      top: 8px;
-      right: 8px;
-      font-size: clamp(1.3em, 5vw, 1.4em); 
-      color: gold;
-      text-shadow: 0 0 4px rgba(255, 215, 0, 0.6); 
-      cursor: pointer;
-      z-index: 1; 
-      text-decoration: none;
-      transition: transform 0.3s ease;
-      display: none;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-      padding: 8px;
-      margin: -8px;
-      user-select: none;
-      -webkit-user-select: none;
+      display: none !important;
     }
-    
-    .arrow-badge:hover, .arrow-badge:active { 
-      transform: scale(1.2); 
-    }
-    
-    .arrow-badge:active {
-      transform: scale(1.1);
-    }
-    
-    li:not(.evento-oggi) .arrow-badge { display: block; }
 
     .popup-overlay {
       position: fixed;
@@ -722,6 +718,97 @@
       justify-content: space-between;
       align-items: center;
     }
+
+    /* MODIFICA: Frecce per navigazione nel datario */
+    .mese-header-arrows {
+      display: flex;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+
+    .mese-header-arrow-btn {
+      background-color: #DAA520;
+      border: 1px solid #B8860B;
+      border-radius: 4px;
+      padding: 4px 6px;
+      cursor: pointer;
+      font-size: 1em;
+      color: white;
+      transition: all 0.3s ease;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .mese-header-arrow-btn:hover, .mese-header-arrow-btn:active {
+      background-color: #B8860B;
+      transform: scale(1.1);
+    }
+
+    .mese-header-arrow-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* MODIFICA: Barra "Oggi" nel datario */
+    .datario-oggi-divider {
+      width: 100%;
+      margin: 15px 0 10px 0;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .datario-oggi-arrows {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .datario-oggi-arrow-btn {
+      background-color: #FFD700;
+      border: 1px solid #DAA520;
+      border-radius: 4px;
+      padding: 3px 5px;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: all 0.3s ease;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .datario-oggi-arrow-btn:hover, .datario-oggi-arrow-btn:active {
+      background-color: #FFE55C;
+      transform: scale(1.1);
+    }
+
+    .datario-oggi-arrow-btn:active {
+      transform: scale(0.95);
+    }
+
+    .datario-oggi-line {
+      flex-grow: 1;
+      position: relative;
+      height: 3px;
+      background-color: #DAA520;
+      border-radius: 2px;
+    }
+
+    .datario-oggi-label {
+      position: absolute;
+      right: 0;
+      top: -12px;
+      background-color: #DAA520;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: clamp(0.8em, 3vw, 0.9em);
+      line-height: 1;
+    }
     
     .mese-header-arrow { 
       font-size: clamp(1.3em, 5vw, 1.4em); 
@@ -764,12 +851,19 @@
       color: #666; 
       min-width: 24px; 
       text-align: center; 
-      border: 1px solid #000; 
+      border: 1px solid #000;
+      flex-shrink: 0;
     }
     
     .mese-container.vuoto .mese-counter { 
       background-color: rgba(200, 200, 200, 0.5); 
       color: #999; 
+    }
+
+    .mese-container.vuoto .mese-header-arrow-btn { 
+      background-color: #ccc; 
+      color: #999; 
+      border-color: #bbb; 
     }
     
     .mese-content { 
@@ -786,6 +880,27 @@
       align-items: center; 
     }
     
+    /* MODIFICA: Badge "OGGI" per eventi nel datario */
+    .datario-oggi-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #ffd93d, #ff6b6b);
+      color: black;
+      font-weight: bold;
+      font-size: 0.7em;
+      padding: 1px 4px;
+      border-radius: 8px;
+      margin-left: 6px;
+      vertical-align: middle;
+      border: 1px solid #000;
+      animation: pulseBadgeSmall 1.5s ease-in-out infinite alternate;
+      line-height: 1;
+    }
+
+    @keyframes pulseBadgeSmall {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.05); }
+    }
+
     .evento-datario { 
       margin-bottom: 8px; 
       line-height: 1.4; 
@@ -982,12 +1097,16 @@
     
     <div id="main-controls-wrapper">
       <div id="view-toggle-container">
-          <span class="action-button" id="tree-icon" data-tooltip="Albero genealogico">A</span>
-          <span class="action-button" id="datario-icon" data-tooltip="Modalità datario">D</span>
-          <span class="action-button" id="calendar-icon" data-tooltip="Calendario stampabile">C</span>
-          <span class="action-button" id="statistics-icon" data-tooltip="Statistiche">S</span>
-          <span class="action-button" id="info-icon-header" data-tooltip="Informazioni">i</span>
-          <span class="action-button" id="exit-icon" data-tooltip="Esci">E</span>
+          <div class="button-row">
+              <span class="action-button" id="datario-icon" data-tooltip="Modalità datario">Datario</span>
+              <span class="action-button" id="tree-icon" data-tooltip="Albero genealogico">Albero</span>
+              <span class="action-button" id="calendar-icon" data-tooltip="Calendario stampabile">Calendario</span>
+          </div>
+          <div class="button-row">
+              <span class="action-button" id="statistics-icon" data-tooltip="Statistiche">Statistiche</span>
+              <span class="action-button" id="info-icon-header" data-tooltip="Informazioni">Info</span>
+              <span class="action-button" id="exit-icon" data-tooltip="Esci">Esci</span>
+          </div>
       </div>
       <div id="search-container">
           <div id="search-input-wrapper">
@@ -1010,7 +1129,7 @@
     <div class="popup-content">
       <div class="popup-header">
         <h2>Istruzioni</h2>
-        <span class="action-button" id="bookmark-close-button" data-tooltip="Chiudi finestra">E</span>
+        <span class="action-button" id="bookmark-close-button" data-tooltip="Chiudi finestra">Esci</span>
       </div>
       <div style="overflow-y: auto; -webkit-overflow-scrolling: touch;">
         <p>Per un'esperienza ottimale, aggiungi questa pagina alla schermata Home del tuo dispositivo.</p>
@@ -1025,7 +1144,7 @@
       <div class="popup-header">
         <span class="action-button" id="calendar-share-button" data-tooltip="Condividi/Stampa PDF">Condividi</span>
         <h2>Calendario</h2>
-        <span class="action-button" id="calendar-close-button" data-tooltip="Chiudi finestra">E</span>
+        <span class="action-button" id="calendar-close-button" data-tooltip="Chiudi finestra">Esci</span>
       </div>
       <div id="calendar-preview">
         <div class="calendar-year-title">2025</div>
@@ -1040,7 +1159,7 @@
       <div class="popup-header">
         <span class="action-button" id="tree-copy-button" data-tooltip="Copia negli appunti">Copia</span>
         <h2>Albero</h2>
-        <span class="action-button" id="tree-close-button" data-tooltip="Chiudi finestra">E</span>
+        <span class="action-button" id="tree-close-button" data-tooltip="Chiudi finestra">Esci</span>
       </div>
       <pre id="treeContent">Caricamento albero...</pre>
     </div>
@@ -1282,7 +1401,6 @@ function creaElementoEvento(evento, prossimiGiorni) {
     icona = '<span class="star-badge">⭐</span>';
     badgeGiorni = '<div class="giorni-badge oggi">OGGI</div>';
   } else {
-    icona = '<a href="#titolo" class="arrow-badge" title="Torna su">⬆️</a>';
     if (evento.giorni > 0) {
         const classiBadge = ['giorni-badge'];
         if (evento.giorni === prossimiGiorni) {
@@ -1330,12 +1448,8 @@ function creaElementoEvento(evento, prossimiGiorni) {
   `;
   
   li.addEventListener('click', (e) => {
-    // Evita che il click su arrow-badge trigga anche questo evento
-    if (e.target.classList.contains('arrow-badge')) return;
-    
     if (evento.giorni === 0) {
       suonaBeep();
-      // Aggiungi feedback visivo per eventi di oggi
       li.style.transform = 'scale(1.02)';
       setTimeout(() => {
         li.style.transform = '';
@@ -1346,30 +1460,56 @@ function creaElementoEvento(evento, prossimiGiorni) {
   return li;
 }
 
-function creaBarraAnno(data) {
+function creaBarraConFrecce(dataFormattata, monthStartIds, monthsInOrder, meseCorrente) {
   const barra = document.createElement('div');
   barra.className = 'year-divider';
-  barra.innerHTML = `<div class="year-label">${data}</div>`;
+  barra.id = monthStartIds.get(meseCorrente);
+
+  const currentMonthOrderIndex = monthsInOrder.indexOf(meseCorrente);
+
+  const nextIndex = (currentMonthOrderIndex + 1) % monthsInOrder.length;
+  const nextMonthId = monthStartIds.get(monthsInOrder[nextIndex]);
+
+  const prevIndex = (currentMonthOrderIndex - 1 + monthsInOrder.length) % monthsInOrder.length;
+  const prevMonthId = monthStartIds.get(monthsInOrder[prevIndex]);
+
+  const downArrowHTML = `<button class="divider-arrow-btn" onclick="document.getElementById('${nextMonthId}').scrollIntoView({ behavior: 'smooth', block: 'center' });">⬇️</button>`;
+  const upArrowHTML = `<button class="divider-arrow-btn" onclick="document.getElementById('${prevMonthId}').scrollIntoView({ behavior: 'smooth', block: 'center' });">⬆️</button>`;
+
+  barra.innerHTML = `
+    <div class="divider-arrows">${downArrowHTML}${upArrowHTML}</div>
+    <div class="divider-line">
+      <div class="year-label">${dataFormattata}</div>
+    </div>
+  `;
+  
   return barra;
 }
 
-function scrollMese(meseCliccato) {
-    const oggi = getDataOdierna();
-    const meseCorrente = oggi.getMonth();
-    let targetId;
+function creaBarraOggiDatario(dataFormattata, monthStartIds, monthsInOrder, meseCorrente) {
+  const barra = document.createElement('div');
+  barra.className = 'datario-oggi-divider';
+  barra.id = `datario-${monthStartIds.get(meseCorrente)}`;
 
-    if (meseCliccato == 0) { 
-        targetId = `mese-container-${meseCorrente}`;
-    } else if (meseCliccato > 0 && meseCliccato <= meseCorrente) { 
-        targetId = 'mese-container-0';
-    } else { 
-        targetId = `mese-container-${meseCorrente}`;
-    }
+  const currentMonthOrderIndex = monthsInOrder.indexOf(meseCorrente);
 
-    const targetElement = document.getElementById(targetId);
-    if (targetElement) {
-        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+  const nextIndex = (currentMonthOrderIndex + 1) % monthsInOrder.length;
+  const nextMonthId = `mese-container-${monthsInOrder[nextIndex]}`;
+
+  const prevIndex = (currentMonthOrderIndex - 1 + monthsInOrder.length) % monthsInOrder.length;
+  const prevMonthId = `mese-container-${monthsInOrder[prevIndex]}`;
+
+  const downArrowHTML = `<button class="datario-oggi-arrow-btn" onclick="document.getElementById('${nextMonthId}').scrollIntoView({ behavior: 'smooth', block: 'center' });">⬇️</button>`;
+  const upArrowHTML = `<button class="datario-oggi-arrow-btn" onclick="document.getElementById('${prevMonthId}').scrollIntoView({ behavior: 'smooth', block: 'center' });">⬆️</button>`;
+
+  barra.innerHTML = `
+    <div class="datario-oggi-arrows">${downArrowHTML}${upArrowHTML}</div>
+    <div class="datario-oggi-line">
+      <div class="datario-oggi-label">${dataFormattata}</div>
+    </div>
+  `;
+  
+  return barra;
 }
 
 function creaMeseDatario(mese, anno, eventi, termineRicerca = '', prossimiGiorniMancanti) {
@@ -1430,7 +1570,6 @@ function creaMeseDatario(mese, anno, eventi, termineRicerca = '', prossimiGiorni
     });
   }
 
-  // Se durante la ricerca il mese non ha eventi, ritorna null per non mostrarlo
   if (termineRicerca.trim() && eventiMese.length === 0) {
     return null;
   }
@@ -1471,14 +1610,19 @@ function creaMeseDatario(mese, anno, eventi, termineRicerca = '', prossimiGiorni
     const classeEvento = evento.Tipo.toLowerCase();
     let classeTemporale = '';
     
-    if (tipologiaMese === 'corrente') {
-        classeTemporale = evento.giorno === giornoCorrente ? ' oggi' : (evento.giorno < giornoCorrente ? ' passato' : '');
+    // MODIFICA: Aggiunge badge "OGGI" per eventi di oggi nel datario
+    let badgeOggi = '';
+    if (tipologiaMese === 'corrente' && evento.giorno === giornoCorrente) {
+        classeTemporale = ' oggi';
+        badgeOggi = '<span class="datario-oggi-badge">OGGI</span>';
+    } else if (tipologiaMese === 'corrente' && evento.giorno < giornoCorrente) {
+        classeTemporale = ' passato';
     } else if (tipologiaMese === 'passato') {
         classeTemporale = ' passato';
     }
 
     return `<div class="evento-datario ${classeEvento}${classeTemporale}">
-              <span class="giorno-numero">${evento.giorno})</span> ${nome}${suffissoOnomastico}<span class="anni-parentesi">${anni}</span>${marcatoreProssimo}
+              <span class="giorno-numero">${evento.giorno})</span> ${nome}${suffissoOnomastico}<span class="anni-parentesi">${anni}</span>${badgeOggi}${marcatoreProssimo}
             </div>`;
   };
   
@@ -1491,7 +1635,6 @@ function creaMeseDatario(mese, anno, eventi, termineRicerca = '', prossimiGiorni
         contenuto += renderEvento(evento);
     });
 
-    // Aggiungi il separatore solo se ci sono eventi passati E eventi futuri/odierni
     if (eventiPassati.length > 0 && (eventiDiOggi.length > 0 || eventiFuturi.length > 0)) {
         contenuto += `<div class="separatore-giorni" data-giorno="${giornoCorrente}"></div>`;
     }
@@ -1513,13 +1656,46 @@ function creaMeseDatario(mese, anno, eventi, termineRicerca = '', prossimiGiorni
   let classiContainer = (numeroEventi === 0) ? ' vuoto' : '';
   classiContainer += (tipologiaMese === 'passato') ? ' passato' : (tipologiaMese === 'corrente' ? ' corrente' : '');
 
+  // MODIFICA: Aggiunge frecce di navigazione nella barra del mese
+  const prevMese = (mese - 1 + 12) % 12;
+  const nextMese = (mese + 1) % 12;
+  const prevMeseId = `mese-container-${prevMese}`;
+  const nextMeseId = `mese-container-${nextMese}`;
+  
+  const upArrowHTML = `<button class="mese-header-arrow-btn" onclick="document.getElementById('${prevMeseId}').scrollIntoView({ behavior: 'smooth', block: 'center' });">⬆️</button>`;
+  const downArrowHTML = `<button class="mese-header-arrow-btn" onclick="document.getElementById('${nextMeseId}').scrollIntoView({ behavior: 'smooth', block: 'center' });">⬇️</button>`;
+
+  // MODIFICA: Controlla se ci sono eventi di oggi nel mese corrente per aggiungere la barra "Oggi"
+  let barraOggi = '';
+  if (tipologiaMese === 'corrente') {
+    const eventiDiOggi = eventiMese.filter(e => e.giorno === giornoCorrente);
+    if (eventiDiOggi.length > 0) {
+      const giorni = ["domenica", "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato"];
+      const mesi = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
+      const dataOggi = new Date(anno, mese, giornoCorrente);
+      const giornoSettimana = giorni[dataOggi.getDay()];
+      const dataFormattata = `Oggi: ${giornoSettimana} ${giornoCorrente} ${mesi[mese]}`;
+      
+      // Creo una barra "Oggi" semplificata per il datario
+      barraOggi = `
+        <div class="datario-oggi-divider">
+          <div class="datario-oggi-line">
+            <div class="datario-oggi-label">${dataFormattata}</div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
   return `
     <div class="mese-container${classiContainer}" id="mese-container-${mese}">
       <div class="mese-header">
+        <div class="mese-header-arrows">${upArrowHTML}${downArrowHTML}</div>
         <div class="mese-nome">${nomiMesi[mese]} ${anno}</div>
         <div class="mese-counter">${numeroEventi}</div>
       </div>
       <div class="mese-content">
+        ${barraOggi}
         ${contenuto || '<div style="color: #bbb; font-style: italic; font-size: 0.9em;">Nessun evento</div>'}
       </div>
     </div>
@@ -1534,7 +1710,7 @@ function mostraDatario() {
   const datarioContainer = document.getElementById('datario-container');
   const datarioIcon = document.getElementById('datario-icon');
   
-  datarioIcon.textContent = 'E';
+  datarioIcon.textContent = 'Elenco';
 
   const eventiOrdinati = ordinaEventi(tuttiGliEventi);
   let prossimiGiorniMancanti = -1;
@@ -1558,13 +1734,6 @@ function mostraDatario() {
   document.getElementById('eventi-lista').style.display = 'none';
   datarioContainer.style.display = 'block';
   modalitaDatario = true;
-  
-  setTimeout(() => {
-    const meseCorrenteEl = document.querySelector('.mese-container.corrente');
-    if (meseCorrenteEl) {
-      meseCorrenteEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }, 100);
 }
 
 function aggiornaContatoreDatario(termineRicerca) {
@@ -1615,7 +1784,7 @@ function mostraElenco() {
   document.getElementById('eventi-lista').style.display = 'flex';
   modalitaDatario = false;
   
-  document.getElementById('datario-icon').textContent = 'D';
+  document.getElementById('datario-icon').textContent = 'Datario';
   
   mostraEventi(tuttiGliEventi, document.getElementById('searchInput').value);
 }
@@ -1685,36 +1854,42 @@ function mostraEventi(eventi, termine = '') {
   const primoEventoProssimo = eventiOrdinati.find(e => e.giorni > 0);
   const prossimiGiorni = primoEventoProssimo ? primoEventoProssimo.giorni : -1;
 
+  const monthStartIds = new Map();
+  eventiFiltrati.forEach(e => {
+    const m = e.dataEvento.getMonth();
+    if (!monthStartIds.has(m)) {
+      monthStartIds.set(m, `month-start-div-${m}`);
+    }
+  });
+  const monthsInOrder = Array.from(monthStartIds.keys());
+
   let ultimoGiornoMostrato = null;
   let ultimoMeseMostrato = null;
   let oggiMostrato = false;
   
   eventiFiltrati.forEach(evento => {
-      const giornoCorrente = evento.dataEvento.toDateString(); // Es: "Fri Jun 27 2025"
+      const giornoCorrente = evento.dataEvento.toDateString();
       const meseCorrente = evento.dataEvento.getMonth();
       
-      // Mostra barra "Oggi" solo per il primo evento di oggi
       if (evento.giorni === 0 && !oggiMostrato) {
           const mesi = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
           const giorniNomi = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
           const giornoSettimana = giorniNomi[evento.dataEvento.getDay()];
           const dataFormattata = `Oggi: ${giornoSettimana} ${evento.dataEvento.getDate()} ${mesi[evento.dataEvento.getMonth()]}`;
           
-          const barra = creaBarraAnno(dataFormattata);
+          const barra = creaBarraConFrecce(dataFormattata, monthStartIds, monthsInOrder, meseCorrente);
           lista.appendChild(barra);
           oggiMostrato = true;
       }
-      // Mostra barra per inizio nuovo mese (solo se non è oggi)
       else if (meseCorrente !== ultimoMeseMostrato && evento.giorni > 0) {
           const mesi = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
           const dataFormattata = `Inizio ${mesi[meseCorrente]}`;
           
-          const barra = creaBarraAnno(dataFormattata);
+          const barra = creaBarraConFrecce(dataFormattata, monthStartIds, monthsInOrder, meseCorrente);
           lista.appendChild(barra);
           ultimoMeseMostrato = meseCorrente;
       }
       
-      // Aggiungi l'elemento li dell'evento
       const li = creaElementoEvento(evento, prossimiGiorni);
       lista.appendChild(li);
   });
@@ -1723,7 +1898,7 @@ function mostraEventi(eventi, termine = '') {
 function cancellaCerca() {
   const input = document.getElementById('searchInput');
   input.value = '';
-  input.blur(); // Rimuove il focus per nascondere la tastiera su mobile
+  input.blur();
   document.getElementById('clear-search-button').style.display = 'none';
   
   if (modalitaDatario) {
@@ -1735,9 +1910,7 @@ function cancellaCerca() {
 
 function clickEvento(nome) {
   console.log("Click su evento:", nome);
-  // Su mobile, potresti voler mostrare più dettagli o fare un'azione specifica
   if (isMobile) {
-    // Feedback tattile leggero
     if (navigator.vibrate) {
       navigator.vibrate(50);
     }
@@ -1877,7 +2050,6 @@ function copiaAlbero() {
       alert("Impossibile copiare. Seleziona e copia manualmente.");
     });
   } else {
-    // Fallback per dispositivi meno recenti
     const range = document.createRange();
     range.selectNode(contenuto);
     window.getSelection().removeAllRanges();
@@ -1893,7 +2065,6 @@ function copiaAlbero() {
   }
 }
 
-// ===== FUNZIONI CALENDARIO =====
 function mostraCalendario() {
   document.getElementById('calendarPopup').style.display = 'flex';
   generaCalendario();
@@ -1963,11 +2134,6 @@ function generaCalendario() {
   }
 }
 
-
-
-
-
-
 function condividiCalendario() {
     if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF !== 'function') {
         return alert('ERRORE: La libreria per creare i PDF non è stata caricata.\nPer favore, ricarica la pagina e assicurati di essere connesso a internet.');
@@ -1979,7 +2145,6 @@ function condividiCalendario() {
         const oggi = getDataOdierna();
         const anno = oggi.getFullYear();
 
-        // Layout parametri
         const margineSinistra = 10;
         const margineDestra = 10;
         const margineSuperiore = 28;
@@ -1992,7 +2157,7 @@ function condividiCalendario() {
         const spazioRiga = 5;
         const colWidth = (larghezzaPagina - margineSinistra - margineDestra - (colonne - 1) * spazioColonna) / colonne;
         const rowHeight = ((altezzaPagina - margineSuperiore - margineInferiore - (righe - 1) * spazioRiga) / righe) - 5;
-        const fasciaMeseAltezza = 8; // fascia per il mese
+        const fasciaMeseAltezza = 8;
 
         const nomiMesi = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
         pdf.setFont('helvetica', 'bold');
@@ -2000,7 +2165,6 @@ function condividiCalendario() {
         pdf.setTextColor(0,0,0);
         pdf.text(anno.toString(), larghezzaPagina / 2, 22, { align: 'center' });
 
-        // Prepara eventi splittati e calcola il massimo per ogni riga
         let eventiSplittati = [];
         let maxRighePerRiga = [0,0,0];
 
@@ -2032,26 +2196,21 @@ function condividiCalendario() {
             const x = margineSinistra + col * (colWidth + spazioColonna);
             const y = margineSuperiore + row * (rowHeight + spazioRiga);
 
-            // Bordo della cella grande del mese
             pdf.setDrawColor(0,0,0);
             pdf.setLineWidth(0.1);
             pdf.rect(x, y, colWidth, rowHeight, 'D');
 
-            // Fascia mese colorata
             pdf.setFillColor(240, 230, 140);
             pdf.rect(x, y, colWidth, fasciaMeseAltezza, 'F');
 
-            // Cornice fascia mese
             pdf.setDrawColor(0,0,0);
             pdf.rect(x, y, colWidth, fasciaMeseAltezza, 'D');
 
-            // Nome del mese
             pdf.setFont('helvetica', 'bold');
             pdf.setFontSize(13);
             pdf.setTextColor(0,0,0);
             pdf.text(nomiMesi[mese], x + colWidth/2, y + fasciaMeseAltezza/2, { align: 'center', baseline: 'middle' });
 
-            // Eventi
             pdf.setFont('helvetica', 'normal');
             pdf.setFontSize(8.5);
 
@@ -2065,7 +2224,6 @@ function condividiCalendario() {
             }
         }
 
-        // Salva/condividi
         const pdfBlob = pdf.output('blob');
         const fileName = 'Calendario_' + anno + '.pdf';
 
@@ -2111,21 +2269,15 @@ function scaricaPDF(pdfBlob, fileName) {
   URL.revokeObjectURL(url);
 }
 
-// ===== GESTIONE EVENTI TOUCH E MOBILE =====
 function gestisciTouchEvents() {
-  // Previeni il bounce scrolling su iOS
   document.addEventListener('touchmove', function(e) {
     if (e.target.closest('.popup-content') || e.target.closest('#treeContent')) {
-      // Permetti lo scroll all'interno dei popup
       return;
     }
-    // Permetti lo scroll normale della pagina
   }, { passive: true });
 
-  // Gestisci il ridimensionamento della finestra (rotazione schermo)
   window.addEventListener('resize', function() {
     if (modalitaDatario) {
-      // Ricalcola il layout del datario dopo la rotazione
       setTimeout(() => {
         const meseCorrenteEl = document.querySelector('.mese-container.corrente');
         if (meseCorrenteEl) {
@@ -2135,9 +2287,7 @@ function gestisciTouchEvents() {
     }
   });
 
-  // Gestisci i popup su mobile
   document.addEventListener('click', function(e) {
-    // Chiudi i popup se si clicca fuori
     if (e.target.classList.contains('popup-overlay')) {
       if (e.target.id === 'bookmarkPopup') {
         nascondiPopupInfo();
@@ -2150,7 +2300,6 @@ function gestisciTouchEvents() {
   });
 }
 
-// ===== INIZIALIZZAZIONE =====
 function inizializza() {
   try {
     tuttiGliEventi = [...eventiData];
@@ -2160,7 +2309,6 @@ function inizializza() {
     
     mostraEventi(tuttiGliEventi, '');
     
-    // Event listeners
     if (!isMobile) {
       document.getElementById('titolo').addEventListener('click', cambiaData);
       document.addEventListener('keydown', e => {
@@ -2175,11 +2323,9 @@ function inizializza() {
       document.getElementById('cambia-data').style.display = 'block';
     } else {
       document.getElementById('titolo').style.cursor = 'default';
-      // Inizializza gestione eventi touch
       gestisciTouchEvents();
     }
     
-    // Event listeners comuni
     const searchInput = document.getElementById('searchInput');
     searchInput.addEventListener('input', e => {
       if (modalitaDatario) {
@@ -2189,7 +2335,6 @@ function inizializza() {
       }
     });
 
-    // Su mobile, nascondi la tastiera quando si preme "Cerca" o "Invio"
     if (isMobile) {
       searchInput.addEventListener('keydown', e => {
         if (e.key === 'Enter' || e.key === 'Search') {
@@ -2202,7 +2347,6 @@ function inizializza() {
     document.getElementById('bookmark-close-button').addEventListener('click', nascondiPopupInfo);
     document.getElementById('info-icon-header').addEventListener('click', mostraPopupInfo);
     document.getElementById('tree-close-button').addEventListener('click', nascondiAlbero);
-    // *** MODIFICA PRINCIPALE: Il pulsante Albero ora apre GitHub ***
     document.getElementById('tree-icon').addEventListener('click', function() {
       window.open('https://sebastiano-mazzarisi.github.io/Test/Albero.html', '_blank');
     });
@@ -2215,9 +2359,7 @@ function inizializza() {
       window.open('https://sebastiano-mazzarisi.github.io/Test/Statistiche.html', '_blank');
     });
     document.getElementById('exit-icon').addEventListener('click', function() {
-      if (confirm('Sei sicuro di voler uscire?')) {
-        window.close();
-      }
+      window.close();
     });
     
     console.log('App inizializzata per:', isMobile ? 'Mobile' : 'Desktop');
@@ -2227,7 +2369,6 @@ function inizializza() {
   }
 }
 
-// Avvia l'applicazione quando il DOM è pronto
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', inizializza);
 } else {
