@@ -2,7 +2,8 @@ name: Controllo Eventi Famiglia
 
 on:
   schedule:
-    - cron: '1 0 * * *'
+    # Esegue alle 06:00 UTC (le 08:00 del mattino in Italia)
+    - cron: '0 6 * * *'
   workflow_dispatch:
 
 jobs:
@@ -17,14 +18,14 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Crea lo script di notifica
+      - name: Crea ed esegui lo script di notifica
         run: |
           cat <<'EOF' > script.js
           const fs = require("fs");
           const path = require("path");
           const { execSync } = require("child_process");
 
-          // Topic hardcoded
+          // Topic impostato direttamente per massima affidabilità
           const topic = "msgalternativo";
 
           const htmlPath = path.join(process.env.GITHUB_WORKSPACE, "Eventi.html");
@@ -37,8 +38,9 @@ jobs:
           
           const eventiData = JSON.parse(match[1]);
 
-          // ATTENZIONE: Qui la data è fissata per test, puoi cambiare in new Date() se vuoi quella reale
-          const oggi = new Date("2025-07-04"); 
+          // --- DATA REALE (VERSIONE FINALE) ---
+          const oggi = new Date();
+          // ------------------------------------
 
           const giornoOggi = oggi.getDate();
           const meseOggi = oggi.getMonth() + 1;
@@ -56,7 +58,7 @@ jobs:
 
             const command = `curl -H "Title: ${titolo}" -H "Tags: cake" -H "Priority: max" -d @- ntfy.sh/${topic}`;
             
-            console.log("Invio notifica con metodo standard input...");
+            console.log("Invio notifica...");
             try {
               const output = execSync(command, { input: messaggio }).toString();
               console.log("Risposta dal server ntfy:", output);
@@ -68,6 +70,5 @@ jobs:
             console.log("Nessun evento per oggi.");
           }
           EOF
-      
-      - name: Esegui lo script e invia notifica
-        run: node script.js
+          
+          node script.js
