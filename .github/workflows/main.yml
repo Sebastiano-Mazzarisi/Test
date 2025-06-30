@@ -1,78 +1,73 @@
-name: Diagnostica Connessione ntfy
+name: Controllo Eventi Famiglia
 
 on:
-  push:
-    branches: [ main ]
+  schedule:
+    - cron: '1 0 * * *'
   workflow_dispatch:
 
 jobs:
-  debug-network:
+  check-and-notify:
     runs-on: ubuntu-latest
-    name: Debug connettività di rete
-    
     steps:
-    - name: Test connettività di base verso siti noti
-      run: |
-        echo "=== Test risoluzione DNS per ntfy.sh ==="
-        nslookup ntfy.sh
-        echo "=== Test curl verso endpoint di controllo (Google) ==="
-        curl -I -s -o /dev/null -w "google.com: Status %{http_code}\n" https://www.google.com
+      - name: Controlla il codice del repository
+        uses: actions/checkout@v4
 
-    - name: Test diagnostico approfondito verso ntfy.sh
-      run: |
-        echo "=== Test curl verboso verso ntfy.sh ==="
-        curl -v --connect-timeout 15 https://ntfy.sh 2>&1 || echo "ERRORE: curl verboso verso ntfy.sh fallito"
+      - name: Imposta Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
 
-  test-ntfy-notifications:
-    runs-on: ubuntu-latest
-    name: Test invio notifiche ntfy con vari metodi
-    needs: debug-network
-    if: always() # Esegui anche se il job precedente fallisce
-    
-    steps:
-    - name: Test notifica ntfy - Metodo 1 (curl diretto)
-      env:
-        NTFY_TOPIC: ${{ secrets.NTFY_TOPIC || 'msgalternativo' }}
-      run: |
-        echo "Tentativo con curl diretto al topic: $NTFY_TOPIC"
-        curl -d "Test (Metodo 1) da GitHub Actions" \
-          -H "Title: GitHub Actions Test (curl)" \
-          https://ntfy.sh/$NTFY_TOPIC || echo "FALLITO: curl diretto"
-    
-    - name: Test notifica ntfy - Metodo 2 (Node.js fetch)
-      env:
-        NTFY_TOPIC: ${{ secrets.NTFY_TOPIC || 'msgalternativo' }}
-      run: |
-        echo "Tentativo con Node.js fetch al topic: $NTFY_TOPIC"
-        node -e "
-          const https = require('https');
-          const message = 'Test (Metodo 2) da Node.js';
-          const options = {
-            hostname: 'ntfy.sh',
-            port: 443,
-            path: '/' + process.env.NTFY_TOPIC,
-            method: 'POST',
-            headers: { 'Title': 'GitHub Actions Test (Node.js)' }
-          };
-          const req = https.request(options, res => {
-            console.log('Node.js test - Status:', res.statusCode);
-            res.on('data', d => process.stdout.write(d));
+      - name: Crea lo script di notifica
+        run: |
+          cat <<'EOF' > script.js
+          const fs = require("fs");
+          const path = require("path");
+          const { execSync } = require("child_process");
+
+          // Topic hardcoded
+          const topic = "msgalternativo";
+
+          const htmlPath = path.join(process.env.GITHUB_WORKSPACE, "Eventi.html");
+          const htmlContent = fs.readFileSync(htmlPath, "utf8");
+          const match = htmlContent.match(/const eventiData = (\[[\s\S]*?\]);/);
+          if (!match) {
+              console.log("Array eventiData non trovato nel file HTML.");
+              process.exit(0);
+          }
+          
+          const eventiData = JSON.parse(match[1]);
+
+          // ATTENZIONE: Qui la data è fissata per test, puoi cambiare in new Date() se vuoi quella reale
+          const oggi = new Date("2025-07-04"); 
+
+          const giornoOggi = oggi.getDate();
+          const meseOggi = oggi.getMonth() + 1;
+
+          const eventiDiOggi = eventiData.filter(evento => {
+            if (!evento.Data) return false;
+            const partiData = evento.Data.split("/");
+            return parseInt(partiData[0], 10) === giornoOggi && parseInt(partiData[1], 10) === meseOggi;
           });
-          req.on('error', e => console.error('ERRORE Node.js:', e));
-          req.write(message);
-          req.end();
-        " || echo "FALLITO: Node.js fetch"
 
-  final-report:
-    runs-on: ubuntu-latest
-    name: Report finale dei test
-    needs: [debug-network, test-ntfy-notifications]
-    if: always()
-    
-    steps:
-    - name: Stampa riepilogo
-      run: |
-        echo "=== RIEPILOGO TEST DIAGNOSTICO ==="
-        echo "Timestamp: $(date)"
-        echo "Questo test ha verificato la connettività di base e ha provato a inviare una notifica a ntfy in due modi diversi (curl e Node.js)."
-        echo "Se i test di connettività di base funzionano ma i test di notifica falliscono, il problema è specifico della comunicazione con ntfy."
+          if (eventiDiOggi.length > 0) {
+            const nomiEventi = eventiDiOggi.map(e => `${e.Nominativo} (${e.Tipo.slice(0,1)})`).join(", ");
+            const messaggio = `Oggi festeggiano: ${nomiEventi}`;
+            const titolo = "🗓️ Promemoria Eventi Famiglia";
+
+            const command = `curl -H "Title: ${titolo}" -H "Tags: cake" -H "Priority: max" -d @- ntfy.sh/${topic}`;
+            
+            console.log("Invio notifica con metodo standard input...");
+            try {
+              const output = execSync(command, { input: messaggio }).toString();
+              console.log("Risposta dal server ntfy:", output);
+            } catch (error) {
+              console.error("Errore durante l'invio della notifica:", error);
+              process.exit(1);
+            }
+          } else {
+            console.log("Nessun evento per oggi.");
+          }
+          EOF
+      
+      - name: Esegui lo script e invia notifica
+        run: node script.js
