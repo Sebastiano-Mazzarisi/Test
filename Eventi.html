@@ -1051,11 +1051,8 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      color: #000; /* MODIFICA: Tutti gli eventi del calendario sono neri */
     }
-
-    .calendar-event.compleanno { color: #00008B; }
-    .calendar-event.onomastico { color: #006400; }
-    .calendar-event.anniversario { color: #8B0000; }
 
     .calendar-day-number {
       font-weight: bold;
@@ -2107,20 +2104,13 @@ function generaCalendario() {
     
     let contenutoEventi = '';
     eventiOrdinati.forEach(function(evento) {
-      let anni = '';
-      if (evento.Tipo === 'Compleanno' || evento.Tipo === 'Anniversario') {
-        const annoNascita = parseInt(evento.Anno);
-        if (!isNaN(annoNascita)) {
-          anni = ' (' + (anno - annoNascita) + ')';
-        }
-      }
+      // MODIFICA: Rimuovo completamente la gestione degli anni per il calendario a video
       
-      const nomeBreve = evento.Nominativo.length > 15 ? 
-        evento.Nominativo.substring(0, 15) + '...' : 
-        evento.Nominativo;
+      // MODIFICA: Uso sempre il nome completo senza abbreviazioni
+      const nomeCompleto = evento.Nominativo;
         
       contenutoEventi += '<div class="calendar-event ' + evento.Tipo.toLowerCase() + '">' +
-        '<span class="calendar-day-number">' + evento.giorno + ')</span> ' + nomeBreve + anni +
+        '<span class="calendar-day-number">' + evento.giorno + ')</span> ' + nomeCompleto +
       '</div>';
     });
     
@@ -2275,17 +2265,6 @@ function gestisciTouchEvents() {
       return;
     }
   }, { passive: true });
-
-  window.addEventListener('resize', function() {
-    if (modalitaDatario) {
-      setTimeout(() => {
-        const meseCorrenteEl = document.querySelector('.mese-container.corrente');
-        if (meseCorrenteEl) {
-          meseCorrenteEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }, 300);
-    }
-  });
 
   document.addEventListener('click', function(e) {
     if (e.target.classList.contains('popup-overlay')) {
