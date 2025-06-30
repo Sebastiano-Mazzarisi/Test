@@ -1863,6 +1863,7 @@ function mostraEventi(eventi, termine = '') {
   let ultimoGiornoMostrato = null;
   let ultimoMeseMostrato = null;
   let oggiMostrato = false;
+  let primaBarraMostrata = false;
   
   eventiFiltrati.forEach(evento => {
       const giornoCorrente = evento.dataEvento.toDateString();
@@ -1877,10 +1878,22 @@ function mostraEventi(eventi, termine = '') {
           const barra = creaBarraConFrecce(dataFormattata, monthStartIds, monthsInOrder, meseCorrente);
           lista.appendChild(barra);
           oggiMostrato = true;
+          primaBarraMostrata = true;
       }
       else if (meseCorrente !== ultimoMeseMostrato && evento.giorni > 0) {
           const mesi = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
-          const dataFormattata = `Inizio ${mesi[meseCorrente]}`;
+          let dataFormattata;
+          
+          if (!primaBarraMostrata) {
+              // Prima barra: aggiungiamo "Oggi: " anche se non è di oggi
+              const giorniNomi = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
+              const oggi = getDataOdierna();
+              const giornoSettimana = giorniNomi[oggi.getDay()];
+              dataFormattata = `Oggi: ${giornoSettimana} ${oggi.getDate()} ${mesi[oggi.getMonth()]}`;
+              primaBarraMostrata = true;
+          } else {
+              dataFormattata = `Inizio ${mesi[meseCorrente]}`;
+          }
           
           const barra = creaBarraConFrecce(dataFormattata, monthStartIds, monthsInOrder, meseCorrente);
           lista.appendChild(barra);
