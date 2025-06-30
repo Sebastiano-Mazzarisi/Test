@@ -2,10 +2,7 @@ name: Controllo Eventi Famiglia
 
 on:
   schedule:
-    # Esegue lo script alle 00:01 UTC ogni giorno.
-    # Per l'Italia (CEST), corrisponde alle 02:01 del mattino.
     - cron: '1 0 * * *'
-  # Permette di eseguire lo script manualmente dalla scheda Actions per fare dei test
   workflow_dispatch:
 
 jobs:
@@ -26,12 +23,10 @@ jobs:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
         run: |
           if [ -z "$NTFY_TOPIC" ]; then
-            echo "Errore: La variabile NTFY_TOPIC non è stata impostata nei segreti del repository."
+            echo "Errore: La variabile NTFY_TOPIC non è stata impostata."
             exit 1
           fi
 
-          # NOTA: Lo script è ancora impostato sulla data di test "2025-07-04"
-          # Ricordati di ripristinarlo a "new Date()" dopo il test!
           node -e '
             const fs = require("fs");
             const path = require("path");
@@ -41,7 +36,7 @@ jobs:
 
             const match = htmlContent.match(/const eventiData = (\[[\s\S]*?\]);/);
             if (!match) {
-              console.log("Nessun evento trovato nel file. Uscita.");
+              console.log("File eventi non trovato o malformato.");
               process.exit(0);
             }
             
@@ -67,17 +62,26 @@ jobs:
               const nomiEventi = eventiDiOggi.map(e => `${e.Nominativo} (${e.Tipo})`).join(", ");
               const messaggio = `Oggi festeggiano: ${nomiEventi}`;
               fs.writeFileSync("notification_message.txt", messaggio);
+              console.log("File notification_message.txt creato.");
             } else {
               console.log("Nessun evento per oggi. Uscita.");
             }
           '
+      
+      # --- NUOVO STEP DI DEBUG ---
+      - name: DEBUG - Elenca i file nella cartella
+        run: ls -l
+
+      # --- NUOVO STEP DI DEBUG ---
+      - name: DEBUG - Mostra il contenuto del file di notifica
+        if: hashFiles('notification_message.txt') != ''
+        run: |
+          echo "Il file notification_message.txt esiste. Contenuto:"
+          cat notification_message.txt
 
       - name: Invia la notifica (se ci sono eventi)
         if: hashFiles('notification_message.txt') != ''
         run: |
-          # --- COMANDO CURL MODIFICATO E MIGLIORATO ---
-          # 1. Aggiunto "Priority: max" per rendere la notifica più evidente.
-          # 2. Modificato il modo in cui vengono inviati i dati (--data-binary) per maggiore affidabilità.
           curl \
             -H "Title: 🗓️ Promemoria Eventi Famiglia" \
             -H "Tags: cake" \
