@@ -17,62 +17,66 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Controlla eventi e invia notifica
-        env:
-          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+      # --- NUOVO METODO: STEP 1 - Crea il file dello script ---
+      - name: Crea lo script di notifica
+        id: create_script
         run: |
-          node -e '
-            const fs = require("fs");
-            const path = require("path");
-            const { execSync } = require("child_process");
+          cat <<'EOF' > script.js
+          const fs = require("fs");
+          const path = require("path");
+          const { execSync } = require("child_process");
 
-            const topic = process.env.NTFY_TOPIC;
-            if (!topic) {
-              console.log("Errore: Topic non trovato nei segreti.");
+          const topic = process.env.NTFY_TOPIC;
+          if (!topic) {
+            console.log("Errore: Topic non trovato nei segreti.");
+            process.exit(1);
+          }
+
+          const htmlPath = path.join(process.env.GITHUB_WORKSPACE, "Eventi.html");
+          const htmlContent = fs.readFileSync(htmlPath, "utf8");
+          const match = htmlContent.match(/const eventiData = (\[[\s\S]*?\]);/);
+          if (!match) {
+              console.log("Array eventiData non trovato nel file HTML.");
+              process.exit(0);
+          }
+          
+          const eventiData = JSON.parse(match[1]);
+
+          // --- DATA DI TEST ---
+          const oggi = new Date("2025-07-04");
+          // --------------------
+
+          const giornoOggi = oggi.getDate();
+          const meseOggi = oggi.getMonth() + 1;
+
+          const eventiDiOggi = eventiData.filter(evento => {
+            if (!evento.Data) return false;
+            const partiData = evento.Data.split("/");
+            return parseInt(partiData[0], 10) === giornoOggi && parseInt(partiData[1], 10) === meseOggi;
+          });
+
+          if (eventiDiOggi.length > 0) {
+            const nomiEventi = eventiDiOggi.map(e => `${e.Nominativo} (${e.Tipo.slice(0,1)})`).join(", ");
+            const messaggio = `Oggi festeggiano: ${nomiEventi}`;
+            const titolo = "🗓️ Promemoria Eventi Famiglia";
+
+            const command = `curl -H "Title: ${titolo}" -H "Tags: cake" -H "Priority: max" -d @- ntfy.sh/${topic}`;
+            
+            console.log("Invio notifica con metodo standard input...");
+            try {
+              const output = execSync(command, { input: messaggio }).toString();
+              console.log("Risposta dal server ntfy:", output);
+            } catch (error) {
+              console.error("Errore durante l"invio della notifica:", error);
               process.exit(1);
             }
-
-            const htmlPath = path.join(process.env.GITHUB_WORKSPACE, "Eventi.html");
-            const htmlContent = fs.readFileSync(htmlPath, "utf8");
-            const match = htmlContent.match(/const eventiData = (\[[\s\S]*?\]);/);
-            if (!match) { process.exit(0); }
-            
-            const eventiData = JSON.parse(match[1]);
-
-            // --- DATA DI TEST ---
-            const oggi = new Date("2025-07-04");
-            // --------------------
-
-            const giornoOggi = oggi.getDate();
-            const meseOggi = oggi.getMonth() + 1;
-
-            const eventiDiOggi = eventiData.filter(evento => {
-              if (!evento.Data) return false;
-              const partiData = evento.Data.split("/");
-              return parseInt(partiData[0], 10) === giornoOggi && parseInt(partiData[1], 10) === meseOggi;
-            });
-
-            if (eventiDiOggi.length > 0) {
-              const nomiEventi = eventiDiOggi.map(e => `${e.Nominativo} (${e.Tipo.slice(0,1)})`).join(", ");
-              const messaggio = `Oggi festeggiano: ${nomiEventi}`;
-              const titolo = "🗓️ Promemoria Eventi Famiglia";
-
-              // --- NUOVO METODO ROBUSTO ---
-              // Il comando ora dice a curl di leggere i dati dal suo "standard input" (-d @-)
-              const command = `curl -H "Title: ${titolo}" -H "Tags: cake" -H "Priority: max" -d @- ntfy.sh/${topic}`;
-              
-              console.log("Invio notifica con metodo standard input...");
-              try {
-                // Passiamo il messaggio come "input" al processo, invece di inserirlo nel comando
-                const output = execSync(command, { input: messaggio }).toString();
-                console.log("Risposta dal server ntfy:", output);
-              } catch (error) {
-                console.error("Errore durante l"invio della notifica:", error.toString());
-                process.exit(1);
-              }
-              // --------------------------
-
-            } else {
-              console.log("Nessun evento per oggi.");
-            }
-          '
+          } else {
+            console.log("Nessun evento per oggi.");
+          }
+          EOF
+      
+      # --- NUOVO METODO: STEP 2 - Esegui il file dello script ---
+      - name: Esegui lo script e invia notifica
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: node script.js
