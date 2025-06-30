@@ -1,0 +1,76 @@
+name: Controllo Eventi Famiglia
+
+on:
+  schedule:
+    # Esegue lo script alle 00:01 UTC ogni giorno.
+    # Per l'Italia (CEST), corrisponde alle 02:01 del mattino.
+    - cron: '1 0 * * *'
+  # Permette di eseguire lo script manualmente dalla scheda Actions per fare dei test
+  workflow_dispatch:
+
+jobs:
+  check-events:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Controlla il codice del repository
+        uses: actions/checkout@v4
+
+      - name: Imposta Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Esegui lo script di notifica
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          if [ -z "$NTFY_TOPIC" ]; then
+            echo "Errore: La variabile NTFY_TOPIC non è stata impostata nei segreti del repository."
+            exit 1
+          fi
+
+          node -e '
+            const fs = require("fs");
+            const path = require("path");
+
+            const htmlPath = path.join(process.env.GITHUB_WORKSPACE, "Eventi.html");
+            const htmlContent = fs.readFileSync(htmlPath, "utf8");
+
+            const match = htmlContent.match(/const eventiData = (\[[\s\S]*?\]);/);
+            if (!match) {
+              console.log("Nessun evento trovato nel file. Uscita.");
+              process.exit(0);
+            }
+
+            const eventiData = JSON.parse(match[1]);
+
+            const oggi = new Date();
+            const giornoOggi = oggi.getDate();
+            const meseOggi = oggi.getMonth() + 1;
+
+            const eventiDiOggi = eventiData.filter(evento => {
+              if (!evento.Data) return false;
+              const partiData = evento.Data.split("/");
+              const giornoEvento = parseInt(partiData[0], 10);
+              const meseEvento = parseInt(partiData[1], 10);
+              return giornoEvento === giornoOggi && meseEvento === meseOggi;
+            });
+
+            if (eventiDiOggi.length > 0) {
+              console.log(`Trovati ${eventiDiOggi.length} eventi per oggi.`);
+              const nomiEventi = eventiDiOggi.map(e => `${e.Nominativo} (${e.Tipo})`).join(", ");
+              const messaggio = `Oggi festeggiano: ${nomiEventi}`;
+              fs.writeFileSync("notification_message.txt", messaggio);
+            } else {
+              console.log("Nessun evento per oggi. Uscita.");
+            }
+          '
+
+      - name: Invia la notifica (se ci sono eventi)
+        if: hashFiles('notification_message.txt') != ''
+        run: |
+          MESSAGE=$(cat notification_message.txt)
+          curl -H "Title: 🗓️ Promemoria Eventi Famiglia" \
+               -H "Tags: cake" \
+               -d "$MESSAGE" \
+               ntfy.sh/${{ secrets.NTFY_TOPIC }}
