@@ -1,90 +1,23 @@
-name: Controllo Eventi Famiglia
+name: Test di Connessione con Debug Avanzato
 
 on:
-  schedule:
-    - cron: '1 0 * * *'
-  workflow_dispatch:
+  workflow_dispatch: # Permette l'avvio manuale
 
 jobs:
-  check-events:
+  advanced-debug-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Controlla il codice del repository
-        uses: actions/checkout@v4
-
-      - name: Imposta Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      - name: Esegui lo script di notifica
-        id: script
-        env:
-          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+      - name: Invia notifica di test con diagnostica completa
         run: |
-          if [ -z "$NTFY_TOPIC" ]; then
-            echo "Errore: La variabile NTFY_TOPIC non è stata impostata."
-            exit 1
-          fi
+          # 1. Definiamo una variabile con il comando esatto da eseguire.
+          #    Ho inserito il tuo topic "msgalternativo".
+          #    L'opzione "-v" a curl ci darà un output "verboso".
+          FULL_COMMAND="curl -v -d 'Test finale di debug da GitHub' ntfy.sh/msgalternativo"
 
-          node -e '
-            const fs = require("fs");
-            const path = require("path");
+          # 2. Stampiamo nel log il comando che stiamo per eseguire
+          echo "--- COMANDO CHE VERRA' ESEGUITO ---"
+          echo $FULL_COMMAND
+          echo "------------------------------------"
 
-            const htmlPath = path.join(process.env.GITHUB_WORKSPACE, "Eventi.html");
-            const htmlContent = fs.readFileSync(htmlPath, "utf8");
-
-            const match = htmlContent.match(/const eventiData = (\[[\s\S]*?\]);/);
-            if (!match) {
-              console.log("File eventi non trovato o malformato.");
-              process.exit(0);
-            }
-            
-            const eventiData = JSON.parse(match[1]);
-
-            // --- DATA DI TEST ---
-            const oggi = new Date("2025-07-04");
-            // --------------------
-
-            const giornoOggi = oggi.getDate();
-            const meseOggi = oggi.getMonth() + 1;
-
-            const eventiDiOggi = eventiData.filter(evento => {
-              if (!evento.Data) return false;
-              const partiData = evento.Data.split("/");
-              const giornoEvento = parseInt(partiData[0], 10);
-              const meseEvento = parseInt(partiData[1], 10);
-              return giornoEvento === giornoOggi && meseEvento === meseOggi;
-            });
-
-            if (eventiDiOggi.length > 0) {
-              console.log(`Trovati ${eventiDiOggi.length} eventi per oggi.`);
-              const nomiEventi = eventiDiOggi.map(e => `${e.Nominativo} (${e.Tipo})`).join(", ");
-              const messaggio = `Oggi festeggiano: ${nomiEventi}`;
-              fs.writeFileSync("notification_message.txt", messaggio);
-              console.log("File notification_message.txt creato.");
-            } else {
-              console.log("Nessun evento per oggi. Uscita.");
-            }
-          '
-      
-      # --- NUOVO STEP DI DEBUG ---
-      - name: DEBUG - Elenca i file nella cartella
-        run: ls -l
-
-      # --- NUOVO STEP DI DEBUG ---
-      - name: DEBUG - Mostra il contenuto del file di notifica
-        if: hashFiles('notification_message.txt') != ''
-        run: |
-          echo "Il file notification_message.txt esiste. Contenuto:"
-          cat notification_message.txt
-
-      - name: Invia la notifica (se ci sono eventi)
-        if: hashFiles('notification_message.txt') != ''
-        run: |
-          curl \
-            -H "Title: 🗓️ Promemoria Eventi Famiglia" \
-            -H "Tags: cake" \
-            -H "Priority: max" \
-            --data-binary "@notification_message.txt" \
-            ntfy.sh/eventifamiglia88
+          # 3. Eseguiamo il comando
+          $FULL_COMMAND
