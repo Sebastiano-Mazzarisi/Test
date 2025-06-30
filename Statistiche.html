@@ -5,20 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Famiglia Pricci</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-    <!-- Chosen Palette: Warm Neutrals & Subtle Accents -->
-    <!-- Application Structure Plan: Ho optato per una struttura a dashboard con navigazione laterale. Questa scelta è motivata dalla natura multidimensionale dei dati (demografia, generazioni, matrimoni, nascite, cultura). Una dashboard consente di presentare i dati chiave in modo sintetico e visivo nella schermata principale ("Panoramica"), mentre le sezioni dedicate (raggiungibili tramite la navigazione) permettono un'analisi più approfondita e mirata. L'utente ha così una visione d'insieme immediata e la possibilità di esplorare i dettagli secondo i propri interessi. Le interazioni (hover sui grafici, selezione delle generazioni) sono pensate per rendere l'esplorazione dinamica e intuitiva, trasformando un'analisi statistica in una narrazione interattiva. -->
-    <!-- Visualization & Content Choices: 
-        - Panoramica (Goal: Informare): KPI (Key Performance Indicators) per dare un colpo d'occhio immediato sui numeri chiave (totale membri, età media, etc.). Grafico a Donut (Chart.js) per la distribuzione di genere e per le generazioni, ideali per mostrare proporzioni. Grafico a barre (Chart.js) per il calendario degli onomastici per una visualizzazione chiara e diretta.
-        - Generazioni (Goal: Comparare e Analizzare Cambiamenti): Grafico a barre (Chart.js) per confrontare la numerosità delle generazioni. Grafico a barre raggruppate (Chart.js) per l'età media alla genitorialità, per un confronto diretto.
-        - Matrimoni (Goal: Analizzare Relazioni): Grafico a barre raggruppate (Chart.js) per confrontare l'età al matrimonio di uomini e donne. Tabella interattiva (HTML/JS) per i dettagli delle singole unioni.
-        - Nascite (Goal: Analizzare Pattern): Grafico a barre (Chart.js) per la stagionalità delle nascite. Diagramma a barre (Chart.js) per il numero di figli per coppia, mostrando il cambiamento del tasso di fertilità.
-        - Dati (Goal: Organizzare): Tabella completa e ricercabile (HTML/JS) per dare accesso granulare a tutti i dati grezzi.
-        Tutte le visualizzazioni sono realizzate con Chart.js su Canvas per garantire interattività e responsività, evitando SVG/Mermaid. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -61,138 +51,144 @@
             padding: 1rem;
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            height: 300px;
-            max-height: 45vh;
+            height: 400px;
             width: 100%;
             margin: auto;
         }
-        @media (min-width: 768px) {
-            .chart-container {
-                height: 400px;
-                max-height: 50vh;
-            }
+        .section-divider {
+            border-bottom: 3px solid #C08261;
+            margin: 3rem 0;
+            padding-bottom: 2rem;
         }
     </style>
 </head>
-<body class="flex min-h-screen">
+<body>
 
-    <!-- Sidebar Navigation -->
-    <aside id="sidebar" class="bg-[#F6E9B2] w-64 p-4 flex flex-col fixed top-0 left-0 h-full transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out z-50">
-        <div>
-            <h1 class="text-2xl font-bold text-center mb-6">Famiglia Pricci</h1>
-            <nav>
-                <a href="#panoramica" class="nav-link block p-3 rounded-lg active">📊 Panoramica</a>
-                <a href="#generazioni" class="nav-link block p-3 rounded-lg">👨‍👩‍👧‍👦 Generazioni</a>
-                <a href="#matrimoni" class="nav-link block p-3 rounded-lg">⚭ Matrimoni</a>
-                <a href="#nascite" class="nav-link block p-3 rounded-lg">👶 Nascite</a>
-                <a href="#dati" class="nav-link block p-3 rounded-lg">📋 Dati Completi</a>
-            </nav>
+    <!-- Fixed Header -->
+    <header class="fixed top-0 left-0 w-full bg-[#F6E9B2] p-4 z-50 shadow-md">
+        <div class="flex justify-between items-center max-w-7xl mx-auto">
+            <h1 class="text-2xl font-bold">Dashboard Famiglia Pricci</h1>
+            <div class="flex gap-4">
+                <button id="print-btn" class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    Report
+                </button>
+                <button id="exit-btn" class="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    Esci
+                </button>
+            </div>
         </div>
-        <div class="mt-auto">
-             <a href="#" id="print-btn" class="nav-link print-link flex items-center p-3 rounded-lg text-blue-700 hover:bg-blue-100 hover:text-blue-800 hover:border-l-blue-700 mb-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                <span>Stampa</span>
-            </a>
-            <a href="#" id="exit-btn" class="nav-link exit-link flex items-center p-3 rounded-lg text-red-700 hover:bg-red-100 hover:text-red-800 hover:border-l-red-700">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                <span>Esci</span>
-            </a>
-        </div>
-    </aside>
-
-    <!-- Mobile Header -->
-    <header class="md:hidden bg-[#F6E9B2] p-4 fixed top-0 left-0 w-full z-30 flex justify-between items-center shadow-md">
-        <h1 class="text-xl font-bold">Famiglia Pricci</h1>
-        <button id="menu-btn" class="text-2xl p-2 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#9A3B3B] rounded-md">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-        </button>
     </header>
 
+    <!-- Navigation Menu -->
+    <nav class="fixed top-20 left-0 w-full bg-[#F8EAD8] p-2 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto">
+            <ul class="flex justify-center space-x-6 text-sm">
+                <li><a href="#panoramica" class="nav-anchor px-3 py-2 rounded hover:bg-[#C08261] hover:text-white transition-colors">📊 Panoramica</a></li>
+                <li><a href="#generazioni" class="nav-anchor px-3 py-2 rounded hover:bg-[#C08261] hover:text-white transition-colors">👨‍👩‍👧‍👦 Generazioni</a></li>
+                <li><a href="#matrimoni" class="nav-anchor px-3 py-2 rounded hover:bg-[#C08261] hover:text-white transition-colors">⚭ Matrimoni</a></li>
+                <li><a href="#nascite" class="nav-anchor px-3 py-2 rounded hover:bg-[#C08261] hover:text-white transition-colors">👶 Nascite</a></li>
+                <li><a href="#dati" class="nav-anchor px-3 py-2 rounded hover:bg-[#C08261] hover:text-white transition-colors">📋 Dati</a></li>
+            </ul>
+        </div>
+    </nav>
+
     <!-- Main Content -->
-    <main class="flex-1 md:ml-64 p-4 md:p-8 pt-24 md:pt-8 bg-[#FDF9E4]">
+    <main class="pt-32 px-4 md:px-8 max-w-7xl mx-auto">
 
         <!-- Panoramica Section -->
-        <section id="panoramica" class="space-y-8">
-            <header>
-                <h2 class="text-2xl md:text-3xl font-bold">Panoramica Demografica</h2>
-                <p class="mt-2 text-md md:text-lg text-gray-600">Una visione d'insieme dei dati chiave che raccontano la storia della famiglia, partendo dai progenitori Luigi e Teresa.</p>
+        <section id="panoramica" class="section-divider">
+            <header class="text-center mb-8">
+                <h2 class="text-3xl font-bold">Panoramica Demografica</h2>
+                <p class="mt-2 text-lg text-gray-600">Una visione d'insieme dei dati chiave della famiglia Pricci</p>
             </header>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
                 <div class="kpi-card">
-                    <div class="text-3xl sm:text-4xl font-bold" id="total-members">33</div>
-                    <div class="text-xs sm:text-sm mt-2">Membri Totali</div>
+                    <div class="text-4xl font-bold" id="total-members">33</div>
+                    <div class="text-sm mt-2">Membri Totali</div>
                 </div>
                 <div class="kpi-card">
-                    <div class="text-3xl sm:text-4xl font-bold" id="avg-age">48.9</div>
-                    <div class="text-xs sm:text-sm mt-2">Età Media</div>
+                    <div class="text-4xl font-bold" id="avg-age">48.9</div>
+                    <div class="text-sm mt-2">Età Media</div>
                 </div>
                 <div class="kpi-card">
-                    <div class="text-3xl sm:text-4xl font-bold" id="time-span">86</div>
-                    <div class="text-xs sm:text-sm mt-2">Arco Temporale</div>
+                    <div class="text-4xl font-bold" id="time-span">86</div>
+                    <div class="text-sm mt-2">Arco Temporale</div>
                 </div>
                 <div class="kpi-card">
-                    <div class="text-3xl sm:text-4xl font-bold" id="median-birth-year">1974</div>
-                    <div class="text-xs sm:text-sm mt-2">Anno Nascita Med.</div>
+                    <div class="text-4xl font-bold" id="median-birth-year">1974</div>
+                    <div class="text-sm mt-2">Anno Nascita Med.</div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                 <div class="chart-container">
-                    <h3 class="text-xl font-bold text-center mb-2">Distribuzione per Genere</h3>
+                    <h3 class="text-xl font-bold text-center mb-4">Distribuzione per Genere</h3>
                     <canvas id="gender-chart"></canvas>
                 </div>
                 <div class="chart-container">
-                    <h3 class="text-xl font-bold text-center mb-2">Composizione Generazionale</h3>
+                    <h3 class="text-xl font-bold text-center mb-4">Composizione Generazionale</h3>
                     <canvas id="generation-pie-chart"></canvas>
                 </div>
             </div>
             
-            <div class="chart-container" style="max-width: 900px;">
+            <div class="chart-container">
                  <h3 class="text-xl font-bold text-center mb-4">Calendario Sociale: Gli Onomastici</h3>
                  <canvas id="onomastici-chart"></canvas>
             </div>
         </section>
 
         <!-- Generazioni Section -->
-        <section id="generazioni" class="space-y-8 hidden">
-            <header>
-                <h2 class="text-2xl md:text-3xl font-bold">Analisi Generazionale</h2>
-                <p class="mt-2 text-md md:text-lg text-gray-600">Un confronto tra le generazioni per osservare l'evoluzione della famiglia.</p>
+        <section id="generazioni" class="section-divider">
+            <header class="text-center mb-8">
+                <h2 class="text-3xl font-bold">Analisi Generazionale</h2>
+                <p class="mt-2 text-lg text-gray-600">Un confronto tra le generazioni per osservare l'evoluzione della famiglia</p>
             </header>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div class="chart-container">
-                    <h3 class="text-xl font-bold text-center mb-2">Numerosità delle Generazioni</h3>
+                    <h3 class="text-xl font-bold text-center mb-4">Numerosità delle Generazioni</h3>
                     <canvas id="generation-bar-chart"></canvas>
                 </div>
                  <div class="chart-container">
-                    <h3 class="text-xl font-bold text-center mb-2">Età Media alla Genitorialità</h3>
+                    <h3 class="text-xl font-bold text-center mb-4">Età Media alla Genitorialità</h3>
                     <canvas id="parenting-age-chart"></canvas>
                 </div>
             </div>
         </section>
 
         <!-- Matrimoni Section -->
-        <section id="matrimoni" class="space-y-8 hidden">
-             <header>
-                <h2 class="text-2xl md:text-3xl font-bold">Statistiche Matrimoniali</h2>
-                <p class="mt-2 text-md md:text-lg text-gray-600">Un'analisi delle unioni che hanno formato i nuclei familiari.</p>
+        <section id="matrimoni" class="section-divider">
+             <header class="text-center mb-8">
+                <h2 class="text-3xl font-bold">Statistiche Matrimoniali</h2>
+                <p class="mt-2 text-lg text-gray-600">Un'analisi delle unioni che hanno formato i nuclei familiari</p>
             </header>
-            <div class="chart-container mx-auto" style="max-width: 800px;">
-                <h3 class="text-xl font-bold text-center mb-2">Età Media al Matrimonio: Uomini vs Donne</h3>
+            <div class="chart-container mb-8 max-w-4xl mx-auto">
+                <h3 class="text-xl font-bold text-center mb-4">Età Media al Matrimonio: Uomini vs Donne</h3>
                 <canvas id="marriage-age-chart"></canvas>
             </div>
-            <div class="bg-[#F8EAD8] p-4 rounded-lg shadow-md">
-                 <h3 class="text-xl font-bold mb-4">Dettaglio delle Unioni</h3>
+            <div class="bg-[#F8EAD8] p-6 rounded-lg shadow-md">
+                 <h3 class="text-xl font-bold mb-4 text-center">Dettaglio delle Unioni</h3>
                  <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
+                    <table class="w-full text-left">
                         <thead>
                             <tr class="border-b-2 border-[#C08261]">
-                                <th class="p-2">Coppia</th>
-                                <th class="p-2">Data Matr.</th>
-                                <th class="p-2">Età Marito</th>
-                                <th class="p-2">Età Moglie</th>
-                                <th class="p-2">Diff.</th>
+                                <th class="p-3">Coppia</th>
+                                <th class="p-3">Data Matrimonio</th>
+                                <th class="p-3">Età Marito</th>
+                                <th class="p-3">Età Moglie</th>
+                                <th class="p-3">Differenza</th>
                             </tr>
                         </thead>
                         <tbody id="marriage-table"></tbody>
@@ -202,45 +198,44 @@
         </section>
 
         <!-- Nascite Section -->
-        <section id="nascite" class="space-y-8 hidden">
-            <header>
-                <h2 class="text-2xl md:text-3xl font-bold">Natalità e Fertilità</h2>
-                <p class="mt-2 text-md md:text-lg text-gray-600">L'evoluzione dei modelli di procreazione nella storia della famiglia.</p>
+        <section id="nascite" class="section-divider">
+            <header class="text-center mb-8">
+                <h2 class="text-3xl font-bold">Natalità e Fertilità</h2>
+                <p class="mt-2 text-lg text-gray-600">L'evoluzione dei modelli di procreazione nella storia della famiglia</p>
             </header>
              <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div class="chart-container">
-                    <h3 class="text-xl font-bold text-center mb-2">Distribuzione Mensile Nascite</h3>
+                    <h3 class="text-xl font-bold text-center mb-4">Distribuzione Mensile Nascite</h3>
                     <canvas id="birth-month-chart"></canvas>
                 </div>
                  <div class="chart-container">
-                    <h3 class="text-xl font-bold text-center mb-2">Numero di Figli per Coppia</h3>
+                    <h3 class="text-xl font-bold text-center mb-4">Numero di Figli per Coppia</h3>
                     <canvas id="children-per-couple-chart"></canvas>
                 </div>
             </div>
         </section>
 
         <!-- Dati Completi Section -->
-        <section id="dati" class="space-y-8 hidden">
-            <header>
-                <h2 class="text-2xl md:text-3xl font-bold">Esplora i Dati Completi</h2>
-                <p class="mt-2 text-md md:text-lg text-gray-600">Cerca, filtra e ordina i dati anagrafici di tutti i membri della famiglia.</p>
+        <section id="dati">
+            <header class="text-center mb-8">
+                <h2 class="text-3xl font-bold">Esplora i Dati Completi</h2>
+                <p class="mt-2 text-lg text-gray-600">Cerca, filtra e ordina i dati anagrafici di tutti i membri della famiglia</p>
             </header>
-            <div class="bg-[#F8EAD8] p-4 rounded-lg shadow-md">
-                <input type="text" id="search-input" class="w-full p-2 mb-4 border-gray-300 rounded-lg" placeholder="Cerca per nome, cognome...">
+            <div class="bg-[#F8EAD8] p-6 rounded-lg shadow-md">
+                <input type="text" id="search-input" class="w-full p-3 mb-4 border border-gray-300 rounded-lg" placeholder="Cerca per nome, cognome...">
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
+                    <table class="w-full text-left">
                         <thead class="border-b-2 border-[#C08261]">
                             <tr>
-                                <th class="p-2 cursor-pointer" onclick="sortTable(0)">Cognome ↓</th>
-                                <th class="p-2 cursor-pointer" onclick="sortTable(1)">Nome ↓</th>
-                                <th class="p-2 cursor-pointer" onclick="sortTable(2)">Sesso ↓</th>
-                                <th class="p-2 cursor-pointer" onclick="sortTable(3)">Nascita ↓</th>
-                                <th class="p-2 cursor-pointer" onclick="sortTable(4)">Gen. ↓</th>
-                                <th class="p-2 cursor-pointer" onclick="sortTable(5)">Età ↓</th>
+                                <th class="p-3 cursor-pointer" onclick="sortTable(0)">Cognome ↓</th>
+                                <th class="p-3 cursor-pointer" onclick="sortTable(1)">Nome ↓</th>
+                                <th class="p-3 cursor-pointer" onclick="sortTable(2)">Sesso ↓</th>
+                                <th class="p-3 cursor-pointer" onclick="sortTable(3)">Nascita ↓</th>
+                                <th class="p-3 cursor-pointer" onclick="sortTable(4)">Gen. ↓</th>
+                                <th class="p-3 cursor-pointer" onclick="sortTable(5)">Età ↓</th>
                             </tr>
                         </thead>
-                        <tbody id="full-data-table">
-                        </tbody>
+                        <tbody id="full-data-table"></tbody>
                     </table>
                 </div>
             </div>
@@ -248,12 +243,27 @@
 
     </main>
 
+    <footer class="mt-16 py-8 text-center text-gray-500">
+        <p>&copy; 2025 Dashboard Famiglia Pricci - Generato con amore per la famiglia</p>
+    </footer>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             
+            // Verifica che Chart.js sia caricato
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js non è caricato correttamente');
+                return;
+            }
+
+            // Registra il plugin dei data labels
+            if (typeof ChartDataLabels !== 'undefined') {
+                Chart.register(ChartDataLabels);
+            }
+            
             window.chartInstances = {};
 
-            const rawFamilyData = [
+            const familyData = [
                 { id: 3, cognome: "Pricci", nome: "Luigi", sesso: "M", nascita: "1933-11-16", morte: null, gen: "G1" },
                 { id: 4, cognome: "Grilletti", nome: "Teresa", sesso: "F", nascita: "1937-03-05", morte: null, gen: "G1" },
                 { id: 5, cognome: "Lorusso", nome: "Onofrio", sesso: "M", nascita: "1951-08-05", morte: null, gen: "G2" },
@@ -288,8 +298,6 @@
                 { id: 34, cognome: "Lorusso", nome: "Nina", sesso: "F", nascita: "2015-11-29", morte: null, gen: "G4" },
                 { id: 35, cognome: "Rotondi", nome: "Nicoletta", sesso: "F", nascita: "2019-02-12", morte: null, gen: "G4" }
             ];
-
-            const familyData = JSON.parse(JSON.stringify(rawFamilyData));
 
             const marriageData = [
                 { marito: "Luigi Pricci", moglie: "Teresa Grilletti", data: "1956-12-03" },
@@ -332,19 +340,7 @@
                 { coppia: "Gianni & Cinzia", figli: 1, gen: "G3" }
             ];
 
-            const customCanvasBackgroundColor = {
-                id: 'customCanvasBackgroundColor',
-                beforeDraw: (chart) => {
-                    const { ctx } = chart;
-                    ctx.save();
-                    ctx.globalCompositeOperation = 'destination-over';
-                    ctx.fillStyle = '#F8EAD8';
-                    ctx.fillRect(0, 0, chart.width, chart.height);
-                    ctx.restore();
-                }
-            };
-
-            Chart.register(ChartDataLabels, customCanvasBackgroundColor);
+            Chart.register(ChartDataLabels);
             
             const getAge = (birthDate, deathDate = null) => {
                 const start = new Date(birthDate);
@@ -375,7 +371,6 @@
             document.getElementById('time-span').textContent = birthYears[birthYears.length - 1] - birthYears[0];
             document.getElementById('median-birth-year').textContent = birthYears[Math.floor(birthYears.length / 2)];
 
-
             // Chart Colors
             const chartColors = {
                 primary: '#9A3B3B',
@@ -398,9 +393,7 @@
                     },
                     datalabels: {
                         color: chartColors.text,
-                        font: {
-                            weight: 'bold'
-                        }
+                        font: { weight: 'bold' }
                     }
                 },
                 scales: {
@@ -431,13 +424,14 @@
                         borderWidth: 4
                     }]
                 },
-                options: { ...chartDefaultOptions, 
+                options: { 
+                    ...chartDefaultOptions, 
                     scales: {},
                     plugins: {
                         ...chartDefaultOptions.plugins,
                         datalabels: {
                             color: '#FFFFFF',
-                             formatter: (value, ctx) => {
+                            formatter: (value, ctx) => {
                                 const sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
                                 const percentage = (value * 100 / sum).toFixed(1) + '%';
                                 return percentage;
@@ -453,6 +447,7 @@
                 acc[p.gen] = (acc[p.gen] || 0) + 1;
                 return acc;
             }, {});
+            
             window.chartInstances['generation-pie-chart'] = new Chart(document.getElementById('generation-pie-chart'), {
                 type: 'pie',
                 data: {
@@ -464,7 +459,8 @@
                         borderWidth: 4
                     }]
                 },
-                options: { ...chartDefaultOptions, 
+                options: { 
+                    ...chartDefaultOptions, 
                     scales: {},
                     plugins: {
                         ...chartDefaultOptions.plugins,
@@ -481,6 +477,7 @@
             const onomasticiCounts = Object.keys(onomasticiData).map(month => {
                  return Object.values(onomasticiData[month]).reduce((sum, arr) => sum + arr.length, 0);
             });
+            
             window.chartInstances['onomastici-chart'] = new Chart(document.getElementById('onomastici-chart'), {
                 type: 'bar',
                 data: {
@@ -500,13 +497,9 @@
                             align: 'center',
                             color: '#FFFFFF'
                         }
-                    },
-                    scales: {
-                        y: { ticks: { stepSize: 1 } }
                     }
                 }
             });
-
 
             // Generation Bar Chart
             window.chartInstances['generation-bar-chart'] = new Chart(document.getElementById('generation-bar-chart'), {
@@ -554,14 +547,6 @@
                     ...chartDefaultOptions,
                     plugins: {
                         ...chartDefaultOptions.plugins,
-                        tooltip: {
-                            callbacks: {
-                                title: (context) => {
-                                    const label = context[0].label.replace('Genitori ', '');
-                                    return `Età media genitori ${label} alla nascita dei figli`
-                                }
-                            }
-                        },
                         datalabels: {
                            color: '#FFFFFF',
                            anchor: 'center',
@@ -576,11 +561,7 @@
             const marriageAges = marriageData.map(m => {
                 const maritoData = findPerson(m.marito);
                 const moglieData = findPerson(m.moglie);
-
-                if (!maritoData || !moglieData) {
-                    console.warn(`Dati non trovati per il matrimonio: ${m.marito} & ${m.moglie}`);
-                    return null;
-                }
+                if (!maritoData || !moglieData) return null;
                 return {
                     maritoAge: getAge(maritoData.nascita, m.data),
                     moglieAge: getAge(moglieData.nascita, m.data),
@@ -618,7 +599,6 @@
             marriageData.forEach(m => {
                 const maritoData = findPerson(m.marito);
                 const moglieData = findPerson(m.moglie);
-                
                 if (!maritoData || !moglieData) return;
 
                 const maritoAge = getAge(maritoData.nascita, m.data);
@@ -626,13 +606,13 @@
                 const diff = maritoAge - moglieAge;
 
                 const row = document.createElement('tr');
-                row.className = 'border-b border-[#E2C799]';
+                row.className = 'border-b border-[#E2C799] hover:bg-[#F6E9B2]';
                 row.innerHTML = `
-                    <td class="p-2">${m.marito} & ${m.moglie}</td>
-                    <td class="p-2">${new Date(m.data).toLocaleDateString('it-IT')}</td>
-                    <td class="p-2">${maritoAge}</td>
-                    <td class="p-2">${moglieAge}</td>
-                    <td class="p-2">${diff > 0 ? '+' : ''}${diff}</td>
+                    <td class="p-3">${m.marito} & ${m.moglie}</td>
+                    <td class="p-3">${new Date(m.data).toLocaleDateString('it-IT')}</td>
+                    <td class="p-3">${maritoAge}</td>
+                    <td class="p-3">${moglieAge}</td>
+                    <td class="p-3">${diff > 0 ? '+' : ''}${diff}</td>
                 `;
                 marriageTableBody.appendChild(row);
             });
@@ -641,6 +621,7 @@
             const birthMonths = familyData.map(p => new Date(p.nascita).getMonth());
             const monthCounts = Array(12).fill(0);
             birthMonths.forEach(m => monthCounts[m]++);
+            
             window.chartInstances['birth-month-chart'] = new Chart(document.getElementById('birth-month-chart'), {
                 type: 'bar',
                 data: {
@@ -684,11 +665,6 @@
                     ...chartDefaultOptions,
                     plugins: {
                          ...chartDefaultOptions.plugins,
-                         tooltip: {
-                             callbacks: {
-                                 afterLabel: (context) => `Genitori della ${childrenData[context.dataIndex].gen}`
-                             }
-                         },
                          datalabels: {
                             anchor: 'center',
                             align: 'center',
@@ -696,13 +672,17 @@
                          }
                     },
                     scales: {
-                        y: { ticks: { stepSize: 1 } },
-                        x: { ticks: {
-                            callback: function(value, index, values) {
-                                const label = this.getLabelForValue(value);
-                                return label.length > 15 ? label.split(' & ') : label;
+                        ...chartDefaultOptions.scales,
+                        x: { 
+                            ...chartDefaultOptions.scales.x,
+                            ticks: {
+                                ...chartDefaultOptions.scales.x.ticks,
+                                callback: function(value, index, values) {
+                                    const label = this.getLabelForValue(value);
+                                    return label.length > 15 ? label.split(' & ') : label;
+                                }
                             }
-                        }}
+                        }
                     }
                 }
             });
@@ -718,12 +698,12 @@
                     const row = document.createElement('tr');
                     row.className = 'border-b border-[#E2C799] hover:bg-[#F6E9B2]';
                     row.innerHTML = `
-                        <td class="p-2">${p.cognome}</td>
-                        <td class="p-2">${p.nome}</td>
-                        <td class="p-2">${p.sesso}</td>
-                        <td class="p-2">${new Date(p.nascita).toLocaleDateString('it-IT')}</td>
-                        <td class="p-2">${p.gen}</td>
-                        <td class="p-2">${p.eta}</td>
+                        <td class="p-3">${p.cognome}</td>
+                        <td class="p-3">${p.nome}</td>
+                        <td class="p-3">${p.sesso}</td>
+                        <td class="p-3">${new Date(p.nascita).toLocaleDateString('it-IT')}</td>
+                        <td class="p-3">${p.gen}</td>
+                        <td class="p-3">${p.eta}</td>
                     `;
                     fullDataTable.appendChild(row);
                 });
@@ -731,7 +711,6 @@
             
             window.sortTable = (columnIndex) => {
                 const direction = (currentSort.column === columnIndex && currentSort.direction === 'asc') ? 'desc' : 'asc';
-                
                 const headers = [ 'cognome', 'nome', 'sesso', 'nascita', 'gen', 'eta'];
                 const key = headers[columnIndex];
                 
@@ -765,60 +744,31 @@
                 );
                 populateTable(filteredData);
             });
-            
-            // Navigation Logic
-            const sections = document.querySelectorAll('main section');
-            const navLinks = document.querySelectorAll('.nav-link');
-            const sidebar = document.getElementById('sidebar');
-            const menuBtn = document.getElementById('menu-btn');
 
-            const activateLink = (hash) => {
-                navLinks.forEach(link => {
-                    if (link.hash === hash) {
-                        link.classList.add('active');
-                    } else {
-                        link.classList.remove('active');
-                    }
-                });
-            };
-            
-            const showSection = (hash) => {
-                sections.forEach(section => {
-                    if ('#' + section.id === hash) {
-                        section.classList.remove('hidden');
-                    } else {
-                        section.classList.add('hidden');
-                    }
-                });
-                activateLink(hash);
-                window.scrollTo(0, 0);
-            };
-
-            navLinks.forEach(link => {
-                link.addEventListener('click', (e) => {
+            // Navigation for smooth scrolling
+            document.querySelectorAll('.nav-anchor').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
                     e.preventDefault();
-                    if (e.currentTarget.id === 'print-btn' || e.currentTarget.id === 'exit-btn') return;
-                    const hash = e.currentTarget.hash;
-                    history.pushState(null, '', hash);
-                    showSection(hash);
-                    if (window.innerWidth < 768) {
-                        sidebar.classList.add('-translate-x-full');
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
                     }
                 });
             });
 
-            menuBtn.addEventListener('click', () => {
-                sidebar.classList.toggle('-translate-x-full');
-            });
-
-            const exitBtn = document.getElementById('exit-btn');
-            exitBtn.addEventListener('click', (e) => {
+            // Exit and Print buttons
+            document.getElementById('exit-btn').addEventListener('click', (e) => {
                 e.preventDefault();
-                document.body.style.display = 'none';
+                window.close();
+                setTimeout(() => {
+                    window.location.href = 'about:blank';
+                }, 100);
             });
 
-            const printBtn = document.getElementById('print-btn');
-            printBtn.addEventListener('click', async (e) => {
+            document.getElementById('print-btn').addEventListener('click', async (e) => {
                 e.preventDefault();
                 await generatePdf();
             });
@@ -830,15 +780,6 @@
                 const docWidth = pdf.internal.pageSize.getWidth();
                 const docHeight = pdf.internal.pageSize.getHeight();
                 let yPos = margin;
-
-                const currentHash = window.location.hash || '#panoramica';
-                document.querySelectorAll('main section').forEach(s => s.classList.remove('hidden'));
-                
-                Object.values(window.chartInstances).forEach(chart => {
-                    if(chart) chart.resize();
-                });
-                
-                await new Promise(resolve => setTimeout(resolve, 300));
 
                 const addTitle = (title, y) => {
                     pdf.setFontSize(18);
@@ -864,21 +805,32 @@
                         console.error(`Grafico non valido: ${canvasId}`);
                         return { width: 0, height: 0, y: y };
                     }
-                    const imgData = chart.toBase64Image('image/jpeg', 0.9);
+                    
+                    // Forza il ridisegno del grafico con sfondo bianco
+                    const originalBg = chart.canvas.style.backgroundColor;
+                    chart.canvas.style.backgroundColor = '#FFFFFF';
+                    chart.update('none');
+                    
+                    const imgData = chart.toBase64Image('image/png', 1.0);
+                    
+                    // Ripristina lo sfondo originale
+                    chart.canvas.style.backgroundColor = originalBg;
+                    
                     const imgWidth = width;
                     const imgHeight = chart.height * imgWidth / chart.width;
                     if (y + imgHeight > docHeight - margin) {
                         pdf.addPage();
                         y = margin;
                     }
-                    pdf.addImage(imgData, 'JPEG', x, y, imgWidth, imgHeight);
+                    pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
                     return { width: imgWidth, height: imgHeight, y: y };
                 }
                 
                 // === PAGE 1 ===
-                yPos = addTitle('Riepilogo Famiglia Pricci', yPos);
+                yPos = addTitle('Report Dashboard Famiglia Pricci', yPos);
                 pdf.autoTable({
-                    theme: 'striped', styles: { cellPadding: 8, font: 'Inter' },
+                    theme: 'striped', 
+                    styles: { cellPadding: 8, font: 'helvetica' },
                     body: [
                         [{ content: 'Membri Totali:', styles: { fontStyle: 'bold' } }, document.getElementById('total-members').textContent],
                         [{ content: 'Età Media:', styles: { fontStyle: 'bold' } }, document.getElementById('avg-age').textContent + ' Anni'],
@@ -909,18 +861,36 @@
                 
                 const marriageAgeDim = addChart('marriage-age-chart', margin, yPos, halfWidth);
                 yPos = addSubTitle('Dettaglio Unioni', marriageAgeDim.y + marriageAgeDim.height + 20);
-                pdf.autoTable({ html: '#marriage-table', startY: yPos, theme: 'grid' });
+                pdf.autoTable({ 
+                    html: '#marriage-table', 
+                    startY: yPos, 
+                    theme: 'grid',
+                    styles: { fontSize: 10 },
+                    headStyles: { fillColor: [154, 59, 59] }
+                });
                 yPos = pdf.previousAutoTable.finalY + 20;
 
                 // === PAGE 3 ===
                 pdf.addPage();
                 yPos = margin;
                 yPos = addTitle('Natalità e Dati Anagrafici', yPos);
-                yPos = addSubTitle('Distribuzione Mensile Nascite', yPos);
-                const birthMonthDim = addChart('birth-month-chart', margin, yPos, halfWidth);
                 
-                const childrenChartY = addSubTitle('Numero Figli per Coppia', yPos);
-                const childrenDim = addChart('children-per-couple-chart', margin + halfWidth + 20, childrenChartY, halfWidth);
+                // Posiziono i sottotitoli sopra i rispettivi grafici
+                const leftSubtitleY = yPos;
+                const rightSubtitleY = yPos;
+                
+                // Aggiungo sottotitolo sinistro
+                pdf.setFontSize(14);
+                pdf.setTextColor('#402E32');
+                pdf.text('Distribuzione Mensile Nascite', margin, leftSubtitleY);
+                
+                // Aggiungo sottotitolo destro
+                pdf.text('Numero Figli per Coppia', margin + halfWidth + 20, rightSubtitleY);
+                
+                // I grafici iniziano alla stessa altezza sotto i sottotitoli
+                const chartsY = leftSubtitleY + 20;
+                const birthMonthDim = addChart('birth-month-chart', margin, chartsY, halfWidth);
+                const childrenDim = addChart('children-per-couple-chart', margin + halfWidth + 20, chartsY, halfWidth);
                 
                 yPos = Math.max(birthMonthDim.y + birthMonthDim.height, childrenDim.y + childrenDim.height) + 20;
                 
@@ -932,15 +902,11 @@
                     headStyles: {fillColor: [154, 59, 59]}
                 });
 
-                showSection(currentHash);
-                
                 pdf.autoPrint();
                 window.open(pdf.output('bloburl'), '_blank');
             }
             
-            // Initial load
-            const initialHash = window.location.hash || '#panoramica';
-            showSection(initialHash);
+            populateTable(familyData);
             sortTable(0);
         });
     </script>
