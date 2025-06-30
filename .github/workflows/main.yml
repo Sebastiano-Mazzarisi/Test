@@ -2,7 +2,6 @@ name: Controllo Eventi Famiglia
 
 on:
   schedule:
-    # Esegue lo script alle 00:01 UTC ogni giorno.
     - cron: '1 0 * * *'
   workflow_dispatch:
 
@@ -25,9 +24,8 @@ jobs:
           node -e '
             const fs = require("fs");
             const path = require("path");
-            const { execSync } = require("child_process"); // Importa il modulo per eseguire comandi
+            const { execSync } = require("child_process");
 
-            // Controlla che il topic sia stato passato correttamente
             const topic = process.env.NTFY_TOPIC;
             if (!topic) {
               console.log("Errore: Topic non trovato nei segreti.");
@@ -59,22 +57,27 @@ jobs:
             });
 
             if (eventiDiOggi.length > 0) {
-              const nomiEventi = eventiDiOggi.map(e => `${e.Nominativo} (${e.Tipo})`).join(", ");
+              const nomiEventi = eventiDiOggi.map(e => `${e.Nominativo} (${e.Tipo.slice(0,1)})`).join(", ");
               const messaggio = `Oggi festeggiano: ${nomiEventi}`;
               const titolo = "🗓️ Promemoria Eventi Famiglia";
 
-              // Pulisce il messaggio per evitare problemi con caratteri speciali nel comando
-              const messaggioPulito = messaggio.replace(/'"'"'/g, "'"'");
-
-              // Costruisce ed esegue il comando curl direttamente da Node.js
-              const command = `curl -H "Title: ${titolo}" -H "Tags: cake" -H "Priority: max" -d "${messaggioPulito}" ntfy.sh/${topic}`;
+              // --- CORREZIONE CHIAVE ---
+              // Questa funzione "pulisce" il messaggio per essere sicuro per il terminale
+              const shellEscape = (str) => {
+                return "'" + str.replace(/'/g, "'\\''") + "'";
+              };
               
-              console.log("Invio notifica...");
+              const messaggioPulito = shellEscape(messaggio);
+              // -----------------------
+
+              const command = `curl -H "Title: ${titolo}" -H "Tags: cake" -H "Priority: max" -d ${messaggioPulito} ntfy.sh/${topic}`;
+              
+              console.log("Invio notifica con comando corretto...");
               try {
                 const output = execSync(command).toString();
                 console.log("Risposta dal server ntfy:", output);
               } catch (error) {
-                console.error("Errore durante l"invio della notifica:", error);
+                console.error("Errore durante l"invio della notifica:", error.toString());
                 process.exit(1);
               }
 
