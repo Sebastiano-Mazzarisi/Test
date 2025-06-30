@@ -1,23 +1,84 @@
-name: Test di Connessione con Debug Avanzato
+name: Controllo Eventi Famiglia
 
 on:
-  workflow_dispatch: # Permette l'avvio manuale
+  schedule:
+    # Esegue lo script alle 00:01 UTC ogni giorno.
+    - cron: '1 0 * * *'
+  workflow_dispatch:
 
 jobs:
-  advanced-debug-test:
+  check-and-notify:
     runs-on: ubuntu-latest
     steps:
-      - name: Invia notifica di test con diagnostica completa
+      - name: Controlla il codice del repository
+        uses: actions/checkout@v4
+
+      - name: Imposta Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Controlla eventi e invia notifica
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
         run: |
-          # 1. Definiamo una variabile con il comando esatto da eseguire.
-          #    Ho inserito il tuo topic "msgalternativo".
-          #    L'opzione "-v" a curl ci darà un output "verboso".
-          FULL_COMMAND="curl -v -d 'Test finale di debug da GitHub' ntfy.sh/msgalternativo"
+          node -e '
+            const fs = require("fs");
+            const path = require("path");
+            const { execSync } = require("child_process"); // Importa il modulo per eseguire comandi
 
-          # 2. Stampiamo nel log il comando che stiamo per eseguire
-          echo "--- COMANDO CHE VERRA' ESEGUITO ---"
-          echo $FULL_COMMAND
-          echo "------------------------------------"
+            // Controlla che il topic sia stato passato correttamente
+            const topic = process.env.NTFY_TOPIC;
+            if (!topic) {
+              console.log("Errore: Topic non trovato nei segreti.");
+              process.exit(1);
+            }
 
-          # 3. Eseguiamo il comando
-          $FULL_COMMAND
+            const htmlPath = path.join(process.env.GITHUB_WORKSPACE, "Eventi.html");
+            const htmlContent = fs.readFileSync(htmlPath, "utf8");
+            const match = htmlContent.match(/const eventiData = (\[[\s\S]*?\]);/);
+
+            if (!match) {
+              console.log("Array eventiData non trovato nel file HTML.");
+              process.exit(0);
+            }
+            
+            const eventiData = JSON.parse(match[1]);
+
+            // --- DATA DI TEST (per l"ultima prova) ---
+            const oggi = new Date("2025-07-04"); 
+            // ----------------------------------------
+
+            const giornoOggi = oggi.getDate();
+            const meseOggi = oggi.getMonth() + 1;
+
+            const eventiDiOggi = eventiData.filter(evento => {
+              if (!evento.Data) return false;
+              const partiData = evento.Data.split("/");
+              return parseInt(partiData[0], 10) === giornoOggi && parseInt(partiData[1], 10) === meseOggi;
+            });
+
+            if (eventiDiOggi.length > 0) {
+              const nomiEventi = eventiDiOggi.map(e => `${e.Nominativo} (${e.Tipo})`).join(", ");
+              const messaggio = `Oggi festeggiano: ${nomiEventi}`;
+              const titolo = "🗓️ Promemoria Eventi Famiglia";
+
+              // Pulisce il messaggio per evitare problemi con caratteri speciali nel comando
+              const messaggioPulito = messaggio.replace(/'"'"'/g, "'"'");
+
+              // Costruisce ed esegue il comando curl direttamente da Node.js
+              const command = `curl -H "Title: ${titolo}" -H "Tags: cake" -H "Priority: max" -d "${messaggioPulito}" ntfy.sh/${topic}`;
+              
+              console.log("Invio notifica...");
+              try {
+                const output = execSync(command).toString();
+                console.log("Risposta dal server ntfy:", output);
+              } catch (error) {
+                console.error("Errore durante l"invio della notifica:", error);
+                process.exit(1);
+              }
+
+            } else {
+              console.log("Nessun evento per oggi.");
+            }
+          '
