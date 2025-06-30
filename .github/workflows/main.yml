@@ -2,7 +2,8 @@ name: Controllo Eventi Famiglia
 
 on:
   schedule:
-    - cron: '1 0 * * *'
+    # Esegue lo script alle 06:00 UTC ogni giorno (le 08:00 del mattino in Italia).
+    - cron: '0 6 * * *'
   workflow_dispatch:
 
 jobs:
@@ -18,7 +19,6 @@ jobs:
           node-version: '18'
 
       - name: Crea lo script di notifica
-        id: create_script
         run: |
           cat <<'EOF' > script.js
           const fs = require("fs");
@@ -41,9 +41,9 @@ jobs:
           
           const eventiData = JSON.parse(match[1]);
 
-          // --- DATA DI TEST ---
+          // --- DATA DI TEST (per l'ultima prova) ---
           const oggi = new Date("2025-07-04");
-          // --------------------
+          // ----------------------------------------
 
           const giornoOggi = oggi.getDate();
           const meseOggi = oggi.getMonth() + 1;
@@ -59,16 +59,13 @@ jobs:
             const messaggio = `Oggi festeggiano: ${nomiEventi}`;
             const titolo = "🗓️ Promemoria Eventi Famiglia";
 
-            // Il comando ora dice a curl di leggere i dati dal suo "standard input" (-d @-)
             const command = `curl -H "Title: ${titolo}" -H "Tags: cake" -H "Priority: max" -d @- ntfy.sh/${topic}`;
             
             console.log("Invio notifica con metodo standard input...");
             try {
-              // Passiamo il messaggio come "input" al processo
               const output = execSync(command, { input: messaggio }).toString();
               console.log("Risposta dal server ntfy:", output);
             } catch (error) {
-              // --- ECCO LA CORREZIONE ---
               console.error("Errore durante l'invio della notifica:", error);
               process.exit(1);
             }
