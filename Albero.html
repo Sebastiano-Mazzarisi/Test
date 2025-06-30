@@ -5,13 +5,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Albero Genealogico Famiglia Pricci</title>
     <style>
-        /* CSS rimane identico alla versione visivamente corretta */
         body { font-family: Arial, Helvetica, sans-serif; background-color: #f0f2f5; line-height: 1.5; color: #1c1e21; margin: 0; padding: 0; padding-top: 80px; }
-        .header { position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; background-color: #FDF9E4; padding: 10px 20px; border-bottom: 1px solid #ddd; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
+        .header { position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; background-color: #FFFFFF; padding: 10px 20px; border: 1px solid #000000; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
         .header h1 { margin: 0; font-size: 1.5em; }
-        .header button { padding: 8px 16px; font-size: 14px; font-weight: bold; border-radius: 6px; border: 1px solid #ccc; cursor: pointer; transition: all 0.2s; }
-        #pdfBtn { background-color: #4CAF50; color: white; border-color: #4CAF50; }
-        #exitBtn { background-color: #f44336; color: white; border-color: #f44336; }
+        
+        /* BOTTONI STILE EVENTI.HTML */
+        .header button { 
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-size: clamp(0.9em, 4vw, 1.1em);
+            font-weight: bold;
+            border-radius: 8px;
+            border: 2px solid #999;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            padding: 10px 16px;
+            white-space: nowrap;
+            min-height: 45px;
+            user-select: none;
+            -webkit-user-select: none;
+            text-decoration: none;
+            position: relative;
+            overflow: visible;
+            box-sizing: border-box;
+        }
+        
+        .header button:focus {
+            outline: none;
+            text-decoration: none;
+        }
+        
+        .header button:active {
+            transform: scale(0.98);
+        }
+        
+        #pdfBtn { 
+            background-color: #FFFFE0;
+            color: #333;
+            border-color: #4CAF50;
+        }
+        
+        #pdfBtn:hover, #pdfBtn:active {
+            color: #000;
+            border-color: #2E7D32;
+            background-color: #C8E6C9;
+            transform: scale(1.01);
+            text-decoration: none;
+            outline: none;
+        }
+        
+        #pdfBtn:active {
+            transform: scale(0.98);
+        }
+        
+        #exitBtn { 
+            background-color: #FFFFE0;
+            color: #333;
+            border-color: #f44336;
+        }
+        
+        #exitBtn:hover, #exitBtn:active {
+            color: #000;
+            border-color: #C62828;
+            background-color: #FFCDD2;
+            transform: scale(1.01);
+            text-decoration: none;
+            outline: none;
+        }
+        
+        #exitBtn:active {
+            transform: scale(0.98);
+        }
+        
         .tree-container { display: flex; justify-content: flex-start; padding: 20px; }
         .tree ul { padding-left: 100px; position: relative; }
         .tree > ul { padding-left: 0; }
@@ -33,13 +101,18 @@
         .tree label:hover .card { transform: scale(1.02); }
         .tree input[type=checkbox] ~ ul { display: none; }
         .tree input[type=checkbox]:checked ~ ul { display: block; }
+        
         @media only screen and (max-width: 600px) {
             .tree ul { padding-left: 50px; }
             .tree > ul { padding-left: 0; }
             .tree li::before { left: -50px; width: 50px; }
             .tree li:last-child::after { left: -50px; }
             .header h1 { font-size: 1.2em; }
-            .header button { padding: 6px 10px; font-size: 12px; }
+            .header button { 
+                padding: 8px 12px; 
+                font-size: clamp(0.85em, 3.5vw, 1.0em);
+                min-height: 40px;
+            }
             .info h4 { font-size: 17px; }
             .info p { font-size: 13px; }
         }
@@ -48,7 +121,7 @@
 <body>
 
     <div class="header">
-        <button id="pdfBtn">Genera PDF</button>
+        <button id="pdfBtn">PDF</button>
         <h1>Famiglia Pricci</h1>
         <button id="exitBtn">Esci</button>
     </div>
@@ -59,7 +132,8 @@
         </div>
     </div>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Versione stabile jsPDF -->
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -68,303 +142,442 @@
         });
 
         function generateMixedLayoutPdf() {
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF('l', 'mm', 'a4');
-            const pageHeight = pdf.internal.pageSize.getHeight();
-            const pageWidth = pdf.internal.pageSize.getWidth();
-
-            const coupleCardHeight = 22;
-            const singleCardHeight = 12;
-            const verticalYSpacing = 15;
-            const horizontalXSpacing = 4;
-            const xMargin = 5;
-            const yMargin = 15;
-            const textMargin = 3;
-            const specialPositions = {};
-
-            function parseNode(element) {
-                const card = element.querySelector('.card');
-                const h4 = card.querySelector('h4');
-                const pTags = card.querySelectorAll('p');
-                const isSingle = !h4.innerHTML.includes('&');
-                let name1 = '', name2 = '';
-                if (isSingle) {
-                    name1 = h4.textContent.trim();
-                } else {
-                    const names = h4.innerHTML.split('<br>');
-                    name1 = names[0].trim().replace('&amp;', '&');
-                    name2 = names[1] ? names[1].trim().replace('&amp;', '&') : '';
-                }
-                const classList = card.classList;
-                return {
-                    name1: name1,
-                    name2: name2,
-                    isSingle: isSingle,
-                    details: Array.from(pTags).map(p => p.textContent),
-                    children: Array.from(element.querySelectorAll(':scope > ul > li')),
-                    isMaleLed: classList.contains('male-led'),
-                    isFemaleLed: classList.contains('female-led'),
-                    hasChildren: classList.contains('has-children')
-                };
-            }
+            console.log('🚀 Generazione PDF albero genealogico...');
             
-            function drawBox(x, y, data) {
-                const titleFontSize = 8.5;
-                const detailFontSize = 6;
-                pdf.setFont('helvetica');
-                const padding = textMargin * 2;
-                let maxTextWidth = 0;
-                if (data.isSingle) {
-                    pdf.setFontSize(titleFontSize).setFont(undefined, 'bold');
-                    maxTextWidth = Math.max(maxTextWidth, pdf.getTextWidth(data.name1));
-                    pdf.setFontSize(detailFontSize).setFont(undefined, 'normal');
-                    if (data.details[0]) maxTextWidth = Math.max(maxTextWidth, pdf.getTextWidth(data.details[0]));
-                } else {
-                    pdf.setFontSize(titleFontSize).setFont(undefined, 'bold');
+            try {
+                // Controllo sicurezza libreria
+                if (!window.jspdf || !window.jspdf.jsPDF) {
+                    console.error('❌ jsPDF non disponibile');
+                    alert('Errore: Libreria PDF non caricata. Ricarica la pagina.');
+                    return;
+                }
+
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('l', 'mm', 'a4');
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                const pageWidth = pdf.internal.pageSize.getWidth();
+
+                console.log('✅ PDF inizializzato, inizio creazione layout...');
+
+                const coupleCardHeight = 22;
+                const singleCardHeight = 12;
+                const verticalYSpacing = 15;
+                const horizontalXSpacing = 4;
+                const textMargin = 3;
+                const specialPositions = {};
+
+                function parseNode(element) {
+                    if (!element) return null;
+                    
+                    const card = element.querySelector('.card');
+                    if (!card) return null;
+                    
+                    const h4 = card.querySelector('h4');
+                    const pTags = card.querySelectorAll('p');
+                    const isSingle = !h4.innerHTML.includes('&');
+                    let name1 = '', name2 = '';
+                    
+                    if (isSingle) {
+                        name1 = h4.textContent.trim();
+                    } else {
+                        const names = h4.innerHTML.split('<br>');
+                        name1 = names[0].trim().replace('&amp;', '&');
+                        name2 = names[1] ? names[1].trim().replace('&amp;', '&') : '';
+                    }
+                    
+                    const classList = card.classList;
+                    return {
+                        name1: name1,
+                        name2: name2,
+                        isSingle: isSingle,
+                        details: Array.from(pTags).map(p => p.textContent),
+                        children: Array.from(element.querySelectorAll(':scope > ul > li')),
+                        isMaleLed: classList.contains('male-led'),
+                        isFemaleLed: classList.contains('female-led'),
+                        hasChildren: classList.contains('has-children')
+                    };
+                }
+                
+                function drawBox(x, y, data) {
+                    if (!data) return null;
+                    
+                    const titleFontSize = 8.5;
+                    const detailFontSize = 6;
+                    pdf.setFont('helvetica');
+                    const padding = textMargin * 2;
+                    let maxTextWidth = 0;
+                    
+                    if (data.isSingle) {
+                        pdf.setFontSize(titleFontSize).setFont(undefined, 'bold');
+                        maxTextWidth = Math.max(maxTextWidth, pdf.getTextWidth(data.name1));
+                        pdf.setFontSize(detailFontSize).setFont(undefined, 'normal');
+                        if (data.details[0]) maxTextWidth = Math.max(maxTextWidth, pdf.getTextWidth(data.details[0]));
+                    } else {
+                        pdf.setFontSize(titleFontSize).setFont(undefined, 'bold');
+                        maxTextWidth = Math.max(maxTextWidth, pdf.getTextWidth(data.name1), pdf.getTextWidth(data.name2));
+                        pdf.setFontSize(detailFontSize).setFont(undefined, 'normal');
+                        data.details.forEach(d => maxTextWidth = Math.max(maxTextWidth, pdf.getTextWidth(d)));
+                    }
+                    
+                    const cardWidth = maxTextWidth + padding;
+                    const cardHeight = data.isSingle ? singleCardHeight : coupleCardHeight;
+                    
+                    // Sfondo bianco
+                    pdf.setFillColor(255, 255, 255);
+                    pdf.rect(x, y, cardWidth, cardHeight, 'F');
+                    
+                    // Bordi colorati
+                    const borderWidth = 0.5;
+                    pdf.setLineWidth(borderWidth);
+
+                    // Bordo superiore
+                    if (data.isMaleLed) {
+                        pdf.setDrawColor(74, 144, 226); 
+                    } else if (data.isFemaleLed) {
+                        pdf.setDrawColor(226, 74, 141);
+                    } else {
+                        pdf.setDrawColor(150);
+                    }
+                    pdf.line(x, y, x + cardWidth, y);
+
+                    // Bordi laterali e inferiore
+                    if (data.hasChildren) {
+                        pdf.setDrawColor(40, 167, 69);
+                    } else {
+                        pdf.setDrawColor(255, 193, 7);
+                    }
+                    pdf.line(x, y, x, y + cardHeight);
+                    pdf.line(x + cardWidth, y, x + cardWidth, y + cardHeight);
+                    pdf.line(x, y + cardHeight, x + cardWidth, y + cardHeight);
+
+                    // Testo
+                    pdf.setTextColor(0, 0, 0);
+                    const textMarginActual = padding / 2;
+                    
+                    if (data.isSingle) {
+                        pdf.setFontSize(titleFontSize).setFont(undefined, 'bold');
+                        pdf.text(data.name1, x + textMarginActual, y + 5);
+                        pdf.setFontSize(detailFontSize).setFont(undefined, 'normal');
+                        if (data.details[0]) pdf.text(data.details[0], x + textMarginActual, y + 9);
+                    } else {
+                        pdf.setFontSize(titleFontSize).setFont(undefined, 'bold');
+                        pdf.text(data.name1, x + textMarginActual, y + 5);
+                        pdf.text(data.name2, x + textMarginActual, y + 9);
+                        pdf.setFontSize(detailFontSize).setFont(undefined, 'normal');
+                        if (data.details[1]) pdf.text(data.details[1], x + textMarginActual, y + 13);
+                        if (data.details[2]) pdf.text(data.details[2], x + textMarginActual, y + 16.5);
+                        if (data.details[0]) pdf.text(data.details[0], x + textMarginActual, y + 20);
+                    }
+                    
+                    return { x, y, width: cardWidth, height: cardHeight };
+                }
+
+                // Funzioni helper per identificare persone specifiche
+                function isAngela(childEl) {
+                    const h4 = childEl.querySelector('.card h4');
+                    return h4 && h4.textContent.includes('Angela Pricci');
+                }
+                
+                function isMariaAntonietta(childEl) {
+                    const h4 = childEl.querySelector('.card h4');
+                    return h4 && h4.textContent.includes('Maria Antonietta Pricci');
+                }
+                
+                function isVanna(childEl) {
+                    const h4 = childEl.querySelector('.card h4');
+                    return h4 && h4.textContent.includes('Vanna Pricci');
+                }
+                
+                function isGiuseppe(childEl) {
+                    const h4 = childEl.querySelector('.card h4');
+                    return h4 && h4.textContent.includes('Giuseppe Pricci');
+                }
+
+                // Parsing della struttura HTML
+                const rootElement = document.querySelector('#main-tree-container .tree > ul > li');
+                if (!rootElement) {
+                    throw new Error('Struttura albero non trovata');
+                }
+                
+                const rootData = parseNode(rootElement);
+                if (!rootData) {
+                    throw new Error('Dati root non validi');
+                }
+
+                const childrenL2 = rootData.children;
+                let totalWidthL2 = 0;
+                
+                // Calcolo larghezze
+                const childWidths = childrenL2.map(childEl => {
+                    const data = parseNode(childEl);
+                    if (!data) return 50; // Default width
+                    
+                    let maxTextWidth = 0;
+                    pdf.setFontSize(8.5).setFont(undefined, 'bold');
                     maxTextWidth = Math.max(maxTextWidth, pdf.getTextWidth(data.name1), pdf.getTextWidth(data.name2));
-                    pdf.setFontSize(detailFontSize).setFont(undefined, 'normal');
+                    pdf.setFontSize(6).setFont(undefined, 'normal');
                     data.details.forEach(d => maxTextWidth = Math.max(maxTextWidth, pdf.getTextWidth(d)));
-                }
-                const cardWidth = maxTextWidth + padding;
-                const cardHeight = data.isSingle ? singleCardHeight : coupleCardHeight;
+                    const finalWidth = maxTextWidth + (textMargin * 2);
+                    totalWidthL2 += finalWidth;
+                    return finalWidth;
+                });
                 
-                pdf.setFillColor(255, 255, 255);
-                pdf.rect(x, y, cardWidth, cardHeight, 'F');
+                totalWidthL2 += (childrenL2.length - 1) * horizontalXSpacing;
+
+                // Disegno root
+                const rootBox = drawBox((pageWidth - (pdf.getTextWidth(rootData.name1) + textMargin * 2)) / 2, 15, rootData);
+                if (rootBox) {
+                    specialPositions['root'] = rootBox;
+                }
                 
-                const borderWidth = 0.5;
-                pdf.setLineWidth(borderWidth);
-
-                if (data.isMaleLed) {
-                    pdf.setDrawColor(74, 144, 226); 
-                } else if (data.isFemaleLed) {
-                    pdf.setDrawColor(226, 74, 141);
-                } else {
-                    pdf.setDrawColor(150);
-                }
-                pdf.line(x, y, x + cardWidth, y);
-
-                if (data.hasChildren) {
-                    pdf.setDrawColor(40, 167, 69);
-                } else {
-                    pdf.setDrawColor(255, 193, 7);
-                }
-                pdf.line(x, y, x, y + cardHeight);
-                pdf.line(x + cardWidth, y, x + cardWidth, y + cardHeight);
-                pdf.line(x, y + cardHeight, x + cardWidth, y + cardHeight);
-
-                pdf.setTextColor(0, 0, 0);
-                const textMarginActual = padding / 2;
-                if (data.isSingle) {
-                    pdf.setFontSize(titleFontSize).setFont(undefined, 'bold');
-                    pdf.text(data.name1, x + textMarginActual, y + 5);
-                    pdf.setFontSize(detailFontSize).setFont(undefined, 'normal');
-                    if (data.details[0]) pdf.text(data.details[0], x + textMarginActual, y + 9);
-                } else {
-                    pdf.setFontSize(titleFontSize).setFont(undefined, 'bold');
-                    pdf.text(data.name1, x + textMarginActual, y + 5);
-                    pdf.text(data.name2, x + textMarginActual, y + 9);
-                    pdf.setFontSize(detailFontSize).setFont(undefined, 'normal');
-                    if (data.details[1]) pdf.text(data.details[1], x + textMarginActual, y + 13);
-                    if (data.details[2]) pdf.text(data.details[2], x + textMarginActual, y + 16.5);
-                    if (data.details[0]) pdf.text(data.details[0], x + textMarginActual, y + 20);
-                }
-                return { x, y, width: cardWidth, height: cardHeight };
-            }
-
-            function isAngela(childEl) {
-                const h4 = childEl.querySelector('.card h4');
-                return h4 && h4.textContent.includes('Angela Pricci');
-            }
-            
-            function isMariaAntonietta(childEl) {
-                const h4 = childEl.querySelector('.card h4');
-                return h4 && h4.textContent.includes('Maria Antonietta Pricci');
-            }
-            
-            function isVanna(childEl) {
-                const h4 = childEl.querySelector('.card h4');
-                return h4 && h4.textContent.includes('Vanna Pricci');
-            }
-            
-            function isGiuseppe(childEl) {
-                const h4 = childEl.querySelector('.card h4');
-                return h4 && h4.textContent.includes('Giuseppe Pricci');
-            }
-
-            // --- FASE 1: DISEGNA TUTTI I BOX E MEMORIZZA LE POSIZIONI ---
-            const rootElement = document.querySelector('#main-tree-container .tree > ul > li');
-            const rootData = parseNode(rootElement);
-            const childrenL2 = rootData.children;
-            let totalWidthL2 = 0;
-            const childWidths = childrenL2.map(childEl => {
-                const data = parseNode(childEl);
-                let maxTextWidth = 0;
-                pdf.setFontSize(8.5).setFont(undefined, 'bold');
-                maxTextWidth = Math.max(maxTextWidth, pdf.getTextWidth(data.name1), pdf.getTextWidth(data.name2));
-                pdf.setFontSize(6).setFont(undefined, 'normal');
-                data.details.forEach(d => maxTextWidth = Math.max(maxTextWidth, pdf.getTextWidth(d)));
-                const finalWidth = maxTextWidth + (textMargin * 2);
-                totalWidthL2 += finalWidth;
-                return finalWidth;
-            });
-            totalWidthL2 += (childrenL2.length - 1) * horizontalXSpacing;
-
-            const rootBox = drawBox((pageWidth - (pdf.getTextWidth(rootData.name1) + textMargin * 2)) / 2, yMargin, rootData);
-            specialPositions['root'] = rootBox;
-            
-            let currentX = (pageWidth - totalWidthL2) / 2;
-            let currentY = rootBox.y + rootBox.height + verticalYSpacing;
-            
-            childrenL2.forEach((childL2_element, index) => {
-                const childL2_data = parseNode(childL2_element);
-                const childL2_box = drawBox(currentX, currentY, childL2_data);
-                specialPositions[`gen2_${index}`] = childL2_box;
-
-                if (isAngela(childL2_element)) {
-                    let verticalY = currentY + childL2_box.height + 60;
-                    const bennyEl = childL2_data.children.find(ch => ch.querySelector('.card h4').textContent.includes('Benny Lorusso'));
-                    const cinziaEl = childL2_data.children.find(ch => ch.querySelector('.card h4').textContent.includes('Cinzia Lorusso'));
-                    if (bennyEl) {
-                        const bennyData = parseNode(bennyEl);
-                        const bennyBox = drawBox(currentX + 10, verticalY, bennyData);
-                        specialPositions.benny = bennyBox;
-                        specialPositions.bennyChildren = [];
-                        let horizontalX = currentX + 10 + bennyBox.width + 10;
-                        bennyData.children.forEach(grandchild => {
-                            const grandchildData = parseNode(grandchild);
-                            const grandchildHeight = grandchildData.isSingle ? singleCardHeight : coupleCardHeight;
-                            const alignedY = bennyBox.y + bennyBox.height - grandchildHeight;
-                            const grandchildBox = drawBox(horizontalX, alignedY, grandchildData);
-                            specialPositions.bennyChildren.push(grandchildBox);
-                            horizontalX += grandchildBox.width + 5;
-                        });
-                        verticalY += bennyBox.height + 5;
+                // Layout figli di secondo livello
+                let currentX = (pageWidth - totalWidthL2) / 2;
+                let currentY = rootBox ? rootBox.y + rootBox.height + verticalYSpacing : 50;
+                
+                childrenL2.forEach((childL2_element, index) => {
+                    const childL2_data = parseNode(childL2_element);
+                    if (!childL2_data) return;
+                    
+                    const childL2_box = drawBox(currentX, currentY, childL2_data);
+                    if (childL2_box) {
+                        specialPositions[`gen2_${index}`] = childL2_box;
                     }
-                    if (cinziaEl) {
-                        const cinziaData = parseNode(cinziaEl);
-                        const cinziaBox = drawBox(currentX + 10, verticalY, cinziaData);
-                        specialPositions.cinzia = cinziaBox;
-                        specialPositions.cinziaChildren = [];
-                        if (cinziaData.children.length > 0) {
-                            const nicolettaData = parseNode(cinziaData.children[0]);
-                            const nicolettaHeight = nicolettaData.isSingle ? singleCardHeight : coupleCardHeight;
-                            const alignedY = cinziaBox.y + cinziaBox.height - nicolettaHeight;
-                            const nicolettaBox = drawBox(currentX + 10 + cinziaBox.width + 10, alignedY, nicolettaData);
-                            specialPositions.cinziaChildren.push(nicolettaBox);
+
+                    // Layout specifico per Angela (layout orizzontale per Benny/Cinzia)
+                    if (isAngela(childL2_element) && childL2_box) {
+                        let verticalY = currentY + childL2_box.height + 60;
+                        const bennyEl = childL2_data.children.find(ch => ch.querySelector('.card h4').textContent.includes('Benny Lorusso'));
+                        const cinziaEl = childL2_data.children.find(ch => ch.querySelector('.card h4').textContent.includes('Cinzia Lorusso'));
+                        
+                        if (bennyEl) {
+                            const bennyData = parseNode(bennyEl);
+                            if (bennyData) {
+                                const bennyBox = drawBox(currentX + 10, verticalY, bennyData);
+                                if (bennyBox) {
+                                    specialPositions.benny = bennyBox;
+                                    specialPositions.bennyChildren = [];
+                                    
+                                    let horizontalX = currentX + 10 + bennyBox.width + 10;
+                                    bennyData.children.forEach(grandchild => {
+                                        const grandchildData = parseNode(grandchild);
+                                        if (grandchildData) {
+                                            const grandchildHeight = grandchildData.isSingle ? singleCardHeight : coupleCardHeight;
+                                            const alignedY = bennyBox.y + bennyBox.height - grandchildHeight;
+                                            const grandchildBox = drawBox(horizontalX, alignedY, grandchildData);
+                                            if (grandchildBox) {
+                                                specialPositions.bennyChildren.push(grandchildBox);
+                                                horizontalX += grandchildBox.width + 5;
+                                            }
+                                        }
+                                    });
+                                    verticalY += bennyBox.height + 5;
+                                }
+                            }
                         }
-                    }
-                } else {
-                    let verticalY = currentY + childL2_box.height + 10;
-                    if (childL2_data.children.length > 0) {
-                        childL2_data.children.forEach((childL3_element, l3_index) => {
-                            const childL3_data = parseNode(childL3_element);
-                            let maxL3Width = 0;
-                            pdf.setFontSize(8.5).setFont(undefined, 'bold');
-                            maxL3Width = Math.max(maxL3Width, pdf.getTextWidth(childL3_data.name1), (childL3_data.name2 ? pdf.getTextWidth(childL3_data.name2) : 0));
-                            pdf.setFontSize(6).setFont(undefined, 'normal');
-                            childL3_data.details.forEach(d => maxL3Width = Math.max(maxL3Width, pdf.getTextWidth(d)));
-                            const childL3_width = maxL3Width + (textMargin * 2);
-                            const parentRightEdge = currentX + childWidths[index];
-                            const alignedX = parentRightEdge - childL3_width + 2;
-                            const childL3_box = drawBox(alignedX, verticalY, childL3_data);
-                            specialPositions[`gen3_${index}_${l3_index}`] = childL3_box;
-                            verticalY += childL3_box.height + 5;
-                        });
-                    }
-                }
-                currentX += childWidths[index] + horizontalXSpacing;
-            });
-            
-            // --- FASE 2: DISEGNO DI TUTTE LE LINEE USANDO LE POSIZIONI MEMORIZZATE ---
-            // MODIFICA: Spessore delle linee di collegamento ridotto
-            pdf.setLineWidth(0.4);
-            pdf.setDrawColor(150);
-
-            childrenL2.forEach((childL2_element, index) => {
-                const parentBox = specialPositions.root;
-                const childBox = specialPositions[`gen2_${index}`];
-                
-                const parentBottomCenter = { x: parentBox.x + parentBox.width / 2, y: parentBox.y + parentBox.height };
-                const childTopCenter = { x: childBox.x + childBox.width / 2, y: childBox.y };
-                pdf.line(parentBottomCenter.x, parentBottomCenter.y, parentBottomCenter.x, parentBottomCenter.y + verticalYSpacing / 2);
-                pdf.line(parentBottomCenter.x, parentBottomCenter.y + verticalYSpacing / 2, childTopCenter.x, childTopCenter.y - verticalYSpacing / 2);
-                pdf.line(childTopCenter.x, childTopCenter.y - verticalYSpacing / 2, childTopCenter.x, childTopCenter.y);
-
-                const childL2_data = parseNode(childL2_element);
-                if (childL2_data.children.length > 0) {
-                    if (isAngela(childL2_element)) {
-                        const angelaBox = childBox;
-                        const bennyBox = specialPositions.benny;
-                        const cinziaBox = specialPositions.cinzia;
                         
-                        const lineStartX = angelaBox.x + 5; 
-                        const parentBottomY = angelaBox.y + angelaBox.height;
-                        const cinziaCenterY = cinziaBox.y + cinziaBox.height / 2;
-                        pdf.line(lineStartX, parentBottomY, lineStartX, cinziaCenterY);
-                        
-                        const bennyCenterY = bennyBox.y + bennyBox.height / 2;
-                        pdf.line(lineStartX, bennyCenterY, bennyBox.x, bennyCenterY);
-                        pdf.line(lineStartX, cinziaCenterY, cinziaBox.x, cinziaCenterY);
-
-                        const childrenOfBenny = specialPositions.bennyChildren;
-                        if (bennyBox && childrenOfBenny && childrenOfBenny.length > 0) {
-                            const lastChild = childrenOfBenny[childrenOfBenny.length - 1];
-                            const armEndX = lastChild.x + lastChild.width / 2;
-                            const busY = bennyBox.y + (bennyBox.height * 0.3);
-                            const armStartX = bennyBox.x + bennyBox.width;
-                            pdf.line(armStartX, busY, armEndX, busY);
-                            childrenOfBenny.forEach(figlio => {
-                                const figlioTopCenter = { x: figlio.x + figlio.width / 2, y: figlio.y };
-                                pdf.line(figlioTopCenter.x, busY, figlioTopCenter.x, figlioTopCenter.y);
+                        if (cinziaEl) {
+                            const cinziaData = parseNode(cinziaEl);
+                            if (cinziaData) {
+                                const cinziaBox = drawBox(currentX + 10, verticalY, cinziaData);
+                                if (cinziaBox) {
+                                    specialPositions.cinzia = cinziaBox;
+                                    specialPositions.cinziaChildren = [];
+                                    
+                                    if (cinziaData.children.length > 0) {
+                                        const nicolettaData = parseNode(cinziaData.children[0]);
+                                        if (nicolettaData) {
+                                            const nicolettaHeight = nicolettaData.isSingle ? singleCardHeight : coupleCardHeight;
+                                            const alignedY = cinziaBox.y + cinziaBox.height - nicolettaHeight;
+                                            const nicolettaBox = drawBox(currentX + 10 + cinziaBox.width + 10, alignedY, nicolettaData);
+                                            if (nicolettaBox) {
+                                                specialPositions.cinziaChildren.push(nicolettaBox);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } 
+                    // Layout standard per gli altri rami
+                    else if (childL2_box) {
+                        let verticalY = currentY + childL2_box.height + 10;
+                        if (childL2_data.children.length > 0) {
+                            childL2_data.children.forEach((childL3_element, l3_index) => {
+                                const childL3_data = parseNode(childL3_element);
+                                if (childL3_data) {
+                                    let maxL3Width = 0;
+                                    pdf.setFontSize(8.5).setFont(undefined, 'bold');
+                                    maxL3Width = Math.max(maxL3Width, pdf.getTextWidth(childL3_data.name1), (childL3_data.name2 ? pdf.getTextWidth(childL3_data.name2) : 0));
+                                    pdf.setFontSize(6).setFont(undefined, 'normal');
+                                    childL3_data.details.forEach(d => maxL3Width = Math.max(maxL3Width, pdf.getTextWidth(d)));
+                                    const childL3_width = maxL3Width + (textMargin * 2);
+                                    const parentRightEdge = currentX + childWidths[index];
+                                    const alignedX = parentRightEdge - childL3_width + 2;
+                                    const childL3_box = drawBox(alignedX, verticalY, childL3_data);
+                                    if (childL3_box) {
+                                        specialPositions[`gen3_${index}_${l3_index}`] = childL3_box;
+                                        verticalY += childL3_box.height + 5;
+                                    }
+                                }
                             });
                         }
+                    }
+                    
+                    currentX += childWidths[index] + horizontalXSpacing;
+                });
+                
+                // DISEGNO LINEE DI COLLEGAMENTO
+                pdf.setLineWidth(0.4);
+                pdf.setDrawColor(150);
 
-                        const childOfCinzia = specialPositions.cinziaChildren ? specialPositions.cinziaChildren[0] : null;
-                        if (cinziaBox && childOfCinzia) {
-                            const nicolettaTopCenter = { x: childOfCinzia.x + childOfCinzia.width / 2, y: childOfCinzia.y };
-                            const busY = cinziaBox.y + (cinziaBox.height * 0.3);
-                            const armStartX = cinziaBox.x + cinziaBox.width;
-                            pdf.line(armStartX, busY, nicolettaTopCenter.x, busY);
-                            pdf.line(nicolettaTopCenter.x, busY, nicolettaTopCenter.x, nicolettaTopCenter.y);
-                        }
+                childrenL2.forEach((childL2_element, index) => {
+                    const parentBox = specialPositions.root;
+                    const childBox = specialPositions[`gen2_${index}`];
+                    
+                    if (!parentBox || !childBox) return;
+                    
+                    // Linea da genitore a figlio
+                    const parentBottomCenter = { x: parentBox.x + parentBox.width / 2, y: parentBox.y + parentBox.height };
+                    const childTopCenter = { x: childBox.x + childBox.width / 2, y: childBox.y };
+                    pdf.line(parentBottomCenter.x, parentBottomCenter.y, parentBottomCenter.x, parentBottomCenter.y + verticalYSpacing / 2);
+                    pdf.line(parentBottomCenter.x, parentBottomCenter.y + verticalYSpacing / 2, childTopCenter.x, childTopCenter.y - verticalYSpacing / 2);
+                    pdf.line(childTopCenter.x, childTopCenter.y - verticalYSpacing / 2, childTopCenter.x, childTopCenter.y);
 
-                    } else {
-                        let lineStartX;
-                        if (isMariaAntonietta(childL2_element)) {
-                            lineStartX = childBox.x + 5;
-                        } else if (isVanna(childL2_element) || isGiuseppe(childL2_element)) {
-                            lineStartX = childBox.x + 2;
+                    const childL2_data = parseNode(childL2_element);
+                    if (childL2_data && childL2_data.children.length > 0) {
+                        if (isAngela(childL2_element)) {
+                            // Gestione speciale per Angela
+                            const angelaBox = childBox;
+                            const bennyBox = specialPositions.benny;
+                            const cinziaBox = specialPositions.cinzia;
+                            
+                            if (bennyBox && cinziaBox) {
+                                const lineStartX = angelaBox.x + 5; 
+                                const parentBottomY = angelaBox.y + angelaBox.height;
+                                const cinziaCenterY = cinziaBox.y + cinziaBox.height / 2;
+                                pdf.line(lineStartX, parentBottomY, lineStartX, cinziaCenterY);
+                                
+                                const bennyCenterY = bennyBox.y + bennyBox.height / 2;
+                                pdf.line(lineStartX, bennyCenterY, bennyBox.x, bennyCenterY);
+                                pdf.line(lineStartX, cinziaCenterY, cinziaBox.x, cinziaCenterY);
+
+                                // Linee per i figli di Benny
+                                const childrenOfBenny = specialPositions.bennyChildren;
+                                if (childrenOfBenny && childrenOfBenny.length > 0) {
+                                    const lastChild = childrenOfBenny[childrenOfBenny.length - 1];
+                                    const armEndX = lastChild.x + lastChild.width / 2;
+                                    const busY = bennyBox.y + (bennyBox.height * 0.3);
+                                    const armStartX = bennyBox.x + bennyBox.width;
+                                    pdf.line(armStartX, busY, armEndX, busY);
+                                    childrenOfBenny.forEach(figlio => {
+                                        const figlioTopCenter = { x: figlio.x + figlio.width / 2, y: figlio.y };
+                                        pdf.line(figlioTopCenter.x, busY, figlioTopCenter.x, figlioTopCenter.y);
+                                    });
+                                }
+
+                                // Linea per Nicoletta
+                                const childOfCinzia = specialPositions.cinziaChildren ? specialPositions.cinziaChildren[0] : null;
+                                if (childOfCinzia) {
+                                    const nicolettaTopCenter = { x: childOfCinzia.x + childOfCinzia.width / 2, y: childOfCinzia.y };
+                                    const busY = cinziaBox.y + (cinziaBox.height * 0.3);
+                                    const armStartX = cinziaBox.x + cinziaBox.width;
+                                    pdf.line(armStartX, busY, nicolettaTopCenter.x, busY);
+                                    pdf.line(nicolettaTopCenter.x, busY, nicolettaTopCenter.x, nicolettaTopCenter.y);
+                                }
+                            }
                         } else {
-                            lineStartX = childBox.x + 1;
-                        }
-                        
-                        const parentBottomY = childBox.y + childBox.height;
-                        const firstChildL3 = specialPositions[`gen3_${index}_0`];
-                        if (!firstChildL3) return; 
-                        
-                        const lastChildL3Data = parseNode(childL2_data.children[childL2_data.children.length-1]);
-                        const lastChildL3Height = lastChildL3Data.isSingle ? singleCardHeight : coupleCardHeight;
-                        let lastY = firstChildL3.y;
-                        for(let i=1; i<childL2_data.children.length; i++) {
-                            const prevChildData = parseNode(childL2_data.children[i-1]);
-                            lastY += (prevChildData.isSingle ? singleCardHeight : coupleCardHeight) + 5;
-                        }
-                        const lastChildCenterY = lastY + lastChildL3Height / 2;
-                        
-                        pdf.line(lineStartX, parentBottomY, lineStartX, lastChildCenterY);
+                            // Gestione standard per altri rami
+                            let lineStartX;
+                            if (isMariaAntonietta(childL2_element)) {
+                                lineStartX = childBox.x + 5;
+                            } else if (isVanna(childL2_element) || isGiuseppe(childL2_element)) {
+                                lineStartX = childBox.x + 2;
+                            } else {
+                                lineStartX = childBox.x + 1;
+                            }
+                            
+                            const parentBottomY = childBox.y + childBox.height;
+                            const firstChildL3 = specialPositions[`gen3_${index}_0`];
+                            if (firstChildL3) {
+                                const lastChildL3Data = parseNode(childL2_data.children[childL2_data.children.length-1]);
+                                const lastChildL3Height = lastChildL3Data && lastChildL3Data.isSingle ? singleCardHeight : coupleCardHeight;
+                                let lastY = firstChildL3.y;
+                                for(let i=1; i<childL2_data.children.length; i++) {
+                                    const prevChildData = parseNode(childL2_data.children[i-1]);
+                                    lastY += (prevChildData && prevChildData.isSingle ? singleCardHeight : coupleCardHeight) + 5;
+                                }
+                                const lastChildCenterY = lastY + lastChildL3Height / 2;
+                                
+                                pdf.line(lineStartX, parentBottomY, lineStartX, lastChildCenterY);
 
-                        childL2_data.children.forEach((l3_el, l3_idx) => {
-                            const l3_box = specialPositions[`gen3_${index}_${l3_idx}`];
-                            if(l3_box) {
-                                const childCenterY = l3_box.y + l3_box.height / 2;
-                                pdf.line(lineStartX, childCenterY, l3_box.x, childCenterY);
+                                childL2_data.children.forEach((l3_el, l3_idx) => {
+                                    const l3_box = specialPositions[`gen3_${index}_${l3_idx}`];
+                                    if(l3_box) {
+                                        const childCenterY = l3_box.y + l3_box.height / 2;
+                                        pdf.line(lineStartX, childCenterY, l3_box.x, childCenterY);
+                                    }
+                                });
+                            }
+                        }
+                    }
+                });
+
+                console.log('✅ Layout completato, generazione file...');
+
+                // Gestione output PDF - stesso sistema stabile della versione che funziona
+                const pdfBlob = pdf.output('blob');
+                const fileName = 'albero-genealogico-famiglia-pricci.pdf';
+                
+                // Rileva mobile
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                
+                if (navigator.share && isMobile) {
+                    const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        navigator.share({
+                            title: 'Albero Genealogico Famiglia Pricci',
+                            files: [file]
+                        }).catch(err => {
+                            if (err.name !== 'AbortError') {
+                                console.error("Errore condivisione:", err);
+                                apriPDFPerStampa(pdfBlob, fileName);
                             }
                         });
+                    } else {
+                        apriPDFPerStampa(pdfBlob, fileName);
                     }
+                } else {
+                    apriPDFPerStampa(pdfBlob, fileName);
                 }
-            });
+                
+                console.log('🎉 PDF generato con successo!');
+                
+            } catch (error) {
+                console.error('❌ Errore durante generazione PDF:', error);
+                alert(`Errore durante la generazione del PDF: ${error.message}\n\nDettagli: ${error.stack}`);
+            }
+        }
 
-            pdf.save('albero-genealogico-famiglia-pricci.pdf');
+        // Funzioni helper per gestione PDF
+        function apriPDFPerStampa(pdfBlob, fileName) {
+            const url = URL.createObjectURL(pdfBlob);
+            const newWindow = window.open(url, '_blank');
+            if (!newWindow) {
+                scaricaPDF(pdfBlob, fileName);
+                alert("Il browser ha bloccato l'apertura. Il PDF è stato scaricato.");
+            }
+        }
+
+        function scaricaPDF(pdfBlob, fileName) {
+            const url = URL.createObjectURL(pdfBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
         }
     </script>
 
