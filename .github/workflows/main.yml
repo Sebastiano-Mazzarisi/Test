@@ -17,7 +17,6 @@ jobs:
         with:
           node-version: '18'
 
-      # --- NUOVO METODO: STEP 1 - Crea il file dello script ---
       - name: Crea lo script di notifica
         id: create_script
         run: |
@@ -60,14 +59,17 @@ jobs:
             const messaggio = `Oggi festeggiano: ${nomiEventi}`;
             const titolo = "🗓️ Promemoria Eventi Famiglia";
 
+            // Il comando ora dice a curl di leggere i dati dal suo "standard input" (-d @-)
             const command = `curl -H "Title: ${titolo}" -H "Tags: cake" -H "Priority: max" -d @- ntfy.sh/${topic}`;
             
             console.log("Invio notifica con metodo standard input...");
             try {
+              // Passiamo il messaggio come "input" al processo
               const output = execSync(command, { input: messaggio }).toString();
               console.log("Risposta dal server ntfy:", output);
             } catch (error) {
-              console.error("Errore durante l"invio della notifica:", error);
+              // --- ECCO LA CORREZIONE ---
+              console.error("Errore durante l'invio della notifica:", error);
               process.exit(1);
             }
           } else {
@@ -75,7 +77,6 @@ jobs:
           }
           EOF
       
-      # --- NUOVO METODO: STEP 2 - Esegui il file dello script ---
       - name: Esegui lo script e invia notifica
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
