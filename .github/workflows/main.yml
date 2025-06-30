@@ -35,17 +35,13 @@ jobs:
             const htmlPath = path.join(process.env.GITHUB_WORKSPACE, "Eventi.html");
             const htmlContent = fs.readFileSync(htmlPath, "utf8");
             const match = htmlContent.match(/const eventiData = (\[[\s\S]*?\]);/);
-
-            if (!match) {
-              console.log("Array eventiData non trovato nel file HTML.");
-              process.exit(0);
-            }
+            if (!match) { process.exit(0); }
             
             const eventiData = JSON.parse(match[1]);
 
-            // --- DATA DI TEST (per l"ultima prova) ---
-            const oggi = new Date("2025-07-04"); 
-            // ----------------------------------------
+            // --- DATA DI TEST ---
+            const oggi = new Date("2025-07-04");
+            // --------------------
 
             const giornoOggi = oggi.getDate();
             const meseOggi = oggi.getMonth() + 1;
@@ -61,25 +57,20 @@ jobs:
               const messaggio = `Oggi festeggiano: ${nomiEventi}`;
               const titolo = "🗓️ Promemoria Eventi Famiglia";
 
-              // --- CORREZIONE CHIAVE ---
-              // Questa funzione "pulisce" il messaggio per essere sicuro per il terminale
-              const shellEscape = (str) => {
-                return "'" + str.replace(/'/g, "'\\''") + "'";
-              };
+              // --- NUOVO METODO ROBUSTO ---
+              // Il comando ora dice a curl di leggere i dati dal suo "standard input" (-d @-)
+              const command = `curl -H "Title: ${titolo}" -H "Tags: cake" -H "Priority: max" -d @- ntfy.sh/${topic}`;
               
-              const messaggioPulito = shellEscape(messaggio);
-              // -----------------------
-
-              const command = `curl -H "Title: ${titolo}" -H "Tags: cake" -H "Priority: max" -d ${messaggioPulito} ntfy.sh/${topic}`;
-              
-              console.log("Invio notifica con comando corretto...");
+              console.log("Invio notifica con metodo standard input...");
               try {
-                const output = execSync(command).toString();
+                // Passiamo il messaggio come "input" al processo, invece di inserirlo nel comando
+                const output = execSync(command, { input: messaggio }).toString();
                 console.log("Risposta dal server ntfy:", output);
               } catch (error) {
                 console.error("Errore durante l"invio della notifica:", error.toString());
                 process.exit(1);
               }
+              // --------------------------
 
             } else {
               console.log("Nessun evento per oggi.");
