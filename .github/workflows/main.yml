@@ -19,22 +19,21 @@ jobs:
 
       - name: Leggi e invia notifiche eventi
         env:
-          NTFY: ${{ secrets.NTFY }} # Inserisci il tuo secret ntfy qui
-          FILE_CSV: eventi.csv       # Cambia se il nome del tuo CSV è diverso
+          NTFY: ${{ secrets.NTFY }}
+          FILE_CSV: eventi.csv
         run: |
+          python - <<EOF
           import os
           import pandas as pd
           from datetime import datetime, timedelta
           import requests
 
-          # Carica il file CSV
           file_csv = os.environ.get('FILE_CSV', 'eventi.csv')
           if not os.path.exists(file_csv):
               print(f"File {file_csv} non trovato!")
               exit(1)
           df = pd.read_csv(file_csv)
 
-          # Funzione di parsing data
           def parse_data(s):
               try:
                   return datetime.strptime(s, "%d/%m/%Y").date()
@@ -49,7 +48,6 @@ jobs:
                   continue
               diff = (data_evento - oggi).days
               if 0 <= diff <= 2:
-                  # Personalizza messaggio in base ai giorni mancanti
                   if diff == 0:
                       avviso = f"Oggi è il giorno di {row['Nominativo']}! 🎉 ({row['Tipo']})"
                   elif diff == 1:
@@ -60,10 +58,9 @@ jobs:
                       avviso = f"Prossimo evento: {row['Tipo']} di {row['Nominativo']} il {row['Data']}"
 
                   url_ntfy = os.environ['NTFY']
-                  # Invia la notifica
                   try:
                       r = requests.post(url_ntfy, data=avviso.encode('utf-8'))
                       print(f"Notifica inviata: {avviso} (Status: {r.status_code})")
                   except Exception as e:
                       print(f"Errore invio notifica: {e}")
-
+          EOF
