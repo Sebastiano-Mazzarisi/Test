@@ -1,66 +1,107 @@
-name: Notifica eventi prossimi
+name: Controllo Eventi Famiglia
 
 on:
   schedule:
-    - cron: '0 6 * * *'  # ogni giorno alle 08:00 ora italiana (06:00 UTC)
+    # Esegue alle 06:00 UTC (le 08:00 del mattino in Italia)
+    - cron: '0 6 * * *'
   workflow_dispatch:
 
 jobs:
-  notify:
+  check-and-notify:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Controlla il codice del repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Imposta Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Crea ed esegui lo script di notifica
         run: |
-          pip install requests pandas
+          cat <<'EOF' > script.js
+          const fs = require("fs");
+          const path = require("path");
+          const { execSync } = require("child_process");
 
-      - name: Leggi e invia notifiche eventi
-        env:
-          NTFY: ${{ secrets.NTFY }}
-          FILE_CSV: eventi.csv
-        run: |
-          python - <<EOF
-          import os
-          import pandas as pd
-          from datetime import datetime, timedelta
-          import requests
+          // Topic impostato direttamente per massima affidabilità
+          const topic = "msgalternativo";
 
-          file_csv = os.environ.get('FILE_CSV', 'eventi.csv')
-          if not os.path.exists(file_csv):
-              print(f"File {file_csv} non trovato!")
-              exit(1)
-          df = pd.read_csv(file_csv)
+          const htmlPath = path.join(process.env.GITHUB_WORKSPACE, "Eventi.html");
+          const htmlContent = fs.readFileSync(htmlPath, "utf8");
+          const match = htmlContent.match(/const eventiData = (\[[\s\S]*?\]);/);
+          if (!match) {
+              console.log("Array eventiData non trovato nel file HTML.");
+              process.exit(0);
+          }
+          
+          const eventiData = JSON.parse(match[1]);
 
-          def parse_data(s):
-              try:
-                  return datetime.strptime(s, "%d/%m/%Y").date()
-              except Exception:
-                  return None
+          // --- DATA REALE (VERSIONE FINALE) ---
+          const oggi = new Date();
+          const domani = new Date(oggi);
+          domani.setDate(oggi.getDate() + 1);
+          const dopodomani = new Date(oggi);
+          dopodomani.setDate(oggi.getDate() + 2);
+          // ------------------------------------
 
-          oggi = datetime.now().date()
-          for idx, row in df.iterrows():
-              data_str = str(row['Data'])
-              data_evento = parse_data(data_str)
-              if not data_evento:
-                  continue
-              diff = (data_evento - oggi).days
-              if 0 <= diff <= 2:
-                  if diff == 0:
-                      avviso = f"Oggi è il giorno di {row['Nominativo']}! 🎉 ({row['Tipo']})"
-                  elif diff == 1:
-                      avviso = f"Domani c'è {row['Tipo']} di {row['Nominativo']}!"
-                  elif diff == 2:
-                      avviso = f"Tra due giorni c'è {row['Tipo']} di {row['Nominativo']}!"
-                  else:
-                      avviso = f"Prossimo evento: {row['Tipo']} di {row['Nominativo']} il {row['Data']}"
+          // Funzione per filtrare eventi per una data specifica
+          function getEventiPerData(targetDate) {
+            const giorno = targetDate.getDate();
+            const mese = targetDate.getMonth() + 1;
+            
+            return eventiData.filter(evento => {
+              if (!evento.Data) return false;
+              const partiData = evento.Data.split("/");
+              return parseInt(partiData[0], 10) === giorno && parseInt(partiData[1], 10) === mese;
+            });
+          }
 
-                  url_ntfy = os.environ['NTFY']
-                  try:
-                      r = requests.post(url_ntfy, data=avviso.encode('utf-8'))
-                      print(f"Notifica inviata: {avviso} (Status: {r.status_code})")
-                  except Exception as e:
-                      print(f"Errore invio notifica: {e}")
+          // Funzione per inviare notifica
+          function inviaNotifica(messaggio, titolo, priorita = "default") {
+            const command = `curl -H "Title: ${titolo}" -H "Tags: cake" -H "Priority: ${priorita}" -d @- ntfy.sh/${topic}`;
+            
+            console.log(`Invio notifica: ${messaggio}`);
+            try {
+              const output = execSync(command, { input: messaggio }).toString();
+              console.log("Risposta dal server ntfy:", output);
+            } catch (error) {
+              console.error("Errore durante l'invio della notifica:", error);
+            }
+          }
+
+          // Controlla eventi di oggi
+          const eventiDiOggi = getEventiPerData(oggi);
+          if (eventiDiOggi.length > 0) {
+            const nomiEventi = eventiDiOggi.map(e => `${e.Nominativo} (${e.Tipo.slice(0,1)})`).join(", ");
+            const messaggio = `🎉 Oggi festeggiano: ${nomiEventi}`;
+            const titolo = "🗓️ Eventi di Oggi";
+            inviaNotifica(messaggio, titolo, "max");
+          }
+
+          // Controlla eventi di domani
+          const eventiDiDomani = getEventiPerData(domani);
+          if (eventiDiDomani.length > 0) {
+            const nomiEventi = eventiDiDomani.map(e => `${e.Nominativo} (${e.Tipo.slice(0,1)})`).join(", ");
+            const messaggio = `⏰ Domani festeggiano: ${nomiEventi}`;
+            const titolo = "🗓️ Promemoria Domani";
+            inviaNotifica(messaggio, titolo, "high");
+          }
+
+          // Controlla eventi di dopodomani
+          const eventiDiDopodomani = getEventiPerData(dopodomani);
+          if (eventiDiDopodomani.length > 0) {
+            const nomiEventi = eventiDiDopodomani.map(e => `${e.Nominativo} (${e.Tipo.slice(0,1)})`).join(", ");
+            const dataDopodomani = `${dopodomani.getDate()}/${dopodomani.getMonth() + 1}`;
+            const messaggio = `📅 Fra due giorni (${dataDopodomani}) festeggiano: ${nomiEventi}`;
+            const titolo = "🗓️ Promemoria Fra Due Giorni";
+            inviaNotifica(messaggio, titolo, "default");
+          }
+
+          if (eventiDiOggi.length === 0 && eventiDiDomani.length === 0 && eventiDiDopodomani.length === 0) {
+            console.log("Nessun evento per oggi, domani o dopodomani.");
+          }
           EOF
+          
+          node script.js
