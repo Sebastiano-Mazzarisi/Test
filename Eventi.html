@@ -26,6 +26,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <style>
+    /* Stili Generali e Reset */
     * {
       box-sizing: border-box;
       text-decoration: none;
@@ -82,7 +83,7 @@
       margin-bottom: 10px;
     }
 
-    /* Contenitore principale per titolo e controlli */
+    /* Header e Controlli Principali */
     #header-container {
       width: 95%;
       max-width: 500px;
@@ -127,7 +128,6 @@
         overflow: visible;
     }
 
-    /* MODIFICA: Nuovo layout per i pulsanti su due righe */
     #view-toggle-container {
         display: flex;
         flex-direction: column;
@@ -325,7 +325,7 @@
         transform: translateY(-50%) scale(0.95);
     }
 
-    /* MODIFICA: Nuovo layout per le barre con frecce */
+    /* Barre con frecce (Elenco Principale) */
     .year-divider {
       width: 100%;
       max-width: 1200px;
@@ -387,6 +387,7 @@
       border: 2px solid #DAA520;
     }
 
+    /* Lista Eventi Principale */
     ul {
       list-style-type: none;
       padding: 0;
@@ -525,11 +526,12 @@
       100% { opacity: 1; color: #DAA520; }
     }
 
-    /* MODIFICA: Nascondi completamente le vecchie frecce */
+    /* Rimuovi le vecchie frecce (erano già nascoste) */
     .arrow-badge {
       display: none !important;
     }
 
+    /* Overlay e Pop-up Generici */
     .popup-overlay {
       position: fixed;
       top: 0;
@@ -553,10 +555,10 @@
       text-align: center;
       position: relative;
       width: 100%;
-      max-width: 90vw;
-      max-height: 90vh;
+      max-width: 90vw; /* Adatto per mobile */
+      max-height: 90vh; /* Adatto per mobile */
       min-width: 280px;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -600,6 +602,7 @@
       border-radius: 8px;
     }
 
+    /* Contenitore Datario */
     #datario-container {
       display: none;
       width: 95%;
@@ -621,7 +624,7 @@
       align-items: center;
     }
 
-    /* MODIFICA: Badge "OGGI" per eventi nel datario */
+    /* Badge "OGGI" per eventi nel datario */
     .datario-oggi-badge {
       display: inline-block;
       background: linear-gradient(135deg, #ffd93d, #ff6b6b);
@@ -727,7 +730,7 @@
       }
     }
 
-    /* Popup calendario */
+    /* Popup Calendario */
     #calendar-preview {
       max-height: 80vh;
       overflow-y: auto;
@@ -792,7 +795,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      color: #000; /* MODIFICA: Tutti gli eventi del calendario sono neri */
+      color: #000; /* Tutti gli eventi del calendario sono neri */
     }
 
     .calendar-day-number {
@@ -820,7 +823,7 @@
       }
     }
 
-    /* Stili per il datario */
+    /* Stili specifici per Datario */
     .mese-container {
       border: 3px solid #DAA520;
       border-radius: 15px;
@@ -927,7 +930,6 @@
       align-items: center;
     }
 
-    /* MODIFICA: Frecce per navigazione nel datario */
     .mese-header-arrows {
       display: flex;
       gap: 5px;
@@ -958,9 +960,8 @@
       transform: scale(0.95);
     }
 
-    /* NUOVO: Stili per il bottone Esci nel mese del datario */
     .mese-exit-button {
-      background-color: #ff4757; /* Rosso */
+      background-color: #ff4757;
       color: white;
       border: 1px solid #d63031;
       border-radius: 4px;
@@ -972,8 +973,8 @@
       -webkit-user-select: none;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
-      flex-shrink: 0; /* Impedisce che si rimpicciolisca */
-      margin-left: 10px; /* Spazio tra mese e bottone */
+      flex-shrink: 0;
+      margin-left: 10px;
     }
 
     .mese-exit-button:hover, .mese-exit-button:active {
@@ -985,8 +986,6 @@
       transform: scale(0.95);
     }
 
-
-    /* MODIFICA: Barra "Oggi" nel datario */
     .datario-oggi-divider {
       width: 100%;
       margin: 15px 0 10px 0;
@@ -1052,7 +1051,6 @@
       cursor: pointer;
       padding: 8px;
       -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
       user-select: none;
       -webkit-user-select: none;
     }
@@ -1076,36 +1074,20 @@
       flex: 1;
       text-align: center;
       font-size: clamp(1.2em, 4.5vw, 1.4em);
-      display: flex; /* NUOVO: Per allineare orizzontalmente nome e contatore */
-      justify-content: center; /* NUOVO: Per centrare il nome e contatore */
-      align-items: center; /* NUOVO: Per allineare verticalmente */
-      gap: 5px; /* NUOVO: Spazio tra nome e contatore */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
     }
 
-    /* NUOVO: Stile specifico per il numero di eventi nel mese header */
     .mese-header .eventi-nel-mese {
-        font-size: 0.8em; /* Più piccolo rispetto al nome del mese */
-        font-weight: normal; /* Non in grassetto */
-        color: #555; /* Colore più tenue */
+        font-size: 0.8em;
+        font-weight: normal;
+        color: #555;
     }
 
-    .mese-counter {
-      background-color: rgba(255, 255, 255, 0.9);
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: clamp(0.9em, 3.5vw, 1em);
-      font-weight: normal;
-      color: #666;
-      min-width: 24px;
-      text-align: center;
-      border: 1px solid #000;
-      flex-shrink: 0;
-      display: none; /* NASCONDO IL VECCHIO CONTATORE */
-    }
-
-    .mese-container.vuoto .mese-counter {
-      background-color: rgba(200, 200, 200, 0.5);
-      color: #999;
+    .mese-counter { /* Vecchio contatore, nascosto */
+      display: none !important;
     }
 
     .mese-content {
@@ -1114,6 +1096,82 @@
       flex: 1;
       display: flex;
       flex-direction: column;
+    }
+
+    /* Stili per il nuovo popup EventDetailPopup */
+    #eventDetailPopup .popup-content {
+      max-width: 95%; /* Allargato per mobile */
+      width: 95%; /* Allargato per mobile */
+      max-height: 95vh; /* Allungato per mobile */
+      overflow-y: auto; /* Aggiunto scroll per contenuti lunghi */
+      padding: 20px;
+      gap: 15px; /* Spazio tra gli elementi interni */
+    }
+
+    #eventDetailPopup .popup-header {
+      margin-bottom: 10px;
+    }
+
+    /* Titolo del pop-up per compleanni/onomastici (nascondo il nome) */
+    #eventDetailPopup.single-person .popup-header h2 {
+        display: none; /* Nasconde il titolo h2 per persona singola */
+    }
+
+    #eventDetailPopup .popup-header h2 {
+        font-size: clamp(1.3em, 6vw, 1.6em);
+        color: #333;
+    }
+
+    #eventDetailPopup .person-details {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    #eventDetailPopup .person-details:last-of-type {
+        margin-bottom: 0;
+    }
+
+    #eventDetailPopup .person-details img {
+      width: 240px; /* RADDOPPLATO: Dimensione fissa per la miniatura */
+      height: 240px; /* RADDOPPLATO: Dimensione fissa per la miniatura */
+      object-fit: cover; /* Assicura che l'immagine copra l'area senza distorsioni */
+      border-radius: 50%; /* Rende l'immagine circolare */
+      border: 3px solid #DAA520;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+      margin: 0 auto 10px auto; /* Centra l'immagine e aggiunge spazio sotto */
+      display: block; /* Per permettere il margin auto orizzontale */
+    }
+
+    #eventDetailPopup .person-details h3 {
+        margin: 0 0 5px 0;
+        font-size: clamp(1.1em, 5vw, 1.3em);
+        color: #000;
+    }
+
+    #eventDetailPopup .person-details p {
+      margin: 3px 0;
+      font-size: clamp(0.9em, 3.5vw, 1em);
+      color: #444;
+    }
+
+    #eventDetailPopup .detail-label {
+        font-weight: bold;
+        color: #555;
+    }
+
+    #eventDetailPopup .anniversary-details {
+        margin-top: 5px; /* Spazio ridotto */
+        padding-top: 5px; /* Padding ridotto */
+        border-top: none; /* Rimosso il bordo superiore per coerenza con la richiesta */
+    }
+
+    #eventDetailPopup .anniversary-details p {
+        margin: 5px 0;
+        font-size: clamp(1em, 4vw, 1.1em);
+        font-weight: bold;
+        color: #8B0000;
     }
   </style>
 </head>
@@ -1196,6 +1254,30 @@
         <span class="action-button" id="tree-close-button" data-tooltip="Chiudi finestra">Esci</span>
       </div>
       <pre id="treeContent">Caricamento albero...</pre>
+    </div>
+  </div>
+
+  <div id="eventDetailPopup" class="popup-overlay">
+    <div class="popup-content">
+      <div class="popup-header">
+        <h2 id="detailName"></h2>
+        <span class="action-button" id="eventDetailCloseButton" data-tooltip="Chiudi finestra">Esci</span>
+      </div>
+      <div id="anniversaryCeremonyDetails" class="anniversary-details" style="display: none;">
+          <p id="anniversaryCeremonyDate"></p>
+          </div>
+      <div id="person1Details" class="person-details">
+        <img id="detailPhoto1" src="" alt="Foto" style="display: none;">
+        <h3 id="personName1"></h3>
+        <p id="detailNascita1" class="detail-label" style="display: none;"></p>
+        <p id="detailOnomastico1" class="detail-label" style="display: none;"></p>
+      </div>
+      <div id="person2Details" class="person-details" style="display: none;">
+        <img id="detailPhoto2" src="" alt="Foto" style="display: none;">
+        <h3 id="personName2"></h3>
+        <p id="detailNascita2" class="detail-label" style="display: none;"></p>
+        <p id="detailOnomastico2" class="detail-label" style="display: none;"></p>
+      </div>
     </div>
   </div>
 
@@ -1303,9 +1385,25 @@ const nomiNozze = {
   "85": "Nozze di Marmo", "90": "Nozze di Granito", "95": "Nozze di Onice", "100": "Nozze di Ossido"
 };
 
+// NUOVO: Mapping per gli anniversari "Nome Anniversario" -> [Nominativo Persona 1 (Cognome Nome), Nominativo Persona 2 (Cognome Nome)]
+// Questi Nominativi devono corrispondere esattamente a quelli nell'array `eventiData`
+const anniversariMapping = {
+  "Angela e Onofrio": ["Pricci Angela", "Lorusso Onofrio"],
+  "Anna e Giuseppe": ["Trivisani Anna", "Pricci Giuseppe"],
+  "Antonietta e Saverio": ["Pricci Maria Antonietta", "Chiarappa Saverio"],
+  "Cinzia e Gianni": ["Lorusso Cinzia", "Rotondi Gianni"],
+  "Genny e Benny": ["Lepore Genny", "Lorusso Benny"],
+  "Marica e Nino": ["Pricci Marica", "Mazzarisi Nino"],
+  "Rosa e Giovanni": ["Bianco Rosa", "Pricci Giovanni"],
+  "Teresa e Luigi": ["Grilletti Teresa", "Pricci Luigi"],
+  "Tiziana e Riccardo": ["Pricci Tiziana", "Dalena Riccardo"],
+  "Vanna e Domenico": ["Pricci Vanna", "Lefemine Domenico"]
+};
+
+
 let tuttiGliEventi = [];
 let dataPersonalizzata = null;
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+const isMobile = /Android|webOS|iPhone|iPad|IPhone OS|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 let modalitaDatario = false;
 
 // ===== FUNZIONI UTILITY =====
@@ -1494,12 +1592,11 @@ function creaElementoEvento(evento, prossimiGiorni) {
     }
   }
 
-  const nomeEscaped = evento.Nominativo.replace(/'/g, "\\'");
-
+  // Passa l'oggetto evento completo a clickEvento
   li.innerHTML = `
     ${badgeGiorni}
     ${icona}
-    <div onclick="clickEvento('${nomeEscaped}')" style="cursor: pointer;">
+    <div onclick="clickEvento(${JSON.stringify(evento).replace(/"/g, '&quot;')})" style="cursor: pointer;">
       <strong>${evento.Nominativo}</strong>
       ${dataNascitaTesto ? `<span class="data-nascita">${dataNascitaTesto}</span>` : ''}
       <span class="tipo-evento">${tipoTesto}</span>
@@ -1725,11 +1822,11 @@ function creaMeseDatario(mese, anno, eventi, termineRicerca = '', prossimiGiorni
 
   const upArrowHTML = `<button class="mese-header-arrow-btn" onclick="document.getElementById('${prevMeseId}').scrollIntoView({ behavior: 'smooth', block: 'center' });">⬆️</button>`;
   const downArrowHTML = `<button class="mese-header-arrow-btn" onclick="document.getElementById('${nextMeseId}').scrollIntoView({ behavior: 'smooth', block: 'center' });">⬇️</button>`;
-  // NUOVO: Bottone "Esci" per tornare alla vista iniziale
+  // Bottone "Esci" per tornare alla vista iniziale
   const exitButtonHTML = `<button class="mese-exit-button" onclick="mostraElenco()">Esci</button>`;
 
 
-  // MODIFICA: Controlla se ci sono eventi di oggi nel mese corrente per aggiungere la barra "Oggi"
+  // Controlla se ci sono eventi di oggi nel mese corrente per aggiungere la barra "Oggi"
   let barraOggi = '';
   if (tipologiaMese === 'corrente') {
     const eventiDiOggi = eventiMese.filter(e => e.giorno === giornoCorrente);
@@ -1755,7 +1852,9 @@ function creaMeseDatario(mese, anno, eventi, termineRicerca = '', prossimiGiorni
     <div class="mese-container${classiContainer}" id="mese-container-${mese}">
       <div class="mese-header">
         <div class="mese-header-arrows">${upArrowHTML}${downArrowHTML}</div>
-        <div class="mese-nome">${nomiMesi[mese]} ${anno} <span class="eventi-nel-mese">(${numeroEventi})</span></div> ${exitButtonHTML} <div class="mese-counter"></div> </div>
+        <div class="mese-nome">${nomiMesi[mese]} ${anno} <span class="eventi-nel-mese">(${numeroEventi})</span></div>
+        ${exitButtonHTML}
+        <div class="mese-counter"></div> </div>
       <div class="mese-content">
         ${barraOggi}
         ${contenuto || '<div style="color: #bbb; font-style: italic; font-size: 0.9em;">Nessun evento</div>'}
@@ -1798,7 +1897,7 @@ function mostraDatario() {
   datarioContainer.style.display = 'block';
   modalitaDatario = true;
 
-  // MODIFICA: Scorri fino al mese corrente all'apertura del datario
+  // Scorri fino al mese corrente all'apertura del datario
   const meseCorrenteElement = document.getElementById(`mese-container-${meseCorrenteIdx}`);
   if (meseCorrenteElement) {
     meseCorrenteElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1944,8 +2043,7 @@ function mostraEventi(eventi, termine = '') {
       if (evento.giorni === 0 && !oggiMostrato) {
           const mesi = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
           const giorniNomi = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
-          const giornoSettimana = giorniNomi[evento.dataEvento.getDay()];
-          const dataFormattata = `Oggi: ${giornoSettimana} ${evento.dataEvento.getDate()} ${mesi[evento.dataEvento.getMonth()]}`;
+          const dataFormattata = `Oggi: ${giorniNomi[evento.dataEvento.getDay()]} ${evento.dataEvento.getDate()} ${mesi[evento.dataEvento.getMonth()]}`;
 
           const barra = creaBarraConFrecce(dataFormattata, monthStartIds, monthsInOrder, meseCorrente);
           lista.appendChild(barra);
@@ -1990,13 +2088,163 @@ function cancellaCerca() {
   }
 }
 
-function clickEvento(nome) {
-  console.log("Click su evento:", nome);
+// Modificata per accettare l'oggetto evento completo
+function clickEvento(evento) {
+  console.log("Click su evento:", evento);
   if (isMobile) {
     if (navigator.vibrate) {
       navigator.vibrate(50);
     }
   }
+
+  const detailPopup = document.getElementById('eventDetailPopup');
+  const detailName = document.getElementById('detailName'); // Titolo generale del popup (per anniversari)
+  const anniversaryCeremonyDetailsDiv = document.getElementById('anniversaryCeremonyDetails'); // Div per data cerimonia e tipo nozze
+  const anniversaryCeremonyDate = document.getElementById('anniversaryCeremonyDate'); // p per data cerimonia
+  // const anniversaryType = document.getElementById('anniversaryType'); // Questo elemento è stato rimosso dall'HTML
+
+  const person1DetailsDiv = document.getElementById('person1Details');
+  const personName1 = document.getElementById('personName1');
+  const detailPhoto1 = document.getElementById('detailPhoto1');
+  const detailNascita1 = document.getElementById('detailNascita1');
+  const detailOnomastico1 = document.getElementById('detailOnomastico1');
+
+  const person2DetailsDiv = document.getElementById('person2Details');
+  const personName2 = document.getElementById('personName2');
+  const detailPhoto2 = document.getElementById('detailPhoto2');
+  const detailNascita2 = document.getElementById('detailNascita2');
+  const detailOnomastico2 = document.getElementById('detailOnomastico2');
+
+  // Reset visualizzazione iniziale di tutti i blocchi
+  detailPopup.classList.remove('single-person'); // Rimuove la classe per il compleanno/onomastico
+  detailName.style.display = 'block'; // Di default visibile, verrà nascosto se è singolo
+  anniversaryCeremonyDetailsDiv.style.display = 'none'; // Nasconde la data cerimonia di default
+  person1DetailsDiv.style.display = 'flex';
+  person2DetailsDiv.style.display = 'none'; // Nasconde la seconda persona di default
+
+  detailPhoto1.style.display = 'none';
+  detailPhoto2.style.display = 'none';
+  detailNascita1.style.display = 'none';
+  detailOnomastico1.style.display = 'none';
+  detailNascita2.style.display = 'none';
+  detailOnomastico2.style.display = 'none';
+
+  const giorniNomi = ["domenica", "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato"];
+  const nomiMesi = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
+
+  // Funzione helper per ottenere il nome per la foto (Nome Cognome)
+  function getNomePerFoto(nominativoCompleto) {
+      const parti = nominativoCompleto.split(' ');
+      if (parti.length >= 2) {
+          // Se "Cognome Nome" (es. Lorusso Alessandro), inverti a "Nome Cognome" (Alessandro Lorusso)
+          // Se "Cognome Nome Nome" (es. Pricci Maria Antonietta), inverti a "Nome Nome Cognome"
+          const cognome = parti[0];
+          const nome = parti.slice(1).join(' ');
+          return `${nome} ${cognome}`;
+      }
+      return nominativoCompleto; // Se è un nome singolo o già "Nome Cognome"
+  }
+
+
+  // Funzione helper per popolare i dettagli di una persona
+  const populatePersonDetails = (nominativoCompleto, personNameElem, photoElem, nascitaElem, onomasticoElem) => {
+    personNameElem.textContent = nominativoCompleto;
+
+    const nomeFoto = getNomePerFoto(nominativoCompleto);
+    const urlFoto = `https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/refs/heads/main/FotoP/${encodeURIComponent(nomeFoto)}.jpg`;
+    photoElem.src = urlFoto;
+    
+    // Verifica se la foto esiste
+    const img = new Image();
+    img.onload = () => { photoElem.style.display = 'block'; };
+    img.onerror = () => { photoElem.style.display = 'none'; }; // Nasconde se la foto non carica
+    img.src = urlFoto;
+
+    // Cerca gli eventi di compleanno e onomastico per questa persona specifica
+    const eventiPersona = tuttiGliEventi.filter(e => e.Nominativo === nominativoCompleto);
+
+    const compleannoPersona = eventiPersona.find(e => e.Tipo === "Compleanno");
+    if (compleannoPersona && compleannoPersona.Data && compleannoPersona.Anno) {
+        const partiData = compleannoPersona.Data.split("/").map(Number);
+        const dataNascitaCompleta = new Date(parseInt(compleannoPersona.Anno), partiData[1] - 1, partiData[0]);
+        const giornoSettimanaNascita = giorniNomi[dataNascitaCompleta.getDay()];
+        const meseNomeNascita = nomiMesi[dataNascitaCompleta.getMonth()];
+        nascitaElem.textContent = `Nascita: ${giornoSettimanaNascita} ${partiData[0]} ${meseNomeNascita} ${compleannoPersona.Anno}`;
+        nascitaElem.style.display = 'block';
+    } else {
+        nascitaElem.style.display = 'none';
+    }
+
+    const onomasticoPersona = eventiPersona.find(e => e.Tipo === "Onomastico");
+    if (onomasticoPersona && onomasticoPersona.Data) {
+        const partiData = onomasticoPersona.Data.split("/").map(Number);
+        onomasticoElem.textContent = `Onomastico: ${partiData[0]} ${nomiMesi[partiData[1] - 1]}`;
+        onomasticoElem.style.display = 'block';
+    } else {
+        onomasticoElem.style.display = 'none';
+    }
+  };
+
+
+  if (evento.Tipo === "Anniversario") {
+    detailPopup.classList.remove('single-person'); // Assicura che la classe per nascondere il titolo H2 non ci sia
+    detailName.textContent = evento.Nominativo; // Mantiene il titolo AM Nome1 e Nome2
+
+    // Estrai i nomi dalla chiave dell'anniversario per trovare il mapping
+    const nomeAnniversarioChiave = evento.Nominativo.replace(/^AM\s/, ''); // Rimuove "AM " iniziale
+    const nomiCoppiaCompleti = anniversariMapping[nomeAnniversarioChiave];
+
+    if (nomiCoppiaCompleti && nomiCoppiaCompleti.length === 2) {
+        const persona1Nominativo = nomiCoppiaCompleti[0];
+        const persona2Nominativo = nomiCoppiaCompleti[1];
+
+        // Dettagli cerimonia per anniversari
+        anniversaryCeremonyDetailsDiv.style.display = 'block';
+        const partiAnniversario = evento.Data.split("/").map(Number);
+        anniversaryCeremonyDate.textContent = `Cerimonia: ${partiAnniversario[0]} ${nomiMesi[partiAnniversario[1]-1]} ${evento.Anno}`;
+        // anniversaryType.textContent = ''; // Tipo di nozze rimosso, quindi non assegnare testo
+        // anniversaryType.style.display = 'none'; // Nascondi completamente l'elemento se non usato, è stato rimosso completamente dall'HTML
+
+        // Popola i dettagli per la Persona 1
+        person1DetailsDiv.style.display = 'flex';
+        populatePersonDetails(persona1Nominativo, personName1, detailPhoto1, detailNascita1, detailOnomastico1);
+
+        // Popola i dettagli per la Persona 2
+        person2DetailsDiv.style.display = 'flex';
+        populatePersonDetails(persona2Nominativo, personName2, detailPhoto2, detailNascita2, detailOnomastico2);
+
+    } else {
+        // Fallback se il mapping non trova i nomi o il formato è inatteso
+        detailName.textContent = evento.Nominativo;
+        detailPhoto1.style.display = 'none'; // Nasconde la foto generica
+        personName1.textContent = "Dettagli non disponibili";
+        detailNascita1.style.display = 'none';
+        detailOnomastico1.style.display = 'none';
+        person2DetailsDiv.style.display = 'none'; // Assicura che la seconda persona sia nascosta
+        
+        anniversaryCeremonyDetailsDiv.style.display = 'block';
+        const partiAnniversario = evento.Data.split("/").map(Number);
+        anniversaryCeremonyDate.textContent = `Cerimonia: ${partiAnniversario[0]} ${nomiMesi[partiAnniversario[1]-1]} ${evento.Anno}`;
+        // anniversaryType.textContent = ''; // Tipo di nozze rimosso
+        // anniversaryType.style.display = 'none'; // Nascondi completamente l'elemento se non usato
+    }
+
+  } else { // Compleanno o Onomastico (singolo)
+    detailPopup.classList.add('single-person'); // Aggiunge classe per nascondere il titolo H2
+    detailName.textContent = ''; // Svuota il titolo h2 per non mostrare nulla per eventi singoli
+
+    person2DetailsDiv.style.display = 'none'; // Assicura che la seconda persona sia nascosta
+    anniversaryCeremonyDetailsDiv.style.display = 'none'; // Assicura che i dettagli anniversario siano nascosti
+    
+    populatePersonDetails(evento.Nominativo, personName1, detailPhoto1, detailNascita1, detailOnomastico1);
+  }
+
+  detailPopup.style.display = 'flex'; // Mostra il pop-up
+}
+
+
+function nascondiEventDetailPopup() {
+  document.getElementById('eventDetailPopup').style.display = 'none';
 }
 
 function cambiaData() {
@@ -2351,6 +2599,7 @@ function gestisciTouchEvents() {
     }
   }, { passive: true });
 
+  // Aggiunto listener per chiudere il popup dei dettagli evento cliccando fuori
   document.addEventListener('click', function(e) {
     if (e.target.classList.contains('popup-overlay')) {
       if (e.target.id === 'bookmarkPopup') {
@@ -2359,6 +2608,8 @@ function gestisciTouchEvents() {
         nascondiAlbero();
       } else if (e.target.id === 'calendarPopup') {
         nascondiCalendario();
+      } else if (e.target.id === 'eventDetailPopup') {
+        nascondiEventDetailPopup();
       }
     }
   });
@@ -2425,6 +2676,10 @@ function inizializza() {
     document.getElementById('exit-icon').addEventListener('click', function() {
       window.close();
     });
+
+    // Listener per il bottone di chiusura del pop-up dei dettagli evento
+    document.getElementById('eventDetailCloseButton').addEventListener('click', nascondiEventDetailPopup);
+
 
     console.log('App inizializzata per:', isMobile ? 'Mobile' : 'Desktop');
 
