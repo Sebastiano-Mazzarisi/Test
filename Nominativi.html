@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compleanni e Onomastici</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #4CAF50;
+    }
+    .controls {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .controls button {
+      padding: 10px 15px;
+      margin: 0 5px;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+    .controls button:hover {
+      background-color: #0056b3;
+    }
+    .controls button.active {
+      background-color: #28a745;
+    }
+    .search-bar {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .search-bar input {
+      width: calc(100% - 20px);
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      background-color: #e9e9e9;
+      margin-bottom: 10px;
+      padding: 15px;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    li.compleanno {
+      border-left: 5px solid #007bff;
+    }
+    li.onomastico {
+      border-left: 5px solid #28a745;
+    }
+    .event-info {
+      flex-grow: 1;
+    }
+    .event-info strong {
+      display: block;
+      font-size: 1.2em;
+      margin-bottom: 5px;
+    }
+    .days-left {
+      font-weight: bold;
+      color: #007bff;
+      flex-shrink: 0;
+      margin-left: 10px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .days-left.today {
+      color: #dc3545;
+      animation: pulse 1.5s infinite;
+    }
+
+    /* Stili per i cerchietti */
+    .circle {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 5px;
+      flex-shrink: 0;
+    }
+    .circle.green { background-color: #28a745; }
+    .circle.orange { background-color: #ffc107; }
+    .circle.red { background-color: #dc3545; }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    /* Stili per il datario */
+    .datario-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .mese-container {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      background-color: #f9f9f9;
+    }
+    .mese-header {
+      font-weight: bold;
+      font-size: 1.1em;
+      margin-bottom: 10px;
+      color: #007bff;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .mese-content p {
+      margin: 5px 0;
+      font-size: 0.9em;
+    }
+    .mese-content .event-date-day {
+        font-weight: bold;
+    }
+    .mese-content .event-name {
+        font-weight: normal;
+        color: #555;
+    }
+    .mese-content .event-type {
+        font-style: italic;
+        color: #777;
+    }
+    .event-datario.compleanno .event-name { color: #007bff; }
+    .event-datario.onomastico .event-name { color: #28a745; }
+
+
+    /* Popup Styles */
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      visibility: hidden;
+      opacity: 0;
+      transition: visibility 0s, opacity 0.3s;
+    }
+    .popup-overlay.show {
+      visibility: visible;
+      opacity: 1;
+    }
+    .popup-content {
+      background-color: white;
+      padding: 25px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+    .popup-content h2 {
+      margin-top: 0;
+      color: #333;
+    }
+    .popup-content p {
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+    .popup-close-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Prossimi Eventi</h1>
+    <div class="controls">
+      <button id="listViewBtn" class="active">Elenco</button>
+      <button id="datarioViewBtn">Datario</button>
+      <button id="infoBtn">Info</button>
+    </div>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Cerca per nome o tipo di evento...">
+    </div>
+
+    <ul id="eventList">
+      </ul>
+
+    <div id="datarioContainer" style="display: none;">
+      </div>
+  </div>
+
+  <div id="infoPopup" class="popup-overlay">
+    <div class="popup-content">
+      <button class="popup-close-button" id="infoCloseBtn">&times;</button>
+      <h2>Informazioni</h2>
+      <p>Per un'esperienza ottimale, aggiungi questa pagina alla schermata Home del tuo dispositivo.</p>
+      <p><strong>Su iPhone/iPad:</strong> Clicca sull'icona "Condividi" (il quadrato con la freccia in alto) e poi "Aggiungi alla schermata Home".</p>
+      <p><strong>Su Android:</strong> Clicca sul menu (i tre puntini in alto a destra) e poi "Aggiungi a schermata Home".</p>
+    </div>
+  </div>
+
+  <script>
+    // Dati delle persone estratti da Nominativi.csv
+    const persone = [{'Cognome': 'Bianco', 'Nome': 'Rosa', 'Genere': 'F', 'Compleanno': '02/09/1971', 'Onomastico': '23/08'}, {'Cognome': 'Chiarappa', 'Nome': 'Cristiano', 'Genere': 'M', 'Compleanno': '20/06/2001', 'Onomastico': '07/04'}, {'Cognome': 'Chiarappa', 'Nome': 'Martino', 'Genere': 'M', 'Compleanno': '24/05/1997', 'Onomastico': '11/11'}, {'Cognome': 'Chiarappa', 'Nome': 'Saverio', 'Genere': 'M', 'Compleanno': '26/11/1951', 'Onomastico': '03/12'}, {'Cognome': 'Dalena', 'Nome': 'Riccardo', 'Genere': 'M', 'Compleanno': '11/04/1973', 'Onomastico': '03/04'}, {'Cognome': 'Grilletti', 'Nome': 'Teresa', 'Genere': 'F', 'Compleanno': '05/03/1937', 'Onomastico': '15/10'}, {'Cognome': 'Lefemine', 'Nome': 'Domenico', 'Genere': 'M', 'Compleanno': '06/02/1957', 'Onomastico': '04/08'}, {'Cognome': 'Lefemine', 'Nome': 'Flavia', 'Genere': 'F', 'Compleanno': '16/11/1996', 'Onomastico': '07/05'}, {'Cognome': 'Lefemine', 'Nome': 'Francesco', 'Genere': 'M', 'Compleanno': '20/03/2000', 'Onomastico': '04/10'}, {'Cognome': 'Lepore', 'Nome': 'Genny', 'Genere': 'F', 'Compleanno': '04/07/1975', 'Onomastico': '11/04'}, {'Cognome': 'Lorusso', 'Nome': 'Alessandro', 'Genere': 'M', 'Compleanno': '17/07/2010', 'Onomastico': '26/08'}, {'Cognome': 'Lorusso', 'Nome': 'Alice', 'Genere': 'F', 'Compleanno': '20/07/2013', 'Onomastico': '13/06'}, {'Cognome': 'Lorusso', 'Nome': 'Benny', 'Genere': 'M', 'Compleanno': '17/11/1975', 'Onomastico': '21/03'}, {'Cognome': 'Lorusso', 'Nome': 'Cinzia', 'Genere': 'F', 'Compleanno': '06/04/1980', 'Onomastico': NaN}, {'Cognome': 'Lorusso', 'Nome': 'Nina', 'Genere': 'F', 'Compleanno': '29/11/2015', 'Onomastico': '15/12'}, {'Cognome': 'Lorusso', 'Nome': 'Onofrio', 'Genere': 'M', 'Compleanno': '05/08/1951', 'Onomastico': '12/06'}, {'Cognome': 'Mazzarisi', 'Nome': 'Maria Grazia', 'Genere': 'F', 'Compleanno': '21/01/1989', 'Onomastico': '12/09'}, {'Cognome': 'Mazzarisi', 'Nome': 'Nino', 'Genere': 'M', 'Compleanno': '07/05/1957', 'Onomastico': '20/01'}, {'Cognome': 'Mazzarisi', 'Nome': 'Onofrio', 'Genere': 'M', 'Compleanno': '05/06/1992', 'Onomastico': '12/06'}, {'Cognome': 'Mazzarisi', 'Nome': 'Teresa', 'Genere': 'F', 'Compleanno': '01/04/1994', 'Onomastico': '15/10'}, {'Cognome': 'Pricci', 'Nome': 'Angela', 'Genere': 'F', 'Compleanno': '13/01/1957', 'Onomastico': '02/08'}, {'Cognome': 'Pricci', 'Nome': 'Asia', 'Genere': 'F', 'Compleanno': '07/06/2006', 'Onomastico': '19/02'}, {'Cognome': 'Pricci', 'Nome': 'Gilda', 'Genere': 'F', 'Compleanno': '29/06/2004', 'Onomastico': '13/02'}, {'Cognome': 'Pricci', 'Nome': 'Giovanni', 'Genere': 'M', 'Compleanno': '24/10/1964', 'Onomastico': '24/06'}, {'Cognome': 'Pricci', 'Nome': 'Giuseppe', 'Genere': 'M', 'Compleanno': '12/08/1968', 'Onomastico': '19/03'}, {'Cognome': 'Pricci', 'Nome': 'Luigi', 'Genere': 'M', 'Compleanno': '16/11/1933', 'Onomastico': '21/06'}, {'Cognome': 'Pricci', 'Nome': 'Maria Antonietta', 'Genere': 'F', 'Compleanno': '21/05/1958', 'Onomastico': '13/06'}, {'Cognome': 'Pricci', 'Nome': 'Marica', 'Genere': 'F', 'Compleanno': '12/04/1961', 'Onomastico': '12/09'}, {'Cognome': 'Pricci', 'Nome': 'Tiziana', 'Genere': 'F', 'Compleanno': '27/06/1972', 'Onomastico': '03/03'}, {'Cognome': 'Pricci', 'Nome': 'Vanna', 'Genere': 'F', 'Compleanno': '11/09/1963', 'Onomastico': '24/06'}, {'Cognome': 'Rotondi', 'Nome': 'Gianni', 'Genere': 'M', 'Compleanno': '08/03/1974', 'Onomastico': '24/06'}, {'Cognome': 'Rotondi', 'Nome': 'Nicoletta', 'Genere': 'F', 'Compleanno': '12/02/2019', 'Onomastico': '06/12'}, {'Cognome': 'Trivisani', 'Nome': 'Anna', 'Genere': 'F', 'Compleanno': '12/07/1969', 'Onomastico': '26/07'}];
+
+    const eventList = document.getElementById('eventList');
+    const datarioContainer = document.getElementById('datarioContainer');
+    const searchInput = document.getElementById('searchInput');
+    const listViewBtn = document.getElementById('listViewBtn');
+    const datarioViewBtn = document.getElementById('datarioViewBtn');
+    const infoBtn = document.getElementById('infoBtn');
+    const infoPopup = document.getElementById('infoPopup');
+    const infoCloseBtn = document.getElementById('infoCloseBtn');
+
+    let currentView = 'list'; // 'list' or 'datario'
+
+    function parseDate(dateString) {
+      if (!dateString) return null;
+      const parts = dateString.split('/');
+      // Date constructor expects month as 0-indexed
+      return new Date(new Date().getFullYear(), parseInt(parts[1]) - 1, parseInt(parts[0]));
+    }
+
+    function getDaysUntil(date) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Normalizza la data di oggi
+
+      let eventDateThisYear = new Date(today.getFullYear(), date.getMonth(), date.getDate());
+
+      // Se l'evento è già passato quest'anno, impostalo per l'anno prossimo
+      if (eventDateThisYear < today) {
+        eventDateThisYear.setFullYear(today.getFullYear() + 1);
+      }
+
+      const diffTime = eventDateThisYear - today;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays;
+    }
+
+    function getAge(birthday, today) {
+      if (!birthday || birthday.split('/').length < 3) return null;
+      const birthYear = parseInt(birthday.split('/')[2]);
+      const birthMonth = parseInt(birthday.split('/')[1]) - 1; // 0-indexed
+      const birthDay = parseInt(birthday.split('/')[0]);
+
+      let age = today.getFullYear() - birthYear;
+
+      // Regola l'età se il compleanno non è ancora avvenuto quest'anno
+      if (today.getMonth() < birthMonth || (today.getMonth() === birthMonth && today.getDate() < birthDay)) {
+        age--;
+      }
+      return Math.max(0, age); // Assicurati che l'età non sia negativa
+    }
+
+    function getAllProcessedEvents() {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      let allEvents = [];
+
+      persone.forEach(person => {
+        // Evento Compleanno
+        if (person.Compleanno) {
+          const birthdayDate = parseDate(person.Compleanno);
+          if (birthdayDate) {
+            const daysUntilBirthday = getDaysUntil(birthdayDate); // This accounts for next year if passed
+            const ageToday = getAge(person.Compleanno, today); // Age completed as of today
+
+            // Determine the age to display for a birthday event based on event date within the current year
+            let ageToDisplay;
+            // Create a date object for the current year with the month and day of the birthday
+            const birthdayThisYear = new Date(today.getFullYear(), birthdayDate.getMonth(), birthdayDate.getDate());
+
+            // If the birthday this year has already passed (or is today), use the ageToday
+            if (birthdayThisYear <= today) {
+                ageToDisplay = ageToday;
+            } else {
+                // If the birthday this year is in the future, they will turn ageToday + 1
+                ageToDisplay = ageToday + 1;
+            }
+            // Handle case where ageToday might be null if birthday format is bad
+            ageToDisplay = (ageToday !== null) ? ageToDisplay : null;
+
+            allEvents.push({
+              name: `${person.Nome} ${person.Cognome}`,
+              type: 'Compleanno',
+              date: person.Compleanno,
+              sortDays: daysUntilBirthday,
+              displayDays: daysUntilBirthday === 0 ? 'OGGI' : daysUntilBirthday === 1 ? 'Domani' : `Tra ${daysUntilBirthday} giorni`,
+              ageText: ageToDisplay !== null ? `${ageToDisplay}° Compleanno` : '' // This will be the dynamic age
+            });
+          }
+        }
+        // Evento Onomastico (no change needed here)
+        if (person.Onomastico && String(person.Onomastico).toLowerCase() !== 'nan') {
+          const onomasticoDate = parseDate(person.Onomastico);
+          if (onomasticoDate) {
+            const daysUntilOnomastico = getDaysUntil(onomasticoDate);
+            allEvents.push({
+              name: `${person.Nome} ${person.Cognome}`,
+              type: 'Onomastico',
+              date: person.Onomastico,
+              sortDays: daysUntilOnomastico,
+              displayDays: daysUntilOnomastico === 0 ? 'OGGI' : daysUntilOnomastico === 1 ? 'Domani' : `Tra ${daysUntilOnomastico} giorni`,
+              ageText: ''
+            });
+          }
+        }
+      });
+      return allEvents;
+    }
+
+
+    function displayListView(filter = '') {
+      eventList.style.display = 'block';
+      datarioContainer.style.display = 'none';
+      eventList.innerHTML = '';
+
+      const allEvents = getAllProcessedEvents();
+      allEvents.sort((a, b) => a.sortDays - b.sortDays); // Sort by days remaining
+
+      const filteredEvents = allEvents.filter(event => {
+        const eventText = `${event.name} ${event.type} ${event.date} ${event.ageText}`.toLowerCase();
+        return eventText.includes(filter.toLowerCase());
+      });
+
+      if (filteredEvents.length === 0) {
+        const li = document.createElement('li');
+        li.textContent = 'Nessun evento trovato.';
+        eventList.appendChild(li);
+        return;
+      }
+
+      filteredEvents.forEach(event => {
+        const li = document.createElement('li');
+        li.classList.add(event.type.toLowerCase());
+
+        const eventInfo = document.createElement('div');
+        eventInfo.classList.add('event-info');
+
+        let typeAndAgeDisplay = '';
+        if (event.type === 'Compleanno') {
+          typeAndAgeDisplay = event.ageText; // Mostra solo "X° Compleanno"
+        } else {
+          typeAndAgeDisplay = event.type; // Mostra "Onomastico"
+        }
+
+        eventInfo.innerHTML = `
+          <strong>${event.name}</strong>
+          <span>${typeAndAgeDisplay} - ${event.date}</span>
+        `;
+
+        const daysLeft = document.createElement('div');
+        daysLeft.classList.add('days-left');
+
+        let circleHtml = '';
+        if (event.sortDays === 0) {
+          daysLeft.classList.add('today');
+          circleHtml = '<span class="circle red"></span>';
+        } else if (event.sortDays === 1) {
+          circleHtml = '<span class="circle orange"></span>';
+        } else if (event.sortDays === 2) { // Green circle for 2 days
+          circleHtml = '<span class="circle green"></span>';
+        }
+        
+        daysLeft.innerHTML = circleHtml + event.displayDays;
+
+        li.appendChild(eventInfo);
+        li.appendChild(daysLeft);
+        eventList.appendChild(li);
+      });
+    }
+
+    function displayDatarioView(filter = '') {
+      eventList.style.display = 'none';
+      datarioContainer.style.display = 'grid'; // Usa grid per il layout dei mesi
+      datarioContainer.innerHTML = '';
+
+      const allEvents = getAllProcessedEvents();
+      
+      const filteredEvents = allEvents.filter(event => {
+        const eventText = `${event.name} ${event.type} ${event.date} ${event.ageText}`.toLowerCase();
+        return eventText.includes(filter.toLowerCase());
+      });
+
+      const mesi = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+      const today = new Date();
+      const currentYear = today.getFullYear();
+
+      const eventsByMonth = {};
+      for(let i = 0; i < 12; i++) {
+        eventsByMonth[i] = [];
+      }
+
+      filteredEvents.forEach(event => {
+        const parts = event.date.split('/');
+        const monthIndex = parseInt(parts[1]) - 1; // 0-indexed month
+        eventsByMonth[monthIndex].push(event);
+      });
+
+      for (let i = 0; i < 12; i++) {
+        const meseDiv = document.createElement('div');
+        meseDiv.classList.add('mese-container');
+        
+        const meseHeader = document.createElement('div');
+        meseHeader.classList.add('mese-header');
+        meseHeader.textContent = `${mesi[i]} ${currentYear}`;
+        meseDiv.appendChild(meseHeader);
+
+        const meseContent = document.createElement('div');
+        meseContent.classList.add('mese-content');
+
+        // Sort events within the month by day
+        eventsByMonth[i].sort((a, b) => parseInt(a.date.split('/')[0]) - parseInt(b.date.split('/')[0]));
+
+        if (eventsByMonth[i].length === 0) {
+          meseContent.innerHTML = '<p>Nessun evento</p>';
+        } else {
+          eventsByMonth[i].forEach(event => {
+            const eventDay = parseInt(event.date.split('/')[0]);
+            let typeAndAgeDisplay = '';
+            if (event.type === 'Compleanno') {
+              typeAndAgeDisplay = event.ageText;
+            } else {
+              typeAndAgeDisplay = event.type;
+            }
+
+            const p = document.createElement('p');
+            p.classList.add('event-datario', event.type.toLowerCase());
+            p.innerHTML = `<span class="event-date-day">${eventDay})</span> <span class="event-name">${event.name}</span> <span class="event-type">(${typeAndAgeDisplay})</span>`;
+            meseContent.appendChild(p);
+          });
+        }
+        meseDiv.appendChild(meseContent);
+        datarioContainer.appendChild(meseDiv);
+      }
+    }
+
+    function showInfoPopup() {
+      infoPopup.classList.add('show');
+    }
+
+    function hideInfoPopup() {
+      infoPopup.classList.remove('show');
+    }
+
+    // Event Listeners
+    listViewBtn.addEventListener('click', () => {
+      listViewBtn.classList.add('active');
+      datarioViewBtn.classList.remove('active');
+      currentView = 'list';
+      displayListView(searchInput.value);
+    });
+
+    datarioViewBtn.addEventListener('click', () => {
+      datarioViewBtn.classList.add('active');
+      listViewBtn.classList.remove('active');
+      currentView = 'datario';
+      displayDatarioView(searchInput.value);
+    });
+
+    infoBtn.addEventListener('click', showInfoPopup);
+    infoCloseBtn.addEventListener('click', hideInfoPopup);
+
+    searchInput.addEventListener('input', (e) => {
+      if (currentView === 'list') {
+        displayListView(e.target.value);
+      } else {
+        displayDatarioView(e.target.value);
+      }
+    });
+
+    // Initial display
+    document.addEventListener('DOMContentLoaded', () => {
+      displayListView();
+    });
+  </script>
+</body>
+</html>
