@@ -254,7 +254,7 @@
             flex-grow: 0;
             max-width: 180px;
         }
-        .chart-bar.monthly { background: #667eea; }
+        .chart-bar.monthly { background: #0076ff; }
         .chart-count { font-weight: bold; flex-shrink: 0; }
         #info h3 { font-size: 1.5em; text-align: left; }
         #info p, #info .info-section p, #info .info-section strong {
@@ -654,6 +654,8 @@ function displayPeople() {
         `;
     }).join('');
 }
+
+// ------ CALENDARIO con stile richiesto ------
 function showCalendarEvents() {
     const container = document.getElementById('monthly-events');
     const months = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno','Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
@@ -709,25 +711,25 @@ function showCalendarEvents() {
                 <h3 style="margin-bottom: 15px; color: #495057;">${monthName}</h3>
                 ${events.length > 0 ? events.map(event => {
                     const icon = event.type === 'birthday' ? '🎂' : '🌟';
-                    const eventType = event.type === 'birthday' ? 'Compleanno' : 'Onomastico';
-                    const daysUntil = getDaysUntilEvent(event.day, event.originalMonth);
-                    let circleHtml = '';
-                    if (daysUntil === 0) {
-                        circleHtml = '<span class="event-circle circle-red"></span>';
-                    } else if (daysUntil === 1) {
-                        circleHtml = '<span class="event-circle circle-yellow"></span>';
-                    } else if (daysUntil === 2) {
-                        circleHtml = '<span class="event-circle circle-green"></span>';
-                    }
                     const ageForDisplay = event.type === 'birthday' && event.person.dataNascita
                         ? getAgeForDisplay(event.person.dataNascita)
                         : null;
                     const ageText = ageForDisplay !== null ? ` (${ageForDisplay} anni)` : '';
-                    return `
-                        <div style="padding: 10px; background: white; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid ${event.type === 'birthday' ? '#ffc107' : '#17a2b8'};">
-                            ${icon} ${event.day} - ${eventType} di ${circleHtml}<strong>${event.person.nome} ${event.person.cognome}</strong>${ageText}
-                        </div>
-                    `;
+                    if (event.type === 'birthday') {
+                        // SOLO nome e cognome in blu elettrico e grassetto, resto normale nero
+                        return `
+                            <div style="padding: 10px; background: white; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #ffc107;">
+                                <span style="font-weight:bold; color:#0076ff;">${icon} ${event.day} - ${event.person.nome} ${event.person.cognome}</span><span style="color:#222; font-weight:normal;">${ageText}</span>
+                            </div>
+                        `;
+                    } else {
+                        // Onomastici: TUTTO granata e grassetto
+                        return `
+                            <div style="padding: 10px; background: white; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #17a2b8;">
+                                <span style="font-weight:bold; color:#88001b;">${icon} ${event.day} - ${event.person.nome} ${event.person.cognome}</span>
+                            </div>
+                        `;
+                    }
                 }).join('') : '<p style="color: #6c757d; font-style: italic;">Nessun evento questo mese</p>'}
             </div>
         `;
@@ -784,6 +786,7 @@ function giornoSettimanaIT(dateString) {
     return giorni[d.getDay()];
 }
 
+// ------ STATISTICHE ETA' con titolo modificato ------
 function showStatistics() {
     const container = document.getElementById('stats-content');
     try {
@@ -793,11 +796,12 @@ function showStatistics() {
             return parseDate(a.dataNascita) - parseDate(b.dataNascita);
         });
         const avgPrecise = getPreciseAverageAge(peopleWithBirthdates);
-        const avgPreciseStr = avgPrecise
-            ? `${avgPrecise.years} anni, ${avgPrecise.months} mesi, ${avgPrecise.days} giorni`
-            : 'N/A';
 
-        // Elenco in formato richiesto
+        let estesa = 'N/A';
+        if (avgPrecise) {
+            estesa = `${avgPrecise.years} anni, ${avgPrecise.months} mesi, ${avgPrecise.days} giorni`;
+        }
+
         const elenco = sorted.map((p, i) => {
             let dn = p.dataNascita;
             let dd, mm, aa;
@@ -815,8 +819,8 @@ function showStatistics() {
             }
             const giorno = giornoSettimanaIT(p.dataNascita).slice(0,3).toLowerCase();
             return `<div>
-                ${i+1}) <strong>${p.nome} ${p.cognome}</strong>
-                <span style="color:#0a224e; font-weight:bold;">${dd}/${mm}/${aa}</span>
+                ${i+1}) ${p.nome} ${p.cognome}
+                <span style="color:#0076ff; font-weight:bold;">${dd}/${mm}/${aa}</span>
                 <span style="color:#888;">(${giorno})</span>
             </div>`;
         }).map((row, i) => {
@@ -843,8 +847,11 @@ function showStatistics() {
 
         container.innerHTML = `
             <div class="stat-section">
-                <div style="text-align:center; color:#b20000; font-size:1.3em; font-weight:bold; margin-bottom:15px;">
-                    Età media: ${avgPreciseStr}
+                <div style="text-align:center; color:#b20000; font-size:1.6em; font-weight:bold; margin-bottom:0.2em; margin-top:-5px;">
+                    Età media
+                </div>
+                <div style="text-align:center; color:#b20000; font-size:1.15em; font-weight:bold; margin-bottom:15px;">
+                    ${estesa}
                 </div>
                 <div>${elenco}</div>
             </div>
