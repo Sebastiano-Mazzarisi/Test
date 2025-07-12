@@ -409,11 +409,13 @@ function parseDate(dateString) {
     const date = new Date(dateString);
     return isNaN(date.getTime()) ? null : date;
 }
+
 function formatDate(dateString) {
     const date = parseDate(dateString);
     if (!date) return '';
     return date.toLocaleDateString('it-IT');
 }
+
 function isToday(dateString) {
     const date = parseDate(dateString);
     if (!date) return false;
@@ -744,24 +746,82 @@ function scrollToCalendarStart() {
         behavior: 'smooth'
     });
 }
+
+// ----------- STATISTICHE ETÀ + ALTRE STATISTICHE --------------
+
+function getPreciseAverageAge(peopleWithBirthdates) {
+    if (peopleWithBirthdates.length === 0) return null;
+    let totalDays = 0;
+    const today = new Date();
+    peopleWithBirthdates.forEach(p => {
+        const birth = parseDate(p.dataNascita);
+        if (birth) {
+            const diff = today - birth;
+            totalDays += diff / (1000 * 60 * 60 * 24); // giorni
+        }
+    });
+    const avgDays = totalDays / peopleWithBirthdates.length;
+    const avgBirth = new Date(today - avgDays * 24 * 60 * 60 * 1000);
+    // Calcola anni, mesi, giorni tra avgBirth e oggi
+    let years = today.getFullYear() - avgBirth.getFullYear();
+    let months = today.getMonth() - avgBirth.getMonth();
+    let days = today.getDate() - avgBirth.getDate();
+    if (days < 0) {
+        months -= 1;
+        const prevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+        days += prevMonth.getDate();
+    }
+    if (months < 0) {
+        years -= 1;
+        months += 12;
+    }
+    return { years, months, days };
+}
+
+function giornoSettimanaIT(dateString) {
+    const giorni = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
+    const d = parseDate(dateString);
+    if (!d) return '';
+    return giorni[d.getDay()];
+}
+
 function showStatistics() {
     const container = document.getElementById('stats-content');
     try {
+        // 1. STATISTICA ETA'
         const peopleWithBirthdates = people.filter(p => p.dataNascita && parseDate(p.dataNascita));
-        const ages = peopleWithBirthdates.map(p => getAge(p.dataNascita));
-        const avgAge = ages.length > 0 ? Math.round(ages.reduce((a, b) => a + b, 0) / ages.length) : 0;
-        const minAgeValue = ages.length > 0 ? Math.min(...ages) : 0;
-        const maxAgeValue = ages.length > 0 ? Math.max(...ages) : 0;
-        const youngestPerson = peopleWithBirthdates.find(p => getAge(p.dataNascita) === minAgeValue);
-        const youngestSurname = youngestPerson ? ` (${youngestPerson.cognome})` : '';
-        const oldestPerson = peopleWithBirthdates.find(p => getAge(p.dataNascita) === maxAgeValue);
-        const oldestSurname = oldestPerson ? ` (${oldestPerson.cognome})` : '';
+        // ORDINA DAL PIÙ ANZIANO AL PIÙ GIOVANE
+        const sorted = peopleWithBirthdates.slice().sort((a, b) => {
+            return parseDate(a.dataNascita) - parseDate(b.dataNascita);
+        });
+        // Età media precisa
+        const avgPrecise = getPreciseAverageAge(peopleWithBirthdates);
+        const avgPreciseStr = avgPrecise
+            ? `${avgPrecise.years} anni, ${avgPrecise.months} mesi, ${avgPrecise.days} giorni`
+            : 'N/A';
+        // Elenco ordinato (nome e cognome in grassetto)
+        const elenco = sorted.map((p, i) => {
+            let dn = p.dataNascita;
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dn)) {
+                const [y, m, d] = dn.split('-');
+                dn = `${d}/${m}/${y}`;
+            } else if (/^\d{2}-\d{2}-\d{4}$/.test(dn)) {
+                const [d, m, y] = dn.split('-');
+                dn = `${d}/${m}/${y}`;
+            }
+            const giorno = giornoSettimanaIT(p.dataNascita);
+            return `<div>${i+1}) <strong>${p.nome} ${p.cognome}</strong> ${dn} <span style="color:#888;">(${giorno})</span></div>`;
+        }).join('');
+
+        // 2. STATISTICA COMUNI
         const comuneStats = {};
         people.forEach(p => {
             if (p.comune) comuneStats[p.comune] = (comuneStats[p.comune] || 0) + 1;
         });
         const sortedComuni = Object.entries(comuneStats).sort(([,a], [,b]) => b - a);
         const maxComuneCount = sortedComuni.length > 0 ? Math.max(...Object.values(comuneStats)) : 1; 
+
+        // 3. STATISTICA COMPLEANNI PER MESE
         const monthlyStats = new Array(12).fill(0);
         people.forEach(p => {
             if (p.dataNascita) {
@@ -770,15 +830,12 @@ function showStatistics() {
             }
         });
         const maxMonthlyCount = Math.max(...monthlyStats) === 0 ? 1 : Math.max(...monthlyStats);
+
         container.innerHTML = `
             <div class="stat-section">
-                <h3 style="margin-bottom: 20px; color: #495057;">📊 Statistiche Età</h3>
-                <div style="display: grid; gap: 15px;">
-                    <div>Età media: <strong>${avgAge} anni</strong></div>
-                    <div>Più giovane: <strong>${minAgeValue} anni</strong><span style="font-weight: normal;">${youngestSurname}</span></div>
-                    <div>Più anziano: <strong>${maxAgeValue} anni</strong><span style="font-weight: normal;">${oldestSurname}</span></div>
-                    <div>Con data di nascita: <strong>${ages.length}/${people.length}</strong></div>
-                </div>
+                <div><strong>Età media: ${avgPreciseStr}</strong></div>
+                <div style="height: 1.2em;"></div>
+                <div>${elenco}</div>
             </div>
             <div class="stat-section">
                 <h3 style="margin-bottom: 20px; color: #495057;">🏘️ Distribuzione per Comune</h3>
@@ -814,15 +871,12 @@ function showStatistics() {
             </div>
         `;
     } catch (error) {
-        console.error('Errore nel calcolo delle statistiche:', error);
-        container.innerHTML = `
-            <div class="error">
-                <strong>Errore nel calcolo delle statistiche:</strong><br>
-                ${error.message}
-            </div>
-        `;
+        container.innerHTML = `<div class="error"><strong>Errore:</strong><br>${error.message}</div>`;
     }
 }
+
+// ----------- FINE STATISTICHE ------------
+
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         const searchInput = document.getElementById('search');
