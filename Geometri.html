@@ -206,7 +206,12 @@
         .circle-green { background-color: #28a745; }
         .circle-yellow { background-color: #ffc107; }
         .circle-red { background-color: #dc3545; }
-        .month-card { border: 1px solid #dee2e6; cursor: pointer; transition: all 0.3s ease; }
+        .month-card {
+            border: 1px solid #dee2e6;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
         .month-card:hover {
             border-color: #adb5bd;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -215,6 +220,7 @@
         .month-card.current-month {
             border: 4px solid #28a745;
             box-shadow: 0 0 15px rgba(40, 167, 69, 0.4);
+            background: #e3e3e8 !important;
         }
         .month-card.current-month:hover {
             border-color: #28a745;
@@ -409,13 +415,11 @@ function parseDate(dateString) {
     const date = new Date(dateString);
     return isNaN(date.getTime()) ? null : date;
 }
-
 function formatDate(dateString) {
     const date = parseDate(dateString);
     if (!date) return '';
     return date.toLocaleDateString('it-IT');
 }
-
 function isToday(dateString) {
     const date = parseDate(dateString);
     if (!date) return false;
@@ -655,13 +659,18 @@ function displayPeople() {
     }).join('');
 }
 
-// ------ CALENDARIO con stile richiesto ------
+// ------ CALENDARIO con mese, anno e "oggi" ------
 function showCalendarEvents() {
     const container = document.getElementById('monthly-events');
     const months = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno','Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
     const eventsByMonth = {};
     const today = new Date();
     const todayMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    const todayDay = today.getDate();
+    const giorniSettimana = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
+    const todayWeekday = giorniSettimana[today.getDay()];
+
     people.forEach(person => {
         if (person.dataNascita) {
             const date = parseDate(person.dataNascita);
@@ -695,20 +704,27 @@ function showCalendarEvents() {
             }
         }
     });
+
     container.innerHTML = months.map((monthName, index) => {
+        let monthTitle = `${monthName} ${currentYear}`;
+        if (index === todayMonth) {
+            monthTitle += ` - Oggi: ${todayWeekday} ${todayDay}`;
+        }
         const events = eventsByMonth[index] || [];
         events.sort((a, b) => a.day - b.day);
         let monthCardClass = 'month-card';
+        let styleBg = 'background: #f8f9fa; padding: 20px; margin-bottom: 20px; border-radius: 15px;';
         if (index < todayMonth) {
             monthCardClass += ' past-month';
         } else if (index === todayMonth) {
             monthCardClass += ' current-month';
+            styleBg = 'background: #e3e3e8; padding: 20px; margin-bottom: 20px; border-radius: 15px;';
         } else {
             monthCardClass += ' future-month';
         }
         return `
-            <div style="background: #f8f9fa; padding: 20px; margin-bottom: 20px; border-radius: 15px;" class="${monthCardClass}" id="month-${index}" onclick="scrollToCalendarStart()">
-                <h3 style="margin-bottom: 15px; color: #495057;">${monthName}</h3>
+            <div style="${styleBg}" class="${monthCardClass}" id="month-${index}" onclick="scrollToCalendarStart()">
+                <h3 style="margin-bottom: 15px; color: #495057;">${monthTitle}</h3>
                 ${events.length > 0 ? events.map(event => {
                     const icon = event.type === 'birthday' ? '🎂' : '🌟';
                     const ageForDisplay = event.type === 'birthday' && event.person.dataNascita
@@ -716,14 +732,12 @@ function showCalendarEvents() {
                         : null;
                     const ageText = ageForDisplay !== null ? ` (${ageForDisplay} anni)` : '';
                     if (event.type === 'birthday') {
-                        // SOLO nome e cognome in blu elettrico e grassetto, resto normale nero
                         return `
                             <div style="padding: 10px; background: white; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #ffc107;">
                                 <span style="font-weight:bold; color:#0076ff;">${icon} ${event.day} - ${event.person.nome} ${event.person.cognome}</span><span style="color:#222; font-weight:normal;">${ageText}</span>
                             </div>
                         `;
                     } else {
-                        // Onomastici: TUTTO granata e grassetto
                         return `
                             <div style="padding: 10px; background: white; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #17a2b8;">
                                 <span style="font-weight:bold; color:#88001b;">${icon} ${event.day} - ${event.person.nome} ${event.person.cognome}</span>
