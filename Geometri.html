@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Geometri</title>
+    
+    <link rel="icon" type="image/png" href="Geometri.png">
+    <link rel="apple-touch-icon" href="Geometri.png">
+    
     <style>
         * {
             margin: 0;
@@ -81,9 +85,9 @@
         }
 
         .nav-tab.active {
-            background: #FFFACD;
-            border-bottom-color: #FFC107;
-            color: #495057;
+            background: #FFFACD; /* Giallo pastello chiaro */
+            border-bottom-color: #FFC107; /* Bordo giallo più scuro */
+            color: #495057; /* Testo scuro per leggibilità */
             font-weight: bold;
         }
 
@@ -278,7 +282,6 @@
             transform: translateY(-2px);
         }
         
-        /* MODIFICA SPESSORE CORNICE MESE CORRENTE */
         .month-card.current-month {
             border: 4px solid #28a745; /* Cornice verde, spessore doppio */
             box-shadow: 0 0 15px rgba(40, 167, 69, 0.4);
@@ -528,7 +531,7 @@ Neri,Anna,F,1988-01-30,26-07,Torino,347-11.22.334,Avvocato`;
                     throw new Error('CSV deve contenere almeno header e una riga di dati');
                 }
                 
-                const headers = lines[0].split(',').map(h => h.trim().replace(/['']/g, ''));
+                const headers = lines[0].split(',').map(h => h.trim().replace(/['"]/g, ''));
                 
                 return lines.slice(1).map((line, index) => {
                     // Gestione migliorata per CSV con virgole nei campi
@@ -541,7 +544,7 @@ Neri,Anna,F,1988-01-30,26-07,Torino,347-11.22.334,Avvocato`;
                         if (char === '"') {
                             inQuotes = !inQuotes;
                         } else if (char === ',' && !inQuotes) {
-                            values.push(current.trim().replace(/['']/g, ''));
+                            values.push(current.trim().replace(/['"]/g, ''));
                             current = '';
                         } else {
                             current += char;
@@ -876,7 +879,7 @@ Neri,Anna,F,1988-01-30,26-07,Torino,347-11.22.334,Avvocato`;
             });
         }
 
-        // GESTIONE DEI GRAFICI - CORREZIONI PER LA LUNGHEZZA DELLE BARRE
+        // GESTIONE DEI GRAFICI
         function showStatistics() {
             const container = document.getElementById('stats-content');
             
@@ -895,8 +898,6 @@ Neri,Anna,F,1988-01-30,26-07,Torino,347-11.22.334,Avvocato`;
                     }
                 });
                 const sortedComuni = Object.entries(comuneStats).sort(([,a], [,b]) => b - a);
-                // maxComuneCount sarà il valore massimo di conteggio in tutti i comuni.
-                // Se non ci sono comuni, sarà 1 per evitare divisione per zero.
                 const maxComuneCount = sortedComuni.length > 0 ? Math.max(...Object.values(comuneStats)) : 1; 
 
                 // Eventi per mese (compleanni)
@@ -909,8 +910,6 @@ Neri,Anna,F,1988-01-30,26-07,Torino,347-11.22.334,Avvocato`;
                         }
                     }
                 });
-                // maxMonthlyCount sarà il valore massimo di compleanni in un singolo mese.
-                // Se non ci sono compleanni, sarà 1 per evitare divisione per zero.
                 const maxMonthlyCount = Math.max(...monthlyStats) === 0 ? 1 : Math.max(...monthlyStats);
                 
                 container.innerHTML = `
@@ -930,8 +929,6 @@ Neri,Anna,F,1988-01-30,26-07,Torino,347-11.22.334,Avvocato`;
                             <div style="display: grid; gap: 12px;">
                                 ${sortedComuni.length > 0 ? sortedComuni
                                     .map(([comune, count]) => {
-                                        // Calcola la larghezza della barra basata sulla proporzione rispetto al massimo,
-                                        // utilizzando 180 come fattore di scala per renderle più corte
                                         const barWidth = Math.max(20, (count / maxComuneCount) * 180); 
                                         return `<div class="chart-item">
                                             <span class="chart-label">${comune || 'Non specificato'}</span>
@@ -949,8 +946,6 @@ Neri,Anna,F,1988-01-30,26-07,Torino,347-11.22.334,Avvocato`;
                             <div style="display: grid; gap: 12px;">
                                 ${['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre']
                                     .map((month, index) => {
-                                        // Calcola la larghezza della barra basata sulla proporzione rispetto al massimo,
-                                        // utilizzando 180 come fattore di scala per renderle più corte
                                         const barWidth = Math.max(20, (monthlyStats[index] / maxMonthlyCount) * 180);
                                         return `<div class="chart-item">
                                             <span class="chart-label">${month}</span>
