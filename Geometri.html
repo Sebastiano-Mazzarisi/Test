@@ -762,7 +762,6 @@ function getPreciseAverageAge(peopleWithBirthdates) {
     });
     const avgDays = totalDays / peopleWithBirthdates.length;
     const avgBirth = new Date(today - avgDays * 24 * 60 * 60 * 1000);
-    // Calcola anni, mesi, giorni tra avgBirth e oggi
     let years = today.getFullYear() - avgBirth.getFullYear();
     let months = today.getMonth() - avgBirth.getMonth();
     let days = today.getDate() - avgBirth.getDate();
@@ -790,27 +789,38 @@ function showStatistics() {
     try {
         // 1. STATISTICA ETA'
         const peopleWithBirthdates = people.filter(p => p.dataNascita && parseDate(p.dataNascita));
-        // ORDINA DAL PIÙ ANZIANO AL PIÙ GIOVANE
         const sorted = peopleWithBirthdates.slice().sort((a, b) => {
             return parseDate(a.dataNascita) - parseDate(b.dataNascita);
         });
-        // Età media precisa
         const avgPrecise = getPreciseAverageAge(peopleWithBirthdates);
         const avgPreciseStr = avgPrecise
             ? `${avgPrecise.years} anni, ${avgPrecise.months} mesi, ${avgPrecise.days} giorni`
             : 'N/A';
-        // Elenco ordinato (nome e cognome in grassetto)
+
+        // Elenco in formato richiesto
         const elenco = sorted.map((p, i) => {
             let dn = p.dataNascita;
+            let dd, mm, aa;
             if (/^\d{4}-\d{2}-\d{2}$/.test(dn)) {
                 const [y, m, d] = dn.split('-');
-                dn = `${d}/${m}/${y}`;
+                dd = d; mm = m; aa = y.slice(-2);
             } else if (/^\d{2}-\d{2}-\d{4}$/.test(dn)) {
                 const [d, m, y] = dn.split('-');
-                dn = `${d}/${m}/${y}`;
+                dd = d; mm = m; aa = y.slice(-2);
+            } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dn)) {
+                const [d, m, y] = dn.split('/');
+                dd = d; mm = m; aa = y.slice(-2);
+            } else {
+                dd = dn; mm = ""; aa = "";
             }
-            const giorno = giornoSettimanaIT(p.dataNascita);
-            return `<div>${i+1}) <strong>${p.nome} ${p.cognome}</strong> ${dn} <span style="color:#888;">(${giorno})</span></div>`;
+            const giorno = giornoSettimanaIT(p.dataNascita).slice(0,3).toLowerCase();
+            return `<div>
+                ${i+1}) <strong>${p.nome} ${p.cognome}</strong>
+                <span style="color:#0a224e; font-weight:bold;">${dd}/${mm}/${aa}</span>
+                <span style="color:#888;">(${giorno})</span>
+            </div>`;
+        }).map((row, i) => {
+            return row + ((i+1)%5===0 ? `<div style="height:1em;"></div>` : '');
         }).join('');
 
         // 2. STATISTICA COMUNI
@@ -833,8 +843,9 @@ function showStatistics() {
 
         container.innerHTML = `
             <div class="stat-section">
-                <div><strong>Età media: ${avgPreciseStr}</strong></div>
-                <div style="height: 1.2em;"></div>
+                <div style="text-align:center; color:#b20000; font-size:1.3em; font-weight:bold; margin-bottom:15px;">
+                    Età media: ${avgPreciseStr}
+                </div>
                 <div>${elenco}</div>
             </div>
             <div class="stat-section">
