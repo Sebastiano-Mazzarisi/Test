@@ -30,7 +30,7 @@
         .header {
             background: linear-gradient(135deg, #ff6b6b, #feca57);
             color: white;
-            padding: 10px 30px; /* Ridotto ulteriormente il padding verticale */
+            padding: 10px 30px;
             text-align: center;
         }
 
@@ -64,7 +64,7 @@
 
         .nav-tabs {
             display: flex;
-            background: #f8f9fa;
+            background: #e9ecef;
             border-bottom: 1px solid #dee2e6;
         }
 
@@ -81,14 +81,19 @@
         }
 
         .nav-tab.active {
-            background: white;
-            border-bottom-color: #667eea;
-            color: #667eea;
+            background: #FFFACD;
+            border-bottom-color: #FFC107;
+            color: #495057;
             font-weight: bold;
         }
 
         .nav-tab:hover {
             background: #e9ecef;
+        }
+
+        .nav-tab:focus {
+            outline: 2px solid #667eea;
+            outline-offset: -2px;
         }
 
         .content {
@@ -103,64 +108,13 @@
             display: block;
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 25px;
-            border-radius: 15px;
-            text-align: center;
-            transition: transform 0.3s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .stat-number {
-            font-size: 2.5em;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            font-size: 0.9em;
-            opacity: 0.9;
-        }
-
-        .alerts {
-            margin-bottom: 30px;
-        }
-
-        .alert {
-            padding: 15px;
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
             border-radius: 10px;
-            margin-bottom: 10px;
-            border-left: 5px solid;
-            animation: slideIn 0.3s ease;
-        }
-
-        .alert-birthday {
-            background: #fff3cd;
-            border-color: #ffc107;
-            color: #856404;
-        }
-
-        .alert-nameday {
-            background: #d1ecf1;
-            border-color: #bee5eb;
-            color: #0c5460;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+            margin: 20px 0;
+            border-left: 5px solid #dc3545;
         }
 
         .search-filter {
@@ -176,7 +130,7 @@
             min-width: 200px;
         }
 
-        .search-filter input, .search-filter select {
+        .search-filter input {
             padding: 12px;
             border: 2px solid #dee2e6;
             border-radius: 8px;
@@ -184,7 +138,7 @@
             width: 100%;
         }
 
-        .search-filter input:focus, .search-filter select:focus {
+        .search-filter input:focus {
             outline: none;
             border-color: #667eea;
         }
@@ -216,23 +170,6 @@
 
         .search-clear.show {
             display: flex;
-        }
-
-        /* Il bottone refresh-btn non esiste più, ma mantengo la regola in caso di riutilizzo */
-        .refresh-btn {
-            padding: 12px 20px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-
-        .refresh-btn:hover {
-            background: #5a6fd8;
-            transform: translateY(-2px);
         }
 
         .person-grid {
@@ -305,34 +242,6 @@
             color: #667eea;
         }
 
-        .upcoming-events {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-        }
-
-        .upcoming-events h3 {
-            margin-bottom: 15px;
-            color: #495057;
-        }
-
-        .event-item {
-            padding: 10px;
-            background: white;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            border-left: 4px solid #667eea;
-        }
-
-        .event-item.birthday {
-            border-left-color: #ffc107;
-        }
-
-        .event-item.nameday {
-            border-left-color: #17a2b8;
-        }
-
         .no-data {
             text-align: center;
             padding: 40px;
@@ -345,16 +254,6 @@
             display: block;
         }
 
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            border-left: 5px solid #dc3545;
-        }
-
-        /* Stili per i cerchietti */
         .event-circle {
             display: inline-block;
             width: 10px;
@@ -367,12 +266,83 @@
         .circle-yellow { background-color: #ffc107; }
         .circle-red { background-color: #dc3545; }
 
-        /* Stile per la cornice del mese corrente */
+        .month-card {
+            border: 1px solid #dee2e6;
+            cursor: pointer; 
+            transition: all 0.3s ease;
+        }
+        
+        .month-card:hover {
+            border-color: #adb5bd;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        /* MODIFICA SPESSORE CORNICE MESE CORRENTE */
         .month-card.current-month {
-            border: 2px solid #28a745; /* Cornice verde */
-            box-shadow: 0 0 15px rgba(40, 167, 69, 0.4); /* Ombra verde */
+            border: 4px solid #28a745; /* Cornice verde, spessore doppio */
+            box-shadow: 0 0 15px rgba(40, 167, 69, 0.4);
         }
 
+        .month-card.current-month:hover {
+            border-color: #28a745;
+            box-shadow: 0 0 20px rgba(40, 167, 69, 0.6);
+        }
+
+        .month-card.past-month {
+            border: 1px solid black;
+        }
+
+        .month-card.future-month {
+            border: 1px solid red;
+        }
+
+        /* STATISTICHE - CLASSI PER I GRAFICI */
+        #stats-content > div {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .chart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-label {
+            min-width: 100px;
+            flex-shrink: 0;
+            word-wrap: break-word;
+            max-width: 150px;
+        }
+
+        .chart-bar-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .chart-bar {
+            background: #28a745;
+            height: 12px;
+            border-radius: 6px;
+            flex-grow: 0;
+            max-width: 180px; /* Limite massimo delle barre per renderle più corte */
+        }
+        .chart-bar.monthly {
+            background: #667eea;
+        }
+
+        .chart-count {
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        /* FINE STATISTICHE - CLASSI PER I GRAFICI */
 
         @media (max-width: 768px) {
             .search-filter {
@@ -386,10 +356,6 @@
             .person-grid {
                 grid-template-columns: 1fr;
             }
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
         }
     </style>
 </head>
@@ -397,7 +363,7 @@
     <div class="container">
         <div class="header">
             <h1>Geometri</h1>
-            </div>
+        </div>
 
         <div id="loading" class="loading">
             🔄 Caricamento dati da GitHub
@@ -406,18 +372,22 @@
         <div id="error" class="error" style="display: none;"></div>
 
         <div id="main-content" style="display: none;">
-            <div class="nav-tabs">
-                <button class="nav-tab active" onclick="showTab('calendar')">📅 Calendario</button> <button class="nav-tab" onclick="showTab('people-list')">👥 Elenco</button>
-                <button class="nav-tab" onclick="showTab('statistics')">📈 Statistiche</button>
+            <div class="nav-tabs" role="tablist">
+                <button class="nav-tab active" role="tab" aria-selected="true" onclick="showTab('calendar')">📅 Calendario</button>
+                <button class="nav-tab" role="tab" aria-selected="false" onclick="showTab('people-list')">👥 Elenco</button>
+                <button class="nav-tab" role="tab" aria-selected="false" onclick="showTab('statistics')">📈 Statistiche</button>
             </div>
 
             <div class="content">
-                <div id="people-list" class="tab-content"> <div class="search-filter">
+                <div id="people-list" class="tab-content" role="tabpanel">
+                    <div class="search-filter">
                         <div class="search-container">
-                            <input type="text" id="search" placeholder="🔍 Cerca per nome, cognome..." onkeyup="filterPeople()" oninput="toggleClearButton()">
-                            <button class="search-clear" id="search-clear" onclick="clearSearch()" title="Cancella ricerca">×</button>
+                            <input type="text" id="search" placeholder="🔍 Cerca per nome, cognome..." 
+                                   oninput="debounceSearch()" aria-label="Cerca persone">
+                            <button class="search-clear" id="search-clear" onclick="clearSearch()" 
+                                    title="Cancella ricerca" aria-label="Cancella ricerca">×</button>
                         </div>
-                        </div>
+                    </div>
 
                     <div id="people-grid" class="person-grid"></div>
                     <div id="no-results" class="no-data" style="display: none;">
@@ -427,10 +397,11 @@
                     </div>
                 </div>
 
-                <div id="calendar" class="tab-content active"> <div id="monthly-events"></div>
+                <div id="calendar" class="tab-content active" role="tabpanel">
+                    <div id="monthly-events"></div>
                 </div>
 
-                <div id="statistics" class="tab-content">
+                <div id="statistics" class="tab-content" role="tabpanel">
                     <div id="stats-content"></div>
                 </div>
             </div>
@@ -440,26 +411,64 @@
     <script>
         let people = [];
         let filteredPeople = [];
+        let searchTimeout;
 
-        // Funzioni di utilità per le date
-        function formatDate(dateString) {
-            if (!dateString) return '';
+        // CSV sample data per testing
+        const sampleCSVData = `Cognome,Nome,Genere,Data Nascita,Onomastico,Comune,Cellulare,Note
+Rossi,Mario,M,1990-03-15,19-03,Milano,333-12.34.567,Ingegnere
+Bianchi,Giulia,F,1985-07-22,22-05,Roma,339-98.76.543,Architetto
+Verdi,Luca,M,1992-12-03,18-10,Napoli,346-55.44.332,Dottore
+Neri,Anna,F,1988-01-30,26-07,Torino,347-11.22.334,Avvocato`;
+
+        // Utilities per le date con validazione migliorata
+        function parseDate(dateString) {
+            if (!dateString) return null;
+            
+            // Supporta diversi formati di data
+            const formats = [
+                /^(\d{4})-(\d{2})-(\d{2})$/, // YYYY-MM-DD
+                /^(\d{2})\/(\d{2})\/(\d{4})$/, // DD/MM/YYYY
+                /^(\d{2})-(\d{2})-(\d{4})$/ // DD-MM-YYYY
+            ];
+            
+            for (let format of formats) {
+                const match = dateString.match(format);
+                if (match) {
+                    if (format === formats[0]) {
+                        // YYYY-MM-DD
+                        return new Date(match[1], match[2] - 1, match[3]);
+                    } else {
+                        // DD/MM/YYYY or DD-MM-YYYY
+                        return new Date(match[3], match[2] - 1, match[1]);
+                    }
+                }
+            }
+            
+            // Fallback to default Date parsing
             const date = new Date(dateString);
+            return isNaN(date.getTime()) ? null : date;
+        }
+
+        function formatDate(dateString) {
+            const date = parseDate(dateString);
+            if (!date) return '';
             return date.toLocaleDateString('it-IT');
         }
 
         function isToday(dateString) {
-            if (!dateString) return false;
+            const date = parseDate(dateString);
+            if (!date) return false;
+            
             const today = new Date();
-            const date = new Date(dateString);
             return date.getDate() === today.getDate() && 
                    date.getMonth() === today.getMonth();
         }
 
         function getAge(birthdate) {
-            if (!birthdate) return null;
+            const birth = parseDate(birthdate);
+            if (!birth) return null;
+            
             const today = new Date();
-            const birth = new Date(birthdate);
             let age = today.getFullYear() - birth.getFullYear();
             const monthDiff = today.getMonth() - birth.getMonth();
             
@@ -469,172 +478,211 @@
             return age;
         }
 
-        // Funzione per calcolare i giorni rimanenti all'evento
-        function getDaysUntilEvent(eventDay, eventMonth) { // eventMonth è 1-based (es. 1 per Gennaio)
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); // Normalizza l'ora per confronti precisi
+        function getDaysUntilEvent(eventDay, eventMonth) {
+            try {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
 
-            let eventDate = new Date(today.getFullYear(), eventMonth - 1, eventDay);
-            
-            // Se la data dell'evento è già passata quest'anno, considera l'anno prossimo
-            if (eventDate.getTime() < today.getTime()) {
-                eventDate.setFullYear(today.getFullYear() + 1);
+                let eventDate = new Date(today.getFullYear(), eventMonth - 1, eventDay);
+                
+                if (eventDate.getTime() < today.getTime()) {
+                    eventDate.setFullYear(today.getFullYear() + 1);
+                }
+                
+                const diffTime = eventDate.getTime() - today.getTime();
+                return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            } catch (error) {
+                console.error('Error calculating days until event:', error);
+                return 999;
             }
-            
-            const diffTime = eventDate.getTime() - today.getTime();
-            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        }
-
-
-        function isUpcoming(dateString, days = 7) {
-            if (!dateString) return false;
-            const today = new Date();
-            const date = new Date(dateString);
-            
-            // Set year to current year for birthday checking
-            date.setFullYear(today.getFullYear());
-            
-            const diffTime = date.getTime() - today.getTime();
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            
-            return diffDays >= 0 && diffDays <= days;
-        }
-
-        function checkNamedayUpcoming(namedayString, days = 7) {
-            if (!namedayString) return false;
-            const [day, month] = namedayString.split('-').map(Number);
-            if (!day || !month) return false;
-            
-            const today = new Date();
-            const nameday = new Date(today.getFullYear(), month - 1, day);
-            
-            const diffTime = nameday.getTime() - today.getTime();
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            
-            return diffDays >= 0 && diffDays <= days;
         }
 
         function isNamedayToday(namedayString) {
             if (!namedayString) return false;
-            const [day, month] = namedayString.split('-').map(Number);
-            if (!day || !month) return false;
-            
-            const today = new Date();
-            return today.getDate() === day && today.getMonth() === (month - 1);
+            try {
+                const [day, month] = namedayString.split('-').map(Number);
+                if (!day || !month) return false;
+                
+                const today = new Date();
+                return today.getDate() === day && today.getMonth() === (month - 1);
+            } catch (error) {
+                console.error('Error checking nameday:', error);
+                return false;
+            }
         }
 
-        // Caricamento dati dal CSV
-        async function loadData(targetTab = 'calendar') { // Accetta un parametro per il tab di destinazione
+        // Funzione per ottenere il nome del mese dal numero
+        function getMonthName(monthNumber) {
+            const months = [
+                'gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno',
+                'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'
+            ];
+            return months[monthNumber - 1] || ''; // monthNumber è 1-based
+        }
+
+        // CSV Parsing migliorato
+        function parseCSV(csvText) {
+            try {
+                const lines = csvText.trim().split('\n');
+                if (lines.length < 2) {
+                    throw new Error('CSV deve contenere almeno header e una riga di dati');
+                }
+                
+                const headers = lines[0].split(',').map(h => h.trim().replace(/['']/g, ''));
+                
+                return lines.slice(1).map((line, index) => {
+                    // Gestione migliorata per CSV con virgole nei campi
+                    const values = [];
+                    let current = '';
+                    let inQuotes = false;
+                    
+                    for (let i = 0; i < line.length; i++) {
+                        const char = line[i];
+                        if (char === '"') {
+                            inQuotes = !inQuotes;
+                        } else if (char === ',' && !inQuotes) {
+                            values.push(current.trim().replace(/['']/g, ''));
+                            current = '';
+                        } else {
+                            current += char;
+                        }
+                    }
+                    values.push(current.trim().replace(/['']/g, ''));
+                    
+                    // Assicurati che ci siano abbastanza valori
+                    while (values.length < headers.length) {
+                        values.push('');
+                    }
+                    
+                    const person = {
+                        id: index + 1,
+                        cognome: values[0] || '',
+                        nome: values[1] || '',
+                        genere: values[2] || '',
+                        dataNascita: values[3] || '',
+                        onomastico: values[4] || '',
+                        comune: values[5] || '',
+                        cellulare: values[6] || '',
+                        note: values[7] || ''
+                    };
+                    return person;
+                }).filter(person => person.nome && person.cognome);
+            } catch (error) {
+                console.error('Errore nel parsing CSV:', error);
+                throw new Error(`Errore nel parsing CSV: ${error.message}`);
+            }
+        }
+
+        // Caricamento dati migliorato con fallback
+        async function loadData(targetTab = 'calendar') {
             try {
                 document.getElementById('loading').style.display = 'block';
                 document.getElementById('error').style.display = 'none';
                 document.getElementById('main-content').style.display = 'none';
 
-                const response = await fetch('https://sebastiano-mazzarisi.github.io/Test/Geometri.csv');
-                if (!response.ok) {
-                    throw new Error(`Errore HTTP: ${response.status}`);
+                let csvText;
+                try {
+                    const response = await fetch('https://sebastiano-mazzarisi.github.io/Test/Geometri.csv');
+                    if (!response.ok) {
+                        throw new Error(`Errore HTTP: ${response.status}`);
+                    }
+                    csvText = await response.text();
+                } catch (fetchError) {
+                    console.warn('Impossibile caricare da GitHub, uso dati di esempio:', fetchError);
+                    csvText = sampleCSVData;
                 }
                 
-                const csvText = await response.text();
                 people = parseCSV(csvText);
+                
+                if (people.length === 0) {
+                    throw new Error('Nessun dato valido trovato nel file CSV');
+                }
                 
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('main-content').style.display = 'block';
                 
-                // populateComuneFilter(); // Rimossa chiamata
-                filterPeople(); // Aggiorna l'elenco
-                showTab(targetTab); // Attiva il tab specificato (es. 'calendar' o 'people-list')
+                filterPeople();
+                showTab(targetTab);
                 
             } catch (error) {
+                console.error('Errore nel caricamento:', error);
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('error').style.display = 'block';
                 document.getElementById('error').innerHTML = `
                     <strong>❌ Errore nel caricamento dei dati:</strong><br>
                     ${error.message}<br>
-                    <small>Verifica la connessione internet e che il file CSV sia accessibile.</small>
+                    <small>Utilizzando dati di esempio per la dimostrazione.</small>
                 `;
+                
+                // Fallback ai dati di esempio
+                try {
+                    people = parseCSV(sampleCSVData);
+                    document.getElementById('main-content').style.display = 'block';
+                    filterPeople();
+                    showTab(targetTab);
+                } catch (fallbackError) {
+                    console.error('Errore anche con i dati di esempio:', fallbackError);
+                }
             }
         }
 
-        function parseCSV(csvText) {
-            const lines = csvText.trim().split('\n');
-            const headers = lines[0].split(',').map(h => h.trim());
-            
-            return lines.slice(1).map((line, index) => {
-                const values = line.split(',').map(v => v.trim());
-                const person = {
-                    id: index + 1,
-                    cognome: values[0] || '',
-                    nome: values[1] || '',
-                    genere: values[2] || '',
-                    dataNascita: values[3] || '',
-                    onomastico: values[4] || '',
-                    comune: values[5] || '',
-                    cellulare: values[6] || '',
-                    note: values[7] || ''
-                };
-                return person;
-            }).filter(person => person.nome && person.cognome);
-        }
-
-        // Gestione tab
+        // Gestione tab migliorata
         function showTab(tabName) {
+            // Nascondi tutti i contenuti
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
+                tab.setAttribute('aria-hidden', 'true');
             });
+            
+            // Rimuovi active da tutti i tab
             document.querySelectorAll('.nav-tab').forEach(tab => {
                 tab.classList.remove('active');
+                tab.setAttribute('aria-selected', 'false');
             });
             
-            document.getElementById(tabName).classList.add('active');
+            // Attiva il tab selezionato
+            const activeTab = document.getElementById(tabName);
+            const activeNavTab = document.querySelector(`[onclick="showTab('${tabName}')"]`);
             
-            // Trova il bottone di navigazione corrispondente al tab e aggiungi la classe 'active'
-            const navButtons = document.querySelectorAll('.nav-tab');
-            navButtons.forEach(button => {
-                // Modifica per usare data-tabName e il controllo del target
-                if (button.onclick.toString().includes(`showTab('${tabName}')`)) {
-                    button.classList.add('active');
-                }
-            });
+            if (activeTab) {
+                activeTab.classList.add('active');
+                activeTab.setAttribute('aria-hidden', 'false');
+            }
             
-            if (tabName === 'calendar') {
-                showCalendarEvents();
-                scrollToCurrentMonth(); // Scorrere al mese corrente
-            } else if (tabName === 'statistics') {
-                showStatistics();
-            } else if (tabName === 'people-list') {
-                filterPeople(); // Ri-filtra l'elenco quando si torna al tab
+            if (activeNavTab) {
+                activeNavTab.classList.add('active');
+                activeNavTab.setAttribute('aria-selected', 'true');
+            }
+            
+            // Esegui azioni specifiche per tab
+            switch(tabName) {
+                case 'calendar':
+                    showCalendarEvents();
+                    setTimeout(scrollToCurrentMonth, 100);
+                    break;
+                case 'statistics':
+                    showStatistics();
+                    break;
+                case 'people-list':
+                    filterPeople();
+                    break;
             }
         }
-        
-        // Funzione populateComuneFilter rimossa in quanto il campo è stato eliminato
-        /*
-        function populateComuneFilter() {
-            const comuni = [...new Set(people.map(p => p.comune).filter(c => c))].sort();
-            const select = document.getElementById('comune-filter');
-            
-            select.innerHTML = '<option value="">Tutti i comuni</option>';
-            comuni.forEach(comune => {
-                const option = document.createElement('option');
-                option.value = comune;
-                option.textContent = comune;
-                select.appendChild(option);
-            });
+
+        // Ricerca con debounce
+        function debounceSearch() {
+            clearTimeout(searchTimeout);
+            toggleClearButton();
+            searchTimeout = setTimeout(filterPeople, 300);
         }
-        */
 
         function filterPeople() {
             const searchTerm = document.getElementById('search').value.toLowerCase();
-            // La riga per il filtro comune è stata rimossa, quindi il filtro ora riguarda solo la ricerca testuale
-            // const comuneFilter = document.getElementById('comune-filter').value; 
             
             filteredPeople = people.filter(person => {
-                const matchesSearch = person.nome.toLowerCase().includes(searchTerm) || 
-                                    person.cognome.toLowerCase().includes(searchTerm);
-                // La condizione per il comune è stata rimossa
-                // const matchesComune = !comuneFilter || person.comune === comuneFilter;
-                
-                return matchesSearch; // Ora filtra solo per nome/cognome
+                return person.nome.toLowerCase().includes(searchTerm) || 
+                       person.cognome.toLowerCase().includes(searchTerm) ||
+                       person.comune.toLowerCase().includes(searchTerm);
             });
             
             displayPeople();
@@ -663,9 +711,7 @@
 
         function formatPhoneForWhatsApp(phone) {
             if (!phone) return '';
-            // Rimuove spazi, trattini e altri caratteri non numerici
             let cleanPhone = phone.replace(/\D/g, '');
-            // Se il numero inizia con 3 (cellulare italiano), aggiunge il prefisso +39
             if (cleanPhone.startsWith('3') && cleanPhone.length === 10) {
                 cleanPhone = '39' + cleanPhone;
             }
@@ -674,13 +720,10 @@
 
         function formatPhoneForDisplay(phone) {
             if (!phone) return '';
-            // Rimuove spazi, trattini e altri caratteri non numerici
             let cleanPhone = phone.replace(/\D/g, '');
-            // Formatta nel pattern xxx-xx.xx.xxx (assumendo 10 cifre)
             if (cleanPhone.length === 10) {
                 return cleanPhone.replace(/(\d{3})(\d{2})(\d{2})(\d{3})/, '$1-$2.$3.$4');
             }
-            // Se il numero non ha 10 cifre, lo restituisce così com'è
             return phone;
         }
 
@@ -706,9 +749,7 @@
                 if (isBirthdayToday) cardClass += ' birthday-today';
                 if (isNamedayTodayBool) cardClass += ' nameday-today';
                 
-                // Formatta il numero per la visualizzazione
                 const formattedPhone = formatPhoneForDisplay(person.cellulare);
-                // Prepara il link WhatsApp diretto
                 const whatsappPhone = formatPhoneForWhatsApp(person.cellulare);
                 const whatsappLink = whatsappPhone ? `https://wa.me/${whatsappPhone}` : '';
                 
@@ -720,9 +761,9 @@
                         </div>
                         <div class="person-info">
                             ${person.dataNascita ? `<div><i>🎂</i> Compleanno: ${formatDate(person.dataNascita)}</div>` : ''}
-                            ${person.onomastico ? `<div><i>🌟</i> Onomastico: ${person.onomastico}</div>` : ''}
+                            ${person.onomastico ? `<div><i>🌟</i> Onomastico: ${person.onomastico.split('-')[0]} ${getMonthName(parseInt(person.onomastico.split('-')[1]))}</div>` : ''}
                             ${person.comune ? `<div><i>🏘️</i> Comune: ${person.comune}</div>` : ''}
-                            ${person.cellulare ? `<div><i>📱</i> Cellulare: <a href="${whatsappLink}" target="_blank" style="color: #25D366; text-decoration: none; font-weight: bold; cursor: pointer;" title="Apri WhatsApp con ${person.nome}"> ${formattedPhone}</a></div>` : ''}
+                            ${person.cellulare ? `<div><i>📱</i> Cellulare:&nbsp;<a href="${whatsappLink}" target="_blank" style="color: #25D366; text-decoration: none; font-weight: bold; cursor: pointer;" title="Apri WhatsApp con ${person.nome}">${formattedPhone}</a></div>` : ''}
                             ${person.note ? `<div><i>📝</i> Note: ${person.note}</div>` : ''}
                         </div>
                     </div>
@@ -738,34 +779,43 @@
             ];
             
             const eventsByMonth = {};
-            const todayMonth = new Date().getMonth(); // Mese corrente (0-based)
+            const today = new Date();
+            const todayMonth = today.getMonth();
 
             people.forEach(person => {
-                // Per i compleanni
+                // Compleanni
                 if (person.dataNascita) {
-                    const date = new Date(person.dataNascita);
-                    const month = date.getMonth(); // Mese 0-based
-                    const day = date.getDate();
-                    if (!eventsByMonth[month]) eventsByMonth[month] = [];
-                    eventsByMonth[month].push({
-                        type: 'birthday',
-                        person: person,
-                        day: day,
-                        originalMonth: date.getMonth() + 1 // Mese 1-based per getDaysUntilEvent
-                    });
+                    const date = parseDate(person.dataNascita);
+                    if (date) {
+                        const month = date.getMonth();
+                        const day = date.getDate();
+                        if (!eventsByMonth[month]) eventsByMonth[month] = [];
+                        eventsByMonth[month].push({
+                            type: 'birthday',
+                            person: person,
+                            day: day,
+                            originalMonth: date.getMonth() + 1
+                        });
+                    }
                 }
                 
-                // Per gli onomastici
+                // Onomastici
                 if (person.onomastico) {
-                    const [day, month] = person.onomastico.split('-').map(Number);
-                    const monthIndex = month - 1; // Converti in 0-based
-                    if (!eventsByMonth[monthIndex]) eventsByMonth[monthIndex] = [];
-                    eventsByMonth[monthIndex].push({
-                        type: 'nameday',
-                        person: person,
-                        day: day,
-                        originalMonth: month // Mese 1-based per getDaysUntilEvent
-                    });
+                    try {
+                        const [day, month] = person.onomastico.split('-').map(Number);
+                        if (day && month && month >= 1 && month <= 12) {
+                            const monthIndex = month - 1;
+                            if (!eventsByMonth[monthIndex]) eventsByMonth[monthIndex] = [];
+                            eventsByMonth[monthIndex].push({
+                                type: 'nameday',
+                                person: person,
+                                day: day,
+                                originalMonth: month
+                            });
+                        }
+                    } catch (error) {
+                        console.warn('Invalid nameday format:', person.onomastico);
+                    }
                 }
             });
             
@@ -773,14 +823,17 @@
                 const events = eventsByMonth[index] || [];
                 events.sort((a, b) => a.day - b.day);
 
-                const isCurrentMonth = (index === todayMonth);
                 let monthCardClass = 'month-card';
-                if (isCurrentMonth) {
+                if (index < todayMonth) {
+                    monthCardClass += ' past-month';
+                } else if (index === todayMonth) {
                     monthCardClass += ' current-month';
+                } else {
+                    monthCardClass += ' future-month';
                 }
                 
                 return `
-                    <div style="background: #f8f9fa; padding: 20px; margin-bottom: 20px; border-radius: 15px;" class="${monthCardClass}" id="month-${index}">
+                    <div style="background: #f8f9fa; padding: 20px; margin-bottom: 20px; border-radius: 15px;" class="${monthCardClass}" id="month-${index}" onclick="scrollToCalendarStart()">
                         <h3 style="margin-bottom: 15px; color: #495057;">${monthName}</h3>
                         ${events.length > 0 ? events.map(event => {
                             const icon = event.type === 'birthday' ? '🎂' : '🌟';
@@ -815,88 +868,147 @@
             }
         }
 
+        // Funzione per scrollare direttamente all'inizio della pagina
+        function scrollToCalendarStart() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // GESTIONE DEI GRAFICI - CORREZIONI PER LA LUNGHEZZA DELLE BARRE
         function showStatistics() {
             const container = document.getElementById('stats-content');
             
-            // Statistiche per età
-            const ages = people.filter(p => p.dataNascita).map(p => getAge(p.dataNascita));
-            const avgAge = ages.length > 0 ? Math.round(ages.reduce((a, b) => a + b, 0) / ages.length) : 0;
-            const minAge = ages.length > 0 ? Math.min(...ages) : 0;
-            const maxAge = ages.length > 0 ? Math.max(...ages) : 0;
-            
-            // Statistiche per comune
-            const comuneStats = {};
-            people.forEach(p => {
-                if (p.comune) {
-                    comuneStats[p.comune] = (comuneStats[p.comune] || 0) + 1;
-                }
-            });
-            const maxComuneCount = Math.max(...Object.values(comuneStats));
-            
-            // Eventi per mese
-            const monthlyStats = new Array(12).fill(0);
-            people.forEach(p => {
-                if (p.dataNascita) {
-                    monthlyStats[new Date(p.dataNascita).getMonth()]++;
-                }
-            });
-            const maxMonthlyCount = Math.max(...monthlyStats);
-            
-            container.innerHTML = `
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
-                    <div style="background: #f8f9fa; padding: 25px; border-radius: 15px;">
-                        <h3 style="margin-bottom: 20px; color: #495057;">📊 Statistiche Età</h3>
-                        <div style="display: grid; gap: 15px;">
-                            <div>Età media: <strong>${avgAge} anni</strong></div>
-                            <div>Più giovane: <strong>${minAge} anni</strong></div>
-                            <div>Più anziano: <strong>${maxAge} anni</strong></div>
-                            <div>Con data di nascita: <strong>${ages.length}/${people.length}</strong></div>
+            try {
+                // Statistiche per età
+                const ages = people.filter(p => p.dataNascita).map(p => getAge(p.dataNascita)).filter(age => age !== null);
+                const avgAge = ages.length > 0 ? Math.round(ages.reduce((a, b) => a + b, 0) / ages.length) : 0;
+                const minAge = ages.length > 0 ? Math.min(...ages) : 0;
+                const maxAge = ages.length > 0 ? Math.max(...ages) : 0;
+                
+                // Statistiche per comune
+                const comuneStats = {};
+                people.forEach(p => {
+                    if (p.comune) {
+                        comuneStats[p.comune] = (comuneStats[p.comune] || 0) + 1;
+                    }
+                });
+                const sortedComuni = Object.entries(comuneStats).sort(([,a], [,b]) => b - a);
+                // maxComuneCount sarà il valore massimo di conteggio in tutti i comuni.
+                // Se non ci sono comuni, sarà 1 per evitare divisione per zero.
+                const maxComuneCount = sortedComuni.length > 0 ? Math.max(...Object.values(comuneStats)) : 1; 
+
+                // Eventi per mese (compleanni)
+                const monthlyStats = new Array(12).fill(0);
+                people.forEach(p => {
+                    if (p.dataNascita) {
+                        const date = parseDate(p.dataNascita);
+                        if (date) {
+                            monthlyStats[date.getMonth()]++;
+                        }
+                    }
+                });
+                // maxMonthlyCount sarà il valore massimo di compleanni in un singolo mese.
+                // Se non ci sono compleanni, sarà 1 per evitare divisione per zero.
+                const maxMonthlyCount = Math.max(...monthlyStats) === 0 ? 1 : Math.max(...monthlyStats);
+                
+                container.innerHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; flex-wrap: wrap; align-items: flex-start;">
+                        <div class="stat-section">
+                            <h3 style="margin-bottom: 20px; color: #495057;">📊 Statistiche Età</h3>
+                            <div style="display: grid; gap: 15px;">
+                                <div>Età media: <strong>${avgAge} anni</strong></div>
+                                <div>Più giovane: <strong>${minAge} anni</strong></div>
+                                <div>Più anziano: <strong>${maxAge} anni</strong></div>
+                                <div>Con data di nascita: <strong>${ages.length}/${people.length}</strong></div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-section">
+                            <h3 style="margin-bottom: 20px; color: #495057;">🏘️ Distribuzione per Comune</h3>
+                            <div style="display: grid; gap: 12px;">
+                                ${sortedComuni.length > 0 ? sortedComuni
+                                    .map(([comune, count]) => {
+                                        // Calcola la larghezza della barra basata sulla proporzione rispetto al massimo,
+                                        // utilizzando 180 come fattore di scala per renderle più corte
+                                        const barWidth = Math.max(20, (count / maxComuneCount) * 180); 
+                                        return `<div class="chart-item">
+                                            <span class="chart-label">${comune || 'Non specificato'}</span>
+                                            <div class="chart-bar-container">
+                                                <div class="chart-bar" style="width: ${barWidth}px;"></div>
+                                                <strong class="chart-count">${count}</strong>
+                                            </div>
+                                        </div>`;
+                                    }).join('') : '<p style="color: #6c757d;">Nessun dato disponibile</p>'}
+                            </div>
+                        </div>
+                        
+                        <div class="stat-section">
+                            <h3 style="margin-bottom: 20px; color: #495057;">🎂 Compleanni per Mese</h3>
+                            <div style="display: grid; gap: 12px;">
+                                ${['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre']
+                                    .map((month, index) => {
+                                        // Calcola la larghezza della barra basata sulla proporzione rispetto al massimo,
+                                        // utilizzando 180 come fattore di scala per renderle più corte
+                                        const barWidth = Math.max(20, (monthlyStats[index] / maxMonthlyCount) * 180);
+                                        return `<div class="chart-item">
+                                            <span class="chart-label">${month}</span>
+                                            <div class="chart-bar-container">
+                                                <div class="chart-bar monthly" style="width: ${barWidth}px;"></div>
+                                                <strong class="chart-count">${monthlyStats[index]}</strong>
+                                            </div>
+                                        </div>`;
+                                    }).join('')}
+                            </div>
                         </div>
                     </div>
-                    
-                    <div style="background: #f8f9fa; padding: 25px; border-radius: 15px;">
-                        <h3 style="margin-bottom: 20px; color: #495057;">🏘️ Distribuzione per Comune</h3>
-                        <div style="display: grid; gap: 12px;">
-                            ${Object.entries(comuneStats)
-                                .sort((a, b) => b[1] - a[1])
-                                .map(([comune, count]) => {
-                                    const barWidth = Math.max(20, (count / maxComuneCount) * 200);
-                                    return `<div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span style="min-width: 100px;">${comune}</span>
-                                        <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-                                            <div style="background: #28a745; height: 12px; width: ${barWidth}px; border-radius: 6px; margin-left: 10px;"></div>
-                                            <strong>${count}</strong>
-                                        </div>
-                                    </div>`;
-                                }).join('')}
-                        </div>
+                `;
+            } catch (error) {
+                console.error('Errore nel calcolo delle statistiche:', error);
+                container.innerHTML = `
+                    <div class="error">
+                        <strong>Errore nel calcolo delle statistiche:</strong><br>
+                        ${error.message}
                     </div>
-                    
-                    <div style="background: #f8f9fa; padding: 25px; border-radius: 15px;">
-                        <h3 style="margin-bottom: 20px; color: #495057;">🎂 Compleanni per Mese</h3>
-                        <div style="display: grid; gap: 12px;">
-                            ${['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre']
-                                .map((month, index) => {
-                                    const barWidth = Math.max(20, (monthlyStats[index] / maxMonthlyCount) * 200);
-                                    return `<div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span style="min-width: 100px;">${month}</span>
-                                        <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-                                            <div style="background: #667eea; height: 12px; width: ${barWidth}px; border-radius: 6px; margin-left: 10px;"></div>
-                                            <strong>${monthlyStats[index]}</strong>
-                                        </div>
-                                    </div>`;
-                                }).join('')}
-                        </div>
-                    </div>
-                </div>
-            `;
+                `;
+            }
         }
+        // FINE GESTIONE DEI GRAFICI
+
+        // Gestione eventi da tastiera per accessibilità
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const searchInput = document.getElementById('search');
+                if (searchInput.value) {
+                    clearSearch();
+                }
+            }
+        });
 
         // Inizializzazione
         document.addEventListener('DOMContentLoaded', function() {
-            // All'avvio, il tab "Calendario" sarà attivo per default,
-            // e loadData() lo chiamerà, che a sua volta chiamerà showCalendarEvents() e scrollToCurrentMonth().
-            loadData(); 
+            loadData();
+        });
+
+        // Gestione errori globali
+        window.addEventListener('error', function(e) {
+            console.error('Errore JavaScript:', e.error);
+            const errorDiv = document.getElementById('error');
+            if (errorDiv) {
+                errorDiv.style.display = 'block';
+                errorDiv.innerHTML = `
+                    <strong>❌ Errore nell'applicazione:</strong><br>
+                    Si è verificato un errore imprevisto. Ricarica la pagina per riprovare.<br>
+                    <small>Dettagli: ${e.message}</small>
+                `;
+            }
+        });
+
+        // Gestione errori di promise non catturate
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('Promise rejection non gestita:', e.reason);
+            e.preventDefault(); 
         });
     </script>
 </body>
