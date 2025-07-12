@@ -4,76 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Geometri</title>
-    
     <link rel="icon" type="image/png" href="Geometri.png">
     <link rel="apple-touch-icon" href="Geometri.png">
-    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 0px; /* Imposta il padding di default a 0 per la massima compressione */
+            padding: 0px;
         }
-
         .container {
-            width: 100%; /* Make it take full width of its parent */
-            max-width: 500px; /* Set a maximum width for desktop view */
-            margin: 0 auto; /* Center the container horizontally */
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
             background: white;
-            border-radius: 0; /* Rimuovi i border-radius sul container per un look a "tutto schermo" sul mobile */
-            box-shadow: none; /* Rimuovi l'ombra per un look a "tutto schermo" sul mobile */
+            border-radius: 0;
+            box-shadow: none;
             overflow: hidden;
         }
-
         .header {
             background: linear-gradient(135deg, #ff6b6b, #feca57);
             color: white;
             padding: 10px 30px;
             text-align: center;
         }
-
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 0;
-        }
-
-        .header p {
-            opacity: 0.9;
-            font-size: 1.1em;
-        }
-
+        .header h1 { font-size: 2.5em; margin-bottom: 0; }
+        .header p { opacity: 0.9; font-size: 1.1em; }
         .loading {
             text-align: center;
             padding: 50px;
             font-size: 1.2em;
             color: #667eea;
         }
-
         .loading::after {
             content: '...';
             animation: dots 1.5s infinite;
         }
-
         @keyframes dots {
             0%, 20% { content: '.'; }
             40% { content: '..'; }
             60%, 100% { content: '...'; }
         }
-
         .nav-tabs {
             display: flex;
             background: #e9ecef;
             border-bottom: 1px solid #dee2e6;
             gap: 2px;
         }
-
         .nav-tab {
             flex: 1;
             padding: 15px;
@@ -89,41 +67,25 @@
             align-items: center;
             justify-content: center;
         }
-
         .nav-tab .icon-label {
             font-size: 2em;
             margin-bottom: 4px;
             line-height: 1;
         }
-
         .nav-tab.active {
             background: #FFFACD;
             border-bottom-color: #FFC107;
             color: #495057;
             font-weight: bold;
         }
-
-        .nav-tab:hover {
-            background: #e9ecef;
-        }
-
+        .nav-tab:hover { background: #e9ecef; }
         .nav-tab:focus {
             outline: 2px solid #667eea;
             outline-offset: -2px;
         }
-
-        .content {
-            padding: 30px;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
+        .content { padding: 30px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
         .error {
             background: #f8d7da;
             color: #721c24;
@@ -132,20 +94,13 @@
             margin: 20px 0;
             border-left: 5px solid #dc3545;
         }
-
         .search-filter {
             display: flex;
             gap: 15px;
             margin-bottom: 20px;
             flex-wrap: wrap;
         }
-
-        .search-container {
-            position: relative;
-            flex: 1;
-            min-width: 200px;
-        }
-
+        .search-container { position: relative; flex: 1; min-width: 200px; }
         .search-filter input {
             padding: 12px;
             border: 2px solid #dee2e6;
@@ -153,12 +108,10 @@
             font-size: 16px;
             width: 100%;
         }
-
         .search-filter input:focus {
             outline: none;
             border-color: #667eea;
         }
-
         .search-clear {
             position: absolute;
             right: 12px;
@@ -178,22 +131,16 @@
             font-weight: bold;
             transition: all 0.2s;
         }
-
         .search-clear:hover {
             background: #c82333;
             transform: translateY(-50%) scale(1.1);
         }
-
-        .search-clear.show {
-            display: flex;
-        }
-
+        .search-clear.show { display: flex; }
         .person-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 20px;
         }
-
         .person-card {
             background: white;
             border: 2px solid #dee2e6;
@@ -202,37 +149,27 @@
             transition: all 0.3s;
             position: relative;
         }
-
         .person-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
-
         .person-card.birthday-today {
             border-color: #ffc107;
             background: linear-gradient(135deg, #fff3cd, #ffffff);
             box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
         }
-
         .person-card.nameday-today {
             border-color: #17a2b8;
             background: linear-gradient(135deg, #d1ecf1, #ffffff);
             box-shadow: 0 0 20px rgba(23, 162, 184, 0.3);
         }
-
         .person-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
         }
-
-        .person-name {
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #495057;
-        }
-
+        .person-name { font-size: 1.3em; font-weight: bold; color: #495057; }
         .person-age {
             background: #e9ecef;
             padding: 5px 10px;
@@ -241,35 +178,23 @@
             font-weight: bold;
             color: #495057;
         }
-
-        .person-info {
-            margin-bottom: 15px;
-        }
-
+        .person-info { margin-bottom: 15px; }
         .person-info div {
             margin-bottom: 8px;
             display: flex;
             align-items: center;
         }
-
-        .person-info i {
-            width: 20px;
-            margin-right: 10px;
-            color: #667eea;
-        }
-
+        .person-info i { width: 20px; margin-right: 10px; color: #667eea; }
         .no-data {
             text-align: center;
             padding: 40px;
             color: #6c757d;
         }
-
         .no-data i {
             font-size: 3em;
             margin-bottom: 15px;
             display: block;
         }
-
         .event-circle {
             display: inline-block;
             width: 10px;
@@ -281,67 +206,47 @@
         .circle-green { background-color: #28a745; }
         .circle-yellow { background-color: #ffc107; }
         .circle-red { background-color: #dc3545; }
-
-        .month-card {
-            border: 1px solid #dee2e6;
-            cursor: pointer; 
-            transition: all 0.3s ease;
-        }
-        
+        .month-card { border: 1px solid #dee2e6; cursor: pointer; transition: all 0.3s ease; }
         .month-card:hover {
             border-color: #adb5bd;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             transform: translateY(-2px);
         }
-        
         .month-card.current-month {
             border: 4px solid #28a745;
             box-shadow: 0 0 15px rgba(40, 167, 69, 0.4);
         }
-
         .month-card.current-month:hover {
             border-color: #28a745;
             box-shadow: 0 0 20px rgba(40, 167, 69, 0.6);
         }
-
-        .month-card.past-month {
+        .month-card.past-month { border: 1px solid black; }
+        .month-card.future-month { border: 1px solid red; }
+        .stat-section {
             border: 1px solid black;
-        }
-
-        .month-card.future-month {
-            border: 1px solid red;
-        }
-
-        /* STATISTICHE - CLASSI PER I GRAFICI */
-        #stats-content > div {
+            border-radius: 15px;
             background: #f8f9fa;
             padding: 25px;
-            border-radius: 15px;
-            flex: 1;
-            min-width: 300px;
+            margin-bottom: 20px;
         }
-
         .chart-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
             gap: 10px;
         }
-
         .chart-label {
             min-width: 100px;
             flex-shrink: 0;
             word-wrap: break-word;
             max-width: 150px;
         }
-
         .chart-bar-container {
             display: flex;
             align-items: center;
             gap: 10px;
             flex: 1;
         }
-
         .chart-bar {
             background: #28a745;
             height: 12px;
@@ -349,752 +254,601 @@
             flex-grow: 0;
             max-width: 180px;
         }
-        .chart-bar.monthly {
-            background: #667eea;
-        }
-
-        .chart-count {
-            font-weight: bold;
-            flex-shrink: 0;
-        }
-        /* FINE STATISTICHE - CLASSI PER I GRAFICI */
-
-        /* Stili per le istruzioni "Aggiungi a Home" */
-        .info-section {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 15px;
-            margin-top: 20px;
-        }
-
-        .info-section h4 {
-            color: #343a40;
-            margin-bottom: 15px;
-        }
-
-        .info-section p {
-            margin-bottom: 10px;
+        .chart-bar.monthly { background: #667eea; }
+        .chart-count { font-weight: bold; flex-shrink: 0; }
+        #info h3 { font-size: 1.5em; text-align: left; }
+        #info p, #info .info-section p, #info .info-section strong {
+            font-size: 1em;
             line-height: 1.6;
             color: #555;
         }
-
-        .info-section strong {
-            color: #212529;
+        .info-section {
+            background: #e9ecef;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-
-        /* Media queries for responsiveness */
+        .info-section h4 { font-size: 1.2em; color: #343a40; margin-bottom: 15px; }
+        .info-section p {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .info-section strong { color: #212529; }
         @media (max-width: 768px) {
-            .search-filter {
-                flex-direction: column;
-            }
-            .search-container {
-                min-width: auto;
-            }
-            .person-grid {
-                grid-template-columns: 1fr;
-            }
-            body {
-                padding: 0px; /* Nessun padding su schermi tablet */
-            }
-            .container {
-                border-radius: 0; /* Rimuovi i border-radius sui tablet */
-                box-shadow: none; /* Rimuovi l'ombra sui tablet */
-            }
-            .content {
-                padding: 15px; /* Riduci il padding interno del contenuto sui tablet */
-            }
+            .search-filter { flex-direction: column; }
+            .search-container { min-width: auto; }
+            .person-grid { grid-template-columns: 1fr; }
+            body { padding: 0px; }
+            .container { border-radius: 0; box-shadow: none; }
+            .content { padding: 15px; }
+            #info h3 { font-size: 1.3em; }
+            #info p, #info .info-section p, #info .info-section strong { font-size: 0.95em; }
+            .info-section h4 { font-size: 1.1em; }
         }
-
         @media (max-width: 480px) {
-            body {
-                padding: 0px; /* Nessun padding su schermi mobile */
-            }
-            .nav-tabs {
-                gap: 1px;
-            }
-            .nav-tab {
-                padding: 10px 0px;
-                font-size: 0.8em;
-            }
-            .nav-tab .icon-label {
-                font-size: 1.8em;
-            }
-            .content {
-                padding: 10px; /* Riduci ulteriormente il padding interno del contenuto sui mobile */
-            }
+            body { padding: 0px; }
+            .nav-tabs { gap: 1px; }
+            .nav-tab { padding: 10px 0px; font-size: 0.8em; }
+            .nav-tab .icon-label { font-size: 1.8em; }
+            .content { padding: 10px; }
+            #info h3 { font-size: 1.2em; }
+            #info p, #info .info-section p, #info .info-section strong { font-size: 0.9em; }
+            .info-section h4 { font-size: 1em; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Geometri</h1>
+<div class="container">
+    <div class="header">
+        <h1>Geometri</h1>
+    </div>
+    <div id="loading" class="loading">🔄 Caricamento dati da GitHub</div>
+    <div id="error" class="error" style="display: none;"></div>
+    <div id="main-content" style="display: none;">
+        <div class="nav-tabs" role="tablist">
+            <button class="nav-tab active" role="tab" aria-selected="true" onclick="showTab('calendar')">
+                <span class="icon-label">📅</span> Calendario
+            </button>
+            <button class="nav-tab" role="tab" aria-selected="false" onclick="showTab('people-list')">
+                <span class="icon-label">👥</span> Elenco
+            </button>
+            <button class="nav-tab" role="tab" aria-selected="false" onclick="showTab('statistics')">
+                <span class="icon-label">📈</span> Statistiche
+            </button>
+            <button class="nav-tab" role="tab" aria-selected="false" onclick="showTab('info')">
+                <span class="icon-label">ℹ️</span> Info
+            </button>
         </div>
-
-        <div id="loading" class="loading">
-            🔄 Caricamento dati da GitHub
-        </div>
-
-        <div id="error" class="error" style="display: none;"></div>
-
-        <div id="main-content" style="display: none;">
-            <div class="nav-tabs" role="tablist">
-                <button class="nav-tab active" role="tab" aria-selected="true" onclick="showTab('calendar')">
-                    <span class="icon-label">📅</span> Calendario
-                </button>
-                <button class="nav-tab" role="tab" aria-selected="false" onclick="showTab('people-list')">
-                    <span class="icon-label">👥</span> Elenco
-                </button>
-                <button class="nav-tab" role="tab" aria-selected="false" onclick="showTab('statistics')">
-                    <span class="icon-label">📈</span> Statistiche
-                </button>
-                <button class="nav-tab" role="tab" aria-selected="false" onclick="showTab('info')">
-                    <span class="icon-label">ℹ️</span> Info
-                </button>
+        <div class="content">
+            <div id="people-list" class="tab-content" role="tabpanel">
+                <div class="search-filter">
+                    <div class="search-container">
+                        <input type="text" id="search" placeholder="🔍 Cerca per nome, cognome..." oninput="debounceSearch()" aria-label="Cerca persone">
+                        <button class="search-clear" id="search-clear" onclick="clearSearch()" title="Cancella ricerca" aria-label="Cancella ricerca">×</button>
+                    </div>
+                </div>
+                <div id="people-grid" class="person-grid"></div>
+                <div id="no-results" class="no-data" style="display: none;">
+                    <i>🔍</i>
+                    <h3>Nessun risultato</h3>
+                    <p>Prova a modificare i filtri di ricerca</p>
+                </div>
             </div>
-
-            <div class="content">
-                <div id="people-list" class="tab-content" role="tabpanel">
-                    <div class="search-filter">
-                        <div class="search-container">
-                            <input type="text" id="search" placeholder="🔍 Cerca per nome, cognome..." 
-                                   oninput="debounceSearch()" aria-label="Cerca persone">
-                            <button class="search-clear" id="search-clear" onclick="clearSearch()" 
-                                    title="Cancella ricerca" aria-label="Cancella ricerca">×</button>
-                        </div>
-                    </div>
-
-                    <div id="people-grid" class="person-grid"></div>
-                    <div id="no-results" class="no-data" style="display: none;">
-                        <i>🔍</i>
-                        <h3>Nessun risultato</h3>
-                        <p>Prova a modificare i filtri di ricerca</p>
-                    </div>
+            <div id="calendar" class="tab-content active" role="tabpanel">
+                <div id="monthly-events"></div>
+            </div>
+            <div id="statistics" class="tab-content" role="tabpanel">
+                <div id="stats-content"></div>
+            </div>
+            <div id="info" class="tab-content" role="tabpanel">
+                <h3 style="margin-bottom: 20px; color: #495057;">Informazioni sull'applicazione</h3>
+                <p style="margin-bottom: 10px;">Questa applicazione è stata sviluppata per la gestione degli eventi dei Geometri.</p>
+                <p>Contiene funzionalità per visualizzare un elenco di persone, un calendario degli eventi e statistiche riassuntive.</p>
+                <div class="info-section">
+                    <h4>Per un'esperienza ottimale: Aggiungi alla schermata Home</h4>
+                    <p>
+                        <span style="display:inline-block; width:26px; height:26px; vertical-align:middle; margin-right:8px;">
+                            <svg viewBox="0 0 24 24" width="24" height="24">
+                                <rect x="4" y="8" width="16" height="12" rx="3" fill="none" stroke="#444" stroke-width="2"/>
+                                <path d="M12 3v9" stroke="#007AFF" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M8 7l4-4 4 4" stroke="#007AFF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </span>
+                        <strong>Su iPhone..:</strong>
+                        Clicca sull'icona "Condividi" (il quadrato con la freccia in alto) e poi "Aggiungi alla schermata Home".
+                    </p>
+                    <p>
+                        <span style="display:inline-block; width:26px; height:26px; vertical-align:middle; margin-right:8px;">
+                            <svg viewBox="0 0 24 24" width="24" height="24">
+                                <rect x="4" y="4" width="16" height="16" rx="4" fill="none" stroke="#444" stroke-width="2"/>
+                                <circle cx="12" cy="8" r="1.5" fill="#444"/>
+                                <circle cx="12" cy="12" r="1.5" fill="#444"/>
+                                <circle cx="12" cy="16" r="1.5" fill="#444"/>
+                            </svg>
+                        </span>
+                        <strong>Su Android:</strong>
+                        Clicca sul menu (i tre puntini in alto a destra) e poi "Aggiungi a schermata Home".
+                    </p>
                 </div>
-
-                <div id="calendar" class="tab-content active" role="tabpanel">
-                    <div id="monthly-events"></div>
-                </div>
-
-                <div id="statistics" class="tab-content" role="tabpanel">
-                    <div id="stats-content"></div>
-                </div>
-
-                <div id="info" class="tab-content" role="tabpanel">
-                    <h3 style="margin-bottom: 20px; color: #495057;">Informazioni sull'applicazione</h3>
-                    <p style="margin-bottom: 10px;">Questa applicazione è stata sviluppata per la gestione degli eventi dei Geometri.</p>
-                    <p>Contiene funzionalità per visualizzare un elenco di persone, un calendario degli eventi e statistiche riassuntive.</p>
-                    
-                    <div class="info-section">
-                        <h4>Per un'esperienza ottimale: Aggiungi alla schermata Home</h4>
-                        <p>Per un accesso rapido e un'esperienza simile a quella di un'app, puoi aggiungere questa pagina alla schermata Home del tuo dispositivo.</p>
-                        <p><strong>Su iPhone/iPad:</strong> Clicca sull'icona "Condividi" (il quadrato con la freccia in alto) e poi "Aggiungi alla schermata Home".</p>
-                        <p><strong>Su Android:</strong> Clicca sul menu (i tre puntini in alto a destra) e poi "Aggiungi a schermata Home".</p>
-                    </div>
-
-                    <p style="margin-top: 20px; font-style: italic;">Versione: 1.0.0</p>
-                </div>
+                <p style="margin-top: 20px; font-style: italic;">Versione: 1.0.0</p>
             </div>
         </div>
     </div>
-
-    <script>
-        let people = [];
-        let filteredPeople = [];
-        let searchTimeout;
-
-        // CSV sample data per testing
-        const sampleCSVData = `Cognome,Nome,Genere,Data Nascita,Onomastico,Comune,Cellulare,Note
+</div>
+<script>
+let people = [];
+let filteredPeople = [];
+let searchTimeout;
+const sampleCSVData = `Cognome,Nome,Genere,Data Nascita,Onomastico,Comune,Cellulare,Note
 Rossi,Mario,M,1990-03-15,19-03,Milano,333-12.34.567,Ingegnere
 Bianchi,Giulia,F,1985-07-22,22-05,Roma,339-98.76.543,Architetto
 Verdi,Luca,M,1992-12-03,18-10,Napoli,346-55.44.332,Dottore
 Neri,Anna,F,1988-01-30,26-07,Torino,347-11.22.334,Avvocato`;
 
-        // Utilities per le date con validazione migliorata
-        function parseDate(dateString) {
-            if (!dateString) return null;
-            
-            // Supporta diversi formati di data
-            const formats = [
-                /^(\d{4})-(\d{2})-(\d{2})$/, // YYYY-MM-DD
-                /^(\d{2})\/(\d{2})\/(\d{4})$/, // DD/MM/YYYY
-                /^(\d{2})-(\d{2})-(\d{4})$/ // DD-MM-YYYY
-            ];
-            
-            for (let format of formats) {
-                const match = dateString.match(format);
-                if (match) {
-                    if (format === formats[0]) {
-                        // YYYY-MM-DD
-                        return new Date(match[1], match[2] - 1, match[3]);
-                    } else {
-                        // DD/MM/YYYY or DD-MM-YYYY
-                        return new Date(match[3], match[2] - 1, match[1]);
-                    }
-                }
-            }
-            
-            // Fallback to default Date parsing
-            const date = new Date(dateString);
-            return isNaN(date.getTime()) ? null : date;
-        }
-
-        function formatDate(dateString) {
-            const date = parseDate(dateString);
-            if (!date) return '';
-            return date.toLocaleDateString('it-IT');
-        }
-
-        function isToday(dateString) {
-            const date = parseDate(dateString);
-            if (!date) return false;
-            
-            const today = new Date();
-            return date.getDate() === today.getDate() && 
-                   date.getMonth() === today.getMonth();
-        }
-
-        function getAge(birthdate) {
-            const birth = parseDate(birthdate);
-            if (!birth) return null;
-            
-            const today = new Date();
-            let age = today.getFullYear() - birth.getFullYear();
-            const monthDiff = today.getMonth() - birth.getMonth();
-            
-            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-                age--;
-            }
-            return age;
-        }
-
-        function getDaysUntilEvent(eventDay, eventMonth) {
-            try {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-
-                let eventDate = new Date(today.getFullYear(), eventMonth - 1, eventDay);
-                
-                if (eventDate.getTime() < today.getTime()) {
-                    eventDate.setFullYear(today.getFullYear() + 1);
-                }
-                
-                const diffTime = eventDate.getTime() - today.getTime();
-                return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            } catch (error) {
-                console.error('Error calculating days until event:', error);
-                return 999;
-            }
-        }
-
-        function isNamedayToday(namedayString) {
-            if (!namedayString) return false;
-            try {
-                const [day, month] = namedayString.split('-').map(Number);
-                if (!day || !month) return false;
-                
-                const today = new Date();
-                return today.getDate() === day && today.getMonth() === (month - 1);
-            } catch (error) {
-                console.error('Error checking nameday:', error);
-                return false;
-            }
-        }
-
-        // Funzione per ottenere il nome del mese dal numero
-        function getMonthName(monthNumber) {
-            const months = [
-                'gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno',
-                'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'
-            ];
-            return months[monthNumber - 1] || ''; // monthNumber è 1-based
-        }
-
-        // CSV Parsing migliorato
-        function parseCSV(csvText) {
-            try {
-                const lines = csvText.trim().split('\n');
-                if (lines.length < 2) {
-                    throw new Error('CSV deve contenere almeno header e una riga di dati');
-                }
-                
-                const headers = lines[0].split(',').map(h => h.trim().replace(/['"]/g, ''));
-                
-                return lines.slice(1).map((line, index) => {
-                    // Gestione migliorata per CSV con virgole nei campi
-                    const values = [];
-                    let current = '';
-                    let inQuotes = false;
-                    
-                    for (let i = 0; i < line.length; i++) {
-                        const char = line[i];
-                        if (char === '"') {
-                            inQuotes = !inQuotes;
-                        } else if (char === ',' && !inQuotes) {
-                            values.push(current.trim().replace(/['']/g, ''));
-                            current = '';
-                        } else {
-                            current += char;
-                        }
-                    }
-                    values.push(current.trim().replace(/['']/g, ''));
-                    
-                    // Assicurati che ci siano abbastanza valori
-                    while (values.length < headers.length) {
-                        values.push('');
-                    }
-                    
-                    const person = {
-                        id: index + 1,
-                        cognome: values[0] || '',
-                        nome: values[1] || '',
-                        genere: values[2] || '',
-                        dataNascita: values[3] || '',
-                        onomastico: values[4] || '',
-                        comune: values[5] || '',
-                        cellulare: values[6] || '',
-                        note: values[7] || ''
-                    };
-                    return person;
-                }).filter(person => person.nome && person.cognome);
-            } catch (error) {
-                console.error('Errore nel parsing CSV:', error);
-                throw new Error(`Errore nel parsing CSV: ${error.message}`);
-            }
-        }
-
-        // Caricamento dati migliorato con fallback
-        async function loadData(targetTab = 'calendar') {
-            try {
-                document.getElementById('loading').style.display = 'block';
-                document.getElementById('error').style.display = 'none';
-                document.getElementById('main-content').style.display = 'none';
-
-                let csvText;
-                try {
-                    const response = await fetch('https://sebastiano-mazzarisi.github.io/Test/Geometri.csv');
-                    if (!response.ok) {
-                        throw new Error(`Errore HTTP: ${response.status}`);
-                    }
-                    csvText = await response.text();
-                } catch (fetchError) {
-                    console.warn('Impossibile caricare da GitHub, uso dati di esempio:', fetchError);
-                    csvText = sampleCSVData;
-                }
-                
-                people = parseCSV(csvText);
-                
-                if (people.length === 0) {
-                    throw new Error('Nessun dato valido trovato nel file CSV');
-                }
-                
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('main-content').style.display = 'block';
-                
-                filterPeople();
-                showTab(targetTab);
-                
-            } catch (error) {
-                console.error('Errore nel caricamento:', error);
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('error').style.display = 'block';
-                document.getElementById('error').innerHTML = `
-                    <strong>❌ Errore nel caricamento dei dati:</strong><br>
-                    ${error.message}<br>
-                    <small>Utilizzando dati di esempio per la dimostrazione.</small>
-                `;
-                
-                // Fallback ai dati di esempio
-                try {
-                    people = parseCSV(sampleCSVData);
-                    document.getElementById('main-content').style.display = 'block';
-                    filterPeople();
-                    showTab(targetTab);
-                } catch (fallbackError) {
-                    console.error('Errore anche con i dati di esempio:', fallbackError);
-                }
-            }
-        }
-
-        // Gestione tab migliorata
-        function showTab(tabName) {
-            // Nascondi tutti i contenuti
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-                tab.setAttribute('aria-hidden', 'true');
-            });
-            
-            // Rimuovi active da tutti i tab
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.classList.remove('active');
-                tab.setAttribute('aria-selected', 'false');
-            });
-            
-            // Attiva il tab selezionato
-            const activeTab = document.getElementById(tabName);
-            const activeNavTab = document.querySelector(`[onclick="showTab('${tabName}')"]`);
-            
-            if (activeTab) {
-                activeTab.classList.add('active');
-                activeTab.setAttribute('aria-hidden', 'false');
-            }
-            
-            if (activeNavTab) {
-                activeNavTab.classList.add('active');
-                activeNavTab.setAttribute('aria-selected', 'true');
-            }
-            
-            // Esegui azioni specifiche per tab
-            switch(tabName) {
-                case 'calendar':
-                    showCalendarEvents();
-                    setTimeout(scrollToCurrentMonth, 100);
-                    break;
-                case 'statistics':
-                    showStatistics();
-                    break;
-                case 'people-list':
-                    filterPeople();
-                    break;
-                case 'info': 
-                    // Nessuna funzione specifica necessaria, il contenuto è HTML statico
-                    break;
-            }
-        }
-
-        // Ricerca con debounce
-        function debounceSearch() {
-            clearTimeout(searchTimeout);
-            toggleClearButton();
-            searchTimeout = setTimeout(filterPeople, 300);
-        }
-
-        function filterPeople() {
-            const searchTerm = document.getElementById('search').value.toLowerCase();
-            
-            filteredPeople = people.filter(person => {
-                return person.nome.toLowerCase().includes(searchTerm) || 
-                       person.cognome.toLowerCase().includes(searchTerm) ||
-                       person.comune.toLowerCase().includes(searchTerm);
-            });
-            
-            displayPeople();
-        }
-
-        function toggleClearButton() {
-            const searchInput = document.getElementById('search');
-            const clearButton = document.getElementById('search-clear');
-            
-            if (searchInput.value.length > 0) {
-                clearButton.classList.add('show');
+function parseDate(dateString) {
+    if (!dateString) return null;
+    const formats = [
+        /^(\d{4})-(\d{2})-(\d{2})$/,
+        /^(\d{2})\/(\d{2})\/(\d{4})$/,
+        /^(\d{2})-(\d{2})-(\d{4})$/
+    ];
+    for (let format of formats) {
+        const match = dateString.match(format);
+        if (match) {
+            if (format === formats[0]) {
+                return new Date(match[1], match[2] - 1, match[3]);
             } else {
-                clearButton.classList.remove('show');
+                return new Date(match[3], match[2] - 1, match[1]);
             }
         }
-
-        function clearSearch() {
-            const searchInput = document.getElementById('search');
-            const clearButton = document.getElementById('search-clear');
-            
-            searchInput.value = '';
-            clearButton.classList.remove('show');
-            searchInput.focus();
+    }
+    const date = new Date(dateString);
+    return isNaN(date.getTime()) ? null : date;
+}
+function formatDate(dateString) {
+    const date = parseDate(dateString);
+    if (!date) return '';
+    return date.toLocaleDateString('it-IT');
+}
+function isToday(dateString) {
+    const date = parseDate(dateString);
+    if (!date) return false;
+    const today = new Date();
+    return date.getDate() === today.getDate() && date.getMonth() === today.getMonth();
+}
+function getAgeForDisplay(birthdate) {
+    const birth = parseDate(birthdate);
+    if (!birth) return null;
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const birthThisYear = new Date(currentYear, birth.getMonth(), birth.getDate());
+    let age = currentYear - birth.getFullYear();
+    return Math.max(0, age); 
+}
+function getAge(birthdate) {
+    const birth = parseDate(birthdate);
+    if (!birth) return null;
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+        age--;
+    }
+    return Math.max(0, age);
+}
+function getDaysUntilEvent(eventDay, eventMonth) {
+    try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        let eventDate = new Date(today.getFullYear(), eventMonth - 1, eventDay);
+        if (eventDate.getTime() < today.getTime()) {
+            eventDate.setFullYear(today.getFullYear() + 1);
+        }
+        const diffTime = eventDate.getTime() - today.getTime();
+        return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    } catch (error) {
+        console.error('Error calculating days until event:', error);
+        return 999;
+    }
+}
+function isNamedayToday(namedayString) {
+    if (!namedayString) return false;
+    try {
+        const [day, month] = namedayString.split('-').map(Number);
+        if (!day || !month) return false;
+        const today = new Date();
+        return today.getDate() === day && today.getMonth() === (month - 1);
+    } catch (error) {
+        console.error('Error checking nameday:', error);
+        return false;
+    }
+}
+function getMonthName(monthNumber) {
+    const months = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno','luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+    return months[monthNumber - 1] || '';
+}
+function parseCSV(csvText) {
+    try {
+        const lines = csvText.trim().split('\n');
+        if (lines.length < 2) throw new Error('CSV deve contenere almeno header e una riga di dati');
+        const headers = lines[0].split(',').map(h => h.trim().replace(/['']/g, ''));
+        return lines.slice(1).map((line, index) => {
+            const values = [];
+            let current = '', inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"') { inQuotes = !inQuotes; }
+                else if (char === ',' && !inQuotes) { values.push(current.trim().replace(/['']/g, '')); current = ''; }
+                else { current += char; }
+            }
+            values.push(current.trim().replace(/['']/g, ''));
+            while (values.length < headers.length) { values.push(''); }
+            const person = {
+                id: index + 1,
+                cognome: values[0] || '',
+                nome: values[1] || '',
+                genere: values[2] || '',
+                dataNascita: values[3] || '',
+                onomastico: values[4] || '',
+                comune: values[5] || '',
+                cellulare: values[6] || '',
+                note: values[7] || ''
+            };
+            return person;
+        }).filter(person => person.nome && person.cognome);
+    } catch (error) {
+        console.error('Errore nel parsing CSV:', error);
+        throw new Error(`Errore nel parsing CSV: ${error.message}`);
+    }
+}
+async function loadData(targetTab = 'calendar') {
+    try {
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('error').style.display = 'none';
+        document.getElementById('main-content').style.display = 'none';
+        let csvText;
+        try {
+            const response = await fetch('https://sebastiano-mazzarisi.github.io/Test/Geometri.csv');
+            if (!response.ok) throw new Error(`Errore HTTP: ${response.status}`);
+            csvText = await response.text();
+        } catch (fetchError) {
+            console.warn('Impossibile caricare da GitHub, uso dati di esempio:', fetchError);
+            csvText = sampleCSVData;
+        }
+        people = parseCSV(csvText);
+        if (people.length === 0) throw new Error('Nessun dato valido trovato nel file CSV');
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('main-content').style.display = 'block';
+        filterPeople();
+        showTab(targetTab);
+    } catch (error) {
+        console.error('Errore nel caricamento:', error);
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('error').style.display = 'block';
+        document.getElementById('error').innerHTML = `
+            <strong>❌ Errore nel caricamento dei dati:</strong><br>
+            ${error.message}<br>
+            <small>Utilizzando dati di esempio per la dimostrazione.</small>
+        `;
+        try {
+            people = parseCSV(sampleCSVData);
+            document.getElementById('main-content').style.display = 'block';
             filterPeople();
+            showTab(targetTab);
+        } catch (fallbackError) {
+            console.error('Errore anche con i dati di esempio:', fallbackError);
         }
-
-        function formatPhoneForWhatsApp(phone) {
-            if (!phone) return '';
-            let cleanPhone = phone.replace(/\D/g, '');
-            if (cleanPhone.startsWith('3') && cleanPhone.length === 10) {
-                cleanPhone = '39' + cleanPhone;
-            }
-            return cleanPhone;
-        }
-
-        function formatPhoneForDisplay(phone) {
-            if (!phone) return '';
-            let cleanPhone = phone.replace(/\D/g, '');
-            if (cleanPhone.length === 10) {
-                return cleanPhone.replace(/(\d{3})(\d{2})(\d{2})(\d{3})/, '$1-$2.$3.$4');
-            }
-            return phone;
-        }
-
-        function displayPeople() {
-            const container = document.getElementById('people-grid');
-            const noResults = document.getElementById('no-results');
-            
-            if (filteredPeople.length === 0) {
-                container.style.display = 'none';
-                noResults.style.display = 'block';
-                return;
-            }
-            
-            container.style.display = 'grid';
-            noResults.style.display = 'none';
-            
-            container.innerHTML = filteredPeople.map(person => {
-                const isBirthdayToday = person.dataNascita && isToday(person.dataNascita);
-                const isNamedayTodayBool = person.onomastico && isNamedayToday(person.onomastico);
-                const age = person.dataNascita ? getAge(person.dataNascita) : null;
-                
-                let cardClass = 'person-card';
-                if (isBirthdayToday) cardClass += ' birthday-today';
-                if (isNamedayTodayBool) cardClass += ' nameday-today';
-                
-                const formattedPhone = formatPhoneForDisplay(person.cellulare);
-                const whatsappPhone = formatPhoneForWhatsApp(person.cellulare);
-                const whatsappLink = whatsappPhone ? `https://wa.me/${whatsappPhone}` : '';
-                
-                return `
-                    <div class="${cardClass}" id="person-${person.id}">
-                        <div class="person-header">
-                            <div class="person-name">${person.nome} ${person.cognome}</div>
-                            ${age !== null ? `<div class="person-age">${age} anni</div>` : ''}
-                        </div>
-                        <div class="person-info">
-                            ${person.dataNascita ? `<div><i>🎂</i> Compleanno: ${formatDate(person.dataNascita)}</div>` : ''}
-                            ${person.onomastico ? `<div><i>🌟</i> Onomastico: ${person.onomastico.split('-')[0]} ${getMonthName(parseInt(person.onomastico.split('-')[1]))}</div>` : ''}
-                            ${person.comune ? `<div><i>🏘️</i> Comune: ${person.comune}</div>` : ''}
-                            ${person.cellulare ? `<div><i>📱</i> Cellulare:&nbsp;<a href="${whatsappLink}" target="_blank" style="color: #25D366; text-decoration: none; font-weight: bold; cursor: pointer;" title="Apri WhatsApp con ${person.nome}">${formattedPhone}</a></div>` : ''}
-                            ${person.note ? `<div><i>📝</i> Note: ${person.note}</div>` : ''}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function showCalendarEvents() {
-            const container = document.getElementById('monthly-events');
-            const months = [
-                'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
-                'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'
-            ];
-            
-            const eventsByMonth = {};
-            const today = new Date();
-            const todayMonth = today.getMonth();
-
-            people.forEach(person => {
-                // Compleanni
-                if (person.dataNascita) {
-                    const date = parseDate(person.dataNascita);
-                    if (date) {
-                        const month = date.getMonth();
-                        const day = date.getDate();
-                        if (!eventsByMonth[month]) eventsByMonth[month] = [];
-                        eventsByMonth[month].push({
-                            type: 'birthday',
-                            person: person,
-                            day: day,
-                            originalMonth: date.getMonth() + 1
-                        });
-                    }
-                }
-                
-                // Onomastici
-                if (person.onomastico) {
-                    try {
-                        const [day, month] = person.onomastico.split('-').map(Number);
-                        if (day && month && month >= 1 && month <= 12) {
-                            const monthIndex = month - 1;
-                            if (!eventsByMonth[monthIndex]) eventsByMonth[monthIndex] = [];
-                            eventsByMonth[monthIndex].push({
-                                type: 'nameday',
-                                person: person,
-                                day: day,
-                                originalMonth: month
-                            });
-                        }
-                    } catch (error) {
-                        console.warn('Invalid nameday format:', person.onomastico);
-                    }
-                }
-            });
-            
-            container.innerHTML = months.map((monthName, index) => {
-                const events = eventsByMonth[index] || [];
-                events.sort((a, b) => a.day - b.day);
-
-                let monthCardClass = 'month-card';
-                if (index < todayMonth) {
-                    monthCardClass += ' past-month';
-                } else if (index === todayMonth) {
-                    monthCardClass += ' current-month';
-                } else {
-                    monthCardClass += ' future-month';
-                }
-                
-                return `
-                    <div style="background: #f8f9fa; padding: 20px; margin-bottom: 20px; border-radius: 15px;" class="${monthCardClass}" id="month-${index}" onclick="scrollToCalendarStart()">
-                        <h3 style="margin-bottom: 15px; color: #495057;">${monthName}</h3>
-                        ${events.length > 0 ? events.map(event => {
-                            const icon = event.type === 'birthday' ? '🎂' : '🌟';
-                            const eventType = event.type === 'birthday' ? 'Compleanno' : 'Onomastico';
-                            
-                            const daysUntil = getDaysUntilEvent(event.day, event.originalMonth);
-                            let circleHtml = '';
-                            if (daysUntil === 0) {
-                                circleHtml = '<span class="event-circle circle-red"></span>';
-                            } else if (daysUntil === 1) {
-                                circleHtml = '<span class="event-circle circle-yellow"></span>';
-                            } else if (daysUntil === 2) {
-                                circleHtml = '<span class="event-circle circle-green"></span>';
-                            }
-
-                            return `
-                                <div style="padding: 10px; background: white; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid ${event.type === 'birthday' ? '#ffc107' : '#17a2b8'};">
-                                    ${icon} ${event.day} - ${eventType} di ${circleHtml}${event.person.nome} ${event.person.cognome}
-                                </div>
-                            `;
-                        }).join('') : '<p style="color: #6c757d; font-style: italic;">Nessun evento questo mese</p>'}
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function scrollToCurrentMonth() {
-            const todayMonth = new Date().getMonth();
-            const currentMonthElement = document.getElementById(`month-${todayMonth}`);
-            if (currentMonthElement) {
-                currentMonthElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+function showTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+        tab.setAttribute('aria-hidden', 'true');
+    });
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.classList.remove('active');
+        tab.setAttribute('aria-selected', 'false');
+    });
+    const activeTab = document.getElementById(tabName);
+    const activeNavTab = document.querySelector(`[onclick="showTab('${tabName}')"]`);
+    if (activeTab) {
+        activeTab.classList.add('active');
+        activeTab.setAttribute('aria-hidden', 'false');
+    }
+    if (activeNavTab) {
+        activeNavTab.classList.add('active');
+        activeNavTab.setAttribute('aria-selected', 'true');
+    }
+    switch(tabName) {
+        case 'calendar': showCalendarEvents(); setTimeout(scrollToCurrentMonth, 100); break;
+        case 'statistics': showStatistics(); break;
+        case 'people-list': filterPeople(); break;
+        case 'info': break;
+    }
+}
+function debounceSearch() {
+    clearTimeout(searchTimeout);
+    toggleClearButton();
+    searchTimeout = setTimeout(filterPeople, 300);
+}
+function filterPeople() {
+    const searchTerm = document.getElementById('search').value.toLowerCase();
+    filteredPeople = people.filter(person => {
+        return person.nome.toLowerCase().includes(searchTerm) || person.cognome.toLowerCase().includes(searchTerm) || person.comune.toLowerCase().includes(searchTerm);
+    });
+    displayPeople();
+}
+function toggleClearButton() {
+    const searchInput = document.getElementById('search');
+    const clearButton = document.getElementById('search-clear');
+    if (searchInput.value.length > 0) {
+        clearButton.classList.add('show');
+    } else {
+        clearButton.classList.remove('show');
+    }
+}
+function clearSearch() {
+    const searchInput = document.getElementById('search');
+    const clearButton = document.getElementById('search-clear');
+    searchInput.value = '';
+    clearButton.classList.remove('show');
+    searchInput.focus();
+    filterPeople();
+}
+function formatPhoneForWhatsApp(phone) {
+    if (!phone) return '';
+    let cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.startsWith('3') && cleanPhone.length === 10) {
+        cleanPhone = '39' + cleanPhone;
+    }
+    return cleanPhone;
+}
+function formatPhoneForDisplay(phone) {
+    if (!phone) return '';
+    let cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length === 10) {
+        return cleanPhone.replace(/(\d{3})(\d{2})(\d{2})(\d{3})/, '$1-$2.$3.$4');
+    }
+    return phone;
+}
+function displayPeople() {
+    const container = document.getElementById('people-grid');
+    const noResults = document.getElementById('no-results');
+    if (filteredPeople.length === 0) {
+        container.style.display = 'none';
+        noResults.style.display = 'block';
+        return;
+    }
+    container.style.display = 'grid';
+    noResults.style.display = 'none';
+    container.innerHTML = filteredPeople.map(person => {
+        const isBirthdayToday = person.dataNascita && isToday(person.dataNascita);
+        const isNamedayTodayBool = person.onomastico && isNamedayToday(person.onomastico);
+        const age = person.dataNascita ? getAge(person.dataNascita) : null;
+        let cardClass = 'person-card';
+        if (isBirthdayToday) cardClass += ' birthday-today';
+        if (isNamedayTodayBool) cardClass += ' nameday-today';
+        const formattedPhone = formatPhoneForDisplay(person.cellulare);
+        const whatsappPhone = formatPhoneForWhatsApp(person.cellulare);
+        const whatsappLink = whatsappPhone ? `https://wa.me/${whatsappPhone}` : '';
+        return `
+            <div class="${cardClass}" id="person-${person.id}">
+                <div class="person-header">
+                    <div class="person-name">${person.nome} ${person.cognome}</div>
+                    ${age !== null ? `<div class="person-age">${age} anni</div>` : ''}
+                </div>
+                <div class="person-info">
+                    ${person.dataNascita ? `<div><i>🎂</i> Compleanno: ${formatDate(person.dataNascita)}</div>` : ''}
+                    ${person.onomastico ? `<div><i>🌟</i> Onomastico: ${person.onomastico.split('-')[0]} ${getMonthName(parseInt(person.onomastico.split('-')[1]))}</div>` : ''}
+                    ${person.comune ? `<div><i>🏘️</i> Comune: ${person.comune}</div>` : ''}
+                    ${person.cellulare ? `<div><i>📱</i> Cellulare:&nbsp;<a href="${whatsappLink}" target="_blank" style="color: #25D366; text-decoration: none; font-weight: bold; cursor: pointer;" title="Apri WhatsApp con ${person.nome}">${formattedPhone}</a></div>` : ''}
+                    ${person.note ? `<div><i>📝</i> Note: ${person.note}</div>` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+function showCalendarEvents() {
+    const container = document.getElementById('monthly-events');
+    const months = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno','Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+    const eventsByMonth = {};
+    const today = new Date();
+    const todayMonth = today.getMonth();
+    people.forEach(person => {
+        if (person.dataNascita) {
+            const date = parseDate(person.dataNascita);
+            if (date) {
+                const month = date.getMonth();
+                const day = date.getDate();
+                if (!eventsByMonth[month]) eventsByMonth[month] = [];
+                eventsByMonth[month].push({
+                    type: 'birthday',
+                    person: person,
+                    day: day,
+                    originalMonth: date.getMonth() + 1
+                });
             }
         }
-
-        // Funzione per scrollare direttamente all'inizio della pagina
-        function scrollToCalendarStart() {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        }
-
-        // GESTIONE DEI GRAFICI
-        function showStatistics() {
-            const container = document.getElementById('stats-content');
-            
+        if (person.onomastico) {
             try {
-                // Statistiche per età
-                const ages = people.filter(p => p.dataNascita).map(p => getAge(p.dataNascita)).filter(age => age !== null);
-                const avgAge = ages.length > 0 ? Math.round(ages.reduce((a, b) => a + b, 0) / ages.length) : 0;
-                const minAge = ages.length > 0 ? Math.min(...ages) : 0;
-                const maxAge = ages.length > 0 ? Math.max(...ages) : 0;
-                
-                // Statistiche per comune
-                const comuneStats = {};
-                people.forEach(p => {
-                    if (p.comune) {
-                        comuneStats[p.comune] = (comuneStats[p.comune] || 0) + 1;
-                    }
-                });
-                const sortedComuni = Object.entries(comuneStats).sort(([,a], [,b]) => b - a);
-                const maxComuneCount = sortedComuni.length > 0 ? Math.max(...Object.values(comuneStats)) : 1; 
-
-                // Eventi per mese (compleanni)
-                const monthlyStats = new Array(12).fill(0);
-                people.forEach(p => {
-                    if (p.dataNascita) {
-                        const date = parseDate(p.dataNascita);
-                        if (date) {
-                            monthlyStats[date.getMonth()]++;
-                        }
-                    }
-                });
-                const maxMonthlyCount = Math.max(...monthlyStats) === 0 ? 1 : Math.max(...monthlyStats);
-                
-                container.innerHTML = `
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; flex-wrap: wrap; align-items: flex-start;">
-                        <div class="stat-section">
-                            <h3 style="margin-bottom: 20px; color: #495057;">📊 Statistiche Età</h3>
-                            <div style="display: grid; gap: 15px;">
-                                <div>Età media: <strong>${avgAge} anni</strong></div>
-                                <div>Più giovane: <strong>${minAge} anni</strong></div>
-                                <div>Più anziano: <strong>${maxAge} anni</strong></div>
-                                <div>Con data di nascita: <strong>${ages.length}/${people.length}</strong></div>
-                            </div>
-                        </div>
-                        
-                        <div class="stat-section">
-                            <h3 style="margin-bottom: 20px; color: #495057;">🏘️ Distribuzione per Comune</h3>
-                            <div style="display: grid; gap: 12px;">
-                                ${sortedComuni.length > 0 ? sortedComuni
-                                    .map(([comune, count]) => {
-                                        const barWidth = Math.max(20, (count / maxComuneCount) * 180); 
-                                        return `<div class="chart-item">
-                                            <span class="chart-label">${comune || 'Non specificato'}</span>
-                                            <div class="chart-bar-container">
-                                                <div class="chart-bar" style="width: ${barWidth}px;"></div>
-                                                <strong class="chart-count">${count}</strong>
-                                            </div>
-                                        </div>`;
-                                    }).join('') : '<p style="color: #6c757d;">Nessun dato disponibile</p>'}
-                            </div>
-                        </div>
-                        
-                        <div class="stat-section">
-                            <h3 style="margin-bottom: 20px; color: #495057;">🎂 Compleanni per Mese</h3>
-                            <div style="display: grid; gap: 12px;">
-                                ${['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre']
-                                    .map((month, index) => {
-                                        const barWidth = Math.max(20, (monthlyStats[index] / maxMonthlyCount) * 180);
-                                        return `<div class="chart-item">
-                                            <span class="chart-label">${month}</span>
-                                            <div class="chart-bar-container">
-                                                <div class="chart-bar monthly" style="width: ${barWidth}px;"></div>
-                                                <strong class="chart-count">${monthlyStats[index]}</strong>
-                                            </div>
-                                        </div>`;
-                                    }).join('')}
-                            </div>
-                        </div>
-                    </div>
-                `;
+                const [day, month] = person.onomastico.split('-').map(Number);
+                if (day && month && month >= 1 && month <= 12) {
+                    const monthIndex = month - 1;
+                    if (!eventsByMonth[monthIndex]) eventsByMonth[monthIndex] = [];
+                    eventsByMonth[monthIndex].push({
+                        type: 'nameday',
+                        person: person,
+                        day: day,
+                        originalMonth: month
+                    });
+                }
             } catch (error) {
-                console.error('Errore nel calcolo delle statistiche:', error);
-                container.innerHTML = `
-                    <div class="error">
-                        <strong>Errore nel calcolo delle statistiche:</strong><br>
-                        ${error.message}
-                    </div>
-                `;
+                console.warn('Invalid nameday format:', person.onomastico);
             }
         }
-        // FINE GESTIONE DEI GRAFICI
-
-        // Gestione eventi da tastiera per accessibilità
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                const searchInput = document.getElementById('search');
-                if (searchInput.value) {
-                    clearSearch();
-                }
+    });
+    container.innerHTML = months.map((monthName, index) => {
+        const events = eventsByMonth[index] || [];
+        events.sort((a, b) => a.day - b.day);
+        let monthCardClass = 'month-card';
+        if (index < todayMonth) {
+            monthCardClass += ' past-month';
+        } else if (index === todayMonth) {
+            monthCardClass += ' current-month';
+        } else {
+            monthCardClass += ' future-month';
+        }
+        return `
+            <div style="background: #f8f9fa; padding: 20px; margin-bottom: 20px; border-radius: 15px;" class="${monthCardClass}" id="month-${index}" onclick="scrollToCalendarStart()">
+                <h3 style="margin-bottom: 15px; color: #495057;">${monthName}</h3>
+                ${events.length > 0 ? events.map(event => {
+                    const icon = event.type === 'birthday' ? '🎂' : '🌟';
+                    const eventType = event.type === 'birthday' ? 'Compleanno' : 'Onomastico';
+                    const daysUntil = getDaysUntilEvent(event.day, event.originalMonth);
+                    let circleHtml = '';
+                    if (daysUntil === 0) {
+                        circleHtml = '<span class="event-circle circle-red"></span>';
+                    } else if (daysUntil === 1) {
+                        circleHtml = '<span class="event-circle circle-yellow"></span>';
+                    } else if (daysUntil === 2) {
+                        circleHtml = '<span class="event-circle circle-green"></span>';
+                    }
+                    const ageForDisplay = event.type === 'birthday' && event.person.dataNascita
+                        ? getAgeForDisplay(event.person.dataNascita)
+                        : null;
+                    const ageText = ageForDisplay !== null ? ` (${ageForDisplay} anni)` : '';
+                    return `
+                        <div style="padding: 10px; background: white; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid ${event.type === 'birthday' ? '#ffc107' : '#17a2b8'};">
+                            ${icon} ${event.day} - ${eventType} di ${circleHtml}${event.person.nome} ${event.person.cognome}${ageText}
+                        </div>
+                    `;
+                }).join('') : '<p style="color: #6c757d; font-style: italic;">Nessun evento questo mese</p>'}
+            </div>
+        `;
+    }).join('');
+}
+function scrollToCurrentMonth() {
+    const todayMonth = new Date().getMonth();
+    const currentMonthElement = document.getElementById(`month-${todayMonth}`);
+    if (currentMonthElement) {
+        currentMonthElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+function scrollToCalendarStart() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+// STATISTICHE: Tre riquadri verticali
+function showStatistics() {
+    const container = document.getElementById('stats-content');
+    try {
+        const peopleWithBirthdates = people.filter(p => p.dataNascita && parseDate(p.dataNascita));
+        const ages = peopleWithBirthdates.map(p => getAge(p.dataNascita));
+        const avgAge = ages.length > 0 ? Math.round(ages.reduce((a, b) => a + b, 0) / ages.length) : 0;
+        const minAgeValue = ages.length > 0 ? Math.min(...ages) : 0;
+        const maxAgeValue = ages.length > 0 ? Math.max(...ages) : 0;
+        const youngestPerson = peopleWithBirthdates.find(p => getAge(p.dataNascita) === minAgeValue);
+        const youngestSurname = youngestPerson ? ` (${youngestPerson.cognome})` : '';
+        const oldestPerson = peopleWithBirthdates.find(p => getAge(p.dataNascita) === maxAgeValue);
+        const oldestSurname = oldestPerson ? ` (${oldestPerson.cognome})` : '';
+        const comuneStats = {};
+        people.forEach(p => {
+            if (p.comune) comuneStats[p.comune] = (comuneStats[p.comune] || 0) + 1;
+        });
+        const sortedComuni = Object.entries(comuneStats).sort(([,a], [,b]) => b - a);
+        const maxComuneCount = sortedComuni.length > 0 ? Math.max(...Object.values(comuneStats)) : 1; 
+        const monthlyStats = new Array(12).fill(0);
+        people.forEach(p => {
+            if (p.dataNascita) {
+                const date = parseDate(p.dataNascita);
+                if (date) monthlyStats[date.getMonth()]++;
             }
         });
-
-        // Inizializzazione
-        document.addEventListener('DOMContentLoaded', function() {
-            loadData();
-        });
-
-        // Gestione errori globali
-        window.addEventListener('error', function(e) {
-            console.error('Errore JavaScript:', e.error);
-            const errorDiv = document.getElementById('error');
-            if (errorDiv) {
-                errorDiv.style.display = 'block';
-                errorDiv.innerHTML = `
-                    <strong>❌ Errore nell'applicazione:</strong><br>
-                    Si è verificato un errore imprevisto. Ricarica la pagina per riprovare.<br>
-                    <small>Dettagli: ${e.message}</small>
-                `;
-            }
-        });
-
-        // Gestione errori di promise non catturate
-        window.addEventListener('unhandledrejection', function(e) {
-            console.error('Promise rejection non gestita:', e.reason);
-            e.preventDefault(); 
-        });
-    </script>
+        const maxMonthlyCount = Math.max(...monthlyStats) === 0 ? 1 : Math.max(...monthlyStats);
+        container.innerHTML = `
+            <div class="stat-section">
+                <h3 style="margin-bottom: 20px; color: #495057;">📊 Statistiche Età</h3>
+                <div style="display: grid; gap: 15px;">
+                    <div>Età media: <strong>${avgAge} anni</strong></div>
+                    <div>Più giovane: <strong>${minAgeValue} anni</strong><span style="font-weight: normal;">${youngestSurname}</span></div>
+                    <div>Più anziano: <strong>${maxAgeValue} anni</strong><span style="font-weight: normal;">${oldestSurname}</span></div>
+                    <div>Con data di nascita: <strong>${ages.length}/${people.length}</strong></div>
+                </div>
+            </div>
+            <div class="stat-section">
+                <h3 style="margin-bottom: 20px; color: #495057;">🏘️ Distribuzione per Comune</h3>
+                <div style="display: grid; gap: 12px;">
+                    ${sortedComuni.length > 0 ? sortedComuni
+                        .map(([comune, count]) => {
+                            const barWidth = Math.max(20, (count / maxComuneCount) * 180); 
+                            return `<div class="chart-item">
+                                <span class="chart-label">${comune || 'Non specificato'}</span>
+                                <div class="chart-bar-container">
+                                    <div class="chart-bar" style="width: ${barWidth}px;"></div>
+                                    <strong class="chart-count">${count}</strong>
+                                </div>
+                            </div>`;
+                        }).join('') : '<p style="color: #6c757d;">Nessun dato disponibile</p>'}
+                </div>
+            </div>
+            <div class="stat-section">
+                <h3 style="margin-bottom: 20px; color: #495057;">🎂 Compleanni per Mese</h3>
+                <div style="display: grid; gap: 12px;">
+                    ${['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre']
+                        .map((month, index) => {
+                            const barWidth = Math.max(20, (monthlyStats[index] / maxMonthlyCount) * 180);
+                            return `<div class="chart-item">
+                                <span class="chart-label">${month}</span>
+                                <div class="chart-bar-container">
+                                    <div class="chart-bar monthly" style="width: ${barWidth}px;"></div>
+                                    <strong class="chart-count">${monthlyStats[index]}</strong>
+                                </div>
+                            </div>`;
+                        }).join('')}
+                </div>
+            </div>
+        `;
+    } catch (error) {
+        console.error('Errore nel calcolo delle statistiche:', error);
+        container.innerHTML = `
+            <div class="error">
+                <strong>Errore nel calcolo delle statistiche:</strong><br>
+                ${error.message}
+            </div>
+        `;
+    }
+}
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const searchInput = document.getElementById('search');
+        if (searchInput.value) clearSearch();
+    }
+});
+document.addEventListener('DOMContentLoaded', function() {
+    loadData();
+});
+window.addEventListener('error', function(e) {
+    console.error('Errore JavaScript:', e.error);
+    const errorDiv = document.getElementById('error');
+    if (errorDiv) {
+        errorDiv.style.display = 'block';
+        errorDiv.innerHTML = `
+            <strong>❌ Errore nell'applicazione:</strong><br>
+            Si è verificato un errore imprevisto. Ricarica la pagina per riprovare.<br>
+            <small>Dettagli: ${e.message}</small>
+        `;
+    }
+});
+window.addEventListener('unhandledrejection', function(e) {
+    console.error('Promise rejection non gestita:', e.reason);
+    e.preventDefault(); 
+});
+</script>
 </body>
 </html>
