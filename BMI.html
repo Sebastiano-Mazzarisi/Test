@@ -3,30 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, shrink-to-fit=no">
-    <title>Calcolatore BMI per iPhone</title>
+    <title>Calcolatore BMI</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     
+    <!-- Icone per iOS e Android - Aggiungi queste righe -->
+    <link rel="apple-touch-icon" sizes="180x180" href="BMI-icona.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="BMI-icona.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="BMI-icona.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="BMI-icona.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="BMI-icona.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="BMI-icona.png">
+    <link rel="shortcut icon" href="BMI-icona.png">
+    
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="BMI Calc">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    
+    <!-- Aggiungi anche questi meta tag -->
+    <meta name="theme-color" content="#007bff">
+    <meta name="msapplication-TileColor" content="#007bff">
+
     <style>
         /* Stili CSS integrati */
         :root {
-            --primary-color: #007bff; /* Blu più classico */
-            --secondary-color: #6c757d; /* Grigio secondario */
-            --bg-color: #F5DEB3; /* Giallo Paglierino */
-            --card-bg: #ffffff; /* Sfondo del contenitore */
-            --text-color: #343a40; /* Testo scuro */
-            --border-color: #ced4da; /* Colore bordo input */
-            --success-color: #28a745; /* Verde per BMI normale */
-            --error-color: #dc3545; /* Rosso per errori/obesità */
-            --warning-color-yellow: #ffc107; /* Giallo per sottopeso */
-            --warning-color-orange: #fd7e14; /* Arancione per sovrappeso */
-            --subtitle-color: #495057; /* Grigio scuro per il sottotitolo */
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --bg-color: #F5DEB3;
+            --card-bg: #ffffff;
+            --text-color: #343a40;
+            --border-color: #ced4da;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --warning-color-yellow: #ffc107;
+            --warning-color-orange: #fd7e14;
+            --subtitle-color: #495057;
         }
 
         html {
-            height: 100%; /* Assicura che l'HTML prenda l'intera altezza */
-            -webkit-overflow-scrolling: touch; /* Migliora lo scrolling nativo su iOS */
+            height: 100%;
+            -webkit-overflow-scrolling: touch;
         }
 
         body {
@@ -34,17 +51,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Priorità per le unità di altezza più compatibili con iOS */
-            min-height: 100dvh; /* Dynamic Viewport Height (modern browsers, iOS 15+) */
-            min-height: -webkit-fill-available; /* Safari specific */
-            min-height: 100vh; /* Fallback standard */
-
+            min-height: 100dvh;
+            min-height: -webkit-fill-available;
+            min-height: 100vh;
             margin: 0;
             background-color: var(--bg-color);
             color: var(--text-color);
-            /* Gestione overflow più mirata per iOS */
-            overflow-y: auto; /* Permetti lo scroll verticale se necessario */
-            overflow-x: hidden; /* Blocca scroll orizzontale */
+            overflow-y: auto;
+            overflow-x: hidden;
             padding: 1.25rem;
             box-sizing: border-box;
             -webkit-text-size-adjust: 100%;
@@ -61,11 +75,10 @@
             box-sizing: border-box;
             position: relative;
             z-index: 1;
-            /* Rendi il container scrollabile internamente se il contenuto è troppo lungo */
-            max-height: calc(100dvh - 2.5rem); /* Altezza massima del container, meno il padding del body */
+            max-height: calc(100dvh - 2.5rem);
             max-height: calc(-webkit-fill-available - 2.5rem); 
-            overflow-y: auto; /* Permette lo scroll interno al container */
-            -webkit-overflow-scrolling: touch; /* Scrolling fluido su iOS */
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         h1 {
@@ -108,11 +121,10 @@
             -webkit-appearance: none;
             -moz-appearance: textfield;
             appearance: textfield;
-            /* Per aiutare la tastiera iOS a non nascondere l'input */
             -webkit-user-select: text;
             user-select: text;
         }
-        /* Nasconde le frecce per gli input di tipo number (alcuni browser) */
+
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button {
             -webkit-appearance: none;
@@ -182,20 +194,18 @@
             min-height: 1.05rem;
         }
 
-        /* Colori per le categorie BMI (usano le variabili root) */
         .bmi-category.red { color: var(--error-color); }
         .bmi-category.orange { color: var(--warning-color-orange); }
         .bmi-category.green { color: var(--success-color); }
         .bmi-category.yellow { color: var(--warning-color-yellow); }
 
-        /* Media Queries per schermi più grandi (desktop) */
         @media (min-width: 768px) {
             .container {
                 padding: 2.5rem;
                 max-width: 28rem;
                 box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.15);
-                max-height: none; /* Rimuovi limiti di altezza su desktop */
-                overflow-y: visible; /* Rimuovi scroll interno su desktop */
+                max-height: none;
+                overflow-y: visible;
             }
             h1 {
                 font-size: 2rem;
@@ -257,7 +267,6 @@
     </div>
 
     <script>
-        // Script JavaScript integrato
         document.addEventListener('DOMContentLoaded', function() {
             const pesoInput = document.getElementById('peso');
             const altezzaInput = document.getElementById('altezza');
@@ -265,9 +274,8 @@
             const risultatoBMIP = document.getElementById('risultatoBMI');
             const classificazioneP = document.getElementById('classificazione');
 
-            // Funzione per aggiornare la classe di colore della classificazione
             function updateClassificationColor(element, category) {
-                element.classList.remove('red', 'orange', 'green', 'yellow'); // Rimuovi classi precedenti
+                element.classList.remove('red', 'orange', 'green', 'yellow');
                 if (category === "Sottopeso") {
                     element.classList.add('yellow');
                 } else if (category === "Normopeso") {
@@ -279,15 +287,12 @@
                 }
             }
 
-            // Event Listener per il pulsante "Calcola BMI"
             calcolaBtn.addEventListener('click', function() {
-                // Utilizzo .value.trim().replace(',', '.') per gestire la virgola come separatore decimale (comune in Italia)
                 const peso = parseFloat(pesoInput.value.trim().replace(',', '.'));
                 const altezzaCm = parseFloat(altezzaInput.value.trim().replace(',', '.'));
 
                 let errorMessage = "";
 
-                // Validazione più robusta
                 if (pesoInput.value.trim() === '') {
                     errorMessage = "Il campo Peso (kg) non può essere vuoto.";
                 } else if (isNaN(peso) || peso <= 0) {
@@ -328,7 +333,6 @@
                 updateClassificationColor(classificazioneP, classificazioneText);
             });
 
-            // Funzione per resettare i colori e i testi quando si modifica un input
             function resetResults() {
                 risultatoBMIP.textContent = "";
                 risultatoBMIP.style.color = 'var(--success-color)'; 
@@ -336,7 +340,6 @@
                 classificazioneP.classList.remove('red', 'orange', 'green', 'yellow');
             }
 
-            // Aggiungi event listener per resettare i risultati quando si digita negli input
             pesoInput.addEventListener('input', resetResults);
             altezzaInput.addEventListener('input', resetResults);
         });
