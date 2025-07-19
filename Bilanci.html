@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisi Bilanci Condominio - Residence Torre dei Normanni</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A four-section, single-page dashboard design was chosen for maximum clarity and user flow. It starts with a high-level overview (Panoramica) to orient the user, then allows for a detailed drill-down into expenses (Analisi Spese). The core findings are synthesized into an actionable list (Punti Chiave), which directly leads to the final, preparatory section (Domande). This structure guides the user from general understanding to specific, actionable insights, which is ideal for preparing for a meeting. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Total expenses over 3 years -> Goal: Show trend -> Viz: Line Chart (Chart.js) -> Interaction: Hover for tooltips -> Justification: Line charts are best for showing trends over time.
+        - Report Info: Expense breakdown per year -> Goal: Compare components -> Viz: Bar Chart (Chart.js) -> Interaction: Buttons to switch years -> Justification: Bar charts are excellent for comparing the magnitude of different categories within a whole. Interactive switching allows for direct comparison across years without clutter.
+        - Report Info: Identified anomalies -> Goal: Inform and highlight -> Viz: Styled list/cards (HTML/Tailwind) -> Interaction: None needed, clarity is key -> Justification: Complex charts are unnecessary here; clear, concise text is most effective for explaining specific issues.
+        - Report Info: Prepared questions -> Goal: Provide actionable tool -> Viz: Numbered list (HTML/Tailwind) -> Interaction: None needed -> Justification: A simple, readable list is the most practical format for questions to be used in a meeting.
+        -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: #FDFBF8;
+            color: #4A4A4A;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 40vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #C89F9C;
+            border-bottom-color: #C89F9C;
+        }
+        .btn-year {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .btn-year.active {
+            background-color: #A67B78;
+            color: white;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-[#A67B78]">Analisi Bilanci</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#panoramica" class="nav-link text-lg pb-1">Panoramica</a>
+                <a href="#analisi-spese" class="nav-link text-lg pb-1">Analisi Spese</a>
+                <a href="#punti-chiave" class="nav-link text-lg pb-1">Punti Chiave</a>
+                <a href="#domande" class="nav-link text-lg pb-1">Domande</a>
+            </div>
+             <div class="md:hidden">
+                <select id="mobile-nav" class="bg-white border border-gray-300 rounded-md py-2 px-3 text-gray-700">
+                    <option value="#panoramica">Panoramica</option>
+                    <option value="#analisi-spese">Analisi Spese</option>
+                    <option value="#punti-chiave">Punti Chiave</option>
+                    <option value="#domande">Domande</option>
+                </select>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 md:py-12">
+
+        <section id="panoramica" class="mb-16 scroll-mt-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Panoramica Finanziaria 2023-2025</h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">Un'analisi dell'andamento delle spese totali del condominio "Residence Torre dei Normanni" per orientarsi prima di entrare nel dettaglio.</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h3 class="text-xl font-bold text-center mb-4 text-gray-700">Andamento Uscite Totali</h3>
+                 <div class="chart-container">
+                    <canvas id="trendsChart"></canvas>
+                </div>
+                 <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-sm text-gray-500">Uscite 2023</p>
+                        <p class="text-2xl font-bold text-gray-800">€75.500</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-sm text-gray-500">Uscite 2024</p>
+                        <p class="text-2xl font-bold text-red-600">€88.000 <span class="text-sm font-normal">(+16.6%)</span></p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-sm text-gray-500">Previsione 2025</p>
+                        <p class="text-2xl font-bold text-orange-600">€95.000 <span class="text-sm font-normal">(+8.0%)</span></p>
+                    </div>
+                </div>
+                <p class="text-center mt-6 text-gray-600">Si osserva una crescita costante e significativa delle spese, con un'accelerazione marcata nel 2024. È fondamentale capire le cause di questi aumenti.</p>
+            </div>
+        </section>
+
+        <section id="analisi-spese" class="mb-16 scroll-mt-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Analisi Dettagliata delle Spese</h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">Esplora la composizione delle spese per ogni anno per identificare dove si concentrano i costi e quali voci hanno subito le maggiori variazioni.</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <div class="flex justify-center mb-6">
+                    <div class="flex space-x-2 bg-gray-200 p-1 rounded-full" id="year-selector">
+                        <button class="btn-year px-4 py-2 rounded-full text-sm md:text-base font-semibold text-gray-700" data-year="2023">2023</button>
+                        <button class="btn-year px-4 py-2 rounded-full text-sm md:text-base font-semibold text-gray-700" data-year="2024">2024</button>
+                        <button class="btn-year px-4 py-2 rounded-full text-sm md:text-base font-semibold text-gray-700" data-year="2025">Prev. 2025</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="expensesChart"></canvas>
+                </div>
+                 <p id="chart-commentary" class="text-center mt-6 text-gray-600 italic"></p>
+            </div>
+        </section>
+
+        <section id="punti-chiave" class="mb-16 scroll-mt-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Punti Chiave e Anomalie Rilevate</h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">Ho identificato alcune voci di spesa che meritano un approfondimento. Questi sono i punti più critici da chiarire durante l'assemblea.</p>
+            </div>
+            <div class="space-y-6">
+                <div class="bg-white rounded-xl shadow-lg p-6 transition-transform hover:scale-105">
+                    <h3 class="text-xl font-bold text-red-700 mb-2">1. Aumento Esponenziale "Manutenzione Ordinaria"</h3>
+                    <p class="text-gray-700">La spesa per la manutenzione ordinaria è quasi raddoppiata nel 2024 (+87.5% rispetto al 2023) e rimane molto elevata nella previsione 2025. Un aumento così drastico richiede una giustificazione dettagliata degli interventi eseguiti e di quelli previsti.</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6 transition-transform hover:scale-105">
+                    <h3 class="text-xl font-bold text-orange-700 mb-2">2. Raddoppio "Spese Postali e Bancarie"</h3>
+                    <p class="text-gray-700">Queste spese sono più che raddoppiate nel 2024 (+140%). In un'era di digitalizzazione, questo andamento è anomalo. È lecito chiedere se si stiano utilizzando metodi di comunicazione e pagamento obsoleti e costosi.</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6 transition-transform hover:scale-105">
+                    <h3 class="text-xl font-bold text-orange-700 mb-2">3. Comparsa di "Spese Legali"</h3>
+                    <p class="text-gray-700">Nel 2024 compare una nuova voce per €2.000 di spese legali, non presente nel 2023. Questa spesa indica probabili azioni di recupero crediti o contenziosi. È importante capire la natura di queste spese e la situazione dei condomini morosi.</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6 transition-transform hover:scale-105">
+                    <h3 class="text-xl font-bold text-indigo-700 mb-2">4. Nuovo "Fondo Lavori Piscina" nel 2025</h3>
+                    <p class="text-gray-700">La previsione 2025 introduce un nuovo fondo di €5.000 per lavori alla piscina, senza che questo sia stato, presumibilmente, discusso e approvato con relativi preventivi in una precedente assemblea. È una spesa straordinaria che va deliberata con la dovuta trasparenza.</p>
+                </div>
+                 <div class="bg-white rounded-xl shadow-lg p-6 transition-transform hover:scale-105">
+                    <h3 class="text-xl font-bold text-gray-700 mb-2">5. Trasparenza della voce "Varie ed Eventuali"</h3>
+                    <p class="text-gray-700">Una voce costante da €5.000 per spese "Varie" manca di trasparenza. Sebbene possa essere necessaria una piccola flessibilità, un importo così rilevante e fisso dovrebbe essere dettagliato per permettere un controllo adeguato da parte dei condomini.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="domande" class="scroll-mt-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">5 Domande da Fare all'Amministratore</h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">Ecco una lista di domande precise e dirette, basate sull'analisi, per chiedere chiarimenti e promuovere una gestione trasparente e efficiente.</p>
+            </div>
+            <div class="space-y-4">
+                 <div class="bg-white border-l-4 border-[#A67B78] rounded-r-lg shadow p-6">
+                    <p class="font-bold text-lg">Domanda 1:</p>
+                    <p class="text-gray-700 mt-1">"Visto l'aumento dell'87% della voce 'Manutenzione Ordinaria' nel 2024 e la previsione elevata per il 2025, può fornirci un elenco dettagliato degli interventi eseguiti e di quelli pianificati che giustifichino una spesa complessiva di oltre €30.000 in due anni?"</p>
+                </div>
+                 <div class="bg-white border-l-4 border-[#A67B78] rounded-r-lg shadow p-6">
+                    <p class="font-bold text-lg">Domanda 2:</p>
+                    <p class="text-gray-700 mt-1">"Come si giustifica il raddoppio delle 'Spese Postali e Bancarie' in un solo anno? Stiamo adottando tutte le soluzioni digitali disponibili (es. PEC, pagamenti online) per ridurre questi costi?"</p>
+                </div>
+                <div class="bg-white border-l-4 border-[#A67B78] rounded-r-lg shadow p-6">
+                    <p class="font-bold text-lg">Domanda 3:</p>
+                    <p class="text-gray-700 mt-1">"Riguardo alle 'Spese Legali' di €2.000 del 2024: a cosa si riferiscono esattamente? Qual è lo stato attuale della morosità e quali sono le azioni di recupero intraprese, dato che questi costi ricadono su tutti i condomini?"</p>
+                </div>
+                <div class="bg-white border-l-4 border-[#A67B78] rounded-r-lg shadow p-6">
+                    <p class="font-bold text-lg">Domanda 4:</p>
+                    <p class="text-gray-700 mt-1">"Il nuovo 'Fondo Lavori Piscina' di €5.000 nella previsione 2025 è una spesa straordinaria. Possiamo visionare i preventivi che hanno portato a questa stima e qual è l'esatta natura e urgenza dei lavori proposti, prima di procedere a qualsiasi delibera?"</p>
+                </div>
+                <div class="bg-white border-l-4 border-[#A67B78] rounded-r-lg shadow p-6">
+                    <p class="font-bold text-lg">Domanda 5:</p>
+                    <p class="text-gray-700 mt-1">"La voce 'Varie ed Eventuali' ammonta a €5.000 ogni anno. È possibile avere un rendiconto analitico di come è stata spesa questa cifra nel 2023 e 2024 per garantire la massima trasparenza?"</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white mt-16 border-t">
+        <div class="container mx-auto px-6 py-4 text-center text-gray-500">
+            <p>&copy; 2025 - Strumento di Analisi Finanziaria. Creato per l'assemblea del Condominio Residence Torre dei Normanni.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const expenseData = {
+                '2023': {
+                    labels: ['Consumi Idrici', 'Energia Elettrica', 'Pulizie', 'Manutenzione Ord.', 'Compenso Amm.', 'Assicurazione', 'Spese Post/Banc', 'Varie'],
+                    values: [25000, 15000, 12000, 8000, 5500, 4000, 500, 5000],
+                    total: 75500
+                },
+                '2024': {
+                    labels: ['Consumi Idrici', 'Energia Elettrica', 'Manutenzione Ord.', 'Pulizie', 'Compenso Amm.', 'Assicurazione', 'Spese Legali', 'Spese Post/Banc', 'Varie'],
+                    values: [26000, 16000, 15000, 12500, 5800, 4500, 2000, 1200, 5000],
+                    total: 88000
+                },
+                '2025': {
+                    labels: ['Consumi Idrici', 'Energia Elettrica', 'Manutenzione Ord.', 'Pulizie', 'Compenso Amm.', 'Fondo Piscina', 'Assicurazione', 'Spese Post/Banc', 'Varie'],
+                    values: [27000, 17000, 16000, 13000, 6000, 5000, 4800, 1200, 5000],
+                    total: 95000
+                }
+            };
+
+            const commentary = {
+                '2023': 'Nel 2023, le spese maggiori sono i consumi, come prevedibile. La manutenzione ordinaria è a un livello contenuto.',
+                '2024': "Il 2024 mostra un'impennata della manutenzione ordinaria e la comparsa di spese legali. Anche le spese postali sono anomale.",
+                '2025': "La previsione 2025 consolida i costi elevati di manutenzione e introduce un nuovo fondo per la piscina da approvare."
+            };
+
+            const trendsCtx = document.getElementById('trendsChart').getContext('2d');
+            new Chart(trendsCtx, {
+                type: 'line',
+                data: {
+                    labels: ['2023', '2024', 'Previsione 2025'],
+                    datasets: [{
+                        label: 'Uscite Totali',
+                        data: [expenseData['2023'].total, expenseData['2024'].total, expenseData['2025'].total],
+                        borderColor: '#A67B78',
+                        backgroundColor: 'rgba(166, 123, 120, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointBackgroundColor: '#A67B78',
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                callback: function(value) {
+                                    return '€' + new Intl.NumberFormat('it-IT').format(value);
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += '€' + new Intl.NumberFormat('it-IT').format(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            const expensesCtx = document.getElementById('expensesChart').getContext('2d');
+            let expensesChart = new Chart(expensesCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Spesa',
+                        data: [],
+                        backgroundColor: '#C89F9C',
+                        borderColor: '#A67B78',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            ticks: {
+                                callback: function(value) {
+                                    return '€' + new Intl.NumberFormat('it-IT').format(value);
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.x !== null) {
+                                        label += '€' + new Intl.NumberFormat('it-IT').format(context.parsed.x);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const yearSelector = document.getElementById('year-selector');
+            const commentaryEl = document.getElementById('chart-commentary');
+
+            function updateExpensesChart(year) {
+                const data = expenseData[year];
+                const sortedData = data.labels.map((label, index) => ({
+                    label: label,
+                    value: data.values[index]
+                })).sort((a, b) => b.value - a.value);
+
+                expensesChart.data.labels = sortedData.map(d => d.label);
+                expensesChart.data.datasets[0].data = sortedData.map(d => d.value);
+                expensesChart.update();
+                
+                commentaryEl.textContent = commentary[year];
+                
+                document.querySelectorAll('.btn-year').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.year === year);
+                });
+            }
+
+            yearSelector.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    const year = e.target.dataset.year;
+                    updateExpensesChart(year);
+                }
+            });
+
+            updateExpensesChart('2024');
+
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+            
+            const mobileNav = document.getElementById('mobile-nav');
+            mobileNav.addEventListener('change', function() {
+                window.location.hash = this.value;
+            });
+            
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 120) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

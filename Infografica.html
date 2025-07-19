@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="it" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografica Bilanci | Residence Torre dei Normanni</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Brilliant Blues & Muted Tones -->
+    <!-- Application Structure Plan: The infographic follows a narrative structure to guide the user from a high-level overview to specific details. It starts with a "Hook" (the rising total costs), then moves to "Analysis" (breaking down where the money went in the critical year), deep-dives into the "Anomalies" (calling out the most problematic expenses in detail), and concludes with a "Call to Action" summary. This top-down approach is most effective for quickly understanding a complex financial situation and preparing for a discussion. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Total expenses trend 2023-2025 -> Goal: Change -> Viz: Area Chart (Chart.js) -> Justification: An area chart effectively shows the trend and magnitude of the increase over time.
+        - Report Info: 2024 Expense Breakdown -> Goal: Compare/Composition -> Viz: Ordered Horizontal Bar Chart (Chart.js) -> Justification: A horizontal bar chart is ideal for comparing categories with potentially long labels and ranking them by importance, immediately highlighting the largest expenses.
+        - Report Info: Specific anomalies (Maintenance, Postal Fees, etc.) -> Goal: Inform/Compare -> Viz: "Big Number" stat + mini bar chart (Chart.js) within a card -> Justification: This combination grabs attention with the large statistic while providing immediate visual context for the year-over-year change, making the anomaly undeniable.
+        - Report Info: Summary of the issue -> Goal: Organize/Process -> Viz: Flow Chart (HTML/CSS) -> Justification: A simple visual flow reinforces the narrative conclusion: rising costs are driven by specific issues that require investigation.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F8F9FA; }
+        .chart-container { position: relative; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; }
+        .mini-chart-container { position: relative; width: 100%; max-width: 400px; margin-left: auto; margin-right: auto; }
+        .stat-card { background-color: white; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); padding: 1.5rem; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+        .flow-step { border: 2px solid #B9D7D9; padding: 1rem; text-align: center; border-radius: 0.5rem; background: white; }
+        .flow-arrow { color: #77A3AF; font-size: 2rem; font-weight: bold; }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-[#00A1E4]">Analisi Bilanci Condominiali</h1>
+                    <p class="text-sm text-gray-600">Residence Torre dei Normanni</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <section id="overview" class="text-center mb-20">
+            <h2 class="text-4xl md:text-5xl font-extrabold mb-4">I Costi Stanno Aumentando. E Molto.</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-600 mb-12">Negli ultimi due anni, le spese totali del condominio hanno seguito un trend di crescita preoccupante. Questa infografica analizza da dove provengono questi aumenti e quali sono le voci più critiche da discutere.</p>
+            <div class="stat-card">
+                 <h3 class="text-2xl font-bold mb-4">Andamento Spese Totali (2023-2025)</h3>
+                <div class="chart-container h-64 sm:h-80 md:h-96">
+                    <canvas id="totalExpensesTrendChart"></canvas>
+                </div>
+                 <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <p class="text-gray-500">2023</p>
+                        <p class="text-3xl font-bold">€75.500</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">2024</p>
+                        <p class="text-3xl font-bold text-[#00A1E4]">€88.000 <span class="text-lg text-red-500 font-semibold">(+16,6%)</span></p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Prev. 2025</p>
+                        <p class="text-3xl font-bold text-[#3B74A3]">€95.000 <span class="text-lg text-orange-500 font-semibold">(+8,0%)</span></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="breakdown" class="mb-20">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-extrabold mb-4">Dove Vanno a Finire i Soldi?</h2>
+                <p class="max-w-3xl mx-auto text-lg text-gray-600">Analizziamo la ripartizione delle spese del 2024, l'anno con l'incremento più significativo, per capire quali categorie di costo pesano di più sul bilancio.</p>
+            </div>
+            <div class="stat-card">
+                 <h3 class="text-2xl font-bold text-center mb-6">Composizione Spese Consuntivo 2024 (€88.000)</h3>
+                <div class="chart-container h-64 sm:h-80 md:h-96">
+                    <canvas id="expenseBreakdownChart"></canvas>
+                </div>
+                <p class="text-center mt-6 text-gray-600 italic">La manutenzione ordinaria emerge come una delle voci di spesa più impattanti, superando costi storicamente primari come pulizie e energia.</p>
+            </div>
+        </section>
+
+        <section id="anomalies" class="mb-20">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-extrabold mb-4">⚠️ Focus sulle Voci Critiche</h2>
+                <p class="max-w-3xl mx-auto text-lg text-gray-600">Alcune voci di spesa mostrano aumenti e valori anomali che richiedono un'attenta valutazione e spiegazioni chiare da parte dell'amministratore.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <div class="stat-card">
+                    <h3 class="text-2xl font-bold text-red-600 mb-2">Esplosione Manutenzione Ordinaria</h3>
+                    <p class="text-gray-600 mb-4">Un aumento spropositato nel 2024 che si mantiene elevato nella previsione 2025.</p>
+                    <div class="text-center my-4">
+                        <p class="text-sm text-gray-500">Aumento 2023 vs 2024</p>
+                        <p class="text-5xl font-extrabold text-red-600">+87,5%</p>
+                    </div>
+                    <div class="mini-chart-container h-32 sm:h-40">
+                        <canvas id="maintenanceChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <h3 class="text-2xl font-bold text-orange-600 mb-2">Raddoppio Spese Postali/Bancarie</h3>
+                    <p class="text-gray-600 mb-4">In un'era digitale, questo aumento è un controsenso e suggerisce una gestione inefficiente.</p>
+                    <div class="text-center my-4">
+                        <p class="text-sm text-gray-500">Aumento 2023 vs 2024</p>
+                        <p class="text-5xl font-extrabold text-orange-600">+140%</p>
+                    </div>
+                     <div class="mini-chart-container h-32 sm:h-40">
+                        <canvas id="postalChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <h3 class="text-2xl font-bold text-[#3B74A3] mb-2">Comparsa Spese Legali</h3>
+                    <p class="text-gray-600 mb-4">Indicano probabili contenziosi o recupero crediti. È fondamentale conoscere i dettagli.</p>
+                    <div class="text-center my-4">
+                        <p class="text-sm text-gray-500">Costo nel 2024</p>
+                        <p class="text-5xl font-extrabold text-[#3B74A3]">€2.000</p>
+                         <p class="text-gray-500 mt-2">Assenti nel 2023</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <h3 class="text-2xl font-bold text-[#77A3AF] mb-2">Nuovo Fondo Lavori Piscina</h3>
+                    <p class="text-gray-600 mb-4">Una spesa straordinaria inserita in un bilancio di previsione senza apparente delibera.</p>
+                    <div class="text-center my-4">
+                        <p class="text-sm text-gray-500">Previsto per il 2025</p>
+                        <p class="text-5xl font-extrabold text-[#77A3AF]">€5.000</p>
+                        <p class="text-gray-500 mt-2">Richiede approvazione e preventivi</p>
+                    </div>
+                </div>
+                 <div class="stat-card md:col-span-2">
+                    <h3 class="text-2xl font-bold text-gray-600 mb-2">Mancanza di Trasparenza: "Varie"</h3>
+                    <p class="text-gray-600 mb-4">Una voce di spesa costante e significativa che non viene mai dettagliata, impedendo un reale controllo.</p>
+                    <div class="text-center my-4">
+                        <p class="text-sm text-gray-500">Costo Annuo Flessibile</p>
+                        <p class="text-5xl font-extrabold text-gray-600">€5.000</p>
+                         <p class="text-gray-500 mt-2">Il 5-6% delle spese totali senza una giustificazione chiara.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="conclusion" class="text-center">
+             <h2 class="text-4xl font-extrabold mb-4">Il Percorso da Seguire</h2>
+             <p class="max-w-3xl mx-auto text-lg text-gray-600 mb-12">La storia che i numeri raccontano è chiara. È necessario agire in assemblea per chiedere trasparenza e giustificazioni puntuali.</p>
+             <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4">
+                <div class="flow-step">
+                    <p class="font-bold">Aumento dei Costi</p>
+                    <p class="text-sm">Le spese totali sono in netta crescita.</p>
+                </div>
+                <div class="flow-arrow hidden md:block">➔</div>
+                <div class="md:hidden text-3xl transform rotate-90">➔</div>
+                 <div class="flow-step">
+                    <p class="font-bold">Anomalie Specifiche</p>
+                    <p class="text-sm">Manutenzione e altre voci fuori controllo.</p>
+                </div>
+                <div class="flow-arrow hidden md:block">➔</div>
+                <div class="md:hidden text-3xl transform rotate-90">➔</div>
+                 <div class="flow-step bg-[#00A1E4] text-white border-[#00A1E4]">
+                    <p class="font-bold">Azione Richiesta</p>
+                    <p class="text-sm">Chiedere spiegazioni e un piano di controllo.</p>
+                </div>
+             </div>
+        </section>
+
+    </main>
+    <footer class="mt-20 py-6 bg-white border-t">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500">
+            <p>Infografica generata per l'analisi dei bilanci del Condominio Residence Torre dei Normanni. Luglio 2025.</p>
+        </div>
+    </footer>
+
+    <script>
+    // Global variables to store chart instances for proper destruction/recreation
+    let totalExpensesTrendChartInstance;
+    let expenseBreakdownChartInstance;
+    let maintenanceChartInstance;
+    let postalChartInstance;
+
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const commonChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+        };
+        
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+              return label.join(' ');
+            } else {
+              return label;
+            }
+        };
+
+        const formatLabel = (str) => {
+            if (str.length <= 16) return str;
+            const words = str.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + ' ' + word).trim().length > 16) {
+                    lines.push(currentLine.trim());
+                    currentLine = word;
+                } else {
+                    currentLine = (currentLine + ' ' + word).trim();
+                }
+            }
+            if (currentLine) lines.push(currentLine);
+            return lines;
+        };
+
+        // Function to set canvas dimensions based on parent container
+        const setupCanvasDimensions = (canvasId) => {
+            const canvas = document.getElementById(canvasId);
+            if (canvas) {
+                const container = canvas.parentElement;
+                // Ensure container has computed dimensions before setting canvas attributes
+                if (container && container.clientWidth > 0 && container.clientHeight > 0) {
+                    canvas.width = container.clientWidth;
+                    canvas.height = container.clientHeight;
+                }
+            }
+        };
+
+        const createCharts = () => {
+            // Destroy existing instances before creating new ones
+            if (totalExpensesTrendChartInstance) totalExpensesTrendChartInstance.destroy();
+            if (expenseBreakdownChartInstance) expenseBreakdownChartInstance.destroy();
+            if (maintenanceChartInstance) maintenanceChartInstance.destroy();
+            if (postalChartInstance) postalChartInstance.destroy();
+
+            // Setup dimensions for each canvas before initializing chart
+            setupCanvasDimensions('totalExpensesTrendChart');
+            totalExpensesTrendChartInstance = new Chart(document.getElementById('totalExpensesTrendChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['2023', '2024', 'Prev. 2025'],
+                    datasets: [{
+                        label: 'Uscite Totali',
+                        data: [75500, 88000, 95000],
+                        borderColor: '#00A1E4',
+                        backgroundColor: 'rgba(0, 161, 228, 0.2)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#00A1E4'
+                    }]
+                },
+                options: { ...commonChartOptions, plugins: { legend: { display: false }, tooltip: { callbacks: { title: tooltipTitleCallback, label: (c) => `€ ${c.raw.toLocaleString('it-IT')}` } } } }
+            });
+
+            const expenseData2024 = [
+                { label: 'Consumi Idrici', value: 26000 },
+                { label: 'Energia Elettrica', value: 16000 },
+                { label: 'Manutenzione Ordinaria', value: 15000 },
+                { label: 'Pulizie', value: 12500 },
+                { label: 'Compenso Amministratore', value: 5800 },
+                { label: 'Assicurazione', value: 4500 },
+                { label: 'Spese Legali', value: 2000 },
+                { label: 'Spese Postali/Bancarie', value: 1200 },
+                { label: 'Varie', value: 5000 },
+            ].sort((a,b) => b.value - a.value);
+
+            setupCanvasDimensions('expenseBreakdownChart');
+            expenseBreakdownChartInstance = new Chart(document.getElementById('expenseBreakdownChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: expenseData2024.map(d => formatLabel(d.label)),
+                    datasets: [{
+                        label: 'Spesa 2024',
+                        data: expenseData2024.map(d => d.value),
+                        backgroundColor: '#3B74A3',
+                        borderColor: '#00A1E4',
+                        borderWidth: 2,
+                        borderRadius: 5,
+                    }]
+                },
+                options: { ...commonChartOptions, indexAxis: 'y', plugins: { legend: { display: false }, tooltip: { callbacks: { title: tooltipTitleCallback, label: (c) => `€ ${c.raw.toLocaleString('it-IT')}` } } }, scales: { x: { ticks: { callback: (v) => `€${(v/1000)}k` } } } }
+            });
+            
+            setupCanvasDimensions('maintenanceChart');
+            maintenanceChartInstance = new Chart(document.getElementById('maintenanceChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['2023', '2024', '2025'],
+                    datasets: [{ data: [8000, 15000, 16000], backgroundColor: ['#B9D7D9', '#E63946', '#F4A261'] }]
+                },
+                options: { ...commonChartOptions, plugins: { legend: { display: false }, tooltip: { callbacks: { title: tooltipTitleCallback, label: (c) => `€ ${c.raw.toLocaleString('it-IT')}` } } }, scales: { y: { ticks: { display: false } }, x: { grid: { display: false } } } }
+            });
+
+            setupCanvasDimensions('postalChart');
+            postalChartInstance = new Chart(document.getElementById('postalChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['2023', '2024', '2025'],
+                    datasets: [{ data: [500, 1200, 1200], backgroundColor: ['#B9D7D9', '#FF9F1C', '#FF9F1C'] }]
+                },
+                options: { ...commonChartOptions, plugins: { legend: { display: false }, tooltip: { callbacks: { title: tooltipTitleCallback, label: (c) => `€ ${c.raw.toLocaleString('it-IT')}` } } }, scales: { y: { ticks: { display: false } }, x: { grid: { display: false } } } }
+            });
+        };
+
+        // Create charts on initial load
+        createCharts();
+
+        // Recreate charts on window resize
+        window.addEventListener('resize', createCharts);
+    });
+    </script>
+</body>
+</html>
