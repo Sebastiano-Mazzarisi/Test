@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Elenchi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --fg: #2c3e50;
+      --accent: #3498db;
+      --accent-dark: #2980b9;
+      --card-bg: #ffffff;
+      --border: #e0e6ed;
+      --shadow: 0 6px 16px rgba(0,0,0,0.08);
+      --border-radius-card: 12px;
+      --border-radius-element: 8px;
+      --touch-target: 44px;
+      --light-blue-border: #aed6f1; /* Un blu molto chiaro per i bordi */
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      background-color: var(--bg);
+      color: var(--fg);
+      padding: 1.5rem;
+      line-height: 1.6;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      overflow-x: hidden; /* Evita scroll orizzontale */
+      overscroll-behavior: none;
+    }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--accent);
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .status-dot.online {
+      background-color: #28a745;
+      box-shadow: 0 0 6px rgba(40, 167, 69, 0.5);
+    }
+
+    .status-dot.offline {
+      background-color: #dc3545;
+      box-shadow: 0 0 6px rgba(220, 53, 69, 0.5);
+    }
+
+    .section {
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+
+    .card {
+      background: #e6f3ff; /* Azzurro pastello */
+      border: 1px solid var(--light-blue-border); /* Bordo blu sulla card */
+      border-radius: var(--border-radius-card);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 0;
+    }
+
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card-bg);
+      padding: 0.5rem 1rem;
+      border-radius: var(--border-radius-element);
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      border: 1px solid var(--border);
+    }
+
+    .status-online {
+      color: #28a745;
+    }
+
+    .status-offline {
+      color: #dc3545;
+    }
+
+    /* Regola generale per input di testo e textarea */
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      touch-action: manipulation;
+      border-radius: var(--border-radius-element);
+      border: 1px solid var(--border); /* Bordo predefinito, le card avranno il loro bordo blu */
+    }
+
+    input[type="text"]:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+
+    button {
+      font-family: 'Inter', sans-serif;
+      font-size: 16px; /* Previene zoom su iOS */
+      border-radius: var(--border-radius-element);
+      background: var(--accent);
+      border: none;
+      color: white;
+      padding: 0.75rem 1.2rem;
+      cursor: pointer;
+      font-weight: 600;
+      margin-right: 0.5rem;
+      transition: all 0.3s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      min-height: var(--touch-target);
+      touch-action: manipulation;
+      user-select: none;
+    }
+
+    button:hover {
+      background: var(--accent-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button:last-child {
+      margin-right: 0;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 1rem 0;
+    }
+
+    .list-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.8rem;
+      background: white;
+      border: 1px solid var(--light-blue-border); /* Bordo blu sui list-item */
+      border-radius: var(--border-radius-element);
+      margin-bottom: 0.3rem;
+      transition: all 0.3s;
+      min-height: var(--touch-target);
+    }
+
+    .list-item.syncing {
+      border-left: 4px solid #ffc107;
+    }
+
+    .list-item.error {
+      border-left: 4px solid #dc3545;
+    }
+
+    .drag-handle {
+      color: #999;
+      cursor: grab;
+      font-size: 1rem;
+      padding: 0.1rem;
+      user-select: none;
+      min-width: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+
+    .drag-handle:hover {
+      color: #666;
+      cursor: grab;
+    }
+
+    /* Regola specifica per input dentro .list-item */
+    .list-item input {
+      flex: 1;
+      border: none; /* Rimuove il bordo dell'input all'interno del list-item per non sovrapporsi */
+      background: transparent;
+      font-size: 16px; /* Previene zoom su iOS */
+      padding: 0.2rem 0.5rem;
+      margin: 0;
+      width: auto;
+      cursor: text; /* Il cursore indica che è modificabile */
+    }
+
+    .list-item input:focus {
+      background: #f8f9fa;
+      border: 1px solid var(--accent); /* Bordo di focus rimane come prima */
+      border-radius: 4px;
+    }
+
+    .list-item .action-btn {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      margin: 0 2px;
+      font-size: 0.8rem;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      min-width: var(--touch-target);
+      min-height: var(--touch-target);
+      touch-action: none;
+      user-select: none;
+    }
+
+    .list-item .select-btn {
+      border: 2px solid #28a745;
+      color: #28a745;
+    }
+
+    .list-item .select-btn:hover {
+      background: #28a745;
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .list-item .delete-btn {
+      border: 2px solid #dc3545;
+      color: #dc3545;
+    }
+
+    .list-item .delete-btn:hover {
+      background: #dc3545;
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .form-row {
+      display: flex;
+      gap: 0.7rem;
+      align-items: center;
+      margin-top: 1rem;
+    }
+
+    .form-row input[type="text"] {
+      flex-grow: 1;
+      margin: 0;
+    }
+
+    .form-row button {
+      margin-right: 0;
+      padding: 0.75rem 1rem;
+      font-size: 1.2rem;
+    }
+
+    .status-bar, .firebase-config {
+      display: none;
+    }
+
+    /* Miglioramenti specifici per mobile */
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+      h1 {
+        font-size: 2rem;
+      }
+      .card {
+        padding: 1rem;
+      }
+      .list-item .action-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+      }
+    }
+
+    /* Ottimizzazioni per schermi molto piccoli */
+    @media (max-width: 480px) {
+      body {
+        padding: 0.75rem;
+      }
+      
+      h1 {
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      .card {
+        padding: 0.75rem;
+      }
+      
+      .list-item {
+        gap: 0.25rem;
+        padding: 0.5rem;
+        margin-bottom: 0.25rem;
+      }
+      
+      .drag-handle {
+        min-width: 20px;
+        font-size: 0.9rem;
+      }
+      
+      .list-item .action-btn {
+        width: 32px;
+        height: 32px;
+        margin: 0 1px;
+      }
+      
+      .form-row {
+        gap: 0.5rem;
+      }
+    }
+
+    /* Schermi extra piccoli */
+    @media (max-width: 360px) {
+      body {
+        padding: 0.5rem;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+      
+      .card {
+        padding: 0.5rem;
+      }
+      
+      .list-item input {
+        font-size: 14px;
+        padding: 0.25rem;
+      }
+    }
+
+    /* Orientamento orizzontale su mobile */
+    @media (max-height: 500px) and (orientation: landscape) {
+      body {
+        padding: 0.5rem;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+        margin-bottom: 0.25rem;
+      }
+      
+      .card {
+        padding: 0.75rem;
+      }
+      
+      .list-item {
+        margin-bottom: 0.2rem;
+      }
+    }
+
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1e1e1e;
+        --fg: #ffffff;
+        --card-bg: #2d2d2d;
+        --border: #404040;
+        --light-blue-border: #6a9acb;
+      }
+      
+      .card {
+        background: #2a3f5f;
+      }
+      
+      .list-item {
+        background: var(--card-bg);
+      }
+      
+      /* In dark mode, gli input dovrebbero avere un loro sfondo */
+      .list-item input { 
+        background: var(--card-bg); 
+      }
+
+      .list-item input:focus {
+        background: #3d3d3d;
+      }
+    }
+
+    #status-dot-single-list {
+      display: inline-block !important;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+
+    .sortable-ghost {
+      opacity: 0.4;
+      background-color: #f0f0f0;
+      border: 1px dashed var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="lists-view">
+      <h1>📝 Elenchi <span id="status-dot" class="status-dot offline"></span></h1>
+      <div class="section">
+        <div class="card">
+          <ul id="list-names"></ul>
+          <div class="form-row">
+            <input type="text" id="new-list-name" placeholder="Nome nuovo elenco" maxlength="50">
+            <button onclick="addList()">➕</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="single-list-view" style="display: none;">
+      <h1 id="current-list-title" style="cursor: pointer; color: var(--accent);">📋 Elenco <span id="status-dot-single-list" class="status-dot offline"></span></h1>
+      <div class="section">
+        <div class="card">
+          <ul id="item-list"></ul>
+          <div class="form-row">
+            <input type="text" id="item-input" placeholder="Aggiungi una cosa da fare" maxlength="200">
+            <button onclick="addItem()" id="add-item-btn">➕</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+  
+  <script>
+    // ✅ CONFIGURAZIONE FIREBASE - QUELLA REALE
+    const firebaseConfig = {
+      apiKey: "AIzaSyChsZzf69k_JTY0EwbrXyWMhh8uVl9pnbA",
+      authDomain: "elenchicondivisi.firebaseapp.com",
+      projectId: "elenchicondivisi",
+      storageBucket: "elenchicondivisi.appspot.com",
+      messagingSenderId: "615174125565",
+      appId: "1:615174125565:web:7a2b4b0bd6af9cbd6f4b94"
+    };
+
+    // Variabili globali
+    let db = null;
+    let isOnline = false;
+    let unsubscribeList = null;
+    let unsubscribeItems = null;
+    let currentList = null;
+
+    // Fallback locale se Firebase non funziona
+    let localDatabase = {
+      lists: JSON.parse(localStorage.getItem('elenchiFare') || '{}')
+    };
+    let listOrder = JSON.parse(localStorage.getItem('elenchiOrder') || '[]');
+
+    // Riferimenti DOM
+    const listNames = document.getElementById("list-names");
+    const itemList = document.getElementById("item-list");
+    const currentListTitle = document.getElementById("current-list-title");
+    const newItemInput = document.getElementById("item-input");
+    const newListInput = document.getElementById("new-list-name");
+    const listsView = document.getElementById("lists-view");
+    const singleListView = document.getElementById("single-list-view");
+    const statusDot = document.getElementById("status-dot");
+    const statusDotSingleList = document.getElementById("status-dot-single-list");
+
+    let sortableLists = null;
+    let sortableItems = null;
+
+    // Test di connettività più robusto
+    function initFirebase() {
+      try {
+        console.log("🔥 Inizializzazione Firebase...");
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+        
+        console.log("📡 Test scrittura Firebase...");
+        
+        const testDoc = {
+          test: true,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        db.collection("_test").doc("connectivity").set(testDoc).then(() => {
+          console.log("✅ Test scrittura riuscito! Firebase completamente funzionante.");
+          
+          db.collection("_test").doc("connectivity").delete();
+          
+          isOnline = true;
+          updateConnectionStatus();
+          loadLists();
+          initSortableLists();
+          
+        }).catch((error) => {
+          console.log("❌ Test scrittura fallito:", error.code, error.message);
+          
+          if (error.code === 'permission-denied') {
+            alert("⚠️ FIREBASE: Permessi insufficienti.\n\nVai su console.firebase.google.com\n→ Firestore Database → Regole\n→ Cambia in: allow read, write: if true;");
+          }
+          
+          console.log("🔄 Provo modalità solo lettura...");
+          db.collection("lists").limit(1).get().then(() => {
+            console.log("📖 Lettura funziona, ma scrittura bloccata");
+            alert("Firebase in modalità solo lettura. Uso modalità locale per salvare.");
+            fallbackToLocal();
+            initSortableLists();
+          }).catch(() => {
+            console.log("❌ Anche lettura fallita");
+            fallbackToLocal();
+            initSortableLists();
+          });
+        });
+        
+      } catch (error) {
+        console.error("❌ Errore inizializzazione:", error);
+        fallbackToLocal();
+        initSortableLists();
+      }
+    }
+
+    // Fallback alla modalità locale
+    function fallbackToLocal() {
+      console.log("🔄 Modalità locale attivata");
+      isOnline = false;
+      updateConnectionStatus();
+      loadListsLocal();
+    }
+
+    // Aggiorna status connessione
+    function updateConnectionStatus() {
+      if (isOnline) {
+        statusDot.className = "status-dot online";
+        statusDot.title = "🟢 Connesso - Sincronizzazione attiva";
+        if (statusDotSingleList) {
+            statusDotSingleList.className = "status-dot online";
+            statusDotSingleList.title = "🟢 Connesso - Sincronizzazione attiva";
+        }
+      } else {
+        statusDot.className = "status-dot offline";
+        statusDot.title = "🔴 Offline - Modalità locale";
+        if (statusDotSingleList) {
+            statusDotSingleList.className = "status-dot offline";
+            statusDotSingleList.title = "🔴 Offline - Modalità locale";
+        }
+      }
+    }
+
+    // Funzione per generare un nuovo order, basato sull'ultimo elemento in una collezione
+    async function getNewOrder(collectionRef) {
+        try {
+            const lastDocSnapshot = await collectionRef.orderBy("order", "desc").limit(1).get();
+            if (!lastDocSnapshot.empty) {
+                const lastOrder = lastDocSnapshot.docs[0].data().order;
+                return lastOrder + 1;
+            }
+            return 0; // Se la collezione è vuota, il primo order è 0
+        } catch (error) {
+            console.error("Errore nel recupero dell'ultimo ordine:", error);
+            return 0; // Fallback
+        }
+    }
+
+    // Funzione per calcolare il nuovo order decimale dopo un trascinamento
+    async function calculateNewDecimalOrder(parentCollectionRef, draggedElementId, newIndex) {
+        let newOrderValue;
+        const currentItemsInDOM = Array.from(document.getElementById(parentCollectionRef.id === "lists" ? "list-names" : "item-list").children);
+        
+        let prevItemOrder = null;
+        let nextItemOrder = null;
+
+        // Recupera gli ordini degli elementi adiacenti nella nuova posizione
+        if (newIndex > 0) {
+            const prevItemId = currentItemsInDOM[newIndex - 1].dataset.itemId;
+            const prevDoc = await parentCollectionRef.doc(prevItemId).get();
+            if (prevDoc.exists && prevDoc.data().order !== undefined) prevItemOrder = prevDoc.data().order;
+        }
+        if (newIndex < currentItemsInDOM.length - 1) {
+            const nextItemId = currentItemsInDOM[newIndex + 1].dataset.itemId;
+            const nextDoc = await parentCollectionRef.doc(nextItemId).get();
+            if (nextDoc.exists && nextDoc.data().order !== undefined) nextItemOrder = nextDoc.data().order;
+        }
+
+        if (prevItemOrder === null && nextItemOrder === null) {
+            newOrderValue = 0; // È l'unico elemento o non ci sono elementi adiacenti con order
+        } else if (prevItemOrder === null) { // Spostato all'inizio
+            newOrderValue = (nextItemOrder !== null && nextItemOrder !== undefined) ? nextItemOrder / 2 : 0;
+        } else if (nextItemOrder === null) { // Spostato alla fine
+            newOrderValue = prevItemOrder + 1;
+        } else { // Spostato tra due elementi
+            newOrderValue = (prevItemOrder + nextItemOrder) / 2;
+        }
+        return { id: draggedElementId, order: newOrderValue };
+    }
+
+    // Funzione per inizializzare SortableJS per le liste di elenchi
+    function initSortableLists() {
+      if (sortableLists) {
+        sortableLists.destroy();
+      }
+      sortableLists = Sortable.create(listNames, {
+        animation: 150,
+        handle: '.drag-handle',
+        ghostClass: 'sortable-ghost',
+        onEnd: async function (evt) {
+          const oldIndex = evt.oldIndex;
+          const newIndex = evt.newIndex;
+          const draggedListName = evt.item.dataset.itemId;
+
+          if (oldIndex !== newIndex) {
+            if (isOnline && db) {
+                console.log("🔥 Modalità Firebase - riordinamento liste");
+                try {
+                    const { id: listToUpdateName, order: newOrderValue } = await calculateNewDecimalOrder(db.collection("lists"), draggedListName, newIndex);
+                    
+                    await db.collection("lists").doc(listToUpdateName).update({ order: newOrderValue });
+                    console.log(`✅ Ordine lista "${listToUpdateName}" aggiornato a ${newOrderValue} in Firebase.`);
+                } catch (error) {
+                    console.error("❌ Errore riordinamento liste Firebase:", error);
+                    alert("Errore durante il riordinamento delle liste: " + error.message);
+                }
+            } else {
+                const [movedItemName] = listOrder.splice(oldIndex, 1);
+                listOrder.splice(newIndex, 0, movedItemName);
+                
+                listOrder.forEach((name, index) => {
+                    if (localDatabase.lists[name]) {
+                      localDatabase.lists[name].order = index;
+                    }
+                });
+                saveToLocalStorage();
+            }
+          }
+        }
+      });
+    }
+
+    // Funzione per inizializzare SortableJS per gli elementi all'interno di una lista
+    function initSortableItems() {
+      if (sortableItems) {
+        sortableItems.destroy();
+      }
+      sortableItems = Sortable.create(itemList, {
+        animation: 150,
+        handle: '.drag-handle',
+        ghostClass: 'sortable-ghost',
+        onEnd: async function (evt) {
+          const oldIndex = evt.oldIndex;
+          const newIndex = evt.newIndex;
+          const draggedItemId = evt.item.dataset.itemId;
+
+          if (oldIndex !== newIndex && currentList) {
+            if (isOnline && db) {
+                console.log("🔥 Modalità Firebase - riordinamento elementi");
+                try {
+                    const { id: itemToUpdateId, order: newOrderValue } = await calculateNewDecimalOrder(db.collection("lists").doc(currentList).collection("items"), draggedItemId, newIndex);
+                    
+                    await db.collection("lists").doc(currentList).collection("items").doc(itemToUpdateId).update({ order: newOrderValue });
+                    console.log(`✅ Ordine elemento "${itemToUpdateId}" aggiornato a ${newOrderValue} in Firebase.`);
+                } catch (error) {
+                    console.error("❌ Errore riordinamento elementi Firebase:", error);
+                    alert("Errore durante il riordinamento degli elementi: " + error.message);
+                }
+            } else {
+                const items = localDatabase.lists[currentList].items;
+                const [movedItem] = items.splice(oldIndex, 1);
+                items.splice(newIndex, 0, movedItem);
+                
+                items.forEach((item, index) => {
+                    item.order = index;
+                });
+                saveToLocalStorage();
+            }
+          }
+        }
+      });
+    }
+
+    // Salvataggio locale
+    function saveToLocalStorage() {
+      localStorage.setItem('elenchiFare', JSON.stringify(localDatabase.lists));
+      localStorage.setItem('elenchiOrder', JSON.stringify(listOrder));
+    }
+
+    // Funzione per rinominare un elenco
+    async function renameList(oldName, newName) {
+      newName = newName.trim();
+      if (!validateListName(newName) || newName === oldName) {
+        return false;
+      }
+
+      console.log(`🔄 Tentativo di rinominare l'elenco da "${oldName}" a "${newName}"`);
+
+      if (isOnline && db) {
+        console.log("🔥 Modalità Firebase - rinomina elenco");
+        try {
+          const newDocRef = db.collection("lists").doc(newName);
+          const newDocSnapshot = await newDocRef.get();
+          if (newDocSnapshot.exists) {
+            alert(`L'elenco "${newName}" esiste già su Firebase.`);
+            return false;
+          }
+
+          const oldListDocRef = db.collection("lists").doc(oldName);
+          const oldListSnapshot = await oldListDocRef.get();
+
+          if (!oldListSnapshot.exists) {
+            console.warn(`Tentativo di rinominare una lista inesistente: "${oldName}"`);
+            return false;
+          }
+
+          const oldListData = oldListSnapshot.data();
+
+          const itemsSnapshot = await oldListDocRef.collection("items").get();
+          const itemsToMove = [];
+          itemsSnapshot.forEach(doc => {
+            itemsToMove.push({ id: doc.id, data: doc.data() });
+          });
+
+          const writeBatch = db.batch();
+          
+          writeBatch.set(newDocRef, oldListData);
+          console.log(`✅ Documento lista "${oldName}" copiato a "${newName}".`);
+
+          const newItemsCollectionRef = newDocRef.collection("items");
+          itemsToMove.forEach(item => {
+            writeBatch.set(newItemsCollectionRef.doc(item.id), item.data);
+          });
+          
+          itemsToMove.forEach(item => {
+            writeBatch.delete(oldListDocRef.collection("items").doc(item.id));
+          });
+          writeBatch.delete(oldListDocRef);
+          
+          await writeBatch.commit();
+          console.log(`✅ Elementi e vecchia lista "${oldName}" eliminati. Operazione di ridenominazione completata.`);
+
+          if (currentList === oldName) {
+            selectList(newName);
+          } else {
+             loadLists();
+          }
+          return true;
+
+        } catch (error) {
+          console.error("❌ Errore durante la ridenominazione Firebase:", error);
+          alert(`Errore Firebase durante la ridenominazione: ${error.message}`);
+          return false;
+        }
+
+      } else {
+        console.log("💻 Modalità locale - rinomina elenco");
+        if (localDatabase.lists[newName]) {
+          alert(`L'elenco "${newName}" esiste già localmente.`);
+          return false;
+        }
+
+        if (localDatabase.lists[oldName]) {
+          localDatabase.lists[newName] = localDatabase.lists[oldName];
+          localDatabase.lists[newName].name = newName;
+          delete localDatabase.lists[oldName];
+          listOrder = listOrder.map(n => n === oldName ? newName : n);
+          saveToLocalStorage();
+          console.log(`✅ Nome lista cambiato da "${oldName}" a "${newName}" localmente.`);
+
+          if (currentList === oldName) {
+              selectList(newName);
+          } else {
+              loadListsLocal();
+          }
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // Event listeners
+    newListInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') addList();
+    });
+
+    newItemInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') addItem();
+    });
+
+    // NAVIGAZIONE
+    function selectList(name) {
+      currentList = name;
+      
+      const existingDot = currentListTitle.querySelector('#status-dot-single-list');
+      currentListTitle.innerHTML = `📋 ${name}`; 
+      if (existingDot) {
+          currentListTitle.appendChild(existingDot);
+      } else {
+          const newDot = document.createElement('span');
+          newDot.id = 'status-dot-single-list';
+          newDot.className = 'status-dot offline';
+          currentListTitle.appendChild(newDot);
+      }
+      
+      currentListTitle.onclick = () => backToLists();
+      
+      listsView.style.display = 'none';
+      singleListView.style.display = 'block';
+
+      if (isOnline) {
+        loadItemsFirebase();
+      } else {
+        loadItemsLocal();
+      }
+      updateConnectionStatus();
+      initSortableItems();
+    }
+
+    function backToLists() {
+      currentList = null;
+      listsView.style.display = 'block';
+      singleListView.style.display = 'none';
+      itemList.innerHTML = "";
+      
+      if (unsubscribeItems) {
+        unsubscribeItems();
+        unsubscribeItems = null;
+      }
+      updateConnectionStatus();
+    }
+
+    // GESTIONE LISTE - FIREBASE
+    function loadLists() {
+      if (!db) {
+        console.log("📂 Database non disponibile - carico locale");
+        return fallbackToLocal();
+      }
+      
+      console.log("📂 Caricamento liste da Firebase...");
+      
+      unsubscribeList = db.collection("lists")
+        .orderBy("order", "asc")
+        .orderBy("createdAt", "asc")
+        .onSnapshot(snapshot => {
+          console.log("📥 Ricevuto aggiornamento Firebase, documenti:", snapshot.size);
+          
+          listNames.innerHTML = "";
+          
+          if (snapshot.empty) {
+            console.log("📭 Nessuna lista trovata");
+            showEmptyLists();
+          } else {
+            const newLocalLists = {};
+            const newOrderList = [];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                newLocalLists[doc.id] = data;
+                newOrderList.push(doc.id);
+                renderListItem(doc.id, data);
+            });
+            localDatabase.lists = newLocalLists;
+            listOrder = newOrderList;
+          }
+          updateConnectionStatus();
+          initSortableLists();
+        }, error => {
+          console.error("❌ Errore listener Firebase:", error);
+          alert(`Errore connessione Firebase: ${error.message}\nPassaggio a modalità locale.`);
+          fallbackToLocal();
+        });
+    }
+
+    async function addList() {
+      const name = newListInput.value.trim();
+      if (!validateListName(name)) return;
+
+      console.log("➕ Tentativo aggiunta elenco:", name);
+
+      if (isOnline && db) {
+        console.log("🔥 Modalità Firebase - salvataggio online");
+        try {
+            const docSnapshot = await db.collection("lists").doc(name).get();
+            if (docSnapshot.exists) {
+                alert(`L'elenco "${name}" esiste già.`);
+                return;
+            }
+            
+            const newOrder = await getNewOrder(db.collection("lists"));
+            
+            await db.collection("lists").doc(name).set({
+                name: name,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                order: newOrder,
+                note: ""
+            });
+            console.log("✅ Elenco salvato su Firebase!");
+            newListInput.value = "";
+            selectList(name);
+
+        } catch (error) {
+            console.error("❌ Errore Firebase:", error);
+            alert(`Errore Firebase: ${error.message}\n\nPassaggio a modalità locale...`);
+            saveListLocally(name);
+        }
+        
+      } else {
+        console.log("💻 Modalità locale");
+        saveListLocally(name);
+      }
+    }
+
+    function saveListLocally(name) {
+      if (localDatabase.lists[name]) {
+        alert(`L'elenco "${name}" esiste già.`);
+        return;
+      }
+      
+      console.log("💾 Salvataggio locale...");
+      const newOrder = listOrder.length > 0 ? 
+                       Math.max(...listOrder.map(n => localDatabase.lists[n].order || 0)) + 1 
+                       : 0;
+      
+      localDatabase.lists[name] = {
+        name: name,
+        items: [],
+        createdAt: new Date().toISOString(),
+        order: newOrder,
+        note: ""
+      };
+      
+      if (!listOrder.includes(name)) {
+        listOrder.push(name);
+        listOrder.sort((a, b) => (localDatabase.lists[a].order || 0) - (localDatabase.lists[b].order || 0));
+      }
+      
+      saveToLocalStorage();
+      newListInput.value = "";
+      console.log("✅ Elenco salvato localmente!");
+      loadListsLocal();
+      selectList(name);
+    }
+
+    function deleteList(listName) {
+      if (!confirm(`Eliminare "${listName}"?\n\nTutti gli elementi saranno cancellati.`)) return;
+
+      if (isOnline && db) {
+        db.collection("lists").doc(listName).collection("items").get().then(snapshot => {
+          const batch = db.batch();
+          snapshot.forEach(doc => {
+            batch.delete(doc.ref);
+          });
+          return batch.commit();
+        }).then(() => {
+          return db.collection("lists").doc(listName).delete();
+        }).then(() => {
+          if (currentList === listName) backToLists();
+        }).catch(error => {
+          console.error("Errore eliminando:", error);
+          alert("Errore eliminando: " + error.message);
+        });
+      } else {
+        delete localDatabase.lists[listName];
+        listOrder = listOrder.filter(name => name !== listName);
+        saveToLocalStorage();
+        if (currentList === listName) backToLists();
+        loadListsLocal();
+      }
+    }
+
+    // GESTIONE LISTE - LOCALE
+    function loadListsLocal() {
+      listNames.innerHTML = "";
+      
+      if (Object.keys(localDatabase.lists).length === 0) {
+        showEmptyLists();
+      } else {
+        const sortedListNames = [...listOrder].sort((a, b) => {
+            const orderA = localDatabase.lists[a].order || 0;
+            const orderB = localDatabase.lists[b].order || 0;
+            return orderA - orderB;
+        });
+
+        sortedListNames.forEach(listName => {
+          if (localDatabase.lists[listName]) {
+            renderListItem(listName, localDatabase.lists[listName]);
+          }
+        });
+      }
+      initSortableLists();
+    }
+
+    // GESTIONE ELEMENTI - FIREBASE
+    function loadItemsFirebase() {
+      if (!db || !currentList) return;
+      
+      unsubscribeItems = db.collection("lists").doc(currentList).collection("items")
+        .orderBy("order", "asc")
+        .orderBy("timestamp", "asc")
+        .onSnapshot(snapshot => {
+          itemList.innerHTML = "";
+          
+          if (snapshot.empty) {
+            showEmptyItems();
+          } else {
+            const currentLocalItems = [];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                currentLocalItems.push({ id: doc.id, ...data });
+                renderItem(data, doc.id);
+            });
+            if (localDatabase.lists[currentList]) {
+                localDatabase.lists[currentList].items = currentLocalItems;
+            }
+          }
+          initSortableItems();
+        }, error => {
+          console.error("❌ Errore caricando elementi:", error);
+        });
+    }
+
+    async function addItem() {
+      const text = newItemInput.value.trim();
+      if (!validateItemText(text)) return;
+
+      console.log("➕ Tentativo aggiunta elemento:", text, "a lista:", currentList);
+
+      if (isOnline && db && currentList) {
+        console.log("🔥 Modalità Firebase - aggiunta elemento");
+        try {
+            const newOrder = await getNewOrder(db.collection("lists").doc(currentList).collection("items"));
+            
+            await db.collection("lists").doc(currentList).collection("items").add({
+                text: text,
+                done: false,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                order: newOrder
+            });
+            console.log("✅ Elemento aggiunto su Firebase!");
+            newItemInput.value = "";
+        } catch (error) {
+            console.error("❌ Errore aggiunta elemento Firebase:", error);
+            alert(`Errore: ${error.message}\nSalvataggio locale...`);
+            addItemLocally(text);
+        }
+        
+      } else if (currentList) {
+        console.log("💻 Modalità locale - aggiunta elemento");
+        addItemLocally(text);
+      } else {
+        alert("Seleziona un elenco prima di aggiungere elementi.");
+      }
+    }
+
+    function addItemLocally(text) {
+      if (!localDatabase.lists[currentList]) {
+        localDatabase.lists[currentList] = { 
+          name: currentList,
+          items: [], 
+          note: "", 
+          createdAt: new Date().toISOString() 
+        };
+      }
+      if (!localDatabase.lists[currentList].items) {
+        localDatabase.lists[currentList].items = [];
+      }
+      
+      const items = localDatabase.lists[currentList].items;
+      const newOrder = items.length > 0 ? Math.max(...items.map(item => item.order || 0)) + 1 : 0;
+
+      localDatabase.lists[currentList].items.push({
+        text: text,
+        done: false,
+        timestamp: new Date().toISOString(),
+        order: newOrder,
+        id: Date.now().toString()
+      });
+      
+      saveToLocalStorage();
+      newItemInput.value = "";
+      console.log("✅ Elemento aggiunto localmente");
+      loadItemsLocal();
+    }
+
+    function updateItem(itemId, updates) {
+      if (isOnline && db && currentList) {
+        db.collection("lists").doc(currentList).collection("items").doc(itemId)
+          .update(updates)
+          .catch(error => {
+            console.error("Errore aggiornando:", error);
+            alert("Errore: " + error.message);
+          });
+      } else if (currentList) {
+        const item = localDatabase.lists[currentList].items.find(i => i.id === itemId);
+        if (item) {
+          Object.assign(item, updates);
+          saveToLocalStorage();
+          loadItemsLocal();
+        }
+      }
+    }
+
+    function deleteItem(itemId) {
+      if (isOnline && db && currentList) {
+        db.collection("lists").doc(currentList).collection("items").doc(itemId).delete()
+          .catch(error => alert("Errore: " + error.message));
+      } else {
+        localDatabase.lists[currentList].items = 
+          localDatabase.lists[currentList].items.filter(i => i.id !== itemId);
+        saveToLocalStorage();
+        loadItemsLocal();
+      }
+    }
+
+    // GESTIONE ELEMENTI - LOCALE
+    function loadItemsLocal() {
+      itemList.innerHTML = "";
+      
+      const items = localDatabase.lists[currentList]?.items || [];
+      
+      if (items.length === 0) {
+        showEmptyItems();
+      } else {
+        items.sort((a, b) => (a.order || 0) - (b.order || 0));
+        items.forEach(item => renderItem(item, item.id));
+      }
+      initSortableItems();
+    }
+
+    // RENDERING
+    function renderListItem(name, data) {
+      const li = document.createElement("li");
+      li.className = "list-item";
+      li.dataset.itemId = name; // Aggiunto per il drag-and-drop persistente
+
+      const dragHandle = document.createElement("span");
+      dragHandle.className = "drag-handle";
+      dragHandle.textContent = "⋮⋮";
+      
+      const nameInput = document.createElement("input");
+      nameInput.type = "text";
+      nameInput.value = name;
+      nameInput.readOnly = false;
+      nameInput.style.cursor = "text";
+      
+      const originalName = name;
+      
+      nameInput.onblur = async () => {
+          const newName = nameInput.value.trim();
+          if (newName === originalName || newName === "") {
+              nameInput.value = originalName;
+              return; 
+          }
+          
+          const success = await renameList(originalName, newName);
+          if (!success) {
+              nameInput.value = originalName;
+          }
+      };
+      nameInput.onkeypress = (e) => {
+          if (e.key === 'Enter') {
+              nameInput.blur();
+          }
+      };
+      
+      const selectBtn = document.createElement("button");
+      selectBtn.textContent = "📋";
+      selectBtn.className = "action-btn select-btn";
+      selectBtn.onclick = () => selectList(name);
+      
+      const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = "🗑️";
+      deleteBtn.className = "action-btn delete-btn";
+      deleteBtn.onclick = () => deleteList(name);
+      
+      li.appendChild(dragHandle);
+      li.appendChild(nameInput);
+      li.appendChild(selectBtn);
+      li.appendChild(deleteBtn);
+      listNames.appendChild(li);
+    }
+
+    function renderItem(item, itemId) {
+      const li = document.createElement("li");
+      li.className = "list-item";
+      li.dataset.itemId = itemId; // Aggiunto per il drag-and-drop persistente
+      
+      const dragHandle = document.createElement("span");
+      dragHandle.className = "drag-handle";
+      dragHandle.textContent = "⋮⋮";
+      
+      const textInput = document.createElement("input");
+      textInput.type = "text";
+      textInput.value = item.text;
+      textInput.onblur = () => updateItem(itemId, { text: textInput.value });
+      textInput.onkeypress = (e) => {
+        if (e.key === 'Enter') textInput.blur();
+      };
+      
+      if (item.done) {
+        textInput.style.textDecoration = "line-through";
+        textInput.style.color = "#7f8c8d";
+        li.style.backgroundColor = "#f5f5f5";
+      }
+      
+      const toggleBtn = document.createElement("button");
+      toggleBtn.textContent = item.done ? "✅" : "⭕";
+      toggleBtn.className = "action-btn select-btn";
+      toggleBtn.onclick = () => updateItem(itemId, { done: !item.done });
+      
+      const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = "🗑️";
+      deleteBtn.className = "action-btn delete-btn";
+      deleteBtn.onclick = () => deleteItem(itemId);
+      
+      li.appendChild(dragHandle);
+      li.appendChild(textInput);
+      li.appendChild(toggleBtn);
+      li.appendChild(deleteBtn);
+      itemList.appendChild(li);
+    }
+
+    // UTILITY
+    function validateListName(name) {
+      if (!name) {
+        alert("Il nome dell'elenco non può essere vuoto.");
+        return false;
+      }
+      if (name.length > 50) {
+        alert("Il nome è troppo lungo (max 50 caratteri).");
+        return false;
+      }
+      return true;
+    }
+
+    function validateItemText(text) {
+      if (!text) {
+        alert("Il testo non può essere vuoto.");
+        return false;
+      }
+      if (text.length > 200) {
+        alert("Il testo è troppo lungo (max 200 caratteri).");
+        return false;
+      }
+      return true;
+    }
+
+    function showEmptyLists() {
+      listNames.innerHTML = "<li style='text-align: center; font-style: italic; color: #7f8c8d; border: none; background: transparent;'>Nessun elenco creato</li>";
+    }
+
+    function showEmptyItems() {
+      itemList.innerHTML = "<li style='text-align: center; font-style: italic; color: #7f8c8d; border: none; background: transparent;'>Nessuna cosa da fare</li>";
+    }
+
+    // INIZIALIZZAZIONE
+    window.addEventListener('load', () => {
+      initFirebase();
+    });
+
+    // Cleanup
+    window.addEventListener('beforeunload', () => {
+      if (unsubscribeList) unsubscribeList();
+      if (unsubscribeItems) unsubscribeItems();
+    });
+
+    // Prevenzione zoom accidentale su doppio tap (solo mobile)
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function (event) {
+      const now = (new Date()).getTime();
+      if (now - lastTouchEnd <= 300) {
+        event.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, false);
+
+    // Focus management migliorato per mobile
+    document.addEventListener('focusin', function(e) {
+      if (e.target.matches('input[type="text"]')) {
+        setTimeout(() => {
+          e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+      }
+    });
+  </script>
+</body>
+</html>
