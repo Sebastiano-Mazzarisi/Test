@@ -66,6 +66,14 @@
       gap: 0.5rem;
     }
 
+    /* Stile per le immagini nelle intestazioni */
+    h1 img, h2 img {
+        vertical-align: middle;
+        height: 1.2em; /* Regola l'altezza dell'icona rispetto al testo */
+        width: auto;
+        margin-right: 0.2em;
+    }
+
     .status-dot {
       width: 12px;
       height: 12px;
@@ -290,6 +298,25 @@
       font-size: 1.2rem;
     }
 
+    /* Stile per l'area di testo degli appunti */
+    .note-section {
+        margin-top: 1.5rem;
+        width: 100%;
+    }
+    .note-section textarea {
+        min-height: 120px;
+        resize: vertical;
+        padding: 1rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        border: 1px solid var(--light-blue-border); /* Bordo blu anche per la textarea */
+        border-radius: var(--border-radius-element);
+    }
+    .note-section textarea:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+
     .status-bar, .firebase-config {
       display: none;
     }
@@ -411,6 +438,9 @@
       .list-item input { 
         background: var(--card-bg); 
       }
+      .note-section textarea {
+          background: var(--card-bg);
+      }
 
       .list-item input:focus {
         background: #3d3d3d;
@@ -433,7 +463,10 @@
 <body>
   <div class="container">
     <div id="lists-view">
-      <h1>📝 Elenchi <span id="status-dot" class="status-dot offline"></span></h1>
+      <h1>
+          <img src="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Fare.png" alt="Icona Elenchi" style="vertical-align: middle; height: 1.2em; width: auto; margin-right: 0.2em;">
+          Elenchi <span id="status-dot" class="status-dot offline"></span>
+      </h1>
       <div class="section">
         <div class="card">
           <ul id="list-names"></ul>
@@ -446,7 +479,10 @@
     </div>
 
     <div id="single-list-view" style="display: none;">
-      <h1 id="current-list-title" style="cursor: pointer; color: var(--accent);">📋 Elenco <span id="status-dot-single-list" class="status-dot offline"></span></h1>
+      <h1 id="current-list-title" style="cursor: pointer; color: var(--accent);">
+          <img src="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Fare.png" alt="Icona Elenco" style="vertical-align: middle; height: 1.2em; width: auto; margin-right: 0.2em;">
+          📋 Elenco <span id="status-dot-single-list" class="status-dot offline"></span>
+      </h1>
       <div class="section">
         <div class="card">
           <ul id="item-list"></ul>
@@ -456,7 +492,16 @@
           </div>
         </div>
       </div>
-    </div>
+      <div class="section note-section">
+          <div class="card">
+              <h2>
+                  <img src="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Fare.png" alt="Icona Appunti" style="vertical-align: middle; height: 1.2em; width: auto; margin-right: 0.2em;">
+                  🗒️ Appunti
+              </h2>
+              <textarea id="note-input" placeholder="Scrivi qui i tuoi appunti per questo elenco..." rows="5" maxlength="1000"></textarea>
+          </div>
+      </div>
+      </div>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
@@ -497,6 +542,7 @@
     const singleListView = document.getElementById("single-list-view");
     const statusDot = document.getElementById("status-dot");
     const statusDotSingleList = document.getElementById("status-dot-single-list");
+    const noteInput = document.getElementById("note-input");
 
     let sortableLists = null;
     let sortableItems = null;
@@ -602,7 +648,6 @@
         let prevItemOrder = null;
         let nextItemOrder = null;
 
-        // Recupera gli ordini degli elementi adiacenti nella nuova posizione
         if (newIndex > 0) {
             const prevItemId = currentItemsInDOM[newIndex - 1].dataset.itemId;
             const prevDoc = await parentCollectionRef.doc(prevItemId).get();
@@ -615,12 +660,12 @@
         }
 
         if (prevItemOrder === null && nextItemOrder === null) {
-            newOrderValue = 0; // È l'unico elemento o non ci sono elementi adiacenti con order
-        } else if (prevItemOrder === null) { // Spostato all'inizio
+            newOrderValue = 0;
+        } else if (prevItemOrder === null) {
             newOrderValue = (nextItemOrder !== null && nextItemOrder !== undefined) ? nextItemOrder / 2 : 0;
-        } else if (nextItemOrder === null) { // Spostato alla fine
+        } else if (nextItemOrder === null) {
             newOrderValue = prevItemOrder + 1;
-        } else { // Spostato tra due elementi
+        } else {
             newOrderValue = (prevItemOrder + nextItemOrder) / 2;
         }
         return { id: draggedElementId, order: newOrderValue };
@@ -807,6 +852,32 @@
       return false;
     }
 
+    // Aggiungi una funzione per aggiornare le note
+    async function updateNote(listName, newNote) {
+        if (!listName) return;
+        newNote = newNote.trim();
+
+        console.log(`✏️ Tentativo di aggiornare la nota per "${listName}"`);
+
+        if (isOnline && db) {
+            try {
+                await db.collection("lists").doc(listName).update({
+                    note: newNote
+                });
+                console.log(`✅ Nota per "${listName}" aggiornata su Firebase.`);
+            } catch (error) {
+                console.error("❌ Errore aggiornamento nota Firebase:", error);
+                alert(`Errore durante l'aggiornamento della nota: ${error.message}`);
+            }
+        } else {
+            if (localDatabase.lists[listName]) {
+                localDatabase.lists[listName].note = newNote;
+                saveToLocalStorage();
+                console.log(`✅ Nota per "${listName}" aggiornata localmente.`);
+            }
+        }
+    }
+
     // Event listeners
     newListInput.addEventListener('keypress', function(e) {
       if (e.key === 'Enter') addList();
@@ -816,20 +887,24 @@
       if (e.key === 'Enter') addItem();
     });
 
+    // Event listener per la nota (textarea)
+    noteInput.addEventListener('blur', () => {
+        if (currentList) {
+            const currentNote = localDatabase.lists[currentList]?.note || "";
+            if (noteInput.value.trim() !== currentNote.trim()) {
+                 updateNote(currentList, noteInput.value.trim());
+            }
+        }
+    });
+
     // NAVIGAZIONE
     function selectList(name) {
       currentList = name;
       
-      const existingDot = currentListTitle.querySelector('#status-dot-single-list');
-      currentListTitle.innerHTML = `📋 ${name}`; 
-      if (existingDot) {
-          currentListTitle.appendChild(existingDot);
-      } else {
-          const newDot = document.createElement('span');
-          newDot.id = 'status-dot-single-list';
-          newDot.className = 'status-dot offline';
-          currentListTitle.appendChild(newDot);
-      }
+      currentListTitle.innerHTML = `
+          <img src="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Fare.png" alt="Icona Elenco" style="vertical-align: middle; height: 1.2em; width: auto; margin-right: 0.2em;">
+          📋 Elenco ${name} <span id="status-dot-single-list" class="status-dot offline"></span>
+      `;
       
       currentListTitle.onclick = () => backToLists();
       
@@ -841,6 +916,9 @@
       } else {
         loadItemsLocal();
       }
+      
+      noteInput.value = localDatabase.lists[currentList]?.note || "";
+
       updateConnectionStatus();
       initSortableItems();
     }
@@ -850,6 +928,7 @@
       listsView.style.display = 'block';
       singleListView.style.display = 'none';
       itemList.innerHTML = "";
+      noteInput.value = "";
       
       if (unsubscribeItems) {
         unsubscribeItems();
@@ -1159,7 +1238,7 @@
     function renderListItem(name, data) {
       const li = document.createElement("li");
       li.className = "list-item";
-      li.dataset.itemId = name; // Aggiunto per il drag-and-drop persistente
+      li.dataset.itemId = name;
 
       const dragHandle = document.createElement("span");
       dragHandle.className = "drag-handle";
@@ -1211,7 +1290,7 @@
     function renderItem(item, itemId) {
       const li = document.createElement("li");
       li.className = "list-item";
-      li.dataset.itemId = itemId; // Aggiunto per il drag-and-drop persistente
+      li.dataset.itemId = itemId;
       
       const dragHandle = document.createElement("span");
       dragHandle.className = "drag-handle";
