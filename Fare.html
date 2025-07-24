@@ -144,6 +144,17 @@
         color: var(--accent);
     }
 
+    #refresh-button {
+        cursor: pointer;
+        font-size: 0.8em;
+        margin-left: 0.75rem;
+        transition: transform 0.5s ease;
+        display: inline-block;
+    }
+    #refresh-button:hover {
+        transform: rotate(360deg);
+    }
+
 
     .status-dot {
       width: 12px;
@@ -476,6 +487,7 @@
       <h1>
           <img id="pdf-export-all-logo" src="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Fare.png" alt="Icona Elenchi" title="Esporta tutti gli elenchi in PDF">
           Elenchi <span id="status-dot" class="status-dot offline"></span>
+          <span id="refresh-button" title="Ricarica la pagina">🔄</span>
       </h1>
       <div class="section">
         <div class="card">
@@ -558,7 +570,7 @@
     let sortableItems = null;
 
     // FUNZIONE PDF PER SINGOLO ELENCO
-    function exportListToPDF(event) {
+    async function exportListToPDF(event) {
         event.stopPropagation(); 
 
         if (!currentList) {
@@ -574,65 +586,62 @@
             return;
         }
         
-        const formattedDate = new Date().toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
+        const pdfWindow = window.open('', '_blank');
+        pdfWindow.document.write('<h1>Preparazione del PDF in corso...</h1>');
 
-        const content = [
-            { text: `${currentList} - ${formattedDate}`, style: 'header' }
-        ];
+        try {
+            const formattedDate = new Date().toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
+            const content = [{ text: `${currentList} - ${formattedDate}`, style: 'header' }];
 
-        if (items.length > 0) {
-            const midpoint = Math.ceil(items.length / 2);
-            const firstHalf = items.slice(0, midpoint);
-            const secondHalf = items.slice(midpoint);
-
-            const tableBodyFirst = firstHalf.map((item, index) => [(index + 1).toString(), item.text]);
-            const tableBodySecond = secondHalf.map((item, index) => [(midpoint + index + 1).toString(), item.text]);
-            
-            if (items.length % 2 !== 0) {
-                tableBodySecond.push([' ', ' ']);
-            }
-            
-            const tableLayout = {
-                hLineColor: function (i, node) { return '#cccccc'; },
-                vLineColor: function (i, node) { return '#cccccc'; }
-            };
-
-            content.push({
-                columnGap: 10,
-                columns: [
-                    {
-                        table: { widths: ['auto', '*'], body: tableBodyFirst },
-                        layout: tableLayout
-                    },
-                    secondHalf.length > 0 ? {
-                        table: { widths: ['auto', '*'], body: tableBodySecond },
-                        layout: tableLayout
-                    } : { text: '' }
-                ]
-            });
-        }
-        
-        if (note.trim()) {
-            content.push({ text: `Nota: ${note}`, style: 'noteStyle' });
-        }
-
-        const docDefinition = {
-            content: content,
-            styles: {
-                header: {
-                    fontSize: 22,
-                    bold: true,
-                    margin: [0, 0, 0, 10],
-                    alignment: 'center'
-                },
-                noteStyle: {
-                    italics: true,
-                    color: '#333333',
-                    margin: [0, 10, 0, 0]
+            if (items.length > 0) {
+                const midpoint = Math.ceil(items.length / 2);
+                const firstHalf = items.slice(0, midpoint);
+                const secondHalf = items.slice(midpoint);
+                const tableBodyFirst = firstHalf.map((item, index) => [(index + 1).toString(), item.text]);
+                const tableBodySecond = secondHalf.map((item, index) => [(midpoint + index + 1).toString(), item.text]);
+                
+                if (items.length % 2 !== 0) {
+                    tableBodySecond.push([' ', ' ']);
                 }
+                
+                const tableLayout = {
+                    hLineColor: (i, node) => '#cccccc',
+                    vLineColor: (i, node) => '#cccccc'
+                };
+
+                content.push({
+                    columnGap: 10,
+                    columns: [
+                        { table: { widths: ['auto', '*'], body: tableBodyFirst }, layout: tableLayout },
+                        secondHalf.length > 0 ? { table: { widths: ['auto', '*'], body: tableBodySecond }, layout: tableLayout } : { text: '' }
+                    ]
+                });
             }
-        };
-        pdfMake.createPdf(docDefinition).open();
+            
+            if (note.trim()) {
+                content.push({ text: `Nota: ${note}`, style: 'noteStyle' });
+            }
+
+            const docDefinition = {
+                content: content,
+                styles: {
+                    header: { fontSize: 22, bold: true, margin: [0, 0, 0, 10], alignment: 'center' },
+                    noteStyle: { italics: true, color: '#333333', margin: [0, 10, 0, 0] }
+                }
+            };
+            
+            // Metodo robusto per caricare il PDF nella nuova finestra
+            const pdfDoc = pdfMake.createPdf(docDefinition);
+            const blob = await new Promise(resolve => pdfDoc.getBlob(resolve));
+            const blobUrl = URL.createObjectURL(blob);
+            pdfWindow.location.href = blobUrl;
+
+        } catch (error) {
+            console.error("Errore creazione PDF singolo:", error);
+            if(pdfWindow && !pdfWindow.closed) {
+                pdfWindow.document.body.innerHTML = `<div style="font-family: sans-serif; padding: 20px;"><h1>Si è verificato un errore</h1><pre style="background-color: #f0f0f0; padding: 10px; border: 1px solid #ccc; white-space: pre-wrap;">${error.stack || error}</pre></div>`;
+            }
+        }
     }
 
     // FUNZIONE PDF PER TUTTI GLI ELENCHI
@@ -642,10 +651,10 @@
             return;
         }
         
-        const indicator = document.getElementById('loading-indicator');
+        const pdfWindow = window.open('', '_blank');
+        pdfWindow.document.write('<h1>Preparazione del riepilogo PDF in corso...</h1>');
+        
         try {
-            indicator.style.display = 'block';
-
             const formattedDate = new Date().toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
             const content = [];
 
@@ -676,21 +685,15 @@
                         }
 
                         const tableLayout = {
-                            hLineColor: function (i, node) { return '#cccccc'; },
-                            vLineColor: function (i, node) { return '#cccccc'; }
+                            hLineColor: (i, node) => '#cccccc',
+                            vLineColor: (i, node) => '#cccccc'
                         };
 
                         content.push({
                             columnGap: 10,
                             columns: [
-                                {
-                                    table: { widths: ['auto', '*'], body: tableBodyFirst },
-                                    layout: tableLayout
-                                },
-                                secondHalf.length > 0 ? {
-                                    table: { widths: ['auto', '*'], body: tableBodySecond },
-                                    layout: tableLayout
-                                } : { text: '' }
+                                { table: { widths: ['auto', '*'], body: tableBodyFirst }, layout: tableLayout },
+                                secondHalf.length > 0 ? { table: { widths: ['auto', '*'], body: tableBodySecond }, layout: tableLayout } : { text: '' }
                             ]
                         });
                     }
@@ -707,21 +710,20 @@
                     docHeader: { fontSize: 24, bold: true, alignment: 'center', margin: [0, 0, 0, 5] },
                     docSubHeader: { fontSize: 12, alignment: 'center', margin: [0, 0, 0, 10] },
                     listHeader: { fontSize: 18, bold: true, margin: [0, 15, 0, 5] },
-                    noteStyle: {
-                        italics: true,
-                        color: '#333333',
-                        margin: [0, 5, 0, 10]
-                    }
+                    noteStyle: { italics: true, color: '#333333', margin: [0, 5, 0, 10] }
                 }
             };
             
-            pdfMake.createPdf(docDefinition).open();
+            const pdfDoc = pdfMake.createPdf(docDefinition);
+            const blob = await new Promise(resolve => pdfDoc.getBlob(resolve));
+            const blobUrl = URL.createObjectURL(blob);
+            pdfWindow.location.href = blobUrl;
 
         } catch (error) {
-            console.error("Errore durante la creazione del PDF di riepilogo:", error);
-            alert("Si è verificato un errore durante la creazione del PDF.");
-        } finally {
-            indicator.style.display = 'none';
+            console.error("Errore creazione PDF riepilogo:", error);
+            if(pdfWindow && !pdfWindow.closed) {
+                pdfWindow.document.body.innerHTML = `<div style="font-family: sans-serif; padding: 20px;"><h1>Si è verificato un errore</h1><pre style="background-color: #f0f0f0; padding: 10px; border: 1px solid #ccc; white-space: pre-wrap;">${error.stack || error}</pre></div>`;
+            }
         }
     }
 
@@ -808,6 +810,8 @@
             handle: '.drag-handle',
             ghostClass: 'sortable-ghost',
             forceFallback: true,
+            delay: 100,
+            delayOnTouchOnly: true,
             onEnd: onEndCallback
         });
     }
@@ -1188,6 +1192,7 @@
       homeIcon.onclick = backToLists;
       document.getElementById('pdf-export-logo').addEventListener('click', exportListToPDF);
       document.getElementById('pdf-export-all-logo').addEventListener('click', exportAllListsToPDF);
+      document.getElementById('refresh-button').addEventListener('click', function() { location.reload(true); });
     });
 
     // Cleanup
