@@ -23,6 +23,10 @@
   <meta name="twitter:image" content="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Fare.png?v=1.0">
   
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/vfs_fonts.js"></script>
+
   <style>
     :root {
       --bg: #f5f7fa;
@@ -60,6 +64,20 @@
       color-scheme: light; /* NUOVO: Forza il tema del browser su light */
     }
 
+    #loading-indicator {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 20px 30px;
+        border-radius: 10px;
+        z-index: 1000;
+        font-size: 1.2rem;
+    }
+
     .container {
       max-width: 600px;
       width: 100%;
@@ -90,7 +108,6 @@
         margin-right: 0.2em;
     }
     
-    /* Nuovo stile per il titolo dell'elenco singolo (h1 nella single-list-view) */
     #current-list-title {
         text-align: center;
         display: flex;
@@ -104,16 +121,19 @@
         font-weight: 700;
         letter-spacing: -0.03em;
     }
-    /* Regola per l'immagine nel titolo dell'elenco singolo: visibile */
+
+    #pdf-export-logo, #pdf-export-all-logo {
+        cursor: pointer;
+    }
+
     #current-list-title img {
         display: inline-block; /* Rende l'immagine visibile qui */
     }
 
-    /* Stile per l'icona Home */
     #home-icon {
         cursor: pointer;
-        font-size: 1.2em; /* Impostato per corrispondere all'altezza della Fare.png in h1 */
-        margin-left: 0.1em; /* Avvicinato al pallino di stato */
+        font-size: 1.2em;
+        margin-left: 0.1em;
         color: var(--accent-dark);
         transition: color 0.2s;
         display: inline-flex;
@@ -176,7 +196,6 @@
       color: #dc3545;
     }
 
-    /* Regola generale per input di testo e textarea */
     input[type="text"], textarea {
       font-size: 20px;
       width: 100%;
@@ -274,7 +293,6 @@
       cursor: grab;
     }
 
-    /* Regola specifica per input dentro .list-item */
     .list-item input {
       flex: 1;
       border: none;
@@ -352,7 +370,6 @@
       font-size: 1.2rem;
     }
 
-    /* Stile per l'area di testo degli appunti */
     .note-section {
         margin-top: 1.5rem;
         width: 100%;
@@ -375,244 +392,89 @@
       display: none;
     }
 
-    /* Ottimizzazioni per schermi piccoli */
     @media (max-width: 768px) {
-      body {
-        padding: 0.75rem;
-      }
-      h1 {
-        font-size: 2rem;
-        margin-bottom: 0.75rem;
-      }
-      #current-list-title { /* Titolo elenco singolo */
-        font-size: 2rem;
-        margin-bottom: 0.75rem;
-      }
-      .card {
-        padding: 1rem;
-      }
-      .list-item {
-        padding: 0.3rem 0.6rem;
-        margin-bottom: 0.2rem;
-      }
-      .list-item .action-btn {
-        width: 36px;
-        height: 36px;
-        font-size: 1rem;
-      }
-      .note-section textarea {
-          padding: 0.75rem;
-          font-size: 0.95rem;
-      }
-      h1 img, h2 img { /* Le immagini in h1 e h2 */
-          height: 1em;
-          margin-right: 0.15em;
-      }
-      #home-icon { /* Ottimizzazione per schermi piccoli */
-        font-size: 1em;
-        margin-left: 0.2em; /* Spazio leggermente ridotto */
-      }
+      body { padding: 0.75rem; }
+      h1, #current-list-title { font-size: 2rem; margin-bottom: 0.75rem; }
+      .card { padding: 1rem; }
+      .list-item { padding: 0.3rem 0.6rem; margin-bottom: 0.2rem; }
+      .list-item .action-btn { width: 36px; height: 36px; font-size: 1rem; }
+      .note-section textarea { padding: 0.75rem; font-size: 0.95rem; }
+      h1 img, h2 img { height: 1em; margin-right: 0.15em; }
+      #home-icon { font-size: 1em; margin-left: 0.2em; }
     }
 
-    /* Ottimizzazioni per schermi molto piccoli (es. smartphone verticali) */
     @media (max-width: 480px) {
-      body {
-        padding: 0.5rem;
-      }
-      h1 {
-        font-size: 1.75rem;
-        margin-bottom: 0.5rem;
-        gap: 0.25rem;
-      }
-      #current-list-title { /* Titolo elenco singolo */
-        font-size: 1.75rem;
-        margin-bottom: 0.5rem;
-        gap: 0.25rem;
-      }
-      .card {
-        padding: 0.75rem;
-      }
-      .list-item {
-        gap: 0.25rem;
-        padding: 0.25rem 0.5rem;
-        margin-bottom: 0.15rem;
-      }
-      .drag-handle {
-        min-width: 20px;
-        font-size: 0.9rem;
-      }
-      .list-item input {
-        font-size: 18px;
-        padding: 0.2rem 0.4rem;
-      }
-      .list-item .action-btn {
-        width: 32px;
-        height: 32px;
-        margin: 0 1px;
-        font-size: 0.9rem;
-      }
-      .form-row {
-        gap: 0.5rem;
-        margin-top: 0.75rem;
-      }
-      .form-row button {
-          padding: 0.6rem 0.8rem;
-          font-size: 1.1rem;
-      }
-      .note-section textarea {
-          padding: 0.6rem;
-          font-size: 0.9rem;
-          min-height: 100px;
-      }
-      #home-icon { /* Ottimizzazione per schermi molto piccoli */
-        font-size: 0.9em;
-        margin-left: 0.15em; /* Spazio ulteriormente ridotto */
-      }
+      body { padding: 0.5rem; }
+      h1, #current-list-title { font-size: 1.75rem; margin-bottom: 0.5rem; gap: 0.25rem; }
+      .card { padding: 0.75rem; }
+      .list-item { gap: 0.25rem; padding: 0.25rem 0.5rem; margin-bottom: 0.15rem; }
+      .drag-handle { min-width: 20px; font-size: 0.9rem; }
+      .list-item input { font-size: 18px; padding: 0.2rem 0.4rem; }
+      .list-item .action-btn { width: 32px; height: 32px; margin: 0 1px; font-size: 0.9rem; }
+      .form-row { gap: 0.5rem; margin-top: 0.75rem; }
+      .form-row button { padding: 0.6rem 0.8rem; font-size: 1.1rem; }
+      .note-section textarea { padding: 0.6rem; font-size: 0.9rem; min-height: 100px; }
+      #home-icon { font-size: 0.9em; margin-left: 0.15em; }
     }
 
-    /* Schermi extra piccoli */
     @media (max-width: 360px) {
-      body {
-        padding: 0.4rem;
-      }
-      h1 {
-        font-size: 1.5rem;
-      }
-      #current-list-title {
-        font-size: 1.5rem;
-      }
-      .card {
-        padding: 0.6rem;
-      }
-      .list-item input {
-        font-size: 17px;
-        padding: 0.15rem 0.3rem;
-      }
-      .note-section textarea {
-          padding: 0.5rem;
-          min-height: 80px;
-      }
-      #home-icon { /* Ottimizzazione per schermi extra piccoli */
-        font-size: 0.85em;
-        margin-left: 0.1em; /* Spazio minimo */
-      }
+      body { padding: 0.4rem; }
+      h1, #current-list-title { font-size: 1.5rem; }
+      .card { padding: 0.6rem; }
+      .list-item input { font-size: 17px; padding: 0.15rem 0.3rem; }
+      .note-section textarea { padding: 0.5rem; min-height: 80px; }
+      #home-icon { font-size: 0.85em; margin-left: 0.1em; }
     }
 
-    /* Orientamento orizzontale su mobile */
     @media (max-height: 500px) and (orientation: landscape) {
-      body {
-        padding: 0.4rem;
-      }
-      h1 {
-        font-size: 1.4rem;
-        margin-bottom: 0.2rem;
-      }
-      #current-list-title {
-        font-size: 1.4rem;
-        margin-bottom: 0.2rem;
-      }
-      .card {
-        padding: 0.6rem;
-      }
-      .list-item {
-        margin-bottom: 0.15rem;
-      }
-      .note-section textarea {
-          min-height: 60px; /* Ancora più piccola in orizzontale */
-      }
+      body { padding: 0.4rem; }
+      h1, #current-list-title { font-size: 1.4rem; margin-bottom: 0.2rem; }
+      .card { padding: 0.6rem; }
+      .list-item { margin-bottom: 0.15rem; }
+      .note-section textarea { min-height: 60px; }
     }
 
-    .card {
-        background: var(--card-bg);
-      }
-      
-      .list-item {
-        background: var(--card-bg);
-      }
-      
-      /* In dark mode, gli input dovrebbero avere un loro sfondo */
-      .list-item input { 
-        background: var(--card-bg); 
-        color: var(--fg); /* Testo bianco */
-      }
-      .note-section textarea {
-          background: var(--card-bg);
-          color: var(--fg); /* Testo bianco */
-      }
-
-      .list-item input:focus {
-        background: #555555; /* Sfondo focus leggermente più chiaro */
-      }
-      /* Testo barrato in Dark Mode */
-      .list-item input[style*="text-decoration: line-through"] {
-          color: #cccccc !important; /* Grigio molto più chiaro */
-      }
-    }
-
-    #status-dot-single-list {
-      display: inline-block !important;
-      margin-left: 0.5rem;
-      vertical-align: middle;
-    }
-
-    .sortable-ghost {
-      opacity: 0.4;
-      background-color: #f0f0f0;
-      border: 1px dashed var(--accent);
-    }
-  
-    input[type="text"], textarea {
-      background-color: #ffffff !important;
-      color: #2c3e50 !important;
-      font-size: 20px !important;
-      -webkit-text-fill-color: #2c3e50 !important;
-      caret-color: #2c3e50;
-    }
-    input[type="text"]:focus, textarea:focus {
-      background-color: #ffffff !important;
-      color: #2c3e50 !important;
-      -webkit-text-fill-color: #2c3e50 !important;
-    }
+    .card { background: var(--card-bg); }
+    .list-item { background: var(--card-bg); }
+    .list-item input { background: var(--card-bg); color: var(--fg); }
+    .note-section textarea { background: var(--card-bg); color: var(--fg); }
+    .list-item input:focus { background: #555555; }
+    .list-item input[style*="text-decoration: line-through"] { color: #cccccc !important; }
+    
+    #status-dot-single-list { display: inline-block !important; margin-left: 0.5rem; vertical-align: middle; }
+    .sortable-ghost { opacity: 0.4; background-color: #f0f0f0; border: 1px dashed var(--accent); }
+    
+    input[type="text"], textarea { background-color: #ffffff !important; color: #2c3e50 !important; font-size: 20px !important; -webkit-text-fill-color: #2c3e50 !important; caret-color: #2c3e50; }
+    input[type="text"]:focus, textarea:focus { background-color: #ffffff !important; color: #2c3e50 !important; -webkit-text-fill-color: #2c3e50 !important; }
 
     /* ================================================= */
-    /* MODIFICHE FINALI INTEGRATE              */
+    /* MODIFICHE FINALI INTEGRATE                        */
     /* ================================================= */
-
-    /* 1. Stile per i placeholder: ridotti, grigi e in corsivo */
     #new-list-name::placeholder,
     #item-input::placeholder,
     #note-input::placeholder {
         color: #CCCCCC !important;
-        -webkit-text-fill-color: #CCCCCC !important; /* Risolve conflitto di colore */
+        -webkit-text-fill-color: #CCCCCC !important;
         font-size: 18px !important;
         font-style: italic !important;
-        opacity: 1; /* Assicura la visibilità su Firefox */
+        opacity: 1;
     }
-
-    /* 2. Cornice grigia e più spessa per il campo "Nome nuovo elenco" */
-    #new-list-name {
-      border: 2px solid #cccccc !important;
+    #new-list-name { border: 2px solid #cccccc !important; }
+    .form-row > button { background-color: white !important; color: var(--accent) !important; border: 2px solid var(--accent) !important; }
+    .form-row > button:hover { background-color: #f0f8ff !important; color: var(--accent-dark) !important; border-color: var(--accent-dark) !important; }
+    
+    .note-section .card {
+        background-color: #FFFACD !important;
     }
-
-    /* 3. Stile con cornice per i bottoni "+" */
-    .form-row > button {
-      background-color: white !important;
-      color: var(--accent) !important;
-      border: 2px solid var(--accent) !important;
-    }
-    .form-row > button:hover {
-      background-color: #f0f8ff !important; /* Leggero azzurro per hover */
-      color: var(--accent-dark) !important;
-      border-color: var(--accent-dark) !important;
-    }
-
-</style>
+  </style>
 </head>
 <body>
+  <div id="loading-indicator">Elaborazione in corso...</div>
+
   <div class="container">
     <div id="lists-view">
       <h1>
-          <img src="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Fare.png" alt="Icona Elenchi">
+          <img id="pdf-export-all-logo" src="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Fare.png" alt="Icona Elenchi" title="Esporta tutti gli elenchi in PDF">
           Elenchi <span id="status-dot" class="status-dot offline"></span>
       </h1>
       <div class="section">
@@ -628,7 +490,7 @@
 
     <div id="single-list-view" style="display: none;">
       <h1 id="current-list-title" style="cursor: pointer; color: var(--accent);">
-          <img src="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Fare.png" alt="Icona Elenco">
+          <img id="pdf-export-logo" src="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Fare.png" alt="Icona Elenco" style="cursor: pointer;" title="Esporta in PDF">
           <span id="list-name-display"></span>
           <span id="status-dot-single-list" class="status-dot offline"></span>
           <span id="home-icon">🏠</span>
@@ -695,6 +557,175 @@
     let sortableLists = null;
     let sortableItems = null;
 
+    // FUNZIONE PDF PER SINGOLO ELENCO
+    function exportListToPDF(event) {
+        event.stopPropagation(); 
+
+        if (!currentList) {
+            alert("Nessun elenco selezionato per l'esportazione.");
+            return;
+        }
+
+        const items = localDatabase.lists[currentList]?.items || [];
+        const note = localDatabase.lists[currentList]?.note || '';
+
+        if (items.length === 0 && !note.trim()) {
+            alert("Questo elenco è vuoto, non c'è nulla da esportare.");
+            return;
+        }
+        
+        const formattedDate = new Date().toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
+
+        const content = [
+            { text: `${currentList} - ${formattedDate}`, style: 'header' }
+        ];
+
+        if (items.length > 0) {
+            const midpoint = Math.ceil(items.length / 2);
+            const firstHalf = items.slice(0, midpoint);
+            const secondHalf = items.slice(midpoint);
+
+            const tableBodyFirst = firstHalf.map((item, index) => [(index + 1).toString(), item.text]);
+            const tableBodySecond = secondHalf.map((item, index) => [(midpoint + index + 1).toString(), item.text]);
+            
+            if (items.length % 2 !== 0) {
+                tableBodySecond.push([' ', ' ']);
+            }
+            
+            const tableLayout = {
+                hLineColor: function (i, node) { return '#cccccc'; },
+                vLineColor: function (i, node) { return '#cccccc'; }
+            };
+
+            content.push({
+                columnGap: 10,
+                columns: [
+                    {
+                        table: { widths: ['auto', '*'], body: tableBodyFirst },
+                        layout: tableLayout
+                    },
+                    secondHalf.length > 0 ? {
+                        table: { widths: ['auto', '*'], body: tableBodySecond },
+                        layout: tableLayout
+                    } : { text: '' }
+                ]
+            });
+        }
+        
+        if (note.trim()) {
+            content.push({ text: `Nota: ${note}`, style: 'noteStyle' });
+        }
+
+        const docDefinition = {
+            content: content,
+            styles: {
+                header: {
+                    fontSize: 22,
+                    bold: true,
+                    margin: [0, 0, 0, 10],
+                    alignment: 'center'
+                },
+                noteStyle: {
+                    italics: true,
+                    color: '#333333',
+                    margin: [0, 10, 0, 0]
+                }
+            }
+        };
+        pdfMake.createPdf(docDefinition).open();
+    }
+
+    // FUNZIONE PDF PER TUTTI GLI ELENCHI
+    async function exportAllListsToPDF() {
+        if (listOrder.length === 0) {
+            alert("Nessun elenco da esportare.");
+            return;
+        }
+        
+        const indicator = document.getElementById('loading-indicator');
+        try {
+            indicator.style.display = 'block';
+
+            const formattedDate = new Date().toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
+            const content = [];
+
+            content.push({ text: 'Riepilogo di Tutti gli Elenchi', style: 'docHeader' });
+            content.push({ text: formattedDate, style: 'docSubHeader' });
+
+            for (const listName of listOrder) {
+                const listData = localDatabase.lists[listName];
+                const note = listData?.note || '';
+                const itemsSnapshot = await db.collection("lists").doc(listName).collection("items").orderBy("order", "asc").get();
+                
+                if (!itemsSnapshot.empty || note.trim()) {
+                    content.push({ text: listName, style: 'listHeader' });
+
+                    if (!itemsSnapshot.empty) {
+                        const items = [];
+                        itemsSnapshot.forEach(doc => items.push(doc.data()));
+
+                        const midpoint = Math.ceil(items.length / 2);
+                        const firstHalf = items.slice(0, midpoint);
+                        const secondHalf = items.slice(midpoint);
+
+                        const tableBodyFirst = firstHalf.map((item, index) => [(index + 1).toString(), item.text]);
+                        const tableBodySecond = secondHalf.map((item, index) => [(midpoint + index + 1).toString(), item.text]);
+
+                        if (items.length % 2 !== 0) {
+                            tableBodySecond.push([' ', ' ']);
+                        }
+
+                        const tableLayout = {
+                            hLineColor: function (i, node) { return '#cccccc'; },
+                            vLineColor: function (i, node) { return '#cccccc'; }
+                        };
+
+                        content.push({
+                            columnGap: 10,
+                            columns: [
+                                {
+                                    table: { widths: ['auto', '*'], body: tableBodyFirst },
+                                    layout: tableLayout
+                                },
+                                secondHalf.length > 0 ? {
+                                    table: { widths: ['auto', '*'], body: tableBodySecond },
+                                    layout: tableLayout
+                                } : { text: '' }
+                            ]
+                        });
+                    }
+                    
+                    if (note.trim()) {
+                        content.push({ text: `Nota: ${note}`, style: 'noteStyle' });
+                    }
+                }
+            }
+
+            const docDefinition = {
+                content: content,
+                styles: {
+                    docHeader: { fontSize: 24, bold: true, alignment: 'center', margin: [0, 0, 0, 5] },
+                    docSubHeader: { fontSize: 12, alignment: 'center', margin: [0, 0, 0, 10] },
+                    listHeader: { fontSize: 18, bold: true, margin: [0, 15, 0, 5] },
+                    noteStyle: {
+                        italics: true,
+                        color: '#333333',
+                        margin: [0, 5, 0, 10]
+                    }
+                }
+            };
+            
+            pdfMake.createPdf(docDefinition).open();
+
+        } catch (error) {
+            console.error("Errore durante la creazione del PDF di riepilogo:", error);
+            alert("Si è verificato un errore durante la creazione del PDF.");
+        } finally {
+            indicator.style.display = 'none';
+        }
+    }
+
+
     // Test di connettività più robusto
     function initFirebase() {
       try {
@@ -717,7 +748,6 @@
           isOnline = true;
           updateConnectionStatus();
           loadLists();
-          initSortableLists();
           
         }).catch((error) => {
           console.log("❌ Test scrittura fallito:", error.code, error.message);
@@ -731,18 +761,15 @@
             console.log("📖 Lettura funziona, ma scrittura bloccata");
             alert("Firebase in modalità solo lettura. Uso modalità locale per salvare.");
             fallbackToLocal();
-            initSortableLists();
           }).catch(() => {
             console.log("❌ Anche lettura fallita");
             fallbackToLocal();
-            initSortableLists();
           });
         });
         
       } catch (error) {
         console.error("❌ Errore inizializzazione:", error);
         fallbackToLocal();
-        initSortableLists();
       }
     }
 
@@ -772,274 +799,138 @@
         }
       }
     }
-
-    // Funzione per generare un nuovo order, basato sull'ultimo elemento in una collezione
-    async function getNewOrder(collectionRef) {
-        try {
-            const lastDocSnapshot = await collectionRef.orderBy("order", "desc").limit(1).get();
-            if (!lastDocSnapshot.empty) {
-                const lastOrder = lastDocSnapshot.docs[0].data().order;
-                return lastOrder + 1;
-            }
-            return 0; // Se la collezione è vuota, il primo order è 0
-        } catch (error) {
-            console.error("Errore nel recupero dell'ultimo ordine:", error);
-            return 0; // Fallback
-        }
+    
+    // Funzione per inizializzare SortableJS
+    function initSortable(element, group, onEndCallback) {
+        if (group.sortable) { group.sortable.destroy(); }
+        group.sortable = Sortable.create(element, {
+            animation: 150,
+            handle: '.drag-handle',
+            ghostClass: 'sortable-ghost',
+            forceFallback: true,
+            onEnd: onEndCallback
+        });
     }
 
-    // Funzione per calcolare il nuovo order decimale dopo un trascinamento
-    async function calculateNewDecimalOrder(parentCollectionRef, draggedElementId, newIndex) {
-        let newOrderValue;
-        const currentItemsInDOM = Array.from(document.getElementById(parentCollectionRef.id === "lists" ? "list-names" : "item-list").children);
+    // Callback per riordinare le liste
+    async function onListSortEnd(evt) {
+        if (evt.oldIndex === evt.newIndex) return;
+
+        const [movedItem] = listOrder.splice(evt.oldIndex, 1);
+        listOrder.splice(evt.newIndex, 0, movedItem);
         
-        let prevItemOrder = null;
-        let nextItemOrder = null;
+        saveToLocalStorage();
 
-        if (newIndex > 0) {
-            const prevItemId = currentItemsInDOM[newIndex - 1].dataset.itemId;
-            const prevDoc = await parentCollectionRef.doc(prevItemId).get();
-            if (prevDoc.exists && prevDoc.data().order !== undefined) prevItemOrder = prevDoc.data().order;
+        if (isOnline && db) {
+            const batch = db.batch();
+            listOrder.forEach((listId, index) => {
+                const docRef = db.collection("lists").doc(listId);
+                batch.update(docRef, { order: index });
+            });
+            await batch.commit().catch(err => console.error("Errore Sincronizzazione Ordine Liste:", err));
         }
-        if (newIndex < currentItemsInDOM.length - 1) {
-            const nextItemId = currentItemsInDOM[newIndex + 1].dataset.itemId;
-            const nextDoc = await parentCollectionRef.doc(nextItemId).get();
-            if (nextDoc.exists && nextDoc.data().order !== undefined) nextItemOrder = nextDoc.data().order;
-        }
-
-        if (prevItemOrder === null && nextItemOrder === null) {
-            newOrderValue = 0;
-        } else if (prevItemOrder === null) {
-            newOrderValue = (nextItemOrder !== null && nextItemOrder !== undefined) ? nextItemOrder / 2 : 0;
-        } else if (nextItemOrder === null) {
-            newOrderValue = prevItemOrder + 1;
-        } else {
-            newOrderValue = (prevItemOrder + nextItemOrder) / 2;
-        }
-        return { id: draggedElementId, order: newOrderValue };
     }
 
-    // Funzione per inizializzare SortableJS per le liste di elenchi
-    function initSortableLists() {
-      if (sortableLists) {
-        sortableLists.destroy();
-      }
-      sortableLists = Sortable.create(listNames, {
-        animation: 150,
-        handle: '.drag-handle',
-        ghostClass: 'sortable-ghost',
-        onEnd: async function (evt) {
-          const oldIndex = evt.oldIndex;
-          const newIndex = evt.newIndex;
-          const draggedListName = evt.item.dataset.itemId;
+    // Callback per riordinare gli elementi
+    async function onItemSortEnd(evt) {
+        if (evt.oldIndex === evt.newIndex || !currentList) return;
 
-          if (oldIndex !== newIndex) {
-            if (isOnline && db) {
-                console.log("🔥 Modalità Firebase - riordinamento liste");
-                try {
-                    const { id: listToUpdateName, order: newOrderValue } = await calculateNewDecimalOrder(db.collection("lists"), draggedListName, newIndex);
-                    
-                    await db.collection("lists").doc(listToUpdateName).update({ order: newOrderValue });
-                    console.log(`✅ Ordine lista "${listToUpdateName}" aggiornato a ${newOrderValue} in Firebase.`);
-                } catch (error) {
-                    console.error("❌ Errore riordinamento liste Firebase:", error);
-                    alert("Errore durante il riordinamento delle liste: " + error.message);
-                }
-            } else {
-                const [movedItemName] = listOrder.splice(oldIndex, 1);
-                listOrder.splice(newIndex, 0, movedItemName);
-                
-                listOrder.forEach((name, index) => {
-                    if (localDatabase.lists[name]) {
-                      localDatabase.lists[name].order = index;
-                    }
-                });
-                saveToLocalStorage();
-            }
-          }
+        const itemsInDom = Array.from(itemList.children);
+        const orderedItemIds = itemsInDom.map(li => li.dataset.itemId);
+        
+        let localItems = localDatabase.lists[currentList].items;
+        localItems.sort((a, b) => orderedItemIds.indexOf(a.id) - orderedItemIds.indexOf(b.id));
+
+        localItems.forEach((item, index) => item.order = index);
+        saveToLocalStorage();
+
+        if (isOnline && db) {
+            const batch = db.batch();
+            const collectionRef = db.collection("lists").doc(currentList).collection("items");
+            localItems.forEach((item) => {
+                const docRef = collectionRef.doc(item.id);
+                batch.update(docRef, { order: item.order });
+            });
+            await batch.commit().catch(err => console.error("Errore Sincronizzazione Ordine Elementi:", err));
         }
-      });
     }
 
-    // Funzione per inizializzare SortableJS per gli elementi all'interno di una lista
-    function initSortableItems() {
-      if (sortableItems) {
-        sortableItems.destroy();
-      }
-      sortableItems = Sortable.create(itemList, {
-        animation: 150,
-        handle: '.drag-handle',
-        ghostClass: 'sortable-ghost',
-        onEnd: async function (evt) {
-          const oldIndex = evt.oldIndex;
-          const newIndex = evt.newIndex;
-          const draggedItemId = evt.item.dataset.itemId;
-
-          if (oldIndex !== newIndex && currentList) {
-            if (isOnline && db) {
-                console.log("🔥 Modalità Firebase - riordinamento elementi");
-                try {
-                    const { id: itemToUpdateId, order: newOrderValue } = await calculateNewDecimalOrder(db.collection("lists").doc(currentList).collection("items"), draggedItemId, newIndex);
-                    
-                    await db.collection("lists").doc(currentList).collection("items").doc(itemToUpdateId).update({ order: newOrderValue });
-                    console.log(`✅ Ordine elemento "${itemToUpdateId}" aggiornato a ${newOrderValue} in Firebase.`);
-                } catch (error) {
-                    console.error("❌ Errore riordinamento elementi Firebase:", error);
-                    alert("Errore durante il riordinamento degli elementi: " + error.message);
-                }
-            } else {
-                const items = localDatabase.lists[currentList].items;
-                const [movedItem] = items.splice(oldIndex, 1);
-                items.splice(newIndex, 0, movedItem);
-                
-                items.forEach((item, index) => {
-                    item.order = index;
-                });
-                saveToLocalStorage();
-            }
-          }
-        }
-      });
+    // Funzione per inizializzare i componenti Sortable
+    function initializeSortables() {
+        initSortable(listNames, { sortable: sortableLists }, onListSortEnd);
+        initSortable(itemList, { sortable: sortableItems }, onItemSortEnd);
     }
-
+    
     // Salvataggio locale
     function saveToLocalStorage() {
-      localStorage.setItem('elenchiFare', JSON.stringify(localDatabase.lists));
+      listOrder.forEach((name, index) => { if(localDatabase.lists[name]) localDatabase.lists[name].order = index; });
       localStorage.setItem('elenchiOrder', JSON.stringify(listOrder));
+      localStorage.setItem('elenchiFare', JSON.stringify(localDatabase.lists));
     }
 
     // Funzione per rinominare un elenco
     async function renameList(oldName, newName) {
       newName = newName.trim();
-      if (!validateListName(newName) || newName === oldName) {
-        return false;
-      }
-
-      console.log(`🔄 Tentativo di rinominare l'elenco da "${oldName}" a "${newName}"`);
+      if (!validateListName(newName) || newName === oldName) return false;
 
       if (isOnline && db) {
-        console.log("🔥 Modalità Firebase - rinomina elenco");
         try {
           const newDocRef = db.collection("lists").doc(newName);
-          const newDocSnapshot = await newDocRef.get();
-          if (newDocSnapshot.exists) {
-            alert(`L'elenco "${newName}" esiste già su Firebase.`);
-            return false;
-          }
-
+          if ((await newDocRef.get()).exists) { alert(`L'elenco "${newName}" esiste già.`); return false; }
           const oldListDocRef = db.collection("lists").doc(oldName);
-          const oldListSnapshot = await oldListDocRef.get();
-
-          if (!oldListSnapshot.exists) {
-            console.warn(`Tentativo di rinominare una lista inesistente: "${oldName}"`);
-            return false;
-          }
-
-          const oldListData = oldListSnapshot.data();
-
+          const oldListData = (await oldListDocRef.get()).data();
           const itemsSnapshot = await oldListDocRef.collection("items").get();
-          const itemsToMove = [];
+          
+          const batch = db.batch();
+          batch.set(newDocRef, oldListData);
           itemsSnapshot.forEach(doc => {
-            itemsToMove.push({ id: doc.id, data: doc.data() });
+            batch.set(newDocRef.collection("items").doc(doc.id), doc.data());
+            batch.delete(doc.ref);
           });
-
-          const writeBatch = db.batch();
+          batch.delete(oldListDocRef);
           
-          writeBatch.set(newDocRef, oldListData);
-          console.log(`✅ Documento lista "${oldName}" copiato a "${newName}".`);
-
-          const newItemsCollectionRef = newDocRef.collection("items");
-          itemsToMove.forEach(item => {
-            writeBatch.set(newItemsCollectionRef.doc(item.id), item.data);
-          });
-          
-          itemsToMove.forEach(item => {
-            writeBatch.delete(oldListDocRef.collection("items").doc(item.id));
-          });
-          writeBatch.delete(oldListDocRef);
-          
-          await writeBatch.commit();
-          console.log(`✅ Elementi e vecchia lista "${oldName}" eliminati. Operazione di ridenominazione completata.`);
-
-          if (currentList === oldName) {
-            selectList(newName);
-          } else {
-             loadLists();
-          }
+          await batch.commit();
+          if (currentList === oldName) selectList(newName);
           return true;
-
         } catch (error) {
-          console.error("❌ Errore durante la ridenominazione Firebase:", error);
-          alert(`Errore Firebase durante la ridenominazione: ${error.message}`);
+          console.error("Errore rinomina Firebase:", error);
+          alert(`Errore Firebase: ${error.message}`);
           return false;
         }
-
       } else {
-        console.log("💻 Modalità locale - rinomina elenco");
-        if (localDatabase.lists[newName]) {
-          alert(`L'elenco "${newName}" esiste già localmente.`);
-          return false;
-        }
-
-        if (localDatabase.lists[oldName]) {
-          localDatabase.lists[newName] = localDatabase.lists[oldName];
-          localDatabase.lists[newName].name = newName;
-          delete localDatabase.lists[oldName];
-          listOrder = listOrder.map(n => n === oldName ? newName : n);
-          saveToLocalStorage();
-          console.log(`✅ Nome lista cambiato da "${oldName}" a "${newName}" localmente.`);
-
-          if (currentList === oldName) {
-              selectList(newName);
-          } else {
-              loadListsLocal();
-          }
-          return true;
-        }
+        if (localDatabase.lists[newName]) { alert(`L'elenco "${newName}" esiste già.`); return false; }
+        localDatabase.lists[newName] = localDatabase.lists[oldName];
+        delete localDatabase.lists[oldName];
+        listOrder = listOrder.map(n => (n === oldName ? newName : n));
+        saveToLocalStorage();
+        if (currentList === oldName) selectList(newName);
+        else loadListsLocal();
+        return true;
       }
-      return false;
     }
 
     // Aggiungi una funzione per aggiornare le note
     async function updateNote(listName, newNote) {
         if (!listName) return;
         newNote = newNote.trim();
-
-        console.log(`✏️ Tentativo di aggiornare la nota per "${listName}"`);
-
         if (isOnline && db) {
-            try {
-                await db.collection("lists").doc(listName).update({
-                    note: newNote
-                });
-                console.log(`✅ Nota per "${listName}" aggiornata su Firebase.`);
-            } catch (error) {
-                console.error("❌ Errore aggiornamento nota Firebase:", error);
-                alert(`Errore durante l'aggiornamento della nota: ${error.message}`);
-            }
+            try { await db.collection("lists").doc(listName).update({ note: newNote }); } 
+            catch (error) { console.error("Errore aggiornamento nota Firebase:", error); }
         } else {
             if (localDatabase.lists[listName]) {
                 localDatabase.lists[listName].note = newNote;
                 saveToLocalStorage();
-                console.log(`✅ Nota per "${listName}" aggiornata localmente.`);
             }
         }
     }
 
     // Event listeners
-    newListInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') addList();
-    });
-
-    newItemInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') addItem();
-    });
-
-    // Event listener per la nota (textarea)
+    newListInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') addList(); });
+    newItemInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') addItem(); });
     noteInput.addEventListener('blur', () => {
         if (currentList) {
             const currentNote = localDatabase.lists[currentList]?.note || "";
-            if (noteInput.value.trim() !== currentNote.trim()) {
+            if (noteInput.value.trim() !== (currentNote || "").trim()) {
                  updateNote(currentList, noteInput.value.trim());
             }
         }
@@ -1048,28 +939,12 @@
     // NAVIGAZIONE
     function selectList(name) {
       currentList = name;
-      
       listNameDisplay.textContent = name;
-      
-      if (homeIcon) {
-          homeIcon.onclick = () => backToLists();
-      }
-      
-      currentListTitle.onclick = () => backToLists();
-      
       listsView.style.display = 'none';
       singleListView.style.display = 'block';
-
-      if (isOnline) {
-        loadItemsFirebase();
-      } else {
-        loadItemsLocal();
-      }
-      
+      if (isOnline) loadItemsFirebase(); else loadItemsLocal();
       noteInput.value = localDatabase.lists[currentList]?.note || "";
-
       updateConnectionStatus();
-      initSortableItems();
     }
 
     function backToLists() {
@@ -1078,51 +953,34 @@
       singleListView.style.display = 'none';
       itemList.innerHTML = "";
       noteInput.value = "";
-      
-      if (unsubscribeItems) {
-        unsubscribeItems();
-        unsubscribeItems = null;
-      }
+      if (unsubscribeItems) { unsubscribeItems(); unsubscribeItems = null; }
       updateConnectionStatus();
     }
 
     // GESTIONE LISTE - FIREBASE
     function loadLists() {
-      if (!db) {
-        console.log("📂 Database non disponibile - carico locale");
-        return fallbackToLocal();
-      }
+      if (!db) return fallbackToLocal();
       
-      console.log("📂 Caricamento liste da Firebase...");
-      
-      unsubscribeList = db.collection("lists")
-        .orderBy("order", "asc")
-        .orderBy("createdAt", "asc")
-        .onSnapshot(snapshot => {
-          console.log("📥 Ricevuto aggiornamento Firebase, documenti:", snapshot.size);
-          
-          listNames.innerHTML = "";
-          
-          if (snapshot.empty) {
-            console.log("📭 Nessuna lista trovata");
-            showEmptyLists();
-          } else {
-            const newLocalLists = {};
-            const newOrderList = [];
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                newLocalLists[doc.id] = data;
-                newOrderList.push(doc.id);
-                renderListItem(doc.id, data);
-            });
-            localDatabase.lists = newLocalLists;
-            listOrder = newOrderList;
-          }
-          updateConnectionStatus();
-          initSortableLists();
+      unsubscribeList = db.collection("lists").orderBy("order", "asc").onSnapshot(snapshot => {
+          const newOrderList = [];
+          snapshot.forEach(doc => newOrderList.push(doc.id));
+          listOrder = newOrderList;
+
+          const newLocalLists = localDatabase.lists;
+          snapshot.docChanges().forEach(change => {
+            const doc = change.doc;
+            if (change.type === "removed") {
+                delete newLocalLists[doc.id];
+            } else {
+                newLocalLists[doc.id] = { ...newLocalLists[doc.id], ...doc.data() };
+            }
+          });
+          localDatabase.lists = newLocalLists;
+
+          loadListsLocal();
+          saveToLocalStorage();
         }, error => {
-          console.error("❌ Errore listener Firebase:", error);
-          alert(`Errore connessione Firebase: ${error.message}\nPassaggio a modalità locale.`);
+          console.error("Errore listener Firebase:", error);
           fallbackToLocal();
         });
     }
@@ -1130,91 +988,48 @@
     async function addList() {
       const name = newListInput.value.trim();
       if (!validateListName(name)) return;
-
-      console.log("➕ Tentativo aggiunta elenco:", name);
-
       if (isOnline && db) {
-        console.log("🔥 Modalità Firebase - salvataggio online");
         try {
-            const docSnapshot = await db.collection("lists").doc(name).get();
-            if (docSnapshot.exists) {
-                alert(`L'elenco "${name}" esiste già.`);
-                return;
+            if ((await db.collection("lists").doc(name).get()).exists) {
+                alert(`L'elenco "${name}" esiste già.`); return;
             }
-            
-            const newOrder = await getNewOrder(db.collection("lists"));
-            
+            const newOrder = listOrder.length;
             await db.collection("lists").doc(name).set({
-                name: name,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                order: newOrder,
-                note: ""
+                name: name, createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                order: newOrder, note: ""
             });
-            console.log("✅ Elenco salvato su Firebase!");
             newListInput.value = "";
             selectList(name);
-
         } catch (error) {
-            console.error("❌ Errore Firebase:", error);
-            alert(`Errore Firebase: ${error.message}\n\nPassaggio a modalità locale...`);
+            console.error("Errore Firebase:", error);
             saveListLocally(name);
         }
-        
       } else {
-        console.log("💻 Modalità locale");
         saveListLocally(name);
       }
     }
 
     function saveListLocally(name) {
-      if (localDatabase.lists[name]) {
-        alert(`L'elenco "${name}" esiste già.`);
-        return;
-      }
-      
-      console.log("💾 Salvataggio locale...");
-      const newOrder = listOrder.length > 0 ? 
-                       Math.max(...listOrder.map(n => localDatabase.lists[n].order || 0)) + 1 
-                       : 0;
-      
-      localDatabase.lists[name] = {
-        name: name,
-        items: [],
-        createdAt: new Date().toISOString(),
-        order: newOrder,
-        note: ""
-      };
-      
-      if (!listOrder.includes(name)) {
-        listOrder.push(name);
-        listOrder.sort((a, b) => (localDatabase.lists[a].order || 0) - (localDatabase.lists[b].order || 0));
-      }
-      
+      if (localDatabase.lists[name]) { alert(`L'elenco "${name}" esiste già.`); return; }
+      const newOrder = listOrder.length;
+      localDatabase.lists[name] = { name: name, items: [], createdAt: new Date().toISOString(), order: newOrder, note: "" };
+      listOrder.push(name);
       saveToLocalStorage();
       newListInput.value = "";
-      console.log("✅ Elenco salvato localmente!");
       loadListsLocal();
       selectList(name);
     }
 
     function deleteList(listName) {
-      if (!confirm(`Eliminare "${listName}"?\n\nTutti gli elementi saranno cancellati.`)) return;
-
+      if (!confirm(`Eliminare "${listName}"?\nTutti gli elementi saranno cancellati.`)) return;
       if (isOnline && db) {
         db.collection("lists").doc(listName).collection("items").get().then(snapshot => {
           const batch = db.batch();
-          snapshot.forEach(doc => {
-            batch.delete(doc.ref);
-          });
+          snapshot.forEach(doc => batch.delete(doc.ref));
           return batch.commit();
-        }).then(() => {
-          return db.collection("lists").doc(listName).delete();
-        }).then(() => {
-          if (currentList === listName) backToLists();
-        }).catch(error => {
-          console.error("Errore eliminando:", error);
-          alert("Errore eliminando: " + error.message);
-        });
+        }).then(() => db.collection("lists").doc(listName).delete())
+          .then(() => { if (currentList === listName) backToLists(); })
+          .catch(error => alert("Errore: " + error.message));
       } else {
         delete localDatabase.lists[listName];
         listOrder = listOrder.filter(name => name !== listName);
@@ -1227,125 +1042,55 @@
     // GESTIONE LISTE - LOCALE
     function loadListsLocal() {
       listNames.innerHTML = "";
-      
-      if (Object.keys(localDatabase.lists).length === 0) {
-        showEmptyLists();
-      } else {
-        const sortedListNames = [...listOrder].sort((a, b) => {
-            const orderA = localDatabase.lists[a].order || 0;
-            const orderB = localDatabase.lists[b].order || 0;
-            return orderA - orderB;
-        });
-
-        sortedListNames.forEach(listName => {
-          if (localDatabase.lists[listName]) {
-            renderListItem(listName, localDatabase.lists[listName]);
-          }
-        });
-      }
-      initSortableLists();
+      if (listOrder.length === 0) showEmptyLists();
+      else listOrder.forEach(listName => { if (localDatabase.lists[listName]) renderListItem(listName); });
+      initializeSortables();
     }
 
     // GESTIONE ELEMENTI - FIREBASE
     function loadItemsFirebase() {
       if (!db || !currentList) return;
       
-      unsubscribeItems = db.collection("lists").doc(currentList).collection("items")
-        .orderBy("order", "asc")
-        .orderBy("timestamp", "asc")
-        .onSnapshot(snapshot => {
-          itemList.innerHTML = "";
-          
-          if (snapshot.empty) {
-            showEmptyItems();
-          } else {
-            const currentLocalItems = [];
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                currentLocalItems.push({ id: doc.id, ...data });
-                renderItem(data, doc.id);
-            });
-            if (localDatabase.lists[currentList]) {
-                localDatabase.lists[currentList].items = currentLocalItems;
-            }
-          }
-          initSortableItems();
-        }, error => {
-          console.error("❌ Errore caricando elementi:", error);
+      unsubscribeItems = db.collection("lists").doc(currentList).collection("items").orderBy("order", "asc").onSnapshot(snapshot => {
+          const currentLocalItems = [];
+          snapshot.forEach(doc => currentLocalItems.push({ id: doc.id, ...doc.data() }));
+          if (localDatabase.lists[currentList]) localDatabase.lists[currentList].items = currentLocalItems;
+          loadItemsLocal();
         });
     }
 
     async function addItem() {
       const text = newItemInput.value.trim();
       if (!validateItemText(text)) return;
-
-      console.log("➕ Tentativo aggiunta elemento:", text, "a lista:", currentList);
-
-      if (isOnline && db && currentList) {
-        console.log("🔥 Modalità Firebase - aggiunta elemento");
-        try {
-            const newOrder = await getNewOrder(db.collection("lists").doc(currentList).collection("items"));
-            
-            await db.collection("lists").doc(currentList).collection("items").add({
-                text: text,
-                done: false,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                order: newOrder
-            });
-            console.log("✅ Elemento aggiunto su Firebase!");
-            newItemInput.value = "";
-        } catch (error) {
-            console.error("❌ Errore aggiunta elemento Firebase:", error);
-            alert(`Errore: ${error.message}\nSalvataggio locale...`);
-            addItemLocally(text);
-        }
-        
-      } else if (currentList) {
-        console.log("💻 Modalità locale - aggiunta elemento");
-        addItemLocally(text);
-      } else {
-        alert("Seleziona un elenco prima di aggiungere elementi.");
+      if (currentList) {
+          const items = localDatabase.lists[currentList]?.items || [];
+          const newOrder = items.length;
+          if (isOnline && db) {
+            try {
+              await db.collection("lists").doc(currentList).collection("items").add({
+                  text: text, done: false,
+                  timestamp: firebase.firestore.FieldValue.serverTimestamp(), order: newOrder
+              });
+              newItemInput.value = "";
+            } catch (error) { addItemLocally(text, newOrder); }
+          } else { addItemLocally(text, newOrder); }
       }
     }
 
-    function addItemLocally(text) {
-      if (!localDatabase.lists[currentList]) {
-        localDatabase.lists[currentList] = { 
-          name: currentList,
-          items: [], 
-          note: "", 
-          createdAt: new Date().toISOString() 
-        };
-      }
-      if (!localDatabase.lists[currentList].items) {
-        localDatabase.lists[currentList].items = [];
-      }
-      
-      const items = localDatabase.lists[currentList].items;
-      const newOrder = items.length > 0 ? Math.max(...items.map(item => item.order || 0)) + 1 : 0;
-
+    function addItemLocally(text, order) {
+      if (!localDatabase.lists[currentList].items) localDatabase.lists[currentList].items = [];
       localDatabase.lists[currentList].items.push({
-        text: text,
-        done: false,
-        timestamp: new Date().toISOString(),
-        order: newOrder,
-        id: Date.now().toString()
+          text: text, done: false, timestamp: new Date().toISOString(), order: order, id: Date.now().toString()
       });
-      
       saveToLocalStorage();
       newItemInput.value = "";
-      console.log("✅ Elemento aggiunto localmente");
       loadItemsLocal();
     }
 
     function updateItem(itemId, updates) {
       if (isOnline && db && currentList) {
         db.collection("lists").doc(currentList).collection("items").doc(itemId)
-          .update(updates)
-          .catch(error => {
-            console.error("Errore aggiornando:", error);
-            alert("Errore: " + error.message);
-          });
+          .update(updates).catch(error => alert("Errore: " + error.message));
       } else if (currentList) {
         const item = localDatabase.lists[currentList].items.find(i => i.id === itemId);
         if (item) {
@@ -1361,8 +1106,7 @@
         db.collection("lists").doc(currentList).collection("items").doc(itemId).delete()
           .catch(error => alert("Errore: " + error.message));
       } else {
-        localDatabase.lists[currentList].items = 
-          localDatabase.lists[currentList].items.filter(i => i.id !== itemId);
+        localDatabase.lists[currentList].items = localDatabase.lists[currentList].items.filter(i => i.id !== itemId);
         saveToLocalStorage();
         loadItemsLocal();
       }
@@ -1371,68 +1115,39 @@
     // GESTIONE ELEMENTI - LOCALE
     function loadItemsLocal() {
       itemList.innerHTML = "";
-      
       const items = localDatabase.lists[currentList]?.items || [];
-      
-      if (items.length === 0) {
-        showEmptyItems();
-      } else {
-        items.sort((a, b) => (a.order || 0) - (b.order || 0));
-        items.forEach(item => renderItem(item, item.id));
-      }
-      initSortableItems();
+      if (items.length === 0) showEmptyItems();
+      else items.forEach(item => renderItem(item, item.id));
+      initializeSortables();
     }
 
     // RENDERING
-    function renderListItem(name, data) {
+    function renderListItem(name) {
       const li = document.createElement("li");
       li.className = "list-item";
       li.dataset.itemId = name;
-
       const dragHandle = document.createElement("span");
       dragHandle.className = "drag-handle";
       dragHandle.textContent = "⋮⋮";
-      
       const nameInput = document.createElement("input");
       nameInput.type = "text";
       nameInput.value = name;
-      nameInput.readOnly = false;
-      nameInput.style.cursor = "text";
-      
-      const originalName = name;
-      
       nameInput.onblur = async () => {
           const newName = nameInput.value.trim();
-          if (newName === originalName || newName === "") {
-              nameInput.value = originalName;
-              return; 
-          }
-          
-          const success = await renameList(originalName, newName);
-          if (!success) {
-              nameInput.value = originalName;
-          }
+          if (newName !== name && newName) {
+            if (!(await renameList(name, newName))) nameInput.value = name;
+          } else { nameInput.value = name; }
       };
-      nameInput.onkeypress = (e) => {
-          if (e.key === 'Enter') {
-              nameInput.blur();
-          }
-      };
-      
+      nameInput.onkeypress = (e) => { if (e.key === 'Enter') nameInput.blur(); };
       const selectBtn = document.createElement("button");
       selectBtn.textContent = "📋";
       selectBtn.className = "action-btn select-btn";
       selectBtn.onclick = () => selectList(name);
-      
       const deleteBtn = document.createElement("button");
       deleteBtn.textContent = "🗑️";
       deleteBtn.className = "action-btn delete-btn";
       deleteBtn.onclick = () => deleteList(name);
-      
-      li.appendChild(dragHandle);
-      li.appendChild(nameInput);
-      li.appendChild(selectBtn);
-      li.appendChild(deleteBtn);
+      li.append(dragHandle, nameInput, selectBtn, deleteBtn);
       listNames.appendChild(li);
     }
 
@@ -1440,104 +1155,50 @@
       const li = document.createElement("li");
       li.className = "list-item";
       li.dataset.itemId = itemId;
-      
       const dragHandle = document.createElement("span");
       dragHandle.className = "drag-handle";
       dragHandle.textContent = "⋮⋮";
-      
       const textInput = document.createElement("input");
       textInput.type = "text";
       textInput.value = item.text;
       textInput.onblur = () => updateItem(itemId, { text: textInput.value });
-      textInput.onkeypress = (e) => {
-        if (e.key === 'Enter') textInput.blur();
-      };
-      
-      if (item.done) {
-        textInput.style.textDecoration = "line-through";
-        textInput.style.color = "#7f8c8d";
-        li.style.backgroundColor = "#f5f5f5";
-      }
-      
+      textInput.onkeypress = (e) => { if (e.key === 'Enter') textInput.blur(); };
+      if (item.done) { textInput.style.textDecoration = "line-through"; textInput.style.color = "#7f8c8d"; }
       const toggleBtn = document.createElement("button");
       toggleBtn.textContent = item.done ? "✅" : "⭕";
       toggleBtn.className = "action-btn select-btn";
       toggleBtn.onclick = () => updateItem(itemId, { done: !item.done });
-      
       const deleteBtn = document.createElement("button");
       deleteBtn.textContent = "🗑️";
       deleteBtn.className = "action-btn delete-btn";
       deleteBtn.onclick = () => deleteItem(itemId);
-      
-      li.appendChild(dragHandle);
-      li.appendChild(textInput);
-      li.appendChild(toggleBtn);
-      li.appendChild(deleteBtn);
+      li.append(dragHandle, textInput, toggleBtn, deleteBtn);
       itemList.appendChild(li);
     }
 
     // UTILITY
-    function validateListName(name) {
-      if (!name) {
-        alert("Il nome dell'elenco non può essere vuoto.");
-        return false;
-      }
-      if (name.length > 50) {
-        alert("Il nome è troppo lungo (max 50 caratteri).");
-        return false;
-      }
-      return true;
-    }
-
-    function validateItemText(text) {
-      if (!text) {
-        alert("Il testo non può essere vuoto.");
-        return false;
-      }
-      if (text.length > 200) {
-        alert("Il testo è troppo lungo (max 200 caratteri).");
-        return false;
-      }
-      return true;
-    }
-
-    function showEmptyLists() {
-      listNames.innerHTML = "<li style='text-align: center; font-style: italic; color: #7f8c8d; border: none; background: transparent;'>Nessun elenco creato</li>";
-    }
-
-    function showEmptyItems() {
-      itemList.innerHTML = "<li style='text-align: center; font-style: italic; color: #7f8c8d; border: none; background: transparent;'>Nessuna cosa da fare</li>";
-    }
+    function validateListName(name) { if (!name) { alert("Il nome dell'elenco non può essere vuoto."); return false; } if (name.length > 50) { alert("Il nome è troppo lungo (max 50 caratteri)."); return false; } return true; }
+    function validateItemText(text) { if (!text) { alert("Il testo non può essere vuoto."); return false; } if (text.length > 200) { alert("Il testo è troppo lungo (max 200 caratteri)."); return false; } return true; }
+    function showEmptyLists() { listNames.innerHTML = "<li style='text-align: center; font-style: italic; color: #7f8c8d; border: none; background: transparent;'>Nessun elenco creato</li>"; }
+    function showEmptyItems() { itemList.innerHTML = "<li style='text-align: center; font-style: italic; color: #7f8c8d; border: none; background: transparent;'>Nessuna cosa da fare</li>"; }
 
     // INIZIALIZZAZIONE
     window.addEventListener('load', () => {
       initFirebase();
+      homeIcon.onclick = backToLists;
+      document.getElementById('pdf-export-logo').addEventListener('click', exportListToPDF);
+      document.getElementById('pdf-export-all-logo').addEventListener('click', exportAllListsToPDF);
     });
 
     // Cleanup
-    window.addEventListener('beforeunload', () => {
-      if (unsubscribeList) unsubscribeList();
-      if (unsubscribeItems) unsubscribeItems();
-    });
+    window.addEventListener('beforeunload', () => { if (unsubscribeList) unsubscribeList(); if (unsubscribeItems) unsubscribeItems(); });
 
-    // Prevenzione zoom accidentale su doppio tap (solo mobile)
+    // Prevenzione zoom
     let lastTouchEnd = 0;
-    document.addEventListener('touchend', function (event) {
-      const now = (new Date()).getTime();
-      if (now - lastTouchEnd <= 300) {
-        event.preventDefault();
-      }
-      lastTouchEnd = now;
-    }, false);
+    document.addEventListener('touchend', function (event) { const now = (new Date()).getTime(); if (now - lastTouchEnd <= 300) { event.preventDefault(); } lastTouchEnd = now; }, false);
 
-    // Focus management migliorato per mobile
-    document.addEventListener('focusin', function(e) {
-      if (e.target.matches('input[type="text"]')) {
-        setTimeout(() => {
-          e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 300);
-      }
-    });
+    // Focus management
+    document.addEventListener('focusin', function(e) { if (e.target.matches('input[type="text"]')) { setTimeout(() => { e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 300); } });
   </script>
 </body>
 </html>
