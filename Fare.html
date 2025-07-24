@@ -284,6 +284,12 @@
       transition: all 0.3s;
       min-height: var(--touch-target);
     }
+    
+    .list-item.updated {
+        border: 2px solid #dc3545;
+        box-shadow: 0 0 8px rgba(220, 53, 69, 0.5);
+    }
+
 
     .list-item.syncing {
       border-left: 4px solid #ffc107;
@@ -348,6 +354,13 @@
     
     .reorder-lists-mode #list-names .move-btn {
         display: flex;
+    }
+    
+    .list-item .item-count {
+        color: #7f8c8d;
+        font-size: 0.9em;
+        margin-left: 0.25rem;
+        white-space: nowrap;
     }
 
     .list-item .move-btn:hover {
@@ -493,6 +506,7 @@
 </head>
 <body>
   <div id="loading-indicator">Elaborazione in corso...</div>
+  <audio id="notification-sound" src="data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaW5nIGNyZWF0ZWQgd2l0aCBSZWFjdGlvbiBUb29sa2l0AABMv+MQAn6QIEgAIIAEQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/8xAmH4Azh0IAABAAAAE4dCqg8MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA/8xAmH4Azh0IAABAAAAE4dCqg8MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAw="></audio>
 
   <div class="container">
     <div id="lists-view">
@@ -564,6 +578,9 @@
       lists: JSON.parse(localStorage.getItem('elenchiFare') || '{}')
     };
     let listOrder = JSON.parse(localStorage.getItem('elenchiOrder') || '[]');
+    
+    let updatedLists = new Set();
+    let hasPlayedSound = false;
 
     // Riferimenti DOM
     const listNames = document.getElementById("list-names");
@@ -578,6 +595,14 @@
     const statusDotSingleList = document.getElementById("status-dot-single-list");
     const noteInput = document.getElementById("note-input");
     const homeIcon = document.getElementById("home-icon");
+
+    // FUNZIONE PER IL SUONO DI NOTIFICA
+    function playNotificationSound() {
+        const sound = document.getElementById('notification-sound');
+        if (sound) {
+            sound.play().catch(e => {}); // Errore gestito silenziosamente
+        }
+    }
 
     // FUNZIONE PDF PER SINGOLO ELENCO
     async function exportListToPDF(event) {
@@ -958,6 +983,11 @@
       listNameDisplay.textContent = name;
       listsView.style.display = 'none';
       singleListView.style.display = 'block';
+      
+      updatedLists.delete(name);
+      hasPlayedSound = false;
+      loadListsLocal();
+
       if (isOnline) loadItemsFirebase(); else loadItemsLocal();
       noteInput.value = localDatabase.lists[currentList]?.note || "";
       updateConnectionStatus();
@@ -977,14 +1007,20 @@
     function loadLists() {
       if (!db) return fallbackToLocal();
       
+      let isFirstLoad = true;
       unsubscribeList = db.collection("lists").orderBy("order", "asc").onSnapshot(snapshot => {
           const newOrderList = [];
           snapshot.forEach(doc => newOrderList.push(doc.id));
           listOrder = newOrderList;
 
           const newLocalLists = localDatabase.lists;
+          let remoteChangeDetected = false;
           snapshot.docChanges().forEach(change => {
             const doc = change.doc;
+            if (!isFirstLoad && !snapshot.metadata.hasPendingWrites && (change.type === "added" || change.type === "modified" || change.type === "removed")) {
+                remoteChangeDetected = true;
+                updatedLists.add(doc.id);
+            }
             if (change.type === "removed") {
                 delete newLocalLists[doc.id];
             } else {
@@ -993,8 +1029,14 @@
           });
           localDatabase.lists = newLocalLists;
 
+          if (remoteChangeDetected && !hasPlayedSound) {
+              playNotificationSound();
+              hasPlayedSound = true;
+          }
+
           loadListsLocal();
           saveToLocalStorage();
+          isFirstLoad = false;
         }, error => {
           console.error("Errore listener Firebase:", error);
           fallbackToLocal();
@@ -1066,10 +1108,19 @@
     function loadItemsFirebase() {
       if (!db || !currentList) return;
       
+      let isFirstLoadItems = true;
       unsubscribeItems = db.collection("lists").doc(currentList).collection("items").orderBy("order", "asc").onSnapshot(snapshot => {
           const currentLocalItems = [];
           snapshot.forEach(doc => currentLocalItems.push({ id: doc.id, ...doc.data() }));
           if (localDatabase.lists[currentList]) localDatabase.lists[currentList].items = currentLocalItems;
+          
+          if (!isFirstLoadItems && !snapshot.metadata.hasPendingWrites) {
+              if (!hasPlayedSound) {
+                  playNotificationSound();
+                  hasPlayedSound = true;
+              }
+          }
+          isFirstLoadItems = false;
           loadItemsLocal();
         });
     }
@@ -1139,6 +1190,15 @@
     function renderListItem(name, index, total) {
       const li = document.createElement("li");
       li.className = "list-item";
+      if (updatedLists.has(name)) {
+        li.classList.add('updated');
+      }
+      
+      const nameWrapper = document.createElement("div");
+      nameWrapper.style.display = "flex";
+      nameWrapper.style.alignItems = "baseline";
+      nameWrapper.style.flex = "1";
+
       const nameInput = document.createElement("input");
       nameInput.type = "text";
       nameInput.value = name;
@@ -1149,6 +1209,14 @@
           } else { nameInput.value = name; }
       };
       nameInput.onkeypress = (e) => { if (e.key === 'Enter') nameInput.blur(); };
+      
+      const itemCount = localDatabase.lists[name]?.items?.length || 0;
+      const countSpan = document.createElement("span");
+      countSpan.className = "item-count";
+      countSpan.textContent = `(${itemCount})`;
+      
+      nameWrapper.append(nameInput, countSpan);
+      
       const moveUpBtn = document.createElement("button");
       moveUpBtn.textContent = "⬆️";
       moveUpBtn.className = "action-btn move-btn";
@@ -1167,7 +1235,7 @@
       deleteBtn.textContent = "🗑️";
       deleteBtn.className = "action-btn delete-btn";
       deleteBtn.onclick = () => deleteList(name);
-      li.append(moveUpBtn, moveDownBtn, nameInput, selectBtn, deleteBtn);
+      li.append(moveUpBtn, moveDownBtn, nameWrapper, selectBtn, deleteBtn);
       listNames.appendChild(li);
     }
 
@@ -1224,6 +1292,19 @@
         event.stopPropagation();
         listsView.classList.toggle('reorder-lists-mode');
       });
+      // Sblocca l'audio al primo tocco
+      function unlockAudio() {
+        const sound = document.getElementById('notification-sound');
+        if (sound) {
+            sound.play().catch(()=>{});
+            sound.pause();
+            sound.currentTime = 0;
+        }
+        window.removeEventListener('click', unlockAudio);
+        window.removeEventListener('touchstart', unlockAudio);
+      }
+      window.addEventListener('click', unlockAudio);
+      window.addEventListener('touchstart', unlockAudio);
     });
 
     // Cleanup
