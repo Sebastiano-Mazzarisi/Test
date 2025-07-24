@@ -600,7 +600,7 @@
     function playNotificationSound() {
         const sound = document.getElementById('notification-sound');
         if (sound) {
-            sound.play().catch(e => {}); // Errore gestito silenziosamente
+            sound.play().catch(e => {});
         }
     }
 
@@ -1008,23 +1008,36 @@
       if (!db) return fallbackToLocal();
       
       let isFirstLoad = true;
-      unsubscribeList = db.collection("lists").orderBy("order", "asc").onSnapshot(snapshot => {
+      unsubscribeList = db.collection("lists").orderBy("order", "asc").onSnapshot(async snapshot => { // Aggiunto async
           const newOrderList = [];
           snapshot.forEach(doc => newOrderList.push(doc.id));
           listOrder = newOrderList;
 
           const newLocalLists = localDatabase.lists;
           let remoteChangeDetected = false;
+
+          // Attendiamo che tutti i conteggi siano stati recuperati
+          const countPromises = snapshot.docs.map(doc => 
+              db.collection("lists").doc(doc.id).collection("items").get()
+                .then(itemsSnapshot => ({ id: doc.id, count: itemsSnapshot.size }))
+          );
+          const counts = await Promise.all(countPromises);
+          const countMap = counts.reduce((acc, {id, count}) => {
+              acc[id] = count;
+              return acc;
+          }, {});
+
           snapshot.docChanges().forEach(change => {
             const doc = change.doc;
-            if (!isFirstLoad && !snapshot.metadata.hasPendingWrites && (change.type === "added" || change.type === "modified" || change.type === "removed")) {
+            if (!isFirstLoad && !snapshot.metadata.hasPendingWrites) {
                 remoteChangeDetected = true;
                 updatedLists.add(doc.id);
             }
             if (change.type === "removed") {
                 delete newLocalLists[doc.id];
             } else {
-                newLocalLists[doc.id] = { ...newLocalLists[doc.id], ...doc.data() };
+                const existingData = newLocalLists[doc.id] || {};
+                newLocalLists[doc.id] = { ...existingData, ...doc.data(), itemCount: countMap[doc.id] };
             }
           });
           localDatabase.lists = newLocalLists;
@@ -1112,13 +1125,18 @@
       unsubscribeItems = db.collection("lists").doc(currentList).collection("items").orderBy("order", "asc").onSnapshot(snapshot => {
           const currentLocalItems = [];
           snapshot.forEach(doc => currentLocalItems.push({ id: doc.id, ...doc.data() }));
-          if (localDatabase.lists[currentList]) localDatabase.lists[currentList].items = currentLocalItems;
+          if (localDatabase.lists[currentList]) {
+              localDatabase.lists[currentList].items = currentLocalItems;
+              localDatabase.lists[currentList].itemCount = currentLocalItems.length;
+          }
           
           if (!isFirstLoadItems && !snapshot.metadata.hasPendingWrites) {
               if (!hasPlayedSound) {
                   playNotificationSound();
                   hasPlayedSound = true;
               }
+              updatedLists.add(currentList);
+              loadListsLocal(); // Ricarica la lista per mostrare il bordo rosso
           }
           isFirstLoadItems = false;
           loadItemsLocal();
@@ -1210,7 +1228,7 @@
       };
       nameInput.onkeypress = (e) => { if (e.key === 'Enter') nameInput.blur(); };
       
-      const itemCount = localDatabase.lists[name]?.items?.length || 0;
+      const itemCount = localDatabase.lists[name]?.itemCount ?? localDatabase.lists[name]?.items?.length ?? 0;
       const countSpan = document.createElement("span");
       countSpan.className = "item-count";
       countSpan.textContent = `(${itemCount})`;
@@ -1295,10 +1313,9 @@
       // Sblocca l'audio al primo tocco
       function unlockAudio() {
         const sound = document.getElementById('notification-sound');
-        if (sound) {
+        if (sound && sound.paused) {
             sound.play().catch(()=>{});
             sound.pause();
-            sound.currentTime = 0;
         }
         window.removeEventListener('click', unlockAudio);
         window.removeEventListener('touchstart', unlockAudio);
