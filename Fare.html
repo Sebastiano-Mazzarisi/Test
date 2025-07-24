@@ -59,9 +59,9 @@
       justify-content: center;
       align-items: flex-start;
       min-height: 100vh;
-      overflow-x: hidden; /* Evita scroll orizzontale */
+      overflow-x: hidden;
       overscroll-behavior: none;
-      color-scheme: light; /* NUOVO: Forza il tema del browser su light */
+      color-scheme: light;
     }
 
     #loading-indicator {
@@ -100,10 +100,9 @@
       gap: 0.5rem;
     }
 
-    /* Stile per le immagini nelle intestazioni */
     h1 img, h2 img {
         vertical-align: middle;
-        height: 1.2em; /* Regola l'altezza dell'icona rispetto al testo */
+        height: 1.2em;
         width: auto;
         margin-right: 0.2em;
     }
@@ -112,7 +111,7 @@
         text-align: center;
         display: flex;
         align-items: center;
-        justify-content: center; /* Ripristina la centratura */
+        justify-content: center;
         gap: 0.5rem;
         cursor: pointer;
         color: var(--accent);
@@ -127,7 +126,7 @@
     }
 
     #current-list-title img {
-        display: inline-block; /* Rende l'immagine visibile qui */
+        display: inline-block;
     }
 
     #home-icon {
@@ -148,7 +147,7 @@
         cursor: pointer;
         font-size: 1.2rem;
         color: var(--accent-dark);
-        margin-left: 0.5rem; /* Aggiunge spazio a sinistra */
+        margin-left: 0.5rem;
     }
 
     #refresh-button {
@@ -161,7 +160,6 @@
     #refresh-button:hover {
         transform: rotate(360deg);
     }
-
 
     .status-dot {
       width: 12px;
@@ -186,8 +184,8 @@
     }
 
     .card {
-      background: #e6f3ff; /* Azzurro pastello */
-      border: 1px solid var(--light-blue-border); /* Bordo blu sulla card */
+      background: #e6f3ff;
+      border: 1px solid var(--light-blue-border);
       border-radius: var(--border-radius-card);
       padding: 1.5rem;
       box-shadow: var(--shadow);
@@ -236,7 +234,7 @@
 
     button {
       font-family: 'Inter', sans-serif;
-      font-size: 20px; /* Previene zoom su iOS */
+      font-size: 20px;
       border-radius: var(--border-radius-element);
       background: var(--accent);
       border: none;
@@ -278,7 +276,7 @@
       gap: 0.5rem;
       padding: 0.4rem 0.8rem;
       background: white;
-      border: 1px solid var(--light-blue-border); /* Bordo blu sui list-item */
+      border: 1px solid var(--light-blue-border);
       border-radius: var(--border-radius-element);
       margin-bottom: 0.3rem;
       transition: all 0.3s;
@@ -289,7 +287,6 @@
         border: 2px solid #dc3545;
         box-shadow: 0 0 8px rgba(220, 53, 69, 0.5);
     }
-
 
     .list-item.syncing {
       border-left: 4px solid #ffc107;
@@ -303,7 +300,7 @@
       flex: 1;
       border: none;
       background: transparent;
-      font-size: 20px; /* Previene zoom su iOS */
+      font-size: 20px;
       padding: 0.2rem 0.5rem;
       margin: 0;
       width: auto;
@@ -341,13 +338,11 @@
         color: #bdc3c7;
     }
     
-    /* Le frecce degli elementi sono nascoste di default */
     #list-names .move-btn,
     #item-list .move-btn {
         display: none;
     }
 
-    /* Mostra le frecce solo quando la modalità riordina è attiva */
     .reorder-mode #item-list .move-btn {
         display: flex;
     }
@@ -400,7 +395,8 @@
     .form-row input[type="text"] {
       flex-grow: 1;
       margin: 0;
-     font-size: 20px;}
+      font-size: 20px;
+    }
 
     .form-row button {
       margin-right: 0;
@@ -483,9 +479,6 @@
     input[type="text"], textarea { background-color: #ffffff !important; color: #2c3e50 !important; font-size: 20px !important; -webkit-text-fill-color: #2c3e50 !important; caret-color: #2c3e50; }
     input[type="text"]:focus, textarea:focus { background-color: #ffffff !important; color: #2c3e50 !important; -webkit-text-fill-color: #2c3e50 !important; }
 
-    /* ================================================= */
-    /* MODIFICHE FINALI INTEGRATE                        */
-    /* ================================================= */
     #new-list-name::placeholder,
     #item-input::placeholder,
     #note-input::placeholder {
@@ -604,6 +597,36 @@
         }
     }
 
+    // FUNZIONE CENTRALIZZATA PER CALCOLARE IL CONTEGGIO ELEMENTI
+    function getItemCount(listName) {
+        if (!localDatabase.lists[listName]) return 0;
+        
+        // Se abbiamo gli elementi memorizzati localmente, contiamoli
+        if (localDatabase.lists[listName].items && Array.isArray(localDatabase.lists[listName].items)) {
+            return localDatabase.lists[listName].items.length;
+        }
+        
+        // Se abbiamo un conteggio memorizzato, usalo
+        if (typeof localDatabase.lists[listName].itemCount === 'number') {
+            return localDatabase.lists[listName].itemCount;
+        }
+        
+        return 0;
+    }
+
+    // FUNZIONE PER AGGIORNARE IL CONTEGGIO ELEMENTI
+    function updateItemCount(listName) {
+        if (!localDatabase.lists[listName]) return;
+        
+        const count = localDatabase.lists[listName].items ? localDatabase.lists[listName].items.length : 0;
+        localDatabase.lists[listName].itemCount = count;
+        
+        // Aggiorna la visualizzazione se siamo nella pagina principale
+        if (currentList === null) {
+            loadListsLocal();
+        }
+    }
+
     // FUNZIONE PDF PER SINGOLO ELENCO
     async function exportListToPDF(event) {
         event.stopPropagation(); 
@@ -705,15 +728,12 @@
             for (const listName of listOrder) {
                 const listData = localDatabase.lists[listName];
                 const note = listData?.note || '';
-                const itemsSnapshot = await db.collection("lists").doc(listName).collection("items").orderBy("order", "asc").get();
+                const items = listData?.items || [];
                 
-                if (!itemsSnapshot.empty || note.trim()) {
+                if (items.length > 0 || note.trim()) {
                     content.push({ text: listName, style: 'listHeader' });
 
-                    if (!itemsSnapshot.empty) {
-                        const items = [];
-                        itemsSnapshot.forEach(doc => items.push(doc.data()));
-
+                    if (items.length > 0) {
                         const midpoint = Math.ceil(items.length / 2);
                         const firstHalf = items.slice(0, midpoint);
                         const secondHalf = items.slice(midpoint);
@@ -773,7 +793,6 @@
             }
         }
     }
-
 
     // Test di connettività più robusto
     function initFirebase() {
@@ -879,6 +898,7 @@
     
     async function updateItemsOrder(items) {
         items.forEach((item, index) => item.order = index);
+        updateItemCount(currentList);
         saveToLocalStorage();
         if (isOnline && db) {
             const batch = db.batch();
@@ -904,7 +924,11 @@
     
     // Salvataggio locale
     function saveToLocalStorage() {
-      listOrder.forEach((name, index) => { if(localDatabase.lists[name]) localDatabase.lists[name].order = index; });
+      listOrder.forEach((name, index) => { 
+        if(localDatabase.lists[name]) {
+          localDatabase.lists[name].order = index;
+        }
+      });
       localStorage.setItem('elenchiOrder', JSON.stringify(listOrder));
       localStorage.setItem('elenchiFare', JSON.stringify(localDatabase.lists));
     }
@@ -1008,38 +1032,71 @@
       if (!db) return fallbackToLocal();
       
       let isFirstLoad = true;
-      unsubscribeList = db.collection("lists").orderBy("order", "asc").onSnapshot(async snapshot => { // Aggiunto async
+      unsubscribeList = db.collection("lists").orderBy("order", "asc").onSnapshot(async snapshot => {
           const newOrderList = [];
-          snapshot.forEach(doc => newOrderList.push(doc.id));
-          listOrder = newOrderList;
+          
+          // Prima raccogli tutti i documenti e il loro ordine
+          const docsWithOrder = [];
+          snapshot.forEach(doc => {
+              docsWithOrder.push({ id: doc.id, data: doc.data() });
+          });
+          
+          // Ordina per campo order se presente, altrimenti mantieni l'ordine del snapshot
+          docsWithOrder.sort((a, b) => {
+              const orderA = a.data.order ?? 999999;
+              const orderB = b.data.order ?? 999999;
+              return orderA - orderB;
+          });
+          
+          // Aggiorna listOrder
+          listOrder = docsWithOrder.map(doc => doc.id);
 
-          const newLocalLists = localDatabase.lists;
+          const newLocalLists = {};
           let remoteChangeDetected = false;
 
-          // Attendiamo che tutti i conteggi siano stati recuperati
-          const countPromises = snapshot.docs.map(doc => 
-              db.collection("lists").doc(doc.id).collection("items").get()
-                .then(itemsSnapshot => ({ id: doc.id, count: itemsSnapshot.size }))
-          );
-          const counts = await Promise.all(countPromises);
-          const countMap = counts.reduce((acc, {id, count}) => {
-              acc[id] = count;
-              return acc;
-          }, {});
+          // Per ogni lista, ottieni il conteggio degli elementi
+          for (const docData of docsWithOrder) {
+              const listName = docData.id;
+              const listInfo = docData.data;
+              
+              try {
+                  const itemsSnapshot = await db.collection("lists").doc(listName).collection("items").get();
+                  const itemCount = itemsSnapshot.size;
+                  
+                  // Mantieni i dati esistenti se li abbiamo
+                  const existingData = localDatabase.lists[listName] || {};
+                  
+                  newLocalLists[listName] = {
+                      ...existingData,
+                      ...listInfo,
+                      itemCount: itemCount
+                  };
+                  
+                  // Se abbiamo gli elementi già caricati, mantienili
+                  if (existingData.items) {
+                      newLocalLists[listName].items = existingData.items;
+                  }
+                  
+              } catch (error) {
+                  console.error(`Errore nel conteggio elementi per ${listName}:`, error);
+                  // Usa i dati esistenti come fallback
+                  const existingData = localDatabase.lists[listName] || {};
+                  newLocalLists[listName] = {
+                      ...existingData,
+                      ...listInfo,
+                      itemCount: existingData.itemCount || 0
+                  };
+              }
+          }
 
+          // Controlla se ci sono stati cambiamenti remoti
           snapshot.docChanges().forEach(change => {
-            const doc = change.doc;
             if (!isFirstLoad && !snapshot.metadata.hasPendingWrites) {
                 remoteChangeDetected = true;
-                updatedLists.add(doc.id);
-            }
-            if (change.type === "removed") {
-                delete newLocalLists[doc.id];
-            } else {
-                const existingData = newLocalLists[doc.id] || {};
-                newLocalLists[doc.id] = { ...existingData, ...doc.data(), itemCount: countMap[doc.id] };
+                updatedLists.add(change.doc.id);
             }
           });
+
           localDatabase.lists = newLocalLists;
 
           if (remoteChangeDetected && !hasPlayedSound) {
@@ -1083,7 +1140,14 @@
     function saveListLocally(name) {
       if (localDatabase.lists[name]) { alert(`L'elenco "${name}" esiste già.`); return; }
       const newOrder = listOrder.length;
-      localDatabase.lists[name] = { name: name, items: [], createdAt: new Date().toISOString(), order: newOrder, note: "" };
+      localDatabase.lists[name] = { 
+        name: name, 
+        items: [], 
+        createdAt: new Date().toISOString(), 
+        order: newOrder, 
+        note: "",
+        itemCount: 0
+      };
       listOrder.push(name);
       saveToLocalStorage();
       newListInput.value = "";
@@ -1113,8 +1177,15 @@
     // GESTIONE LISTE - LOCALE
     function loadListsLocal() {
       listNames.innerHTML = "";
-      if (listOrder.length === 0) showEmptyLists();
-      else listOrder.forEach((listName, index) => { if (localDatabase.lists[listName]) renderListItem(listName, index, listOrder.length); });
+      if (listOrder.length === 0) {
+        showEmptyLists();
+      } else {
+        listOrder.forEach((listName, index) => { 
+          if (localDatabase.lists[listName]) {
+            renderListItem(listName, index, listOrder.length); 
+          }
+        });
+      }
     }
 
     // GESTIONE ELEMENTI - FIREBASE
@@ -1125,6 +1196,7 @@
       unsubscribeItems = db.collection("lists").doc(currentList).collection("items").orderBy("order", "asc").onSnapshot(snapshot => {
           const currentLocalItems = [];
           snapshot.forEach(doc => currentLocalItems.push({ id: doc.id, ...doc.data() }));
+          
           if (localDatabase.lists[currentList]) {
               localDatabase.lists[currentList].items = currentLocalItems;
               localDatabase.lists[currentList].itemCount = currentLocalItems.length;
@@ -1157,15 +1229,19 @@
               });
               newItemInput.value = "";
             } catch (error) { addItemLocally(text, newOrder); }
-          } else { addItemLocally(text, newOrder); }
+          } else { 
+            addItemLocally(text, newOrder); 
+          }
       }
     }
 
     function addItemLocally(text, order) {
       if (!localDatabase.lists[currentList].items) localDatabase.lists[currentList].items = [];
-      localDatabase.lists[currentList].items.push({
+      const newItem = {
           text: text, done: false, timestamp: new Date().toISOString(), order: order, id: Date.now().toString()
-      });
+      };
+      localDatabase.lists[currentList].items.push(newItem);
+      updateItemCount(currentList);
       saveToLocalStorage();
       newItemInput.value = "";
       loadItemsLocal();
@@ -1191,6 +1267,7 @@
           .catch(error => alert("Errore: " + error.message));
       } else {
         localDatabase.lists[currentList].items = localDatabase.lists[currentList].items.filter(i => i.id !== itemId);
+        updateItemCount(currentList);
         saveToLocalStorage();
         loadItemsLocal();
       }
@@ -1228,7 +1305,8 @@
       };
       nameInput.onkeypress = (e) => { if (e.key === 'Enter') nameInput.blur(); };
       
-      const itemCount = localDatabase.lists[name]?.itemCount ?? localDatabase.lists[name]?.items?.length ?? 0;
+      // Usa la funzione centralizzata per il conteggio
+      const itemCount = getItemCount(name);
       const countSpan = document.createElement("span");
       countSpan.className = "item-count";
       countSpan.textContent = `(${itemCount})`;
@@ -1240,19 +1318,23 @@
       moveUpBtn.className = "action-btn move-btn";
       moveUpBtn.onclick = () => moveList(name, 'up');
       if (index === 0) moveUpBtn.style.visibility = 'hidden';
+      
       const moveDownBtn = document.createElement("button");
       moveDownBtn.textContent = "⬇️";
       moveDownBtn.className = "action-btn move-btn";
       moveDownBtn.onclick = () => moveList(name, 'down');
       if (index === total - 1) moveDownBtn.style.visibility = 'hidden';
+      
       const selectBtn = document.createElement("button");
       selectBtn.textContent = "📋";
       selectBtn.className = "action-btn select-btn";
       selectBtn.onclick = () => selectList(name);
+      
       const deleteBtn = document.createElement("button");
       deleteBtn.textContent = "🗑️";
       deleteBtn.className = "action-btn delete-btn";
       deleteBtn.onclick = () => deleteList(name);
+      
       li.append(moveUpBtn, moveDownBtn, nameWrapper, selectBtn, deleteBtn);
       listNames.appendChild(li);
     }
@@ -1261,39 +1343,75 @@
       const li = document.createElement("li");
       li.className = "list-item";
       li.dataset.itemId = itemId;
+      
       const moveUpBtn = document.createElement("button");
       moveUpBtn.textContent = "⬆️";
       moveUpBtn.className = "action-btn move-btn";
       moveUpBtn.onclick = () => moveItem(itemId, 'up');
       if (index === 0) moveUpBtn.style.visibility = 'hidden';
+      
       const moveDownBtn = document.createElement("button");
       moveDownBtn.textContent = "⬇️";
       moveDownBtn.className = "action-btn move-btn";
       moveDownBtn.onclick = () => moveItem(itemId, 'down');
       if (index === total - 1) moveDownBtn.style.visibility = 'hidden';
+      
       const textInput = document.createElement("input");
       textInput.type = "text";
       textInput.value = item.text;
       textInput.onblur = () => updateItem(itemId, { text: textInput.value });
       textInput.onkeypress = (e) => { if (e.key === 'Enter') textInput.blur(); };
-      if (item.done) { textInput.style.textDecoration = "line-through"; textInput.style.color = "#7f8c8d"; }
+      if (item.done) { 
+        textInput.style.textDecoration = "line-through"; 
+        textInput.style.color = "#7f8c8d"; 
+      }
+      
       const toggleBtn = document.createElement("button");
       toggleBtn.textContent = item.done ? "✅" : "⭕";
       toggleBtn.className = "action-btn select-btn";
       toggleBtn.onclick = () => updateItem(itemId, { done: !item.done });
+      
       const deleteBtn = document.createElement("button");
       deleteBtn.textContent = "🗑️";
       deleteBtn.className = "action-btn delete-btn";
       deleteBtn.onclick = () => deleteItem(itemId);
+      
       li.append(moveUpBtn, moveDownBtn, textInput, toggleBtn, deleteBtn);
       itemList.appendChild(li);
     }
 
     // UTILITY
-    function validateListName(name) { if (!name) { alert("Il nome dell'elenco non può essere vuoto."); return false; } if (name.length > 50) { alert("Il nome è troppo lungo (max 50 caratteri)."); return false; } return true; }
-    function validateItemText(text) { if (!text) { alert("Il testo non può essere vuoto."); return false; } if (text.length > 200) { alert("Il testo è troppo lungo (max 200 caratteri)."); return false; } return true; }
-    function showEmptyLists() { listNames.innerHTML = "<li style='text-align: center; font-style: italic; color: #7f8c8d; border: none; background: transparent;'>Nessun elenco creato</li>"; }
-    function showEmptyItems() { itemList.innerHTML = "<li style='text-align: center; font-style: italic; color: #7f8c8d; border: none; background: transparent;'>Nessuna cosa da fare</li>"; }
+    function validateListName(name) { 
+      if (!name) { 
+        alert("Il nome dell'elenco non può essere vuoto."); 
+        return false; 
+      } 
+      if (name.length > 50) { 
+        alert("Il nome è troppo lungo (max 50 caratteri)."); 
+        return false; 
+      } 
+      return true; 
+    }
+    
+    function validateItemText(text) { 
+      if (!text) { 
+        alert("Il testo non può essere vuoto."); 
+        return false; 
+      } 
+      if (text.length > 200) { 
+        alert("Il testo è troppo lungo (max 200 caratteri)."); 
+        return false; 
+      } 
+      return true; 
+    }
+    
+    function showEmptyLists() { 
+      listNames.innerHTML = "<li style='text-align: center; font-style: italic; color: #7f8c8d; border: none; background: transparent;'>Nessun elenco creato</li>"; 
+    }
+    
+    function showEmptyItems() { 
+      itemList.innerHTML = "<li style='text-align: center; font-style: italic; color: #7f8c8d; border: none; background: transparent;'>Nessuna cosa da fare</li>"; 
+    }
 
     // INIZIALIZZAZIONE
     window.addEventListener('load', () => {
@@ -1310,6 +1428,7 @@
         event.stopPropagation();
         listsView.classList.toggle('reorder-lists-mode');
       });
+      
       // Sblocca l'audio al primo tocco
       function unlockAudio() {
         const sound = document.getElementById('notification-sound');
@@ -1325,14 +1444,29 @@
     });
 
     // Cleanup
-    window.addEventListener('beforeunload', () => { if (unsubscribeList) unsubscribeList(); if (unsubscribeItems) unsubscribeItems(); });
+    window.addEventListener('beforeunload', () => { 
+      if (unsubscribeList) unsubscribeList(); 
+      if (unsubscribeItems) unsubscribeItems(); 
+    });
 
     // Prevenzione zoom
     let lastTouchEnd = 0;
-    document.addEventListener('touchend', function (event) { const now = (new Date()).getTime(); if (now - lastTouchEnd <= 300) { event.preventDefault(); } lastTouchEnd = now; }, false);
+    document.addEventListener('touchend', function (event) { 
+      const now = (new Date()).getTime(); 
+      if (now - lastTouchEnd <= 300) { 
+        event.preventDefault(); 
+      } 
+      lastTouchEnd = now; 
+    }, false);
 
     // Focus management
-    document.addEventListener('focusin', function(e) { if (e.target.matches('input[type="text"]')) { setTimeout(() => { e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 300); } });
+    document.addEventListener('focusin', function(e) { 
+      if (e.target.matches('input[type="text"]')) { 
+        setTimeout(() => { 
+          e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }); 
+        }, 300); 
+      } 
+    });
   </script>
 </body>
 </html>
