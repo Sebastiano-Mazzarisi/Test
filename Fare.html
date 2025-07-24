@@ -112,7 +112,7 @@
         text-align: center;
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: center; /* Ripristina la centratura */
         gap: 0.5rem;
         cursor: pointer;
         color: var(--accent);
@@ -142,6 +142,13 @@
     }
     #home-icon:hover {
         color: var(--accent);
+    }
+    
+    .toggle-reorder-btn {
+        cursor: pointer;
+        font-size: 1.2rem;
+        color: var(--accent-dark);
+        margin-left: 0.5rem; /* Aggiunge spazio a sinistra */
     }
 
     #refresh-button {
@@ -285,25 +292,7 @@
     .list-item.error {
       border-left: 4px solid #dc3545;
     }
-
-    .drag-handle {
-      color: #999;
-      cursor: grab;
-      font-size: 1rem;
-      padding: 0.1rem;
-      user-select: none;
-      min-width: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      touch-action: manipulation;
-    }
-
-    .drag-handle:hover {
-      color: #666;
-      cursor: grab;
-    }
-
+    
     .list-item input {
       flex: 1;
       border: none;
@@ -340,7 +329,32 @@
       touch-action: none;
       user-select: none;
     }
+    
+    .list-item .move-btn {
+        border: 2px solid #bdc3c7;
+        color: #bdc3c7;
+    }
+    
+    /* Le frecce degli elementi sono nascoste di default */
+    #list-names .move-btn,
+    #item-list .move-btn {
+        display: none;
+    }
 
+    /* Mostra le frecce solo quando la modalità riordina è attiva */
+    .reorder-mode #item-list .move-btn {
+        display: flex;
+    }
+    
+    .reorder-lists-mode #list-names .move-btn {
+        display: flex;
+    }
+
+    .list-item .move-btn:hover {
+        background: #bdc3c7;
+        color: white;
+    }
+    
     .list-item .select-btn {
       border: 2px solid #28a745;
       color: #28a745;
@@ -419,7 +433,6 @@
       h1, #current-list-title { font-size: 1.75rem; margin-bottom: 0.5rem; gap: 0.25rem; }
       .card { padding: 0.75rem; }
       .list-item { gap: 0.25rem; padding: 0.25rem 0.5rem; margin-bottom: 0.15rem; }
-      .drag-handle { min-width: 20px; font-size: 0.9rem; }
       .list-item input { font-size: 18px; padding: 0.2rem 0.4rem; }
       .list-item .action-btn { width: 32px; height: 32px; margin: 0 1px; font-size: 0.9rem; }
       .form-row { gap: 0.5rem; margin-top: 0.75rem; }
@@ -453,7 +466,6 @@
     .list-item input[style*="text-decoration: line-through"] { color: #cccccc !important; }
     
     #status-dot-single-list { display: inline-block !important; margin-left: 0.5rem; vertical-align: middle; }
-    .sortable-ghost { opacity: 0.4; background-color: #f0f0f0; border: 1px dashed var(--accent); }
     
     input[type="text"], textarea { background-color: #ffffff !important; color: #2c3e50 !important; font-size: 20px !important; -webkit-text-fill-color: #2c3e50 !important; caret-color: #2c3e50; }
     input[type="text"]:focus, textarea:focus { background-color: #ffffff !important; color: #2c3e50 !important; -webkit-text-fill-color: #2c3e50 !important; }
@@ -488,6 +500,7 @@
           <img id="pdf-export-all-logo" src="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Fare.png" alt="Icona Elenchi" title="Esporta tutti gli elenchi in PDF">
           Elenchi <span id="status-dot" class="status-dot offline"></span>
           <span id="refresh-button" title="Ricarica la pagina">🔄</span>
+          <span id="toggle-reorder-lists-btn" class="toggle-reorder-btn" title="Attiva/Disattiva riordinamento">↕️</span>
       </h1>
       <div class="section">
         <div class="card">
@@ -501,11 +514,12 @@
     </div>
 
     <div id="single-list-view" style="display: none;">
-      <h1 id="current-list-title" style="cursor: pointer; color: var(--accent);">
+      <h1 id="current-list-title">
           <img id="pdf-export-logo" src="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Fare.png" alt="Icona Elenco" style="cursor: pointer;" title="Esporta in PDF">
           <span id="list-name-display"></span>
           <span id="status-dot-single-list" class="status-dot offline"></span>
           <span id="home-icon">🏠</span>
+          <span id="toggle-reorder-btn" class="toggle-reorder-btn" title="Attiva/Disattiva riordinamento">↕️</span>
       </h1>
       <div class="section">
         <div class="card">
@@ -526,7 +540,6 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
   
   <script>
     // ✅ CONFIGURAZIONE FIREBASE - QUELLA REALE
@@ -566,9 +579,6 @@
     const noteInput = document.getElementById("note-input");
     const homeIcon = document.getElementById("home-icon");
 
-    let sortableLists = null;
-    let sortableItems = null;
-
     // FUNZIONE PDF PER SINGOLO ELENCO
     async function exportListToPDF(event) {
         event.stopPropagation(); 
@@ -597,8 +607,15 @@
                 const midpoint = Math.ceil(items.length / 2);
                 const firstHalf = items.slice(0, midpoint);
                 const secondHalf = items.slice(midpoint);
-                const tableBodyFirst = firstHalf.map((item, index) => [(index + 1).toString(), item.text]);
-                const tableBodySecond = secondHalf.map((item, index) => [(midpoint + index + 1).toString(), item.text]);
+                
+                const tableBodyFirst = firstHalf.map((item, index) => [
+                    (index + 1).toString(),
+                    item.done ? { text: item.text, decoration: 'lineThrough', color: '#7f8c8d' } : item.text
+                ]);
+                const tableBodySecond = secondHalf.map((item, index) => [
+                    (midpoint + index + 1).toString(),
+                    item.done ? { text: item.text, decoration: 'lineThrough', color: '#7f8c8d' } : item.text
+                ]);
                 
                 if (items.length % 2 !== 0) {
                     tableBodySecond.push([' ', ' ']);
@@ -630,7 +647,6 @@
                 }
             };
             
-            // Metodo robusto per caricare il PDF nella nuova finestra
             const pdfDoc = pdfMake.createPdf(docDefinition);
             const blob = await new Promise(resolve => pdfDoc.getBlob(resolve));
             const blobUrl = URL.createObjectURL(blob);
@@ -677,8 +693,14 @@
                         const firstHalf = items.slice(0, midpoint);
                         const secondHalf = items.slice(midpoint);
 
-                        const tableBodyFirst = firstHalf.map((item, index) => [(index + 1).toString(), item.text]);
-                        const tableBodySecond = secondHalf.map((item, index) => [(midpoint + index + 1).toString(), item.text]);
+                        const tableBodyFirst = firstHalf.map((item, index) => [
+                            (index + 1).toString(),
+                            item.done ? { text: item.text, decoration: 'lineThrough', color: '#7f8c8d' } : item.text
+                        ]);
+                        const tableBodySecond = secondHalf.map((item, index) => [
+                            (midpoint + index + 1).toString(),
+                            item.done ? { text: item.text, decoration: 'lineThrough', color: '#7f8c8d' } : item.text
+                        ]);
 
                         if (items.length % 2 !== 0) {
                             tableBodySecond.push([' ', ' ']);
@@ -802,29 +824,49 @@
       }
     }
     
-    // Funzione per inizializzare SortableJS
-    function initSortable(element, group, onEndCallback) {
-        if (group.sortable) { group.sortable.destroy(); }
-        group.sortable = Sortable.create(element, {
-            animation: 150,
-            handle: '.drag-handle',
-            ghostClass: 'sortable-ghost',
-            forceFallback: true,
-            delay: 100,
-            delayOnTouchOnly: true,
-            onEnd: onEndCallback
-        });
+    // NUOVE FUNZIONI PER SPOSTAMENTO CON FRECCE
+    async function moveItem(itemId, direction) {
+        if (!currentList) return;
+        let items = localDatabase.lists[currentList].items;
+        const itemIndex = items.findIndex(i => i.id === itemId);
+
+        if (itemIndex === -1) return;
+        if (direction === 'up' && itemIndex === 0) return;
+        if (direction === 'down' && itemIndex === items.length - 1) return;
+
+        const targetIndex = direction === 'up' ? itemIndex - 1 : itemIndex + 1;
+        [items[itemIndex], items[targetIndex]] = [items[targetIndex], items[itemIndex]];
+        updateItemsOrder(items);
+        loadItemsLocal();
+    }
+    
+    async function moveList(listName, direction) {
+        const listIndex = listOrder.indexOf(listName);
+        if (listIndex === -1) return;
+        if (direction === 'up' && listIndex === 0) return;
+        if (direction === 'down' && listIndex === listOrder.length - 1) return;
+
+        const targetIndex = direction === 'up' ? listIndex - 1 : listIndex + 1;
+        [listOrder[listIndex], listOrder[targetIndex]] = [listOrder[targetIndex], listOrder[listIndex]];
+        updateListsOrder();
+        loadListsLocal();
+    }
+    
+    async function updateItemsOrder(items) {
+        items.forEach((item, index) => item.order = index);
+        saveToLocalStorage();
+        if (isOnline && db) {
+            const batch = db.batch();
+            const collectionRef = db.collection("lists").doc(currentList).collection("items");
+            items.forEach(item => {
+                batch.update(collectionRef.doc(item.id), { order: item.order });
+            });
+            await batch.commit().catch(err => console.error("Errore Sincronizzazione Ordine Elementi:", err));
+        }
     }
 
-    // Callback per riordinare le liste
-    async function onListSortEnd(evt) {
-        if (evt.oldIndex === evt.newIndex) return;
-
-        const [movedItem] = listOrder.splice(evt.oldIndex, 1);
-        listOrder.splice(evt.newIndex, 0, movedItem);
-        
+    async function updateListsOrder() {
         saveToLocalStorage();
-
         if (isOnline && db) {
             const batch = db.batch();
             listOrder.forEach((listId, index) => {
@@ -833,36 +875,6 @@
             });
             await batch.commit().catch(err => console.error("Errore Sincronizzazione Ordine Liste:", err));
         }
-    }
-
-    // Callback per riordinare gli elementi
-    async function onItemSortEnd(evt) {
-        if (evt.oldIndex === evt.newIndex || !currentList) return;
-
-        const itemsInDom = Array.from(itemList.children);
-        const orderedItemIds = itemsInDom.map(li => li.dataset.itemId);
-        
-        let localItems = localDatabase.lists[currentList].items;
-        localItems.sort((a, b) => orderedItemIds.indexOf(a.id) - orderedItemIds.indexOf(b.id));
-
-        localItems.forEach((item, index) => item.order = index);
-        saveToLocalStorage();
-
-        if (isOnline && db) {
-            const batch = db.batch();
-            const collectionRef = db.collection("lists").doc(currentList).collection("items");
-            localItems.forEach((item) => {
-                const docRef = collectionRef.doc(item.id);
-                batch.update(docRef, { order: item.order });
-            });
-            await batch.commit().catch(err => console.error("Errore Sincronizzazione Ordine Elementi:", err));
-        }
-    }
-
-    // Funzione per inizializzare i componenti Sortable
-    function initializeSortables() {
-        initSortable(listNames, { sortable: sortableLists }, onListSortEnd);
-        initSortable(itemList, { sortable: sortableItems }, onItemSortEnd);
     }
     
     // Salvataggio locale
@@ -1047,8 +1059,7 @@
     function loadListsLocal() {
       listNames.innerHTML = "";
       if (listOrder.length === 0) showEmptyLists();
-      else listOrder.forEach(listName => { if (localDatabase.lists[listName]) renderListItem(listName); });
-      initializeSortables();
+      else listOrder.forEach((listName, index) => { if (localDatabase.lists[listName]) renderListItem(listName, index, listOrder.length); });
     }
 
     // GESTIONE ELEMENTI - FIREBASE
@@ -1121,18 +1132,13 @@
       itemList.innerHTML = "";
       const items = localDatabase.lists[currentList]?.items || [];
       if (items.length === 0) showEmptyItems();
-      else items.forEach(item => renderItem(item, item.id));
-      initializeSortables();
+      else items.forEach((item, index) => renderItem(item, item.id, index, items.length));
     }
 
     // RENDERING
-    function renderListItem(name) {
+    function renderListItem(name, index, total) {
       const li = document.createElement("li");
       li.className = "list-item";
-      li.dataset.itemId = name;
-      const dragHandle = document.createElement("span");
-      dragHandle.className = "drag-handle";
-      dragHandle.textContent = "⋮⋮";
       const nameInput = document.createElement("input");
       nameInput.type = "text";
       nameInput.value = name;
@@ -1143,6 +1149,16 @@
           } else { nameInput.value = name; }
       };
       nameInput.onkeypress = (e) => { if (e.key === 'Enter') nameInput.blur(); };
+      const moveUpBtn = document.createElement("button");
+      moveUpBtn.textContent = "⬆️";
+      moveUpBtn.className = "action-btn move-btn";
+      moveUpBtn.onclick = () => moveList(name, 'up');
+      if (index === 0) moveUpBtn.style.visibility = 'hidden';
+      const moveDownBtn = document.createElement("button");
+      moveDownBtn.textContent = "⬇️";
+      moveDownBtn.className = "action-btn move-btn";
+      moveDownBtn.onclick = () => moveList(name, 'down');
+      if (index === total - 1) moveDownBtn.style.visibility = 'hidden';
       const selectBtn = document.createElement("button");
       selectBtn.textContent = "📋";
       selectBtn.className = "action-btn select-btn";
@@ -1151,17 +1167,24 @@
       deleteBtn.textContent = "🗑️";
       deleteBtn.className = "action-btn delete-btn";
       deleteBtn.onclick = () => deleteList(name);
-      li.append(dragHandle, nameInput, selectBtn, deleteBtn);
+      li.append(moveUpBtn, moveDownBtn, nameInput, selectBtn, deleteBtn);
       listNames.appendChild(li);
     }
 
-    function renderItem(item, itemId) {
+    function renderItem(item, itemId, index, total) {
       const li = document.createElement("li");
       li.className = "list-item";
       li.dataset.itemId = itemId;
-      const dragHandle = document.createElement("span");
-      dragHandle.className = "drag-handle";
-      dragHandle.textContent = "⋮⋮";
+      const moveUpBtn = document.createElement("button");
+      moveUpBtn.textContent = "⬆️";
+      moveUpBtn.className = "action-btn move-btn";
+      moveUpBtn.onclick = () => moveItem(itemId, 'up');
+      if (index === 0) moveUpBtn.style.visibility = 'hidden';
+      const moveDownBtn = document.createElement("button");
+      moveDownBtn.textContent = "⬇️";
+      moveDownBtn.className = "action-btn move-btn";
+      moveDownBtn.onclick = () => moveItem(itemId, 'down');
+      if (index === total - 1) moveDownBtn.style.visibility = 'hidden';
       const textInput = document.createElement("input");
       textInput.type = "text";
       textInput.value = item.text;
@@ -1176,7 +1199,7 @@
       deleteBtn.textContent = "🗑️";
       deleteBtn.className = "action-btn delete-btn";
       deleteBtn.onclick = () => deleteItem(itemId);
-      li.append(dragHandle, textInput, toggleBtn, deleteBtn);
+      li.append(moveUpBtn, moveDownBtn, textInput, toggleBtn, deleteBtn);
       itemList.appendChild(li);
     }
 
@@ -1193,6 +1216,14 @@
       document.getElementById('pdf-export-logo').addEventListener('click', exportListToPDF);
       document.getElementById('pdf-export-all-logo').addEventListener('click', exportAllListsToPDF);
       document.getElementById('refresh-button').addEventListener('click', function() { location.reload(true); });
+      document.getElementById('toggle-reorder-btn').addEventListener('click', (event) => {
+        event.stopPropagation();
+        singleListView.classList.toggle('reorder-mode');
+      });
+      document.getElementById('toggle-reorder-lists-btn').addEventListener('click', (event) => {
+        event.stopPropagation();
+        listsView.classList.toggle('reorder-lists-mode');
+      });
     });
 
     // Cleanup
