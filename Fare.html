@@ -216,10 +216,9 @@
         transition: all 0.3s;
     }
     
-    /* MODIFICA CHIAVE: Usa un giallo più tenue */
     .list-item.completed {
-      background-color: #FFFFE0; /* Giallo tenue (lightyellow) */
-      border-color: #E0E0B8; /* Bordo coordinato */
+      background-color: #FFFFE0; 
+      border-color: #E0E0B8;
     }
     
     .list-item.completed input {
@@ -412,6 +411,12 @@
     let localDatabase = { lists: JSON.parse(localStorage.getItem('elenchiFare') || '{}') };
     let listOrder = JSON.parse(localStorage.getItem('elenchiOrder') || '[]');
     
+    // Variabili per lo swipe
+    let touchstartX = 0;
+    let touchendX = 0;
+    let touchstartY = 0;
+    let touchendY = 0;
+
     const listNames = document.getElementById("list-names");
     const itemList = document.getElementById("item-list");
     const listNameDisplay = document.getElementById("list-name-display");
@@ -862,9 +867,43 @@
     function validateItemText(text) { if (!text || text.length > 200) { alert("Testo non valido (max 200 caratteri)."); return false; } return true; }
     function showEmptyLists() { listNames.innerHTML = "<li style='text-align: center; font-style: italic; color: #7f8c8d; border: none; background: transparent;'>Nessun elenco</li>"; }
     function showEmptyItems() { itemList.innerHTML = "<li style='text-align: center; font-style: italic; color: #7f8c8d; border: none; background: transparent;'>Nessuna cosa da fare</li>"; }
+    
+    // Funzione per gestire la navigazione (usata da frecce e swipe)
+    function navigateList(direction) {
+        if (!currentList) return;
+        const currentIndex = listOrder.indexOf(currentList);
+        let newIndex = -1;
 
+        if (direction === 'next' && currentIndex < listOrder.length - 1) {
+            newIndex = currentIndex + 1;
+        } else if (direction === 'prev' && currentIndex > 0) {
+            newIndex = currentIndex - 1;
+        }
+
+        if (newIndex !== -1) {
+            selectList(listOrder[newIndex]);
+        }
+    }
+
+    // Funzione per gestire lo swipe
+    function handleSwipe() {
+        const swipeThreshold = 50; // Distanza minima per uno swipe
+        const verticalThreshold = 75; // Distanza verticale massima consentita
+        const dx = touchendX - touchstartX;
+        const dy = touchendY - touchstartY;
+
+        if (Math.abs(dx) > swipeThreshold && Math.abs(dy) < verticalThreshold) {
+            if (dx < 0) { // Swipe verso sinistra
+                navigateList('next');
+            } else { // Swipe verso destra
+                navigateList('prev');
+            }
+        }
+    }
+    
     window.addEventListener('load', () => {
-        initFirebase(); homeIcon.onclick = backToLists;
+        initFirebase();
+        homeIcon.onclick = backToLists;
         document.getElementById('pdf-export-logo').addEventListener('click', exportListToPDF);
         document.getElementById('pdf-export-all-logo').addEventListener('click', exportAllListsToPDF);
         manageListsBtn.addEventListener('click', e => { e.stopPropagation(); toggleManageMode(); });
@@ -872,6 +911,29 @@
         newListInput.addEventListener('keypress', e => { if (e.key === 'Enter') addList(); });
         newItemInput.addEventListener('keypress', e => { if (e.key === 'Enter') addItem(); });
         noteInput.addEventListener('blur', () => { if (currentList) updateNote(currentList, noteInput.value.trim()); });
+        
+        window.addEventListener('keydown', (event) => {
+            if (singleListView.style.display !== 'block') return;
+            if (event.key === 'ArrowRight') {
+                event.preventDefault();
+                navigateList('next');
+            } else if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                navigateList('prev');
+            }
+        });
+
+        // Aggiunta listener per lo swipe
+        singleListView.addEventListener('touchstart', e => {
+            touchstartX = e.changedTouches[0].screenX;
+            touchstartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+
+        singleListView.addEventListener('touchend', e => {
+            touchendX = e.changedTouches[0].screenX;
+            touchendY = e.changedTouches[0].screenY;
+            handleSwipe();
+        });
     });
 
     window.addEventListener('beforeunload', () => { if (unsubscribeList) unsubscribeList(); if (unsubscribeItems) unsubscribeItems(); });
