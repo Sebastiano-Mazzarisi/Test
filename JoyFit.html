@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joy Fit Putignano - Il Tuo Benessere, su Misura</title>
+    <style>
+        /* --- FONT MODERNO E LEGGIBILE --- */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap');
+
+        /* --- PALETTE COLORI LUMINOSA E VIBRANTE --- */
+        :root {
+            --primary-gradient: linear-gradient(90deg, #F92B7D 0%, #F5A623 100%);
+            --primary-pink: #F92B7D;
+            --primary-orange: #F5A623;
+            --dark-text: #212529;
+            --light-text: #ffffff;
+            --secondary-text: #6c757d;
+            --bg-light: #f8f9fa;
+            --white: #ffffff;
+            --shadow: 0px 10px 30px rgba(0, 0, 0, 0.07);
+        }
+
+        /* --- IMPOSTAZIONI GLOBALI --- */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--white);
+            color: var(--dark-text);
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* --- ANIMAZIONI DI INGRESSO --- */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 1s ease-out forwards;
+        }
+        
+        /* --- BARRA DI NAVIGAZIONE CON LOGO --- */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+        }
+
+        .nav-logo img {
+            height: 60px;
+            width: auto;
+            transition: transform 0.3s ease;
+        }
+        
+        .nav-logo img:hover {
+            transform: scale(1.1);
+        }
+
+        .nav-links a {
+            color: var(--dark-text);
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 2rem;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* --- HERO SECTION --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image: url('https://images.pexels.com/photos/866027/pexels-photo-866027.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
+            background-size: cover;
+            background-position: center;
+            text-align: center;
+        }
+        
+        .hero-content {
+            background: rgba(255, 255, 255, 0.85);
+            padding: 2.5rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            max-width: 90%;
+            width: 700px;
+        }
+
+        .hero-content h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin: 0;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .hero-content p {
+            font-size: 1.2rem;
+            color: var(--dark-text);
+            margin: 1rem 0 2rem 0;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            font-weight: 700;
+            text-decoration: none;
+            border-radius: 50px;
+            background: var(--primary-gradient);
+            color: var(--light-text);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(249, 43, 125, 0.3);
+        }
+
+        /* --- LAYOUT SEZIONI --- */
+        .section {
+            padding: 6rem 1rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        
+        .section-header h2 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 0;
+        }
+        
+        .section-header p {
+            font-size: 1.1rem;
+            color: var(--secondary-text);
+            max-width: 600px;
+            margin: 0.5rem auto 0 auto;
+        }
+        
+        /* --- GRIGLIA CORSI --- */
+        #corsi {
+            background: var(--bg-light);
+        }
+        
+        .courses-grid-full {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+        
+        .course-card-detailed {
+            background: var(--white);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .course-card-detailed:hover {
+            transform: translateY(-10px);
+            box-shadow: 0px 15px 35px rgba(0, 0, 0, 0.1);
+        }
+        
+        .course-card-detailed img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+        }
+        
+        .course-content {
+            padding: 1.5rem;
+            flex-grow: 1;
+        }
+        
+        .course-content h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+        
+        .course-content p {
+            font-size: 0.95rem;
+            color: var(--secondary-text);
+            margin-bottom: 0;
+            line-height: 1.6;
+        }
+
+        /* --- CONTATTI E MAPPA --- */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+        .contact-grid iframe {
+            width: 100%; height: 100%; min-height: 450px;
+            border-radius: 15px; border: 0;
+        }
+        .contact-info h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* --- FOOTER --- */
+        .footer {
+            text-align: center;
+            padding: 3rem 1rem;
+            background: var(--bg-light);
+            border-top: 1px solid #dee2e6;
+        }
+        .footer a {
+            color: var(--primary-pink);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        /* --- RESPONSIVE --- */
+        @media(max-width: 768px) {
+            .nav-links { display: none; }
+            .hero-content h1 { font-size: 2.5rem; }
+            .contact-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    
+    <nav class="navbar">
+        <div class="nav-logo">
+            <a href="#"><img src="https://www.dropbox.com/scl/fi/kf5jj6evqf0fitkgdm3lu/Logo-Joy-Fit-1000x1000.jpg?rlkey=hh87io49e09r3kuynubwb9jmy&raw=1" alt="Logo Joy Fit Putignano"></a>
+        </div>
+        <div class="nav-links">
+            <a href="#corsi">Corsi</a>
+            <a href="#contatti">Contatti</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-content fade-in">
+            <h1>Il Tuo Corpo. La Tua Energia. La Tua Palestra.</h1>
+            <p>Joy Fit Putignano è il luogo dove i tuoi obiettivi prendono vita. Un ambiente moderno, istruttori esperti e una community che ti ispira a dare il massimo.</p>
+            <a href="#corsi" class="btn">Scopri i corsi</a>
+        </div>
+    </header>
+
+    <main>
+        <section id="corsi" class="section">
+            <div class="container">
+                <div class="section-header fade-in">
+                    <h2>Un Corso Per Ogni Passione</h2>
+                    <p>Ecco una panoramica completa delle nostre attività. Trova quella perfetta per te e preparati a dare il massimo!</p>
+                </div>
+                <div class="courses-grid-full">
+                    
+                    <div class="course-card-detailed fade-in" style="animation-delay: 0.1s;">
+                        <img src="https://images.pexels.com/photos/3775566/pexels-photo-3775566.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Personal Training">
+                        <div class="course-content">
+                            <h3>Personal Training</h3>
+                            <p>Un percorso individuale e su misura per te. Lavorerai a stretto contatto con un nostro trainer qualificato per definire i tuoi obiettivi e raggiungerli nel modo più rapido ed efficace possibile.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="course-card-detailed fade-in" style="animation-delay: 0.2s;">
+                        <img src="https://images.pexels.com/photos/4056535/pexels-photo-4056535.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Pilates">
+                        <div class="course-content">
+                            <h3>Pilates & Postural</h3>
+                            <p>Un allenamento che migliora la postura, la flessibilità e la forza del "core". Ideale per rinforzare i muscoli profondi, prevenire il mal di schiena e ottenere un corpo più tonico e armonioso.</p>
+                        </div>
+                    </div>
+                    
+                     <div class="course-card-detailed fade-in" style="animation-delay: 0.3s;">
+                        <img src="https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Allenamento Funzionale">
+                         <div class="course-content">
+                            <h3>Allenamento Funzionale</h3>
+                            <p>Migliora forza, resistenza e agilità con esercizi multi-articolari che simulano i movimenti della vita quotidiana. È un workout intenso e vario che potenzia il corpo a 360 gradi.</p>
+                         </div>
+                    </div>
+
+                    <div class="course-card-detailed fade-in" style="animation-delay: 0.4s;">
+                        <img src="https://images.pexels.com/photos/3837464/pexels-photo-3837464.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Body Sculpt">
+                        <div class="course-content">
+                            <h3>Body Sculpt</h3>
+                            <p>Un corso di tonificazione generale che modella e scolpisce tutto il corpo. Si utilizzano piccoli attrezzi come pesi, elastici e step a ritmo di musica per un allenamento energico e divertente.</p>
+                        </div>
+                    </div>
+
+                    <div class="course-card-detailed fade-in" style="animation-delay: 0.5s;">
+                        <img src="https://images.pexels.com/photos/903171/pexels-photo-903171.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Calisthenics">
+                        <div class="course-content">
+                            <h3>Calisthenics</h3>
+                            <p>Sfrutta il peso del tuo corpo come unica resistenza per costruire forza, controllo e definizione muscolare. Un percorso per imparare a dominare il proprio corpo, con corsi anche per i più giovani (Junior).</p>
+                        </div>
+                    </div>
+                    
+                    <div class="course-card-detailed fade-in" style="animation-delay: 0.6s;">
+                        <img src="https://images.pexels.com/photos/863977/pexels-photo-863977.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Krav Maga">
+                        <div class="course-content">
+                            <h3>Krav Maga & Defence System</h3>
+                            <p>Impara le tecniche di autodifesa più efficaci e intuitive al mondo. Questi corsi sono pensati per aumentare la tua sicurezza e la capacità di reazione in situazioni di pericolo reale, adatti a tutti.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="course-card-detailed fade-in" style="animation-delay: 0.7s;">
+                        <img src="https://images.pexels.com/photos/6456293/pexels-photo-6456293.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Slow Fit">
+                        <div class="course-content">
+                            <h3>Slow Fit</h3>
+                            <p>Un approccio dolce e consapevole al movimento. Questo corso unisce esercizi di ginnastica dolce, stretching e respirazione per migliorare la mobilità articolare e il benessere generale, senza stress.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="course-card-detailed fade-in" style="animation-delay: 0.8s;">
+                        <img src="https://images.pexels.com/photos/4325450/pexels-photo-4325450.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Aerea Kids">
+                        <div class="course-content">
+                            <h3>Aerea Kids & Functional Kids</h3>
+                            <p>Il modo più divertente per i più piccoli di avvicinarsi al movimento! Con i tessuti aerei o attraverso percorsi di gioco, i bambini sviluppano coordinazione, forza e fiducia in sé stessi... volando!</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section id="contatti" class="section">
+            <div class="container">
+                 <div class="section-header fade-in">
+                    <h2>Contattaci</h2>
+                    <p>Vieni a trovarci per una prova gratuita o scrivici per qualsiasi domanda. Siamo qui per te.</p>
+                </div>
+                 <div class="contact-grid fade-in">
+                     <div class="contact-info">
+                         <h3>Indirizzo</h3>
+                         <p>Via Giacomo Leopardi, 56<br>70017 Putignano (BA)</p>
+                         
+                         <h3>Contatti Diretti</h3>
+                         <p>Tel.: 080-491.22.23<br>Cell.: 366-40.06.050<br>Email: joyfit.putignano@libero.it</p>
+
+                         <h3>Orari Segreteria</h3>
+                         <p>
+                            Lun. Mar. Gio. Ven.: 08:00-12:00 e 16:00-20:00<br>
+                            Mercoledì: 16:00-20:00<br>
+                            Sabato: 09:00-12:00
+                         </p>
+                     </div>
+                     <div>
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3023.513697921936!2d17.11478167672935!3d40.83896013233868!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1347b1655b380f39%3A0x2833a6e5f8069a3c!2sVia%20Giacomo%20Leopardi%2C%2056%2C%2070017%20Putignano%20BA!5e0!3m2!1sit!2sit!4v1695825330349!5m2!1sit!2sit" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                     </div>
+                 </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2025 Palestra Joy Fit Putignano</p>
+    </footer>
+
+    <script>
+        // Script per far cambiare la navbar allo scroll
+        const navbar = document.querySelector('.navbar');
+        window.onscroll = () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        };
+    </script>
+
+</body>
+</html>
