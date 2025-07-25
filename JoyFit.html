@@ -43,6 +43,7 @@
 
         .fade-in {
             animation: fadeIn 1s ease-out forwards;
+            opacity: 0; /* Inizia trasparente per l'animazione */
         }
         
         /* --- BARRA DI NAVIGAZIONE CON LOGO --- */
@@ -65,8 +66,14 @@
             box-shadow: var(--shadow);
         }
 
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
         .nav-logo img {
-            height: 60px;
+            height: 75px; /* LOGO PIU' GRANDE */
             width: auto;
             transition: transform 0.3s ease;
         }
@@ -74,6 +81,22 @@
         .nav-logo img:hover {
             transform: scale(1.1);
         }
+        
+        /* TESTO "JOY FIT" CHE APPARE */
+        .nav-logo-text {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        
+        .navbar.scrolled .nav-logo-text {
+            opacity: 1;
+        }
+        
 
         .nav-links a {
             color: var(--dark-text);
@@ -81,12 +104,11 @@
             font-weight: 600;
             margin-left: 2rem;
             transition: color 0.3s ease;
+            position: relative;
         }
         
         .nav-links a:hover {
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--primary-pink);
         }
         
         /* --- HERO SECTION --- */
@@ -144,7 +166,7 @@
 
         /* --- LAYOUT SEZIONI --- */
         .section {
-            padding: 6rem 1rem;
+            padding: 6rem 2rem;
         }
         
         .container {
@@ -220,8 +242,50 @@
             margin-bottom: 0;
             line-height: 1.6;
         }
+        
+        /* --- SEZIONE PUNTI DI FORZA --- */
+        .strengths-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            text-align: center;
+        }
+        .strength-item svg {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 1rem;
+            color: var(--primary-pink);
+        }
+        .strength-item h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* --- SEZIONE CALL TO ACTION --- */
+        .cta-section {
+            text-align: center;
+            padding: 6rem 2rem;
+            background: var(--primary-gradient);
+            color: var(--light-text);
+            border-radius: 20px;
+            margin: 4rem auto;
+        }
+        .cta-section h2 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+        .cta-section .btn {
+            background: var(--white);
+            color: var(--primary-pink);
+            margin-top: 1.5rem;
+        }
 
         /* --- CONTATTI E MAPPA --- */
+        #contatti {
+             background: var(--bg-light);
+        }
         .contact-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -244,11 +308,11 @@
         .footer {
             text-align: center;
             padding: 3rem 1rem;
-            background: var(--bg-light);
-            border-top: 1px solid #dee2e6;
+            background-color: var(--dark-text);
+            color: #aaa;
         }
         .footer a {
-            color: var(--primary-pink);
+            color: var(--white);
             text-decoration: none;
             font-weight: 600;
         }
@@ -266,8 +330,10 @@
     <nav class="navbar">
         <div class="nav-logo">
             <a href="#"><img src="https://www.dropbox.com/scl/fi/kf5jj6evqf0fitkgdm3lu/Logo-Joy-Fit-1000x1000.jpg?rlkey=hh87io49e09r3kuynubwb9jmy&raw=1" alt="Logo Joy Fit Putignano"></a>
+            <span class="nav-logo-text">Joy Fit</span>
         </div>
         <div class="nav-links">
+            <a href="#strengths">Perché Noi</a>
             <a href="#corsi">Corsi</a>
             <a href="#contatti">Contatti</a>
         </div>
@@ -277,11 +343,38 @@
         <div class="hero-content fade-in">
             <h1>Il Tuo Corpo. La Tua Energia. La Tua Palestra.</h1>
             <p>Joy Fit Putignano è il luogo dove i tuoi obiettivi prendono vita. Un ambiente moderno, istruttori esperti e una community che ti ispira a dare il massimo.</p>
-            <a href="#corsi" class="btn">Scopri i corsi</a>
+            <a href="#cta" class="btn">Inizia la Prova Gratuita</a>
         </div>
     </header>
 
     <main>
+        
+        <section id="strengths" class="section">
+            <div class="container">
+                <div class="section-header fade-in">
+                    <h2>Perché Scegliere Joy Fit</h2>
+                    <p>Non siamo solo una palestra, siamo il partner del tuo benessere.</p>
+                </div>
+                <div class="strengths-grid">
+                    <div class="strength-item fade-in" style="animation-delay: 0.2s;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <h3>Istruttori Certificati</h3>
+                        <p>Sarai seguito da un team di professionisti appassionati e qualificati, pronti a guidarti in ogni fase del tuo percorso.</p>
+                    </div>
+                    <div class="strength-item fade-in" style="animation-delay: 0.4s;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 1-3 9L1 9l7 5-3 9 8-5 8 5-3-9 7-5-8-1z"/></svg>
+                        <h3>Attrezzatura Moderna</h3>
+                        <p>Mettiamo a tua disposizione solo i migliori macchinari e le attrezzature più all'avanguardia per un allenamento sicuro ed efficace.</p>
+                    </div>
+                    <div class="strength-item fade-in" style="animation-delay: 0.6s;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                        <h3>Community Unica</h3>
+                        <p>Da noi non trovi solo un luogo dove allenarti, ma una vera e propria community di persone che condividono la tua stessa passione.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section id="corsi" class="section">
             <div class="container">
                 <div class="section-header fade-in">
@@ -357,11 +450,21 @@
                 </div>
             </div>
         </section>
+        
+        <section id="cta" class="section">
+            <div class="container">
+                <div class="cta-section fade-in">
+                    <h2>Pronto a Iniziare?</h2>
+                    <p>La tua prima lezione di prova è gratuita. Non aspettare, contattaci oggi stesso per prenotare il tuo posto e scoprire la differenza di Joy Fit.</p>
+                    <a href="#contatti" class="btn">Prenota la Tua Prova</a>
+                </div>
+            </div>
+        </section>
 
         <section id="contatti" class="section">
             <div class="container">
                  <div class="section-header fade-in">
-                    <h2>Contattaci</h2>
+                    <h2>Contatti e Orari</h2>
                     <p>Vieni a trovarci per una prova gratuita o scrivici per qualsiasi domanda. Siamo qui per te.</p>
                 </div>
                  <div class="contact-grid fade-in">
@@ -401,6 +504,18 @@
                 navbar.classList.remove('scrolled');
             }
         };
+        
+        // Script per animazioni "fade-in" allo scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in-visible');
+                }
+            });
+        });
+        
+        const faders = document.querySelectorAll('.fade-in');
+        faders.forEach((el) => observer.observe(el));
     </script>
 
 </body>
