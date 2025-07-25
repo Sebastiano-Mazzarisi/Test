@@ -27,7 +27,7 @@
       --shadow: 0 6px 16px rgba(0,0,0,0.08);
       --border-radius-card: 12px;
       --border-radius-element: 8px;
-      --touch-target: 44px;
+      --touch-target: 48px;
       --light-blue-border: #aed6f1;
     }
 
@@ -138,7 +138,7 @@
     }
 
     .card {
-      background: #e6f3ff; /* Azzurro pastello per pagina principale */
+      background: #e6f3ff;
       border: 1px solid var(--light-blue-border);
       border-radius: var(--border-radius-card);
       padding: 1.5rem;
@@ -146,12 +146,10 @@
       margin-bottom: 0;
     }
 
-    /* Verde pastello per la vista singolo elenco */
     #single-list-view .card {
-      background: #e8f5e8; /* Verde pastello */
+      background: #e8f5e8;
     }
 
-    /* Giallo paglierino solo per le note */
     .note-section .card {
         background-color: #FFFACD !important;
     }
@@ -174,8 +172,6 @@
       outline: none;
       border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-      background: white;
-      color: var(--fg);
     }
 
     button {
@@ -202,14 +198,6 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
 
-    button:active {
-      transform: translateY(0);
-    }
-
-    button:last-child {
-      margin-right: 0;
-    }
-
     ul {
       list-style: none;
       padding: 0;
@@ -217,74 +205,62 @@
     }
 
     .list-item {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.4rem 0.8rem;
-      background: white;
-      border: 1.5px solid #3498db; /* Spessore dimezzato e colore azzurro */
-      border-radius: var(--border-radius-element);
-      margin-bottom: 0.3rem;
-      transition: all 0.3s;
-      min-height: var(--touch-target);
-    }
-    
-    .list-item.completed {
-      background: #fffef0; /* Giallo appena più scuro */
-      border: 1px solid var(--light-blue-border); /* Bordo normale per elementi completati */
-    }
-    
-    .list-item.completed input {
-      background: transparent !important; /* Trasparente per mostrare il giallo del contenitore */
-    }
-    
-    .list-item.updated {
-        border: 2px solid #dc3545;
-        box-shadow: 0 0 8px rgba(220, 53, 69, 0.5);
-    }
-
-    /* Vista semplificata degli elenchi */
-    .list-item.simple-view {
         display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0.8rem 1rem;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.8rem;
         background: white;
-        border: 1px solid var(--light-blue-border);
+        border: 1.5px solid #3498db;
         border-radius: var(--border-radius-element);
         margin-bottom: 0.5rem;
         transition: all 0.3s;
-        min-height: var(--touch-target);
-        cursor: pointer;
+    }
+    
+    /* MODIFICA CHIAVE: Usa un giallo più tenue */
+    .list-item.completed {
+      background-color: #FFFFE0; /* Giallo tenue (lightyellow) */
+      border-color: #E0E0B8; /* Bordo coordinato */
+    }
+    
+    .list-item.completed input {
+        background-color: transparent !important;
+    }
+    
+    .item-content-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+    }
+    
+    .item-actions-row {
+        display: none;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        width: 100%;
+        padding-top: 0.5rem;
+        margin-top: 0.3rem;
+        border-top: 1px solid #e0e6ed;
     }
 
-    .list-item.simple-view:hover {
-        background: #f8f9fa;
-        border-color: var(--accent);
+    .manage-mode .list-item .item-actions-row,
+    .manage-items-mode .list-item .item-actions-row {
+        display: flex;
     }
 
-    .list-name-display {
+    .list-name-display, .list-name-input {
         font-size: 20px;
         font-weight: 500;
         color: var(--fg);
-        flex: 1;
+        flex-grow: 1;
         text-align: left;
-        cursor: pointer;
     }
-
-    .list-count-display {
-        font-size: 18px;
-        font-weight: 600;
-        color: var(--accent);
-        cursor: pointer;
-        padding: 0.2rem 0.5rem;
-        border-radius: 4px;
-        transition: background-color 0.2s;
-    }
-
-    .list-count-display:hover {
-        background-color: var(--accent);
-        color: white;
+    
+    .list-name-input {
+      border: 2px solid var(--accent) !important;
+      border-radius: 4px;
+      padding: 0.4rem 0.6rem !important;
+      margin: 0 !important;
     }
     
     .list-item input {
@@ -294,86 +270,63 @@
       font-size: 20px;
       padding: 0.2rem 0.5rem;
       margin: 0;
-      width: auto;
-      cursor: text;
     }
-
-    .list-item input:focus {
-      background: #f8f9fa;
-      border: 1px solid var(--accent);
-      border-radius: 4px;
-    }
-
-    .list-item .action-btn {
-      width: 28px;
-      height: 28px;
+    
+    .list-item .action-btn, .list-count-display {
+      width: var(--touch-target);
+      height: var(--touch-target);
       padding: 0;
-      margin: 0 2px;
-      font-size: 0.8rem;
-      border-radius: 6px;
+      margin: 0;
+      flex-shrink: 0;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       transition: all 0.2s;
       background: white;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      min-width: var(--touch-target);
-      min-height: var(--touch-target);
-      touch-action: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       user-select: none;
+    }
+    
+    .list-item .action-btn {
+      font-size: 1.6rem;
+    }
+    
+    .list-item .action-btn:hover, .list-count-display:hover {
+        transform: scale(1.05);
+    }
+    
+    .list-count-display {
+        font-size: 1.2rem;
+        font-weight: 600;
+        border: 2px solid var(--accent);
+        color: var(--accent);
+    }
+
+    .list-count-display:hover {
+        background-color: var(--accent);
+        color: white;
     }
     
     .list-item .move-btn {
         border: 2px solid #bdc3c7;
         color: #bdc3c7;
-        display: none;
     }
     
-    .manage-mode .list-item .move-btn,
-    .manage-items-mode .list-item .move-btn {
-        display: flex;
-    }
-    
-    .list-item .item-count {
-        color: #7f8c8d;
-        font-size: 0.9em;
-        margin-left: 0.25rem;
-        white-space: nowrap;
-    }
-
-    .list-item .move-btn:hover {
-        background: #bdc3c7;
-        color: white;
+    .list-item .rename-btn {
+        border: 2px solid #f39c12;
+        color: #f39c12;
     }
     
     .list-item .select-btn {
       border: 2px solid #28a745;
       color: #28a745;
-      display: flex; /* Sempre visibile per gli elementi */
     }
-
-    .list-item .select-btn:hover {
-      background: #28a745;
-      color: white;
-      transform: scale(1.05);
-    }
-
+    
     .list-item .delete-btn {
       border: 2px solid #dc3545;
       color: #dc3545;
-      display: none;
-    }
-
-    .manage-mode .list-item .delete-btn,
-    .manage-items-mode .list-item .delete-btn {
-        display: flex;
-    }
-
-    .list-item .delete-btn:hover {
-      background: #dc3545;
-      color: white;
-      transform: scale(1.05);
     }
 
     .form-row {
@@ -383,180 +336,11 @@
       margin-top: 1rem;
     }
 
-    .simple-view-mode .form-row {
-        display: none;
-    }
-
-    .form-row input[type="text"] {
-      flex-grow: 1;
-      margin: 0;
-      font-size: 20px;
-    }
-
-    .form-row button {
-      margin-right: 0;
-      padding: 0.75rem 1rem;
-      font-size: 1.2rem;
-    }
-
-    .note-section {
-        margin-top: 1.5rem;
-        width: 100%;
-    }
-    
-    .note-section textarea {
-        min-height: 120px;
-        resize: vertical;
-        padding: 1rem;
-        font-size: 1rem;
-        line-height: 1.5;
-        border: 1px solid var(--light-blue-border);
-        border-radius: var(--border-radius-element);
-    }
-    
-    .note-section textarea:focus {
-        border-color: var(--accent);
-        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-    }
-
     #new-list-name::placeholder,
     #item-input::placeholder,
     #note-input::placeholder {
         color: #CCCCCC !important;
-        font-size: 18px !important;
         font-style: italic !important;
-        opacity: 1;
-    }
-    
-    #new-list-name { 
-        border: 2px solid #cccccc !important; 
-    }
-    
-    .form-row > button { 
-        background-color: white !important; 
-        color: var(--accent) !important; 
-        border: 2px solid var(--accent) !important; 
-    }
-    
-    .form-row > button:hover { 
-        background-color: #f0f8ff !important; 
-        color: var(--accent-dark) !important; 
-        border-color: var(--accent-dark) !important; 
-    }
-    
-    .note-section .card {
-        background-color: #FFFACD !important;
-    }
-    
-    #status-dot-single-list { 
-        display: inline-block !important; 
-        margin-left: 0.5rem; 
-        vertical-align: middle; 
-    }
-
-    @media (max-width: 768px) {
-      body { padding: 0.75rem; }
-      h1, #current-list-title { font-size: 2rem; margin-bottom: 0.75rem; }
-      .card { padding: 1rem; }
-      .list-item { 
-        padding: 0.6rem 0.8rem; 
-        margin-bottom: 0.4rem; 
-        min-height: 48px; /* Touch target iOS/Android */
-        gap: 0.7rem;
-      }
-      .list-item .action-btn { 
-        width: 44px; 
-        height: 44px; 
-        font-size: 1.1rem; 
-        margin: 0 4px;
-        min-width: 44px;
-        min-height: 44px;
-      }
-      .list-item input {
-        font-size: 18px;
-        padding: 0.5rem;
-        min-height: 40px;
-      }
-      .note-section textarea { padding: 1rem; font-size: 16px; min-height: 120px; }
-      h1 img { height: 1em; margin-right: 0.15em; }
-      #home-icon, #manage-lists-btn, #manage-items-btn { 
-        font-size: 1.1em; 
-        margin-left: 0.3em; 
-        width: 1.1em; 
-        height: 1.1em; 
-        min-width: 44px;
-        min-height: 44px;
-      }
-      .form-row button {
-        min-height: 48px;
-        padding: 0.8rem 1.2rem;
-        font-size: 1.1rem;
-      }
-      .form-row input[type="text"] {
-        min-height: 48px;
-        font-size: 18px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      body { padding: 0.5rem; }
-      h1, #current-list-title { font-size: 1.8rem; margin-bottom: 0.5rem; gap: 0.3rem; }
-      .card { padding: 0.8rem; }
-      .list-item { 
-        gap: 0.5rem; 
-        padding: 0.7rem 0.6rem; 
-        margin-bottom: 0.3rem;
-        min-height: 52px; /* Più spazio su schermi piccoli */
-      }
-      .list-item input { 
-        font-size: 17px; 
-        padding: 0.6rem 0.5rem;
-        min-height: 44px;
-      }
-      .list-item .action-btn { 
-        width: 48px; 
-        height: 48px; 
-        margin: 0 2px; 
-        font-size: 1.2rem;
-        min-width: 48px;
-        min-height: 48px;
-      }
-      .form-row { gap: 0.6rem; margin-top: 0.8rem; }
-      .form-row button { 
-        padding: 0.8rem 1rem; 
-        font-size: 1.2rem;
-        min-height: 52px;
-      }
-      .form-row input[type="text"] {
-        font-size: 17px;
-        min-height: 52px;
-        padding: 0.8rem;
-      }
-      .note-section textarea { 
-        padding: 0.8rem; 
-        font-size: 16px; 
-        min-height: 120px; 
-      }
-      #home-icon, #manage-lists-btn, #manage-items-btn { 
-        font-size: 1.1em; 
-        margin-left: 0.2em; 
-        width: 1.2em; 
-        height: 1.2em;
-        min-width: 48px;
-        min-height: 48px;
-      }
-      /* Migliore spaziatura per pollici */
-      .list-name-display {
-        font-size: 18px;
-        padding: 0.3rem 0;
-      }
-      .list-count-display {
-        font-size: 17px;
-        padding: 0.4rem 0.6rem;
-        min-height: 44px;
-        display: flex;
-        align-items: center;
-      }
     }
   </style>
 </head>
@@ -618,7 +402,6 @@
       appId: "1:615174125565:web:7a2b4b0bd6af9cbd6f4b94"
     };
 
-    // Variabili globali
     let db = null;
     let isOnline = false;
     let unsubscribeList = null;
@@ -626,20 +409,11 @@
     let currentList = null;
     let isManageMode = false;
     let isManageItemsMode = false;
-
-    // Database locale
-    let localDatabase = {
-      lists: JSON.parse(localStorage.getItem('elenchiFare') || '{}')
-    };
+    let localDatabase = { lists: JSON.parse(localStorage.getItem('elenchiFare') || '{}') };
     let listOrder = JSON.parse(localStorage.getItem('elenchiOrder') || '[]');
     
-    let updatedLists = new Set();
-    let hasPlayedSound = false;
-
-    // Riferimenti DOM
     const listNames = document.getElementById("list-names");
     const itemList = document.getElementById("item-list");
-    const currentListTitle = document.getElementById("current-list-title");
     const listNameDisplay = document.getElementById("list-name-display");
     const newItemInput = document.getElementById("item-input");
     const newListInput = document.getElementById("new-list-name");
@@ -652,684 +426,332 @@
     const manageListsBtn = document.getElementById("manage-lists-btn");
     const manageItemsBtn = document.getElementById("manage-items-btn");
 
-    // Funzione per generare il download
-    function generateDownload() {
-        const htmlContent = document.documentElement.outerHTML;
-        const blob = new Blob([htmlContent], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        
-        const downloadLink = document.getElementById('download-link');
-        downloadLink.href = url;
-        
-        downloadLink.addEventListener('click', () => {
-            setTimeout(() => URL.revokeObjectURL(url), 1000);
-        });
-    }
-
-    // Funzione per attivare/disattivare la modalità gestione liste
     function toggleManageMode() {
         isManageMode = !isManageMode;
-        
-        if (isManageMode) {
-            listsView.classList.add('manage-mode');
-            listsView.classList.remove('simple-view-mode');
-            manageListsBtn.textContent = '✖️';
-            manageListsBtn.title = 'Torna alla vista semplice';
-            manageListsBtn.style.fontSize = '1.2em';
-        } else {
-            listsView.classList.remove('manage-mode');
-            listsView.classList.add('simple-view-mode');
-            manageListsBtn.textContent = '⚙️';
-            manageListsBtn.title = 'Gestisci elenchi';
-            manageListsBtn.style.fontSize = '1.2em';
-        }
-        
+        manageListsBtn.textContent = isManageMode ? '✖️' : '⚙️';
+        manageListsBtn.title = isManageMode ? 'Termina gestione' : 'Gestisci elenchi';
         loadListsLocal();
     }
 
-    // Funzione per attivare/disattivare la modalità gestione elementi
     function toggleManageItemsMode() {
         isManageItemsMode = !isManageItemsMode;
-        
-        if (isManageItemsMode) {
-            singleListView.classList.add('manage-items-mode');
-            manageItemsBtn.textContent = '✖️';
-            manageItemsBtn.title = 'Torna alla vista semplice';
-            manageItemsBtn.style.fontSize = '1.2em';
-        } else {
-            singleListView.classList.remove('manage-items-mode');
-            manageItemsBtn.textContent = '⚙️';
-            manageItemsBtn.title = 'Gestisci elementi';
-            manageItemsBtn.style.fontSize = '1.2em';
-        }
-        
-        loadItemsLocal();
+        manageItemsBtn.textContent = isManageItemsMode ? '✖️' : '⚙️';
+        manageItemsBtn.title = isManageItemsMode ? 'Termina gestione' : 'Gestisci elementi';
+        singleListView.classList.toggle('manage-items-mode', isManageItemsMode);
     }
 
-    // Funzione per ottenere il conteggio degli elementi non completati
     function getItemCount(listName) {
         const list = localDatabase.lists[listName];
-        if (!list) return 0;
-        
-        if (list.items && Array.isArray(list.items)) {
-            return list.items.filter(item => !item.done).length;
-        }
-        
-        return list.pendingCount || 0;
+        if (!list || !Array.isArray(list.items)) return 0;
+        return list.items.filter(item => !item.done).length;
     }
 
-    // Funzione per aggiornare i conteggi delle liste
     async function updateListCounts(listName) {
-        if (!localDatabase.lists[listName]) return;
-        
         const list = localDatabase.lists[listName];
+        if (!list || !Array.isArray(list.items)) return;
         
-        if (list.items && Array.isArray(list.items)) {
-            const totalCount = list.items.length;
-            const pendingCount = list.items.filter(item => !item.done).length;
-            const completedCount = list.items.filter(item => item.done).length;
-            
-            list.itemCount = totalCount;
-            list.pendingCount = pendingCount;
-            list.completedCount = completedCount;
-            
-            if (isOnline && db) {
-                try {
-                    await db.collection("lists").doc(listName).update({
-                        itemCount: totalCount,
-                        pendingCount: pendingCount,
-                        completedCount: completedCount
-                    });
-                } catch (error) {
-                    console.error("Errore sincronizzazione conteggi:", error);
-                }
-            }
-            
-            saveToLocalStorage();
-            
-            if (currentList === null) {
-                loadListsLocal();
-            }
+        list.itemCount = list.items.length;
+        list.pendingCount = list.items.filter(item => !item.done).length;
+
+        if (isOnline && db) {
+            try {
+                await db.collection("lists").doc(listName).update({
+                    itemCount: list.itemCount,
+                    pendingCount: list.pendingCount,
+                });
+            } catch (error) { console.error("Errore sinc conteggi:", error); }
         }
+        saveToLocalStorage();
+        if (currentList === null) loadListsLocal();
     }
 
-    // Inizializzazione Firebase
     function initFirebase() {
-      try {
-        console.log("🔥 Inizializzazione Firebase...");
-        firebase.initializeApp(firebaseConfig);
-        db = firebase.firestore();
-        
-        const testDoc = {
-          test: true,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        
-        db.collection("_test").doc("connectivity").set(testDoc).then(() => {
-          console.log("✅ Firebase funzionante!");
-          db.collection("_test").doc("connectivity").delete();
-          isOnline = true;
-          updateConnectionStatus();
-          loadLists();
-        }).catch((error) => {
-          console.log("❌ Firebase non disponibile:", error.message);
-          fallbackToLocal();
-        });
-        
-      } catch (error) {
-        console.error("❌ Errore inizializzazione:", error);
-        fallbackToLocal();
-      }
-    }
-
-    // Fallback alla modalità locale
-    function fallbackToLocal() {
-      console.log("🔄 Modalità locale attivata");
-      isOnline = false;
-      updateConnectionStatus();
-      loadListsLocal();
-    }
-
-    // Aggiorna status connessione
-    function updateConnectionStatus() {
-      if (isOnline) {
-        statusDot.className = "status-dot online";
-        statusDot.title = "🟢 Connesso";
-        if (statusDotSingleList) {
-            statusDotSingleList.className = "status-dot online";
-            statusDotSingleList.title = "🟢 Connesso";
-        }
-      } else {
-        statusDot.className = "status-dot offline";
-        statusDot.title = "🔴 Offline";
-        if (statusDotSingleList) {
-            statusDotSingleList.className = "status-dot offline";
-            statusDotSingleList.title = "🔴 Offline";
-        }
-      }
-    }
-
-    // Caricamento liste da Firebase
-    function loadLists() {
-      if (!db) return fallbackToLocal();
-      
-      unsubscribeList = db.collection("lists").orderBy("order", "asc").onSnapshot(async snapshot => {
-          const docsWithOrder = [];
-          snapshot.forEach(doc => {
-              docsWithOrder.push({ id: doc.id, data: doc.data() });
-          });
-          
-          docsWithOrder.sort((a, b) => {
-              const orderA = a.data.order ?? 999999;
-              const orderB = b.data.order ?? 999999;
-              return orderA - orderB;
-          });
-          
-          listOrder = docsWithOrder.map(doc => doc.id);
-          const newLocalLists = {};
-
-          for (const docData of docsWithOrder) {
-              const listName = docData.id;
-              const listInfo = docData.data;
-              
-              try {
-                  const itemsSnapshot = await db.collection("lists").doc(listName).collection("items").get();
-                  const items = [];
-                  itemsSnapshot.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
-                  
-                  const totalCount = items.length;
-                  const pendingCount = items.filter(item => !item.done).length;
-                  const completedCount = items.filter(item => item.done).length;
-                  
-                  const existingData = localDatabase.lists[listName] || {};
-                  
-                  newLocalLists[listName] = {
-                      ...existingData,
-                      ...listInfo,
-                      items: items,
-                      itemCount: totalCount,
-                      pendingCount: pendingCount,
-                      completedCount: completedCount
-                  };
-                  
-              } catch (error) {
-                  console.error(`Errore nel caricamento di ${listName}:`, error);
-                  const existingData = localDatabase.lists[listName] || {};
-                  newLocalLists[listName] = {
-                      ...existingData,
-                      ...listInfo,
-                      pendingCount: existingData.pendingCount || 0
-                  };
-              }
-          }
-
-          localDatabase.lists = newLocalLists;
-          loadListsLocal();
-          saveToLocalStorage();
-        }, error => {
-          console.error("Errore listener Firebase:", error);
-          fallbackToLocal();
-        });
-    }
-
-    // Aggiungere nuova lista
-    async function addList() {
-      const name = newListInput.value.trim();
-      if (!validateListName(name)) return;
-      
-      if (isOnline && db) {
         try {
-            if ((await db.collection("lists").doc(name).get()).exists) {
-                alert(`L'elenco "${name}" esiste già.`); 
-                return;
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            db.collection("_test").doc("connectivity").set({ test: true, timestamp: firebase.firestore.FieldValue.serverTimestamp() })
+            .then(() => {
+                db.collection("_test").doc("connectivity").delete(); isOnline = true; updateConnectionStatus(); loadLists();
+            }).catch(() => fallbackToLocal());
+        } catch (error) { fallbackToLocal(); }
+    }
+
+    function fallbackToLocal() { isOnline = false; updateConnectionStatus(); loadListsLocal(); }
+    function updateConnectionStatus() {
+        [statusDot, statusDotSingleList].forEach(dot => {
+            if(dot) { dot.className = `status-dot ${isOnline ? 'online' : 'offline'}`; dot.title = isOnline ? "🟢 Connesso" : "🔴 Offline"; }
+        });
+    }
+
+    function loadLists() {
+        if (!db) return fallbackToLocal();
+        unsubscribeList = db.collection("lists").orderBy("order", "asc").onSnapshot(async snapshot => {
+            listOrder = snapshot.docs.map(doc => doc.id);
+            const newLocalLists = {};
+            for (const doc of snapshot.docs) {
+                const listName = doc.id;
+                const itemsSnapshot = await db.collection("lists").doc(listName).collection("items").get();
+                newLocalLists[listName] = { ...localDatabase.lists[listName], ...doc.data(), items: itemsSnapshot.docs.map(d => ({ id: d.id, ...d.data() })) };
             }
-            const newOrder = listOrder.length;
-            await db.collection("lists").doc(name).set({
-                name: name, 
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                order: newOrder, 
-                note: "",
-                itemCount: 0,
-                pendingCount: 0,
-                completedCount: 0
-            });
-            newListInput.value = "";
-            selectList(name);
-        } catch (error) {
-            console.error("Errore Firebase:", error);
-            saveListLocally(name);
-        }
-      } else {
-        saveListLocally(name);
-      }
+            localDatabase.lists = newLocalLists; loadListsLocal(); saveToLocalStorage();
+        }, () => fallbackToLocal());
+    }
+
+    async function addList() {
+        const name = newListInput.value.trim(); if (!validateListName(name)) return;
+        if (isOnline && db) {
+            try { if ((await db.collection("lists").doc(name).get()).exists) { alert(`L'elenco "${name}" esiste già.`); return; }
+                await db.collection("lists").doc(name).set({ name, createdAt: firebase.firestore.FieldValue.serverTimestamp(), order: listOrder.length, note: "" });
+                newListInput.value = ""; selectList(name);
+            } catch { saveListLocally(name); }
+        } else { saveListLocally(name); }
     }
 
     function saveListLocally(name) {
-      if (localDatabase.lists[name]) { 
-        alert(`L'elenco "${name}" esiste già.`); 
-        return; 
-      }
-      
-      const newOrder = listOrder.length;
-      localDatabase.lists[name] = { 
-        name: name, 
-        items: [], 
-        createdAt: new Date().toISOString(), 
-        order: newOrder, 
-        note: "",
-        itemCount: 0,
-        pendingCount: 0,
-        completedCount: 0
-      };
-      listOrder.push(name);
-      saveToLocalStorage();
-      newListInput.value = "";
-      loadListsLocal();
-      selectList(name);
+        if (localDatabase.lists[name]) { alert(`L'elenco "${name}" esiste già.`); return; }
+        localDatabase.lists[name] = { name, items: [], createdAt: new Date().toISOString(), order: listOrder.length, note: "" };
+        listOrder.push(name); saveToLocalStorage(); newListInput.value = ""; loadListsLocal(); selectList(name);
     }
 
     function deleteList(listName) {
-      if (!confirm(`Eliminare "${listName}"?\nTutti gli elementi saranno cancellati.`)) return;
-      
-      if (isOnline && db) {
-        db.collection("lists").doc(listName).collection("items").get().then(snapshot => {
-          const batch = db.batch();
-          snapshot.forEach(doc => batch.delete(doc.ref));
-          return batch.commit();
-        }).then(() => db.collection("lists").doc(listName).delete())
-          .then(() => { if (currentList === listName) backToLists(); })
-          .catch(error => alert("Errore: " + error.message));
-      } else {
-        delete localDatabase.lists[listName];
-        listOrder = listOrder.filter(name => name !== listName);
-        saveToLocalStorage();
-        if (currentList === listName) backToLists();
-        loadListsLocal();
-      }
+        if (!confirm(`Eliminare "${listName}"?\nTutti gli elementi saranno cancellati.`)) return;
+        if (isOnline && db) {
+            db.collection("lists").doc(listName).collection("items").get().then(snap => {
+                const batch = db.batch(); snap.forEach(doc => batch.delete(doc.ref)); return batch.commit();
+            }).then(() => db.collection("lists").doc(listName).delete()).then(() => { if (currentList === listName) backToLists(); });
+        } else {
+            delete localDatabase.lists[listName]; listOrder = listOrder.filter(n => n !== listName);
+            saveToLocalStorage(); if (currentList === listName) backToLists(); loadListsLocal();
+        }
     }
 
-    // Caricamento liste locale
     function loadListsLocal() {
-      listNames.innerHTML = "";
-      if (listOrder.length === 0) {
-        showEmptyLists();
-      } else {
-        listOrder.forEach((listName, index) => { 
-          if (localDatabase.lists[listName]) {
-            renderListItem(listName, index, listOrder.length); 
-          }
-        });
-      }
-      
-      if (!isManageMode) {
-          listsView.classList.add('simple-view-mode');
-          listsView.classList.remove('manage-mode');
-      }
+        listNames.innerHTML = "";
+        listsView.classList.toggle('manage-mode', isManageMode);
+        if (listOrder.length === 0) { showEmptyLists(); } else {
+            listOrder.forEach((listName, index) => { if (localDatabase.lists[listName]) renderListItem(listName, index, listOrder.length); });
+        }
     }
 
-    // Rendering degli elementi della lista
-    function renderListItem(name, index, total) {
-      const li = document.createElement("li");
-      
-      if (isManageMode) {
-          // Modalità gestione - vista completa
-          li.className = "list-item";
-          if (updatedLists.has(name)) {
-            li.classList.add('updated');
-          }
-          
-          const nameWrapper = document.createElement("div");
-          nameWrapper.style.display = "flex";
-          nameWrapper.style.alignItems = "baseline";
-          nameWrapper.style.flex = "1";
-
-          const nameInput = document.createElement("input");
-          nameInput.type = "text";
-          nameInput.value = name;
-          nameInput.readOnly = true;
-          nameInput.style.cursor = "pointer";
-          nameInput.style.backgroundColor = "transparent";
-          
-          nameInput.onclick = () => {
-              if (nameInput.readOnly) {
-                  selectList(name);
-              }
-          };
-          
-          nameInput.onblur = async () => {
-              const newName = nameInput.value.trim();
-              if (newName !== name && newName) {
-                if (!(await renameList(name, newName))) nameInput.value = name;
-              } else { nameInput.value = name; }
-              
-              nameInput.readOnly = true;
-              nameInput.style.cursor = "pointer";
-              nameInput.style.backgroundColor = "transparent";
-          };
-          
-          nameInput.onkeypress = (e) => { 
-            if (e.key === 'Enter') {
-              nameInput.blur();
+    function enableInlineEdit(nameContainer, oldName) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = oldName;
+        input.className = 'list-name-input';
+        
+        const originalParent = nameContainer.parentNode;
+        
+        const save = async () => {
+            const newName = input.value.trim();
+            if (newName && newName !== oldName) {
+                const success = await renameList(oldName, newName);
+                if (!success) {
+                    originalParent.replaceChild(nameContainer, input);
+                    nameContainer.textContent = oldName;
+                }
+            } else {
+                originalParent.replaceChild(nameContainer, input);
+                nameContainer.textContent = oldName;
             }
-          };
-          
-          const itemCount = getItemCount(name);
-          const countSpan = document.createElement("span");
-          countSpan.className = "item-count";
-          countSpan.textContent = `(${itemCount})`;
-          countSpan.style.cursor = "pointer";
-          countSpan.onclick = (e) => {
-              e.stopPropagation();
-              nameInput.readOnly = false;
-              nameInput.style.cursor = "text";
-              nameInput.style.backgroundColor = "#f8f9fa";
-              nameInput.focus();
-              nameInput.select();
-          };
-          
-          nameWrapper.append(nameInput, countSpan);
-          
-          const moveUpBtn = document.createElement("button");
-          moveUpBtn.textContent = "⬆️";
-          moveUpBtn.className = "action-btn move-btn";
-          moveUpBtn.onclick = () => moveList(name, 'up');
-          if (index === 0) moveUpBtn.style.visibility = 'hidden';
-          
-          const moveDownBtn = document.createElement("button");
-          moveDownBtn.textContent = "⬇️";
-          moveDownBtn.className = "action-btn move-btn";
-          moveDownBtn.onclick = () => moveList(name, 'down');
-          if (index === total - 1) moveDownBtn.style.visibility = 'hidden';
-          
-          const deleteBtn = document.createElement("button");
-          deleteBtn.textContent = "🗑️";
-          deleteBtn.className = "action-btn delete-btn";
-          deleteBtn.onclick = () => deleteList(name);
-          
-          li.append(moveUpBtn, moveDownBtn, nameWrapper, deleteBtn);
-      } else {
-          // Vista semplificata - solo nome e conteggio
-          li.className = "list-item simple-view";
-          if (updatedLists.has(name)) {
-            li.classList.add('updated');
-          }
-          
-          const nameDisplay = document.createElement("div");
-          nameDisplay.className = "list-name-display";
-          nameDisplay.textContent = name;
-          nameDisplay.onclick = () => {
-              selectList(name);
-          };
-          
-          const itemCount = getItemCount(name);
-          const countDisplay = document.createElement("div");
-          countDisplay.className = "list-count-display";
-          countDisplay.textContent = `[${itemCount}]`;
-          countDisplay.onclick = (e) => {
-              e.stopPropagation();
-              // Sostituisce il nome con un input per la modifica diretta
-              const nameInput = document.createElement("input");
-              nameInput.type = "text";
-              nameInput.value = name;
-              nameInput.style.fontSize = "20px";
-              nameInput.style.fontWeight = "500";
-              nameInput.style.border = "2px solid var(--accent)";
-              nameInput.style.borderRadius = "4px";
-              nameInput.style.padding = "0.2rem 0.5rem";
-              nameInput.style.background = "white";
-              nameInput.style.width = "100%";
-              
-              const originalText = nameDisplay.textContent;
-              nameDisplay.innerHTML = "";
-              nameDisplay.appendChild(nameInput);
-              
-              nameInput.focus();
-              nameInput.select();
-              
-              const saveChanges = async () => {
-                  const newName = nameInput.value.trim();
-                  if (newName && newName !== name) {
-                      if (await renameList(name, newName)) {
-                          nameDisplay.textContent = newName;
-                      } else {
-                          nameDisplay.textContent = originalText;
-                      }
-                  } else {
-                      nameDisplay.textContent = originalText;
-                  }
-              };
-              
-              nameInput.onblur = saveChanges;
-              nameInput.onkeypress = (e) => {
-                  if (e.key === 'Enter') {
-                      nameInput.blur();
-                  }
-              };
-          };
-          
-          li.append(nameDisplay, countDisplay);
-      }
-      
-      listNames.appendChild(li);
+        };
+
+        input.onblur = save;
+        input.onkeydown = (e) => {
+            if (e.key === 'Enter') input.blur();
+            if (e.key === 'Escape') {
+                nameContainer.textContent = oldName;
+                originalParent.replaceChild(nameContainer, input);
+            }
+        };
+
+        originalParent.replaceChild(input, nameContainer);
+        input.focus();
+        input.select();
+    }
+    
+    function renderListItem(name, index, total) {
+        const li = document.createElement("li");
+        li.className = "list-item";
+
+        const contentRow = document.createElement("div");
+        contentRow.className = "item-content-row";
+
+        const nameDisplay = document.createElement("div");
+        nameDisplay.className = "list-name-display";
+        nameDisplay.textContent = name;
+        nameDisplay.onclick = () => selectList(name);
+
+        const renameOrCountButton = document.createElement("div");
+
+        if (isManageMode) {
+            renameOrCountButton.className = "action-btn rename-btn";
+            renameOrCountButton.innerHTML = '✏️';
+            renameOrCountButton.title = 'Rinomina elenco';
+        } else {
+            renameOrCountButton.className = "list-count-display";
+            renameOrCountButton.textContent = getItemCount(name);
+            renameOrCountButton.title = "Rinomina elenco";
+        }
+        
+        renameOrCountButton.onclick = (e) => {
+           e.stopPropagation();
+           enableInlineEdit(nameDisplay, name);
+        };
+        
+        contentRow.append(nameDisplay, renameOrCountButton);
+
+        const actionsRow = document.createElement("div");
+        actionsRow.className = "item-actions-row";
+
+        ['up', 'down', 'delete'].forEach(action => {
+            const btn = document.createElement("button");
+            if (action === 'up') {
+                btn.textContent = "⬆️"; btn.className = "action-btn move-btn";
+                btn.onclick = () => moveList(name, 'up');
+                if (index === 0) btn.style.visibility = 'hidden';
+            } else if (action === 'down') {
+                btn.textContent = "⬇️"; btn.className = "action-btn move-btn";
+                btn.onclick = () => moveList(name, 'down');
+                if (index === total - 1) btn.style.visibility = 'hidden';
+            } else {
+                btn.textContent = "🗑️"; btn.className = "action-btn delete-btn";
+                btn.onclick = () => deleteList(name);
+            }
+            actionsRow.appendChild(btn);
+        });
+        
+        li.append(contentRow, actionsRow);
+        listNames.appendChild(li);
+    }
+    
+    function renderItem(item, itemId, index, total) {
+        const li = document.createElement("li");
+        li.className = "list-item";
+        if(item.done) li.classList.add('completed');
+        
+        const contentRow = document.createElement("div");
+        contentRow.className = "item-content-row";
+        const textInput = document.createElement("input");
+        textInput.type = "text";
+        textInput.value = item.text;
+        textInput.onblur = () => updateItem(itemId, { text: textInput.value });
+        textInput.onkeydown = e => { if (e.key === 'Enter') textInput.blur(); };
+        if (item.done) { textInput.style.textDecoration = "line-through"; textInput.style.color = "#7f8c8d"; }
+        const toggleBtn = document.createElement("button");
+        toggleBtn.textContent = item.done ? "✅" : "⭕";
+        toggleBtn.className = "action-btn select-btn";
+        toggleBtn.onclick = () => updateItem(itemId, { done: !item.done });
+        contentRow.append(textInput, toggleBtn);
+
+        const actionsRow = document.createElement("div");
+        actionsRow.className = "item-actions-row";
+        ['up', 'down', 'delete'].forEach(action => {
+            const btn = document.createElement("button");
+            if (action === 'up') {
+                btn.textContent = "⬆️"; btn.className = "action-btn move-btn";
+                btn.onclick = () => moveItem(itemId, 'up');
+                if (index === 0) btn.style.visibility = 'hidden';
+            } else if (action === 'down') {
+                btn.textContent = "⬇️"; btn.className = "action-btn move-btn";
+                btn.onclick = () => moveItem(itemId, 'down');
+                if (index === total - 1) btn.style.visibility = 'hidden';
+            } else {
+                btn.textContent = "🗑️"; btn.className = "action-btn delete-btn";
+                btn.onclick = () => deleteItem(itemId);
+            }
+            actionsRow.appendChild(btn);
+        });
+        li.append(contentRow, actionsRow);
+        itemList.appendChild(li);
     }
 
-    // Navigazione
     function selectList(name) {
-      currentList = name;
-      listNameDisplay.textContent = name;
-      listsView.style.display = 'none';
-      singleListView.style.display = 'block';
-      
-      updatedLists.delete(name);
-      hasPlayedSound = false;
-      
-      if (isOnline) loadItemsFirebase(); else loadItemsLocal();
-      noteInput.value = localDatabase.lists[currentList]?.note || "";
-      updateConnectionStatus();
+        currentList = name; listNameDisplay.textContent = name;
+        listsView.style.display = 'none'; singleListView.style.display = 'block';
+        if (isOnline) loadItemsFirebase(); else loadItemsLocal();
+        noteInput.value = localDatabase.lists[currentList]?.note || "";
+        updateConnectionStatus();
     }
 
     function backToLists() {
-      currentList = null;
-      listsView.style.display = 'block';
-      singleListView.style.display = 'none';
-      itemList.innerHTML = "";
-      noteInput.value = "";
-      if (unsubscribeItems) { unsubscribeItems(); unsubscribeItems = null; }
-      
-      isManageMode = false;
-      isManageItemsMode = false;
-      listsView.classList.add('simple-view-mode');
-      listsView.classList.remove('manage-mode');
-      singleListView.classList.remove('manage-items-mode');
-      manageListsBtn.textContent = '⚙️';
-      manageListsBtn.title = 'Gestisci elenchi';
-      manageItemsBtn.textContent = '⚙️';
-      manageItemsBtn.title = 'Gestisci elementi';
-      
-      loadListsLocal();
-      updateConnectionStatus();
+        currentList = null; listsView.style.display = 'block'; singleListView.style.display = 'none';
+        if (unsubscribeItems) { unsubscribeItems(); unsubscribeItems = null; }
+        isManageMode = false; isManageItemsMode = false;
+        loadListsLocal(); updateConnectionStatus();
     }
 
-    // Caricamento elementi da Firebase
     function loadItemsFirebase() {
-      if (!db || !currentList) return;
-      
-      unsubscribeItems = db.collection("lists").doc(currentList).collection("items").orderBy("order", "asc").onSnapshot(async snapshot => {
-          const currentLocalItems = [];
-          snapshot.forEach(doc => currentLocalItems.push({ id: doc.id, ...doc.data() }));
-          
-          if (localDatabase.lists[currentList]) {
-              localDatabase.lists[currentList].items = currentLocalItems;
-              await updateListCounts(currentList);
-          }
-          
-          loadItemsLocal();
+        if (!db || !currentList) return;
+        unsubscribeItems = db.collection("lists").doc(currentList).collection("items").orderBy("order", "asc").onSnapshot(async snapshot => {
+            if (localDatabase.lists[currentList]) {
+                localDatabase.lists[currentList].items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                await updateListCounts(currentList);
+            }
+            loadItemsLocal();
         });
     }
 
-    // Aggiungere nuovo elemento
     async function addItem() {
-      const text = newItemInput.value.trim();
-      if (!validateItemText(text)) return;
-      
-      if (currentList) {
-          const items = localDatabase.lists[currentList]?.items || [];
-          const newOrder = items.length;
-          if (isOnline && db) {
-            try {
-              await db.collection("lists").doc(currentList).collection("items").add({
-                  text: text, done: false,
-                  timestamp: firebase.firestore.FieldValue.serverTimestamp(), order: newOrder
-              });
-              newItemInput.value = "";
-            } catch (error) { 
-              addItemLocally(text, newOrder); 
-            }
-          } else { 
-            addItemLocally(text, newOrder); 
-          }
-      }
+        const text = newItemInput.value.trim(); if (!validateItemText(text)) return;
+        const items = localDatabase.lists[currentList]?.items || []; const newOrder = items.length;
+        if (isOnline && db) {
+            try { await db.collection("lists").doc(currentList).collection("items").add({ text, done: false, timestamp: firebase.firestore.FieldValue.serverTimestamp(), order: newOrder });
+                newItemInput.value = "";
+            } catch { addItemLocally(text, newOrder); }
+        } else { addItemLocally(text, newOrder); }
     }
 
     async function addItemLocally(text, order) {
-      if (!localDatabase.lists[currentList].items) localDatabase.lists[currentList].items = [];
-      const newItem = {
-          text: text, done: false, timestamp: new Date().toISOString(), order: order, id: Date.now().toString()
-      };
-      localDatabase.lists[currentList].items.push(newItem);
-      await updateListCounts(currentList);
-      newItemInput.value = "";
-      loadItemsLocal();
+        if (!localDatabase.lists[currentList].items) localDatabase.lists[currentList].items = [];
+        localDatabase.lists[currentList].items.push({ text, done: false, timestamp: new Date().toISOString(), order, id: Date.now().toString() });
+        await updateListCounts(currentList); newItemInput.value = ""; loadItemsLocal();
     }
 
     async function updateItem(itemId, updates) {
-      if (isOnline && db && currentList) {
-        db.collection("lists").doc(currentList).collection("items").doc(itemId)
-          .update(updates).catch(error => alert("Errore: " + error.message));
-      } else if (currentList) {
-        const item = localDatabase.lists[currentList].items.find(i => i.id === itemId);
-        if (item) {
-          Object.assign(item, updates);
-          await updateListCounts(currentList);
-          loadItemsLocal();
-          if (updates.hasOwnProperty('done')) {
-              loadListsLocal();
-          }
+        if (isOnline && db && currentList) db.collection("lists").doc(currentList).collection("items").doc(itemId).update(updates);
+        else if (currentList) {
+            const item = localDatabase.lists[currentList].items.find(i => i.id === itemId);
+            if (item) { Object.assign(item, updates); await updateListCounts(currentList); loadItemsLocal(); if (updates.hasOwnProperty('done')) loadListsLocal(); }
         }
-      }
     }
 
     async function deleteItem(itemId) {
-      if (isOnline && db && currentList) {
-        db.collection("lists").doc(currentList).collection("items").doc(itemId).delete()
-          .catch(error => alert("Errore: " + error.message));
-      } else {
-        localDatabase.lists[currentList].items = localDatabase.lists[currentList].items.filter(i => i.id !== itemId);
-        await updateListCounts(currentList);
-        loadItemsLocal();
-        loadListsLocal();
-      }
+        if (isOnline && db && currentList) db.collection("lists").doc(currentList).collection("items").doc(itemId).delete();
+        else { localDatabase.lists[currentList].items = localDatabase.lists[currentList].items.filter(i => i.id !== itemId);
+            await updateListCounts(currentList); loadItemsLocal(); loadListsLocal();
+        }
     }
 
-    // Caricamento elementi locale
     function loadItemsLocal() {
-      itemList.innerHTML = "";
-      const items = localDatabase.lists[currentList]?.items || [];
-      if (items.length === 0) showEmptyItems();
-      else items.forEach((item, index) => renderItem(item, item.id, index, items.length));
+        itemList.innerHTML = ""; const items = localDatabase.lists[currentList]?.items || [];
+        if (items.length === 0) showEmptyItems();
+        else items.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).forEach((item, index) => renderItem(item, item.id, index, items.length));
     }
 
-    function renderItem(item, itemId, index, total) {
-      const li = document.createElement("li");
-      li.className = "list-item";
-      li.dataset.itemId = itemId;
-      
-      // Aggiungi classe per elementi completati
-      if (item.done) {
-        li.classList.add('completed');
-      }
-      
-      // Pulsanti di movimento (visibili solo in modalità gestione)
-      const moveUpBtn = document.createElement("button");
-      moveUpBtn.textContent = "⬆️";
-      moveUpBtn.className = "action-btn move-btn";
-      moveUpBtn.onclick = () => moveItem(itemId, 'up');
-      if (index === 0) moveUpBtn.style.visibility = 'hidden';
-      
-      const moveDownBtn = document.createElement("button");
-      moveDownBtn.textContent = "⬇️";
-      moveDownBtn.className = "action-btn move-btn";
-      moveDownBtn.onclick = () => moveItem(itemId, 'down');
-      if (index === total - 1) moveDownBtn.style.visibility = 'hidden';
-      
-      // Input per il testo
-      const textInput = document.createElement("input");
-      textInput.type = "text";
-      textInput.value = item.text;
-      textInput.onblur = () => updateItem(itemId, { text: textInput.value });
-      textInput.onkeypress = (e) => { if (e.key === 'Enter') textInput.blur(); };
-      if (item.done) { 
-        textInput.style.textDecoration = "line-through"; 
-        textInput.style.color = "#7f8c8d"; 
-        textInput.style.backgroundColor = "transparent"; /* Trasparente per mostrare il giallo del contenitore */
-      } else {
-        textInput.style.backgroundColor = "white"; /* Bianco per elementi normali */
-      }
-      
-      // Pulsante toggle per fatto/non fatto (SEMPRE visibile)
-      const toggleBtn = document.createElement("button");
-      toggleBtn.textContent = item.done ? "✅" : "⭕";
-      toggleBtn.className = "action-btn select-btn";
-      toggleBtn.onclick = () => updateItem(itemId, { done: !item.done });
-      
-      // Pulsante elimina (visibile SOLO in modalità gestione)
-      const deleteBtn = document.createElement("button");
-      deleteBtn.textContent = "🗑️";
-      deleteBtn.className = "action-btn delete-btn";
-      deleteBtn.onclick = () => deleteItem(itemId);
-      
-      li.append(moveUpBtn, moveDownBtn, textInput, toggleBtn, deleteBtn);
-      itemList.appendChild(li);
-    }
-
-    // Funzioni di movimento
     async function moveItem(itemId, direction) {
-        if (!currentList) return;
         let items = localDatabase.lists[currentList].items;
-        const itemIndex = items.findIndex(i => i.id === itemId);
-
-        if (itemIndex === -1) return;
-        if (direction === 'up' && itemIndex === 0) return;
-        if (direction === 'down' && itemIndex === items.length - 1) return;
-
-        const targetIndex = direction === 'up' ? itemIndex - 1 : itemIndex + 1;
-        [items[itemIndex], items[targetIndex]] = [items[targetIndex], items[itemIndex]];
-        updateItemsOrder(items);
-        loadItemsLocal();
+        const i = items.findIndex(item => item.id === itemId);
+        const j = direction === 'up' ? i - 1 : i + 1;
+        if (i === -1 || j < 0 || j >= items.length) return;
+        [items[i], items[j]] = [items[j], items[i]];
+        updateItemsOrder(items); loadItemsLocal();
     }
-    
+
     async function moveList(listName, direction) {
-        const listIndex = listOrder.indexOf(listName);
-        if (listIndex === -1) return;
-        if (direction === 'up' && listIndex === 0) return;
-        if (direction === 'down' && listIndex === listOrder.length - 1) return;
-
-        const targetIndex = direction === 'up' ? listIndex - 1 : listIndex + 1;
-        [listOrder[listIndex], listOrder[targetIndex]] = [listOrder[targetIndex], listOrder[listIndex]];
-        updateListsOrder();
-        loadListsLocal();
+        const i = listOrder.indexOf(listName);
+        const j = direction === 'up' ? i - 1 : i + 1;
+        if (i === -1 || j < 0 || j >= listOrder.length) return;
+        [listOrder[i], listOrder[j]] = [listOrder[j], listOrder[i]];
+        updateListsOrder(); loadListsLocal();
     }
-    
+
     async function updateItemsOrder(items) {
         items.forEach((item, index) => item.order = index);
         await updateListCounts(currentList);
         if (isOnline && db) {
             const batch = db.batch();
-            const collectionRef = db.collection("lists").doc(currentList).collection("items");
-            items.forEach(item => {
-                batch.update(collectionRef.doc(item.id), { order: item.order });
-            });
-            await batch.commit().catch(err => console.error("Errore ordine elementi:", err));
+            items.forEach(item => batch.update(db.collection("lists").doc(currentList).collection("items").doc(item.id), { order: item.order }));
+            await batch.commit();
         }
     }
 
@@ -1337,342 +759,122 @@
         saveToLocalStorage();
         if (isOnline && db) {
             const batch = db.batch();
-            listOrder.forEach((listId, index) => {
-                const docRef = db.collection("lists").doc(listId);
-                batch.update(docRef, { order: index });
-            });
-            await batch.commit().catch(err => console.error("Errore ordine liste:", err));
+            listOrder.forEach((id, i) => batch.update(db.collection("lists").doc(id), { order: i }));
+            await batch.commit();
+        }
+    }
+
+    function saveToLocalStorage() {
+        listOrder.forEach((name, i) => { if(localDatabase.lists[name]) localDatabase.lists[name].order = i; });
+        localStorage.setItem('elenchiOrder', JSON.stringify(listOrder));
+        localStorage.setItem('elenchiFare', JSON.stringify(localDatabase.lists));
+    }
+
+    async function renameList(oldName, newName) {
+        if (!validateListName(newName) || newName === oldName) return false;
+        if (isOnline && db) {
+            try { if ((await db.collection("lists").doc(newName).get()).exists) { alert(`L'elenco "${newName}" esiste già.`); return false; }
+                const oldDoc = await db.collection("lists").doc(oldName).get();
+                const items = await db.collection("lists").doc(oldName).collection("items").get();
+                const batch = db.batch(); batch.set(db.collection("lists").doc(newName), oldDoc.data());
+                items.forEach(doc => batch.set(db.collection("lists").doc(newName).collection("items").doc(doc.id), doc.data()));
+                batch.delete(db.collection("lists").doc(oldName)); await batch.commit();
+                if (currentList === oldName) selectList(newName);
+                else loadListsLocal();
+                return true;
+            } catch { return false; }
+        } else {
+            if (localDatabase.lists[newName]) { alert(`L'elenco "${newName}" esiste già.`); return false; }
+            localDatabase.lists[newName] = localDatabase.lists[oldName]; delete localDatabase.lists[oldName];
+            listOrder = listOrder.map(n => (n === oldName ? newName : n));
+            saveToLocalStorage();
+            if (currentList === oldName) selectList(newName); else loadListsLocal();
+            return true;
         }
     }
     
-    // Salvataggio locale
-    function saveToLocalStorage() {
-      listOrder.forEach((name, index) => { 
-        if(localDatabase.lists[name]) {
-          localDatabase.lists[name].order = index;
-        }
-      });
-      localStorage.setItem('elenchiOrder', JSON.stringify(listOrder));
-      localStorage.setItem('elenchiFare', JSON.stringify(localDatabase.lists));
-    }
-
-    // Rinominare lista
-    async function renameList(oldName, newName) {
-      newName = newName.trim();
-      if (!validateListName(newName) || newName === oldName) return false;
-
-      if (isOnline && db) {
-        try {
-          const newDocRef = db.collection("lists").doc(newName);
-          if ((await newDocRef.get()).exists) { 
-            alert(`L'elenco "${newName}" esiste già.`); 
-            return false; 
-          }
-          const oldListDocRef = db.collection("lists").doc(oldName);
-          const oldListData = (await oldListDocRef.get()).data();
-          const itemsSnapshot = await oldListDocRef.collection("items").get();
-          
-          const batch = db.batch();
-          batch.set(newDocRef, oldListData);
-          itemsSnapshot.forEach(doc => {
-            batch.set(newDocRef.collection("items").doc(doc.id), doc.data());
-            batch.delete(doc.ref);
-          });
-          batch.delete(oldListDocRef);
-          
-          await batch.commit();
-          if (currentList === oldName) selectList(newName);
-          return true;
-        } catch (error) {
-          console.error("Errore rinomina Firebase:", error);
-          alert(`Errore Firebase: ${error.message}`);
-          return false;
-        }
-      } else {
-        if (localDatabase.lists[newName]) { 
-          alert(`L'elenco "${newName}" esiste già.`); 
-          return false; 
-        }
-        localDatabase.lists[newName] = localDatabase.lists[oldName];
-        delete localDatabase.lists[oldName];
-        listOrder = listOrder.map(n => (n === oldName ? newName : n));
-        saveToLocalStorage();
-        if (currentList === oldName) selectList(newName);
-        else loadListsLocal();
-        return true;
-      }
-    }
-
-    // Aggiornare note
     async function updateNote(listName, newNote) {
         if (!listName) return;
         newNote = newNote.trim();
-        if (isOnline && db) {
-            try { 
-              await db.collection("lists").doc(listName).update({ note: newNote }); 
-            } catch (error) { 
-              console.error("Errore aggiornamento nota Firebase:", error); 
-            }
-        } else {
-            if (localDatabase.lists[listName]) {
-                localDatabase.lists[listName].note = newNote;
-                saveToLocalStorage();
-            }
+        if (isOnline && db) await db.collection("lists").doc(listName).update({ note: newNote });
+        else if (localDatabase.lists[listName]) {
+            localDatabase.lists[listName].note = newNote;
+            saveToLocalStorage();
         }
     }
 
-    // Export PDF per singolo elenco
+    async function exportPDF(content, styles) {
+        const pdfWindow = window.open('', '_blank');
+        pdfWindow.document.write('<h1>Preparazione PDF...</h1>');
+        try {
+            pdfMake.createPdf({ content, styles }).getBlob(blob => { 
+                pdfWindow.location.href = URL.createObjectURL(blob); 
+            });
+        } catch (error) {
+            pdfWindow.document.body.innerHTML = `<h1>Errore</h1><pre>${error.stack || error}</pre>`;
+        }
+    }
+
+    function createPdfTable(items) {
+        if (!items || items.length === 0) return null;
+        const midpoint = Math.ceil(items.length / 2);
+        const bodyFirst = items.slice(0, midpoint).map((item, i) => [(i + 1).toString(), item.done ? { text: item.text, decoration: 'lineThrough', color: '#7f8c8d' } : item.text]);
+        const bodySecond = items.slice(midpoint).map((item, i) => [(midpoint + i + 1).toString(), item.done ? { text: item.text, decoration: 'lineThrough', color: '#7f8c8d' } : item.text]);
+        if (items.length % 2 !== 0 && bodySecond.length > 0) bodySecond.push([' ', ' ']);
+        const layout = { hLineColor: '#ccc', vLineColor: '#ccc' };
+        return {
+            columnGap: 10,
+            columns: [
+                { table: { widths: ['auto', '*'], body: bodyFirst }, layout },
+                bodySecond.length > 0 ? { table: { widths: ['auto', '*'], body: bodySecond }, layout } : {}
+            ]
+        };
+    }
+
     async function exportListToPDF(event) {
-        event.stopPropagation(); 
-
-        if (!currentList) {
-            alert("Nessun elenco selezionato per l'esportazione.");
-            return;
-        }
-
-        const items = localDatabase.lists[currentList]?.items || [];
-        const note = localDatabase.lists[currentList]?.note || '';
-
-        if (items.length === 0 && !note.trim()) {
-            alert("Questo elenco è vuoto, non c'è nulla da esportare.");
-            return;
-        }
-        
-        const pdfWindow = window.open('', '_blank');
-        pdfWindow.document.write('<h1>Preparazione del PDF in corso...</h1>');
-
-        try {
-            const formattedDate = new Date().toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
-            const content = [{ text: `${currentList} - ${formattedDate}`, style: 'header' }];
-
-            if (items.length > 0) {
-                const midpoint = Math.ceil(items.length / 2);
-                const firstHalf = items.slice(0, midpoint);
-                const secondHalf = items.slice(midpoint);
-                
-                const tableBodyFirst = firstHalf.map((item, index) => [
-                    (index + 1).toString(),
-                    item.done ? { text: item.text, decoration: 'lineThrough', color: '#7f8c8d' } : item.text
-                ]);
-                const tableBodySecond = secondHalf.map((item, index) => [
-                    (midpoint + index + 1).toString(),
-                    item.done ? { text: item.text, decoration: 'lineThrough', color: '#7f8c8d' } : item.text
-                ]);
-                
-                if (items.length % 2 !== 0) {
-                    tableBodySecond.push([' ', ' ']);
-                }
-                
-                const tableLayout = {
-                    hLineColor: (i, node) => '#cccccc',
-                    vLineColor: (i, node) => '#cccccc'
-                };
-
-                content.push({
-                    columnGap: 10,
-                    columns: [
-                        { table: { widths: ['auto', '*'], body: tableBodyFirst }, layout: tableLayout },
-                        secondHalf.length > 0 ? { table: { widths: ['auto', '*'], body: tableBodySecond }, layout: tableLayout } : { text: '' }
-                    ]
-                });
-            }
-            
-            if (note.trim()) {
-                content.push({ text: `Nota: ${note}`, style: 'noteStyle' });
-            }
-
-            const docDefinition = {
-                content: content,
-                styles: {
-                    header: { fontSize: 22, bold: true, margin: [0, 0, 0, 10], alignment: 'center' },
-                    noteStyle: { italics: true, color: '#333333', margin: [0, 10, 0, 0] }
-                }
-            };
-            
-            const pdfDoc = pdfMake.createPdf(docDefinition);
-            const blob = await new Promise(resolve => pdfDoc.getBlob(resolve));
-            const blobUrl = URL.createObjectURL(blob);
-            pdfWindow.location.href = blobUrl;
-
-        } catch (error) {
-            console.error("Errore creazione PDF singolo:", error);
-            if(pdfWindow && !pdfWindow.closed) {
-                pdfWindow.document.body.innerHTML = `<div style="font-family: sans-serif; padding: 20px;"><h1>Si è verificato un errore</h1><pre style="background-color: #f0f0f0; padding: 10px; border: 1px solid #ccc; white-space: pre-wrap;">${error.stack || error}</pre></div>`;
-            }
-        }
+        event.stopPropagation();
+        if (!currentList) { alert("Nessun elenco selezionato."); return; }
+        const { items, note } = localDatabase.lists[currentList] || {};
+        if ((!items || items.length === 0) && !note?.trim()) { alert("Elenco vuoto."); return; }
+        const content = [{ text: `${currentList} - ${new Date().toLocaleDateString('it-IT')}`, style: 'header' }];
+        const table = createPdfTable(items);
+        if (table) content.push(table);
+        if (note?.trim()) content.push({ text: `Nota: ${note}`, style: 'noteStyle' });
+        exportPDF(content, { header: { fontSize: 22, bold: true, margin: [0, 0, 0, 10], alignment: 'center' }, noteStyle: { italics: true, color: '#333', margin: [0, 10, 0, 0] } });
     }
 
-    // Export PDF per tutti gli elenchi
     async function exportAllListsToPDF() {
-        if (listOrder.length === 0) {
-            alert("Nessun elenco da esportare.");
-            return;
-        }
-        
-        const pdfWindow = window.open('', '_blank');
-        pdfWindow.document.write('<h1>Preparazione del riepilogo PDF in corso...</h1>');
-        
-        try {
-            const formattedDate = new Date().toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
-            const content = [];
-
-            content.push({ text: 'Riepilogo di Tutti gli Elenchi', style: 'docHeader' });
-            content.push({ text: formattedDate, style: 'docSubHeader' });
-
-            for (const listName of listOrder) {
-                const listData = localDatabase.lists[listName];
-                const note = listData?.note || '';
-                const items = listData?.items || [];
-                
-                if (items.length > 0 || note.trim()) {
-                    content.push({ text: listName, style: 'listHeader' });
-
-                    if (items.length > 0) {
-                        const midpoint = Math.ceil(items.length / 2);
-                        const firstHalf = items.slice(0, midpoint);
-                        const secondHalf = items.slice(midpoint);
-
-                        const tableBodyFirst = firstHalf.map((item, index) => [
-                            (index + 1).toString(),
-                            item.done ? { text: item.text, decoration: 'lineThrough', color: '#7f8c8d' } : item.text
-                        ]);
-                        const tableBodySecond = secondHalf.map((item, index) => [
-                            (midpoint + index + 1).toString(),
-                            item.done ? { text: item.text, decoration: 'lineThrough', color: '#7f8c8d' } : item.text
-                        ]);
-
-                        if (items.length % 2 !== 0) {
-                            tableBodySecond.push([' ', ' ']);
-                        }
-
-                        const tableLayout = {
-                            hLineColor: (i, node) => '#cccccc',
-                            vLineColor: (i, node) => '#cccccc'
-                        };
-
-                        content.push({
-                            columnGap: 10,
-                            columns: [
-                                { table: { widths: ['auto', '*'], body: tableBodyFirst }, layout: tableLayout },
-                                secondHalf.length > 0 ? { table: { widths: ['auto', '*'], body: tableBodySecond }, layout: tableLayout } : { text: '' }
-                            ]
-                        });
-                    }
-                    
-                    if (note.trim()) {
-                        content.push({ text: `Nota: ${note}`, style: 'noteStyle' });
-                    }
-                }
-            }
-
-            const docDefinition = {
-                content: content,
-                styles: {
-                    docHeader: { fontSize: 24, bold: true, alignment: 'center', margin: [0, 0, 0, 5] },
-                    docSubHeader: { fontSize: 12, alignment: 'center', margin: [0, 0, 0, 10] },
-                    listHeader: { fontSize: 18, bold: true, margin: [0, 15, 0, 5] },
-                    noteStyle: { italics: true, color: '#333333', margin: [0, 5, 0, 10] }
-                }
-            };
-            
-            const pdfDoc = pdfMake.createPdf(docDefinition);
-            const blob = await new Promise(resolve => pdfDoc.getBlob(resolve));
-            const blobUrl = URL.createObjectURL(blob);
-            pdfWindow.location.href = blobUrl;
-
-        } catch (error) {
-            console.error("Errore creazione PDF riepilogo:", error);
-            if(pdfWindow && !pdfWindow.closed) {
-                pdfWindow.document.body.innerHTML = `<div style="font-family: sans-serif; padding: 20px;"><h1>Si è verificato un errore</h1><pre style="background-color: #f0f0f0; padding: 10px; border: 1px solid #ccc; white-space: pre-wrap;">${error.stack || error}</pre></div>`;
+        if (listOrder.length === 0) { alert("Nessun elenco da esportare."); return; }
+        const content = [{ text: 'Riepilogo Elenchi', style: 'docHeader' }, { text: new Date().toLocaleDateString('it-IT'), style: 'docSubHeader' }];
+        for (const listName of listOrder) {
+            const { items, note } = localDatabase.lists[listName] || {};
+            if ((items && items.length > 0) || note?.trim()) {
+                content.push({ text: listName, style: 'listHeader' });
+                const table = createPdfTable(items);
+                if (table) content.push(table);
+                if (note?.trim()) content.push({ text: `Nota: ${note}`, style: 'noteStyle' });
             }
         }
+        exportPDF(content, { docHeader: { fontSize: 24, bold: true, alignment: 'center' }, docSubHeader: { fontSize: 12, alignment: 'center', margin: [0, 0, 0, 10] }, listHeader: { fontSize: 18, bold: true, margin: [0, 15, 0, 5] }, noteStyle: { italics: true, color: '#333', margin: [0, 5, 0, 10] } });
     }
 
-    // Event listeners
-    newListInput.addEventListener('keypress', function(e) { 
-      if (e.key === 'Enter') addList(); 
-    });
-    newItemInput.addEventListener('keypress', function(e) { 
-      if (e.key === 'Enter') addItem(); 
-    });
-    noteInput.addEventListener('blur', () => {
-        if (currentList) {
-            const currentNote = localDatabase.lists[currentList]?.note || "";
-            if (noteInput.value.trim() !== (currentNote || "").trim()) {
-                 updateNote(currentList, noteInput.value.trim());
-            }
-        }
-    });
+    function validateListName(name) { if (!name || name.length > 50) { alert("Nome non valido (max 50 caratteri)."); return false; } return true; }
+    function validateItemText(text) { if (!text || text.length > 200) { alert("Testo non valido (max 200 caratteri)."); return false; } return true; }
+    function showEmptyLists() { listNames.innerHTML = "<li style='text-align: center; font-style: italic; color: #7f8c8d; border: none; background: transparent;'>Nessun elenco</li>"; }
+    function showEmptyItems() { itemList.innerHTML = "<li style='text-align: center; font-style: italic; color: #7f8c8d; border: none; background: transparent;'>Nessuna cosa da fare</li>"; }
 
-    // Funzioni di validazione
-    function validateListName(name) { 
-      if (!name) { 
-        alert("Il nome dell'elenco non può essere vuoto."); 
-        return false; 
-      } 
-      if (name.length > 50) { 
-        alert("Il nome è troppo lungo (max 50 caratteri)."); 
-        return false; 
-      } 
-      return true; 
-    }
-    
-    function validateItemText(text) { 
-      if (!text) { 
-        alert("Il testo non può essere vuoto."); 
-        return false; 
-      } 
-      if (text.length > 200) { 
-        alert("Il testo è troppo lungo (max 200 caratteri)."); 
-        return false; 
-      } 
-      return true; 
-    }
-    
-    function showEmptyLists() { 
-      listNames.innerHTML = "<li style='text-align: center; font-style: italic; color: #7f8c8d; border: none; background: transparent;'>Nessun elenco creato</li>"; 
-    }
-    
-    function showEmptyItems() { 
-      itemList.innerHTML = "<li style='text-align: center; font-style: italic; color: #7f8c8d; border: none; background: transparent;'>Nessuna cosa da fare</li>"; 
-    }
-
-    // Inizializzazione
     window.addEventListener('load', () => {
-      isManageMode = false;
-      listsView.classList.add('simple-view-mode');
-      
-      initFirebase();
-      homeIcon.onclick = backToLists;
-      document.getElementById('pdf-export-logo').addEventListener('click', exportListToPDF);
-      document.getElementById('pdf-export-all-logo').addEventListener('click', exportAllListsToPDF);
-      
-      manageListsBtn.addEventListener('click', (event) => {
-        event.stopPropagation();
-        toggleManageMode();
-      });
-      
-      manageItemsBtn.addEventListener('click', (event) => {
-        event.stopPropagation();
-        toggleManageItemsMode();
-      });
+        initFirebase(); homeIcon.onclick = backToLists;
+        document.getElementById('pdf-export-logo').addEventListener('click', exportListToPDF);
+        document.getElementById('pdf-export-all-logo').addEventListener('click', exportAllListsToPDF);
+        manageListsBtn.addEventListener('click', e => { e.stopPropagation(); toggleManageMode(); });
+        manageItemsBtn.addEventListener('click', e => { e.stopPropagation(); toggleManageItemsMode(); });
+        newListInput.addEventListener('keypress', e => { if (e.key === 'Enter') addList(); });
+        newItemInput.addEventListener('keypress', e => { if (e.key === 'Enter') addItem(); });
+        noteInput.addEventListener('blur', () => { if (currentList) updateNote(currentList, noteInput.value.trim()); });
     });
 
-    // Cleanup
-    window.addEventListener('beforeunload', () => { 
-      if (unsubscribeList) unsubscribeList(); 
-      if (unsubscribeItems) unsubscribeItems(); 
-    });
-
-    // Prevenzione zoom su mobile
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', function (event) { 
-      const now = (new Date()).getTime(); 
-      if (now - lastTouchEnd <= 300) { 
-        event.preventDefault(); 
-      } 
-      lastTouchEnd = now; 
-    }, false);
+    window.addEventListener('beforeunload', () => { if (unsubscribeList) unsubscribeList(); if (unsubscribeItems) unsubscribeItems(); });
   </script>
 </body>
 </html>
