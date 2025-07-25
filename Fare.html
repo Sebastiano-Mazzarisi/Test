@@ -74,6 +74,11 @@
       justify-content: center;
       gap: 0.5rem;
     }
+    
+    #main-title {
+        cursor: pointer;
+        transition: opacity 0.3s;
+    }
 
     h1 img {
         vertical-align: middle;
@@ -122,7 +127,6 @@
 
     .card {
       background: #e6f3ff;
-      /* MODIFICA: Bordo raddoppiato e colore di default */
       border: 2px solid var(--light-blue-border);
       border-radius: var(--border-radius-card);
       padding: 1.5rem;
@@ -131,14 +135,13 @@
       transition: border-color 0.5s, box-shadow 0.5s;
     }
 
-    /* NUOVE REGOLE PER LO STATO DELLA CONNESSIONE SULLA CORNICE */
     .is-online .card {
-      border-color: #28a745; /* Verde */
+      border-color: #28a745; 
       box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
     }
 
     .is-offline .card {
-      border-color: #dc3545; /* Rosso granata */
+      border-color: #dc3545;
       box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
     }
 
@@ -341,32 +344,18 @@
 
     @media (max-width: 480px) {
       body { padding: 0.5rem; }
-      
       h1 { font-size: 1.8rem; }
-      
-      #current-list-title {
-        font-size: 1.6rem; 
-      }
-      
-      #current-list-title img {
-        height: 1.0em;
-      }
-      
-      #home-icon, #manage-lists-btn, #manage-items-btn {
-        font-size: 1.0em;
-      }
-
-      .list-item .action-btn {
-        font-size: 1.4rem;
-      }
+      #current-list-title { font-size: 1.6rem; }
+      #current-list-title img { height: 1.0em; }
+      #home-icon, #manage-lists-btn, #manage-items-btn { font-size: 1.0em; }
+      .list-item .action-btn { font-size: 1.4rem; }
     }
-
   </style>
 </head>
 <body>
   <div class="container">
     <div id="lists-view">
-      <h1>
+      <h1 id="main-title">
           <img id="pdf-export-all-logo" src="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Fare.png" alt="Icona Elenchi" title="Esporta tutti gli elenchi in PDF">
           Elenchi
           <span id="manage-lists-btn" title="Gestisci elenchi">⚙️</span>
@@ -461,7 +450,6 @@
         singleListView.classList.toggle('manage-items-mode', isManageItemsMode);
     }
     
-    // MODIFICA: La funzione ora gestisce le classi sui contenitori principali
     function updateConnectionStatus() {
         const views = [listsView, singleListView];
         if (isOnline) {
@@ -477,10 +465,6 @@
         }
     }
 
-    // ... il resto del codice JavaScript rimane quasi identico ...
-    // Lo incollo qui per completezza, assicurandomi che non ci siano riferimenti
-    // ai vecchi 'status-dot' rimossi.
-    
     function getItemCount(listName) {
         const list = localDatabase.lists[listName];
         if (!list || !Array.isArray(list.items)) return 0;
@@ -889,13 +873,11 @@
         if (!currentList) return;
         const currentIndex = listOrder.indexOf(currentList);
         let newIndex = -1;
-
         if (direction === 'next' && currentIndex < listOrder.length - 1) {
             newIndex = currentIndex + 1;
         } else if (direction === 'prev' && currentIndex > 0) {
             newIndex = currentIndex - 1;
         }
-
         if (newIndex !== -1) {
             selectList(listOrder[newIndex]);
         }
@@ -913,11 +895,39 @@
         }
     }
     
+    // NUOVA funzione per forzare l'aggiornamento
+    function refreshData() {
+        if (!isOnline) {
+            alert("Sei offline. Impossibile aggiornare i dati dal server.");
+            return;
+        }
+        console.log("🔄 Forzando l'aggiornamento dei dati...");
+        if (unsubscribeList) {
+            unsubscribeList();
+        }
+        loadLists();
+        const mainTitle = document.getElementById("main-title");
+        if(mainTitle) {
+            mainTitle.style.opacity = '0.5';
+            setTimeout(() => { mainTitle.style.opacity = '1'; }, 400);
+        }
+    }
+
     window.addEventListener('load', () => {
         initFirebase();
         homeIcon.onclick = backToLists;
         document.getElementById('pdf-export-logo').addEventListener('click', exportListToPDF);
         document.getElementById('pdf-export-all-logo').addEventListener('click', exportAllListsToPDF);
+        
+        // NUOVO: Listener per il refresh sul titolo
+        const mainTitle = document.getElementById("main-title");
+        mainTitle.addEventListener('click', (event) => {
+            // Esegui il refresh solo se il click non è sull'icona di gestione
+            if (event.target.id !== 'manage-lists-btn') {
+                refreshData();
+            }
+        });
+
         manageListsBtn.addEventListener('click', e => { e.stopPropagation(); toggleManageMode(); });
         manageItemsBtn.addEventListener('click', e => { e.stopPropagation(); toggleManageItemsMode(); });
         newListInput.addEventListener('keypress', e => { if (e.key === 'Enter') addList(); });
