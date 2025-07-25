@@ -115,23 +115,6 @@
         color: var(--accent);
     }
 
-    .status-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-
-    .status-dot.online {
-      background-color: #28a745;
-      box-shadow: 0 0 6px rgba(40, 167, 69, 0.5);
-    }
-
-    .status-dot.offline {
-      background-color: #dc3545;
-      box-shadow: 0 0 6px rgba(220, 53, 69, 0.5);
-    }
-
     .section {
       width: 100%;
       margin-bottom: 1rem;
@@ -139,12 +122,26 @@
 
     .card {
       background: #e6f3ff;
-      border: 1px solid var(--light-blue-border);
+      /* MODIFICA: Bordo raddoppiato e colore di default */
+      border: 2px solid var(--light-blue-border);
       border-radius: var(--border-radius-card);
       padding: 1.5rem;
       box-shadow: var(--shadow);
       margin-bottom: 0;
+      transition: border-color 0.5s, box-shadow 0.5s;
     }
+
+    /* NUOVE REGOLE PER LO STATO DELLA CONNESSIONE SULLA CORNICE */
+    .is-online .card {
+      border-color: #28a745; /* Verde */
+      box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+    }
+
+    .is-offline .card {
+      border-color: #dc3545; /* Rosso granata */
+      box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
+    }
+
 
     #single-list-view .card {
       background: #e8f5e8;
@@ -341,6 +338,29 @@
         color: #CCCCCC !important;
         font-style: italic !important;
     }
+
+    @media (max-width: 480px) {
+      body { padding: 0.5rem; }
+      
+      h1 { font-size: 1.8rem; }
+      
+      #current-list-title {
+        font-size: 1.6rem; 
+      }
+      
+      #current-list-title img {
+        height: 1.0em;
+      }
+      
+      #home-icon, #manage-lists-btn, #manage-items-btn {
+        font-size: 1.0em;
+      }
+
+      .list-item .action-btn {
+        font-size: 1.4rem;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -348,7 +368,7 @@
     <div id="lists-view">
       <h1>
           <img id="pdf-export-all-logo" src="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Fare.png" alt="Icona Elenchi" title="Esporta tutti gli elenchi in PDF">
-          Elenchi <span id="status-dot" class="status-dot offline"></span>
+          Elenchi
           <span id="manage-lists-btn" title="Gestisci elenchi">⚙️</span>
       </h1>
       <div class="section">
@@ -366,7 +386,6 @@
       <h1 id="current-list-title">
           <img id="pdf-export-logo" src="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Fare.png" alt="Icona Elenco" style="cursor: pointer;" title="Esporta in PDF">
           <span id="list-name-display"></span>
-          <span id="status-dot-single-list" class="status-dot offline"></span>
           <span id="manage-items-btn" title="Gestisci elementi">⚙️</span>
           <span id="home-icon">🏠</span>
       </h1>
@@ -411,7 +430,6 @@
     let localDatabase = { lists: JSON.parse(localStorage.getItem('elenchiFare') || '{}') };
     let listOrder = JSON.parse(localStorage.getItem('elenchiOrder') || '[]');
     
-    // Variabili per lo swipe
     let touchstartX = 0;
     let touchendX = 0;
     let touchstartY = 0;
@@ -424,8 +442,6 @@
     const newListInput = document.getElementById("new-list-name");
     const listsView = document.getElementById("lists-view");
     const singleListView = document.getElementById("single-list-view");
-    const statusDot = document.getElementById("status-dot");
-    const statusDotSingleList = document.getElementById("status-dot-single-list");
     const noteInput = document.getElementById("note-input");
     const homeIcon = document.getElementById("home-icon");
     const manageListsBtn = document.getElementById("manage-lists-btn");
@@ -444,7 +460,27 @@
         manageItemsBtn.title = isManageItemsMode ? 'Termina gestione' : 'Gestisci elementi';
         singleListView.classList.toggle('manage-items-mode', isManageItemsMode);
     }
+    
+    // MODIFICA: La funzione ora gestisce le classi sui contenitori principali
+    function updateConnectionStatus() {
+        const views = [listsView, singleListView];
+        if (isOnline) {
+            views.forEach(view => {
+                view.classList.remove('is-offline');
+                view.classList.add('is-online');
+            });
+        } else {
+            views.forEach(view => {
+                view.classList.remove('is-online');
+                view.classList.add('is-offline');
+            });
+        }
+    }
 
+    // ... il resto del codice JavaScript rimane quasi identico ...
+    // Lo incollo qui per completezza, assicurandomi che non ci siano riferimenti
+    // ai vecchi 'status-dot' rimossi.
+    
     function getItemCount(listName) {
         const list = localDatabase.lists[listName];
         if (!list || !Array.isArray(list.items)) return 0;
@@ -482,12 +518,7 @@
     }
 
     function fallbackToLocal() { isOnline = false; updateConnectionStatus(); loadListsLocal(); }
-    function updateConnectionStatus() {
-        [statusDot, statusDotSingleList].forEach(dot => {
-            if(dot) { dot.className = `status-dot ${isOnline ? 'online' : 'offline'}`; dot.title = isOnline ? "🟢 Connesso" : "🔴 Offline"; }
-        });
-    }
-
+    
     function loadLists() {
         if (!db) return fallbackToLocal();
         unsubscribeList = db.collection("lists").orderBy("order", "asc").onSnapshot(async snapshot => {
@@ -577,17 +608,13 @@
     function renderListItem(name, index, total) {
         const li = document.createElement("li");
         li.className = "list-item";
-
         const contentRow = document.createElement("div");
         contentRow.className = "item-content-row";
-
         const nameDisplay = document.createElement("div");
         nameDisplay.className = "list-name-display";
         nameDisplay.textContent = name;
         nameDisplay.onclick = () => selectList(name);
-
         const renameOrCountButton = document.createElement("div");
-
         if (isManageMode) {
             renameOrCountButton.className = "action-btn rename-btn";
             renameOrCountButton.innerHTML = '✏️';
@@ -597,17 +624,10 @@
             renameOrCountButton.textContent = getItemCount(name);
             renameOrCountButton.title = "Rinomina elenco";
         }
-        
-        renameOrCountButton.onclick = (e) => {
-           e.stopPropagation();
-           enableInlineEdit(nameDisplay, name);
-        };
-        
+        renameOrCountButton.onclick = (e) => { e.stopPropagation(); enableInlineEdit(nameDisplay, name); };
         contentRow.append(nameDisplay, renameOrCountButton);
-
         const actionsRow = document.createElement("div");
         actionsRow.className = "item-actions-row";
-
         ['up', 'down', 'delete'].forEach(action => {
             const btn = document.createElement("button");
             if (action === 'up') {
@@ -624,7 +644,6 @@
             }
             actionsRow.appendChild(btn);
         });
-        
         li.append(contentRow, actionsRow);
         listNames.appendChild(li);
     }
@@ -633,7 +652,6 @@
         const li = document.createElement("li");
         li.className = "list-item";
         if(item.done) li.classList.add('completed');
-        
         const contentRow = document.createElement("div");
         contentRow.className = "item-content-row";
         const textInput = document.createElement("input");
@@ -647,7 +665,6 @@
         toggleBtn.className = "action-btn select-btn";
         toggleBtn.onclick = () => updateItem(itemId, { done: !item.done });
         contentRow.append(textInput, toggleBtn);
-
         const actionsRow = document.createElement("div");
         actionsRow.className = "item-actions-row";
         ['up', 'down', 'delete'].forEach(action => {
@@ -868,7 +885,6 @@
     function showEmptyLists() { listNames.innerHTML = "<li style='text-align: center; font-style: italic; color: #7f8c8d; border: none; background: transparent;'>Nessun elenco</li>"; }
     function showEmptyItems() { itemList.innerHTML = "<li style='text-align: center; font-style: italic; color: #7f8c8d; border: none; background: transparent;'>Nessuna cosa da fare</li>"; }
     
-    // Funzione per gestire la navigazione (usata da frecce e swipe)
     function navigateList(direction) {
         if (!currentList) return;
         const currentIndex = listOrder.indexOf(currentList);
@@ -885,19 +901,15 @@
         }
     }
 
-    // Funzione per gestire lo swipe
     function handleSwipe() {
-        const swipeThreshold = 50; // Distanza minima per uno swipe
-        const verticalThreshold = 75; // Distanza verticale massima consentita
+        const swipeThreshold = 50; 
+        const verticalThreshold = 75;
         const dx = touchendX - touchstartX;
         const dy = touchendY - touchstartY;
 
         if (Math.abs(dx) > swipeThreshold && Math.abs(dy) < verticalThreshold) {
-            if (dx < 0) { // Swipe verso sinistra
-                navigateList('next');
-            } else { // Swipe verso destra
-                navigateList('prev');
-            }
+            if (dx < 0) { navigateList('next'); } 
+            else { navigateList('prev'); }
         }
     }
     
@@ -923,7 +935,6 @@
             }
         });
 
-        // Aggiunta listener per lo swipe
         singleListView.addEventListener('touchstart', e => {
             touchstartX = e.changedTouches[0].screenX;
             touchstartY = e.changedTouches[0].screenY;
