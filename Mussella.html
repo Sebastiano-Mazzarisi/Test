@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mussella Amministrazioni - Gestione Condominiale Moderna</title>
+    <meta name="description" content="Studio Mussella di Tommaso Mussella: amministrazione condominiale a Gravina in Puglia con un approccio moderno, trasparente e digitale.">
+
+    <link rel="icon" type="image/png" href="https://www.dropbox.com/scl/fi/k6567w7nw4szkaxf3q1vs/Logo-piccolo-essenziale.png?rlkey=tc51u7bletclimzryslva39rp&raw=1">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-color: #0b3d4f;
+            --accent-color: #d4a05d;
+            --text-color: #333333;
+            --bg-color: #fdfdfd;
+            --bg-light: #f5f5f5;
+            --white: #ffffff;
+            --font-family: 'Poppins', sans-serif;
+            --header-height: 120px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: var(--font-family); color: var(--text-color); background-color: var(--bg-color); line-height: 1.6; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .section { padding: 100px 0; }
+        .section-title { text-align: center; font-size: 2.8rem; color: var(--primary-color); margin-bottom: 60px; font-weight: 700; }
+        
+        .bg-light { background-color: var(--bg-light); }
+
+        /* Header */
+        .header { background-color: var(--white); height: var(--header-height); position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .header .container { display: flex; align-items: center; justify-content: space-between; height: 100%; }
+        .logo img { height: 90px; }
+
+        .main-nav ul { display: flex; list-style: none; gap: 40px; }
+        .main-nav a { text-decoration: none; color: var(--text-color); font-weight: 600; padding-bottom: 5px; position: relative; }
+        .main-nav a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2px; background-color: var(--accent-color); transition: width 0.3s ease; }
+        .main-nav a:hover::after, .main-nav a.active::after { width: 100%; }
+        
+        #mobile-nav-toggle { display: none; }
+        .mobile-nav-label { display: none; cursor: pointer; z-index: 1001; }
+
+        /* Hero */
+        .hero {
+            background: linear-gradient(to right, rgba(11, 61, 79, 0.5), rgba(11, 61, 79, 0.3)),
+                        url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070&auto=format&fit=crop') no-repeat center center/cover;
+            padding-top: calc(var(--header-height) + 80px);
+            padding-bottom: 100px;
+            color: var(--white);
+            text-align: center;
+        }
+        .hero-logo-container { margin-bottom: 30px; }
+        .hero-logo-container img { max-width: 450px; width: 100%; height: auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3)); }
+        .hero-content { max-width: 700px; display: inline-block; text-align: center; }
+        .hero-title { font-size: 3rem; font-weight: 700; line-height: 1.2; margin-bottom: 20px; }
+        .hero-subtitle { font-size: 1.2rem; margin-bottom: 40px; opacity: 0.95; }
+
+        /* Features & Services Grid */
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+        .feature-card {
+            background-color: var(--white); padding: 40px; text-align: center; border-radius: 12px;
+            border: 1px solid #EAEAEA; box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .feature-card:hover { transform: translateY(-8px); border-color: var(--accent-color); box-shadow: 0 12px 30px rgba(0,0,0,0.1); }
+        .icon-wrapper { font-size: 3.5rem; color: var(--accent-color); margin-bottom: 25px; display: inline-block; }
+        .feature-card h3 { color: var(--primary-color); font-size: 1.5rem; margin-bottom: 15px; }
+
+        /* Why Us Section */
+        .why-us-item { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+        .why-us-item img { width: 100%; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .why-us-text h3 { font-size: 2rem; color: var(--primary-color); margin-bottom: 20px; }
+
+        /* FAQ Section */
+        .faq-container { max-width: 800px; margin: 0 auto; }
+        .faq-item { border-bottom: 1px solid #ddd; }
+        .faq-item summary { font-size: 1.2rem; font-weight: 600; padding: 20px 0; cursor: pointer; position: relative; list-style: none; }
+        .faq-item summary::-webkit-details-marker { display: none; }
+        .faq-item summary::after { content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; right: 10px; transition: transform 0.3s; }
+        .faq-item[open] summary::after { transform: rotate(180deg); }
+        .faq-item div { padding: 0 10px 20px 10px; }
+
+        /* CTA Contatti */
+        .cta { background-color: var(--primary-color); color: var(--white); text-align: center; }
+        .cta h2 { font-size: 2.5rem; margin-bottom: 20px; }
+        .cta p { font-size: 1.1rem; max-width: 600px; margin: 0 auto 30px auto; opacity: 0.9; }
+        .cta .contact-info { font-size: 1.2rem; font-weight: 600; margin-bottom: 40px; }
+        /* MODIFICA: Stile per i link nel CTA per garantire alto contrasto */
+        .cta .contact-info a {
+            color: var(--white);
+            text-decoration: none;
+            display: inline-block;
+            margin: 0 10px;
+            transition: color 0.2s;
+        }
+        .cta .contact-info a:hover { color: var(--accent-color); }
+
+        .btn {
+            display: inline-block; padding: 12px 35px; border-radius: 50px; text-decoration: none;
+            font-weight: 600; transition: all 0.3s ease; font-size: 1.1rem; border: 2px solid transparent;
+        }
+        .btn-primary { background-color: var(--accent-color); color: var(--primary-color); box-shadow: 0 4px 15px rgba(212, 160, 93, 0.3); }
+        .btn-primary:hover { background-color: var(--white); color: var(--primary-color); transform: translateY(-3px); box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4); }
+        
+        /* Footer */
+        /* MODIFICA: Stile del footer migliorato per leggibilità */
+        .footer {
+            background-color: var(--text-color);
+            color: rgba(255, 255, 255, 0.85); /* Testo più chiaro ma non abbagliante */
+            padding: 60px 0 30px 0;
+            text-align: center;
+        }
+        .footer address { font-style: normal; line-height: 1.7; }
+        .footer .footer-logo { height: 100px; margin-bottom: 20px; opacity: 0.9; }
+        .footer-bottom { margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.15); color: rgba(255, 255, 255, 0.7); }
+        .footer-bottom a { color: var(--white); text-decoration: underline; }
+
+        
+        /* MEDIA QUERIES PER LA VISUALIZZAZIONE MOBILE */
+        @media (max-width: 992px) {
+            .logo img { height: 75px; }
+            :root { --header-height: 100px; }
+            .main-nav ul { gap: 25px; }
+        }
+
+        @media (max-width: 768px) {
+            :root { --header-height: 90px; }
+            
+            /* Stile e logica del menu Hamburger */
+            .main-nav {
+                display: none; position: absolute; top: var(--header-height); left: 0;
+                width: 100%; background-color: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); padding: 10px 0;
+            }
+            .main-nav ul { flex-direction: column; gap: 0; }
+            .main-nav ul li a { display: block; width: 100%; padding: 15px 20px; text-align: center; border-bottom: 1px solid #f0f0f0; }
+            .main-nav a:hover, .main-nav a.active { color: var(--accent-color); }
+            .main-nav a::after { display: none; }
+            
+            #mobile-nav-toggle:checked ~ .main-nav { display: block; }
+            
+            .mobile-nav-label {
+                display: flex; flex-direction: column; justify-content: space-around;
+                width: 30px; height: 30px;
+            }
+            .mobile-nav-label span {
+                display: block; width: 100%; height: 3px;
+                background-color: var(--primary-color); border-radius: 3px;
+                transition: transform 0.3s, opacity 0.3s;
+            }
+            #mobile-nav-toggle:checked ~ .mobile-nav-label span:nth-child(1) { transform: translateY(8.5px) rotate(45deg); }
+            #mobile-nav-toggle:checked ~ .mobile-nav-label span:nth-child(2) { opacity: 0; }
+            #mobile-nav-toggle:checked ~ .mobile-nav-label span:nth-child(3) { transform: translateY(-8.5px) rotate(-45deg); }
+            
+            .section { padding: 60px 0; }
+            .hero { padding-top: calc(var(--header-height) + 40px); padding-bottom: 60px; }
+            .hero-title { font-size: 2.2rem; }
+            .section-title { font-size: 2.1rem; }
+            .hero-subtitle { font-size: 1.1rem; }
+            .hero-logo-container img { max-width: 350px; }
+
+            .why-us-item { grid-template-columns: 1fr; gap: 40px; }
+            .why-us-item .why-us-image { order: -1; }
+            .why-us-text h3, .why-us-text .section-title { text-align: center; }
+            
+            .cta .contact-info { display: flex; flex-direction: column; gap: 15px; }
+        }
+
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="container">
+        <a href="#home" class="logo">
+            <img src="https://www.dropbox.com/scl/fi/k6567w7nw4szkaxf3q1vs/Logo-piccolo-essenziale.png?rlkey=tc51u7bletclimzryslva39rp&raw=1" alt="Logo piccolo Mussella">
+        </a>
+        
+        <input type="checkbox" id="mobile-nav-toggle">
+        <label for="mobile-nav-toggle" class="mobile-nav-label">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
+
+        <nav class="main-nav">
+            <ul>
+                <li><a href="#home" class="active">Home</a></li>
+                <li><a href="#servizi">I Nostri Servizi</a></li>
+                <li><a href="#perche-noi">Perché Noi</a></li>
+                <li><a href="#faq">FAQ</a></li>
+                <li><a href="#contatti">Contatti</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <section id="home" class="hero">
+        <div class="container">
+            <div class="hero-logo-container">
+                <img src="https://www.dropbox.com/scl/fi/mpbpfueo9vog2qtmastxf/Logo-lungo-rettangolare.png?rlkey=7nf21fksf1on8hzflen41r1i1&raw=1" alt="Logo lungo Mussella">
+            </div>
+            <div class="hero-content">
+                <h1 class="hero-title">La gestione del tuo condominio, evoluta.</h1>
+                <p class="hero-subtitle">Con lo Studio Mussella di Tommaso Mussella, scopri un'amministrazione trasparente, digitale e sempre al tuo fianco.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="servizi" class="features section bg-light">
+        <div class="container">
+            <h2 class="section-title">I Nostri Servizi</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="icon-wrapper"><i class="fas fa-calculator"></i></div>
+                    <h3>Gestione Contabile e Amministrativa</h3>
+                    <p>Redazione bilanci, ripartizione spese, gestione conti correnti e adempimenti fiscali con la massima precisione e trasparenza.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon-wrapper"><i class="fas fa-tools"></i></div>
+                    <h3>Gestione Tecnica e Manutenzioni</h3>
+                    <p>Coordinamento di interventi di manutenzione ordinaria e straordinaria, gestione dei fornitori e sopralluoghi periodici.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon-wrapper"><i class="fas fa-gavel"></i></div>
+                    <h3>Consulenza Legale e Fiscale</h3>
+                    <p>Supporto per la gestione delle pratiche legali, recupero crediti, e consulenza sulle normative condominiali e le agevolazioni fiscali.</p>
+                </div>
+                 <div class="feature-card">
+                    <div class="icon-wrapper"><i class="fas fa-cloud"></i></div>
+                    <h3>Servizi Digitali e Area Riservata</h3>
+                    <p>Accesso H24 a documenti, fatture, avvisi e segnalazioni tramite la nostra piattaforma online. La trasparenza è a portata di click.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="perche-noi" class="section">
+        <div class="container">
+             <div class="why-us-item">
+                <div class="why-us-text">
+                    <h2 class="section-title" style="text-align: left; margin-bottom: 30px;">Un approccio proattivo, non solo reattivo</h2>
+                    <p>Non ci limitiamo ad amministrare: ci prendiamo cura del vostro immobile. Il nostro metodo si basa sulla pianificazione e sulla prevenzione, non sulla semplice risposta alle emergenze. Effettuiamo sopralluoghi regolari per identificare potenziali criticità prima che diventino problemi costosi.</p>
+                    <br>
+                    <p>Crediamo nella comunicazione costante e chiara. Ogni condòmino è sempre informato sullo stato di salute del condominio e sulle attività in corso, promuovendo un clima di fiducia e collaborazione.</p>
+                </div>
+                <div class="why-us-image">
+                    <img src="https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=2070&auto=format&fit=crop" alt="Team che collabora">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="faq" class="section bg-light">
+        <div class="container">
+            <h2 class="section-title">Domande Frequenti</h2>
+            <div class="faq-container">
+                <details class="faq-item">
+                    <summary>Come funziona il passaggio da un altro amministratore?</summary>
+                    <div>
+                        <p>Gestiamo noi l'intero processo. Una volta ricevuta la nomina dall'assemblea, ci occuperemo del passaggio di consegne con il precedente amministratore, inclusa tutta la documentazione contabile e tecnica, garantendo una transizione fluida e senza disagi per i condòmini.</p>
+                    </div>
+                </details>
+                <details class="faq-item">
+                    <summary>Cosa include esattamente la vostra area riservata online?</summary>
+                    <div>
+                        <p>L'area riservata è uno spazio digitale sicuro dove ogni condòmino può consultare in qualsiasi momento: il bilancio condominiale, le fatture, i verbali delle assemblee, gli avvisi importanti e lo stato di eventuali segnalazioni. È il cuore della nostra politica di trasparenza.</p>
+                    </div>
+                </details>
+                <details class="faq-item">
+                    <summary>Come gestite le emergenze (es. guasti, perdite)?</summary>
+                    <div>
+                        <p>Disponiamo di una rete di tecnici e artigiani di fiducia pronti a intervenire tempestivamente. Mettiamo a disposizione numeri dedicati per le emergenze, attivi anche al di fuori degli orari d'ufficio, per garantire una risoluzione rapida dei problemi urgenti.</p>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <section id="contatti" class="cta section">
+        <div class="container">
+            <h2>Pronto a cambiare?</h2>
+            <p>Contattaci per un preventivo gratuito o per discutere le esigenze del tuo condominio. Saremo felici di offrirti la nostra migliore soluzione.</p>
+            <p class="contact-info">
+                <a href="tel:+390803264516"><i class="fas fa-phone"></i> 080 3264516</a>
+                <a href="mailto:info@studiomussella.it"><i class="fas fa-envelope"></i> info@studiomussella.it</a>
+            </p>
+            <a href="mailto:info@studiomussella.it" class="btn btn-primary">Scrivici una mail</a>
+        </div>
+    </section>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-logo">
+            <img src="https://www.dropbox.com/scl/fi/k6567w7nw4szkaxf3q1vs/Logo-piccolo-essenziale.png?rlkey=tc51u7bletclimzryslva39rp&raw=1" alt="Logo piccolo Mussella" class="footer-logo">
+        </div>
+        <address>
+            Mussella Amministrazioni Condominiali di Tommaso Mussella<br>
+            Via Gorizia, 29 - 70024 Gravina in Puglia (BA)<br>
+            Tel/Fax: 080 3264516 | Mob: 338 1441257 | PEC: info@pec.studiomussella.it
+        </address>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Studio Mussella - Tutti i diritti riservati. P.IVA 01234567890 | <a href="#">Privacy Policy</a></p>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>
