@@ -436,6 +436,34 @@
     const manageListsBtn = document.getElementById("manage-lists-btn");
     const manageItemsBtn = document.getElementById("manage-items-btn");
 
+    // NUOVA FUNZIONE PER IL BEEP
+    let audioCtx; // Definiamo il contesto audio fuori dalla funzione
+    function playBeep(frequency, duration, volume) {
+        // Crea il contesto audio al primo click (richiesto dai browser)
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        // Crea un oscillatore per generare l'onda sonora
+        const oscillator = audioCtx.createOscillator();
+        
+        // Crea un nodo per controllare il volume
+        const gainNode = audioCtx.createGain();
+
+        // Collega i nodi: oscillatore -> volume -> altoparlanti
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        // Imposta i parametri del suono
+        oscillator.type = 'sine'; // Un'onda sinusoidale produce un suono pulito tipo "beep"
+        oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime); // Frequenza in Hz (es. 200 = basso)
+        gainNode.gain.setValueAtTime(volume, audioCtx.currentTime); // Volume (da 0.0 a 1.0)
+
+        // Avvia e interrompi il suono
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + duration / 1000); // La durata è in millisecondi
+    }
+
     function toggleManageMode() {
         isManageMode = !isManageMode;
         manageListsBtn.textContent = isManageMode ? '✖️' : '⚙️';
@@ -648,10 +676,9 @@
         toggleBtn.textContent = item.done ? "✅" : "⭕";
         toggleBtn.className = "action-btn select-btn";
         toggleBtn.onclick = () => {
-            // Fa vibrare il dispositivo per 50ms se supportato
-            if (window.navigator && window.navigator.vibrate) {
-                navigator.vibrate(50); 
-            }
+            // Riproduce un breve suono
+            playBeep(200, 100, 0.1); 
+
             updateItem(itemId, { done: !item.done });
         };
         contentRow.append(textInput, toggleBtn);
