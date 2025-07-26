@@ -647,7 +647,13 @@
         const toggleBtn = document.createElement("button");
         toggleBtn.textContent = item.done ? "✅" : "⭕";
         toggleBtn.className = "action-btn select-btn";
-        toggleBtn.onclick = () => updateItem(itemId, { done: !item.done });
+        toggleBtn.onclick = () => {
+            // Fa vibrare il dispositivo per 50ms se supportato
+            if (window.navigator && window.navigator.vibrate) {
+                navigator.vibrate(50); 
+            }
+            updateItem(itemId, { done: !item.done });
+        };
         contentRow.append(textInput, toggleBtn);
         const actionsRow = document.createElement("div");
         actionsRow.className = "item-actions-row";
