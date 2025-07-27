@@ -1,0 +1,30 @@
+name: Estrai e Invia Menù Quotidiano
+
+on:
+  schedule:
+    # Esegue alle 8:00 UTC, che sono le 10:00 in Italia con l'ora legale.
+    - cron: '0 8 * * *'
+  workflow_dispatch: # Aggiunge un pulsante per avviare l'azione manualmente
+
+jobs:
+  scrape-and-email:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 1. Prepara il repository
+      uses: actions/checkout@v3
+
+    - name: 2. Imposta Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: 3. Installa le dipendenze
+      run: |
+        pip install playwright requests Pillow schedule
+        playwright install --with-deps
+
+    - name: 4. Esegui lo script Fantasia.py
+      env:
+        GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      run: python fantasia.py
