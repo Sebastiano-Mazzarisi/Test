@@ -24,7 +24,12 @@ jobs:
         pip install playwright requests Pillow schedule
         playwright install --with-deps
 
-    - name: 4. Esegui lo script Fantasia.py
+    - name: 4. Crea il file dei cookie dal Secret
+      env:
+        FACEBOOK_COOKIES_SECRET: ${{ secrets.FACEBOOK_COOKIES }}
+      run: echo "$FACEBOOK_COOKIES_SECRET" > cookies.txt
+
+    - name: 5. Esegui lo script Fantasia.py
       env:
         GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
       run: python fantasia.py
