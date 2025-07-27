@@ -2,9 +2,9 @@ name: Estrai e Invia Menù Quotidiano
 
 on:
   schedule:
-    # Esegue alle 8:00 UTC, che sono le 10:00 in Italia con l'ora legale.
-    - cron: '0 8 * * *'
-  workflow_dispatch: # Aggiunge un pulsante per avviare l'azione manualmente
+    # Esegue ogni 15 minuti, dalle 6 alle 11 UTC (dalle 8 alle 13 in Italia con ora legale)
+    - cron: '*/15 6-11 * * 1-5' # Esegue solo da Lunedì a Venerdì
+  workflow_dispatch:
 
 jobs:
   scrape-and-email:
@@ -14,23 +14,28 @@ jobs:
     - name: 1. Prepara il repository
       uses: actions/checkout@v3
 
-    - name: 2. Imposta Python
+    - name: 2. Ripristina la "memoria" (cache)
+      uses: actions/cache@v3
+      with:
+        path: status.json
+        key: ${{ runner.os }}-status
+
+    - name: 3. Imposta Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
 
-    - name: 3. Installa le dipendenze
+    - name: 4. Installa le dipendenze
       run: |
-        pip install playwright requests Pillow schedule
+        pip install playwright requests Pillow
         playwright install --with-deps
 
-    - name: 4. Crea il file dei cookie dal Secret
+    - name: 5. Crea il file dei cookie dal Secret
       env:
         FACEBOOK_COOKIES_SECRET: ${{ secrets.FACEBOOK_COOKIES }}
       run: echo "$FACEBOOK_COOKIES_SECRET" > cookies.txt
 
-    - name: 5. Esegui lo script Fantasia.py
+    - name: 6. Esegui lo script Fantasia.py
       env:
         GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-      # --- ECCO LA CORREZIONE ---
       run: python Fantasia.py
