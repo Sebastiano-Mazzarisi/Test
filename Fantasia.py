@@ -1,182 +1,256 @@
-# ==============================================================================
-#      SCRIPT FINALE: INVIO INTELLIGENTE DELL'IMMAGINE MENU VIA EMAIL
+# Script per estrarre l'immagine del "Menù del giorno" dalla pagina Facebook
+# di Rosticceria Fantasia, convertire l'immagine in testo tramite OCR e
+# inviare il testo via email e/o via WhatsApp.
 #
-#                         -- VERSIONE 9.0 --
-#
-# OBIETTIVO: Eseguito ogni 15 minuti, cerca il menù e invia l'email solo
-#            la prima volta che rileva un cambio rispetto al giorno precedente.
-#            Dopodiché, si ferma per il resto della giornata.
-# ==============================================================================
+# VERSIONE CORRETTA:
+# Include una logica di controllo per evitare l'invio di menù duplicati.
+# Utilizza un file 'status.json' per "ricordare" l'ultimo menù inviato.
 
-CONFIG = {
-    "FACEBOOK_PAGE": "RosticceriaFantasia",
-    "TARGET_KEYWORDS": ["MENU DEL GIORNO", "MENÙ DEL GIORNO", "IL NOSTRO MENU", "MENU DI OGGI"],
-    "COOKIE_FILE": "cookies.txt", "OUTPUT_DIR": "output", "LOG_FILE": "output/menu_extractor.log",
-    "STATUS_FILE": "status.json", # File per la "memoria" dello script
-    "EMAIL_SENDER_ADDRESS": "s.mazzarisi@gmail.com",
-    "EMAIL_SENDER_PASSWORD": "", # Letta dal Secret di GitHub
-    "EMAIL_RECIPIENT_ADDRESS": "s.mazzarisi@mazzarisi.it",
-    "EMAIL_SMTP_SERVER": "smtp.gmail.com", "EMAIL_SMTP_PORT": 587,
-}
+from __future__ import annotations
 
-# ==============================================================================
-# =================== FINE CONFIGURAZIONE - NON MODIFICARE SOTTO ===============
-# ==============================================================================
+import os
+import datetime
+import re
+import time
+import traceback
+import json
+import hashlib
+from typing import Iterable, Optional
 
-import os, sys, datetime, logging, time, argparse, requests, html, json, hashlib
-from typing import Dict, Optional, List
-import smtplib
-from email.mime.multipart import MIMEMultipart
+import requests
 from email.mime.text import MIMEText
-from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+import smtplib
+
+from PIL import Image
+import pytesseract  # type: ignore
+from facebook_scraper import get_posts  # type: ignore
+import schedule  # type: ignore
 
 try:
-    from playwright.sync_api import sync_playwright
-except ImportError as e:
-    print(f"ERRORE: Manca una libreria -> {e.name}. Esegui 'pip install playwright requests Pillow' e 'playwright install'")
-    sys.exit(1)
+    from twilio.rest import Client  # type: ignore
+except ImportError:
+    Client = None
 
-def setup_logging(log_path: str):
-    os.makedirs(os.path.dirname(log_path), exist_ok=True)
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] - %(message)s",
-                        handlers=[logging.FileHandler(log_path, encoding='utf-8'), logging.StreamHandler(sys.stdout)])
+# --- CONFIGURAZIONE ---
+PAGE_NAME = "RosticceriaFantasia"
+TARGET_PHRASE = "MENÙ DEL GIORNO"
+RECIPIENT_EMAIL = "s.mazzarisi@mazzarisi.it"
+COOKIES_FILE = "cookies.txt"
+STATUS_FILE = "status.json" # File per memorizzare lo stato dell'ultimo invio
 
-class StateManager:
-    """Gestisce la lettura e scrittura dello stato per evitare invii multipli."""
-    def __init__(self, status_file):
-        self.status_file = status_file
-        self.state = self._load()
+# Credenziali per email e WhatsApp da impostare come variabili d'ambiente:
+# EMAIL_USER, EMAIL_PASS
+# TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_WHATSAPP_FROM, TWILIO_WHATSAPP_TO
 
-    def _load(self) -> dict:
-        if not os.path.exists(self.status_file):
-            return {}
-        try:
-            with open(self.status_file, 'r') as f:
-                return json.load(f)
-        except (json.JSONDecodeError, FileNotFoundError):
-            return {}
 
-    def has_sent_today(self) -> bool:
-        today_str = datetime.date.today().isoformat()
-        return self.state.get("last_sent_date") == today_str
+def debug_log(message: str) -> None:
+    """Stampa i messaggi di debug con timestamp."""
+    ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{ts}] {message}")
 
-    def is_new_menu(self, menu_text: str) -> bool:
-        new_hash = hashlib.sha256(menu_text.encode('utf-8')).hexdigest()
-        return self.state.get("last_menu_hash") != new_hash
 
-    def update(self, menu_text: str):
-        today_str = datetime.date.today().isoformat()
-        new_hash = hashlib.sha256(menu_text.encode('utf-8')).hexdigest()
-        self.state = {"last_sent_date": today_str, "last_menu_hash": new_hash}
-        with open(self.status_file, 'w') as f:
-            json.dump(self.state, f)
-        logging.info(f"Stato aggiornato: email inviata per il menù del {today_str}.")
+def fetch_menu_post(pages_to_scan: int = 10, cookies: Optional[str] = None) -> Optional[dict]:
+    """
+    Scansiona i post recenti della pagina Facebook per trovare il post
+    del menù del giorno.
+    """
+    debug_log(f"Ricerca del post con '{TARGET_PHRASE}' su {PAGE_NAME}...")
+    options = {"allow_extra_requests": True}
+    try:
+        posts: Iterable[dict] = get_posts(
+            PAGE_NAME,
+            pages=pages_to_scan,
+            cookies=cookies,
+            options=options,
+        )
+        for post in posts:
+            post_text = post.get('text', '').upper()
+            # Cerca il post corretto e assicurati che abbia un'immagine
+            if TARGET_PHRASE in post_text and (post.get("image") or post.get("images")):
+                debug_log("Trovato il post del menù del giorno.")
+                return post
+    except Exception as exc:
+        debug_log(f"Errore durante lo scraping della pagina: {exc}")
+        traceback.print_exc()
+    return None
 
-# ... Le altre classi (NotificationManager, FacebookScraper, etc.) rimangono quasi uguali ...
-# (Le classi omesse sono state riportate per completezza nel blocco di codice finale)
-class NotificationManager:
-    def __init__(self, config: dict): self.config = config
-    def send_menu_image(self, image_path: str, post_text: str = ""):
-        sender, password, recipient = self.config.get("EMAIL_SENDER_ADDRESS"), self.config.get("EMAIL_SENDER_PASSWORD"), self.config.get("EMAIL_RECIPIENT_ADDRESS")
-        if not all([sender, password, recipient]): return logging.error("Credenziali email non configurate."), False
-        try:
-            msg = MIMEMultipart('related')
-            msg['Subject'] = "Rosticceria Fantasia"
-            msg['From'], msg['To'] = sender, recipient
-            cleaned_text = html.escape(post_text)
-            html_body = f"""<html><body style="font-family: sans-serif;"><pre style="font-family: sans-serif; font-size: 1em; white-space: pre-wrap; word-wrap: break-word;">{cleaned_text}</pre><img src="cid:menu_image"></body></html>"""
-            msg.attach(MIMEText(html_body, 'html'))
-            with open(image_path, 'rb') as f: img = MIMEImage(f.read()); img.add_header('Content-ID', '<menu_image>'); msg.attach(img)
-            with smtplib.SMTP(self.config["EMAIL_SMTP_SERVER"], self.config["EMAIL_SMTP_PORT"]) as server:
-                server.starttls(); server.login(sender, password); server.sendmail(sender, recipient, msg.as_string())
-            logging.info("✅ Email inviata con successo!"); return True
-        except Exception as e: logging.error(f"❌ Fallimento invio email: {e}"); return False
-class FacebookScraper:
-    def __init__(self, page_name: str, cookie_file_path: str): self.page_url = f"https://www.facebook.com/{page_name}"; self.cookie_file_path = cookie_file_path
-    def _load_cookies_for_playwright(self) -> Optional[List[Dict]]:
-        if not os.path.exists(self.cookie_file_path): logging.error(f"File cookie '{self.cookie_file_path}' non trovato."); return None
-        cookies = []
-        with open(self.cookie_file_path, 'r', encoding='utf-8') as f:
-            for line in f:
-                parts = line.strip().split('\t')
-                if len(parts) == 7: cookies.append({'domain': parts[0], 'path': parts[2], 'secure': parts[3].upper() == 'TRUE', 'expires': int(parts[4]), 'name': parts[5], 'value': parts[6], 'httpOnly': False, 'sameSite': 'Lax'})
-        if not any('.facebook.com' in c['domain'] for c in cookies): logging.error("Nessun cookie di Facebook trovato nel file."); return None
-        logging.info(f"Caricati {len(cookies)} cookie validi."); return cookies
-    def find_daily_menu_post(self, keywords: List[str]) -> Optional[Dict]:
-        cookies = self._load_cookies_for_playwright()
-        if not cookies: return None
-        with sync_playwright() as p:
-            browser = None
-            try:
-                browser = p.chromium.launch(headless=True)
-                context = browser.new_context(user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36')
-                context.add_cookies(cookies); page = context.new_page()
-                page.goto(self.page_url, wait_until='load', timeout=60000); time.sleep(5)
-                posts = page.locator('div[aria-posinset]').all() or page.locator('div[role="article"]').all()
-                for post_element in posts[:15]:
-                    post_full_text = post_element.inner_text()
-                    if any(keyword.upper() in post_full_text.upper() for keyword in keywords):
-                        image_loc = post_element.locator('a[href*="photo"] img, img[data-visualcompletion="media-vc-image"]').first
-                        if image_loc.is_visible(timeout=5000):
-                            image_url = image_loc.get_attribute('src')
-                            text_content_loc = post_element.locator('div[data-ad-preview="message"], div:has(> span[dir="auto"])').first
-                            post_text_content = text_content_loc.inner_text() if text_content_loc.count() > 0 else ""
-                            browser.close()
-                            return {'image': image_url, 'text': post_text_content}
-                browser.close(); return None
-            except Exception as e:
-                logging.error(f"Errore scraping Playwright: {e}")
-                if browser and browser.is_connected(): browser.close()
-                return None
-class ImageProcessor:
-    def __init__(self, output_dir: str): self.output_dir = output_dir; os.makedirs(output_dir, exist_ok=True)
-    def download_image(self, post_data: Dict) -> Optional[str]:
-        image_url = post_data.get("image")
-        if not image_url: return logging.error("URL immagine non trovato."), None
-        try:
-            response = requests.get(image_url, timeout=30); response.raise_for_status()
-            filepath = os.path.join(self.output_dir, f"menu_{datetime.date.today().strftime('%Y%m%d')}.jpg")
-            with open(filepath, 'wb') as f: f.write(response.content)
-            logging.info(f"Immagine scaricata: {filepath}"); return filepath
-        except requests.RequestException as e: return logging.error(f"Errore download: {e}"), None
 
-class MenuExtractor:
-    def __init__(self, config: dict):
-        config["EMAIL_SENDER_PASSWORD"] = os.getenv('GMAIL_APP_PASSWORD', config.get("EMAIL_SENDER_PASSWORD"))
-        self.config = config
-        self.scraper = FacebookScraper(config["FACEBOOK_PAGE"], config["COOKIE_FILE"])
-        self.processor = ImageProcessor(config["OUTPUT_DIR"])
-        self.notifier = NotificationManager(config)
-        self.state_manager = StateManager(config["STATUS_FILE"])
+def download_image(image_url: str, destination: str) -> bool:
+    """Scarica l'immagine dall'URL specificato."""
+    debug_log(f"Download dell'immagine: {image_url}")
+    try:
+        response = requests.get(image_url, timeout=60)
+        response.raise_for_status()
+        with open(destination, "wb") as f:
+            f.write(response.content)
+        return True
+    except Exception as exc:
+        debug_log(f"Impossibile scaricare l'immagine: {exc}")
+        return False
 
-    def run_full_flow(self):
-        logging.info("--- Inizio Flusso di Controllo Menù ---")
 
-        if self.state_manager.has_sent_today():
-            logging.info("Email per il menù di oggi già inviata. Termino l'esecuzione.")
-            return
+def extract_text_from_image(image_path: str) -> str:
+    """Utilizza Tesseract per estrarre testo da un'immagine."""
+    debug_log(f"Avvio OCR sull'immagine: {image_path}")
+    try:
+        with Image.open(image_path) as img:
+            gray = img.convert("L")
+            bw = gray.point(lambda x: 255 if x > 150 else 0, mode="1") # Soglia ottimizzata
+            text = pytesseract.image_to_string(bw, lang="ita")
+            return text.strip()
+    except Exception as exc:
+        debug_log(f"Errore OCR: {exc}")
+        return ""
 
-        post = self.scraper.find_daily_menu_post(self.config["TARGET_KEYWORDS"])
-        if not post: return logging.info("Nessun post del menù trovato al momento.")
+
+def send_email(subject: str, body: str, recipient: str = RECIPIENT_EMAIL) -> bool:
+    """Invia una mail utilizzando le credenziali definite nelle variabili d'ambiente."""
+    sender = os.getenv("EMAIL_USER")
+    password = os.getenv("EMAIL_PASS")
+    if not sender or not password:
+        debug_log("Credenziali email non configurate. Impossibile inviare.")
+        return False
         
-        post_text = post.get("text", "")
-        if not self.state_manager.is_new_menu(post_text):
-            logging.info("Trovato menù, ma è lo stesso del giorno precedente. Attendo aggiornamento.")
-            return
+    debug_log(f"Invio email a {recipient}...")
+    msg = MIMEMultipart()
+    msg["Subject"] = subject
+    msg["From"] = sender
+    msg["To"] = recipient
+    msg.attach(MIMEText(body, "plain", "utf-8"))
+    
+    try:
+        smtp_server = "smtp.gmail.com"
+        port = 587
+        with smtplib.SMTP(smtp_server, port) as server:
+            server.starttls()
+            server.login(sender, password)
+            server.sendmail(sender, recipient, msg.as_string())
+        debug_log("Email inviata con successo.")
+        return True
+    except Exception as exc:
+        debug_log(f"Impossibile inviare l'email: {exc}")
+        return False
 
-        logging.info("Trovato un NUOVO menù! Procedo con download e invio email...")
-        image_path = self.processor.download_image(post)
-        if not image_path: return logging.error("Download fallito.")
-        
-        if self.notifier.send_menu_image(image_path, post_text):
-            self.state_manager.update(post_text)
-        
-        logging.info("--- Flusso Completato con Successo ---")
 
-def main():
-    setup_logging(CONFIG["LOG_FILE"])
-    extractor = MenuExtractor(CONFIG)
-    extractor.run_full_flow()
+def send_whatsapp(body: str) -> bool:
+    """Invia un messaggio WhatsApp utilizzando Twilio."""
+    if Client is None:
+        debug_log("Libreria Twilio non installata. Salto invio WhatsApp.")
+        return False
+        
+    sid = os.getenv("TWILIO_ACCOUNT_SID")
+    token = os.getenv("TWILIO_AUTH_TOKEN")
+    from_wa = os.getenv("TWILIO_WHATSAPP_FROM")
+    to_wa = os.getenv("TWILIO_WHATSAPP_TO")
+
+    if not all([sid, token, from_wa, to_wa]):
+        debug_log("Parametri Twilio non configurati. Impossibile inviare.")
+        return False
+        
+    debug_log(f"Invio messaggio WhatsApp a {to_wa}...")
+    try:
+        client = Client(sid, token)
+        client.messages.create(body=body, from_=from_wa, to=to_wa)
+        debug_log("Messaggio WhatsApp inviato con successo.")
+        return True
+    except Exception as exc:
+        debug_log(f"Impossibile inviare il messaggio WhatsApp: {exc}")
+        return False
+
+
+def show_popup(message: str) -> None:
+    """Visualizza un popup con il testo del menù (fallback)."""
+    try:
+        import tkinter as tk
+        from tkinter import messagebox
+        root = tk.Tk()
+        root.withdraw()
+        messagebox.showinfo("Menù del giorno", message)
+        root.destroy()
+    except Exception:
+        debug_log(f"Impossibile mostrare popup. Testo:\n{message}")
+
+
+def process_daily_menu() -> None:
+    """
+    Funzione principale che orchestra l'intero processo, con logica
+    per evitare invii duplicati.
+    """
+    debug_log(f"Avvio processo per il {datetime.date.today().isoformat()}")
+
+    # 1. Carica lo stato precedente
+    try:
+        with open(STATUS_FILE, 'r', encoding='utf-8') as f:
+            status = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        status = {"last_sent_date": "", "last_menu_hash": ""}
+
+    # Cerca il post del menù
+    cookies_path = COOKIES_FILE if os.path.exists(COOKIES_FILE) else None
+    post = fetch_menu_post(pages_to_scan=10, cookies=cookies_path)
+    if not post:
+        debug_log("Nessun post del menù trovato. Fine del processo.")
+        return
+
+    # Estrai l'URL dell'immagine e scaricala
+    image_url = post.get("image") or (post.get("images", [])[0] if post.get("images") else None)
+    if not image_url:
+        debug_log("Post trovato ma non contiene immagini. Fine del processo.")
+        return
+    
+    image_path = "menu_del_giorno.jpg"
+    if not download_image(image_url, image_path):
+        debug_log("Download dell'immagine fallito. Fine del processo.")
+        return
+
+    # Estrai il testo dall'immagine
+    text = extract_text_from_image(image_path)
+    if not text:
+        debug_log("Testo OCR vuoto. Fine del processo.")
+        return
+
+    # 2. Genera l'hash del menù attuale
+    current_hash = hashlib.sha256(text.encode('utf-8')).hexdigest()
+
+    # 3. Controlla se il menù è nuovo
+    if current_hash != status.get("last_menu_hash"):
+        debug_log(f"Nuovo menù rilevato (hash: {current_hash[:7]}...). Invio notifiche.")
+        
+        today = datetime.date.today()
+        subject_line = f"Menù del giorno {today.strftime('%d/%m/%Y')}"
+        
+        email_ok = send_email(subject_line, text)
+        wa_ok = send_whatsapp(text)
+
+        # 4. Aggiorna lo stato solo dopo un invio andato a buon fine
+        if email_ok or wa_ok:
+            status['last_sent_date'] = today.isoformat()
+            status['last_menu_hash'] = current_hash
+            with open(STATUS_FILE, 'w', encoding='utf-8') as f:
+                json.dump(status, f, indent=4)
+            debug_log("File di stato aggiornato con successo.")
+        else:
+            debug_log("Invio fallito. Lo stato non è stato aggiornato.")
+            if not os.getenv("EMAIL_USER") and not os.getenv("TWILIO_ACCOUNT_SID"):
+                 show_popup(text) # Fallback con popup se nessuna notifica è configurata
+    else:
+        debug_log("Il menù non è cambiato dall'ultimo invio. Nessuna azione.")
+
+
+def schedule_daily_task(hour: str = "10:00") -> None:
+    """Pianifica l'esecuzione giornaliera."""
+    debug_log(f"Pianificazione del task giornaliero alle {hour}")
+    schedule.every().day.at(hour).do(process_daily_menu)
+    while True:
+        schedule.run_pending()
+        time.sleep(30)
+
 
 if __name__ == "__main__":
-    main()
+    # Esegue subito il processo una volta per test/debug
+    process_daily_menu()
+    
+    # Avvia la pianificazione giornaliera (decommentare per l'uso in produzione)
+    # debug_log("Avvio della pianificazione giornaliera...")
+    # schedule_daily_task("10:00")
