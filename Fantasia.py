@@ -21,7 +21,11 @@ CONFIG = {
     # La password viene letta da un Secret di GitHub, non più scritta qui.
     "EMAIL_SENDER_PASSWORD": "",
     
-    "EMAIL_RECIPIENT_ADDRESS": "s.mazzarisi@mazzarisi.it",
+    "EMAIL_RECIPIENT_ADDRESSES": [
+        "s.mazzarisi@mazzarisi.it",
+        "mg.mazzarisi@mazzarisi.it", 
+        "m.pricci@mazzarisi.it"
+    ],
     "EMAIL_SMTP_SERVER": "smtp.gmail.com",
     "EMAIL_SMTP_PORT": 587,
     
@@ -67,15 +71,21 @@ class NotificationManager:
         self.config = config
 
     def send_menu_image(self, image_path: str, post_text: str = ""):
-        sender, password, recipient = self.config.get("EMAIL_SENDER_ADDRESS"), self.config.get("EMAIL_SENDER_PASSWORD"), self.config.get("EMAIL_RECIPIENT_ADDRESS")
-        if not all([sender, password, recipient]): return logging.error("Credenziali email non configurate o password mancante.")
+        sender, password = self.config.get("EMAIL_SENDER_ADDRESS"), self.config.get("EMAIL_SENDER_PASSWORD")
+        recipients = self.config.get("EMAIL_RECIPIENT_ADDRESSES", [])
         
-        logging.info(f"Preparo l'email HTML pulita per {recipient}...")
+        if not all([sender, password]) or not recipients: 
+            return logging.error("Credenziali email non configurate o destinatari mancanti.")
+        
+        logging.info(f"Preparo l'email HTML per {len(recipients)} destinatari: {', '.join(recipients)}")
+        
         try:
             msg = MIMEMultipart('related')
             test_suffix = " [MODALITÀ TEST]" if self.config.get("TEST_MODE") else ""
             msg['Subject'] = f"Rosticceria Fantasia{test_suffix}"
-            msg['From'], msg['To'] = sender, recipient
+            msg['From'] = sender
+            msg['To'] = ", ".join(recipients)  # Tutti i destinatari nel campo To
+            
             cleaned_text = html.escape(post_text)
             html_body = f"""
             <html><head></head><body style="font-family: sans-serif;">
@@ -83,15 +93,23 @@ class NotificationManager:
             <img src="cid:menu_image">
             </body></html>"""
             msg.attach(MIMEText(html_body, 'html'))
+            
             with open(image_path, 'rb') as f:
                 img = MIMEImage(f.read())
             img.add_header('Content-ID', '<menu_image>')
             msg.attach(img)
-            logging.info(f"Invio email a {recipient}...")
+            
+            logging.info(f"Invio email a: {', '.join(recipients)}")
             with smtplib.SMTP(self.config["EMAIL_SMTP_SERVER"], self.config["EMAIL_SMTP_PORT"]) as server:
-                server.starttls(); server.login(sender, password); server.sendmail(sender, recipient, msg.as_string())
-            logging.info("✅ Email inviata con successo!")
-        except Exception as e: logging.error(f"❌ Fallimento invio email: {e}")
+                server.starttls()
+                server.login(sender, password)
+                # Invia a tutti i destinatari con una sola chiamata
+                server.sendmail(sender, recipients, msg.as_string())
+            
+            logging.info("✅ Email inviata con successo a tutti i destinatari!")
+            
+        except Exception as e: 
+            logging.error(f"❌ Fallimento invio email: {e}")
 
 class FacebookScraper:
     def __init__(self, page_name: str, cookie_file_path: str):
@@ -154,8 +172,6 @@ class FacebookScraper:
                                 post_text_content = f"[TEST MODE - {datetime.datetime.now().strftime('%d/%m/%Y %H:%M')}]\n\n{post_text_content}"
                             else:
                                 logging.info("🎉 Post del menù trovato!")
-                                # Aggiungi il timestamp al testo del post per identificarlo
-                                post_text_content = f"[{current_time}] {post_text_content}"
                             
                             browser.close()
                             return {'image': image_url, 'text': post_text_content}
