@@ -1,34 +1,30 @@
 # Script per estrarre l'immagine del "Menù del giorno" dalla pagina Facebook
-# di Rosticceria Fantasia, convertire l'immagine in testo tramite OCR e
-# inviare il testo via email e/o via WhatsApp.
+# e inviarla via email (come allegato) e/o via WhatsApp (come link).
 #
-# VERSIONE CORRETTA:
-# Include una logica di controllo per evitare l'invio di menù duplicati.
-# Utilizza un file 'status.json' per "ricordare" l'ultimo menù inviato.
+# VERSIONE SENZA OCR:
+# Non esegue il riconoscimento del testo, invia solo l'immagine.
+# Il controllo duplicati è basato sull'hash del file immagine.
 
 from __future__ import annotations
 
 import os
 import datetime
-import re
-import time
-import traceback
 import json
 import hashlib
+import traceback
 from typing import Iterable, Optional
 
 import requests
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.image import MIMEImage
 import smtplib
 
-from PIL import Image
-import pytesseract  # type: ignore
-from facebook_scraper import get_posts  # type: ignore
-import schedule  # type: ignore
+from facebook_scraper import get_posts
+import schedule
 
 try:
-    from twilio.rest import Client  # type: ignore
+    from twilio.rest import Client
 except ImportError:
     Client = None
 
@@ -37,11 +33,9 @@ PAGE_NAME = "RosticceriaFantasia"
 TARGET_PHRASE = "MENÙ DEL GIORNO"
 RECIPIENT_EMAIL = "s.mazzarisi@mazzarisi.it"
 COOKIES_FILE = "cookies.txt"
-STATUS_FILE = "status.json" # File per memorizzare lo stato dell'ultimo invio
+STATUS_FILE = "status.json"
 
-# Credenziali per email e WhatsApp da impostare come variabili d'ambiente:
-# EMAIL_USER, EMAIL_PASS
-# TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_WHATSAPP_FROM, TWILIO_WHATSAPP_TO
+# Credenziali per email e WhatsApp da impostare come variabili d'ambiente.
 
 
 def debug_log(message: str) -> None:
@@ -51,27 +45,17 @@ def debug_log(message: str) -> None:
 
 
 def fetch_menu_post(pages_to_scan: int = 10, cookies: Optional[str] = None) -> Optional[dict]:
-    """
-    Scansiona i post recenti della pagina Facebook per trovare il post
-    del menù del giorno.
-    """
+    """Scansiona i post recenti per trovare il post del menù del giorno."""
     debug_log(f"Ricerca del post con '{TARGET_PHRASE}' su {PAGE_NAME}...")
     options = {"allow_extra_requests": True}
     try:
-        posts: Iterable[dict] = get_posts(
-            PAGE_NAME,
-            pages=pages_to_scan,
-            cookies=cookies,
-            options=options,
-        )
-        for post in posts:
+        for post in get_posts(PAGE_NAME, pages=pages_to_scan, cookies=cookies, options=options):
             post_text = post.get('text', '').upper()
-            # Cerca il post corretto e assicurati che abbia un'immagine
             if TARGET_PHRASE in post_text and (post.get("image") or post.get("images")):
                 debug_log("Trovato il post del menù del giorno.")
                 return post
     except Exception as exc:
-        debug_log(f"Errore durante lo scraping della pagina: {exc}")
+        debug_log(f"Errore durante lo scraping: {exc}")
         traceback.print_exc()
     return None
 
@@ -90,68 +74,56 @@ def download_image(image_url: str, destination: str) -> bool:
         return False
 
 
-def extract_text_from_image(image_path: str) -> str:
-    """Utilizza Tesseract per estrarre testo da un'immagine."""
-    debug_log(f"Avvio OCR sull'immagine: {image_path}")
-    try:
-        with Image.open(image_path) as img:
-            gray = img.convert("L")
-            bw = gray.point(lambda x: 255 if x > 150 else 0, mode="1") # Soglia ottimizzata
-            text = pytesseract.image_to_string(bw, lang="ita")
-            return text.strip()
-    except Exception as exc:
-        debug_log(f"Errore OCR: {exc}")
-        return ""
-
-
-def send_email(subject: str, body: str, recipient: str = RECIPIENT_EMAIL) -> bool:
-    """Invia una mail utilizzando le credenziali definite nelle variabili d'ambiente."""
+def send_email_with_attachment(subject: str, body_text: str, image_path: str, recipient: str = RECIPIENT_EMAIL) -> bool:
+    """Invia un'email con un'immagine come allegato."""
     sender = os.getenv("EMAIL_USER")
     password = os.getenv("EMAIL_PASS")
     if not sender or not password:
-        debug_log("Credenziali email non configurate. Impossibile inviare.")
+        debug_log("Credenziali email non configurate.")
         return False
-        
-    debug_log(f"Invio email a {recipient}...")
+
+    debug_log(f"Invio email con allegato a {recipient}...")
     msg = MIMEMultipart()
     msg["Subject"] = subject
     msg["From"] = sender
     msg["To"] = recipient
-    msg.attach(MIMEText(body, "plain", "utf-8"))
-    
+    msg.attach(MIMEText(body_text, "plain", "utf-8"))
+
     try:
-        smtp_server = "smtp.gmail.com"
-        port = 587
-        with smtplib.SMTP(smtp_server, port) as server:
+        with open(image_path, 'rb') as f:
+            img = MIMEImage(f.read())
+            img.add_header('Content-Disposition', 'attachment', filename=os.path.basename(image_path))
+            msg.attach(img)
+    except FileNotFoundError:
+        debug_log(f"Immagine non trovata in {image_path}, impossibile allegarla.")
+        return False
+
+    try:
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
             server.starttls()
             server.login(sender, password)
             server.sendmail(sender, recipient, msg.as_string())
-        debug_log("Email inviata con successo.")
+        debug_log("Email con allegato inviata con successo.")
         return True
     except Exception as exc:
         debug_log(f"Impossibile inviare l'email: {exc}")
         return False
 
 
-def send_whatsapp(body: str) -> bool:
-    """Invia un messaggio WhatsApp utilizzando Twilio."""
+def send_whatsapp_with_image_url(body: str, image_url: str) -> bool:
+    """Invia un messaggio WhatsApp con un link a un'immagine."""
     if Client is None:
-        debug_log("Libreria Twilio non installata. Salto invio WhatsApp.")
         return False
-        
-    sid = os.getenv("TWILIO_ACCOUNT_SID")
-    token = os.getenv("TWILIO_AUTH_TOKEN")
-    from_wa = os.getenv("TWILIO_WHATSAPP_FROM")
-    to_wa = os.getenv("TWILIO_WHATSAPP_TO")
-
+    
+    sid, token, from_wa, to_wa = (os.getenv(k) for k in ["TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_WHATSAPP_FROM", "TWILIO_WHATSAPP_TO"])
     if not all([sid, token, from_wa, to_wa]):
-        debug_log("Parametri Twilio non configurati. Impossibile inviare.")
+        debug_log("Parametri Twilio non configurati.")
         return False
         
     debug_log(f"Invio messaggio WhatsApp a {to_wa}...")
     try:
         client = Client(sid, token)
-        client.messages.create(body=body, from_=from_wa, to=to_wa)
+        client.messages.create(body=body, from_=from_wa, to=to_wa, media_url=[image_url])
         debug_log("Messaggio WhatsApp inviato con successo.")
         return True
     except Exception as exc:
@@ -159,98 +131,51 @@ def send_whatsapp(body: str) -> bool:
         return False
 
 
-def show_popup(message: str) -> None:
-    """Visualizza un popup con il testo del menù (fallback)."""
-    try:
-        import tkinter as tk
-        from tkinter import messagebox
-        root = tk.Tk()
-        root.withdraw()
-        messagebox.showinfo("Menù del giorno", message)
-        root.destroy()
-    except Exception:
-        debug_log(f"Impossibile mostrare popup. Testo:\n{message}")
-
-
 def process_daily_menu() -> None:
-    """
-    Funzione principale che orchestra l'intero processo, con logica
-    per evitare invii duplicati.
-    """
+    """Funzione principale che orchestra il processo."""
     debug_log(f"Avvio processo per il {datetime.date.today().isoformat()}")
-
-    # 1. Carica lo stato precedente
     try:
         with open(STATUS_FILE, 'r', encoding='utf-8') as f:
             status = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
-        status = {"last_sent_date": "", "last_menu_hash": ""}
+        status = {"last_menu_hash": ""}
 
-    # Cerca il post del menù
     cookies_path = COOKIES_FILE if os.path.exists(COOKIES_FILE) else None
-    post = fetch_menu_post(pages_to_scan=10, cookies=cookies_path)
+    post = fetch_menu_post(cookies=cookies_path)
     if not post:
-        debug_log("Nessun post del menù trovato. Fine del processo.")
+        debug_log("Nessun post del menù trovato.")
         return
 
-    # Estrai l'URL dell'immagine e scaricala
     image_url = post.get("image") or (post.get("images", [])[0] if post.get("images") else None)
     if not image_url:
-        debug_log("Post trovato ma non contiene immagini. Fine del processo.")
+        debug_log("Post trovato ma senza immagine.")
         return
     
     image_path = "menu_del_giorno.jpg"
     if not download_image(image_url, image_path):
-        debug_log("Download dell'immagine fallito. Fine del processo.")
         return
 
-    # Estrai il testo dall'immagine
-    text = extract_text_from_image(image_path)
-    if not text:
-        debug_log("Testo OCR vuoto. Fine del processo.")
-        return
+    # Crea l'hash del file immagine
+    with open(image_path, 'rb') as f:
+        current_hash = hashlib.sha256(f.read()).hexdigest()
 
-    # 2. Genera l'hash del menù attuale
-    current_hash = hashlib.sha256(text.encode('utf-8')).hexdigest()
-
-    # 3. Controlla se il menù è nuovo
     if current_hash != status.get("last_menu_hash"):
-        debug_log(f"Nuovo menù rilevato (hash: {current_hash[:7]}...). Invio notifiche.")
+        debug_log(f"Nuova immagine rilevata (hash: {current_hash[:7]}...).")
         
-        today = datetime.date.today()
-        subject_line = f"Menù del giorno {today.strftime('%d/%m/%Y')}"
-        
-        email_ok = send_email(subject_line, text)
-        wa_ok = send_whatsapp(text)
+        today_str = datetime.date.today().strftime('%d/%m/%Y')
+        subject = f"Menù del giorno {today_str}"
+        body = f"Ecco il menù del giorno {today_str} dalla Rosticceria Fantasia."
 
-        # 4. Aggiorna lo stato solo dopo un invio andato a buon fine
+        email_ok = send_email_with_attachment(subject, body, image_path)
+        wa_ok = send_whatsapp_with_image_url(body, image_url)
+
         if email_ok or wa_ok:
-            status['last_sent_date'] = today.isoformat()
             status['last_menu_hash'] = current_hash
             with open(STATUS_FILE, 'w', encoding='utf-8') as f:
                 json.dump(status, f, indent=4)
-            debug_log("File di stato aggiornato con successo.")
-        else:
-            debug_log("Invio fallito. Lo stato non è stato aggiornato.")
-            if not os.getenv("EMAIL_USER") and not os.getenv("TWILIO_ACCOUNT_SID"):
-                 show_popup(text) # Fallback con popup se nessuna notifica è configurata
+            debug_log("File di stato aggiornato.")
     else:
-        debug_log("Il menù non è cambiato dall'ultimo invio. Nessuna azione.")
-
-
-def schedule_daily_task(hour: str = "10:00") -> None:
-    """Pianifica l'esecuzione giornaliera."""
-    debug_log(f"Pianificazione del task giornaliero alle {hour}")
-    schedule.every().day.at(hour).do(process_daily_menu)
-    while True:
-        schedule.run_pending()
-        time.sleep(30)
-
+        debug_log("L'immagine del menù non è cambiata dall'ultimo invio.")
 
 if __name__ == "__main__":
-    # Esegue subito il processo una volta per test/debug
     process_daily_menu()
-    
-    # Avvia la pianificazione giornaliera (decommentare per l'uso in produzione)
-    # debug_log("Avvio della pianificazione giornaliera...")
-    # schedule_daily_task("10:00")
