@@ -1,0 +1,35 @@
+name: Estrai e Invia Menu Quotidiano
+
+on:
+  schedule:
+    # Esegui alle 11:30 ogni giorno (ora UTC)
+    - cron: '30 11 * * *'
+  workflow_dispatch: # Permette esecuzione manuale
+
+jobs:
+  scrape-and-email:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install playwright schedule requests Pillow
+        
+    - name: Install Playwright browsers
+      run: |
+        playwright install chromium
+        playwright install-deps chromium
+        
+    - name: Run script
+      env:
+        GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      run: python Fantasia.py
