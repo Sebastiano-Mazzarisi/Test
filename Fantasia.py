@@ -1,7 +1,7 @@
 # ==============================================================================
 #      SCRIPT FINALE PER GITHUB ACTIONS (LETTO DA VARIABILE D'AMBIENTE)
 #
-#                         -- VERSIONE 9.0 --
+#                         -- VERSIONE 9.1 CON MODALITÀ TEST --
 #
 # OBIETTIVO: Essere eseguito in modo automatico e sicuro su GitHub Actions.
 #            La password dell'email viene letta da un "Secret" di GitHub.
@@ -24,6 +24,9 @@ CONFIG = {
     "EMAIL_RECIPIENT_ADDRESS": "s.mazzarisi@mazzarisi.it",
     "EMAIL_SMTP_SERVER": "smtp.gmail.com",
     "EMAIL_SMTP_PORT": 587,
+    
+    # MODALITÀ TEST: Se True, invia il primo post con immagine trovato
+    "TEST_MODE": False,
 }
 
 # ==============================================================================
@@ -70,7 +73,8 @@ class NotificationManager:
         logging.info(f"Preparo l'email HTML pulita per {recipient}...")
         try:
             msg = MIMEMultipart('related')
-            msg['Subject'] = "Rosticceria Fantasia"
+            test_suffix = " [MODALITÀ TEST]" if self.config.get("TEST_MODE") else ""
+            msg['Subject'] = f"Rosticceria Fantasia{test_suffix}"
             msg['From'], msg['To'] = sender, recipient
             cleaned_text = html.escape(post_text)
             html_body = f"""
@@ -103,8 +107,17 @@ class FacebookScraper:
         if not any('.facebook.com' in c['domain'] for c in cookies): logging.error("Nessun cookie di Facebook trovato nel file."); return None
         logging.info(f"Caricati {len(cookies)} cookie validi."); return cookies
     
-    def find_daily_menu_post(self, keywords: List[str]) -> Optional[Dict]:
+    def find_daily_menu_post(self, keywords: List[str], test_mode: bool = False) -> Optional[Dict]:
         logging.info(f"Avvio scraping con Playwright per '{self.page_url}'...")
+        if test_mode:
+            logging.info("🧪 MODALITÀ TEST: Cercherò il primo post con immagine, ignorando le keywords")
+        
+        # Aggiungi timestamp alle keywords per renderle sempre diverse
+        current_time = datetime.datetime.now().strftime("%H%M%S")
+        modified_keywords = [f"{current_time} {keyword}" for keyword in keywords]
+        
+        logging.info(f"Keywords di ricerca: {modified_keywords if not test_mode else 'MODALITÀ TEST - qualsiasi post con immagine'}")
+        
         cookies = self._load_cookies_for_playwright()
         if not cookies: return None
         with sync_playwright() as p:
@@ -118,17 +131,35 @@ class FacebookScraper:
                 time.sleep(5)
                 posts = page.locator('div[aria-posinset]').all() or page.locator('div[role="article"]').all()
                 logging.info(f"Trovati {len(posts)} post candidati.")
+                
                 for post_element in posts[:15]:
                     post_full_text = post_element.inner_text()
-                    if any(keyword.upper() in post_full_text.upper() for keyword in keywords):
+                    
+                    # In modalità test, accetta qualsiasi post con immagine
+                    if test_mode:
+                        keywords_match = True
+                    else:
+                        # Usa le keywords originali (senza timestamp) per la ricerca
+                        keywords_match = any(keyword.upper() in post_full_text.upper() for keyword in keywords)
+                    
+                    if keywords_match:
                         image_loc = post_element.locator('a[href*="photo"] img, img[data-visualcompletion="media-vc-image"]').first
                         if image_loc.is_visible(timeout=5000):
                             image_url = image_loc.get_attribute('src')
                             text_content_loc = post_element.locator('div[data-ad-preview="message"], div:has(> span[dir="auto"])').first
                             post_text_content = text_content_loc.inner_text() if text_content_loc.count() > 0 else ""
-                            logging.info("🎉 Post del menù trovato!")
+                            
+                            if test_mode:
+                                logging.info("🧪 TEST: Post con immagine trovato!")
+                                post_text_content = f"[TEST MODE - {datetime.datetime.now().strftime('%d/%m/%Y %H:%M')}]\n\n{post_text_content}"
+                            else:
+                                logging.info("🎉 Post del menù trovato!")
+                                # Aggiungi il timestamp al testo del post per identificarlo
+                                post_text_content = f"[{current_time}] {post_text_content}"
+                            
                             browser.close()
                             return {'image': image_url, 'text': post_text_content}
+                
                 browser.close(); return None
             except Exception as e:
                 logging.error(f"Errore scraping Playwright: {e}")
@@ -154,14 +185,21 @@ class MenuExtractor:
         # Legge la password dal Secret di GitHub (variabile d'ambiente)
         config["EMAIL_SENDER_PASSWORD"] = os.getenv('GMAIL_APP_PASSWORD', config.get("EMAIL_SENDER_PASSWORD"))
         
+        # Attiva modalità test se specificato tramite variabile d'ambiente
+        config["TEST_MODE"] = os.getenv('TEST_MODE', 'false').lower() == 'true'
+        
         self.config = config
         self.scraper = FacebookScraper(config["FACEBOOK_PAGE"], config["COOKIE_FILE"])
         self.processor = ImageProcessor(config["OUTPUT_DIR"])
         self.notifier = NotificationManager(config)
 
     def run_full_flow(self):
+        test_mode = self.config.get("TEST_MODE", False)
+        if test_mode:
+            logging.info("🧪 --- MODALITÀ TEST ATTIVATA ---")
+        
         logging.info("--- Inizio Flusso Estrazione Menu ---")
-        post = self.scraper.find_daily_menu_post(self.config["TARGET_KEYWORDS"])
+        post = self.scraper.find_daily_menu_post(self.config["TARGET_KEYWORDS"], test_mode)
         if not post: return logging.error("Processo interrotto: post non trovato.")
         image_path = self.processor.download_image(post)
         if not image_path: return logging.error("Processo interrotto: download fallito.")
@@ -174,7 +212,6 @@ class MenuExtractor:
 
 def main():
     setup_logging(CONFIG["LOG_FILE"])
-    # Rimuoviamo la gestione degli argomenti, su GitHub lo script viene eseguito sempre in modo standard
     extractor = MenuExtractor(CONFIG)
     extractor.run_full_flow()
 
