@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Impostazione Revisione Retribuzioni Joy Fit</title>
+    <title>Revisione Retribuzioni Joy Fit</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -12,6 +12,7 @@
             background-color: #f0f2f5;
             color: #333;
             line-height: 1.6;
+            scroll-behavior: smooth; /* Abilita lo scroll fluido per gli anchor links */
         }
         .container {
             max-width: 900px;
@@ -20,6 +21,8 @@
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            display: flex; /* Utilizza Flexbox per organizzare il contenuto */
+            flex-direction: column; /* Impila gli elementi verticalmente */
         }
         h1 {
             color: #2c3e50;
@@ -57,24 +60,26 @@
         .button-section {
             display: flex;
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 15px;
             justify-content: center;
             margin-top: 40px;
+            margin-bottom: 20px;
         }
         .button {
             background-color: #3498db;
             color: white;
-            padding: 20px 30px;
+            padding: 15px 25px;
             border: none;
             border-radius: 10px;
-            font-size: 1.2em;
+            font-size: 1.1em;
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.2s ease;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-            flex: 1 1 auto;
-            max-width: 300px;
+            flex: 1 1 calc(33% - 30px);
+            max-width: 280px;
             text-align: center;
             text-decoration: none;
+            box-sizing: border-box;
         }
         .button:hover {
             background-color: #2980b9;
@@ -92,107 +97,170 @@
         .calculation-box strong {
             color: #1a5276;
         }
+
+        #dynamic-content-area {
+            border-top: 1px solid #e0e0e0;
+            padding-top: 20px;
+            margin-top: 20px;
+            min-height: 100px;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .back-to-top-button {
+            display: block; /* Rendi il bottone un blocco per avere la sua riga */
+            margin-top: 30px;
+            padding: 10px 20px;
+            background-color: #6c757d; /* Grigio scuro per il bottone "Inizio" */
+            color: white;
+            text-align: center;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .back-to-top-button:hover {
+            background-color: #5a6268;
+        }
+
+        @media (max-width: 768px) {
+            .button {
+                flex: 1 1 calc(50% - 15px);
+                font-size: 1em;
+                padding: 12px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .button {
+                flex: 1 1 100%;
+                font-size: 1em;
+                padding: 10px 15px;
+            }
+        }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>Impostazione Revisione Retribuzioni Joy Fit</h1>
+<body id="top"> <div class="container">
+        <h1>Revisione Retribuzioni Joy Fit</h1>
 
-        <div class="button-section">
-            <button class="button" onclick="showSection('fitto')">Revisione Fitto</button>
-            <button class="button" onclick="showSection('versamento')">Restituzione Versamento Iniziale</button>
-            <button class="button" onclick="showSection('amministratore')">Retribuzione Amministratore</button>
-            <button class="button" onclick="showSection('checco')">Retribuzione Checco</button>
-            <button class="button" onclick="showSection('mimmo')">Retribuzione Mimmo</button>
-            <button class="button" onclick="showSection('marica')">Retribuzione Marica</button>
-            <button class="button" onclick="showSection('vantaggio')">Vantaggio per il Futuro</button>
+        <div class="button-section" id="button-section"> <button class="button" onclick="showContent('fitto')">Revisione Fitto</button>
+            <button class="button" onclick="showContent('versamento')">Restituzione Versamento Iniziale</button>
+            <button class="button" onclick="showContent('amministratore')">Retribuzione Amministratore</button>
+            <button class="button" onclick="showContent('checco')">Retribuzione Checco</button>
+            <button class="button" onclick="showContent('mimmo')">Retribuzione Mimmo</button>
+            <button class="button" onclick="showContent('marica')">Retribuzione Marica</button>
+            <button class="button" onclick="showContent('vantaggio')">Vantaggio per il Futuro</button>
         </div>
 
-        <div id="fitto" class="content-section" style="display: none;">
-            <h2>Revisione fitto</h2>
-            <p>Visto che il <strong>valore degli immobili</strong> della palestra è aumentato con il montaggio del <strong>nuovo soppalco</strong>, potrebbe essere il momento ideale per valutare una <strong>revisione del fitto</strong>, tutto dichiarato ufficialmente.</p>
-            <p>Aumento da <strong>€ 3.000/mese a € 3.600/mese</strong>.</p>
-        </div>
-
-        <div id="versamento" class="content-section" style="display: none;">
-            <h2>Restituzione versamento iniziale</h2>
-            <p>Il giorno 23/12/2005, con atto del notaio Pantaleo, Nino ha acquistato il <strong>25% della New Gym Enjoy SSD a r.l.</strong>, versando un importo di <strong>€ 120.000</strong> con l'accordo di tutti (Checco, Mimmo e Agata) che quei soldi sarebbero rientrati con versamenti mensili.</p>
-            <p>Cosa che <strong>non è mai successo</strong> perché all'inizio tutti i soldi versati sono serviti per riavviare la palestra e poi perché con l'assunzione di Marica si è confuso il suo lavoro con l'impegno di restituzione.</p>
-            <h3>Tre osservazioni a proposito.</h3>
-            <ul>
-                <li>Nel momento di decidere se effettuare o meno l'investimento di <strong>€ 120.000</strong> ho avuto il parere nettamente <strong>negativo da parte di commercialisti e avvocati</strong>, ma io e Marica abbiamo deciso comunque di andare avanti per cercare di <strong>salvare la situazione</strong>.</li>
-                <li>La <strong>situazione debitoria era molto pesante</strong>, per una errata valutazione degli investimenti effettuati la palestra aveva debiti per più di <strong>€ 70.000</strong> e aveva fideiussioni personali e di parenti per la copertura del mutuo della banca per l'acquisto dell'immobile, e se la situazione non si fosse sbloccata la banca avrebbe rilevato l'immobile e molto probabilmente avrebbe attinto dai beni dei fideiussori.</li>
-                <li>Marica ha lavorato per più di <strong>10 anni (dal 2006 al 2016)</strong> ricevendo soltanto i contributi che allora erano di circa <strong>€ 250/300 mese</strong>.</li>
-            </ul>
-            <p>Per 10 anni Marica non è servita soltanto per pagare (in nero) le retribuzioni di Checco, Agata e Mimmo.</p>
-            <p>La situazione attuale è che il <strong>netto vero di Marica è inferiore ai € 1.000/mese</strong>.</p>
-            <p>Alla luce di quanto esposto, ritengo sia giunto il momento opportuno per iniziare a pianificare la <strong>restituzione dei € 120.000</strong>, che, calcolando tutto al <strong>3% (il minimo)</strong>, da restituire con una <strong>rata mensile</strong>, prioritariamente e indipendentemente rispetto agli altri compensi da decidere.</p>
-            <h3>Ecco un breve calcolo:</h3>
-            <div class="calculation-box">
-                <p><strong>23/12/2005:</strong> Capitale di <strong>€ 120.000</strong></p>
-                <p><strong>Percentuale minima di interesse:</strong> <strong>3%</strong></p>
-                <p><strong>23/12/2025:</strong> Montante si <strong>€ 217.000</strong></p>
-                <p><strong>Restituzione in:</strong> <strong>15 anni</strong></p>
-                <p><strong>Importo rata mensile:</strong> <strong>€ 1.500/mese</strong></p>
+        <div id="dynamic-content-area">
             </div>
-        </div>
 
-        <div id="amministratore" class="content-section" style="display: none;">
-            <h2>Retribuzione amministratore</h2>
-            <p>Per chi ha il ruolo di <strong>Amministratore Unico</strong>, per le responsabilità che ricadono su questo ruolo bisognerebbe considerare:</p>
-            <ul>
-                <li>Un compenso per questo ruolo, indipendentemente da ogni altra cosa, potrebbe essere quantificato in circa <strong>€ 300/mese</strong></li>
-                <li>Una polizza assicurativa di circa <strong>€ 200/mese</strong> che la società può detrarre.</li>
-                <li>Naturalmente l'amministratore potrebbe anche non essere sempre la stessa persona e quindi quei <strong>€ 500/mese (orientativi)</strong> saranno dati (ufficialmente) alla persona che ha l'incarico di Amministratore in quel momento.</li>
-            </ul>
-            <p><strong>Tutto alla luce del sole</strong>.</p>
-        </div>
+        <div style="display: none;">
+            <div id="fitto" class="content-section">
+                <h2>Revisione fitto</h2>
+                <p>Visto che il <strong>valore degli immobili</strong> della palestra è aumentato con il montaggio del <strong>nuovo soppalco</strong>, potrebbe essere il momento ideale per valutare una <strong>revisione del fitto</strong>, tutto dichiarato ufficialmente.</p>
+                <p>Aumento da <strong>€ 3.000/mese a € 3.600/mese</strong>.</p>
+                <a href="#top" class="back-to-top-button">Inizio</a>
+            </div>
 
-        <div id="checco" class="content-section" style="display: none;">
-            <h2>Retribuzione Checco</h2>
-            <p>Per Checco, in ottica di <strong>equità e trasparenza tra i soci</strong>, sarebbe opportuno <strong>sospendere extra e incentivi</strong>, in sintesi niente più personal e niente incentivi di nessun tipo (sono altri gli incentivi).</p>
-            <p>Tutto quello che i soci lavoratori fanno è per la palestra.</p>
-            <p>Attualmente è Amministratore Unico quindi vale quello scritto precedentemente.</p>
-            <p>Per quanto riguarda il compenso come attività, la procedura corretta da seguire è quella di fare una <strong>ricerca di mercato</strong> e determinare il <strong>compenso medio</strong> di un istruttore/gestore che faccia le stesse attività di Checco, assunto regolarmente, assunzione che deve essere dello stesso tipo anche a Checco, <strong>tutto alla luce del sole</strong>.</p>
-        </div>
+            <div id="versamento" class="content-section">
+                <h2>Restituzione versamento iniziale</h2>
+                <p>Il giorno 23/12/2005, con atto del notaio Pantaleo, Nino ha acquistato il <strong>25% della New Gym Enjoy SSD a r.l.</strong>, versando un importo di <strong>€ 120.000</strong> con l'accordo di tutti (Checco, Mimmo e Agata) che quei soldi sarebbero rientrati con versamenti mensili.</p>
+                <p>Cosa che <strong>non è mai successo</strong> perché all'inizio tutti i soldi versati sono serviti per riavviare la palestra e poi perché con l'assunzione di Marica si è confuso il suo lavoro con l'impegno di restituzione.</p>
+                <h3>Tre osservazioni a proposito.</h3>
+                <ul>
+                    <li>Nel momento di decidere se effettuare o meno l'investimento di <strong>€ 120.000</strong> ho avuto il parere nettamente <strong>negativo da parte di commercialisti e avvocati</strong>, ma io e Marica abbiamo deciso comunque di andare avanti per cercare di <strong>salvare la situazione</strong>.</li>
+                    <li>La <strong>situazione debitoria era molto pesante</strong>, per una errata valutazione degli investimenti effettuati la palestra aveva debiti per più di <strong>€ 70.000</strong> e aveva fideiussioni personali e di parenti per la copertura del mutuo della banca per l'acquisto dell'immobile, e se la situazione non si fosse sbloccata la banca avrebbe rilevato l'immobile e molto probabilmente avrebbe attinto dai beni dei fideiussori.</li>
+                    <li>Marica ha lavorato per più di <strong>10 anni (dal 2006 al 2016)</strong> ricevendo soltanto i contributi che allora erano di circa <strong>€ 250/300 mese</strong>.</li>
+                </ul>
+                <p>Per 10 anni Marica non è servita soltanto per pagare (in nero) le retribuzioni di Checco, Agata e Mimmo.</p>
+                <p>La situazione attuale è che il <strong>netto vero di Marica è inferiore ai € 1.000/mese</strong>.</p>
+                <p>Alla luce di quanto esposto, ritengo sia giunto il momento opportuno per iniziare a pianificare la <strong>restituzione dei € 120.000</strong>, che, calcolando tutto al <strong>3% (il minimo)</strong>, da restituire con una <strong>rata mensile</strong>, prioritariamente e indipendentemente rispetto agli altri compensi da decidere.</p>
+                <h3>Ecco un breve calcolo:</h3>
+                <div class="calculation-box">
+                    <p><strong>23/12/2005:</strong> Capitale di <strong>€ 120.000</strong></p>
+                    <p><strong>Percentuale minima di interesse:</strong> <strong>3%</strong></p>
+                    <p><strong>23/12/2025:</strong> Montante si <strong>€ 217.000</strong></p>
+                    <p><strong>Restituzione in:</strong> <strong>15 anni</strong></p>
+                    <p><strong>Importo rata mensile:</strong> <strong>€ 1.500/mese</strong></p>
+                </div>
+                <a href="#top" class="back-to-top-button">Inizio</a>
+            </div>
 
-        <div id="mimmo" class="content-section" style="display: none;">
-            <h2>Retribuzione Mimmo</h2>
-            <p><strong>Niente più quell'euro a "paziente"</strong> (gli incentivi sono per i non soci).</p>
-            <p>Per quanto riguarda il lavoro, stesso discorso fatto per Checco, si individua (idealmente) una persona che possa fare lo stesso lavoro che fa Mimmo e si determina il <strong>compenso medio</strong> di una tale figura, e si adotta lo stesso criterio di assunzione per Mimmo, ancora una volta <strong>tutto alla luce del sole</strong>.</p>
-        </div>
+            <div id="amministratore" class="content-section">
+                <h2>Retribuzione amministratore</h2>
+                <p>Per chi ha il ruolo di <strong>Amministratore Unico</strong>, per le responsabilità che ricadono su questo ruolo bisognerebbe considerare:</p>
+                <ul>
+                    <li>Un compenso per questo ruolo, indipendentemente da ogni altra cosa, potrebbe essere quantificato in circa <strong>€ 300/mese</strong></li>
+                    <li>Una polizza assicurativa di circa <strong>€ 200/mese</strong> che la società può detrarre.</li>
+                    <li>Naturalmente l'amministratore potrebbe anche non essere sempre la stessa persona e quindi quei <strong>€ 500/mese (orientativi)</strong> saranno dati (ufficialmente) alla persona che ha l'incarico di Amministratore in quel momento.</li>
+                </ul>
+                <p><strong>Tutto alla luce del sole</strong>.</p>
+                <a href="#top" class="back-to-top-button">Inizio</a>
+            </div>
 
-        <div id="marica" class="content-section" style="display: none;">
-            <h2>Retribuzione Marica</h2>
-            <p>Il compenso di Marica semplicemente diventa quello che ha adesso, senza più bisogno di fare conti strani ogni mese per calcolare quanto deve versare nelle casse della palestra, <strong>niente più restituzioni mensili, o restituzione di tredicesime o anche di fine rapporto</strong>.</p>
-            <p>Insomma, è ora di riconoscere a Marica uno <strong>stipendio ufficiale, equo e dignitoso</strong>.</p>
-            <p>Infine, <strong>niente incentivi a cottimo</strong>, assolutamente umilianti per chi già fa tutto quello che può fare perché quando lavora lo fa da socia e non da semplice impiegata.</p>
-            <p>Ma allora, i soci guadagnano quanto gli istruttori o gli impiegati?</p>
-            <p><strong>Assolutamente no</strong>, se le cose andranno bene, e tutto lo lascia presagire, i soci, <strong>due volte l'anno (luglio e gennaio) si divideranno equamente gli extra</strong>, che si preannuncino molto interessanti.</p>
-        </div>
+            <div id="checco" class="content-section">
+                <h2>Retribuzione Checco</h2>
+                <p>Per Checco, in ottica di <strong>equità e trasparenza tra i soci</strong>, sarebbe opportuno <strong>sospendere extra e incentivi</strong>, in sintesi niente più personal e niente incentivi di nessun tipo (sono altri gli incentivi).</p>
+                <p>Tutto quello che i soci lavoratori fanno è per la palestra.</p>
+                <p>Attualmente è Amministratore Unico quindi vale quello scritto precedentemente.</p>
+                <p>Per quanto riguarda il compenso come attività, la procedura corretta da seguire è quella di fare una <strong>ricerca di mercato</strong> e determinare il <strong>compenso medio</strong> di un istruttore/gestore che faccia le stesse attività di Checco, assunto regolarmente, assunzione che deve essere dello stesso tipo anche a Checco, <strong>tutto alla luce del sole</strong>.</p>
+                <a href="#top" class="back-to-top-button">Inizio</a>
+            </div>
 
-        <div id="vantaggio" class="content-section" style="display: none;">
-            <h2>Vantaggio per il futuro</h2>
-            <ul>
-                <li>Con questo approccio <strong>non c'è più un Amministratore Unico a vita</strong>, ma il ruolo potrebbe essere svolto a turno (tra chi lo vuole fare), e nulla vieta che lo possa fare un esterno di fiducia.</li>
-                <li>Risolviamo così anche il fatto che <strong>Flavia è la socia e Mimmo è un istruttore</strong>.</li>
-                <li>Si risolve il problema del <strong>passaggio generazionale</strong>, nel senso che se c'è qualche socio che lavora viene pagato a quotazioni di mercato, e se non lavora non ha retribuzioni, ma in ogni caso resta l'incontro semestrale per la suddivisione degli extra, solo a favore dei soci: <strong>Checco, Marica e Flavia</strong>.</li>
-            </ul>
+            <div id="mimmo" class="content-section">
+                <h2>Retribuzione Mimmo</h2>
+                <p><strong>Niente più quell'euro a "paziente"</strong> (gli incentivi sono per i non soci).</p>
+                <p>Per quanto riguarda il lavoro, stesso discorso fatto per Checco, si individua (idealmente) una persona che possa fare lo stesso lavoro che fa Mimmo e si determina il <strong>compenso medio</strong> di una tale figura, e si adotta lo stesso criterio di assunzione per Mimmo, ancora una volta <strong>tutto alla luce del sole</strong>.</p>
+                <a href="#top" class="back-to-top-button">Inizio</a>
+            </div>
+
+            <div id="marica" class="content-section">
+                <h2>Retribuzione Marica</h2>
+                <p>Il compenso di Marica semplicemente diventa quello che ha adesso, senza più bisogno di fare conti strani ogni mese per calcolare quanto deve versare nelle casse della palestra, <strong>niente più restituzioni mensili, o restituzione di tredicesime o anche di fine rapporto</strong>.</p>
+                <p>Insomma, è ora di riconoscere a Marica uno <strong>stipendio ufficiale, equo e dignitoso</strong>.</p>
+                <p>Infine, <strong>niente incentivi a cottimo</strong>, assolutamente umilianti per chi già fa tutto quello che può fare perché quando lavora lo fa da socia e non da semplice impiegata.</p>
+                <p>Ma allora, i soci guadagnano quanto gli istruttori o gli impiegati?</p>
+                <p><strong>Assolutamente no</strong>, se le cose andranno bene, e tutto lo lascia presagire, i soci, <strong>due volte l'anno (luglio e gennaio) si divideranno equamente gli extra</strong>, che si preannuncino molto interessanti.</p>
+                <a href="#top" class="back-to-top-button">Inizio</a>
+            </div>
+
+            <div id="vantaggio" class="content-section">
+                <h2>Vantaggio per il futuro</h2>
+                <ul>
+                    <li>Con questo approccio <strong>non c'è più un Amministratore Unico a vita</strong>, ma il ruolo potrebbe essere svolto a turno (tra chi lo vuole fare), e nulla vieta che lo possa fare un esterno di fiducia.</li>
+                    <li>Risolviamo così anche il fatto che <strong>Flavia è la socia e Mimmo è un istruttore</strong>.</li>
+                    <li>Si risolve il problema del <strong>passaggio generazionale</strong>, nel senso che se c'è qualche socio che lavora viene pagato a quotazioni di mercato, e se non lavora non ha retribuzioni, ma in ogni caso resta l'incontro semestrale per la suddivisione degli extra, solo a favore dei soci: <strong>Checco, Marica e Flavia</strong>.</li>
+                </ul>
+                <a href="#top" class="back-to-top-button">Inizio</a>
+            </div>
         </div>
     </div>
 
     <script>
-        function showSection(sectionId) {
-            // Nasconde tutte le sezioni
-            const sections = document.querySelectorAll('.content-section');
-            sections.forEach(section => {
-                section.style.display = 'none';
-            });
+        function showContent(sectionId) {
+            const dynamicContentArea = document.getElementById('dynamic-content-area');
+            const sourceSection = document.getElementById(sectionId);
+            const buttonSection = document.getElementById('button-section'); // Ottieni la sezione dei pulsanti
 
-            // Mostra la sezione desiderata
-            const activeSection = document.getElementById(sectionId);
-            if (activeSection) {
-                activeSection.style.display = 'block';
+            // Pulisci l'area di contenuto dinamica da qualsiasi contenuto precedente
+            dynamicContentArea.innerHTML = '';
+
+            if (sourceSection) {
+                // Clona il contenuto della sezione desiderata
+                const clonedContent = sourceSection.cloneNode(true);
+                
+                // Rimuovi l'attributo style="display: none;" dal clone
+                // (già gestito da .content-section { display: none; } ma per sicurezza)
+                clonedContent.style.display = 'block';
+
+                // Appendi il contenuto clonata all'area di visualizzazione dinamica
+                dynamicContentArea.appendChild(clonedContent);
+
+                // Scorri la pagina per posizionare la sezione dei pulsanti in cima,
+                // assicurando che il contenuto appena sotto sia visibile.
+                buttonSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }
     </script>
