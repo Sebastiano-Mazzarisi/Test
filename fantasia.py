@@ -1,35 +1,50 @@
 # ==============================================================================
-#    SCRIPT PER INVIARE L'ULTIMA IMMAGINE PUBBLICATA (ANCHE SENZA "MENU")
+#      SCRIPT FINALE PER GITHUB ACTIONS (LETTO DA VARIABILE D'AMBIENTE)
 #
-#                         -- VERSIONE 9.4 ULTIMA IMMAGINE --
+#                         -- VERSIONE 9.2 CON CONTROLLO ORARIO --
+#
+# OBIETTIVO: Essere eseguito in modo automatico e sicuro su GitHub Actions.
+#            La password dell'email viene letta da un "Secret" di GitHub.
+#            NUOVO: Controllo orario programmato dalle 09:00 alle 12:00
 # ==============================================================================
 
 CONFIG = {
     # Configurazione Scraping
     "FACEBOOK_PAGE": "RosticceriaFantasia",
+    "TARGET_KEYWORDS": ["MENU DEL GIORNO", "MENÙ DEL GIORNO", "IL NOSTRO MENU", "MENU DI OGGI"],
     "COOKIE_FILE": "cookies.txt",
     "OUTPUT_DIR": "output",
     "LOG_FILE": "output/menu_extractor.log",
 
     # Configurazione Email
     "EMAIL_SENDER_ADDRESS": "s.mazzarisi@gmail.com",
+    
+    # La password viene letta da un Secret di GitHub, non più scritta qui.
     "EMAIL_SENDER_PASSWORD": "",
+    
     "EMAIL_RECIPIENT_ADDRESS": "s.mazzarisi@mazzarisi.it",
     "EMAIL_SMTP_SERVER": "smtp.gmail.com",
     "EMAIL_SMTP_PORT": 587,
     
-    # MODALITÀ: 
-    # "MENU" = cerca solo post con parola MENU
-    # "LATEST" = invia l'ultima immagine pubblicata
-    # "TEST" = invia la prima immagine che trova
-    "SEARCH_MODE": "LATEST",
+    # MODALITÀ TEST: Se True, invia il primo post con immagine trovato
+    "TEST_MODE": False,
+    
+    # CONFIGURAZIONE ORARIO
+    "MONITORING_START_HOUR": 8,   # Ora di inizio monitoraggio
+    "MONITORING_END_HOUR": 12,    # Ora di fine monitoraggio
+    "CHECK_INTERVAL_MINUTES": 10, # Intervallo controlli in minuti
 }
+
+# ==============================================================================
+# =================== FINE CONFIGURAZIONE - NON MODIFICARE SOTTO ===============
+# ==============================================================================
 
 import os
 import sys
 import datetime
 import logging
 import time
+import argparse
 import requests
 import html
 from typing import Dict, Optional, List
@@ -64,8 +79,8 @@ class NotificationManager:
         logging.info(f"Preparo l'email HTML pulita per {recipient}...")
         try:
             msg = MIMEMultipart('related')
-            mode_suffix = f" [{self.config.get('SEARCH_MODE', 'UNKNOWN')} MODE]"
-            msg['Subject'] = f"Rosticceria Fantasia{mode_suffix}"
+            test_suffix = " [MODALITÀ TEST]" if self.config.get("TEST_MODE") else ""
+            msg['Subject'] = f"Rosticceria Fantasia{test_suffix}"
             msg['From'], msg['To'] = sender, recipient
             cleaned_text = html.escape(post_text)
             html_body = f"""
@@ -88,7 +103,7 @@ class FacebookScraper:
     def __init__(self, page_name: str, cookie_file_path: str):
         self.page_url = f"https://www.facebook.com/{page_name}"
         self.cookie_file_path = cookie_file_path
-    
+        
     def _load_cookies_for_playwright(self) -> Optional[List[Dict]]:
         if not os.path.exists(self.cookie_file_path): logging.error(f"File cookie '{self.cookie_file_path}' non trovato."); return None
         cookies = []
@@ -99,12 +114,19 @@ class FacebookScraper:
         if not any('.facebook.com' in c['domain'] for c in cookies): logging.error("Nessun cookie di Facebook trovato nel file."); return None
         logging.info(f"Caricati {len(cookies)} cookie validi."); return cookies
     
-    def find_post_by_mode(self, search_mode: str) -> Optional[Dict]:
-        logging.info(f"🚀 Avvio scraping in modalità: {search_mode}")
+    def find_daily_menu_post(self, keywords: List[str], test_mode: bool = False) -> Optional[Dict]:
+        logging.info(f"Avvio scraping con Playwright per '{self.page_url}'...")
+        if test_mode:
+            logging.info("🧪 MODALITÀ TEST: Cercherò il primo post con immagine, ignorando le keywords")
+        
+        # Aggiungi timestamp alle keywords per renderle sempre diverse
+        current_time = datetime.datetime.now().strftime("%H%M%S")
+        modified_keywords = [f"{current_time} {keyword}" for keyword in keywords]
+        
+        logging.info(f"Keywords di ricerca: {modified_keywords if not test_mode else 'MODALITÀ TEST - qualsiasi post con immagine'}")
         
         cookies = self._load_cookies_for_playwright()
         if not cookies: return None
-        
         with sync_playwright() as p:
             browser = None
             try:
@@ -113,150 +135,41 @@ class FacebookScraper:
                 context.add_cookies(cookies)
                 page = context.new_page()
                 page.goto(self.page_url, wait_until='load', timeout=60000)
+                time.sleep(5)
+                posts = page.locator('div[aria-posinset]').all() or page.locator('div[role="article"]').all()
+                logging.info(f"Trovati {len(posts)} post candidati.")
                 
-                # Attendi e scrolla
-                logging.info("⏳ Caricamento pagina e scroll...")
-                time.sleep(10)
-                for i in range(6):
-                    page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-                    time.sleep(3)
-                
-                # STRATEGIA NUOVA: Cerca direttamente tutte le immagini di contenuto
-                logging.info("🔍 Strategia diretta: cercando TUTTE le immagini sulla pagina...")
-                all_images = page.locator('img').all()
-                logging.info(f"📸 Trovate {len(all_images)} immagini totali")
-                
-                # Filtra solo le immagini di contenuto vere
-                content_images = []
-                for i, img in enumerate(all_images):
-                    try:
-                        src = img.get_attribute('src')
-                        if src and ('scontent' in src or 'fbcdn' in src) and len(src) > 50:
-                            # Controlla se è un'immagine grande (probabilmente un post)
-                            try:
-                                # Ottieni dimensioni se possibile
-                                width = img.get_attribute('width')
-                                height = img.get_attribute('height')
-                                
-                                # Se ha dimensioni decenti o se il src sembra essere un post
-                                is_content_image = (
-                                    'scontent' in src and 
-                                    ('_n.' in src or '_o.' in src or len(src) > 100)  # URL lunghi sono spesso immagini di post
-                                )
-                                
-                                if is_content_image:
-                                    content_images.append((img, src))
-                                    logging.info(f"✅ Immagine #{len(content_images)}: {src[:70]}...")
-                                    
-                            except:
-                                # Se non riusciamo a ottenere info, accettiamo comunque se ha scontent
-                                if 'scontent' in src:
-                                    content_images.append((img, src))
-                                    logging.info(f"✅ Immagine #{len(content_images)} (fallback): {src[:70]}...")
-                                    
-                    except Exception as e:
-                        logging.debug(f"Errore immagine #{i}: {e}")
-                        continue
-                
-                logging.info(f"🖼️ Trovate {len(content_images)} immagini di contenuto")
-                
-                if not content_images:
-                    logging.error("❌ Nessuna immagine di contenuto trovata!")
-                    browser.close()
-                    return None
-                
-                # Analizza ogni immagine di contenuto per trovare il testo associato
-                for i, (img_element, img_src) in enumerate(content_images):
-                    try:
-                        logging.info(f"━━━ ANALIZZANDO IMMAGINE #{i+1}/{len(content_images)} ━━━")
-                        logging.info(f"🖼️ URL: {img_src[:60]}...")
-                        
-                        # Trova il contenitore del post risalendo nella gerarchia
-                        post_text = ""
-                        
-                        # Prova diversi metodi per trovare il testo associato
-                        try:
-                            # Metodo 1: Cerca il div padre che contiene testo
-                            parent_levels = [2, 3, 4, 5, 6, 7, 8]
-                            for level in parent_levels:
-                                try:
-                                    parent = img_element.locator(f'xpath=ancestor::div[{level}]').first
-                                    if parent.count() > 0:
-                                        parent_text = parent.inner_text()
-                                        if len(parent_text) > 20:  # Solo se ha abbastanza testo
-                                            post_text = parent_text
-                                            logging.info(f"📝 Testo trovato al livello {level} (primi 200 char): {parent_text[:200]}")
-                                            break
-                                except:
-                                    continue
-                        except:
-                            pass
-                        
-                        # Se non troviamo testo, prova un approccio diverso
-                        if not post_text:
-                            try:
-                                # Metodo 2: Cerca elementi di testo vicini all'immagine
-                                nearby_text_elements = page.locator('span, p, div').all()
-                                for elem in nearby_text_elements[:50]:  # Limita per performance
-                                    try:
-                                        elem_text = elem.inner_text()
-                                        if len(elem_text) > 10 and ('menu' in elem_text.lower() or 'del giorno' in elem_text.lower()):
-                                            post_text = elem_text
-                                            logging.info(f"📝 Testo trovato tramite ricerca nearby: {elem_text[:200]}")
-                                            break
-                                    except:
-                                        continue
-                            except:
-                                pass
-                        
-                        # Se ancora non abbiamo testo, usa un placeholder
-                        if not post_text:
-                            post_text = f"Immagine #{i+1} dalla pagina Rosticceria Fantasia - {datetime.datetime.now().strftime('%d/%m/%Y %H:%M')}"
-                            logging.info("📝 Usando testo placeholder")
-                        
-                        # Controlla in base alla modalità
-                        if search_mode == "TEST":
-                            logging.info(f"🧪 TEST MODE: Accetto immagine #{i+1}")
-                            browser.close()
-                            return {'image': img_src, 'text': f"[MODALITÀ TEST]\n\n{post_text}"}
-                        
-                        elif search_mode == "LATEST":
-                            logging.info(f"📅 LATEST MODE: Accetto prima immagine trovata #{i+1}")
-                            browser.close()
-                            return {'image': img_src, 'text': f"[ULTIMA IMMAGINE PUBBLICATA]\n\n{post_text}"}
-                        
-                        elif search_mode == "MENU":
-                            # Cerca specificatamente "MENU" nel testo
-                            if "MENU" in post_text.upper() or "MENÙ" in post_text.upper():
-                                logging.info(f"🎯 MENU MODE: TROVATO! Immagine #{i+1} contiene MENU!")
-                                browser.close()
-                                return {'image': img_src, 'text': post_text}
+                for post_element in posts[:15]:
+                    post_full_text = post_element.inner_text()
+                    
+                    # In modalità test, accetta qualsiasi post con immagine
+                    if test_mode:
+                        keywords_match = True
+                    else:
+                        # Usa le keywords originali (senza timestamp) per la ricerca
+                        keywords_match = any(keyword.upper() in post_full_text.upper() for keyword in keywords)
+                    
+                    if keywords_match:
+                        image_loc = post_element.locator('a[href*="photo"] img, img[data-visualcompletion="media-vc-image"]').first
+                        if image_loc.is_visible(timeout=5000):
+                            image_url = image_loc.get_attribute('src')
+                            text_content_loc = post_element.locator('div[data-ad-preview="message"], div:has(> span[dir="auto"])').first
+                            post_text_content = text_content_loc.inner_text() if text_content_loc.count() > 0 else ""
+                            
+                            if test_mode:
+                                logging.info("🧪 TEST: Post con immagine trovato!")
+                                post_text_content = f"[TEST MODE - {datetime.datetime.now().strftime('%d/%m/%Y %H:%M')}]\n\n{post_text_content}"
                             else:
-                                logging.info(f"⚠️ Immagine #{i+1}: Non contiene MENU, continuo...")
-                                # Continua con la prossima immagine
-                                continue
-                        
-                    except Exception as e:
-                        logging.warning(f"Errore analisi immagine #{i+1}: {e}")
-                        continue
+                                logging.info("🎉 Post del menù trovato!")
+                            
+                            browser.close()
+                            return {'image': image_url, 'text': post_text_content}
                 
-                # Se arriviamo qui, non abbiamo trovato nulla
-                if search_mode == "MENU":
-                    logging.error("❌ Nessuna immagine con MENU trovata")
-                else:
-                    logging.error("❌ Nessuna immagine elaborabile trovata")
-                
-                browser.close()
-                return None
-                
+                browser.close(); return None
             except Exception as e:
-                logging.error(f"Errore scraping: {e}")
-                if browser and browser.is_connected(): 
-                    browser.close()
+                logging.error(f"Errore scraping Playwright: {e}")
+                if browser and browser.is_connected(): browser.close()
                 return None
-    
-    # Rimuovi i metodi vecchi che non servono più
-    # Ora tutto è gestito nel metodo principale find_post_by_mode
 
 class ImageProcessor:
     def __init__(self, output_dir: str):
@@ -275,37 +188,152 @@ class ImageProcessor:
 
 class MenuExtractor:
     def __init__(self, config: dict):
+        # Legge la password dal Secret di GitHub (variabile d'ambiente)
         config["EMAIL_SENDER_PASSWORD"] = os.getenv('GMAIL_APP_PASSWORD', config.get("EMAIL_SENDER_PASSWORD"))
         
-        # Modalità da variabile d'ambiente o config
-        search_mode = os.getenv('SEARCH_MODE', config.get("SEARCH_MODE", "LATEST"))
-        config["SEARCH_MODE"] = search_mode
+        # Attiva modalità test se specificato tramite variabile d'ambiente
+        config["TEST_MODE"] = os.getenv('TEST_MODE', 'false').lower() == 'true'
         
         self.config = config
         self.scraper = FacebookScraper(config["FACEBOOK_PAGE"], config["COOKIE_FILE"])
         self.processor = ImageProcessor(config["OUTPUT_DIR"])
         self.notifier = NotificationManager(config)
+        self.menu_sent_today = False  # Flag per evitare invii multipli
+        self.last_check_date = None   # Traccia l'ultimo giorno di controllo
+
+    def is_monitoring_time(self) -> bool:
+        """Controlla se siamo nell'orario di monitoraggio"""
+        now = datetime.datetime.now().time()
+        start_time = datetime.time(self.config["MONITORING_START_HOUR"], 0)
+        end_time = datetime.time(self.config["MONITORING_END_HOUR"], 0)
+        return start_time <= now <= end_time
+
+    def reset_daily_flag_if_needed(self):
+        """Resetta il flag giornaliero se è un nuovo giorno"""
+        today = datetime.date.today()
+        if self.last_check_date != today:
+            self.menu_sent_today = False
+            self.last_check_date = today
+            logging.info(f"🗓️  Nuovo giorno: {today.strftime('%d/%m/%Y')} - Flag reset")
 
     def run_full_flow(self):
-        search_mode = self.config.get("SEARCH_MODE", "LATEST")
+        """Esegue il flusso completo di estrazione menu"""
+        test_mode = self.config.get("TEST_MODE", False)
+        if test_mode:
+            logging.info("🧪 --- MODALITÀ TEST ATTIVATA ---")
         
-        logging.info(f"--- Inizio Flusso in modalità: {search_mode} ---")
+        # Controlla se abbiamo già inviato il menu oggi
+        self.reset_daily_flag_if_needed()
+        if self.menu_sent_today and not test_mode:
+            logging.info("📧 Menu già inviato oggi. Salto l'estrazione.")
+            return
         
-        post = self.scraper.find_post_by_mode(search_mode)
+        logging.info("--- Inizio Flusso Estrazione Menu ---")
+        post = self.scraper.find_daily_menu_post(self.config["TARGET_KEYWORDS"], test_mode)
         if not post: 
-            return logging.error("Processo interrotto: post non trovato.")
+            logging.info("🔍 Post non trovato in questo controllo.")
+            return
         
         image_path = self.processor.download_image(post)
         if not image_path: 
-            return logging.error("Processo interrotto: download fallito.")
+            logging.error("Processo interrotto: download fallito.")
+            return
         
         self.notifier.send_menu_image(image_path, post.get("text", ""))
+        self.menu_sent_today = True  # Marca come inviato
         logging.info("--- Flusso Completato con Successo ---")
+
+    def run_scheduled_monitoring(self):
+        """Monitora la pagina Facebook dalle 09:00 alle 12:00"""
+        start_hour = self.config["MONITORING_START_HOUR"]
+        end_hour = self.config["MONITORING_END_HOUR"]
+        check_interval = self.config["CHECK_INTERVAL_MINUTES"]
+        
+        logging.info(f"🕘 Avvio monitoraggio programmato ({start_hour:02d}:00-{end_hour:02d}:00)")
+        logging.info(f"⏰ Controllo ogni {check_interval} minuti")
+        
+        # Programma il controllo periodico
+        schedule.every(check_interval).minutes.do(self._scheduled_check)
+        
+        while True:
+            try:
+                current_time = datetime.datetime.now()
+                
+                if self.is_monitoring_time():
+                    # Siamo nell'orario di monitoraggio
+                    schedule.run_pending()
+                    time.sleep(60)  # Controlla ogni minuto per scheduling preciso
+                else:
+                    # Fuori orario - calcola quando dormire
+                    time_str = current_time.strftime("%H:%M")
+                    
+                    if current_time.time() < datetime.time(start_hour, 0):
+                        # Prima delle 09:00 - aspetta fino alle 09:00
+                        next_run = current_time.replace(hour=start_hour, minute=0, second=0, microsecond=0)
+                        logging.info(f"⏸️  Prima dell'orario ({time_str}). Prossimo controllo alle {start_hour:02d}:00")
+                    else:
+                        # Dopo le 12:00 - aspetta fino alle 09:00 del giorno dopo
+                        next_run = current_time.replace(hour=start_hour, minute=0, second=0, microsecond=0) + datetime.timedelta(days=1)
+                        logging.info(f"⏸️  Fuori orario ({time_str}). Prossimo controllo domani alle {start_hour:02d}:00")
+                    
+                    # Calcola secondi da dormire (max 1 ora per controlli intermedi)
+                    sleep_seconds = min((next_run - current_time).total_seconds(), 3600)
+                    if sleep_seconds > 0:
+                        time.sleep(sleep_seconds)
+                
+            except KeyboardInterrupt:
+                logging.info("🛑 Monitoraggio interrotto dall'utente")
+                break
+            except Exception as e:
+                logging.error(f"❌ Errore nel loop di monitoraggio: {e}")
+                time.sleep(300)  # Aspetta 5 minuti in caso di errore
+
+    def _scheduled_check(self):
+        """Esegue il controllo programmato solo se siamo nell'orario giusto"""
+        if self.is_monitoring_time():
+            current_time = datetime.datetime.now().strftime('%H:%M')
+            logging.info(f"⏰ Controllo programmato: {current_time}")
+            self.run_full_flow()
+        else:
+            current_time = datetime.datetime.now().strftime('%H:%M')
+            logging.info(f"⏸️  Controllo saltato - fuori orario: {current_time}")
+
+    def run_manual_flow(self, image_path: str):
+        """Invia manualmente un'immagine via email"""
+        logging.info(f"--- Flusso Manuale per: {image_path} ---")
+        if not os.path.exists(image_path):
+            logging.error(f"File non trovato: {image_path}")
+            return
+        self.notifier.send_menu_image(image_path, f"Immagine inviata manualmente - {datetime.date.today().strftime('%d/%m/%Y')}")
 
 def main():
     setup_logging(CONFIG["LOG_FILE"])
+    
+    parser = argparse.ArgumentParser(description='Menu Extractor per Rosticceria Fantasia')
+    parser.add_argument('--schedule', action='store_true', 
+                       help='Esegui con monitoraggio programmato (09:00-12:00)')
+    parser.add_argument('--manual', type=str, 
+                       help='Invia immagine manualmente (percorso file)')
+    parser.add_argument('--test', action='store_true',
+                       help='Attiva modalità test (primo post con immagine)')
+    
+    args = parser.parse_args()
+    
+    # Attiva modalità test se richiesto
+    if args.test:
+        CONFIG["TEST_MODE"] = True
+    
     extractor = MenuExtractor(CONFIG)
-    extractor.run_full_flow()
+    
+    if args.manual:
+        # Modalità manuale
+        extractor.run_manual_flow(args.manual)
+    elif args.schedule:
+        # Modalità con monitoraggio continuo
+        extractor.run_scheduled_monitoring()
+    else:
+        # Modalità singola esecuzione (per GitHub Actions)
+        extractor.run_full_flow()
 
 if __name__ == "__main__":
     main()
