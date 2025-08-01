@@ -1,34 +1,41 @@
-name: Estrai e Invia Menu Quotidiano
+name: Estrai & Invia Menu Quotidiano
 
 on:
   schedule:
-    # Esegui alle 11:30 ogni giorno (ora UTC)
-    - cron: '30 11 * * *'
+    # Esegue ogni 10 minuti dalle 08:00 alle 11:50 (UTC)
+    # 08:00, 08:10, 08:20, 08:30, 08:40, 08:50
+    - cron: '0,10,20,30,40,50 8 * * *'
+    # 09:00, 09:10, 09:20, 09:30, 09:40, 09:50
+    - cron: '0,10,20,30,40,50 9 * * *'
+    # 10:00, 10:10, 10:20, 10:30, 10:40, 10:50
+    - cron: '0,10,20,30,40,50 10 * * *'
+    # 11:00, 11:10, 11:20, 11:30, 11:40, 11:50
+    - cron: '0,10,20,30,40,50 11 * * *'
   workflow_dispatch: # Permette esecuzione manuale
 
 jobs:
   scrape-and-email:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.9'
-        
+
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
         pip install playwright schedule requests Pillow
-        
+
     - name: Install Playwright browsers
       run: |
         playwright install chromium
         playwright install-deps chromium
-        
+
     - name: Run script
       env:
         GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
