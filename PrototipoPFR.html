@@ -11,6 +11,7 @@
         .view { display: none; }
         .container { max-width: 1200px; margin: 2rem auto; padding: 2.5rem; background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         header { border-bottom: 2px solid var(--primary-color); margin-bottom: 1.5rem; padding-bottom: 1rem; text-align: center;}
+        .logo { max-width: 150px; height: auto; margin-bottom: 1rem; }
         h1, h2, h3, h4 { color: var(--primary-color); font-weight: 600; }
         .button { display: inline-block; padding: 12px 28px; background-color: var(--primary-color); color: white; text-decoration: none; border-radius: 5px; border: none; cursor: pointer; text-align: center; margin-top: 1rem; font-size: 1em; font-weight: 500; transition: background-color 0.2s, box-shadow 0.2s; }
         .button:hover { background-color: #003366; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
@@ -80,7 +81,10 @@
 
     <div id="view-start" class="view" style="display: block;">
         <div class="container">
-            <header> <h1>Progetto di Ricerca "Playing for Resilience"</h1> </header>
+            <header>
+                <img src="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/35f45f651fc8580ac4af1dd5111a55b57ba2444a/LogoPFR.png" alt="Logo Playing for Resilience" class="logo">
+                <h1>Progetto di Ricerca "Playing for Resilience"</h1>
+            </header>
             <main>
                 <p>Benvenuto/a. Stai per partecipare a uno studio che esplora nuovi modi di comunicare le sfide dell'adattamento climatico. La tua partecipazione è volontaria e anonima, e contribuirà alla ricerca nel campo delle scienze sociali per la sostenibilità.</p>
                 <p>Verrai assegnato/a casualmente a una di due condizioni sperimentali:</p>
@@ -223,37 +227,10 @@
         // --- REPORT, QUESTIONNAIRE & DEBRIEFING LOGIC ---
         function renderReport() { const container = document.getElementById('report-content'); container.innerHTML = ''; for (const key in INVESTMENTS) { const inv = INVESTMENTS[key]; const section = document.createElement('div'); section.className = 'report-section'; let effectsHTML = '<ul>'; for (const eff in inv.effects) { effectsHTML += `<li><strong>Impatto su ${eff}:</strong> ${inv.effects[eff]} punti</li>`; } effectsHTML += '</ul>'; section.innerHTML = `<h4>${inv.name}</h4><p><strong>Costo:</strong> ${inv.cost}M €.</p><strong>Effetti:</strong>${effectsHTML}`; container.appendChild(section); } }
         function selectPolicy(choice) { document.getElementById('policy-a').classList.remove('selected'); document.getElementById('policy-b').classList.remove('selected'); document.getElementById(`policy-${choice}`).classList.add('selected'); document.getElementById('policy-choice-input').value = choice; }
-        
-        function handleLikertSelection(event) {
-            const button = event.target.closest('.likert-btn');
-            if (!button) return;
-            const value = button.dataset.value;
-            const container = button.parentElement;
-            const targetInputId = container.dataset.targetInput; // Legge il target dall'attributo data
-            const input = document.getElementById(targetInputId);
-            if (input) {
-                input.value = value;
-                container.querySelectorAll('.likert-btn').forEach(btn => btn.classList.remove('selected'));
-                button.classList.add('selected');
-            }
-        }
-        
-        document.addEventListener('DOMContentLoaded', () => {
-             document.getElementById('likert-efficacy').addEventListener('click', handleLikertSelection);
-             document.getElementById('likert-risk').addEventListener('click', handleLikertSelection);
-        });
-
-        function handleQuestionnaireSubmit() {
-            alert('Grazie per la tua partecipazione!');
-            if (wasInGame) {
-                renderDebriefing();
-                showView('view-debriefing');
-            } else {
-                showView('view-start');
-            }
-        }
-        
-        function renderDebriefing() { const dashboard = document.getElementById('debriefing-dashboard'); dashboard.innerHTML = `<div id="game-dashboard"> <div class="metric"><div class="label">Resilienza</div><div class="value" style="color:var(--success-color)">${gameState.resilience}/100</div></div> <div class="metric"><div class="label">Op. Pubblica</div><div class="value" style="color:var(--warning-color)">${gameState.opinion}/100</div></div> <div class="metric"><div class="label">Ambiente</div><div class="value" style="color:var(--teal-color)">${gameState.environment}/100</div></div> </div>`; const analysis = document.getElementById('debriefing-analysis'); let text = 'Le tue decisioni hanno portato la città a un buon equilibrio. '; if (gameState.resilience < 40) text = 'La città è vulnerabile! Le tue scelte hanno privilegiato altri aspetti a discapito della sicurezza a lungo termine. '; if (gameState.opinion < 40) text += 'L\'opinione pubblica è bassa, suggerendo che le tue scelte sono state impopolari. '; if (gameState.environment < 40) text += 'L\'ambiente ha sofferto a causa di investimenti poco sostenibili.'; analysis.innerHTML = `<p>${text}</p><p>Questo gioco illustra i complessi <strong>trade-off</strong> che i decisori devono affrontare.</p>`; }
+        function handleLikertSelection(event) { const button = event.target.closest('.likert-btn'); if (!button) return; const value = button.dataset.value; const container = button.parentElement; const targetInputId = container.dataset.targetInput; const input = document.getElementById(targetInputId); if (input) { input.value = value; container.querySelectorAll('.likert-btn').forEach(btn => btn.classList.remove('selected')); button.classList.add('selected'); } }
+        document.addEventListener('DOMContentLoaded', () => { document.getElementById('likert-efficacy').addEventListener('click', handleLikertSelection); document.getElementById('likert-risk').addEventListener('click', handleLikertSelection); });
+        function handleQuestionnaireSubmit() { alert('Grazie per la tua partecipazione!'); if (wasInGame) { renderDebriefing(); showView('view-debriefing'); } else { showView('view-start'); } }
+        function renderDebriefing() { const dashboard = document.getElementById('debriefing-dashboard'); dashboard.innerHTML = `<div id="game-dashboard"> <div class="metric"><div class="label">Resilienza</div><div class="value" id="game-resilience">${gameState.resilience}/100</div></div> <div class="metric"><div class="label">Op. Pubblica</div><div class="value" id="game-opinion">${gameState.opinion}/100</div></div> <div class="metric"><div class="label">Ambiente</div><div class="value" id="game-environment">${gameState.environment}/100</div></div> </div>`; const analysis = document.getElementById('debriefing-analysis'); let text = 'Le tue decisioni hanno portato la città a un buon equilibrio. '; if (gameState.resilience < 40) text = 'La città è vulnerabile! Le tue scelte hanno privilegiato altri aspetti a discapito della sicurezza a lungo termine. '; if (gameState.opinion < 40) text += 'L\'opinione pubblica è bassa, suggerendo che le tue scelte sono state impopolari. '; if (gameState.environment < 40) text += 'L\'ambiente ha sofferto a causa di investimenti poco sostenibili.'; analysis.innerHTML = `<p>${text}</p><p>Questo gioco illustra i complessi <strong>trade-off</strong> che i decisori devono affrontare.</p>`; }
     </script>
 </body>
 </html>
