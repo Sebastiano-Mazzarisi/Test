@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Playing for Resilience - Prototipo di Ricerca</title>
+    <title>Playing for Resilience</title>
+    <meta name="apple-mobile-web-app-title" content="Playing for Resilience">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/35f45f651fc8580ac4af1dd5111a55b57ba2444a/LogoPFR.png">
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/35f45f651fc8580ac4af1dd5111a55b57ba2444a/LogoPFR.png">
     
     <style>
         :root { 
@@ -32,7 +35,7 @@
         #game-resilience { color: var(--success-color); }
         #game-opinion { color: var(--warning-color); }
         #game-environment { color: var(--teal-color); }
-        #news-panel { margin-bottom: 2rem; padding: 1rem; background-color: #fffbeb; border-left: 5px solid var(--pastel-orange); }
+        #news-panel { margin-bottom: 2rem; padding: 1rem; background-color: #fffbeb; border: 2px solid var(--pastel-orange); border-left-width: 5px; border-radius: 8px; }
         #choices-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
         .choice-card { border: 2px solid var(--gray); border-radius: 8px; padding: 1rem; text-align: center; transition: box-shadow 0.2s, border-color 0.2s; display: flex; flex-direction: column; }
         .card-constructive { border-color: var(--pastel-green); }
@@ -48,10 +51,25 @@
         .btn-constructive { background-color: var(--success-color); } .btn-constructive:hover { background-color: #256a29; }
         .btn-infrastructure { background-color: var(--secondary-color); } .btn-infrastructure:hover { background-color: #4a6781; }
         .btn-political { background-color: var(--warning-color); } .btn-political:hover { background-color: #d97800; }
-        #event-log { margin-top: 2rem; padding: 1rem; background-color: #e3f2fd; border-left: 5px solid var(--pastel-blue); text-align: center; }
+        #event-log { margin-bottom: 2rem; padding: 1rem; background-color: #e3f2fd; border: 2px solid var(--secondary-color); border-radius: 8px; text-align: center; }
+        .end-game-summary { padding: 2rem; background-color: var(--light-gray); border: 2px solid var(--primary-color); border-radius: 8px; }
+        .final-metrics { display: flex; justify-content: space-around; gap: 1rem; margin: 1.5rem 0; text-align: center; flex-wrap: wrap; }
+        .final-metric { flex-basis: 150px; }
+        .final-metric .label { font-weight: 600; color: var(--secondary-color); }
+        .final-metric .value { font-size: 1.8em; font-weight: 700; }
+        .progress-bar-wrapper { height: 10px; background-color: var(--gray); border-radius: 5px; margin-top: 5px; overflow: hidden; }
+        .progress-bar { height: 100%; border-radius: 5px; transition: width 0.5s ease-in-out; }
+        .progress-resilience { background-color: var(--success-color); }
+        .progress-opinion { background-color: var(--warning-color); }
+        .progress-environment { background-color: var(--teal-color); }
+        .final-feedback { text-align: center; font-size: 1.1em; margin: 1.5rem 0; }
         
-        /* Questionario */
-        .report-section, .question-group { margin-bottom: 2rem; background-color: #fff; padding: 1.5rem 2rem; border-radius: 8px; border: 2px solid var(--pastel-blue); box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
+        /* Report & Questionario */
+        #report-content { display: flex; flex-direction: row; gap: 1.5rem; align-items: stretch; }
+        .report-section { flex: 1; min-width: 200px; border: 2px solid var(--pastel-blue); border-radius: 8px; padding: 1.5rem; background-color: var(--light-gray); }
+        .report-section h4 { margin-top: 0; }
+        .report-section ul { padding-left: 20px; }
+        .question-group { margin-bottom: 2rem; background-color: #fff; padding: 1.5rem 2rem; border-radius: 8px; border: 2px solid var(--pastel-blue); box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
         .question-group h4 { margin-top: 0; }
         .choice-experiment { display: flex; gap: 1.5rem; justify-content: center; flex-direction: column; }
         @media (min-width: 768px) { .choice-experiment { flex-direction: row; } }
@@ -78,10 +96,16 @@
         .likert-5 { color: #388e3c; border-color: #388e3c; } .likert-5.selected { background-color: #388e3c; color: white; }
 
         /* Stili per il mobile */
+        @media (max-width: 992px) {
+            #report-content { flex-direction: column; } 
+        }
         @media (max-width: 768px) {
+            body { font-size: 1.05em; }
             .container { padding: 1.5rem 1rem; margin: 1rem 0.5rem; }
+            h1 { font-size: 1.5rem; }
+            h2 { font-size: 1.3rem; }
             #game-dashboard { grid-template-columns: 1fr 1fr; }
-            .metric .value { font-size: 1.4em; }
+            .metric .value { font-size: 1.2em; }
             #choices-container { grid-template-columns: 1fr; }
         }
     </style>
@@ -102,24 +126,18 @@
         </div>
     </div>
 
-    <div id="view-methodology" class="view">
+    <div id="view-methodology" class="view" style="display: none;">
         <div class="container">
             <header> <h2>Spiegazione del Disegno Sperimentale</h2> </header>
             <main>
                 <h4>Perché non posso scegliere il percorso?</h4>
-                <p>Ti sei chiesto/a perché, cliccando "Inizia", non puoi scegliere se provare il gioco o leggere il report? La risposta risiede nel cuore del metodo scientifico utilizzato in questo progetto di ricerca.</p>
-                <h4>L'Assegnazione Casuale: Un Principio Chiave</h4>
-                <p>Il prototipo simula un'<strong>assegnazione casuale</strong>. Questo approccio è fondamentale per il rigore della ricerca. Come descritto nel progetto, si utilizza un disegno sperimentale "between-subjects", dove i partecipanti sono "<strong>assegnati casualmente a una di due condizioni</strong>":</p>
-                <ul><li>Un <strong>Gruppo di Trattamento</strong> che interagisce con il "serious game".</li><li>Un <strong>Gruppo di Controllo</strong> che legge un documento informativo statico.</li></ul>
-                <p>Questo metodo serve a garantire che i due gruppi siano, in media, il più simili possibile prima di iniziare. In questo modo, qualsiasi differenza nelle loro risposte finali può essere attribuita con maggiore sicurezza all'effetto dell'esperienza vissuta.</p>
-                <h4>Il Tuo Ruolo come Partecipante</h4>
-                <p>La tua esperienza, sia essa il gioco o la lettura del documento, è un contributo prezioso e valido. Non esiste un percorso "giusto" o "sbagliato". Entrambe le condizioni sono essenziali per rispondere alla domanda di ricerca.</p>
+                <p>Il prototipo simula un'<strong>assegnazione casuale</strong> a una delle due condizioni (gioco o report), come previsto dal disegno sperimentale "between-subjects" del progetto di ricerca. Questo metodo è cruciale per la validità scientifica dei risultati.</p>
                 <div class="text-center"> <button class="button" onclick="showView('view-start')">Torna alla Home</button> </div>
             </main>
         </div>
     </div>
     
-    <div id="view-game" class="view">
+    <div id="view-game" class="view" style="display: none;">
         <div class="container">
             <header> <h2>Sindaco di Costa Futura</h2> <p>Il tuo obiettivo è guidare la città per i prossimi 30 anni, gestendo il budget per proteggerla dagli impatti climatici.</p> </header>
             <div id="game-dashboard">
@@ -130,26 +148,25 @@
                 <div class="metric"><div class="label">Ambiente</div><div class="value" id="game-environment"></div></div>
             </div>
             <div id="news-panel"></div>
+            <div id="event-log" style="display:none;"></div>
             <h4>Decisioni di Mandato (scegli un'azione)</h4>
             <div id="choices-container"></div>
-            <div id="event-log" style="display:none;"></div>
-            <div class="text-center" id="end-game-btn-container" style="display:none;">
-                <p>Il tuo mandato trentennale è concluso. Puoi procedere al questionario finale.</p>
-                <button class="button" onclick="showView('view-questionnaire')">Vai al Questionario Finale</button>
+            <div class="text-center" id="pass-turn-container" style="display: none;">
+                <button class="button" id="pass-turn-btn" onclick="passTurn()">Risparmia e passa al turno successivo</button>
             </div>
         </div>
     </div>
     
-    <div id="view-report" class="view">
+    <div id="view-report" class="view" style="display: none;">
         <div class="container">
             <header><h2>Documento Informativo: Strategie di Adattamento</h2></header>
             <p>Le seguenti opzioni sono disponibili per la pianificazione strategica trentennale della città di Costa Futura.</p>
             <div id="report-content"></div>
-            <div class="text-center"> <button class="button" onclick="showView('view-questionnaire')">Vai al Questionario Finale</button> </div>
+            <div class="text-center" style="margin-top: 2rem;"> <button class="button" onclick="showView('view-questionnaire')">Vai al Questionario Finale</button> </div>
         </div>
     </div>
 
-    <div id="view-questionnaire" class="view">
+    <div id="view-questionnaire" class="view" style="display: none;">
         <div class="container">
             <header><h3>Questionario Finale</h3></header>
             <form onsubmit="event.preventDefault(); handleQuestionnaireSubmit()">
@@ -215,7 +232,7 @@
         </div>
     </div>
     
-    <div id="view-debriefing" class="view">
+    <div id="view-debriefing" class="view" style="display: none;">
         <div class="container">
             <header><h3>Riepilogo del tuo Mandato</h3></header>
             <p>Grazie per aver completato la simulazione. Ecco un riepilogo finale dello stato di Costa Futura al 2055.</p>
@@ -239,12 +256,14 @@
         function startExperiment() { wasInGame = false; if (Math.random() > 0.5) { wasInGame = true; initializeGame(); showView('view-game'); } else { renderReport(); showView('view-report'); } }
 
         // --- GAME LOGIC ---
-        function initializeGame() { gameState = { turn: 0, year: 2025, budget: 100, resilience: 20, opinion: 50, environment: 50 }; document.getElementById('end-game-btn-container').style.display = 'none'; document.getElementById('event-log').style.display = 'none'; runTurn(); }
-        function runTurn() { if (gameState.turn >= 6) { endGame(); return; } updateGameUI(); document.getElementById('news-panel').innerHTML = `📰 <strong>Notiziario Comunale:</strong> ${SOCIAL_NORMS[Math.floor(Math.random() * SOCIAL_NORMS.length)]}`; const choicesContainer = document.getElementById('choices-container'); choicesContainer.innerHTML = ''; if (gameState.turn === 1 || gameState.turn === 3) { choicesContainer.innerHTML += createChoiceCard('bonus', DILEMMAS.bonus, true); choicesContainer.innerHTML += createChoiceCard('manutenzione', DILEMMAS.manutenzione, true); } else { for (const key in INVESTMENTS) { choicesContainer.innerHTML += createChoiceCard(key, INVESTMENTS[key]); } } choicesContainer.querySelectorAll('button').forEach(btn => btn.addEventListener('click', handleChoice)); }
+        function initializeGame() { gameState = { turn: 0, year: 2025, budget: 100, resilience: 20, opinion: 50, environment: 50 }; document.getElementById('event-log').style.display = 'none'; document.getElementById('pass-turn-container').style.display = 'block'; runTurn(); }
+        function advanceTurnAndTriggerEvent() { const eventLog = document.getElementById('event-log'); if (Math.random() > 0.3 && gameState.turn > 0) { const randomEvent = EVENTS[Math.floor(Math.random() * EVENTS.length)]; eventLog.innerHTML = `<strong>Evento!</strong> Nel ${gameState.year+2}, ${randomEvent.name} ha colpito la città.`; for (const eff in randomEvent.effects) { gameState[eff] = Math.max(0, Math.min(100, gameState[eff] + randomEvent.effects[eff])); } eventLog.style.display = 'block'; } else { eventLog.style.display = 'none'; } gameState.turn++; gameState.year += 5; if (gameState.nextBudgetEffect) { gameState.budget += gameState.nextBudgetEffect; delete gameState.nextBudgetEffect; } runTurn(); }
+        function passTurn() { const eventLog = document.getElementById('event-log'); eventLog.innerHTML = `Hai deciso di non fare investimenti per questo mandato, risparmiando il budget.`; eventLog.style.display = 'block'; advanceTurnAndTriggerEvent(); }
+        function runTurn() { if (gameState.turn >= 6) { endGame(); return; } updateGameUI(); document.getElementById('news-panel').style.display = 'block'; document.getElementById('news-panel').innerHTML = `📰 <strong>Notiziario Comunale:</strong> ${SOCIAL_NORMS[Math.floor(Math.random() * SOCIAL_NORMS.length)]}`; const choicesContainer = document.getElementById('choices-container'); choicesContainer.innerHTML = ''; if (gameState.turn === 1 || gameState.turn === 3) { choicesContainer.innerHTML += createChoiceCard('bonus', DILEMMAS.bonus, true); choicesContainer.innerHTML += createChoiceCard('manutenzione', DILEMMAS.manutenzione, true); } else { for (const key in INVESTMENTS) { choicesContainer.innerHTML += createChoiceCard(key, INVESTMENTS[key]); } } choicesContainer.querySelectorAll('button').forEach(btn => btn.addEventListener('click', handleChoice)); }
         function createChoiceCard(key, item, isDilemma=false) { let effectsHTML = '<ul>'; for (const eff_raw in item.effects) { const value = item.effects[eff_raw]; const eff = eff_raw.replace('_next',''); let label = eff.charAt(0).toUpperCase() + eff.slice(1); let text = `${label}: ${value > 0 ? '+' : ''}${value}`; if(eff === 'budget') text = `Budget prox. turno: ${value > 0 ? '+' : ''}${value}M €`; const icon = value >= 0 ? '<span class="impact-good">▲</span>' : '<span class="impact-bad">▼</span>'; effectsHTML += `<li>${icon} ${text}</li>`; } effectsHTML += '</ul>'; const buttonClass = `btn-${item.category || 'infrastructure'}`; return `<div class="choice-card card-${item.category || 'infrastructure'}"><h4>${item.name}</h4><p class="cost">${item.cost}M €</p>${effectsHTML}<button class="button ${buttonClass}" data-key="${key}" data-is-dilemma="${isDilemma}">Approva</button></div>`; }
-        function handleChoice(event) { const key = event.target.dataset.key; const isDilemma = event.target.dataset.isDilemma === 'true'; const choice = isDilemma ? DILEMMAS[key] : INVESTMENTS[key]; if (gameState.budget < choice.cost) { alert("Budget insufficiente!"); return; } gameState.budget -= choice.cost; for (const eff_raw in choice.effects) { const eff = eff_raw.replace('_next', ''); const value = choice.effects[eff_raw]; if (eff_raw.includes('_next')) { gameState.nextBudgetEffect = (gameState.nextBudgetEffect || 0) + value; } else { let keyToUpdate = eff.toLowerCase().replace(/ /g, ''); if (keyToUpdate === 'opinionepubblica') keyToUpdate = 'opinion'; else if (keyToUpdate === 'saluteambientale') keyToUpdate = 'environment'; gameState[keyToUpdate] = Math.max(0, Math.min(100, gameState[keyToUpdate] + value)); } } const eventLog = document.getElementById('event-log'); if (Math.random() > 0.3) { const randomEvent = EVENTS[Math.floor(Math.random() * EVENTS.length)]; eventLog.innerHTML = `<strong>Evento!</strong> Nel ${gameState.year+2}, ${randomEvent.name} ha colpito la città.`; for (const eff in randomEvent.effects) { gameState[eff] = Math.max(0, Math.min(100, gameState[eff] + randomEvent.effects[eff])); } eventLog.style.display = 'block'; } else { eventLog.style.display = 'none'; } gameState.turn++; gameState.year += 5; if (gameState.nextBudgetEffect) { gameState.budget += gameState.nextBudgetEffect; delete gameState.nextBudgetEffect; } runTurn(); }
+        function handleChoice(event) { const key = event.target.dataset.key; const isDilemma = event.target.dataset.isDilemma === 'true'; const choice = isDilemma ? DILEMMAS[key] : INVESTMENTS[key]; if (gameState.budget < choice.cost) { alert("Budget insufficiente!"); return; } gameState.budget -= choice.cost; for (const eff_raw in choice.effects) { const eff = eff_raw.replace('_next', ''); const value = choice.effects[eff_raw]; if (eff_raw.includes('_next')) { gameState.nextBudgetEffect = (gameState.nextBudgetEffect || 0) + value; } else { let keyToUpdate = eff.toLowerCase().replace(/ /g, ''); if (keyToUpdate === 'opinionepubblica') keyToUpdate = 'opinion'; else if (keyToUpdate === 'saluteambientale') keyToUpdate = 'environment'; gameState[keyToUpdate] = Math.max(0, Math.min(100, gameState[keyToUpdate] + value)); } } advanceTurnAndTriggerEvent(); }
         function updateGameUI() { document.getElementById('game-year').textContent = gameState.year; document.getElementById('game-budget').textContent = `${gameState.budget}M €`; document.getElementById('game-resilience').textContent = `${gameState.resilience}/100`; document.getElementById('game-opinion').textContent = `${gameState.opinion}/100`; document.getElementById('game-environment').textContent = `${gameState.environment}/100`; }
-        function endGame() { document.getElementById('choices-container').innerHTML = '<h4>Il tuo mandato trentennale è concluso.</h4>'; document.getElementById('news-panel').style.display = 'none'; document.getElementById('end-game-btn-container').style.display = 'block'; }
+        function endGame() { const choicesContainer = document.getElementById('choices-container'); const finalState = gameState; let feedbackText = ''; if (finalState.resilience < 40) { feedbackText = `<p class='impact-bad'>La città è rimasta vulnerabile agli eventi climatici.</p>`; } else if (finalState.resilience > 70) { feedbackText = `<p class='impact-good'>Hai reso la città molto resiliente!</p>`; } else { feedbackText = `<p>Hai mantenuto un discreto livello di resilienza.</p>`; } let summaryHTML = `<div class="end-game-summary"><h4>Mandato Concluso: Riepilogo Finale (Anno ${finalState.year})</h4><div class="final-metrics"><div class="final-metric"><div class="label">Resilienza</div><div class="value" style="color:var(--success-color)">${finalState.resilience}/100</div><div class="progress-bar-wrapper"><div class="progress-bar progress-resilience" style="width: ${finalState.resilience}%;"></div></div></div><div class="final-metric"><div class="label">Opinione Pubblica</div><div class="value" style="color:var(--warning-color)">${finalState.opinion}/100</div><div class="progress-bar-wrapper"><div class="progress-bar progress-opinion" style="width: ${finalState.opinion}%;"></div></div></div><div class="final-metric"><div class="label">Salute Ambientale</div><div class="value" style="color:var(--teal-color)">${finalState.environment}/100</div><div class="progress-bar-wrapper"><div class="progress-bar progress-environment" style="width: ${finalState.environment}%;"></div></div></div></div><div class="final-feedback">${feedbackText}</div><div class="text-center"><button class="button" onclick="showView('view-questionnaire')">Prosegui al Questionario</button></div></div>`; choicesContainer.innerHTML = summaryHTML; document.getElementById('news-panel').style.display = 'none'; document.getElementById('event-log').style.display = 'none'; document.getElementById('pass-turn-container').style.display = 'none'; }
         
         // --- REPORT, QUESTIONNAIRE & DEBRIEFING LOGIC ---
         function renderReport() { const container = document.getElementById('report-content'); container.innerHTML = ''; for (const key in INVESTMENTS) { const inv = INVESTMENTS[key]; const section = document.createElement('div'); section.className = 'report-section'; let effectsHTML = '<ul>'; for (const eff in inv.effects) { effectsHTML += `<li><strong>Impatto su ${eff}:</strong> ${inv.effects[eff]} punti</li>`; } effectsHTML += '</ul>'; section.innerHTML = `<h4>${inv.name}</h4><p><strong>Costo:</strong> ${inv.cost}M €.</p><strong>Effetti:</strong>${effectsHTML}`; container.appendChild(section); } }
@@ -252,7 +271,7 @@
         function handleLikertSelection(event) { const button = event.target.closest('.likert-btn'); if (!button) return; const value = button.dataset.value; const container = button.parentElement; const targetInputId = container.dataset.targetInput; const input = document.getElementById(targetInputId); if (input) { input.value = value; container.querySelectorAll('.likert-btn').forEach(btn => btn.classList.remove('selected')); button.classList.add('selected'); } }
         document.addEventListener('DOMContentLoaded', () => { document.getElementById('likert-efficacy').addEventListener('click', handleLikertSelection); document.getElementById('likert-risk').addEventListener('click', handleLikertSelection); });
         function handleQuestionnaireSubmit() { if (wasInGame) { renderDebriefing(); showView('view-debriefing'); } else { showView('view-start'); } }
-        function renderDebriefing() { const dashboard = document.getElementById('debriefing-dashboard'); dashboard.innerHTML = `<div id="game-dashboard"> <div class="metric"><div class="label">Resilienza</div><div class="value" id="game-resilience">${gameState.resilience}/100</div></div> <div class="metric"><div class="label">Op. Pubblica</div><div class="value" id="game-opinion">${gameState.opinion}/100</div></div> <div class="metric"><div class="label">Ambiente</div><div class="value" id="game-environment">${gameState.environment}/100</div></div> </div>`; const analysis = document.getElementById('debriefing-analysis'); let text = 'Le tue decisioni hanno portato la città a un buon equilibrio. '; if (gameState.resilience < 40) text = 'La città è vulnerabile! Le tue scelte hanno privilegiato altri aspetti a discapito della sicurezza a lungo termine. '; if (gameState.opinion < 40) text += 'L\'opinione pubblica è bassa, suggerendo che le tue scelte sono state impopolari. '; if (gameState.environment < 40) text += 'L\'ambiente ha sofferto a causa di investimenti poco sostenibili.'; analysis.innerHTML = `<p>${text}</p><p>Questo gioco illustra i complessi <strong>trade-off</strong> che i decisori devono affrontare.</p>`; }
+        function renderDebriefing() { const dashboard = document.getElementById('debriefing-dashboard'); dashboard.innerHTML = `<div id="game-dashboard"> <div class="metric"><div class="label">Resilienza</div><div class="value">${gameState.resilience}/100</div></div> <div class="metric"><div class="label">Op. Pubblica</div><div class="value">${gameState.opinion}/100</div></div> <div class="metric"><div class="label">Ambiente</div><div class="value">${gameState.environment}/100</div></div> </div>`; const analysis = document.getElementById('debriefing-analysis'); let text = 'Le tue decisioni hanno portato la città a un buon equilibrio. '; if (gameState.resilience < 40) text = 'La città è vulnerabile!'; if (gameState.opinion < 40) text += 'L\'opinione pubblica è bassa. '; if (gameState.environment < 40) text += 'L\'ambiente ha sofferto.'; analysis.innerHTML = `<p>${text}</p><p>Questo gioco illustra i complessi <strong>trade-off</strong> che i decisori devono affrontare.</p>`; }
     </script>
 </body>
 </html>
