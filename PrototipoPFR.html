@@ -6,19 +6,25 @@
     <title>Playing for Resilience - Prototipo di Ricerca</title>
     
     <style>
-        :root { --primary-color: #004080; --secondary-color: #5a7d9a; --success-color: #2e7d32; --danger-color: #c62828; --warning-color: #ff8f00; --teal-color: #00695c; --light-gray: #f8f9fa; --gray: #e9ecef; --font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; }
+        :root { 
+            --primary-color: #004080; --secondary-color: #5a7d9a; 
+            --success-color: #2e7d32; --danger-color: #c62828; --warning-color: #ff8f00; 
+            --teal-color: #00695c; --light-gray: #f8f9fa; --gray: #e9ecef; 
+            --font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            --pastel-green: #a5d6a7; --pastel-blue: #90caf9; --pastel-orange: #ffcc80;
+        }
         body { font-family: var(--font-family); line-height: 1.6; margin: 0; background-color: var(--light-gray); color: #333; }
         .view { display: none; }
         .container { max-width: 1200px; margin: 2rem auto; padding: 2.5rem; background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         header { border-bottom: 2px solid var(--primary-color); margin-bottom: 1.5rem; padding-bottom: 1rem; text-align: center;}
-        .logo { max-width: 150px; height: auto; margin-bottom: 1rem; }
+        .logo { max-width: 150px; height: auto; margin-bottom: 1rem; cursor: pointer; }
         h1, h2, h3, h4 { color: var(--primary-color); font-weight: 600; }
         .button { display: inline-block; padding: 12px 28px; background-color: var(--primary-color); color: white; text-decoration: none; border-radius: 5px; border: none; cursor: pointer; text-align: center; margin-top: 1rem; font-size: 1em; font-weight: 500; transition: background-color 0.2s, box-shadow 0.2s; }
         .button:hover { background-color: #003366; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .text-center { text-align: center; }
         
         /* Game UI */
-        #game-dashboard { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; background-color: var(--light-gray); padding: 1rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid var(--gray); }
+        #game-dashboard { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; background-color: var(--light-gray); padding: 1rem; border-radius: 8px; margin-bottom: 2rem; border: 2px solid var(--pastel-blue); }
         .metric { text-align: center; }
         .metric .label { font-size: 0.8em; color: var(--secondary-color); text-transform: uppercase; }
         .metric .value { font-size: 1.6em; font-weight: 700; }
@@ -26,10 +32,13 @@
         #game-resilience { color: var(--success-color); }
         #game-opinion { color: var(--warning-color); }
         #game-environment { color: var(--teal-color); }
-        #news-panel { margin-bottom: 2rem; padding: 1rem; background-color: #fffbeb; border-left: 5px solid var(--warning-color); font-style: italic; }
+        #news-panel { margin-bottom: 2rem; padding: 1rem; background-color: #fffbeb; border-left: 5px solid var(--pastel-orange); }
         #choices-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
-        .choice-card { border: 1px solid var(--gray); border-radius: 8px; padding: 1rem; text-align: center; transition: box-shadow 0.2s, border-color 0.2s; display: flex; flex-direction: column; }
-        .choice-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-color: var(--secondary-color); }
+        .choice-card { border: 2px solid var(--gray); border-radius: 8px; padding: 1rem; text-align: center; transition: box-shadow 0.2s, border-color 0.2s; display: flex; flex-direction: column; }
+        .card-constructive { border-color: var(--pastel-green); }
+        .card-infrastructure { border-color: var(--pastel-blue); }
+        .card-political { border-color: var(--pastel-orange); }
+        .choice-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .choice-card h4 { margin-top: 0; font-size: 1.1em; }
         .choice-card .cost { font-size: 1.1em; font-weight: bold; color: var(--danger-color); margin-bottom: 1rem; }
         .choice-card ul { list-style-type: none; padding: 0; text-align: left; font-size: 0.9em; flex-grow: 1; }
@@ -39,16 +48,16 @@
         .btn-constructive { background-color: var(--success-color); } .btn-constructive:hover { background-color: #256a29; }
         .btn-infrastructure { background-color: var(--secondary-color); } .btn-infrastructure:hover { background-color: #4a6781; }
         .btn-political { background-color: var(--warning-color); } .btn-political:hover { background-color: #d97800; }
-        #event-log { margin-top: 2rem; padding: 1rem; background-color: #e3f2fd; border-left: 5px solid var(--secondary-color); text-align: center; }
+        #event-log { margin-top: 2rem; padding: 1rem; background-color: #e3f2fd; border-left: 5px solid var(--pastel-blue); text-align: center; }
         
         /* Questionario */
-        .report-section, .question-group { margin-bottom: 2rem; background-color: #fff; padding: 1.5rem 2rem; border-radius: 8px; border: 1px solid var(--gray); box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
+        .report-section, .question-group { margin-bottom: 2rem; background-color: #fff; padding: 1.5rem 2rem; border-radius: 8px; border: 2px solid var(--pastel-blue); box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
         .question-group h4 { margin-top: 0; }
         .choice-experiment { display: flex; gap: 1.5rem; justify-content: center; flex-direction: column; }
         @media (min-width: 768px) { .choice-experiment { flex-direction: row; } }
         .policy-option { flex: 1; border: 2px solid var(--gray); padding: 1.5rem; border-radius: 8px; cursor: pointer; transition: all 0.2s; position: relative; background-color: var(--light-gray); }
         .policy-option:hover { border-color: var(--secondary-color); }
-        .policy-option.selected { border-color: var(--success-color); background-color: #e8f5e9; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .policy-option.selected { border-color: var(--pastel-green); background-color: #e8f5e9; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .policy-option.selected::after { content: '✔'; font-size: 1.5em; color: var(--success-color); position: absolute; top: 10px; right: 10px; }
         .policy-option ul { list-style-type: none; padding-left: 0; }
         .policy-option li { display: flex; align-items: center; margin-bottom: 0.5rem; }
@@ -82,19 +91,34 @@
     <div id="view-start" class="view" style="display: block;">
         <div class="container">
             <header>
-                <img src="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/35f45f651fc8580ac4af1dd5111a55b57ba2444a/LogoPFR.png" alt="Logo Playing for Resilience" class="logo">
+                <img src="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/35f45f651fc8580ac4af1dd5111a55b57ba2444a/LogoPFR.png" alt="Logo Playing for Resilience" class="logo" onclick="showView('view-methodology')">
                 <h1>Progetto di Ricerca "Playing for Resilience"</h1>
             </header>
             <main>
-                <p>Benvenuto/a. Stai per partecipare a uno studio che esplora nuovi modi di comunicare le sfide dell'adattamento climatico. La tua partecipazione è volontaria e anonima, e contribuirà alla ricerca nel campo delle scienze sociali per la sostenibilità.</p>
-                <p>Verrai assegnato/a casualmente a una di due condizioni sperimentali:</p>
-                <ol> <li>Interagire con una <strong>simulazione gestionale</strong>.</li> <li>Leggere un <strong>documento informativo</strong>.</li> </ol>
-                <p>Al termine, ti verrà chiesto di compilare un breve questionario. Non ci sono risposte giuste o sbagliate. Grazie per il tuo tempo.</p>
+                <p>Benvenuto/a. Stai per partecipare a uno studio che esplora nuovi modi di comunicare le sfide dell'adattamento climatico. La tua partecipazione è volontaria e anonima e contribuirà alla ricerca nel campo delle scienze sociali per la sostenibilità.</p>
+                <p>Verrai assegnato/a casualmente a una di due condizioni sperimentali. Clicca sul logo per maggiori dettagli sulla metodologia.</p>
                 <div class="text-center"> <button class="button" onclick="startExperiment()">Inizia l'Esperimento</button> </div>
             </main>
         </div>
     </div>
 
+    <div id="view-methodology" class="view">
+        <div class="container">
+            <header> <h2>Spiegazione del Disegno Sperimentale</h2> </header>
+            <main>
+                <h4>Perché non posso scegliere il percorso?</h4>
+                <p>Ti sei chiesto/a perché, cliccando "Inizia", non puoi scegliere se provare il gioco o leggere il report? La risposta risiede nel cuore del metodo scientifico utilizzato in questo progetto di ricerca.</p>
+                <h4>L'Assegnazione Casuale: Un Principio Chiave</h4>
+                <p>Il prototipo simula un'<strong>assegnazione casuale</strong>. Questo approccio è fondamentale per il rigore della ricerca. Come descritto nel progetto, si utilizza un disegno sperimentale "between-subjects", dove i partecipanti sono "<strong>assegnati casualmente a una di due condizioni</strong>":</p>
+                <ul><li>Un <strong>Gruppo di Trattamento</strong> che interagisce con il "serious game".</li><li>Un <strong>Gruppo di Controllo</strong> che legge un documento informativo statico.</li></ul>
+                <p>Questo metodo serve a garantire che i due gruppi siano, in media, il più simili possibile prima di iniziare. In questo modo, qualsiasi differenza nelle loro risposte finali può essere attribuita con maggiore sicurezza all'effetto dell'esperienza vissuta.</p>
+                <h4>Il Tuo Ruolo come Partecipante</h4>
+                <p>La tua esperienza, sia essa il gioco o la lettura del documento, è un contributo prezioso e valido. Non esiste un percorso "giusto" o "sbagliato". Entrambe le condizioni sono essenziali per rispondere alla domanda di ricerca.</p>
+                <div class="text-center"> <button class="button" onclick="showView('view-start')">Torna alla Home</button> </div>
+            </main>
+        </div>
+    </div>
+    
     <div id="view-game" class="view">
         <div class="container">
             <header> <h2>Sindaco di Costa Futura</h2> <p>Il tuo obiettivo è guidare la città per i prossimi 30 anni, gestendo il budget per proteggerla dagli impatti climatici.</p> </header>
@@ -136,29 +160,28 @@
                         <div class="policy-option" id="policy-a" onclick="selectPolicy('a')">
                             <h4>Piano Alfa</h4>
                             <ul>
-                                <li><span class="icon">💰</span><strong>Costo per famiglia:</strong> 50€/anno</li>
-                                <li><span class="icon">🛡️</span><strong>Livello di Protezione:</strong> Alto</li>
-                                <li class="impact-negative"><span class="icon">🌿</span><strong>Impatto Ambientale:</strong> Negativo</li>
+                                <li><span class="icon">💰</span><strong>Costo:</strong> 50€/anno</li>
+                                <li><span class="icon">🛡️</span><strong>Protezione:</strong> Alto</li>
+                                <li class="impact-negative"><span class="icon">🌿</span><strong>Impatto Amb.:</strong> Negativo</li>
                             </ul>
                         </div>
                         <div class="policy-option" id="policy-b" onclick="selectPolicy('b')">
                             <h4>Piano Beta</h4>
                             <ul>
-                                <li><span class="icon">💰</span><strong>Costo per famiglia:</strong> 30€/anno</li>
-                                <li><span class="icon">🛡️</span><strong>Livello di Protezione:</strong> Medio</li>
-                                <li class="impact-positive"><span class="icon">🌿</span><strong>Impatto Ambientale:</strong> Positivo</li>
+                                <li><span class="icon">💰</span><strong>Costo:</strong> 30€/anno</li>
+                                <li><span class="icon">🛡️</span><strong>Protezione:</strong> Medio</li>
+                                <li class="impact-positive"><span class="icon">🌿</span><strong>Impatto Amb.:</strong> Positivo</li>
                             </ul>
                         </div>
                     </div>
                     <input type="hidden" id="policy-choice-input" required>
                 </div>
-
                 <div class="question-group">
                     <div class="perception-question">
                         <span class="icon">💪</span>
                         <div class="text">
                             <h4>Percezioni Individuali</h4>
-                            <label>"Mi sento personalmente in grado di contribuire a mitigare gli effetti del cambiamento climatico."</label>
+                            <label>"Mi sento in grado di contribuire a mitigare gli effetti del cambiamento climatico."</label>
                         </div>
                     </div>
                     <div class="likert-buttons" id="likert-efficacy" data-target-input="q-efficacy-input">
@@ -170,13 +193,12 @@
                     </div>
                     <input type="hidden" id="q-efficacy-input" required>
                 </div>
-
                  <div class="question-group">
                     <div class="perception-question">
                         <span class="icon">⚠️</span>
                         <div class="text">
                              <h4>Percezione del Rischio</h4>
-                            <label>Quanto percepisci alto il rischio di eventi climatici estremi nella tua regione nei prossimi 10 anni?</label>
+                            <label>Quanto percepisci alto il rischio di eventi climatici estremi nella tua regione?</label>
                         </div>
                     </div>
                      <div class="likert-buttons" id="likert-risk" data-target-input="q-risk-input">
@@ -208,7 +230,7 @@
         let wasInGame = false;
         const INVESTMENTS = { diga: { name: "Costruzione Diga", category: "infrastructure", cost: 40, effects: { 'Resilienza': 30, 'Opinione Pubblica': -10, 'Salute Ambientale': -20 } }, ripascimento: { name: "Ripascimento Spiagge", category: "constructive", cost: 20, effects: { 'Resilienza': 15, 'Opinione Pubblica': 15, 'Salute Ambientale': 5 } }, delocalizzazione: { name: "Delocalizzazione", category: "political", cost: 50, effects: { 'Resilienza': 25, 'Opinione Pubblica': -20, 'Salute Ambientale': 10 } }, allerta: { name: "Sistema di Allerta", category: "constructive", cost: 10, effects: { 'Resilienza': 5, 'Opinione Pubblica': 10, 'Salute Ambientale': 0 } } };
         const DILEMMAS = { bonus: { name: "Bonus Elettorale", category: "political", cost: 10, effects: { 'Opinione Pubblica': 20, 'budget_next': -15 } }, manutenzione: { name: "Fondo Manutenzione", category: "infrastructure", cost: 10, effects: { 'Resilienza': 10, 'Opinione Pubblica': -5 } } };
-        const SOCIAL_NORMS = [ "Un report nazionale indica che il 70% delle città costiere sta investendo in soluzioni basate sulla natura.", "Gli esperti raccomandano di dare priorità a investimenti con benefici a lungo termine.", "I sindaci rieletti hanno speso in media il 30% in più per la resilienza rispetto a quelli non rieletti.", "La fiducia dei cittadini aumenta quando vedono investimenti concreti, anche se costosi.", "L'ultima conferenza sul clima ha sottolineato l'urgenza di proteggere gli ecosistemi marini." ];
+        const SOCIAL_NORMS = [ "Un report nazionale indica che il 70% delle città costiere sta investendo in soluzioni basate sulla natura.", "Gli esperti raccomandano di dare priorità a investimenti con benefici a lungo termine.", "I sindaci rieletti hanno speso in media il 30% in più per la resilienza rispetto a quelli non rieletti." ];
         const EVENTS = [ { name: "una forte mareggiata", effects: { resilience: -20, opinion: -15 } }, { name: "un'ondata di calore", effects: { opinion: -10, environment: -10 } }, { name: "un boom del turismo ecologico", effects: { budget: 15, opinion: 10 } } ];
         let gameState = {};
 
@@ -219,7 +241,7 @@
         // --- GAME LOGIC ---
         function initializeGame() { gameState = { turn: 0, year: 2025, budget: 100, resilience: 20, opinion: 50, environment: 50 }; document.getElementById('end-game-btn-container').style.display = 'none'; document.getElementById('event-log').style.display = 'none'; runTurn(); }
         function runTurn() { if (gameState.turn >= 6) { endGame(); return; } updateGameUI(); document.getElementById('news-panel').innerHTML = `📰 <strong>Notiziario Comunale:</strong> ${SOCIAL_NORMS[Math.floor(Math.random() * SOCIAL_NORMS.length)]}`; const choicesContainer = document.getElementById('choices-container'); choicesContainer.innerHTML = ''; if (gameState.turn === 1 || gameState.turn === 3) { choicesContainer.innerHTML += createChoiceCard('bonus', DILEMMAS.bonus, true); choicesContainer.innerHTML += createChoiceCard('manutenzione', DILEMMAS.manutenzione, true); } else { for (const key in INVESTMENTS) { choicesContainer.innerHTML += createChoiceCard(key, INVESTMENTS[key]); } } choicesContainer.querySelectorAll('button').forEach(btn => btn.addEventListener('click', handleChoice)); }
-        function createChoiceCard(key, item, isDilemma=false) { let effectsHTML = '<ul>'; for (const eff_raw in item.effects) { const value = item.effects[eff_raw]; const eff = eff_raw.replace('_next',''); let label = eff.charAt(0).toUpperCase() + eff.slice(1); let text = `${label}: ${value > 0 ? '+' : ''}${value}`; if(eff === 'budget') text = `Budget prox. turno: ${value > 0 ? '+' : ''}${value}M €`; const icon = value >= 0 ? '<span class="impact-good">▲</span>' : '<span class="impact-bad">▼</span>'; effectsHTML += `<li>${icon} ${text}</li>`; } effectsHTML += '</ul>'; const buttonClass = `btn-${item.category || 'infrastructure'}`; return `<div class="choice-card"><h4>${item.name}</h4><p class="cost">${item.cost}M €</p>${effectsHTML}<button class="button ${buttonClass}" data-key="${key}" data-is-dilemma="${isDilemma}">Approva</button></div>`; }
+        function createChoiceCard(key, item, isDilemma=false) { let effectsHTML = '<ul>'; for (const eff_raw in item.effects) { const value = item.effects[eff_raw]; const eff = eff_raw.replace('_next',''); let label = eff.charAt(0).toUpperCase() + eff.slice(1); let text = `${label}: ${value > 0 ? '+' : ''}${value}`; if(eff === 'budget') text = `Budget prox. turno: ${value > 0 ? '+' : ''}${value}M €`; const icon = value >= 0 ? '<span class="impact-good">▲</span>' : '<span class="impact-bad">▼</span>'; effectsHTML += `<li>${icon} ${text}</li>`; } effectsHTML += '</ul>'; const buttonClass = `btn-${item.category || 'infrastructure'}`; return `<div class="choice-card card-${item.category || 'infrastructure'}"><h4>${item.name}</h4><p class="cost">${item.cost}M €</p>${effectsHTML}<button class="button ${buttonClass}" data-key="${key}" data-is-dilemma="${isDilemma}">Approva</button></div>`; }
         function handleChoice(event) { const key = event.target.dataset.key; const isDilemma = event.target.dataset.isDilemma === 'true'; const choice = isDilemma ? DILEMMAS[key] : INVESTMENTS[key]; if (gameState.budget < choice.cost) { alert("Budget insufficiente!"); return; } gameState.budget -= choice.cost; for (const eff_raw in choice.effects) { const eff = eff_raw.replace('_next', ''); const value = choice.effects[eff_raw]; if (eff_raw.includes('_next')) { gameState.nextBudgetEffect = (gameState.nextBudgetEffect || 0) + value; } else { let keyToUpdate = eff.toLowerCase().replace(/ /g, ''); if (keyToUpdate === 'opinionepubblica') keyToUpdate = 'opinion'; else if (keyToUpdate === 'saluteambientale') keyToUpdate = 'environment'; gameState[keyToUpdate] = Math.max(0, Math.min(100, gameState[keyToUpdate] + value)); } } const eventLog = document.getElementById('event-log'); if (Math.random() > 0.3) { const randomEvent = EVENTS[Math.floor(Math.random() * EVENTS.length)]; eventLog.innerHTML = `<strong>Evento!</strong> Nel ${gameState.year+2}, ${randomEvent.name} ha colpito la città.`; for (const eff in randomEvent.effects) { gameState[eff] = Math.max(0, Math.min(100, gameState[eff] + randomEvent.effects[eff])); } eventLog.style.display = 'block'; } else { eventLog.style.display = 'none'; } gameState.turn++; gameState.year += 5; if (gameState.nextBudgetEffect) { gameState.budget += gameState.nextBudgetEffect; delete gameState.nextBudgetEffect; } runTurn(); }
         function updateGameUI() { document.getElementById('game-year').textContent = gameState.year; document.getElementById('game-budget').textContent = `${gameState.budget}M €`; document.getElementById('game-resilience').textContent = `${gameState.resilience}/100`; document.getElementById('game-opinion').textContent = `${gameState.opinion}/100`; document.getElementById('game-environment').textContent = `${gameState.environment}/100`; }
         function endGame() { document.getElementById('choices-container').innerHTML = '<h4>Il tuo mandato trentennale è concluso.</h4>'; document.getElementById('news-panel').style.display = 'none'; document.getElementById('end-game-btn-container').style.display = 'block'; }
@@ -229,7 +251,7 @@
         function selectPolicy(choice) { document.getElementById('policy-a').classList.remove('selected'); document.getElementById('policy-b').classList.remove('selected'); document.getElementById(`policy-${choice}`).classList.add('selected'); document.getElementById('policy-choice-input').value = choice; }
         function handleLikertSelection(event) { const button = event.target.closest('.likert-btn'); if (!button) return; const value = button.dataset.value; const container = button.parentElement; const targetInputId = container.dataset.targetInput; const input = document.getElementById(targetInputId); if (input) { input.value = value; container.querySelectorAll('.likert-btn').forEach(btn => btn.classList.remove('selected')); button.classList.add('selected'); } }
         document.addEventListener('DOMContentLoaded', () => { document.getElementById('likert-efficacy').addEventListener('click', handleLikertSelection); document.getElementById('likert-risk').addEventListener('click', handleLikertSelection); });
-        function handleQuestionnaireSubmit() { alert('Grazie per la tua partecipazione!'); if (wasInGame) { renderDebriefing(); showView('view-debriefing'); } else { showView('view-start'); } }
+        function handleQuestionnaireSubmit() { if (wasInGame) { renderDebriefing(); showView('view-debriefing'); } else { showView('view-start'); } }
         function renderDebriefing() { const dashboard = document.getElementById('debriefing-dashboard'); dashboard.innerHTML = `<div id="game-dashboard"> <div class="metric"><div class="label">Resilienza</div><div class="value" id="game-resilience">${gameState.resilience}/100</div></div> <div class="metric"><div class="label">Op. Pubblica</div><div class="value" id="game-opinion">${gameState.opinion}/100</div></div> <div class="metric"><div class="label">Ambiente</div><div class="value" id="game-environment">${gameState.environment}/100</div></div> </div>`; const analysis = document.getElementById('debriefing-analysis'); let text = 'Le tue decisioni hanno portato la città a un buon equilibrio. '; if (gameState.resilience < 40) text = 'La città è vulnerabile! Le tue scelte hanno privilegiato altri aspetti a discapito della sicurezza a lungo termine. '; if (gameState.opinion < 40) text += 'L\'opinione pubblica è bassa, suggerendo che le tue scelte sono state impopolari. '; if (gameState.environment < 40) text += 'L\'ambiente ha sofferto a causa di investimenti poco sostenibili.'; analysis.innerHTML = `<p>${text}</p><p>Questo gioco illustra i complessi <strong>trade-off</strong> che i decisori devono affrontare.</p>`; }
     </script>
 </body>
