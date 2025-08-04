@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Converti Alimenti</title>
+    <link rel="apple-touch-icon" href="https://github.com/Sebastiano-Mazzarisi/Test/blob/main/BMI-icona.png">
+    <link rel="shortcut icon" href="https://github.com/Sebastiano-Mazzarisi/Test/blob/main/BMI-icona.png">
+    <meta name="apple-mobile-web-app-title" content="Converti">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 15px; /* Reduced padding for smaller screens */
+            background-color: #e0f2f7; /* Light blue background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box; /* Include padding in element's total width and height */
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px; /* Adjusted padding for mobile */
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); /* Slightly softer shadow */
+            max-width: 600px;
+            width: 100%;
+            border: 3px solid #007bff; /* Stronger blue frame */
+            box-sizing: border-box;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50; /* Darker blue for headings */
+            margin-bottom: 25px; /* Adjusted margin */
+            font-size: 1.8em; /* Adjusted font size for mobile */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+        }
+        .form-group {
+            margin-bottom: 20px; /* Adjusted margin */
+            padding: 15px;
+            border: 2px solid #66bb6a; /* Green frame for form groups */
+            border-radius: 8px;
+            background-color: #f0fdf0; /* Very light green background */
+            box-sizing: border-box;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px; /* Adjusted margin */
+            font-weight: bold;
+            color: #34495e; /* Medium dark blue for labels */
+            font-size: 1em; /* Adjusted font size for mobile */
+        }
+        select, input[type="number"] {
+            width: 100%; /* Full width */
+            padding: 12px;
+            border: 1px solid #90caf9; /* Light blue border */
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1em;
+            color: #333;
+            background-color: #ffffff;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        select:focus, input[type="number"]:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+        input[type="radio"] {
+            margin-right: 8px;
+            transform: scale(1.1); /* Slightly larger radio buttons */
+        }
+        .radio-group label {
+            display: inline-block;
+            margin-right: 20px; /* Adjusted margin */
+            font-weight: normal;
+            color: #555;
+            font-size: 0.95em; /* Adjusted font size for mobile */
+        }
+        button {
+            width: 100%;
+            padding: 14px; /* Adjusted padding */
+            background-color: #28a745; /* Green for action button */
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em; /* Adjusted font size for mobile */
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+            margin-top: 10px; /* Add some space above the button */
+        }
+        button:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .result {
+            margin-top: 25px; /* Adjusted margin */
+            padding: 20px;
+            background-color: #e6ffe6; /* Very light green for success/result */
+            border-radius: 8px;
+            border: 2px solid #28a745; /* Stronger green frame for result */
+            color: #155724; /* Dark green text */
+            font-size: 1.1em; /* Adjusted font size for mobile */
+            text-align: center;
+            font-weight: bold;
+            display: none; /* Hidden by default */
+            box-sizing: border-box;
+        }
+        /* The .error class is no longer used for on-page display due to alert() */
+    
+        /* Media queries for better mobile responsiveness */
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                border-radius: 10px;
+            }
+            h1 {
+                font-size: 1.6em;
+                margin-bottom: 20px;
+            }
+            .form-group {
+                padding: 10px;
+                margin-bottom: 15px;
+            }
+            label {
+                font-size: 0.95em;
+                margin-bottom: 5px;
+            }
+            select, input[type="number"] {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+            button {
+                padding: 12px;
+                font-size: 1em;
+            }
+            .result {
+                font-size: 1em;
+                padding: 15px;
+            }
+            .radio-group label {
+                margin-right: 15px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Convertitore Cotto/Crudo</h1>
+
+        <div class="form-group">
+            <label>Tipo di conversione:</label>
+            <div class="radio-group">
+                <input type="radio" id="cookedToRaw" name="conversionType" value="cookedToRaw" checked>
+                <label for="cookedToRaw">Da cotto a crudo</label>
+                <input type="radio" id="rawToCooked" name="conversionType" value="rawToCooked">
+                <label for="rawToCooked">Da crudo a cotto</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="foodItem">Tipo di alimento:</label>
+            <select id="foodItem">
+                <option value="">Seleziona un alimento</option>
+                </select>
+        </div>
+
+        <div class="form-group">
+            <label id="weightLabel" for="weightInput">Peso cotto (g):</label>
+            <input type="number" id="weightInput" min="0">
+        </div>
+
+        <button onclick="calculateConversion()">Calcola</button>
+
+        <div class="result" id="result"></div>
+        </div>
+
+    <script>
+        // Embedded conversion data from ConversionePastaRiso.csv
+        const conversionRatios = {
+            "Spaghetti": 2.4,
+            "Penne rigate": 2.4,
+            "Fusilli": 2.4,
+            "Ditalini": 2.4,
+            "Anellini": 2.5,
+            "Tagliatelle secche": 2.2,
+            "Pappardelle": 2.2,
+            "Trofie secche": 2.5,
+            "Orecchiette secche": 2.3,
+            "Lasagne secche": 2.0,
+            "Gnocchi di patate": 1.3,
+            "Pasta fresca all'uovo": 1.7,
+            "Riso Arborio": 3.0,
+            "Riso Carnaroli": 3.0,
+            "Riso Ribe": 2.8,
+            "Riso Roma": 2.8,
+            "Riso Basmati": 2.5,
+            "Riso Jasmine": 2.4,
+            "Riso Integrale": 2.2,
+            "Riso Venere (nero)": 2.5,
+            "Riso Rosso integrale": 2.4,
+            "Riso per sushi": 3.0,
+            "Riso parboiled": 2.5,
+            "Riso selvaggio": 3.0
+        };
+
+        const cookedToRawRadio = document.getElementById('cookedToRaw');
+        const rawToCookedRadio = document.getElementById('rawToCooked');
+        const weightLabel = document.getElementById('weightLabel');
+        const foodItemSelect = document.getElementById('foodItem');
+        const resultDiv = document.getElementById('result');
+
+        // Function to update the label based on selected radio button
+        function updateLabel() {
+            if (cookedToRawRadio.checked) {
+                weightLabel.textContent = 'Peso cotto (g):';
+            } else {
+                weightLabel.textContent = 'Peso crudo (g):';
+            }
+            resultDiv.style.display = 'none'; // Hide result when changing conversion type
+            resultDiv.textContent = ''; // Clear result content
+        }
+
+        // Function to populate the dropdown from embedded data
+        function populateFoodItems() {
+            for (const item in conversionRatios) {
+                const option = document.createElement('option');
+                option.value = item;
+                // Display food item and its conversion ratio, formatted with comma
+                option.textContent = `${item} (${conversionRatios[item].toString().replace('.', ',')})`;
+                foodItemSelect.appendChild(option);
+            }
+        }
+
+        // Function to perform the conversion calculation
+        function calculateConversion() {
+            const foodItem = foodItemSelect.value;
+            const weightInput = parseFloat(document.getElementById('weightInput').value);
+            const cookedToRaw = cookedToRawRadio.checked;
+
+            resultDiv.style.display = 'none'; // Hide previous result
+
+            if (!foodItem) {
+                alert('Per favore, seleziona un alimento.');
+                return;
+            }
+            if (isNaN(weightInput) || weightInput <= 0) {
+                alert('Per favore, inserisci un peso valido (maggiore di 0).');
+                return;
+            }
+
+            const ratio = conversionRatios[foodItem];
+            let convertedWeight;
+            let fromUnit, toUnit;
+
+            if (cookedToRaw) {
+                convertedWeight = weightInput / ratio;
+                fromUnit = 'cotto';
+                toUnit = 'crudo';
+            } else {
+                convertedWeight = weightInput * ratio;
+                fromUnit = 'crudo';
+                toUnit = 'cotto';
+            }
+
+            // Round the converted weight to the nearest whole number
+            const roundedConvertedWeight = Math.round(convertedWeight);
+
+            resultDiv.innerHTML = `
+                <p>Hai inserito ${weightInput}g di ${foodItem} ${fromUnit}.</p>
+                <p>Il rapporto di conversione per ${foodItem} è: ${ratio.toString().replace('.', ',')}.</p>
+                <p>Questo corrisponde a circa <strong>${roundedConvertedWeight}g</strong> di ${foodItem} ${toUnit}.</p>
+            `;
+            resultDiv.style.display = 'block'; // Show the result
+        }
+
+        // Initial setup when the DOM content is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            populateFoodItems(); // Populate dropdown
+            updateLabel(); // Set initial label based on default radio selection
+        });
+
+        // Event Listeners for radio button changes
+        cookedToRawRadio.addEventListener('change', updateLabel);
+        rawToCookedRadio.addEventListener('change', updateLabel);
+
+    </script>
+</body>
+</html>
