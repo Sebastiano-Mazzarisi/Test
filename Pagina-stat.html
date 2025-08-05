@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisi Interattiva: Probabilità di Immissione in Ruolo - A045 Puglia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Academia -->
+    <!-- Application Structure Plan: L'applicazione è strutturata come una narrazione a scorrimento verticale per guidare l'utente attraverso l'analisi in modo logico. Si inizia con la conclusione principale per una risposta immediata (Le tue probabilità sono molto alte), per poi approfondire i dettagli: la posizione attuale della candidata, il contesto normativo, l'analisi dei dati storici con un grafico interattivo, le proiezioni future e infine i fattori chiave e i consigli pratici. Questa struttura scompone un argomento complesso in sezioni digeribili, utilizzando la visualizzazione dei dati per rendere le tendenze e i confronti immediatamente evidenti, migliorando la comprensione rispetto a un report testuale. La struttura è stata completamente ottimizzata per la visualizzazione su dispositivi mobili. -->
+    <!-- Visualization & Content Choices: Report Info: Posizione in graduatoria, dati storici e proiezioni assunzioni. -> Goal: Informare, Confrontare, Mostrare trend. -> Viz/Presentation Method: 1) Diagramma HTML/CSS per la struttura della graduatoria (chiaro, no SVG). 2) Card e grandi numeri per le statistiche chiave (impatto immediato). 3) Grafico a barre raggruppato e statico (Chart.js) per i dati storici, mostrando sia i posti totali che quelli da GM per una facile comparazione. 4) Grafico a barre statico per le proiezioni (chiarezza sul futuro). -> Interaction: Tutti i dati sono statici e visibili al caricamento della pagina, senza necessità di interazione da parte dell'utente. -> Justification: Questa combinazione traduce il testo denso in elementi visivi e statici che facilitano la comprensione delle tendenze e dei numeri chiave su schermi piccoli. -> Library/Method: Chart.js, chartjs-plugin-datalabels, TailwindCSS, Vanilla JS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fdfcfb;
+            color: #4a4a4a;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+        .kpi-card {
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.07);
+        }
+        .section-title {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: #6b7280;
+            max-width: 800px;
+            margin: 0 auto 3rem auto;
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #3b82f6, #1e40af);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        .ranking-item.gm {
+            background-color: #e0e7ff;
+            border-left: 4px solid #4f46e5;
+        }
+        .ranking-item.idonei {
+            background-color: #d1fae5;
+            border-left: 4px solid #059669;
+        }
+        .ranking-item.me {
+            background-color: #fef9c3;
+            border-left: 4px solid #f59e0b;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="navbar" class="sticky top-0 bg-white/80 backdrop-blur-md z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <span class="font-bold text-lg text-gray-800">Analisi A045 Puglia</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#hero" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 border-b-2 border-transparent">Sintesi</a>
+                        <a href="#posizione" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 border-b-2 border-transparent">La Tua Posizione</a>
+                        <a href="#trend" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 border-b-2 border-transparent">Trend Assunzioni</a>
+                        <a href="#proiezione" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 border-b-2 border-transparent">Prospettive</a>
+                        <a href="#conclusioni" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 border-b-2 border-transparent">Conclusioni</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="hero" class="py-20 md:py-28 text-center bg-gray-50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 tracking-tight">
+                    Analisi Probabilità di Assunzione
+                </h1>
+                <p class="mt-4 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+                    Mazzarisi Teresa - Classe di Concorso A045 (Scienze Economico-Aziendali)
+                </p>
+                <div class="mt-12">
+                    <div class="inline-block bg-green-100 border border-green-200 rounded-full px-6 py-3">
+                        <p class="text-2xl font-bold text-green-800">
+                            Le tue probabilità di immissione in ruolo entro 3 anni sono
+                            <span class="block text-4xl mt-2">ESTREMAMENTE ALTE</span>
+                        </p>
+                    </div>
+                    <p class="mt-6 text-gray-600">Questa analisi interattiva esplora i dati e i fattori chiave dietro questa conclusione.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="posizione" class="py-20 md:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="section-title">La Tua Posizione Attuale</h2>
+                <p class="section-subtitle">
+                    Per iniziare, vediamo i dati fondamentali che definiscono la tua situazione attuale nella graduatoria valida fino all'8 Luglio 2028. Questi numeri sono il punto di partenza per l'intera analisi.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16">
+                    <div class="kpi-card">
+                        <span class="text-5xl font-extrabold gradient-text">15</span>
+                        <h3 class="text-lg font-semibold text-gray-800 mt-4">Posizione in Graduatoria Combinata</h3>
+                        <p class="text-sm text-gray-500 mt-1">Sei l'ultima candidata nella graduatoria finale composta da 15 persone.</p>
+                    </div>
+                    <div class="kpi-card">
+                        <span class="text-5xl font-extrabold gradient-text">182,25</span>
+                        <h3 class="text-lg font-semibold text-gray-800 mt-4">Punteggio Totale</h3>
+                        <p class="text-sm text-gray-500 mt-1">Ottenuto dalla somma dei punteggi di prove e titoli.</p>
+                    </div>
+                    <div class="kpi-card">
+                        <span class="text-5xl font-extrabold gradient-text">14</span>
+                        <h3 class="text-lg font-semibold text-gray-800 mt-4">Candidati che ti Precedono</h3>
+                        <p class="text-sm text-gray-500 mt-1">Questo è il numero di posizioni da coprire prima di arrivare a te.</p>
+                    </div>
+                </div>
+
+                <div class="max-w-4xl mx-auto text-left bg-white p-8 rounded-xl shadow-lg border">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2 text-center">Struttura della Graduatoria Combinata A045</h3>
+                    <p class="text-gray-600 mb-6 text-center">La tua assunzione dipende dallo scorrimento di un'unica lista, formata da due gruppi. I candidati vengono chiamati in ordine sequenziale.</p>
+                    <div class="md:flex md:space-x-8">
+                        <div class="md:w-1/2">
+                            <h4 class="font-bold text-lg mb-3 text-indigo-700">1. Graduatoria di Merito (GM)</h4>
+                            <div id="gm-list">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                        <div class="md:w-1/2 mt-8 md:mt-0">
+                             <h4 class="font-bold text-lg mb-3 text-green-700">2. Elenco Idonei (ex DL 45/2025)</h4>
+                            <div id="idonei-list">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="trend" class="py-20 md:py-24 bg-gray-50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="section-title">Trend Assunzioni: Domanda in Crescita</h2>
+                <p class="section-subtitle">
+                    Per capire le tue possibilità future, è fondamentale guardare al passato. Questo grafico mostra l'andamento delle assunzioni per la tua classe di concorso (A045) in Puglia negli ultimi anni.
+                </p>
+                <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg border">
+                    <div class="chart-container">
+                        <canvas id="historicalChart"></canvas>
+                    </div>
+                    <div class="text-sm text-gray-500 mt-4 text-left">
+                        <p>Il grafico confronta i posti totali assegnati con i posti specificamente attribuiti dalle Graduatorie di Merito (GM). Si osserva una chiara tendenza di aumento in entrambi i casi, il che è un segnale molto positivo.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="proiezione" class="py-20 md:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="section-title">Prospettive Future: I Numeri a Tuo Favore</h2>
+                <p class="section-subtitle">
+                    Basandoci sul trend storico, possiamo proiettare il numero di posti che si renderanno disponibili nei prossimi 3 anni. Il confronto tra i posti previsti e i candidati prima di te è il cuore di questa analisi di probabilità.
+                </p>
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 items-center max-w-6xl mx-auto">
+                    <div class="lg:col-span-3 bg-white p-6 rounded-xl shadow-lg border">
+                        <h3 class="text-xl font-bold text-gray-900 mb-4">Proiezione Posti da GM (2025-2028)</h3>
+                        <div class="chart-container" style="height: 350px; max-height: 40vh;">
+                            <canvas id="projectionChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 flex flex-col space-y-8">
+                        <div class="kpi-card">
+                            <span class="text-6xl font-extrabold gradient-text">51</span>
+                            <h3 class="text-lg font-semibold text-gray-800 mt-2">Posti da GM Previsti</h3>
+                            <p class="text-sm text-gray-500 mt-1">Numero totale di posti stimati da GM nei prossimi 3 anni.</p>
+                        </div>
+                        <div class="kpi-card">
+                            <span class="text-6xl font-extrabold gradient-text">14</span>
+                            <h3 class="text-lg font-semibold text-gray-800 mt-2">Candidati Davanti a Te</h3>
+                            <p class="text-sm text-gray-500 mt-1">Il numero di posizioni da coprire prima di arrivare alla tua.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="conclusioni" class="py-20 md:py-24 bg-gray-50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="section-title">Conclusioni e Prossimi Passi</h2>
+                <p class="section-subtitle">
+                    L'analisi dei dati converge verso una conclusione molto positiva. Ecco una sintesi dei fattori determinanti e alcuni consigli pratici per il futuro.
+                </p>
+                <div class="max-w-4xl mx-auto text-left space-y-6">
+                    <div class="bg-white p-6 rounded-lg shadow border">
+                        <h3 class="font-bold text-lg text-green-700">Perché le probabilità sono così alte?</h3>
+                        <ul class="mt-2 list-disc list-inside text-gray-600 space-y-1">
+                            <li><b>Trend Positivo:</b> Il numero di posti per A045 in Puglia è in costante crescita.</li>
+                            <li><b>Pochi Candidati:</b> La graduatoria combinata è molto corta (15 persone in totale).</li>
+                            <li><b>Proiezioni Favorevoli:</b> I 51 posti previsti da GM superano ampiamente i 14 candidati che ti precedono.</li>
+                            <li><b>Fattore Rinunce:</b> È molto probabile che alcuni dei 14 candidati rinuncino, accelerando ulteriormente lo scorrimento.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow border">
+                        <h3 class="font-bold text-lg text-blue-700">Cosa fare ora? (Consigli Pratici)</h3>
+                         <ul class="mt-2 list-disc list-inside text-gray-600 space-y-1">
+                            <li><b>Monitora l'USR Puglia:</b> Controlla regolarmente il sito dell'Ufficio Scolastico Regionale per avvisi di immissione in ruolo.</li>
+                            <li><b>Valuta le Supplenze:</b> Acquisire esperienza tramite supplenze è sempre una strategia vincente.</li>
+                            <li><b>Rimani Aggiornata:</b> Tieni d'occhio eventuali nuovi concorsi o cambiamenti normativi.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white">
+        <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-sm">
+            <p>&copy; 2025 Analisi Dati Interattiva. Tutti i diritti riservati.</p>
+            <p class="text-gray-400 mt-1">Questa applicazione è basata su dati e documenti ufficiali forniti dall'utente.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const historicalData = {
+                labels: ['2022/2023', '2023/2024', '2024/2025'],
+                datasets: [
+                    {
+                        label: 'Posti da GM',
+                        data: [4, 9, 13],
+                        backgroundColor: '#3b82f6',
+                        borderColor: '#3b82f6',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Posti Totali',
+                        data: [10, 16, 20],
+                        backgroundColor: '#6b7280',
+                        borderColor: '#6b7280',
+                        borderWidth: 1
+                    }
+                ]
+            };
+
+            const projectionData = {
+                labels: ['2025/2026', '2026/2027', '2027/2028'],
+                datasets: [{
+                    label: 'Posti GM Previsti',
+                    data: [15, 17, 19],
+                    backgroundColor: '#10b981',
+                    borderColor: '#10b981',
+                    borderWidth: 1
+                }]
+            };
+
+            const chartOptions = {
+                maintainAspectRatio: false,
+                responsive: true,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#4a4a4a',
+                            font: {
+                                size: 14,
+                                family: "'Inter', sans-serif"
+                            }
+                        }
+                    },
+                    tooltip: {
+                        enabled: false,
+                    },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'end',
+                        color: '#4a4a4a',
+                        font: {
+                            size: 14,
+                            weight: 'bold',
+                            family: "'Inter', sans-serif"
+                        },
+                        formatter: function(value, context) {
+                            return value;
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#6b7280',
+                            font: {
+                                family: "'Inter', sans-serif"
+                            }
+                        },
+                        grid: {
+                            color: '#e5e7eb'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#6b7280',
+                            font: {
+                                family: "'Inter', sans-serif"
+                            }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            };
+            
+            const historicalCtx = document.getElementById('historicalChart').getContext('2d');
+            const historicalChart = new Chart(historicalCtx, {
+                type: 'bar',
+                data: historicalData,
+                options: chartOptions,
+                plugins: [ChartDataLabels]
+            });
+
+            const projectionCtx = document.getElementById('projectionChart').getContext('2d');
+            const projectionChart = new Chart(projectionCtx, {
+                type: 'bar',
+                data: projectionData,
+                options: chartOptions,
+                plugins: [ChartDataLabels]
+            });
+            
+            const rankingData = {
+                gm: [
+                    { pos: 1, name: 'Ruggieri A.' }, { pos: 2, name: 'Galluzzi M.' },
+                    { pos: 3, name: 'De Mare M. V.' }, { pos: 4, name: 'Palumbo N. M.' },
+                    { pos: 5, name: 'Candidato 5' }, { pos: 6, name: 'Candidato 6' },
+                    { pos: 7, name: 'Candidato 7' }, { pos: 8, name: 'Candidato 8' },
+                    { pos: 9, name: 'Candidato 9' }, { pos: 10, name: 'Candidato 10' },
+                    { pos: 11, name: 'Candidato 11' }, { pos: 12, name: 'Candidato 12' },
+                ],
+                idonei: [
+                    { pos: 14, name: 'Aprile Ximenes M.' },
+                    { pos: 15, name: 'Occhiuto V.' },
+                    { pos: 16, name: 'Mazzarisi T.', isMe: true }
+                ]
+            };
+            
+            const gmListContainer = document.getElementById('gm-list');
+            rankingData.gm.forEach(c => {
+                const item = document.createElement('div');
+                item.className = 'ranking-item gm';
+                item.innerHTML = `<span class="font-bold w-8">${c.pos}.</span><span>${c.name}</span>`;
+                gmListContainer.appendChild(item);
+            });
+
+            const idoneiListContainer = document.getElementById('idonei-list');
+            rankingData.idonei.forEach(c => {
+                const item = document.createElement('div');
+                item.className = `ranking-item ${c.isMe ? 'me' : 'idonei'}`;
+                item.innerHTML = `<span class="font-bold w-8">${c.pos}.</span><span>${c.name} ${c.isMe ? '(Tu)' : ''}</span>`;
+                idoneiListContainer.appendChild(item);
+            });
+            
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.4
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>

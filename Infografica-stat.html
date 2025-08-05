@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="it" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografica: Analisi Probabilità di Assunzione - A045 Puglia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Energetic & Playful -->
+    <!-- Application Structure Plan: The infographic follows a top-down narrative structure, starting with the main conclusion (Extremely High Probability) to provide an immediate answer. It then drills down into the supporting evidence: 1. Key personal stats (rank, score). 2. A visual breakdown of the short 15-person combined ranking list. 3. A bar chart showing the positive historical trend in hiring. 4. A projection chart comparing the ~51 expected spots vs. the 14 candidates ahead. 5. A summary of key factors and actionable advice. This structure was chosen to guide the user from the 'what' to the 'why' in a logical, digestible flow, making complex report data easy to understand at a glance. -->
+    <!-- Visualization & Content Choices: - Main Conclusion: Goal: Inform -> Method: Large, bold text (HTML/CSS) for maximum impact. - Personal Stats: Goal: Inform -> Method: KPI Cards (HTML/CSS) to isolate key numbers. - Ranking Structure: Goal: Organize -> Method: Styled Flexbox columns (HTML/CSS) to represent the two-part list sequentially, highlighting the user's position. Confirms NO SVG/Mermaid. - Historical Trend: Goal: Change/Compare -> Method: Chart.js Bar Chart showing total vs. GM posts. - Future Projections: Goal: Compare -> Method: Chart.js Bar Chart for projected posts, paired with KPI cards for direct comparison. - Key Factors/Advice: Goal: Inform -> Method: Styled lists within cards (HTML/CSS) for clear, scannable information. All Chart.js instances use Canvas and include required tooltip configuration. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1f2937;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: #4b5563;
+            max-width: 650px;
+        }
+        .kpi-card {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .gradient-text {
+            background: linear-gradient(45deg, #4D96FF, #FF6B6B);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            border: 1px solid;
+        }
+        .ranking-item.gm {
+            background-color: #eff6ff;
+            border-color: #bfdbfe;
+            color: #1e40af;
+        }
+        .ranking-item.idonei {
+            background-color: #f0fdf4;
+            border-color: #bbf7d0;
+            color: #166534;
+        }
+        .ranking-item.me {
+            background-color: #fefce8;
+            border-color: #fde047;
+            color: #854d0e;
+            font-weight: 700;
+            transform: scale(1.02);
+            box-shadow: 0 0 15px rgba(253, 224, 71, 0.5);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+
+        <section id="hero" class="text-center mb-20 md:mb-28">
+            <h1 class="section-title mb-4">Analisi Probabilità di Assunzione<br>Classe A045 Puglia</h1>
+            <p class="section-subtitle mx-auto">Un'infografica basata sul caso di Mazzarisi Teresa, che analizza la sua posizione in graduatoria, i trend di assunzione e le proiezioni future.</p>
+        </section>
+
+        <section id="conclusion" class="mb-20 md:mb-28">
+            <div class="text-center">
+                <h2 class="text-xl font-semibold text-gray-600 mb-2">La Conclusione Chiave</h2>
+                <p class="text-5xl md:text-7xl font-extrabold tracking-tight" style="color: #4ecdc4;">PROBABILITÀ MOLTO ALTA</p>
+                <p class="mt-4 text-lg text-gray-700 max-w-2xl mx-auto">Con soli 14 candidati che la precedono in una graduatoria molto corta e una forte domanda di docenti, le prospettive di immissione in ruolo entro 3 anni sono estremamente favorevoli.</p>
+            </div>
+        </section>
+        
+        <section id="kpis" class="mb-20 md:mb-28">
+            <div class="text-center mb-12">
+                <h2 class="section-title">La Tua Posizione in Numeri</h2>
+                <p class="section-subtitle mx-auto mt-4">Questi tre indicatori definiscono il tuo punto di partenza e sono fondamentali per l'intera analisi.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto">
+                <div class="kpi-card">
+                    <p class="text-6xl font-extrabold gradient-text">15°</p>
+                    <h3 class="text-lg font-semibold text-gray-800 mt-2">Posizione Finale</h3>
+                    <p class="text-sm text-gray-500 mt-1">Sei l'ultima candidata nella graduatoria combinata definitiva.</p>
+                </div>
+                <div class="kpi-card">
+                    <p class="text-6xl font-extrabold gradient-text">14</p>
+                    <h3 class="text-lg font-semibold text-gray-800 mt-2">Candidati che Precedono</h3>
+                    <p class="text-sm text-gray-500 mt-1">Il numero di posizioni da coprire prima di arrivare a te.</p>
+                </div>
+                <div class="kpi-card">
+                     <p class="text-6xl font-extrabold gradient-text">182,25</p>
+                    <h3 class="text-lg font-semibold text-gray-800 mt-2">Punteggio Totale</h3>
+                    <p class="text-sm text-gray-500 mt-1">Risultato di prove scritte, orali e valutazione dei titoli.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="ranking-structure" class="mb-20 md:mb-28">
+            <div class="text-center mb-12">
+                <h2 class="section-title">Come è Strutturata la Graduatoria</h2>
+                <p class="section-subtitle mx-auto mt-4">La tua assunzione dipende dallo scorrimento di un'unica lista, formata da due gruppi che vengono chiamati in ordine sequenziale. La graduatoria è sorprendentemente corta.</p>
+            </div>
+            <div class="max-w-4xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg border-2 border-gray-100">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                    <div>
+                        <h3 class="font-bold text-lg mb-3 text-center" style="color: #4D96FF;">1. Graduatoria di Merito (Pos. 1-12)</h3>
+                        <div class="space-y-2">
+                            <div class="ranking-item gm"><span class="font-bold w-8">1.</span><span>Ruggieri A.</span></div>
+                            <div class="ranking-item gm"><span class="font-bold w-8">2.</span><span>Galluzzi M.</span></div>
+                            <div class="ranking-item gm"><span class="font-bold w-8">3.</span><span>De Mare M. V.</span></div>
+                            <div class="text-center text-gray-400 py-2">... e altri 9 candidati</div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg mb-3 text-center" style="color: #4ecdc4;">2. Elenco Idonei (Pos. 14-16)</h3>
+                        <div class="space-y-2">
+                            <div class="ranking-item idonei"><span class="font-bold w-8">14.</span><span>Aprile Ximenes M.</span></div>
+                            <div class="ranking-item idonei"><span class="font-bold w-8">15.</span><span>Occhiuto V.</span></div>
+                            <div class="ranking-item me"><span class="font-bold w-8">16.</span><span>Mazzarisi T. (Tu)</span></div>
+                        </div>
+                    </div>
+                </div>
+                 <p class="text-xs text-gray-500 mt-6 text-center">Nota: La posizione 13 (Intartaglia A.) è stata rimossa, portando la graduatoria totale a 15 candidati.</p>
+            </div>
+        </section>
+
+        <section id="trend" class="mb-20 md:mb-28">
+            <div class="text-center mb-12">
+                <h2 class="section-title">Trend Assunzioni: Domanda in Forte Crescita</h2>
+                <p class="section-subtitle mx-auto mt-4">I dati storici mostrano un aumento costante e significativo del numero di posti per la classe A045 in Puglia. Questo è il segnale più incoraggiante per le tue prospettive.</p>
+            </div>
+            <div class="kpi-card">
+                <div class="chart-container">
+                    <canvas id="historicalChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="projection" class="mb-20 md:mb-28">
+             <div class="text-center mb-12">
+                <h2 class="section-title">Prospettive Future: I Posti Previsti</h2>
+                <p class="section-subtitle mx-auto mt-4">Basandoci sul trend, possiamo proiettare il numero di posti da Graduatoria di Merito (GM) che si renderanno disponibili. Il confronto con i candidati prima di te è nettamente favorevole.</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <div class="kpi-card flex flex-col justify-center items-center h-full">
+                    <p class="text-gray-600 font-semibold">Posti GM proiettati nei prossimi 3 anni</p>
+                    <p class="text-8xl font-extrabold" style="color: #FF6B6B;">~51</p>
+                </div>
+                <div class="kpi-card">
+                     <div class="chart-container">
+                        <canvas id="projectionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="factors" class="text-center">
+            <h2 class="section-title">Fattori Chiave e Prossimi Passi</h2>
+            <p class="section-subtitle mx-auto mt-4">L'analisi converge su una conclusione positiva. Ecco perché e cosa puoi fare per rimanere preparata.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto mt-12 text-left">
+                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                    <h3 class="font-bold text-xl mb-3" style="color: #4D96FF;">Perché le probabilità sono alte?</h3>
+                    <ul class="space-y-2 text-gray-600 list-disc list-inside">
+                        <li><b>Trend Positivo:</b> Il numero di posti per A045 in Puglia è in costante e forte crescita.</li>
+                        <li><b>Graduatoria Corta:</b> La lista totale è di soli 15 candidati, un numero molto basso.</li>
+                        <li><b>Proiezioni Favorevoli:</b> I 51 posti previsti da GM superano di gran lunga i 14 candidati che ti precedono.</li>
+                        <li><b>Fattore Rinunce:</b> È probabile che alcuni candidati rinuncino, accelerando ulteriormente lo scorrimento.</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                    <h3 class="font-bold text-xl mb-3" style="color: #FF6B6B;">Cosa fare ora?</h3>
+                    <ul class="space-y-2 text-gray-600 list-disc list-inside">
+                        <li><b>Monitora l'USR Puglia:</b> Controlla regolarmente il sito per avvisi di immissione in ruolo.</li>
+                        <li><b>Valuta le Supplenze:</b> Acquisire esperienza tramite supplenze è sempre una strategia vincente.</li>
+                        <li><b>Rimani Aggiornata:</b> Tieni d'occhio eventuali nuovi concorsi o cambiamenti normativi.</li>
+                        <li><b>Networking:</b> Interagisci con forum e sindacati per informazioni "dal campo".</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="bg-gray-800 text-white mt-20">
+        <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-sm">
+            <p>&copy; 2025 Infografica Dati. Tutti i diritti riservati.</p>
+            <p class="text-gray-400 mt-1">Questa analisi è basata su dati e documenti ufficiali forniti dall'utente.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const commonChartOptions = {
+                maintainAspectRatio: false,
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#6b7280', font: { family: "'Inter', sans-serif" } },
+                        grid: { color: '#e5e7eb' }
+                    },
+                    x: {
+                        ticks: { color: '#6b7280', font: { family: "'Inter', sans-serif" } },
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: { color: '#4a4a4a', font: { size: 14, family: "'Inter', sans-serif" } }
+                    },
+                    tooltip: {
+                        enabled: false
+                    },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        color: '#4a4a4a',
+                        font: {
+                            size: 14,
+                            weight: 'bold',
+                            family: "'Inter', sans-serif"
+                        },
+                        formatter: function(value, context) {
+                            return value;
+                        }
+                    }
+                }
+            };
+
+            const historicalCtx = document.getElementById('historicalChart').getContext('2d');
+            new Chart(historicalCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['2022/2023', '2023/2024', '2024/2025'],
+                    datasets: [
+                        {
+                            label: 'Posti Assegnati da GM',
+                            data: [4, 9, 13],
+                            backgroundColor: '#4D96FF',
+                            borderColor: '#4D96FF',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Posti Totali Assegnati',
+                            data: [10, 16, 20],
+                            backgroundColor: '#FFD166',
+                            borderColor: '#FFD166',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: commonChartOptions,
+                plugins: [ChartDataLabels]
+            });
+
+            const projectionCtx = document.getElementById('projectionChart').getContext('2d');
+            new Chart(projectionCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['2025/26', '2026/27', '2027/28'],
+                    datasets: [{
+                        label: 'Posti GM Previsti',
+                        data: [15, 17, 19],
+                        backgroundColor: '#FF6B6B',
+                        borderColor: '#FF6B6B',
+                        borderWidth: 1
+                    }]
+                },
+                options: commonChartOptions,
+                plugins: [ChartDataLabels]
+            });
+        });
+    </script>
+</body>
+</html>
