@@ -1498,12 +1498,13 @@ function calcolaEtaProssimoCompleanno(evento) {
     // Usiamo Date object per un confronto più preciso di data completa
     const dataCompleannoQuestAnno = new Date(oggiAnno, meseEvento - 1, giornoEvento); 
 
-    // Se la data odierna è uguale o successiva al compleanno di quest'anno,
+    // Se la data odierna è successiva al compleanno di quest'anno,
     // allora il prossimo compleanno sarà l'anno prossimo.
     if (oggi.getTime() > dataCompleannoQuestAnno.getTime()) {
         anniProssimi = (oggiAnno + 1) - annoNascita;
     } else {
-        // Altrimenti, il prossimo compleanno è ancora quest'anno.
+        // Se la data odierna è uguale o precedente al compleanno di quest'anno,
+        // allora il prossimo compleanno è ancora quest'anno.
         anniProssimi = oggiAnno - annoNascita;
     }
 
@@ -1555,10 +1556,14 @@ function ordinaEventi(eventi) {
 
     const giorni = calcolaGiorni(dataEventoCompleta, oggiSenzaOra);
     let anni;
-    if (giorni === 0) {
-      anni = calcolaEtaAttuale(e);
+    if (e.Tipo === 'Compleanno' || e.Tipo === 'Anniversario') {
+      if (giorni === 0) {
+        anni = calcolaEtaAttuale(e);
+      } else {
+        anni = calcolaEtaProssimoCompleanno(e);
+      }
     } else {
-      anni = calcolaEtaProssimoCompleanno(e);
+      anni = null;
     }
 
     return { ...e, dataEvento: dataEventoCompleta, giorni, anni };
@@ -1604,17 +1609,8 @@ function creaElementoEvento(evento, prossimiGiorni) {
   }
 
   const { giornoSettimana, giorno, mese, annoCorrente } = getDataCompleta(evento);
-  let dataCompletaString = `${giornoSettimana} ${giorno} ${mese} ${annoCorrente}`; // Usa una variabile temporanea
+  const dataCompletaString = `${giornoSettimana} ${giorno} ${mese} ${annoCorrente}`;
 
-  // NUOVO: Aggiungi il numero di anni di matrimonio alla data per gli anniversari
-  if (evento.Tipo === "Anniversario") {
-    const anniMatrimonioCompiuti = calcolaEtaAttuale(evento); // Usa la funzione per l'età attuale
-    if (anniMatrimonioCompiuti !== null) {
-        dataCompletaString += ` (${anniMatrimonioCompiuti})`;
-    }
-  }
-
-  // Calcola la data di nascita per i compleanni (il testo "Nato/Nata...")
   let dataNascitaTesto = "";
   if (evento.Tipo === "Compleanno" && evento.Anno && evento.Data) {
     const annoNascita = parseInt(evento.Anno);
@@ -1627,7 +1623,6 @@ function creaElementoEvento(evento, prossimiGiorni) {
     const giornoMeseNascita = dataNascita.getDate();
     const meseNomeNascita = mesi[dataNascita.getMonth()];
 
-    // Determina se è maschio o femmina basandosi sul nome
     const nome = evento.Nominativo.toLowerCase();
     const isFemmina = nome.includes("anna") || nome.includes("angela") || nome.includes("teresa") ||
                      nome.includes("maria") || nome.includes("antonietta") || nome.includes("marica") ||
@@ -1639,7 +1634,7 @@ function creaElementoEvento(evento, prossimiGiorni) {
     dataNascitaTesto = `${natoNata} ${giornoSettimanaNascita} ${giornoMeseNascita} ${meseNomeNascita} ${annoNascita}`;
   }
 
-  let tipoTesto = ""; // This uses evento.anni from calcolaEtaProssimoCompleanno
+  let tipoTesto = "";
   if (evento.Tipo === "Compleanno" || evento.Tipo === "Anniversario") {
     if (evento.anni !== null && evento.anni !== undefined) {
       const quando = evento.giorni === 0 ? "oggi" : evento.giorni === 1 ? "domani" : `tra ${evento.giorni} giorni`;
@@ -1660,7 +1655,6 @@ function creaElementoEvento(evento, prossimiGiorni) {
     }
   }
 
-  // Passa l'oggetto evento completo a clickEvento
   li.innerHTML = `
     ${badgeGiorni}
     ${icona}
@@ -1820,14 +1814,13 @@ function creaMeseDatario(mese, anno, eventi, termineRicerca = '', prossimiGiorni
 
   const renderEvento = (evento) => {
     let nome = evento.Nominativo;
-    let anniTesto = ''; // Modificato il nome della variabile per chiarezza
+    let anniTesto = '';
 
-    // Utilizza calcolaEtaProssimoCompleanno per i badge/testo nell'elenco
     if (evento.Tipo === 'Compleanno' || evento.Tipo === 'Anniversario') {
-      const anni = calcolaEtaProssimoCompleanno(evento);
-      if (anni !== null) {
-        anniTesto = ` (${anni})`;
-      }
+        const anni = calcolaEtaAttuale(evento);
+        if (anni !== null) {
+            anniTesto = ` (${anni})`;
+        }
     }
 
     const marcatoreProssimo = evento.giorniMancanti === prossimiGiorniMancanti ? `<span class="prossimo-evento-marker">${prossimiGiorniMancanti}</span>` : '';
@@ -1835,7 +1828,6 @@ function creaMeseDatario(mese, anno, eventi, termineRicerca = '', prossimiGiorni
     const classeEvento = evento.Tipo.toLowerCase();
     let classeTemporale = '';
 
-    // MODIFICA: Aggiunge badge "OGGI" per eventi di oggi nel datario
     let badgeOggi = '';
     if (tipologiaMese === 'corrente' && evento.giorno === giornoCorrente) {
         classeTemporale = ' oggi';
@@ -1881,7 +1873,6 @@ function creaMeseDatario(mese, anno, eventi, termineRicerca = '', prossimiGiorni
   let classiContainer = (numeroEventi === 0) ? ' vuoto' : '';
   classiContainer += (tipologiaMese === 'passato') ? ' passato' : (tipologiaMese === 'corrente' ? ' corrente' : '');
 
-  // MODIFICA: Aggiunge frecce di navigazione nella barra del mese
   const prevMese = (mese - 1 + 12) % 12;
   const nextMese = (mese + 1) % 12;
   const prevMeseId = `mese-container-${prevMese}`;
@@ -1889,11 +1880,9 @@ function creaMeseDatario(mese, anno, eventi, termineRicerca = '', prossimiGiorni
 
   const upArrowHTML = `<button class="mese-header-arrow-btn" onclick="document.getElementById('${prevMeseId}').scrollIntoView({ behavior: 'smooth', block: 'center' });">⬆️</button>`;
   const downArrowHTML = `<button class="mese-header-arrow-btn" onclick="document.getElementById('${nextMeseId}').scrollIntoView({ behavior: 'smooth', block: 'center' });">⬇️</button>`;
-  // Bottone "Esci" per tornare alla vista iniziale
   const exitButtonHTML = `<button class="mese-exit-button" onclick="mostraElenco()">Esci</button>`;
 
 
-  // Controlla se ci sono eventi di oggi nel mese corrente per aggiungere la barra "Oggi"
   let barraOggi = '';
   if (tipologiaMese === 'corrente') {
     const eventiDiOggi = eventiMese.filter(e => e.giorno === giornoCorrente);
@@ -1904,7 +1893,6 @@ function creaMeseDatario(mese, anno, eventi, termineRicerca = '', prossimiGiorni
       const giornoSettimana = giorni[dataOggi.getDay()];
       const dataFormattata = `Oggi: ${giornoSettimana} ${giornoCorrente} ${mesi[mese]}`;
 
-      // Creo una barra "Oggi" semplificata per il datario
       barraOggi = `
         <div class="datario-oggi-divider">
           <div class="datario-oggi-line">
@@ -1933,7 +1921,7 @@ function creaMeseDatario(mese, anno, eventi, termineRicerca = '', prossimiGiorni
 function mostraDatario() {
   const oggi = getDataOdierna();
   const annoCorrente = oggi.getFullYear();
-  const meseCorrenteIdx = oggi.getMonth(); // Ottiene l'indice del mese corrente (0-11)
+  const meseCorrenteIdx = oggi.getMonth();
   const termineRicerca = document.getElementById('searchInput').value;
 
   const datarioContainer = document.getElementById('datario-container');
@@ -1964,7 +1952,6 @@ function mostraDatario() {
   datarioContainer.style.display = 'block';
   modalitaDatario = true;
 
-  // Scorri fino al mese corrente all'apertura del datario
   const meseCorrenteElement = document.getElementById(`mese-container-${meseCorrenteIdx}`);
   if (meseCorrenteElement) {
     meseCorrenteElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -2099,13 +2086,12 @@ function mostraEventi(eventi, termine = '') {
   const monthsInOrder = Array.from(monthStartIds.keys());
 
   let ultimoMeseMostrato = null;
+  let primaBarraAggiunta = false;
 
   const oggi = getDataOdierna();
   const mesi = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
   const giorniNomi = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
   const dataFormattataOggi = `Oggi: ${giorniNomi[oggi.getDay()]} ${oggi.getDate()} ${mesi[oggi.getMonth()]}`;
-
-  let primaBarraAggiunta = false;
 
   eventiFiltrati.forEach(evento => {
       const meseCorrente = evento.dataEvento.getMonth();
@@ -2141,7 +2127,6 @@ function cancellaCerca() {
   }
 }
 
-// Modificata per accettare l'oggetto evento completo
 function clickEvento(evento) {
   console.log("Click su evento:", evento);
   if (isMobile) {
@@ -2151,9 +2136,9 @@ function clickEvento(evento) {
   }
 
   const detailPopup = document.getElementById('eventDetailPopup');
-  const detailName = document.getElementById('detailName'); // Titolo generale del popup (per anniversari)
-  const anniversaryCeremonyDetailsDiv = document.getElementById('anniversaryCeremonyDetails'); // Div per data cerimonia
-  const anniversaryCeremonyDate = document.getElementById('anniversaryCeremonyDate'); // p per data cerimonia
+  const detailName = document.getElementById('detailName');
+  const anniversaryCeremonyDetailsDiv = document.getElementById('anniversaryCeremonyDetails');
+  const anniversaryCeremonyDate = document.getElementById('anniversaryCeremonyDate');
 
   const person1DetailsDiv = document.getElementById('person1Details');
   const personName1 = document.getElementById('personName1');
@@ -2167,12 +2152,11 @@ function clickEvento(evento) {
   const detailNascita2 = document.getElementById('detailNascita2');
   const detailOnomastico2 = document.getElementById('detailOnomastico2');
 
-  // Reset visualizzazione iniziale di tutti i blocchi
-  detailPopup.classList.remove('single-person'); // Rimuove la classe per il compleanno/onomastico
-  detailName.style.display = 'block'; // Di default visibile, verrà nascosto se è singolo
-  anniversaryCeremonyDetailsDiv.style.display = 'none'; // Nasconde la data cerimonia di default
+  detailPopup.classList.remove('single-person');
+  detailName.style.display = 'block';
+  anniversaryCeremonyDetailsDiv.style.display = 'none';
   person1DetailsDiv.style.display = 'flex';
-  person2DetailsDiv.style.display = 'none'; // Nasconde la seconda persona di default
+  person2DetailsDiv.style.display = 'none';
 
   detailPhoto1.style.display = 'none';
   detailPhoto2.style.display = 'none';
@@ -2184,21 +2168,16 @@ function clickEvento(evento) {
   const giorniNomi = ["domenica", "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato"];
   const nomiMesi = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
 
-  // Funzione helper per ottenere il nome per la foto (Nome Cognome)
   function getNomePerFoto(nominativoCompleto) {
       const parti = nominativoCompleto.split(' ');
       if (parti.length >= 2) {
-          // Se "Cognome Nome" (es. Lorusso Alessandro), inverti a "Nome Cognome" (Alessandro Lorusso)
-          // Se "Cognome Nome Nome" (es. Pricci Maria Antonietta), inverti a "Nome Nome Cognome"
           const cognome = parti[0];
           const nome = parti.slice(1).join(' ');
           return `${nome} ${cognome}`;
       }
-      return nominativoCompleto; // Se è un nome singolo o già "Nome Cognome"
+      return nominativoCompleto;
   }
 
-
-  // Funzione helper per popolare i dettagli di una persona
   const populatePersonDetails = (nominativoCompleto, personNameElem, photoElem, nascitaElem, onomasticoElem) => {
     personNameElem.textContent = nominativoCompleto;
 
@@ -2206,13 +2185,11 @@ function clickEvento(evento) {
     const urlFoto = `https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/refs/heads/main/FotoP/${encodeURIComponent(nomeFoto)}.jpg`;
     photoElem.src = urlFoto;
     
-    // Verifica se la foto esiste
     const img = new Image();
     img.onload = () => { photoElem.style.display = 'block'; };
-    img.onerror = () => { photoElem.style.display = 'none'; }; // Nasconde se la foto non carica
+    img.onerror = () => { photoElem.style.display = 'none'; };
     img.src = urlFoto;
 
-    // Cerca gli eventi di compleanno e onomastico per questa persona specifica
     const eventiPersona = tuttiGliEventi.filter(e => e.Nominativo === nominativoCompleto);
 
     const compleannoPersona = eventiPersona.find(e => e.Tipo === "Compleanno");
@@ -2221,7 +2198,7 @@ function clickEvento(evento) {
         const dataNascitaCompleta = new Date(parseInt(compleannoPersona.Anno), partiData[1] - 1, partiData[0]);
         const giornoSettimanaNascita = giorniNomi[dataNascitaCompleta.getDay()];
         const meseNomeNascita = nomiMesi[dataNascitaCompleta.getMonth()];
-        const anniAttuali = calcolaEtaAttuale(compleannoPersona); // Usa la NUOVA calcolaEtaAttuale
+        const anniAttuali = calcolaEtaAttuale(compleannoPersona);
 
         nascitaElem.textContent = `Nascita: ${giornoSettimanaNascita} ${partiData[0]} ${meseNomeNascita} ${compleannoPersona.Anno} (${anniAttuali})`;
         nascitaElem.style.display = 'block';
@@ -2241,40 +2218,35 @@ function clickEvento(evento) {
 
 
   if (evento.Tipo === "Anniversario") {
-    detailPopup.classList.remove('single-person'); // Assicura che la classe per nascondere il titolo H2 non ci sia
-    detailName.textContent = evento.Nominativo; // Mantiene il titolo AM Nome1 e Nome2
+    detailPopup.classList.remove('single-person');
+    detailName.textContent = evento.Nominativo;
 
-    // Estrai i nomi dalla chiave dell'anniversario per trovare il mapping
-    const nomeAnniversarioChiave = evento.Nominativo.replace(/^AM\s/, ''); // Rimuove "AM " iniziale
+    const nomeAnniversarioChiave = evento.Nominativo.replace(/^AM\s/, '');
     const nomiCoppiaCompleti = anniversariMapping[nomeAnniversarioChiave];
 
     if (nomiCoppiaCompleti && nomiCoppiaCompleti.length === 2) {
         const persona1Nominativo = nomiCoppiaCompleti[0];
         const persona2Nominativo = nomiCoppiaCompleti[1];
 
-        // Dettagli cerimonia per anniversari
         anniversaryCeremonyDetailsDiv.style.display = 'block';
         const partiAnniversario = evento.Data.split("/").map(Number);
-        const anniCerimonia = calcolaEtaAttuale(evento); // Calcola anni compiuti per la cerimonia
+        const anniCerimonia = calcolaEtaAttuale(evento);
 
         anniversaryCeremonyDate.textContent = `Cerimonia: ${partiAnniversario[0]} ${nomiMesi[partiAnniversario[1]-1]} ${evento.Anno} (${anniCerimonia})`;
         
-        // Popola i dettagli per la Persona 1
         person1DetailsDiv.style.display = 'flex';
         populatePersonDetails(persona1Nominativo, personName1, detailPhoto1, detailNascita1, detailOnomastico1);
 
-        // Popola i dettagli per la Persona 2
         person2DetailsDiv.style.display = 'flex';
         populatePersonDetails(persona2Nominativo, personName2, detailPhoto2, detailNascita2, detailOnomastico2);
 
     } else {
-        // Fallback se il mapping non trova i nomi o il formato è inatteso
         detailName.textContent = evento.Nominativo;
-        detailPhoto1.style.display = 'none'; // Nasconde la foto generica
+        detailPhoto1.style.display = 'none';
         personName1.textContent = "Dettagli non disponibili";
         detailNascita1.style.display = 'none';
         detailOnomastico1.style.display = 'none';
-        person2DetailsDiv.style.display = 'none'; // Assicura che la seconda persona sia nascosta
+        person2DetailsDiv.style.display = 'none';
         
         anniversaryCeremonyDetailsDiv.style.display = 'block';
         const partiAnniversario = evento.Data.split("/").map(Number);
@@ -2282,19 +2254,18 @@ function clickEvento(evento) {
         anniversaryCeremonyDate.textContent = `Cerimonia: ${partiAnniversario[0]} ${nomiMesi[partiAnniversario[1]-1]} ${evento.Anno} (${anniCerimonia})`;
     }
 
-  } else { // Compleanno o Onomastico (singolo)
-    detailPopup.classList.add('single-person'); // Aggiunge classe per nascondere il titolo H2
-    detailName.textContent = ''; // Svuota il titolo h2 per non mostrare nulla per eventi singoli
+  } else {
+    detailPopup.classList.add('single-person');
+    detailName.textContent = '';
 
-    person2DetailsDiv.style.display = 'none'; // Assicura che la seconda persona sia nascosta
-    anniversaryCeremonyDetailsDiv.style.display = 'none'; // Assicura che i dettagli anniversario siano nascosti
+    person2DetailsDiv.style.display = 'none';
+    anniversaryCeremonyDetailsDiv.style.display = 'none';
     
     populatePersonDetails(evento.Nominativo, personName1, detailPhoto1, detailNascita1, detailOnomastico1);
   }
 
-  detailPopup.style.display = 'flex'; // Mostra il pop-up
+  detailPopup.style.display = 'flex';
 }
-
 
 function nascondiEventDetailPopup() {
   document.getElementById('eventDetailPopup').style.display = 'none';
@@ -2490,9 +2461,6 @@ function generaCalendario() {
 
     let contenutoEventi = '';
     eventiOrdinati.forEach(function(evento) {
-      // MODIFICA: Rimuovo completamente la gestione degli anni per il calendario a video
-
-      // MODIFICA: Uso sempre il nome completo senza abbreviazioni
       const nomeCompleto = evento.Nominativo;
 
       contenutoEventi += '<div class="calendar-event ' + evento.Tipo.toLowerCase() + '">' +
@@ -2652,7 +2620,6 @@ function gestisciTouchEvents() {
     }
   }, { passive: true });
 
-  // Aggiunto listener per chiudere il popup dei dettagli evento cliccando fuori
   document.addEventListener('click', function(e) {
     if (e.target.classList.contains('popup-overlay')) {
       if (e.target.id === 'bookmarkPopup') {
@@ -2730,9 +2697,7 @@ function inizializza() {
       window.close();
     });
 
-    // Listener per il bottone di chiusura del pop-up dei dettagli evento
     document.getElementById('eventDetailCloseButton').addEventListener('click', nascondiEventDetailPopup);
-
 
     console.log('App inizializzata per:', isMobile ? 'Mobile' : 'Desktop');
 
