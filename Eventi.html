@@ -1500,7 +1500,7 @@ function calcolaEtaProssimoCompleanno(evento) {
 
     // Se la data odierna è uguale o successiva al compleanno di quest'anno,
     // allora il prossimo compleanno sarà l'anno prossimo.
-    if (oggi.getTime() >= dataCompleannoQuestAnno.getTime()) {
+    if (oggi.getTime() > dataCompleannoQuestAnno.getTime()) {
         anniProssimi = (oggiAnno + 1) - annoNascita;
     } else {
         // Altrimenti, il prossimo compleanno è ancora quest'anno.
@@ -1554,8 +1554,12 @@ function ordinaEventi(eventi) {
     }
 
     const giorni = calcolaGiorni(dataEventoCompleta, oggiSenzaOra);
-    // Usa calcolaEtaProssimoCompleanno per i badge/titoli dell'elenco principale
-    const anni = calcolaEtaProssimoCompleanno(e); 
+    let anni;
+    if (giorni === 0) {
+      anni = calcolaEtaAttuale(e);
+    } else {
+      anni = calcolaEtaProssimoCompleanno(e);
+    }
 
     return { ...e, dataEvento: dataEventoCompleta, giorni, anni };
   }).filter(e => e?.dataEvento).sort((a, b) => {
@@ -2094,40 +2098,26 @@ function mostraEventi(eventi, termine = '') {
   });
   const monthsInOrder = Array.from(monthStartIds.keys());
 
-  let ultimoGiornoMostrato = null;
   let ultimoMeseMostrato = null;
-  let oggiMostrato = false;
-  let primaBarraMostrata = false;
+
+  const oggi = getDataOdierna();
+  const mesi = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
+  const giorniNomi = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
+  const dataFormattataOggi = `Oggi: ${giorniNomi[oggi.getDay()]} ${oggi.getDate()} ${mesi[oggi.getMonth()]}`;
+
+  let primaBarraAggiunta = false;
 
   eventiFiltrati.forEach(evento => {
-      const giornoCorrente = evento.dataEvento.toDateString();
       const meseCorrente = evento.dataEvento.getMonth();
 
-      if (evento.giorni === 0 && !oggiMostrato) {
-          const mesi = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
-          const giorniNomi = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
-          const dataFormattata = `Oggi: ${giorniNomi[evento.dataEvento.getDay()]} ${evento.dataEvento.getDate()} ${mesi[evento.dataEvento.getMonth()]}`;
-
-          const barra = creaBarraConFrecce(dataFormattata, monthStartIds, monthsInOrder, meseCorrente);
+      if (!primaBarraAggiunta) {
+          const barra = creaBarraConFrecce(dataFormattataOggi, monthStartIds, monthsInOrder, meseCorrente);
           lista.appendChild(barra);
-          oggiMostrato = true;
-          primaBarraMostrata = true;
+          primaBarraAggiunta = true;
+          ultimoMeseMostrato = meseCorrente;
       }
-      else if (meseCorrente !== ultimoMeseMostrato && evento.giorni > 0) {
-          const mesi = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
-          let dataFormattata;
-
-          if (!primaBarraMostrata) {
-              // Prima barra: aggiungiamo "Oggi: " anche se non è di oggi
-              const giorniNomi = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
-              const oggi = getDataOdierna();
-              const giornoSettimana = giorniNomi[oggi.getDay()];
-              dataFormattata = `Oggi: ${giornoSettimana} ${oggi.getDate()} ${mesi[oggi.getMonth()]}`;
-              primaBarraMostrata = true;
-          } else {
-              dataFormattata = `Inizio ${mesi[meseCorrente]}`;
-          }
-
+      else if (meseCorrente !== ultimoMeseMostrato) {
+          let dataFormattata = `Inizio ${mesi[meseCorrente]}`;
           const barra = creaBarraConFrecce(dataFormattata, monthStartIds, monthsInOrder, meseCorrente);
           lista.appendChild(barra);
           ultimoMeseMostrato = meseCorrente;
