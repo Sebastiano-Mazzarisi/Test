@@ -1,520 +1,303 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, shrink-to-fit=no">
-    <title>Calcolatore BMI e ISC</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calcolatore BMI Moderno</title>
+
+  <style>
+    /* ----- CSS Reset e Stili Globali ----- */
+    :root {
+      --primary-color: #007bff;
+      --normal-color: #009688;
+      --underweight-color: #ffc107;
+      --overweight-color: #ff9800;
+      --obese-color: #f44336;
+      --background-color: #f4f7f9;
+      --card-background: #ffffff;
+      --text-color: #333;
+      --label-color: #555;
+      --border-color: #ddd;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+
+    /* ----- Contenitore Principale (La "Scheda") ----- */
+    .container {
+      width: 100%;
+      max-width: 400px;
+      background-color: var(--card-background);
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    h1 {
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .author {
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 2rem;
+    }
+
+    /* ----- Sezione Input ----- */
+    .input-group {
+      margin-bottom: 1.5rem;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--label-color);
+    }
+
+    .input-wrapper {
+      display: flex;
+      align-items: center;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 1.2rem;
+      text-align: center;
+      -moz-appearance: textfield; /* Rimuove frecce in Firefox */
+    }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none; /* Rimuove frecce in Chrome/Safari */
+        margin: 0;
+    }
+
+
+    .adjust-buttons button {
+      width: 45px;
+      height: 45px;
+      margin-left: 0.5rem;
+      border: 1px solid var(--border-color);
+      background-color: #fff;
+      color: var(--primary-color);
+      font-size: 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    .adjust-buttons button:hover {
+      background-color: var(--primary-color);
+      color: #fff;
+    }
+
+    /* ----- Sezione Risultati ----- */
+    .result-section {
+      margin-top: 2rem;
+    }
+
+    #result {
+      font-size: 3.5rem;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+      color: var(--normal-color);
+      transition: color 0.3s;
+    }
+
+    #status {
+      font-size: 1.2rem;
+      font-weight: 500;
+      height: 1.5rem; /* Altezza fissa per evitare "salti" del layout */
+    }
     
-    <!-- Icone per iOS e Android -->
-    <link rel="apple-touch-icon" sizes="180x180" href="BMI-icona.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="BMI-icona.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="BMI-icona.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="BMI-icona.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="BMI-icona.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="BMI-icona.png">
-    <link rel="shortcut icon" href="BMI-icona.png">
-    
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="BMI & ISC">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#007bff">
-    <meta name="msapplication-TileColor" content="#007bff">
+    /* ----- Barra del BMI ----- */
+    .bar-container {
+      margin-top: 2rem;
+    }
 
-    <style>
-        :root {
-            --primary-color: #007bff;
-            --secondary-color: #6c757d;
-            --bg-color: #F5DEB3;
-            --card-bg: #ffffff;
-            --text-color: #343a40;
-            --border-color: #ced4da;
-            --success-color: #28a745;
-            --error-color: #dc3545;
-            --warning-color-yellow: #ffc107;
-            --warning-color-orange: #fd7e14;
-            --subtitle-color: #495057;
-            --info-color: #17a2b8;
-        }
+    .bar {
+      position: relative;
+      height: 12px;
+      background: linear-gradient(to right, var(--underweight-color), var(--normal-color) 45%, var(--overweight-color) 70%, var(--obese-color));
+      border-radius: 6px;
+    }
 
-        html {
-            height: 100%;
-            -webkit-overflow-scrolling: touch;
-        }
+    .pointer {
+      position: absolute;
+      top: -6px; /* Posiziona il puntatore a metà della barra */
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 12px solid transparent;
+      border-right: 12px solid transparent;
+      border-top: 20px solid var(--primary-color);
+      transition: left 0.3s ease-out;
+    }
 
-        body {
-            font-family: 'Roboto', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100dvh;
-            min-height: -webkit-fill-available;
-            min-height: 100vh;
-            margin: 0;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding: 1.25rem;
-            box-sizing: border-box;
-            -webkit-text-size-adjust: 100%;
-        }
-
-        .container {
-            background-color: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
-            text-align: center;
-            width: 100%;
-            max-width: 28rem;
-            box-sizing: border-box;
-            position: relative;
-            z-index: 1;
-            max-height: calc(100dvh - 2.5rem);
-            max-height: calc(-webkit-fill-available - 2.5rem); 
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        h1 {
-            color: var(--primary-color);
-            margin-bottom: 0.5rem;
-            font-size: 1.6rem;
-            font-weight: 700;
-            line-height: 1.2;
-        }
-
-        .subtitle {
-            color: var(--subtitle-color);
-            font-size: 0.85rem;
-            margin-top: 0;
-            margin-bottom: 1.5rem;
-            display: block;
-        }
-
-        .section-divider {
-            border-top: 1px solid #e9ecef;
-            margin: 1.5rem 0;
-            padding-top: 1rem;
-        }
-
-        .input-group {
-            margin-bottom: 1.125rem;
-            text-align: left;
-        }
-
-        .gender-group {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin-bottom: 1.125rem;
-        }
-
-        .gender-option {
-            flex: 1;
-            max-width: 120px;
-        }
-
-        .gender-option input[type="radio"] {
-            display: none;
-        }
-
-        .gender-option label {
-            display: block;
-            padding: 0.5rem;
-            border: 2px solid var(--border-color);
-            border-radius: 0.3125rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-align: center;
-            font-weight: 500;
-        }
-
-        .gender-option input[type="radio"]:checked + label {
-            background-color: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-
-        .gender-option label:hover {
-            border-color: var(--primary-color);
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.375rem;
-            font-size: 0.95rem;
-            font-weight: 400;
-            color: #555;
-        }
-
-        input[type="number"] {
-            width: 100%;
-            padding: 0.625rem;
-            border: 1px solid var(--border-color);
-            border-radius: 0.3125rem;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.2s ease;
-            -webkit-appearance: none;
-            -moz-appearance: textfield;
-            appearance: textfield;
-            -webkit-user-select: text;
-            user-select: text;
-        }
-
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
-        input[type="number"]:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-        }
-
-        button {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 0.75rem 1.25rem;
-            border: none;
-            border-radius: 0.3125rem;
-            cursor: pointer;
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-top: 1.25rem;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-            width: 100%;
-            box-shadow: 0 0.125rem 0.3125rem rgba(0, 0, 0, 0.1);
-            max-width: 20rem;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-            transform: translateY(-0.0625rem);
-        }
-
-        button:active {
-            transform: translateY(0);
-            box-shadow: none;
-        }
-
-        .result-section {
-            margin-top: 1.5625rem;
-            padding-top: 1.25rem;
-            border-top: 1px solid #e9ecef;
-        }
-
-        .result-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .result-card {
-            background-color: #f8f9fa;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            border-left: 4px solid var(--primary-color);
-        }
-
-        .result-card h3 {
-            margin: 0 0 0.5rem 0;
-            font-size: 1rem;
-            color: var(--primary-color);
-            font-weight: 700;
-        }
-
-        .result-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-            transition: color 0.3s ease;
-        }
-
-        .result-category {
-            font-size: 0.85rem;
-            font-style: italic;
-            color: #6c757d;
-            min-height: 1rem;
-        }
-
-        .info-box {
-            background-color: #e7f3ff;
-            border: 1px solid #b3d9ff;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            margin-top: 1rem;
-            text-align: left;
-        }
-
-        .info-box h4 {
-            margin: 0 0 0.5rem 0;
-            color: var(--info-color);
-            font-size: 0.95rem;
-            font-weight: 700;
-        }
-
-        .info-box p {
-            margin: 0;
-            font-size: 0.85rem;
-            line-height: 1.4;
-            color: #495057;
-        }
-
-        .result-category.red, .result-value.red { color: var(--error-color); }
-        .result-category.orange, .result-value.orange { color: var(--warning-color-orange); }
-        .result-category.green, .result-value.green { color: var(--success-color); }
-        .result-category.yellow, .result-value.yellow { color: var(--warning-color-yellow); }
-        .result-category.blue, .result-value.blue { color: var(--info-color); }
-
-        @media (min-width: 768px) {
-            .container {
-                padding: 2.5rem;
-                max-width: 32rem;
-                box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.15);
-                max-height: none;
-                overflow-y: visible;
-            }
-            h1 {
-                font-size: 2rem;
-            }
-            .subtitle {
-                font-size: 0.95rem;
-                margin-bottom: 1.875rem;
-            }
-            label {
-                font-size: 1rem;
-            }
-            input[type="number"] {
-                padding: 0.75rem;
-                font-size: 1.1rem;
-            }
-            button {
-                padding: 0.875rem 1.5625rem;
-                font-size: 1.2rem;
-                margin-top: 1.25rem;
-                max-width: 18rem;
-            }
-            .result-section {
-                margin-top: 2.1875rem;
-                padding-top: 1.5625rem;
-            }
-            .result-value {
-                font-size: 2.2rem;
-            }
-            .result-category {
-                font-size: 1rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .result-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    .bar-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: #777;
+      margin-top: 0.75rem;
+      padding: 0 5px;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Calcola BMI e ISC</h1>
-        <span class="subtitle">By Teresa Mazzarisi - Versione Potenziata</span>
-        
-        <div class="input-group">
-            <label>Sesso:</label>
-            <div class="gender-group">
-                <div class="gender-option">
-                    <input type="radio" id="maschio" name="sesso" value="maschio" checked>
-                    <label for="maschio">Maschio</label>
-                </div>
-                <div class="gender-option">
-                    <input type="radio" id="femmina" name="sesso" value="femmina">
-                    <label for="femmina">Femmina</label>
-                </div>
-            </div>
-        </div>
 
-        <div class="input-group">
-            <label for="peso">Peso (kg):</label>
-            <input type="number" id="peso" placeholder="Es: 70" min="1" step="0.1" inputmode="decimal">
-        </div>
-        
-        <div class="input-group">
-            <label for="altezza">Altezza (cm):</label>
-            <input type="number" id="altezza" placeholder="Es: 175" min="1" step="0.1" inputmode="decimal">
-        </div>
+  <main class="container">
+    <h1>Calcolatore BMI</h1>
+    <p class="author">By Teresa Mazzarisi</p>
 
-        <div class="section-divider">
-            <div class="input-group">
-                <label for="circonferenza">Circonferenza Vita (cm):</label>
-                <input type="number" id="circonferenza" placeholder="Es: 85" min="1" step="0.1" inputmode="decimal">
-            </div>
+    <div class="input-group">
+      <label for="height">Altezza (cm)</label>
+      <div class="input-wrapper">
+        <input type="number" id="height" value="170">
+        <div class="adjust-buttons">
+          <button data-target="height" data-step="1">▲</button>
+          <button data-target="height" data-step="-1">▼</button>
         </div>
-        
-        <button id="calcolaBtn">Calcola BMI e ISC</button>
-        
-        <div class="result-section">
-            <div class="result-grid">
-                <div class="result-card">
-                    <h3>BMI Tradizionale</h3>
-                    <div id="risultatoBMI" class="result-value"></div>
-                    <div id="classificazioneBMI" class="result-category"></div>
-                </div>
-                <div class="result-card">
-                    <h3>ISC (Indice Salute Corporea)</h3>
-                    <div id="risultatoISC" class="result-value"></div>
-                    <div id="classificazioneISC" class="result-category"></div>
-                </div>
-            </div>
-            
-            <div class="info-box">
-                <h4>💡 Cos'è l'ISC?</h4>
-                <p>L'Indice di Salute Corporea integra il BMI con la circonferenza vita per una valutazione più accurata. Considera la distribuzione del grasso corporeo, distinguendo meglio tra massa muscolare e grasso addominale pericoloso.</p>
-            </div>
-        </div>
+      </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const pesoInput = document.getElementById('peso');
-            const altezzaInput = document.getElementById('altezza');
-            const circonferenzaInput = document.getElementById('circonferenza');
-            const calcolaBtn = document.getElementById('calcolaBtn');
-            const risultatoBMI = document.getElementById('risultatoBMI');
-            const classificazioneBMI = document.getElementById('classificazioneBMI');
-            const risultatoISC = document.getElementById('risultatoISC');
-            const classificazioneISC = document.getElementById('classificazioneISC');
+    <div class="input-group">
+      <label for="weight">Peso (kg)</label>
+      <div class="input-wrapper">
+        <input type="number" id="weight" value="70" step="0.5">
+        <div class="adjust-buttons">
+          <button data-target="weight" data-step="0.5">▲</button>
+          <button data-target="weight" data-step="-0.5">▼</button>
+        </div>
+      </div>
+    </div>
 
-            function updateClassificationColor(element, category) {
-                element.classList.remove('red', 'orange', 'green', 'yellow', 'blue');
-                if (category.includes("Sottopeso")) {
-                    element.classList.add('yellow');
-                } else if (category.includes("Normale") || category.includes("Ottimale")) {
-                    element.classList.add('green');
-                } else if (category.includes("Sovrappeso") || category.includes("Monitoraggio")) {
-                    element.classList.add('orange');
-                } else if (category.includes("Obeso") || category.includes("Valutazione medica")) {
-                    element.classList.add('red');
-                } else if (category.includes("Eccellente")) {
-                    element.classList.add('blue');
-                }
-            }
+    <div class="result-section">
+      <div id="result">--</div>
+      <div id="status"></div>
+    </div>
+    
+    <div class="bar-container">
+        <div class="bar">
+            <div id="pointer" class="pointer"></div>
+        </div>
+        <div class="bar-labels">
+            <span>Sottopeso</span>
+            <span>Normale</span>
+            <span>Sovrappeso</span>
+            <span>Obeso</span>
+        </div>
+    </div>
+  </main>
 
-            function getBMICategory(bmi) {
-                if (bmi < 18.5) return "Sottopeso";
-                if (bmi <= 24.9) return "Normale";
-                if (bmi <= 29.9) return "Sovrappeso";
-                return "Obeso";
-            }
+  <script>
+    // Attendere che il documento sia completamente caricato
+    document.addEventListener('DOMContentLoaded', () => {
 
-            function getISCCategory(isc) {
-                if (isc < 20) return "Eccellente";
-                if (isc < 22) return "Ottimale";
-                if (isc <= 27) return "Monitoraggio consigliato";
-                return "Valutazione medica raccomandata";
-            }
+      // ----- Selezione degli Elementi del DOM -----
+      const heightInput = document.getElementById('height');
+      const weightInput = document.getElementById('weight');
+      const resultEl = document.getElementById('result');
+      const statusEl = document.getElementById('status');
+      const pointerEl = document.getElementById('pointer');
+      const adjustButtons = document.querySelectorAll('.adjust-buttons button');
 
-            function calcolaISC(bmi, circonferenza, sesso) {
-                // Soglie raccomandate dall'OMS
-                const sogliaNormale = sesso === 'maschio' ? 94 : 80;
-                const sogliaRischio = sesso === 'maschio' ? 102 : 88;
-                
-                // Calcolo del fattore di correzione
-                let fattoreCorrezione;
-                if (circonferenza <= sogliaNormale) {
-                    // Se la circonferenza è normale o migliore
-                    fattoreCorrezione = 1 - (sogliaNormale - circonferenza) / sogliaNormale * 0.15;
-                } else {
-                    // Se la circonferenza è elevata
-                    const eccesso = circonferenza - sogliaNormale;
-                    const rangeRischio = sogliaRischio - sogliaNormale;
-                    fattoreCorrezione = 1 + (eccesso / rangeRischio) * 0.4;
-                }
-                
-                return bmi * fattoreCorrezione;
-            }
+      // ----- Funzione Principale per il Calcolo -----
+      function calculateBMI() {
+        const height = parseFloat(heightInput.value) / 100; // Converti cm in metri
+        const weight = parseFloat(weightInput.value);
 
-            calcolaBtn.addEventListener('click', function() {
-                const peso = parseFloat(pesoInput.value.trim().replace(',', '.'));
-                const altezzaCm = parseFloat(altezzaInput.value.trim().replace(',', '.'));
-                const circonferenza = parseFloat(circonferenzaInput.value.trim().replace(',', '.'));
-                const sesso = document.querySelector('input[name="sesso"]:checked').value;
+        // Se i valori non sono validi, esci
+        if (!height || !weight || height <= 0 || weight <= 0) {
+            resultEl.textContent = '--';
+            statusEl.textContent = 'Inserisci valori validi';
+            return;
+        }
 
-                let errorMessage = "";
+        const bmi = weight / (height * height);
+        resultEl.textContent = bmi.toFixed(1);
 
-                if (pesoInput.value.trim() === '') {
-                    errorMessage = "Il campo Peso non può essere vuoto.";
-                } else if (isNaN(peso) || peso <= 0) {
-                    errorMessage = "Inserisci un peso valido.";
-                } else if (altezzaInput.value.trim() === '') {
-                    errorMessage = "Il campo Altezza non può essere vuoto.";
-                } else if (isNaN(altezzaCm) || altezzaCm <= 0) {
-                    errorMessage = "Inserisci un'altezza valida.";
-                } else if (circonferenzaInput.value.trim() === '') {
-                    errorMessage = "Il campo Circonferenza Vita non può essere vuoto.";
-                } else if (isNaN(circonferenza) || circonferenza <= 0) {
-                    errorMessage = "Inserisci una circonferenza vita valida.";
-                }
+        // Determina la categoria e il colore associato
+        let category = '';
+        let color = '';
+        if (bmi < 18.5) {
+          category = 'Sottopeso';
+          color = 'var(--underweight-color)';
+        } else if (bmi < 25) {
+          category = 'Normopeso';
+          color = 'var(--normal-color)';
+        } else if (bmi < 30) {
+          category = 'Sovrappeso';
+          color = 'var(--overweight-color)';
+        } else {
+          category = 'Obeso';
+          color = 'var(--obese-color)';
+        }
+        statusEl.textContent = category;
+        resultEl.style.color = color;
+        statusEl.style.color = color;
 
-                if (errorMessage !== "") {
-                    risultatoBMI.textContent = "Errore!";
-                    risultatoBMI.className = 'result-value red';
-                    classificazioneBMI.textContent = errorMessage;
-                    classificazioneBMI.className = 'result-category red';
-                    risultatoISC.textContent = "";
-                    classificazioneISC.textContent = "";
-                    return;
-                }
+        // Aggiorna la posizione del puntatore sulla barra
+        // Mappiamo il valore del BMI (es: da 15 a 40) su una percentuale (0% a 100%)
+        const minBmi = 15;
+        const maxBmi = 40;
+        const percentage = Math.min(Math.max((bmi - minBmi) / (maxBmi - minBmi), 0), 1) * 100;
+        pointerEl.style.left = `${percentage}%`;
+      }
 
-                // Calcolo BMI
-                const altezzaMetri = altezzaCm / 100;
-                const bmi = peso / (altezzaMetri * altezzaMetri);
-                const categoriaBMI = getBMICategory(bmi);
+      // ----- Gestione degli Eventi -----
 
-                // Calcolo ISC
-                const isc = calcolaISC(bmi, circonferenza, sesso);
-                const categoriaISC = getISCCategory(isc);
+      // Calcola quando i valori di input cambiano
+      heightInput.addEventListener('input', calculateBMI);
+      weightInput.addEventListener('input', calculateBMI);
 
-                // Aggiorna risultati BMI
-                risultatoBMI.textContent = bmi.toFixed(1);
-                classificazioneBMI.textContent = categoriaBMI;
-                updateClassificationColor(risultatoBMI, categoriaBMI);
-                updateClassificationColor(classificazioneBMI, categoriaBMI);
+      // Gestisce il click sui pulsanti ▲ e ▼
+      adjustButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const targetId = button.dataset.target;
+          const step = parseFloat(button.dataset.step);
+          const targetInput = document.getElementById(targetId);
+          
+          let currentValue = parseFloat(targetInput.value);
+          if (isNaN(currentValue)) currentValue = 0;
 
-                // Aggiorna risultati ISC
-                risultatoISC.textContent = isc.toFixed(1);
-                classificazioneISC.textContent = categoriaISC;
-                updateClassificationColor(risultatoISC, categoriaISC);
-                updateClassificationColor(classificazioneISC, categoriaISC);
-            });
-
-            function resetResults() {
-                risultatoBMI.textContent = "";
-                risultatoBMI.className = 'result-value';
-                classificazioneBMI.textContent = "";
-                classificazioneBMI.className = 'result-category';
-                risultatoISC.textContent = "";
-                risultatoISC.className = 'result-value';
-                classificazioneISC.textContent = "";
-                classificazioneISC.className = 'result-category';
-            }
-
-            // Reset dei risultati quando cambiano gli input
-            pesoInput.addEventListener('input', resetResults);
-            altezzaInput.addEventListener('input', resetResults);
-            circonferenzaInput.addEventListener('input', resetResults);
-            document.querySelectorAll('input[name="sesso"]').forEach(input => {
-                input.addEventListener('change', resetResults);
-            });
+          // Arrotonda per evitare problemi con i decimali del peso
+          let newValue = (currentValue + step).toFixed(1);
+          if (targetId === 'height') {
+              newValue = Math.round(currentValue + step);
+          }
+          
+          targetInput.value = newValue;
+          
+          // Richiama il calcolo dopo aver modificato il valore
+          calculateBMI();
         });
-    </script>
+      });
+
+      // Esegui un primo calcolo al caricamento della pagina
+      calculateBMI();
+    });
+  </script>
+
 </body>
 </html>
