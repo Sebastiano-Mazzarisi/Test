@@ -5,18 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Revisione</title>
     
-    <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#3498db">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Revisione">
     
-    <!-- Icone per PWA -->
     <link rel="apple-touch-icon" href="https://github.com/Sebastiano-Mazzarisi/Test/blob/main/JoyFit.jpg?raw=true">
     <link rel="icon" type="image/jpeg" href="https://github.com/Sebastiano-Mazzarisi/Test/blob/main/JoyFit.jpg?raw=true">
     <link rel="shortcut icon" href="https://github.com/Sebastiano-Mazzarisi/Test/blob/main/JoyFit.jpg?raw=true">
     
-    <!-- Manifest per PWA -->
     <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlJldmlzaW9uZSIsCiAgInNob3J0X25hbWUiOiAiUmV2aXNpb25lIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmMGYyZjUiLAogICJ0aGVtZV9jb2xvciI6ICIjMzQ5OGRiIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9naXRodWIuY29tL1NlYmFzdGlhbm8tTWF6emFyaXNpL1Rlc3QvYmxvYi9tYWluL0pveUZpdC5qcGc/cmF3PXRydWUiLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL2pwZWciCiAgICB9LAogICAgewogICAgICAic3JjIjogImh0dHBzOi8vZ2l0aHViLmNvbS9TZWJhc3RpYW5vLU1henphcmlzaS9UZXN0L2Jsb2IvbWFpbi9Kb3lGaXQuanBnP3Jhdz10cnVlIiwKICAgICAgInNpemVzIjogIjE5MngxOTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9qcGVnIgogICAgfQogIF0KfQ=="> 
     <style>
         body {
@@ -103,6 +100,12 @@
             background-color: #2980b9;
             transform: translateY(-3px);
         }
+        .emoji {
+            font-size: 1.5em;
+            margin-right: 8px;
+            vertical-align: middle;
+            line-height: 0;
+        }
         .calculation-box {
             background-color: #e8f6f3;
             border: 1px solid #d1eeeb;
@@ -130,16 +133,26 @@
             text-align: center;
             font-weight: bold;
         }
+        .calculator-grid {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+        .calculator-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
         .calculator-row {
             display: flex;
             align-items: center;
-            margin-bottom: 15px;
             gap: 15px;
         }
         .calculator-label {
             font-weight: bold;
             color: #495057;
-            min-width: 150px;
+            flex-shrink: 0;
         }
         .calculator-select {
             padding: 10px 15px;
@@ -149,6 +162,7 @@
             background-color: #fefcbf;
             cursor: pointer;
             transition: border-color 0.3s ease;
+            width: 100%;
         }
         .calculator-select:focus {
             outline: none;
@@ -211,143 +225,43 @@
         }
 
         @media (max-width: 768px) {
-            body {
-                font-size: 1em;
-                padding: 10px;
-            }
-            .container {
-                padding: 20px;
-                margin: 10px auto;
-            }
-            .button {
-                flex: 1 1 calc(50% - 15px);
-                font-size: 1.1em;
-                padding: 12px 25px;
-            }
-            h1 {
-                font-size: 2.2em;
-                margin-top: 5px;
-                margin-bottom: 5px;
-            }
-            p {
-                font-size: 1em;
-            }
-            ul li {
-                font-size: 1em;
-            }
-            .calculator-section {
-                padding: 15px;
-                margin-top: 15px;
-                margin-bottom: 15px;
-            }
-            .calculator-title {
-                font-size: 1.3em;
-                margin-bottom: 15px;
-            }
-            .calculator-row {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 8px;
-                margin-bottom: 20px;
-            }
-            .calculator-label {
-                min-width: auto;
-                font-size: 1.1em;
-                margin-bottom: 5px;
-            }
-            .calculator-select {
-                width: 100%;
-                padding: 12px 15px;
-                font-size: 1.2em;
-                box-sizing: border-box;
-            }
-            .calculator-result {
-                padding: 15px;
-                margin-top: 15px;
-            }
-            .result-row {
-                flex-direction: column;
-                align-items: stretch;
-                padding: 12px 0;
-                gap: 5px;
-            }
-            .result-label {
-                font-size: 1em;
-                margin-bottom: 3px;
-            }
-            .result-value {
-                font-size: 1.4em;
-                text-align: right;
-                color: #0d47a1;
-            }
-            .calculation-box {
-                padding: 15px;
-                margin-top: 15px;
-                font-size: 1em;
-            }
-            .calculation-box h3 {
-                font-size: 1.2em;
-                margin-bottom: 12px;
-            }
-            .calculation-box div[style*="background-color: #fff"] {
-                padding: 12px !important;
-                font-size: 1em !important;
-            }
-            .calculation-box div[style*="font-size: 0.95em"] {
-                font-size: 0.9em !important;
-            }
+            body { font-size: 1em; padding: 10px; }
+            .container { padding: 20px; margin: 10px auto; }
+            .button { flex: 1 1 calc(50% - 15px); font-size: 1.1em; padding: 12px 25px; }
+            h1 { font-size: 2.2em; margin-top: 5px; margin-bottom: 5px; }
+            p { font-size: 1em; }
+            ul li { font-size: 1em; }
+            .calculator-section { padding: 15px; margin-top: 15px; margin-bottom: 15px; }
+            .calculator-title { font-size: 1.3em; margin-bottom: 15px; }
+            .calculator-grid { flex-direction: column; gap: 5px; }
+            .calculator-column { gap: 20px; }
+            .calculator-row { flex-direction: column; align-items: stretch; gap: 8px; margin-bottom: 0; }
+            .calculator-label { min-width: auto; font-size: 1.1em; margin-bottom: 5px; }
+            .calculator-select { width: 100%; padding: 12px 15px; font-size: 1.2em; box-sizing: border-box; }
+            .calculator-result { padding: 15px; margin-top: 15px; }
+            .result-row { flex-direction: column; align-items: stretch; padding: 12px 0; gap: 5px; }
+            .result-label { font-size: 1em; margin-bottom: 3px; }
+            .result-value { font-size: 1.4em; text-align: right; color: #0d47a1; }
+            .calculation-box { padding: 15px; margin-top: 15px; font-size: 1em; }
+            .calculation-box h3 { font-size: 1.2em; margin-bottom: 12px; }
+            .calculation-box div[style*="background-color: #fff"] { padding: 12px !important; font-size: 1em !important; }
+            .calculation-box div[style*="font-size: 0.95em"] { font-size: 0.9em !important; }
         }
 
         @media (max-width: 480px) {
-            body {
-                font-size: 0.95em;
-                padding: 5px;
-            }
-            .container {
-                padding: 15px;
-                margin: 5px auto;
-            }
-            .button {
-                flex: 1 1 100%;
-                font-size: 1.1em;
-                padding: 10px 20px;
-                margin-bottom: 10px;
-            }
-            h1 {
-                font-size: 1.8em;
-                margin-top: 5px;
-                margin-bottom: 5px;
-            }
-            h2 {
-                font-size: 1.5em;
-                margin-top: 25px;
-            }
-            p {
-                font-size: 1em;
-            }
-            ul li {
-                font-size: 1em;
-                padding: 10px 12px;
-            }
-            .calculator-section {
-                padding: 12px;
-            }
-            .calculator-title {
-                font-size: 1.2em;
-            }
-            .calculator-select {
-                padding: 14px 12px;
-                font-size: 1.1em;
-            }
-            .result-value {
-                font-size: 1.3em;
-            }
-            .calculation-box {
-                padding: 12px;
-            }
-            .calculation-box h3 {
-                font-size: 1.1em;
-            }
+            body { font-size: 0.95em; padding: 5px; }
+            .container { padding: 15px; margin: 5px auto; }
+            .button { flex: 1 1 100%; font-size: 1.1em; padding: 10px 20px; margin-bottom: 10px; }
+            h1 { font-size: 1.8em; margin-top: 5px; margin-bottom: 5px; }
+            h2 { font-size: 1.5em; margin-top: 25px; }
+            p { font-size: 1em; }
+            ul li { font-size: 1em; padding: 10px 12px; }
+            .calculator-section { padding: 12px; }
+            .calculator-title { font-size: 1.2em; }
+            .calculator-select { padding: 14px 12px; font-size: 1.1em; }
+            .result-value { font-size: 1.3em; }
+            .calculation-box { padding: 12px; }
+            .calculation-box h3 { font-size: 1.1em; }
         }
     </style>
 </head>
@@ -355,13 +269,13 @@
     <div class="container">
         <h1>Revisione</h1> 
         <div class="button-section" id="button-section">
-            <button class="button" onclick="showContent('fitto')">Revisione Fitto</button>
-            <button class="button" onclick="showContent('versamento')">Restituzione Versamento Iniziale</button>
-            <button class="button" onclick="showContent('amministratore')">Retribuzione Amministratore</button>
-            <button class="button" onclick="showContent('checco')">Retribuzione Checco</button>
-            <button class="button" onclick="showContent('mimmo')">Retribuzione Mimmo</button>
-            <button class="button" onclick="showContent('marica')">Retribuzione Marica</button>
-            <button class="button" onclick="showContent('vantaggio')">Vantaggio per il Futuro</button>
+            <button class="button" onclick="showContent('fitto')"><span class="emoji">🏠</span>Revisione Fitto</button>
+            <button class="button" onclick="showContent('versamento')"><span class="emoji">💰</span>Restituzione Versamento Iniziale</button>
+            <button class="button" onclick="showContent('amministratore')"><span class="emoji">👔</span>Retribuzione Amministratore</button>
+            <button class="button" onclick="showContent('checco')"><span class="emoji">🏋️‍♂️</span>Retribuzione Checco</button>
+            <button class="button" onclick="showContent('mimmo')"><span class="emoji">🧑‍⚕️</span>Retribuzione Mimmo</button>
+            <button class="button" onclick="showContent('marica')"><span class="emoji">👩</span>Retribuzione Marica</button>
+            <button class="button" onclick="showContent('vantaggio')"><span class="emoji">📈</span>Vantaggi per il Futuro</button>
         </div>
 
         <div id="dynamic-content-area">
@@ -391,24 +305,47 @@
                 <div class="calculator-section">
                     <div class="calculator-title">Calcolatore Restituzione</div>
                     
-                    <div class="calculator-row">
-                        <span class="calculator-label">Interesse medio:</span>
-                        <select id="interesse" class="calculator-select" onchange="calculateLoan()">
-                            <option value="3">3%</option>
-                            <option value="4" selected>4%</option>
-                            <option value="5">5%</option>
-                            <option value="6">6%</option>
-                        </select>
-                    </div>
-
-                    <div class="calculator-row">
-                        <span class="calculator-label">Restituzione in anni:</span>
-                        <select id="anni" class="calculator-select" onchange="calculateLoan()">
-                            <option value="5">5 anni</option>
-                            <option value="10">10 anni</option>
-                            <option value="15" selected>15 anni</option>
-                            <option value="20">20 anni</option>
-                        </select>
+                    <div class="calculator-grid">
+                        <div class="calculator-column">
+                            <div class="calculator-row">
+                                <span class="calculator-label">Interesse prestito:</span>
+                                <select id="interessePrestito" class="calculator-select" onchange="calculateLoan()">
+                                    <option value="2.0">2,0% (ISTAT)</option>
+                                    <option value="2.5">2,5%</option>
+                                    <option value="3.0" selected>3,0% (BOT-CCT)</option>
+                                    <option value="3.5">3,5%</option>
+                                    <option value="4.0">4,0%</option>
+                                    <option value="4.5">4,5%</option>
+                                    <option value="5.0">5,0% (A rischio)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="calculator-column">
+                            <div class="calculator-row">
+                                <span class="calculator-label">Interesse restituzione:</span>
+                                <select id="interesseRestituzione" class="calculator-select" onchange="calculateLoan()">
+                                    <option value="2.0">2,0%</option>
+                                    <option value="2.5">2,5%</option>
+                                    <option value="3.0" selected>3,0%</option>
+                                    <option value="3.5">3,5%</option>
+                                    <option value="4.0">4,0%</option>
+                                    <option value="4.5">4,5%</option>
+                                </select>
+                            </div>
+                            <div class="calculator-row">
+                                <span class="calculator-label">Restituzione in anni:</span>
+                                <select id="anni" class="calculator-select" onchange="calculateLoan()">
+                                    <option value="1">1 anno</option>
+                                    <option value="2">2 anni</option>
+                                    <option value="5">5 anni</option>
+                                    <option value="10">10 anni</option>
+                                    <option value="15">15 anni</option>
+                                    <option value="20" selected>20 anni</option>
+                                    <option value="25">25 anni</option>
+                                    <option value="30">30 anni</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="calculator-result" id="risultati">
@@ -439,7 +376,7 @@
                             Dove:<br>
                             • <strong>M</strong> = Montante finale<br>
                             • <strong>C</strong> = Capitale iniziale (€ 120.000)<br>
-                            • <strong>i</strong> = Tasso di interesse annuo<br>
+                            • <strong>i</strong> = Tasso di interesse annuo (Interesse prestito)<br>
                             • <strong>n</strong> = Anni trascorsi dal 23/12/2005
                         </div>
                     </div>
@@ -453,7 +390,7 @@
                             Dove:<br>
                             • <strong>R</strong> = Rata mensile<br>
                             • <strong>M</strong> = Montante da restituire<br>
-                            • <strong>i<sub>m</sub></strong> = Tasso mensile (tasso annuo ÷ 12)<br>
+                            • <strong>i<sub>m</sub></strong> = Tasso mensile (Interesse restituzione ÷ 12)<br>
                             • <strong>t</strong> = Numero totale di mesi per la restituzione
                         </div>
                     </div>
@@ -501,10 +438,9 @@
             </div>
 
             <div id="vantaggio" class="content-section">
-                <h2>Vantaggio per il futuro</h2>
+                <h2>Vantaggi per il futuro</h2>
                 <ul>
                     <li>Con questo approccio <strong>non c'è più un Amministratore Unico a vita</strong>, ma il ruolo potrebbe essere svolto a turno (tra chi lo vuole fare), e nulla vieta che lo possa fare un esterno di fiducia.</li>
-                    <li>Risolviamo così anche il fatto che <strong>Flavia è la socia e Mimmo è un istruttore</strong>.</li>
                     <li>Si risolve il problema del <strong>passaggio generazionale</strong>, nel senso che se c'è qualche socio che lavora viene pagato a quotazioni di mercato, e se non lavora non ha retribuzioni, ma in ogni caso resta l'incontro semestrale per la suddivisione degli extra, solo a favore dei soci: <strong>Checco, Marica e Flavia</strong>.</li>
                 </ul>
                 <a href="#top" class="back-to-top-button">Inizio</a>
@@ -517,15 +453,37 @@
             const dynamicContentArea = document.getElementById('dynamic-content-area');
             const sourceSection = document.getElementById(sectionId);
             const buttonSection = document.getElementById('button-section'); 
+            const pageTitle = document.querySelector('h1');
 
             dynamicContentArea.innerHTML = '';
 
+            // Mappa sezione → emoji + testo per H1/H2 e <title>
+            const titles = {
+                'fitto': '🏠 Revisione Fitto',
+                'versamento': '💰 Restituzione Versamento Iniziale',
+                'amministratore': '👔 Retribuzione Amministratore',
+                'checco': '🏋️‍♂️ Retribuzione Checco',
+                'mimmo': '🧑‍⚕️ Retribuzione Mimmo',
+                'marica': '👩 Retribuzione Marica',
+                'vantaggio': '📈 Vantaggi per il Futuro'
+            };
+
+            // Aggiorna il titolo della scheda e l'H1
+            if (titles[sectionId]) {
+                document.title = titles[sectionId];
+                if (pageTitle) pageTitle.textContent = titles[sectionId];
+            }
+
             if (sourceSection) {
                 const clonedContent = sourceSection.cloneNode(true);
+                const h2 = clonedContent.querySelector('h2');
+                if (h2 && titles[sectionId]) {
+                    h2.innerHTML = titles[sectionId];
+                }
                 clonedContent.style.display = 'block';
                 dynamicContentArea.appendChild(clonedContent);
                 
-                // Se è la sezione versamento, ricalcola subito
+                // Se è la sezione versamento, ricalcola subito i valori
                 if (sectionId === 'versamento') {
                     setTimeout(() => calculateLoan(), 100);
                 }
@@ -543,46 +501,54 @@
             const gg = String(dataOggi.getDate()).padStart(2, '0');
             const mm = String(dataOggi.getMonth() + 1).padStart(2, '0');
             const aaaa = dataOggi.getFullYear();
-            document.getElementById('data-oggi').textContent = `${gg}/${mm}/${aaaa}`;
+            if(document.getElementById('data-oggi')) {
+                document.getElementById('data-oggi').textContent = `${gg}/${mm}/${aaaa}`;
+            }
             
-            const interesse = parseFloat(document.getElementById('interesse').value) / 100;
+            // Legge i valori dai select
+            const interessePrestito = parseFloat(document.getElementById('interessePrestito').value) / 100;
+            const interesseRestituzione = parseFloat(document.getElementById('interesseRestituzione').value) / 100;
             const anniRestituzione = parseInt(document.getElementById('anni').value);
             
             // Calcola anni trascorsi dal versamento
             const anniTrascorsi = (dataOggi - dataInizio) / (1000 * 60 * 60 * 24 * 365.25);
             
-            // Calcola montante con interesse composto
-            const montante = capitale * Math.pow(1 + interesse, anniTrascorsi);
+            // Calcola montante con il tasso del prestito
+            const montante = capitale * Math.pow(1 + interessePrestito, anniTrascorsi);
             
-            // Calcola rata mensile per restituire il montante in X anni
+            // Calcola rata mensile con il tasso di restituzione
             const mesiRestituzione = anniRestituzione * 12;
-            const interesseMensile = interesse / 12;
+            const interesseMensileRestituzione = interesseRestituzione / 12;
             
             let rataMensile;
-            if (interesseMensile === 0) {
+            if (interesseMensileRestituzione === 0) {
                 rataMensile = montante / mesiRestituzione;
             } else {
-                rataMensile = montante * (interesseMensile * Math.pow(1 + interesseMensile, mesiRestituzione)) / 
-                             (Math.pow(1 + interesseMensile, mesiRestituzione) - 1);
+                rataMensile = montante * (interesseMensileRestituzione * Math.pow(1 + interesseMensileRestituzione, mesiRestituzione)) / 
+                             (Math.pow(1 + interesseMensileRestituzione, mesiRestituzione) - 1);
             }
             
-            // Arrotonda ai 100 euro
+            // Arrotonda ai 100 euro per una visualizzazione più pulita
             const montanteArrotondato = Math.round(montante / 100) * 100;
             const rataArrotondata = Math.round(rataMensile / 100) * 100;
             
-            // Aggiorna i risultati con formattazione forzata
-            document.getElementById('montante').textContent = '€ ' + formatNumber(montanteArrotondato);
-            document.getElementById('rata').textContent = '€ ' + formatNumber(rataArrotondata);
+            // Aggiorna i risultati nel DOM
+            const montanteEl = document.getElementById('montante');
+            const rataEl = document.getElementById('rata');
+            if (montanteEl) montanteEl.textContent = '€ ' + formatNumber(montanteArrotondato);
+            if (rataEl) rataEl.textContent = '€ ' + formatNumber(rataArrotondata);
         }
 
-        // Funzione per forzare la formattazione italiana
+        // Funzione per formattare i numeri con il punto come separatore delle migliaia
         function formatNumber(num) {
             return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
 
-        // Calcola automaticamente al caricamento della pagina
+        // Calcola automaticamente al caricamento della pagina se la sezione è visibile
         document.addEventListener('DOMContentLoaded', function() {
-            calculateLoan();
+            if (document.getElementById('dynamic-content-area').querySelector('.calculator-section')) {
+                calculateLoan();
+            }
         });
     </script>
 </body>
