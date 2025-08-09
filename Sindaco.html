@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Il Sindaco della Montagna</title>
+    <style>
+        :root {
+            --primary-bg: #f4f7f6;
+            --secondary-bg: #ffffff;
+            --primary-border: #bcccdc;
+            --text-color: #2c3e50;
+            --accent-color: #2980b9;
+            --emergency-bg: #ffebee;
+            --emergency-border: #c62828;
+            --gauge-red: #d32f2f;
+            --gauge-yellow: #fbc02d;
+            --gauge-green: #388e3c;
+        }
+        * { box-sizing: border-box; }
+        html, body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #2c3e50;
+            color: var(--text-color);
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1em;
+        }
+        #game-wrapper {
+            width: 100%;
+            height: 100%;
+            max-width: 450px;
+            max-height: 850px;
+            aspect-ratio: 9 / 16;
+            position: relative;
+        }
+        #game-container {
+            width: 100%;
+            height: 100%;
+            background-color: var(--primary-bg);
+            border: 2px solid var(--primary-border);
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        #main-view {
+            flex: 1;
+            position: relative;
+            background: linear-gradient(to bottom, #a9d6e5 60%, #89b397 60%);
+            overflow: hidden;
+        }
+        #hud {
+            position: absolute; top: 0; left: 0; right: 0; display: flex;
+            justify-content: space-around; padding: 8px;
+            background-color: rgba(255, 255, 255, 0.7); backdrop-filter: blur(4px);
+            font-size: 0.9em; font-weight: bold; z-index: 10;
+        }
+        .hud-item { display: flex; align-items: center; gap: 5px; }
+        #stability-bar-container { width: 80px; height: 12px; background-color: #e0e0e0; border-radius: 6px; border: 1px solid #999; overflow: hidden; }
+        #stability-bar { width: 50%; height: 100%; background-color: var(--gauge-green); transition: width 0.5s, background-color 0.5s; }
+        #mountain {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 80%;
+            background-color: #6b4d38; clip-path: polygon(50% 15%, 0% 100%, 100% 100%);
+        }
+        #mountain-surface {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 80%;
+            clip-path: polygon(50% 15%, 0% 100%, 100% 100%);
+            z-index: 2;
+        }
+        #village {
+            position: absolute; bottom: 5px; width: 100%; text-align: center;
+            font-size: 1.5em; z-index: 5; text-shadow: 0 0 5px white;
+        }
+        .terrace {
+            position: absolute; width: 40%; height: 6px;
+            background-color: #a0522d; border-top: 2px solid #cd853f;
+            border-radius: 2px; box-shadow: 0 2px 2px rgba(0,0,0,0.2);
+        }
+        .tree {
+            position: absolute; display: flex; flex-direction: column; align-items: center;
+        }
+        .tree::before { content: ''; display: block; background-color: #2e8b57; border-radius: 50%; transition: all 1s; }
+        .tree::after { content: ''; display: block; background-color: #5f4222; }
+        .tree-sapling::before { width: 12px; height: 12px; }
+        .tree-sapling::after { width: 3px; height: 6px; }
+        .tree-grown::before { width: 20px; height: 20px; }
+        .tree-grown::after { width: 4px; height: 10px; }
+        
+        #control-panel {
+            height: 45%; background-color: var(--secondary-bg);
+            border-top: 2px solid var(--primary-border);
+            padding: 10px 15px; display: flex; flex-direction: column;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        #control-panel.emergency-mode {
+            background-color: var(--emergency-bg);
+            border-top: 2px solid var(--emergency-border);
+        }
+        #control-panel.emergency-mode #panel-title { color: var(--emergency-border); }
+        
+        #actions-container { flex: 1; overflow-y: auto; }
+        .action-choice {
+            display: block; position: relative; padding: 10px 10px 10px 45px;
+            margin-bottom: 10px; cursor: pointer; border: 2px solid var(--primary-border);
+            border-radius: 8px; background-color: #eaf5ff; transition: background-color 0.2s;
+        }
+        .action-choice:hover { background-color: #d4e9ff; }
+        .action-choice input { display: none; }
+        .checkmark {
+            position: absolute; top: 50%; left: 15px; transform: translateY(-50%);
+            height: 25px; width: 25px; background-color: #fff;
+            border: 2px solid #ccc; border-radius: 5px;
+        }
+        .action-choice input:checked ~ .checkmark { background-color: var(--accent-color); border-color: var(--accent-color); }
+        .checkmark:after {
+            content: ""; position: absolute; display: none; left: 8px; top: 4px; width: 5px;
+            height: 10px; border: solid white; border-width: 0 3px 3px 0; transform: rotate(45deg);
+        }
+        .action-choice input:checked ~ .checkmark:after { display: block; }
+        .action-choice .cost { float: right; font-weight: bold; color: var(--accent-color); }
+        .action-choice .effect { font-size: 0.8em; color: #555; margin-top: 2px; }
+
+        #confirmation-area { padding-top: 10px; border-top: 1px solid #eee; }
+        #total-cost { font-weight: bold; text-align: center; margin-bottom: 10px; }
+        #confirm-button {
+            width: 100%; padding: 12px; font-size: 1.1em; font-weight: bold;
+            color: white; background-color: var(--accent-color); border: none;
+            border-radius: 8px; cursor: pointer;
+        }
+        #confirm-button:disabled { background-color: #bdc3c7; }
+
+        .modal {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(44, 62, 80, 0.85); display: flex; justify-content: center;
+            align-items: center; z-index: 100; opacity: 1; transition: opacity 0.5s;
+        }
+        .modal.hidden { opacity: 0; pointer-events: none; }
+        .modal-content {
+            background: white; padding: 25px; border-radius: 10px; text-align: center;
+            width: 90%; max-width: 400px; line-height: 1.6;
+        }
+        .modal-content h2 { color: var(--accent-color); }
+        .modal-content button { margin-top: 15px; width: 100%; }
+
+        /* NUOVO: Stili per il GAUGE FINALE aggiornati */
+        .gauge-container {
+            width: 200px; height: 100px; position: relative; margin: 20px auto;
+            overflow: hidden; /* Nasconde la parte superiore del cerchio */
+        }
+        .gauge-semi-circle {
+            width: 200px; height: 200px; /* Un cerchio completo */
+            border-radius: 50%;
+            /* Il gradiente parte da sinistra (180deg), va a giallo (-90deg), finisce a destra (0deg) */
+            background: conic-gradient(from 180deg, var(--gauge-red), var(--gauge-yellow), var(--gauge-green));
+            position: absolute;
+            top: 0;
+        }
+        .gauge-needle {
+            position: absolute; top: 0; left: 50%;
+            width: 4px; height: 90px; background-color: #333;
+            transform-origin: bottom center; /* L'origine è ora al centro del semicerchio */
+            transform: translateX(-50%) rotate(-90deg); /* Parte da 0 (sinistra) */
+            transition: transform 1.5s cubic-bezier(0.2, 1, 0.2, 1);
+            border-radius: 5px; box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            z-index: 2;
+        }
+        .gauge-center-dot {
+            position: absolute; top: 90px; left: 50%; /* Posizionato al centro del lato piatto */
+            width: 20px; height: 20px; background-color: #333;
+            border-radius: 50%; transform: translateX(-50%);
+            z-index: 3;
+        }
+        #gauge-value { font-size: 1.2em; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div id="game-wrapper">
+        <div id="game-container" style="visibility: hidden;">
+            <div id="main-view">
+                <div id="hud">
+                    <div class="hud-item">🗓️ <span id="date-display"></span></div>
+                    <div class="hud-item">💰 <span id="money-display"></span></div>
+                    <div class="hud-item">
+                        <div id="stability-bar-container"><div id="stability-bar"></div></div>
+                        <span id="stability-display"></span>
+                    </div>
+                </div>
+                <div id="mountain"></div>
+                <div id="mountain-surface"></div>
+                <div id="village">🏡🏡🏡</div>
+            </div>
+            <div id="control-panel">
+                <h3 id="panel-title" style="margin: 0; text-align: center;"></h3>
+                <div id="actions-container"></div>
+                <div id="confirmation-area">
+                    <div id="total-cost">Costo Totale: €0</div>
+                    <button id="confirm-button">Approva e Procedi</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="intro-modal" class="modal">
+            <div class="modal-content">
+                <h2>Il Sindaco della Montagna</h2>
+                <p>
+                    Il tuo obiettivo è completare un <strong>mandato di 5 anni</strong> per proteggere il paese dai rischi della montagna.
+                </p>
+                <p>
+                    Per farlo, hai a disposizione un budget iniziale di <strong>€600.000</strong>. All'inizio di ogni anno, dal secondo in poi, riceverai ulteriori <strong>€100.000</strong>.
+                </p>
+                <p>Usa i fondi con saggezza. Buona fortuna!</p>
+                <button id="start-game-button" class="action-button" style="background-color: var(--accent-color); color: white; border-color: var(--accent-color); text-align: center;">Inizia il tuo mandato!</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const gameState = { year: 1, semester: 1, money: 600000, stability: 50, trees: [], terraces: 0, mandateYears: 5 };
+        const dom = {
+            gameContainer: document.getElementById('game-container'),
+            introModal: document.getElementById('intro-modal'),
+            startGameButton: document.getElementById('start-game-button'),
+            dateDisplay: document.getElementById('date-display'),
+            moneyDisplay: document.getElementById('money-display'),
+            stabilityDisplay: document.getElementById('stability-display'),
+            stabilityBar: document.getElementById('stability-bar'),
+            mountainSurface: document.getElementById('mountain-surface'),
+            controlPanel: document.getElementById('control-panel'),
+            panelTitle: document.getElementById('panel-title'),
+            actionsContainer: document.getElementById('actions-container'),
+            totalCostDisplay: document.getElementById('total-cost'),
+            confirmButton: document.getElementById('confirm-button')
+        };
+        const actions = {
+            plantTrees: { name: "Pianta 100 Alberi", cost: 50000, effectText: "+1% stabilità, +1%/anno per 5 anni", apply: () => {
+                gameState.stability = Math.min(100, gameState.stability + 1);
+                for (let i = 0; i < 10; i++) gameState.trees.push({ age: 0 });
+            }},
+            buildTerraces: { name: "Costruisci Terrazzamenti", cost: 150000, effectText: "+10% stabilità subito", apply: () => {
+                gameState.stability = Math.min(100, gameState.stability + 10);
+                gameState.terraces++;
+            }},
+            installDrains: { name: "Installa Canali di Drenaggio", cost: 80000, effectText: "+5% stabilità subito", apply: () => {
+                gameState.stability = Math.min(100, gameState.stability + 5);
+            }},
+            doNothing: { name: "Nessuna Azione (Risparmia)", cost: 0, effectText: "Conserva i fondi per le emergenze.", apply: () => {} }
+        };
+        const emergencyActions = {
+            cleanCanals: { name: "Pulizia Straordinaria Canali", cost: 25000, effectText: "Riduce i danni del 50%", apply: (event) => { event.damageMultiplier = 0.5; }},
+            evacuate: { name: "Evacuazione Area a Rischio", cost: 40000, effectText: "Dimezza la perdita di stabilità", apply: (event) => { event.damageMultiplier = 0.5; }},
+        };
+        const weatherEvents = [
+            { name: "Forti Piogge", description: "Allerta meteo per piogge torrenziali!", stabilityLoss: 15 },
+            { name: "Nevicate Abbondanti", description: "Prevista nevicata eccezionale.", stabilityLoss: 10 }
+        ];
+
+        function updateHUD() {
+            dom.dateDisplay.textContent = `A ${gameState.year}/S ${gameState.semester}`;
+            dom.moneyDisplay.textContent = `€${gameState.money.toLocaleString('it-IT')}`;
+            dom.stabilityDisplay.textContent = `${Math.round(gameState.stability)}%`;
+            dom.stabilityBar.style.width = `${gameState.stability}%`;
+            if (gameState.stability < 30) dom.stabilityBar.style.backgroundColor = 'var(--gauge-red)';
+            else if (gameState.stability < 60) dom.stabilityBar.style.backgroundColor = 'var(--gauge-yellow)';
+            else dom.stabilityBar.style.backgroundColor = 'var(--gauge-green)';
+        }
+        function updateVisuals() {
+            dom.mountainSurface.innerHTML = '';
+            for (let i = 0; i < gameState.terraces; i++) {
+                const terrace = document.createElement('div');
+                terrace.className = 'terrace';
+                terrace.style.left = `${20 + (i % 2 === 0 ? 0 : 40)}%`;
+                terrace.style.bottom = `${10 + i * 8}%`; 
+                dom.mountainSurface.appendChild(terrace);
+            }
+            gameState.trees.forEach(tree => {
+                const treeEl = document.createElement('div');
+                treeEl.className = `tree ${tree.age < 2 ? 'tree-sapling' : 'tree-grown'}`;
+                const xPos = 10 + Math.random() * 80;
+                treeEl.style.left = `${xPos}%`;
+                const maxBottom = (1 - Math.abs(50 - xPos) / 50) * 80 - 15;
+                treeEl.style.bottom = `${5 + Math.random() * Math.max(0, maxBottom)}%`;
+                dom.mountainSurface.appendChild(treeEl);
+            });
+        }
+        function showDecisionPanel(isEmergency, eventData = null) {
+            dom.actionsContainer.innerHTML = '';
+            dom.controlPanel.classList.toggle('emergency-mode', isEmergency);
+            const choices = isEmergency ? emergencyActions : actions;
+            dom.panelTitle.textContent = isEmergency ? `🚨 EMERGENZA: ${eventData.description}` : "🏛️ Riunione Semestrale";
+            for (const key in choices) {
+                const action = choices[key];
+                const label = document.createElement('label');
+                label.className = 'action-choice';
+                label.innerHTML = `<input type="checkbox" value="${key}" data-cost="${action.cost}"><span class="checkmark"></span><span>${action.name}</span><span class="cost">€${action.cost.toLocaleString('it-IT')}</span><div class="effect">${action.effectText}</div>`;
+                dom.actionsContainer.appendChild(label);
+            }
+            dom.actionsContainer.onchange = updateTotalCost;
+            dom.confirmButton.onclick = () => confirmSelections(isEmergency, eventData);
+            updateTotalCost();
+        }
+        function updateTotalCost() {
+            const selected = document.querySelectorAll('#actions-container input:checked');
+            let totalCost = 0;
+            selected.forEach(input => totalCost += parseInt(input.dataset.cost));
+            dom.totalCostDisplay.textContent = `Costo Totale: €${totalCost.toLocaleString('it-IT')}`;
+            dom.confirmButton.disabled = totalCost > gameState.money || selected.length === 0;
+            if(totalCost > gameState.money) dom.totalCostDisplay.style.color = 'red';
+            else dom.totalCostDisplay.style.color = 'black';
+        }
+        function confirmSelections(isEmergency, eventData) {
+            const selectedInputs = document.querySelectorAll('#actions-container input:checked');
+            let totalCost = 0;
+            const selectedActions = [];
+            selectedInputs.forEach(input => {
+                totalCost += parseInt(input.dataset.cost);
+                selectedActions.push(input.value);
+            });
+            if (gameState.money >= totalCost) {
+                gameState.money -= totalCost;
+                const allActions = isEmergency ? emergencyActions : actions;
+                selectedActions.forEach(key => allActions[key].apply(isEmergency ? eventData : null));
+                if(isEmergency) {
+                    gameState.stability -= eventData.stabilityLoss * (eventData.damageMultiplier || 1);
+                }
+                dom.actionsContainer.innerHTML = `<p style="text-align:center; padding: 20px;">Decisioni approvate. Attendere...</p>`;
+                dom.confirmButton.disabled = true;
+                setTimeout(nextTurn, 1000);
+            }
+        }
+        function nextTurn() {
+            if (checkGameOver()) return;
+            if (gameState.semester === 2) {
+                gameState.year++;
+                gameState.semester = 1;
+                if (gameState.year > 1) gameState.money += 100000;
+                gameState.trees.forEach(tree => {
+                    tree.age++;
+                    if (tree.age <= 5) gameState.stability = Math.min(100, gameState.stability + 1 / 10);
+                });
+            } else {
+                gameState.semester++;
+            }
+            updateHUD();
+            updateVisuals();
+            if (checkGameOver()) return;
+            const eventChance = 0.4;
+            if (Math.random() < eventChance) {
+                const randomEvent = weatherEvents[Math.floor(Math.random() * weatherEvents.length)];
+                showDecisionPanel(true, {...randomEvent});
+            } else {
+                 showDecisionPanel(false);
+            }
+        }
+        
+        function checkGameOver() {
+            let isOver = false, title = "", finalScore = 0;
+            if (gameState.stability <= 0) {
+                gameState.stability = 0;
+                title = "Disastro! 🛑";
+                isOver = true;
+            } else if (gameState.year > gameState.mandateYears) {
+                title = "Fine Mandato! 🎉";
+                isOver = true;
+            }
+            if (isOver) {
+                const stabilityScore = gameState.stability;
+                const moneyScore = Math.min(100, (gameState.money / 600000) * 100);
+                finalScore = Math.round((stabilityScore * 0.7) + (moneyScore * 0.3));
+                updateHUD();
+                dom.controlPanel.innerHTML = `
+                    <div style="text-align: center;">
+                        <h3 style="margin:0;">${title}</h3>
+                        <div class="gauge-container">
+                           <div class="gauge-semi-circle"></div>
+                           <div class="gauge-needle"></div>
+                           <div class="gauge-center-dot"></div>
+                        </div>
+                        <div id="gauge-value">Punteggio finale: ${finalScore}%</div>
+                        <p style="font-size:0.9em; margin: 10px 0;">Stabilità: ${Math.round(stabilityScore)}% | Fondi: €${gameState.money.toLocaleString('it-IT')}</p>
+                        <button id="restart-button" class="action-button" style="width:100%; text-align:center;">Ricomincia la Partita</button>
+                    </div>
+                `;
+                const needle = document.querySelector('.gauge-needle');
+                // La logica di rotazione non cambia: 0->sinistra, 50->centro, 100->destra
+                const rotation = (finalScore / 100) * 180 - 90;
+                setTimeout(() => {
+                    needle.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
+                }, 100);
+                document.getElementById('restart-button').onclick = () => window.location.reload();
+            }
+            return isOver;
+        }
+
+        dom.startGameButton.onclick = () => {
+            dom.introModal.classList.add('hidden');
+            dom.gameContainer.style.visibility = 'visible';
+            updateHUD();
+            updateVisuals();
+            showDecisionPanel(false);
+        };
+    });
+    </script>
+</body>
+</html>
