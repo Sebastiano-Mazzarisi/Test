@@ -20,86 +20,81 @@
             border: 2px solid #333;
             background-color: #fff;
             cursor: pointer;
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* NUOVO: Stili per il messaggio di rotazione */
+        #rotate-message {
+            display: none; /* Nascosto di default */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            background-color: #f0f0f0;
+            text-align: center;
+            font-size: 1.2em;
+        }
+
+        /* NUOVO: Media Query per mostrare il messaggio solo in verticale */
+        @media (orientation: portrait) {
+            #gameCanvas {
+                display: none; /* Nasconde il gioco */
+            }
+            #rotate-message {
+                display: flex; /* Mostra il messaggio */
+            }
         }
     </style>
 </head>
 <body>
+
     <canvas id="gameCanvas" width="800" height="300"></canvas>
+
+    <div id="rotate-message">
+        <p style="font-size: 3em;">🔄</p>
+        <p>Per favore, ruota il dispositivo<br>in orizzontale per giocare.</p>
+    </div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+        const gameVersion = "1.2"; // Versione aggiornata per verifica
 
-        // --- IMPOSTAZIONI DI DIFFICOLTÀ ---
+        // --- IMPOSTAZIONI DI DIFFICOLTÀ (CON INTERVALLI CASUALI) ---
         const difficulties = {
-            facile: {
-                name: 'Facile',
-                initialSpeed: 3.5,
-                speedIncrement: 0.0005,
-                obstacleInterval: 150
-            },
-            medio: {
-                name: 'Medio',
-                initialSpeed: 5,
-                speedIncrement: 0.0015,
-                obstacleInterval: 90
-            },
-            difficile: {
-                name: 'Difficile',
-                initialSpeed: 6,
-                speedIncrement: 0.002,
-                obstacleInterval: 75
-            }
+            facile: { name: 'Facile', initialSpeed: 3.5, speedIncrement: 0.0005, minObstacleInterval: 130, maxObstacleInterval: 180 },
+            medio: { name: 'Medio', initialSpeed: 5, speedIncrement: 0.0015, minObstacleInterval: 90, maxObstacleInterval: 140 },
+            difficile: { name: 'Difficile', initialSpeed: 6, speedIncrement: 0.002, minObstacleInterval: 75, maxObstacleInterval: 110 }
         };
         let currentDifficulty = {};
 
         // --- Variabili di Gioco ---
-        let score = 0;
-        let highscore = 0;
-        let isAlive = false;
-        let hasStarted = false;
-        let frameCount = 0;
-        let gameSpeed = 0;
-
-        const GRAVITY = 0.6;
-        const JUMP_FORCE = -12;
-        const GROUND_Y = canvas.height - 50;
+        let score = 0, highscore = 0, isAlive = false, hasStarted = false, frameCount = 0, gameSpeed = 0, nextObstacleFrame = 0;
+        const GRAVITY = 0.6, JUMP_FORCE = -12, GROUND_Y = canvas.height - 50;
         
         // --- Giocatore ---
         const player = {
-            x: 50,
-            y: GROUND_Y,
-            width: 30,
-            height: 50,
-            velocityY: 0,
-            isJumping: false,
-
+            x: 50, y: GROUND_Y, width: 30, height: 50, velocityY: 0, isJumping: false,
             draw() {
                 ctx.fillStyle = 'black';
                 ctx.fillRect(this.x, this.y - this.height, this.width, this.height);
                 this.drawLabel();
             },
             drawLabel() {
-                const labelText = 'Ony';
-                const labelOffsetY = 25;
-                const rectWidth = 60;
-                const rectHeight = 25;
-                const playerTopX = this.x + this.width / 2;
-                const playerTopY = this.y - this.height;
-
+                const labelText = 'Ony', labelOffsetY = 25, rectWidth = 60, rectHeight = 25;
+                const playerTopX = this.x + this.width / 2, playerTopY = this.y - this.height;
                 ctx.beginPath();
                 ctx.moveTo(playerTopX, playerTopY);
                 ctx.lineTo(playerTopX, playerTopY - labelOffsetY);
                 ctx.strokeStyle = 'black';
                 ctx.stroke();
-
-                const rectX = playerTopX - rectWidth / 2;
-                const rectY = playerTopY - labelOffsetY - rectHeight;
+                const rectX = playerTopX - rectWidth / 2, rectY = playerTopY - labelOffsetY - rectHeight;
                 ctx.fillStyle = 'white';
                 ctx.strokeStyle = 'black';
                 ctx.fillRect(rectX, rectY, rectWidth, rectHeight);
                 ctx.strokeRect(rectX, rectY, rectWidth, rectHeight);
-                
                 ctx.fillStyle = 'black';
                 ctx.font = '16px "Courier New"';
                 ctx.textAlign = 'center';
@@ -109,38 +104,31 @@
             update() {
                 this.velocityY += GRAVITY;
                 this.y += this.velocityY;
-                if (this.y > GROUND_Y) {
-                    this.y = GROUND_Y;
-                    this.velocityY = 0;
-                    this.isJumping = false;
-                }
+                if (this.y > GROUND_Y) { this.y = GROUND_Y; this.velocityY = 0; this.isJumping = false; }
             },
-            jump() {
-                if (!this.isJumping) {
-                    this.velocityY = JUMP_FORCE;
-                    this.isJumping = true;
-                }
-            }
+            jump() { if (!this.isJumping) { this.velocityY = JUMP_FORCE; this.isJumping = true; } }
         };
 
         // --- Ostacoli ---
         let obstacles = [];
+        function calculateNextObstacleFrame() {
+            const { minObstacleInterval, maxObstacleInterval } = currentDifficulty;
+            const randomInterval = Math.floor(Math.random() * (maxObstacleInterval - minObstacleInterval + 1)) + minObstacleInterval;
+            nextObstacleFrame = frameCount + randomInterval;
+        }
         function updateObstacles() {
-            if (frameCount % currentDifficulty.obstacleInterval === 0) {
+            if (frameCount >= nextObstacleFrame) {
                 const type = { width: 20, height: 40 };
                 obstacles.push({ x: canvas.width, y: GROUND_Y, width: type.width, height: type.height });
+                calculateNextObstacleFrame();
             }
             for (let i = obstacles.length - 1; i >= 0; i--) {
                 const obs = obstacles[i];
                 obs.x -= gameSpeed;
                 ctx.fillStyle = 'red';
                 ctx.fillRect(obs.x, obs.y - obs.height, obs.width, obs.height);
-                if (player.x < obs.x + obs.width && player.x + player.width > obs.x && player.y > obs.y - obs.height) {
-                    endGame();
-                }
-                if (obs.x + obs.width < 0) {
-                    obstacles.splice(i, 1);
-                }
+                if (player.x < obs.x + obs.width && player.x + player.width > obs.x && player.y > obs.y - obs.height) { endGame(); }
+                if (obs.x + obs.width < 0) { obstacles.splice(i, 1); }
             }
         }
         
@@ -152,14 +140,12 @@
             ctx.lineTo(canvas.width, GROUND_Y);
             ctx.stroke();
         }
-        
         function drawScore() {
             ctx.fillStyle = 'black';
             ctx.font = '20px "Courier New"';
             ctx.textAlign = 'right';
             ctx.fillText(`HI ${String(highscore).padStart(5, '0')} ${String(Math.floor(score)).padStart(5, '0')}`, canvas.width - 20, 30);
         }
-
         function showGameOverOverlay() {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -170,114 +156,78 @@
             ctx.font = '20px "Courier New"';
             ctx.fillText(`Punteggio: ${Math.floor(score)}. Clicca per riprovare.`, canvas.width / 2, canvas.height / 2 + 20);
         }
-
-        function clearCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-
+        function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
         function startGame() {
-            isAlive = true;
-            hasStarted = true;
-            score = 0;
-            gameSpeed = currentDifficulty.initialSpeed;
-            obstacles = [];
-            player.y = GROUND_Y;
-            player.velocityY = 0;
-            frameCount = 0;
+            isAlive = true; hasStarted = true; score = 0; gameSpeed = currentDifficulty.initialSpeed;
+            obstacles = []; player.y = GROUND_Y; player.velocityY = 0; frameCount = 0;
+            calculateNextObstacleFrame();
         }
-        
         function endGame() {
             isAlive = false;
-            if (Math.floor(score) > highscore) {
-                highscore = Math.floor(score);
-            }
+            if (Math.floor(score) > highscore) { highscore = Math.floor(score); }
         }
-
-        // --- Schermata di selezione difficoltà ---
         const difficultyButtons = [];
         function drawDifficultyScreen() {
             clearCanvas();
             drawGround();
             player.draw();
-            
             ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
             ctx.fillStyle = 'white';
             ctx.font = '30px "Courier New"';
             ctx.textAlign = 'center';
             ctx.fillText('Scegli la difficoltà', canvas.width / 2, canvas.height / 2 - 80);
-
-            const buttonWidth = 150;
-            const buttonHeight = 40;
-            const spacing = 15;
+            const buttonWidth = 150, buttonHeight = 40, spacing = 15;
             const totalButtonHeight = (buttonHeight * 3) + (spacing * 2);
             const startY = (canvas.height / 2) - (totalButtonHeight / 2) + 20;
-            
             difficultyButtons.length = 0;
-
             Object.values(difficulties).forEach((level, index) => {
-                const btn = {
-                    x: canvas.width / 2 - buttonWidth / 2,
-                    y: startY + index * (buttonHeight + spacing),
-                    width: buttonWidth,
-                    height: buttonHeight,
-                    level: level
-                };
+                const btn = { x: canvas.width / 2 - buttonWidth / 2, y: startY + index * (buttonHeight + spacing), width: buttonWidth, height: buttonHeight, level: level };
                 difficultyButtons.push(btn);
-                
                 ctx.fillStyle = 'white';
                 ctx.strokeStyle = 'black';
                 ctx.strokeRect(btn.x, btn.y, btn.width, btn.height);
-                
                 ctx.fillStyle = 'black';
                 ctx.font = '20px "Courier New"';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(level.name, btn.x + btn.width / 2, btn.y + btn.height / 2);
             });
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.font = '12px "Courier New"';
+            ctx.textAlign = 'left';
+            ctx.fillText(`v${gameVersion}`, 10, canvas.height - 10);
         }
-        
-        // --- NUOVO: Funzione per tornare al menu principale ---
         function resetToMenu() {
-            hasStarted = false;
-            isAlive = false;
-            score = 0;
-            obstacles = [];
-            player.y = GROUND_Y;
-            player.velocityY = 0;
+            hasStarted = false; isAlive = false; score = 0; obstacles = [];
+            player.y = GROUND_Y; player.velocityY = 0;
         }
-
-        // --- Game Loop Principale ---
         function gameLoop() {
             clearCanvas();
-            
             if (!hasStarted) {
                 drawDifficultyScreen();
             } else {
                 drawGround();
                 drawScore();
                 player.draw();
-
                 if (isAlive) {
-                    frameCount++;
-                    score++;
-                    gameSpeed += currentDifficulty.speedIncrement;
+                    frameCount++; score++; gameSpeed += currentDifficulty.speedIncrement;
                     player.update();
                     updateObstacles();
                 } else {
                     showGameOverOverlay();
                 }
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.font = '12px "Courier New"';
+                ctx.textAlign = 'left';
+                ctx.fillText(`v${gameVersion}`, 10, canvas.height - 10);
             }
             requestAnimationFrame(gameLoop);
         }
-
-        // --- Gestione Input ---
         function handleInteraction(event) {
             const rect = canvas.getBoundingClientRect();
             const x = (event.clientX || event.touches[0].clientX) - rect.left;
             const y = (event.clientY || event.touches[0].clientY) - rect.top;
-
             if (!hasStarted) {
                 difficultyButtons.forEach(btn => {
                     if (x > btn.x && x < btn.x + btn.width && y > btn.y && y < btn.y + btn.height) {
@@ -291,30 +241,12 @@
                 player.jump();
             }
         }
-        
-        // Gestore tastiera (MODIFICATO)
         window.addEventListener('keydown', (e) => {
-            // Salta o riavvia con Spazio
-            if (e.code === 'Space' && hasStarted) {
-                e.preventDefault();
-                if (isAlive) player.jump();
-                else startGame();
-            }
-            
-            // NUOVO: Torna al menu con ESC
-            if (e.code === 'Escape') {
-                e.preventDefault();
-                resetToMenu();
-            }
+            if (e.code === 'Space' && hasStarted) { e.preventDefault(); if (isAlive) player.jump(); else startGame(); }
+            if (e.code === 'Escape') { e.preventDefault(); resetToMenu(); }
         });
-        
         canvas.addEventListener('mousedown', handleInteraction);
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            handleInteraction(e);
-        });
-
-        // Avvio
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleInteraction(e); });
         requestAnimationFrame(gameLoop);
     </script>
 </body>
