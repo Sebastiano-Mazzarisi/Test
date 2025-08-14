@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Gioco Runner</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+        }
+        canvas {
+            border: 2px solid #333;
+            background-color: #fff;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="300"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- IMPOSTAZIONI DI DIFFICOLTÀ ---
+        const difficulties = {
+            facile: {
+                name: 'Facile',
+                initialSpeed: 3.5,
+                speedIncrement: 0.0005,
+                obstacleInterval: 150
+            },
+            medio: {
+                name: 'Medio',
+                initialSpeed: 5,
+                speedIncrement: 0.0015,
+                obstacleInterval: 90
+            },
+            difficile: {
+                name: 'Difficile',
+                initialSpeed: 6,
+                speedIncrement: 0.002,
+                obstacleInterval: 75
+            }
+        };
+        let currentDifficulty = {};
+
+        // --- Variabili di Gioco ---
+        let score = 0;
+        let highscore = 0;
+        let isAlive = false;
+        let hasStarted = false;
+        let frameCount = 0;
+        let gameSpeed = 0;
+
+        const GRAVITY = 0.6;
+        const JUMP_FORCE = -12;
+        const GROUND_Y = canvas.height - 50;
+        
+        // --- Giocatore ---
+        const player = {
+            x: 50,
+            y: GROUND_Y,
+            width: 30,
+            height: 50,
+            velocityY: 0,
+            isJumping: false,
+
+            draw() {
+                ctx.fillStyle = 'black';
+                ctx.fillRect(this.x, this.y - this.height, this.width, this.height);
+                this.drawLabel();
+            },
+            drawLabel() {
+                const labelText = 'Ony';
+                const labelOffsetY = 25;
+                const rectWidth = 60;
+                const rectHeight = 25;
+                const playerTopX = this.x + this.width / 2;
+                const playerTopY = this.y - this.height;
+
+                ctx.beginPath();
+                ctx.moveTo(playerTopX, playerTopY);
+                ctx.lineTo(playerTopX, playerTopY - labelOffsetY);
+                ctx.strokeStyle = 'black';
+                ctx.stroke();
+
+                const rectX = playerTopX - rectWidth / 2;
+                const rectY = playerTopY - labelOffsetY - rectHeight;
+                ctx.fillStyle = 'white';
+                ctx.strokeStyle = 'black';
+                ctx.fillRect(rectX, rectY, rectWidth, rectHeight);
+                ctx.strokeRect(rectX, rectY, rectWidth, rectHeight);
+                
+                ctx.fillStyle = 'black';
+                ctx.font = '16px "Courier New"';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(labelText, playerTopX, rectY + rectHeight / 2);
+            },
+            update() {
+                this.velocityY += GRAVITY;
+                this.y += this.velocityY;
+                if (this.y > GROUND_Y) {
+                    this.y = GROUND_Y;
+                    this.velocityY = 0;
+                    this.isJumping = false;
+                }
+            },
+            jump() {
+                if (!this.isJumping) {
+                    this.velocityY = JUMP_FORCE;
+                    this.isJumping = true;
+                }
+            }
+        };
+
+        // --- Ostacoli ---
+        let obstacles = [];
+        function updateObstacles() {
+            if (frameCount % currentDifficulty.obstacleInterval === 0) {
+                const type = { width: 20, height: 40 };
+                obstacles.push({ x: canvas.width, y: GROUND_Y, width: type.width, height: type.height });
+            }
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                const obs = obstacles[i];
+                obs.x -= gameSpeed;
+                ctx.fillStyle = 'red';
+                ctx.fillRect(obs.x, obs.y - obs.height, obs.width, obs.height);
+                if (player.x < obs.x + obs.width && player.x + player.width > obs.x && player.y > obs.y - obs.height) {
+                    endGame();
+                }
+                if (obs.x + obs.width < 0) {
+                    obstacles.splice(i, 1);
+                }
+            }
+        }
+        
+        // --- Funzioni di Gioco ---
+        function drawGround() {
+            ctx.strokeStyle = '#333';
+            ctx.beginPath();
+            ctx.moveTo(0, GROUND_Y);
+            ctx.lineTo(canvas.width, GROUND_Y);
+            ctx.stroke();
+        }
+        
+        function drawScore() {
+            ctx.fillStyle = 'black';
+            ctx.font = '20px "Courier New"';
+            ctx.textAlign = 'right';
+            ctx.fillText(`HI ${String(highscore).padStart(5, '0')} ${String(Math.floor(score)).padStart(5, '0')}`, canvas.width - 20, 30);
+        }
+
+        function showGameOverOverlay() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'white';
+            ctx.font = '40px "Courier New"';
+            ctx.textAlign = 'center';
+            ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2 - 20);
+            ctx.font = '20px "Courier New"';
+            ctx.fillText(`Punteggio: ${Math.floor(score)}. Clicca per riprovare.`, canvas.width / 2, canvas.height / 2 + 20);
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function startGame() {
+            isAlive = true;
+            hasStarted = true;
+            score = 0;
+            gameSpeed = currentDifficulty.initialSpeed;
+            obstacles = [];
+            player.y = GROUND_Y;
+            player.velocityY = 0;
+            frameCount = 0;
+        }
+        
+        function endGame() {
+            isAlive = false;
+            if (Math.floor(score) > highscore) {
+                highscore = Math.floor(score);
+            }
+        }
+
+        // --- Schermata di selezione difficoltà ---
+        const difficultyButtons = [];
+        function drawDifficultyScreen() {
+            clearCanvas();
+            drawGround();
+            player.draw();
+            
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = 'white';
+            ctx.font = '30px "Courier New"';
+            ctx.textAlign = 'center';
+            ctx.fillText('Scegli la difficoltà', canvas.width / 2, canvas.height / 2 - 80);
+
+            const buttonWidth = 150;
+            const buttonHeight = 40;
+            const spacing = 15;
+            const totalButtonHeight = (buttonHeight * 3) + (spacing * 2);
+            const startY = (canvas.height / 2) - (totalButtonHeight / 2) + 20;
+            
+            difficultyButtons.length = 0;
+
+            Object.values(difficulties).forEach((level, index) => {
+                const btn = {
+                    x: canvas.width / 2 - buttonWidth / 2,
+                    y: startY + index * (buttonHeight + spacing),
+                    width: buttonWidth,
+                    height: buttonHeight,
+                    level: level
+                };
+                difficultyButtons.push(btn);
+                
+                ctx.fillStyle = 'white';
+                ctx.strokeStyle = 'black';
+                ctx.strokeRect(btn.x, btn.y, btn.width, btn.height);
+                
+                ctx.fillStyle = 'black';
+                ctx.font = '20px "Courier New"';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(level.name, btn.x + btn.width / 2, btn.y + btn.height / 2);
+            });
+        }
+        
+        // --- NUOVO: Funzione per tornare al menu principale ---
+        function resetToMenu() {
+            hasStarted = false;
+            isAlive = false;
+            score = 0;
+            obstacles = [];
+            player.y = GROUND_Y;
+            player.velocityY = 0;
+        }
+
+        // --- Game Loop Principale ---
+        function gameLoop() {
+            clearCanvas();
+            
+            if (!hasStarted) {
+                drawDifficultyScreen();
+            } else {
+                drawGround();
+                drawScore();
+                player.draw();
+
+                if (isAlive) {
+                    frameCount++;
+                    score++;
+                    gameSpeed += currentDifficulty.speedIncrement;
+                    player.update();
+                    updateObstacles();
+                } else {
+                    showGameOverOverlay();
+                }
+            }
+            requestAnimationFrame(gameLoop);
+        }
+
+        // --- Gestione Input ---
+        function handleInteraction(event) {
+            const rect = canvas.getBoundingClientRect();
+            const x = (event.clientX || event.touches[0].clientX) - rect.left;
+            const y = (event.clientY || event.touches[0].clientY) - rect.top;
+
+            if (!hasStarted) {
+                difficultyButtons.forEach(btn => {
+                    if (x > btn.x && x < btn.x + btn.width && y > btn.y && y < btn.y + btn.height) {
+                        currentDifficulty = btn.level;
+                        startGame();
+                    }
+                });
+            } else if (!isAlive) {
+                startGame();
+            } else {
+                player.jump();
+            }
+        }
+        
+        // Gestore tastiera (MODIFICATO)
+        window.addEventListener('keydown', (e) => {
+            // Salta o riavvia con Spazio
+            if (e.code === 'Space' && hasStarted) {
+                e.preventDefault();
+                if (isAlive) player.jump();
+                else startGame();
+            }
+            
+            // NUOVO: Torna al menu con ESC
+            if (e.code === 'Escape') {
+                e.preventDefault();
+                resetToMenu();
+            }
+        });
+        
+        canvas.addEventListener('mousedown', handleInteraction);
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            handleInteraction(e);
+        });
+
+        // Avvio
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>
