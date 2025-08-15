@@ -12,7 +12,6 @@
     <meta property="og:image" content="https://github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png?raw=true">
     <meta property="og:image:width" content="192">
     <meta property="og:image:height" content="192">
-    
     <link rel="icon" href="https://github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png?raw=true">
     <link rel="apple-touch-icon" href="https://github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png?raw=true">
 
@@ -24,44 +23,15 @@
     <link rel="manifest" href='data:application/manifest+json,{"name":"Runner","short_name":"Runner","start_url":".","display":"standalone","background_color":"#f0f0f0","theme_color":"#f0f0f0","icons":[{"src":"https://github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png?raw=true","sizes":"192x192","type":"image/png"}]}' />
 
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f0f0;
-            font-family: 'Courier New', Courier, monospace;
-            overflow: hidden;
-        }
-        canvas {
-            border: 2px solid #333;
-            background-color: #fff;
-            cursor: pointer;
-            max-width: 100%;
-            height: auto;
-        }
-        #rotate-message {
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            height: 100%;
-            background-color: #f0f0f0;
-            text-align: center;
-            font-size: 1.2em;
-        }
-        @media (orientation: portrait) {
-            #gameCanvas { display: none; }
-            #rotate-message { display: flex; }
-        }
+        body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f0f0; font-family: 'Courier New', Courier, monospace; overflow: hidden; }
+        canvas { border: 2px solid #333; background-color: #fff; cursor: pointer; max-width: 100%; max-height: 100%; }
+        #rotate-message { display: none; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; background-color: #f0f0f0; text-align: center; font-size: 1.2em; }
+        @media (orientation: portrait) { #gameCanvas { display: none; } #rotate-message { display: flex; } }
     </style>
 </head>
 <body>
 
-    <canvas id="gameCanvas" width="800" height="300"></canvas>
+    <canvas id="gameCanvas"></canvas>
     <div id="rotate-message">
         <p style="font-size: 3em;">売</p>
         <p>Per favore, ruota il dispositivo<br>in orizzontale per giocare.</p>
@@ -70,454 +40,157 @@
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const gameVersion = "2.8"; // Versione aggiornata
+        const gameVersion = "5.0"; // Versione aggiornata
         const PLAYER_NAME = "Ony";
 
         // --- GESTIONE AUDIO ---
         let audioCtx;
-        function playSound(type) {
-            if (!audioCtx) return;
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
+        function playSound(type) { if(!audioCtx) return; const o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); if(type==='jump'){o.type='sine';o.frequency.setValueAtTime(600,audioCtx.currentTime);o.frequency.linearRampToValueAtTime(900,audioCtx.currentTime+0.05);g.gain.setValueAtTime(0.2,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.1);o.start(audioCtx.currentTime);o.stop(audioCtx.currentTime+0.1);}else if(type==='fail'){o.type='sawtooth';o.frequency.setValueAtTime(220,audioCtx.currentTime);o.frequency.linearRampToValueAtTime(110,audioCtx.currentTime+0.2);g.gain.setValueAtTime(0.3,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.25);o.start(audioCtx.currentTime);o.stop(audioCtx.currentTime+0.25);}}
 
-            if (type === 'jump') {
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(600, audioCtx.currentTime);
-                oscillator.frequency.linearRampToValueAtTime(900, audioCtx.currentTime + 0.05);
-                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-                oscillator.start(audioCtx.currentTime);
-                oscillator.stop(audioCtx.currentTime + 0.1);
-            } else if (type === 'fail') {
-                oscillator.type = 'sawtooth';
-                oscillator.frequency.setValueAtTime(220, audioCtx.currentTime);
-                oscillator.frequency.linearRampToValueAtTime(110, audioCtx.currentTime + 0.2);
-                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
-                oscillator.start(audioCtx.currentTime);
-                oscillator.stop(audioCtx.currentTime + 0.25);
-            }
-        }
-
-        // --- IMPOSTAZIONI DI DIFFICOLTÀ ---
+        // --- IMPOSTAZIONI DI DIFFICOLTÀ (Aumentata) ---
         const difficulties = {
-            facile: { name: 'Facile', initialSpeed: 2.8, speedIncrement: 0.0005, minObstacleInterval: 130, maxObstacleInterval: 180 },
-            medio: { name: 'Medio', initialSpeed: 6, speedIncrement: 0.0018, minObstacleInterval: 80, maxObstacleInterval: 130 },
-            difficile: { name: 'Difficile', initialSpeed: 8, speedIncrement: 0.0025, minObstacleInterval: 65, maxObstacleInterval: 100 }
+            facile: { name: 'Facile', initialSpeed: 220, speedIncrement: 4, minObstacleInterval: 1.6, maxObstacleInterval: 3.0 },
+            medio: { name: 'Medio', initialSpeed: 370, speedIncrement: 10, minObstacleInterval: 1.3, maxObstacleInterval: 2.4 },
+            difficile: { name: 'Difficile', initialSpeed: 610, speedIncrement: 18, minObstacleInterval: 1.0, maxObstacleInterval: 1.9 }
         };
         let currentDifficulty = {};
 
         // --- Variabili di Gioco ---
-        let score = 0, highscore = 0, isAlive = false, hasStarted = false, frameCount = 0, gameSpeed = 0, nextObstacleFrame = 0;
-        const GRAVITY = 0.6, JUMP_FORCE = -12, GROUND_Y = canvas.height - 50;
-        const INITIAL_LIVES = 3;
-        let lives = 0;
-        let isInvincible = false;
-        let invincibilityTimer = 0;
-        let screenFlashTimer = 0;
+        let score=0, highscore=0, isAlive=false, hasStarted=false, totalTime=0, gameSpeed=0, nextObstacleTime=0;
+        const GRAVITY=2200, JUMP_FORCE=-750;
+        let GROUND_Y = canvas.height - 50;
+        const INITIAL_LIVES=3; let lives=0; let isInvincible=false;
+        let invincibilityTimer=0, screenFlashTimer=0, lastTime=0;
+        const difficultyButtons = [];
 
-        // --- PAESAGGIO DETTAGLIATO ---
-        let landscapeLayers = [];
-
-        function getTerrainY(x, points) {
-            const p1 = points.slice().reverse().find(p => p.x <= x);
-            const p2 = points.find(p => p.x > x);
-            if (p1 && p2) {
-                const slope = (p2.y - p1.y) / (p2.x - p1.x);
-                return p1.y + slope * (x - p1.x);
-            }
-            return p1 ? p1.y : GROUND_Y;
-        }
-
+        // --- PAESAGGIO E CICLO GIORNO/NOTTE ---
+        const DAY_CYCLE_DURATION = 180;
+        let landscapeLayers=[], stars=[], clouds=[], airborneObjects=[];
+        let timeOfDay = 0;
+        const skyColors = {dawn:{r:255,g:182,b:193}, noon:{r:135,g:206,b:235}, dusk:{r:255,g:165,b:0}, night:{r:12,g:12,b:51}};
+        function lerpColor(c1,c2,f){const r=Math.round(c1.r+f*(c2.r-c1.r)),g=Math.round(c1.g+f*(c2.g-c1.g)),b=Math.round(c1.b+f*(c2.b-c1.b));return`rgb(${r},${g},${b})`;}
+        function getSkyColor(){const p=timeOfDay/DAY_CYCLE_DURATION;if(p<0.25)return lerpColor(skyColors.night,skyColors.dawn,p/0.25);if(p<0.50)return lerpColor(skyColors.dawn,skyColors.noon,(p-0.25)/0.25);if(p<0.75)return lerpColor(skyColors.noon,skyColors.dusk,(p-0.5)/0.25);return lerpColor(skyColors.dusk,skyColors.night,(p-0.75)/0.25);}
         function initLandscape() {
-            landscapeLayers = [];
-            const RENDER_WIDTH = canvas.width * 2;
-
-            // Layer 1: Montagne distanti
-            let points1 = [];
-            for (let x = 0; x <= RENDER_WIDTH; x += 150) {
-                points1.push({ x: x, y: GROUND_Y - 100 - Math.random() * 50 });
-            }
-            landscapeLayers.push({ points: points1, color: '#CAD8DE', speedMultiplier: 0.1, offsetX: 0, objects: [] });
-
-            // Layer 2: Colline medie
-            let points2 = [];
-            for (let x = 0; x <= RENDER_WIDTH; x += 100) {
-                points2.push({ x: x, y: GROUND_Y - 50 - Math.random() * 40 });
-            }
-            landscapeLayers.push({ points: points2, color: '#A5C8A5', speedMultiplier: 0.2, offsetX: 0, objects: [] });
-
-            // Layer 3: Colline vicine con case, pecore, alberi
-            let points3 = [];
-            for (let x = 0; x <= RENDER_WIDTH; x += 80) {
-                points3.push({ x: x, y: GROUND_Y - 15 - Math.random() * 25 });
-            }
-            const objects3 = [];
-            for (let i = 0; i < 10; i++) { // Aggiungi case
+            landscapeLayers=[], stars=[], clouds=[], airborneObjects=[];
+            const RENDER_WIDTH = canvas.width * 3;
+            for(let i=0;i<100;i++){stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height*0.6,r:Math.random()*1.5});}
+            for(let i=0;i<15;i++){clouds.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height*0.3,r:20+Math.random()*20,speed:5+Math.random()*5});}
+            for(let i=0;i<5;i++){airborneObjects.push({type:'birds',x:canvas.width+Math.random()*canvas.width,y:Math.random()*canvas.height*0.25,speed:20+Math.random()*15});}
+            let p1=[]; for(let x=0; x<=RENDER_WIDTH; x+=150)p1.push({x:x,y:GROUND_Y-100-Math.random()*50}); landscapeLayers.push({points:p1,color:'#CAD8DE',speedMultiplier:0.1,offsetX:0,objects:[]});
+            let p2=[]; for(let x=0; x<=RENDER_WIDTH; x+=100)p2.push({x:x,y:GROUND_Y-50-Math.random()*40}); landscapeLayers.push({points:p2,color:'#A5C8A5',speedMultiplier:0.2,offsetX:0,objects:[]});
+            let p3=[]; for(let x=0; x<=RENDER_WIDTH; x+=80)p3.push({x:x,y:GROUND_Y-15-Math.random()*25});
+            const obj3=[];
+            const objectTypes = ['house', 'sheep', 'tree', 'horse', 'tractor', 'car'];
+            for(let i=0; i<60; i++){
                 const x = Math.random() * RENDER_WIDTH;
-                objects3.push({ type: 'house', x: x, y: getTerrainY(x, points3) });
+                const randType = objectTypes[Math.floor(Math.random() * objectTypes.length)];
+                 obj3.push({type: randType, x: x, y: getTerrainY(x, p3)});
             }
-            for (let i = 0; i < 25; i++) { // Aggiungi pecore
-                const x = Math.random() * RENDER_WIDTH;
-                objects3.push({ type: 'sheep', x: x, y: getTerrainY(x, points3) });
-            }
-            for (let i = 0; i < 20; i++) { // Aggiungi alberi
-                 const x = Math.random() * RENDER_WIDTH;
-                objects3.push({ type: 'tree', x: x, y: getTerrainY(x, points3) });
-            }
-            objects3.sort((a, b) => a.x - b.x); // Ordina per disegnare correttamente
-            landscapeLayers.push({ points: points3, color: '#8FBC8F', speedMultiplier: 0.4, offsetX: 0, objects: objects3 });
+            obj3.sort((a,b)=>a.x-b.x); landscapeLayers.push({points:p3,color:'#8FBC8F',speedMultiplier:0.4,offsetX:0,objects:obj3});
         }
-
-        function drawLandscapeObject(obj, offsetX) {
-            const x = obj.x + offsetX;
-            const y = obj.y;
-
-            if (obj.type === 'house') {
-                if (!obj.details) { // Inizializza dettagli se non esistono
-                    obj.details = {
-                        width: 40 + Math.random() * 20,
-                        height: 30 + Math.random() * 15,
-                        color: `hsl(${Math.random() * 30 + 10}, 40%, 70%)`,
-                        roofColor: `hsl(${Math.random() * 20 + 5}, 50%, 45%)`
-                    };
-                }
-                const d = obj.details;
-                ctx.fillStyle = d.color;
-                ctx.fillRect(x - d.width / 2, y - d.height, d.width, d.height);
-                ctx.fillStyle = d.roofColor;
-                ctx.beginPath();
-                ctx.moveTo(x - d.width / 2 - 5, y - d.height);
-                ctx.lineTo(x + d.width / 2 + 5, y - d.height);
-                ctx.lineTo(x, y - d.height - 20);
-                ctx.closePath();
-                ctx.fill();
-            } else if (obj.type === 'sheep') {
-                if (!obj.details) { // Inizializza dettagli
-                    obj.details = {
-                        state: 'down',
-                        timer: Math.random() * 180,
-                    };
-                }
-                const d = obj.details;
-                ctx.fillStyle = '#FFFFFF';
-                // Corpo a nuvoletta
-                ctx.beginPath();
-                ctx.arc(x, y - 10, 6, 0, Math.PI * 2);
-                ctx.arc(x + 5, y - 12, 5, 0, Math.PI * 2);
-                ctx.arc(x - 5, y - 12, 5, 0, Math.PI * 2);
-                ctx.fill();
-                // Testa
-                let headY = (d.state === 'down') ? y - 8 : y - 18;
-                ctx.fillStyle = '#333333';
-                ctx.beginPath();
-                ctx.arc(x + 10, headY, 4, 0, Math.PI * 2);
-                ctx.fill();
-
-            } else if (obj.type === 'tree') {
-                 if (!obj.details) { // Inizializza dettagli
-                    obj.details = {
-                        height: 20 + Math.random() * 30,
-                        radius: 6 + Math.random() * 6
-                    };
-                }
-                const d = obj.details;
-                ctx.fillStyle = '#8B4513';
-                ctx.fillRect(x - 2, y - d.height, 4, d.height);
-                ctx.fillStyle = `hsl(120, 60%, ${25 + Math.random() * 10}%)`;
-                ctx.beginPath();
-                ctx.arc(x, y - d.height, d.radius, 0, Math.PI * 2);
-                ctx.arc(x + d.radius/2, y - d.height - 5, d.radius, 0, Math.PI * 2);
-                ctx.arc(x - d.radius/2, y - d.height - 5, d.radius, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
+        function getTerrainY(x,points){const p1=points.slice().reverse().find(p=>p.x<=x);const p2=points.find(p=>p.x>x);if(p1&&p2){const m=(p2.y-p1.y)/(p2.x-p1.x);return p1.y+m*(x-p1.x);}return p1?p1.y:GROUND_Y;}
+        function drawSky(){ctx.fillStyle=getSkyColor();ctx.fillRect(0,0,canvas.width,canvas.height);const nightFactor=Math.max(0,1-Math.abs(timeOfDay-DAY_CYCLE_DURATION*0.75)/(DAY_CYCLE_DURATION*0.25));const dayFactor=1-nightFactor;const angle=(timeOfDay/DAY_CYCLE_DURATION)*2*Math.PI-Math.PI/2;const cX=canvas.width/2-Math.cos(angle)*canvas.width*0.4;const cY=canvas.height*0.7-Math.sin(angle)*canvas.height*0.6;if(dayFactor>0.1){ctx.fillStyle=`rgba(255,255,0,${dayFactor*0.8})`;ctx.beginPath();ctx.arc(cX,cY,20,0,Math.PI*2);ctx.fill();} if(nightFactor>0.1){ctx.fillStyle=`rgba(240,240,240,${nightFactor*0.8})`;ctx.beginPath();ctx.arc(cX,cY,15,0,Math.PI*2);ctx.fill();} if(nightFactor>0){stars.forEach(s=>{ctx.fillStyle=`rgba(255,255,255,${nightFactor*(0.5+Math.random()*0.5)})`;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,2*Math.PI);ctx.fill();});}}
+        function drawClouds(dt){clouds.forEach(c=>{c.x-=c.speed*dt;if(c.x+c.r*2<0)c.x=canvas.width+c.r*2;ctx.fillStyle='rgba(255,255,255,0.7)';ctx.beginPath();ctx.arc(c.x,c.y,c.r,0,Math.PI*2);ctx.arc(c.x+c.r/2,c.y,c.r,0,Math.PI*2);ctx.arc(c.x-c.r/2,c.y,c.r,0,Math.PI*2);ctx.fill();});}
+        function drawAirborneObjects(dt){airborneObjects.forEach(a=>{a.x-=a.speed*dt;if(a.x<-50)a.x=canvas.width+50;if(a.type==='birds'){ctx.strokeStyle='black';ctx.lineWidth=2;ctx.beginPath();for(let i=0;i<5;i++){const bX=a.x+i*20,bY=a.y+Math.sin(totalTime*5+i)*5;ctx.moveTo(bX-10,bY);ctx.quadraticCurveTo(bX,bY-10,bX+10,bY);}}ctx.stroke();});}
         
-        function updateLandscape() {
-            landscapeLayers.forEach(layer => {
-                layer.offsetX -= gameSpeed * layer.speedMultiplier;
-                if (layer.offsetX < -canvas.width * 2) {
-                    layer.offsetX += canvas.width * 2;
-                }
-                layer.objects.forEach(obj => {
-                    if (obj.type === 'sheep') {
-                        obj.details.timer--;
-                        if (obj.details.timer <= 0) {
-                            obj.details.state = (obj.details.state === 'down') ? 'up' : 'down';
-                            obj.details.timer = 60 + Math.random() * 120; // tra 1 e 3 secondi
-                        }
-                    }
-                });
-            });
-        }
-
-        function drawLandscape() {
-            landscapeLayers.forEach(layer => {
-                ctx.fillStyle = layer.color;
-                ctx.beginPath();
-                ctx.moveTo(layer.points[0].x + layer.offsetX, canvas.height);
-                layer.points.forEach(p => {
-                    ctx.lineTo(p.x + layer.offsetX, p.y);
-                });
-                ctx.lineTo(layer.points[layer.points.length - 1].x + layer.offsetX, canvas.height);
-                ctx.closePath();
-                ctx.fill();
-
-                layer.objects.forEach(obj => {
-                    drawLandscapeObject(obj, layer.offsetX);
-                });
-            });
-        }
-
-        // --- Giocatore (Omino stilizzato originale) ---
-        const player = {
-            x: 50, y: GROUND_Y, width: 30, height: 50, velocityY: 0, isJumping: false,
-            draw() {
-                ctx.save();
-                ctx.strokeStyle = 'black';
-                ctx.lineWidth = 3;
-                ctx.lineCap = 'round';
-                const centerX = this.x + this.width / 2;
-                const baseY = this.y - 1;
-                const headRadius = 8;
-                const headY = baseY - this.height + headRadius;
-                ctx.beginPath(); ctx.arc(centerX, headY, headRadius, 0, Math.PI * 2); ctx.stroke();
-                const torsoStartY = headY + headRadius;
-                const torsoEndY = baseY - this.height / 2;
-                ctx.beginPath(); ctx.moveTo(centerX, torsoStartY); ctx.lineTo(centerX, torsoEndY); ctx.stroke();
-                const animationFrame = Math.floor(frameCount / 12) % 2;
-                if (this.isJumping) {
-                    ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX - 10, torsoEndY + 10); ctx.stroke();
-                    ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX + 10, torsoEndY + 10); ctx.stroke();
-                    ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX - 5, baseY - 10); ctx.stroke();
-                    ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX + 5, baseY); ctx.stroke();
-                } else if (animationFrame === 0) {
-                    ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX - 15, torsoEndY + 5); ctx.stroke();
-                    ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX + 15, torsoEndY + 5); ctx.stroke();
-                    ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX - 10, baseY); ctx.stroke();
-                    ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX + 15, baseY); ctx.stroke();
-                } else {
-                    ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX + 15, torsoEndY - 5); ctx.stroke();
-                    ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX - 15, torsoEndY - 5); ctx.stroke();
-                    ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX + 10, baseY); ctx.stroke();
-                    ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX - 15, baseY); ctx.stroke();
-                }
-                ctx.restore();
-                this.drawLabel();
-            },
-            drawLabel() {
-                const labelOffsetY = 25;
-                const rectWidth = 60;
-                const rectHeight = 25;
-                const playerTopX = this.x + this.width / 2;
-                const playerTopY = this.y - this.height;
-                ctx.beginPath();
-                ctx.moveTo(playerTopX, playerTopY);
-                ctx.lineTo(playerTopX, playerTopY - labelOffsetY);
-                ctx.strokeStyle = 'black';
-                ctx.stroke();
-                const rectX = playerTopX - rectWidth / 2;
-                const rectY = playerTopY - labelOffsetY - rectHeight;
-                ctx.fillStyle = 'white';
-                ctx.strokeStyle = 'black';
-                ctx.fillRect(rectX, rectY, rectWidth, rectHeight);
-                ctx.strokeRect(rectX, rectY, rectWidth, rectHeight);
-                ctx.fillStyle = 'black';
-                ctx.font = '16px "Courier New"';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(PLAYER_NAME, playerTopX, rectY + rectHeight / 2);
-            },
-            update() {
-                this.velocityY += GRAVITY;
-                this.y += this.velocityY;
-                if (this.y > GROUND_Y) { this.y = GROUND_Y; this.velocityY = 0; this.isJumping = false; }
-            },
-            jump() {
-                if (!this.isJumping && isAlive) {
-                    this.velocityY = JUMP_FORCE;
-                    this.isJumping = true;
-                    playSound('jump');
-                }
+        function drawLandscapeObject(obj,offsetX) {
+            const x=obj.x+offsetX; const y=obj.y;
+            const isNight=timeOfDay/DAY_CYCLE_DURATION>0.6&&timeOfDay/DAY_CYCLE_DURATION<0.9;
+            if(!obj.details){ obj.details={}; } // Inizializza dettagli se non esistono
+            
+            switch(obj.type) {
+                case 'house':
+                    if(!obj.details.width){obj.details={width:40+Math.random()*20,height:30+Math.random()*15,color:`hsl(${Math.random()*30+10},40%,70%)`,roofColor:`hsl(${Math.random()*20+5},50%,45%)`};}
+                    const h=obj.details;ctx.fillStyle=h.color;ctx.fillRect(x-h.width/2,y-h.height,h.width,h.height);if(isNight){ctx.fillStyle='yellow';ctx.fillRect(x-h.width/4,y-h.height/2,h.width/4,h.height/4);} ctx.fillStyle=h.roofColor;ctx.beginPath();ctx.moveTo(x-h.width/2-5,y-h.height);ctx.lineTo(x+h.width/2+5,y-h.height);ctx.lineTo(x,y-h.height-20);ctx.closePath();ctx.fill();
+                    break;
+                case 'sheep':
+                    if(!obj.details.state){obj.details={state:'down',timer:Math.random()*3};}
+                    const s=obj.details;ctx.fillStyle='#FFFFFF';ctx.beginPath();ctx.arc(x,y-10,6,0,Math.PI*2);ctx.arc(x+5,y-12,5,0,Math.PI*2);ctx.arc(x-5,y-12,5,0,Math.PI*2);ctx.fill();let sHeadY=(s.state==='down')?y-8:y-18;ctx.fillStyle='#333333';ctx.beginPath();ctx.arc(x+10,sHeadY,4,0,Math.PI*2);ctx.fill();
+                    break;
+                case 'horse':
+                    if(!obj.details.state){obj.details={state:'down',timer:Math.random()*3,color:`hsl(30,50%,${20+Math.random()*15}%)`};}
+                    const p=obj.details;ctx.fillStyle=p.color;ctx.beginPath();ctx.ellipse(x,y-15,12,8,0,0,Math.PI*2);ctx.fill();let pHeadY=(p.state==='down')?y-15:y-25;ctx.beginPath();ctx.arc(x+15,pHeadY,5,0,Math.PI*2);ctx.fill();ctx.fillRect(x-10,y-10,2,10);ctx.fillRect(x+5,y-10,2,10);
+                    break;
+                case 'tree':
+                    if(!obj.details.height){obj.details={height:20+Math.random()*30,radius:6+Math.random()*6};}
+                    const t=obj.details;ctx.fillStyle='#8B4513';ctx.fillRect(x-2,y-t.height,4,t.height);ctx.fillStyle=`hsl(120,60%,${25+Math.random()*10}%)`;ctx.beginPath();ctx.arc(x,y-t.height,t.radius,0,Math.PI*2);ctx.arc(x+t.radius/2,y-t.height-5,t.radius,0,Math.PI*2);ctx.arc(x-t.radius/2,y-t.height-5,t.radius,0,Math.PI*2);ctx.fill();
+                    break;
+                case 'tractor':
+                    ctx.fillStyle='red';ctx.fillRect(x-15,y-20,30,15);ctx.fillRect(x,y-30,10,10);ctx.fillStyle='black';ctx.beginPath();ctx.arc(x+10,y-8,8,0,Math.PI*2);ctx.arc(x-12,y-5,4,0,Math.PI*2);ctx.fill();
+                    break;
+                case 'car':
+                    if(!obj.details.color){obj.details.color=`hsl(${180+Math.random()*60},50%,50%)`;}
+                    ctx.fillStyle=obj.details.color;ctx.fillRect(x-20,y-15,40,10);ctx.beginPath();ctx.roundRect(x-15,y-25,30,10,[5,5,0,0]);ctx.fill();ctx.fillStyle='black';ctx.beginPath();ctx.arc(x-10,y-5,4,0,Math.PI*2);ctx.arc(x+10,y-5,4,0,Math.PI*2);ctx.fill();
+                    break;
             }
-        };
+        }
+        function updateLandscape(dt){landscapeLayers.forEach(l=>{l.offsetX-=gameSpeed*l.speedMultiplier*dt;if(l.offsetX<-canvas.width*3){l.offsetX+=canvas.width*3;} l.objects.forEach(obj=>{if(obj.type==='sheep'||obj.type==='horse'){obj.details.timer-=dt;if(obj.details.timer<=0){obj.details.state=(obj.details.state==='down')?'up':'down';obj.details.timer=1+Math.random()*2;}}});});}
+        function drawLandscape(){landscapeLayers.forEach(l=>{ctx.fillStyle=l.color;ctx.beginPath();ctx.moveTo(l.points[0].x+l.offsetX,canvas.height);l.points.forEach(p=>{ctx.lineTo(p.x+l.offsetX,p.y);});ctx.lineTo(l.points[l.points.length-1].x+l.offsetX,canvas.height);ctx.closePath();ctx.fill();l.objects.forEach(obj=>{drawLandscapeObject(obj,l.offsetX);});});}
+
+        // --- Giocatore ---
+        const player = {x:50,y:GROUND_Y,width:30,height:50,velocityY:0,isJumping:false,draw(){ctx.save();ctx.strokeStyle='black';ctx.lineWidth=3;ctx.lineCap='round';const cX=this.x+this.width/2,bY=this.y-1,hR=8;const hY=bY-this.height+hR;ctx.beginPath();ctx.arc(cX,hY,hR,0,Math.PI*2);ctx.stroke();const tSY=hY+hR,tEY=bY-this.height/2;ctx.beginPath();ctx.moveTo(cX,tSY);ctx.lineTo(cX,tEY);ctx.stroke();const aF=Math.floor(totalTime*10)%2;if(this.isJumping){ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX-10,tEY+10);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX+10,tEY+10);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX-5,bY-10);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX+5,bY);ctx.stroke();}else if(aF===0){ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX-15,tEY+5);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX+15,tEY+5);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX-10,bY);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX+15,bY);ctx.stroke();}else{ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX+15,tEY-5);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX-15,tEY-5);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX+10,bY);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX-15,bY);ctx.stroke();} ctx.restore();this.drawLabel();},drawLabel(){const oY=25,rW=60,rH=25,pX=this.x+this.width/2;const pY=this.y-this.height;ctx.beginPath();ctx.moveTo(pX,pY);ctx.lineTo(pX,pY-oY);ctx.strokeStyle='black';ctx.stroke();const rX=pX-rW/2,rY=pY-oY-rH;ctx.fillStyle='white';ctx.strokeStyle='black';ctx.fillRect(rX,rY,rW,rH);ctx.strokeRect(rX,rY,rW,rH);ctx.fillStyle='black';ctx.font='16px "Courier New"';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(PLAYER_NAME,pX,rY+rH/2);},update(dt){this.velocityY+=GRAVITY*dt;this.y+=this.velocityY*dt;if(this.y>GROUND_Y){this.y=GROUND_Y;this.velocityY=0;this.isJumping=false;}},jump(){if(!this.isJumping&&isAlive){this.velocityY=JUMP_FORCE;this.isJumping=true;playSound('jump');}}};
 
         // --- Ostacoli ---
         let obstacles = [];
-        function calculateNextObstacleFrame() { 
-            const { minObstacleInterval, maxObstacleInterval } = currentDifficulty;
-            const randomInterval = Math.floor(Math.random() * (maxObstacleInterval - minObstacleInterval + 1)) + minObstacleInterval;
-            nextObstacleFrame = frameCount + randomInterval;
-        }
-        function generateObstacle() {
-            const rand = Math.random();
-            let newObstacle = { x: canvas.width, width: 20, height: 40, y: 0, type: 'ground' };
-
-            if (rand < 0.4) {
-                newObstacle.height = 25;
-                newObstacle.width = 25;
-                newObstacle.y = GROUND_Y - newObstacle.height;
-            } else if (rand < 0.8) {
-                newObstacle.height = 50;
-                newObstacle.y = GROUND_Y - newObstacle.height;
-            } else {
-                newObstacle.type = 'flying';
-                newObstacle.width = 35;
-                newObstacle.height = 20;
-                newObstacle.y = GROUND_Y - player.height - (25 + Math.random() * 20);
-            }
-            obstacles.push(newObstacle);
-        }
-
-        function updateObstacles() {
-            if (frameCount >= nextObstacleFrame) {
-                generateObstacle();
-                calculateNextObstacleFrame();
-            }
-            for (let i = obstacles.length - 1; i >= 0; i--) {
-                const obs = obstacles[i];
-                obs.x -= gameSpeed;
-
-                if (obs.type === 'flying') {
-                    ctx.fillStyle = '#4169E1';
-                } else {
-                    ctx.fillStyle = '#DC143C';
-                }
-                ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-
-                const playerHitbox = { x: player.x, y: player.y - player.height, width: player.width, height: player.height };
-                const obsHitbox = { x: obs.x, y: obs.y, width: obs.width, height: obs.height };
-
-                if (!isInvincible && 
-                    playerHitbox.x < obsHitbox.x + obsHitbox.width &&
-                    playerHitbox.x + playerHitbox.width > obsHitbox.x &&
-                    playerHitbox.y < obsHitbox.y + obsHitbox.height &&
-                    playerHitbox.y + playerHitbox.height > obsHitbox.y)
-                {
-                    handleCollision();
-                }
-                if (obs.x + obs.width < 0) { obstacles.splice(i, 1); }
-            }
-        }
+        function calculateNextObstacleTime(){const{minObstacleInterval,maxObstacleInterval}=currentDifficulty;nextObstacleTime=totalTime+(Math.random()*(maxObstacleInterval-minObstacleInterval)+minObstacleInterval);}
+        function generateObstacle(){const r=Math.random();let o={x:canvas.width,width:20,height:40,y:0,type:'ground'};if(r<0.65){o.height=25;o.width=25;o.y=GROUND_Y-o.height;}else if(r<0.85){o.height=50;o.y=GROUND_Y-o.height;}else{o.type='flying';o.width=35;o.height=20;o.y=GROUND_Y-player.height-(25+Math.random()*20);}obstacles.push(o);}
+        function updateObstacles(dt){if(totalTime>=nextObstacleTime){generateObstacle();calculateNextObstacleTime();} for(let i=obstacles.length-1;i>=0;i--){const o=obstacles[i];o.x-=gameSpeed*dt;if(o.type==='flying'){ctx.fillStyle='#4169E1';}else{ctx.fillStyle='#DC143C';} ctx.fillRect(o.x,o.y,o.width,o.height);const pH={x:player.x,y:player.y-player.height,width:player.width,height:player.height};const oH={x:o.x,y:o.y,width:o.width,height:o.height};if(!isInvincible&&pH.x<oH.x+oH.width&&pH.x+pH.width>oH.x&&pH.y<oH.y+oH.height&&pH.y+pH.height>oH.y){handleCollision();} if(o.x+o.width<0){obstacles.splice(i,1);}}}
         
-        // --- Funzioni di Gioco ---
-        function drawScore() {
-            const currentTimeFormatted = formatTime(score);
-            const recordTimeFormatted = formatTime(highscore);
-            ctx.fillStyle = 'black';
-            ctx.font = '20px "Courier New"';
-            ctx.textAlign = 'right';
-            ctx.fillText(`${PLAYER_NAME} HI ${recordTimeFormatted} ${currentTimeFormatted}`, canvas.width - 20, 30);
-        }
+        // --- Funzioni di Gioco e UI ---
+        function drawScore(){const c=formatTime(score),r=formatTime(highscore);ctx.fillStyle='black';ctx.font='20px "Courier New"';ctx.textAlign='right';ctx.fillText(`${PLAYER_NAME} HI ${r} ${c}`,canvas.width-20,30);}
+        function startGame(){isAlive=true;hasStarted=true;score=0;gameSpeed=currentDifficulty.initialSpeed;obstacles=[];player.y=GROUND_Y;player.velocityY=0;totalTime=0;lastTime=0;lives=INITIAL_LIVES;isInvincible=false;invincibilityTimer=0;initLandscape();calculateNextObstacleTime();}
+        function triggerGameOver(){isAlive=false;if(score>highscore){highscore=score;}}
+        function handleCollision(){playSound('fail');screenFlashTimer=0.2;lives--;if(lives<=0){triggerGameOver();}else{isInvincible=true;invincibilityTimer=2.0;}}
+        function setupDifficultyButtons(){difficultyButtons.length=0;const bW=150,bH=40,s=15;const tH=(Object.keys(difficulties).length*(bH+s))-s;const sY=(canvas.height/2)-(tH/2)+20;Object.values(difficulties).forEach((l,i)=>{const btn={x:canvas.width/2-bW/2,y:sY+i*(bH+s),width:bW,height:bH,level:l};difficultyButtons.push(btn);});}
         
-        function clearCanvas() {
-            ctx.fillStyle = '#87CEEB';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-        function startGame() {
-            isAlive = true; hasStarted = true; score = 0; gameSpeed = currentDifficulty.initialSpeed;
-            obstacles = []; player.y = GROUND_Y; player.velocityY = 0; frameCount = 0;
-            lives = INITIAL_LIVES;
-            isInvincible = false; invincibilityTimer = 0;
-            initLandscape();
-            calculateNextObstacleFrame();
-        }
-        function triggerGameOver() {
-            isAlive = false;
-            if (score > highscore) { highscore = score; }
-        }
-        function handleCollision() {
-            playSound('fail');
-            screenFlashTimer = 10;
-            lives--;
-            if (lives <= 0) {
-                triggerGameOver();
-            } else {
-                isInvincible = true;
-                invincibilityTimer = 120;
-            }
-        }
-        const difficultyButtons = [];
-        
-        // --- Game Loop Principale ---
-        function gameLoop() {
-            clearCanvas();
+        function gameLoop(timestamp) {
+            if(!lastTime){lastTime=timestamp;requestAnimationFrame(gameLoop);return;}
+            const deltaTime=(timestamp-lastTime)/1000;lastTime=timestamp;
+            if(deltaTime>0.1){requestAnimationFrame(gameLoop);return;}
+
+            drawSky();
+            drawAirborneObjects(deltaTime);
+            drawClouds(deltaTime);
             drawLandscape();
 
-            if (screenFlashTimer > 0) {
-                ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                screenFlashTimer--;
-            }
+            if(screenFlashTimer>0){ctx.fillStyle='rgba(255,0,0,0.3)';ctx.fillRect(0,0,canvas.width,canvas.height);screenFlashTimer-=deltaTime;}
 
-            if (!hasStarted) {
+            if(!hasStarted){
                 drawDifficultyScreen();
             } else {
-                drawGround();
-                drawScore();
-                drawLives();
-                
-                if (isAlive) {
-                    frameCount++; score++; gameSpeed += currentDifficulty.speedIncrement;
-                    if (isInvincible) {
-                        invincibilityTimer--;
-                        if (invincibilityTimer <= 0) isInvincible = false;
-                    }
-                    player.update();
-                    updateLandscape();
-                    updateObstacles();
+                drawGround();drawScore();drawLives();
+                if(isAlive){
+                    timeOfDay=(timeOfDay+deltaTime)%DAY_CYCLE_DURATION;
+                    totalTime+=deltaTime;score+=deltaTime*10;gameSpeed+=currentDifficulty.speedIncrement*deltaTime;
+                    if(isInvincible){invincibilityTimer-=deltaTime;if(invincibilityTimer<=0)isInvincible=false;}
+                    player.update(deltaTime);
+                    updateLandscape(deltaTime);
+                    updateObstacles(deltaTime);
                 } else {
                     showGameOverOverlay();
                 }
-                
-                if (isInvincible && Math.floor(frameCount / 10) % 2 !== 0) {
-                    // Effetto lampeggiante
-                } else {
-                    player.draw();
-                }
-
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-                ctx.font = '12px "Courier New"';
-                ctx.textAlign = 'left';
-                ctx.fillText(`v${gameVersion}`, 10, canvas.height - 10);
+                if(isInvincible&&Math.floor(totalTime*10)%2!==0){}else{player.draw();}
+                ctx.fillStyle='rgba(0,0,0,0.3)';ctx.font='12px "Courier New"';ctx.textAlign='left';ctx.fillText(`v${gameVersion}`,10,canvas.height-10);
             }
             requestAnimationFrame(gameLoop);
         }
         
-        function handleInteraction(event) {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const rect = canvas.getBoundingClientRect();
-            const x = (event.clientX || event.touches[0].clientX) - rect.left;
-            const y = (event.clientY || event.touches[0].clientY) - rect.top;
-            if (!hasStarted) {
-                difficultyButtons.forEach(btn => {
-                    if (x > btn.x && x < btn.x + btn.width && y > btn.y && y < btn.y + btn.height) {
-                        currentDifficulty = btn.level;
-                        startGame();
-                    }
-                });
-            } else if (!isAlive) {
-                startGame();
-            } else {
-                player.jump();
-            }
-        }
+        function handleInteraction(event){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();const r=canvas.getBoundingClientRect();const x=(event.clientX||event.touches[0].clientX)-r.left;const y=(event.clientY||event.touches[0].clientY)-r.top;if(!hasStarted){difficultyButtons.forEach(btn=>{if(x>btn.x&&x<btn.x+btn.width&&y>btn.y&&y<btn.y+btn.height){currentDifficulty=btn.level;startGame();}});
+        }else if(!isAlive){startGame();}else{player.jump();}}
+        function drawGround(){ctx.fillStyle='#A0522D';ctx.fillRect(0,GROUND_Y,canvas.width,canvas.height-GROUND_Y);ctx.strokeStyle='#333';ctx.beginPath();ctx.moveTo(0,GROUND_Y);ctx.lineTo(canvas.width,GROUND_Y);ctx.stroke();}
+        function formatTime(s){const tS=Math.floor(s/10);const m=Math.floor(tS/60);const sec=tS%60;return`${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;}
+        function drawLives(){ctx.fillStyle='black';ctx.font='20px "Courier New"';ctx.textAlign='left';ctx.fillText(`Vite: ${lives}`,20,30);}
+        function showGameOverOverlay(){ctx.fillStyle='rgba(255,255,224,0.7)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='black';ctx.font='40px "Courier New"';ctx.textAlign='center';ctx.fillText('Game Over!',canvas.width/2,canvas.height/2-20);ctx.font='20px "Courier New"';ctx.fillText(`Tempo: ${formatTime(score)}. Clicca per riprovare.`,canvas.width/2,canvas.height/2+20);}
+        function drawDifficultyScreen(){drawGround();player.draw();ctx.fillStyle='rgba(255,255,224,0.7)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='black';ctx.font='30px "Courier New"';ctx.textAlign='center';ctx.fillText('Scegli la difficoltà',canvas.width/2,canvas.height/2-80);difficultyButtons.forEach(btn=>{ctx.fillStyle='#FFFACD';ctx.strokeStyle='black';ctx.fillRect(btn.x,btn.y,btn.width,btn.height);ctx.strokeRect(btn.x,btn.y,btn.width,btn.height);ctx.fillStyle='black';ctx.font='20px "Courier New"';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(btn.level.name,btn.x+btn.width/2,btn.y+btn.height/2);});ctx.fillStyle='rgba(0,0,0,0.4)';ctx.font='12px "Courier New"';ctx.textAlign='left';ctx.fillText(`v${gameVersion}`,10,canvas.height-10);}
+        function resetToMenu(){hasStarted=false;isAlive=false;score=0;obstacles=[];player.y=GROUND_Y;player.velocityY=0;setupDifficultyButtons();}
         
-        // Funzioni di utilità e listener
-        function drawGround() { ctx.fillStyle = '#A0522D'; ctx.fillRect(0, GROUND_Y, canvas.width, canvas.height - GROUND_Y); ctx.strokeStyle = '#333'; ctx.beginPath(); ctx.moveTo(0, GROUND_Y); ctx.lineTo(canvas.width, GROUND_Y); ctx.stroke(); }
-        function formatTime(totalFrames) { const totalSeconds = Math.floor(totalFrames / 60); const minutes = Math.floor(totalSeconds / 60); const seconds = totalSeconds % 60; return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`; }
-        function drawLives() { ctx.fillStyle = 'black'; ctx.font = '20px "Courier New"'; ctx.textAlign = 'left'; ctx.fillText(`Vite: ${lives}`, 20, 30); }
-        function showGameOverOverlay() { ctx.fillStyle = 'rgba(255, 255, 224, 0.7)'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = 'black'; ctx.font = '40px "Courier New"'; ctx.textAlign = 'center'; ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2 - 20); ctx.font = '20px "Courier New"'; ctx.fillText(`Tempo: ${formatTime(score)}. Clicca per riprovare.`, canvas.width / 2, canvas.height / 2 + 20); }
-        function drawDifficultyScreen() { drawGround(); player.draw(); ctx.fillStyle = 'rgba(255, 255, 224, 0.7)'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = 'black'; ctx.font = '30px "Courier New"'; ctx.textAlign = 'center'; ctx.fillText('Scegli la difficoltà', canvas.width / 2, canvas.height / 2 - 80); const buttonWidth = 150, buttonHeight = 40, spacing = 15; const totalButtonHeight = (buttonHeight * 3) + (spacing * 2); const startY = (canvas.height / 2) - (totalButtonHeight / 2) + 20; difficultyButtons.length = 0; Object.values(difficulties).forEach((level, index) => { const btn = { x: canvas.width / 2 - buttonWidth / 2, y: startY + index * (buttonHeight + spacing), width: buttonWidth, height: buttonHeight, level: level }; difficultyButtons.push(btn); ctx.fillStyle = '#FFFACD'; ctx.strokeStyle = 'black'; ctx.fillRect(btn.x, btn.y, btn.width, btn.height); ctx.strokeRect(btn.x, btn.y, btn.width, btn.height); ctx.fillStyle = 'black'; ctx.font = '20px "Courier New"'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(level.name, btn.x + btn.width / 2, btn.y + btn.height / 2); }); ctx.fillStyle = 'rgba(0, 0, 0, 0.4)'; ctx.font = '12px "Courier New"'; ctx.textAlign = 'left'; ctx.fillText(`v${gameVersion}`, 10, canvas.height - 10); }
-        function resetToMenu() { hasStarted = false; isAlive = false; score = 0; obstacles = []; player.y = GROUND_Y; player.velocityY = 0; }
-        window.addEventListener('keydown', (e) => { if(e.code === 'Space'){if(!audioCtx)audioCtx = new (window.AudioContext || window.webkitAudioContext)();if(hasStarted){e.preventDefault();if(isAlive)player.jump();else startGame();}} if(e.code === 'Escape'){e.preventDefault();resetToMenu();}});
-        canvas.addEventListener('mousedown', handleInteraction);
-        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleInteraction(e); });
-        
+        function resizeCanvas(){const ar=800/300;const nW=window.innerWidth,nH=window.innerHeight;if(nW/nH>ar){canvas.height=nH;canvas.width=nH*ar;}else{canvas.width=nW;canvas.height=nW/ar;}GROUND_Y=canvas.height-50;initLandscape();setupDifficultyButtons();}
+        window.addEventListener('keydown',(e)=>{if(e.code==='Space'){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(hasStarted){e.preventDefault();if(isAlive)player.jump();else startGame();}} if(e.code==='Escape'){e.preventDefault();resetToMenu();}});
+        canvas.addEventListener('mousedown',handleInteraction);canvas.addEventListener('touchstart',(e)=>{e.preventDefault();handleInteraction(e);});
+        window.addEventListener('resize',resizeCanvas);
+
         // --- Inizializzazione ---
-        initLandscape();
+        resizeCanvas();
         requestAnimationFrame(gameLoop);
     </script>
 </body>
