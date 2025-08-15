@@ -43,15 +43,37 @@
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const gameVersion = "5.1";
+        const gameVersion = "5.6"; // Versione aggiornata
         const PLAYER_NAME = "Ony";
 
-        // Imposta il testo della versione nella schermata di rotazione
         document.getElementById('version-text-rotate').textContent = `Runner v${gameVersion}`;
 
         // --- GESTIONE AUDIO ---
         let audioCtx;
-        function playSound(type) { if(!audioCtx) return; const o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); if(type==='jump'){o.type='sine';o.frequency.setValueAtTime(600,audioCtx.currentTime);o.frequency.linearRampToValueAtTime(900,audioCtx.currentTime+0.05);g.gain.setValueAtTime(0.2,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.1);o.start(audioCtx.currentTime);o.stop(audioCtx.currentTime+0.1);}else if(type==='fail'){o.type='sawtooth';o.frequency.setValueAtTime(220,audioCtx.currentTime);o.frequency.linearRampToValueAtTime(110,audioCtx.currentTime+0.2);g.gain.setValueAtTime(0.3,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.25);o.start(audioCtx.currentTime);o.stop(audioCtx.currentTime+0.25);}}
+        function playSound(type) {
+            if (!audioCtx) return;
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            if (type === 'jump') {
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(600, audioCtx.currentTime);
+                oscillator.frequency.linearRampToValueAtTime(900, audioCtx.currentTime + 0.05);
+                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                oscillator.start(audioCtx.currentTime);
+                oscillator.stop(audioCtx.currentTime + 0.1);
+            } else if (type === 'fail') {
+                oscillator.type = 'sawtooth';
+                oscillator.frequency.setValueAtTime(220, audioCtx.currentTime);
+                oscillator.frequency.linearRampToValueAtTime(110, audioCtx.currentTime + 0.2);
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+                oscillator.start(audioCtx.currentTime);
+                oscillator.stop(audioCtx.currentTime + 0.25);
+            }
+        }
 
         // --- IMPOSTAZIONI DI DIFFICOLTÀ ---
         const difficulties = {
@@ -62,122 +84,123 @@
         let currentDifficulty = {};
 
         // --- Variabili di Gioco ---
-        let score=0, highscore=0, isAlive=false, hasStarted=false, totalTime=0, gameSpeed=0, nextObstacleTime=0;
+        let score=0,highscore=0,isAlive=false,hasStarted=false,totalTime=0,gameSpeed=0,nextObstacleTime=0;
+        let isDemoMode=false,demoDayCount=0;
         const GRAVITY=2200, JUMP_FORCE=-750;
         let GROUND_Y = canvas.height - 50;
         const INITIAL_LIVES=3; let lives=0; let isInvincible=false;
         let invincibilityTimer=0, screenFlashTimer=0, lastTime=0;
         const difficultyButtons = [];
 
-        // --- PAESAGGIO E CICLO GIORNO/NOTTE ---
-        const DAY_CYCLE_DURATION = 180;
-        let landscapeLayers=[], stars=[], clouds=[], airborneObjects=[];
-        let timeOfDay = 0;
-        const skyColors = {dawn:{r:255,g:182,b:193}, noon:{r:135,g:206,b:235}, dusk:{r:255,g:165,b:0}, night:{r:12,g:12,b:51}};
+        // --- PAESAGGIO, SEGNALI E CICLO GIORNO/NOTTE ---
+        const DAY_CYCLE_DURATION=120; // Ciclo di 2 minuti
+        let landscapeLayers=[],stars=[],clouds=[],airborneObjects=[],signs=[];
+        let timeOfDay=0;
+        const SIGN_TEXTS=['Putignano','Bologna','Salerno','Trieste','Roma'];
+        let currentSignIndex=0, nextSignTime=0;
+        const skyColors = {dawn:{r:255,g:182,b:193},noon:{r:135,g:206,b:235},dusk:{r:255,g:165,b:0},night:{r:25,g:25,b:112}};
+        
         function lerpColor(c1,c2,f){const r=Math.round(c1.r+f*(c2.r-c1.r)),g=Math.round(c1.g+f*(c2.g-c1.g)),b=Math.round(c1.b+f*(c2.b-c1.b));return`rgb(${r},${g},${b})`;}
-        function getSkyColor(){const p=timeOfDay/DAY_CYCLE_DURATION;if(p<0.25)return lerpColor(skyColors.night,skyColors.dawn,p/0.25);if(p<0.50)return lerpColor(skyColors.dawn,skyColors.noon,(p-0.25)/0.25);if(p<0.75)return lerpColor(skyColors.noon,skyColors.dusk,(p-0.5)/0.25);return lerpColor(skyColors.dusk,skyColors.night,(p-0.75)/0.25);}
-        function initLandscape() {
-            landscapeLayers=[], stars=[], clouds=[], airborneObjects=[];
-            const RENDER_WIDTH = canvas.width * 3;
-            for(let i=0;i<100;i++){stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height*0.6,r:Math.random()*1.5});}
-            for(let i=0;i<15;i++){clouds.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height*0.3,r:20+Math.random()*20,speed:5+Math.random()*5});}
-            for(let i=0;i<5;i++){airborneObjects.push({type:'birds',x:canvas.width+Math.random()*canvas.width,y:Math.random()*canvas.height*0.25,speed:20+Math.random()*15});}
-            let p1=[]; for(let x=0; x<=RENDER_WIDTH; x+=150)p1.push({x:x,y:GROUND_Y-100-Math.random()*50}); landscapeLayers.push({points:p1,color:'#CAD8DE',speedMultiplier:0.1,offsetX:0,objects:[]});
-            let p2=[]; for(let x=0; x<=RENDER_WIDTH; x+=100)p2.push({x:x,y:GROUND_Y-50-Math.random()*40}); landscapeLayers.push({points:p2,color:'#A5C8A5',speedMultiplier:0.2,offsetX:0,objects:[]});
-            let p3=[]; for(let x=0; x<=RENDER_WIDTH; x+=80)p3.push({x:x,y:GROUND_Y-15-Math.random()*25});
-            const obj3=[];
-            const objectTypes = ['house', 'sheep', 'tree', 'horse', 'tractor', 'car'];
-            for(let i=0; i<60; i++){
-                const x = Math.random() * RENDER_WIDTH;
-                const randType = objectTypes[Math.floor(Math.random() * objectTypes.length)];
-                 obj3.push({type: randType, x: x, y: getTerrainY(x, p3)});
-            }
-            obj3.sort((a,b)=>a.x-b.x); landscapeLayers.push({points:p3,color:'#8FBC8F',speedMultiplier:0.4,offsetX:0,objects:obj3});
+        
+        function getSkyColor(simulatedHour) {
+            if (simulatedHour >= 5 && simulatedHour < 7) { return lerpColor(skyColors.night, skyColors.dawn, (simulatedHour - 5) / 2); }
+            if (simulatedHour >= 7 && simulatedHour < 9) { return lerpColor(skyColors.dawn, skyColors.noon, (simulatedHour - 7) / 2); }
+            if (simulatedHour >= 9 && simulatedHour < 17) { return `rgb(${skyColors.noon.r}, ${skyColors.noon.g}, ${skyColors.noon.b})`; }
+            if (simulatedHour >= 17 && simulatedHour < 19) { return lerpColor(skyColors.noon, skyColors.dusk, (simulatedHour - 17) / 2); }
+            if (simulatedHour >= 19 && simulatedHour < 21) { return lerpColor(skyColors.dusk, skyColors.night, (simulatedHour - 19) / 2); }
+            return `rgb(${skyColors.night.r}, ${skyColors.night.g}, ${skyColors.night.b})`;
         }
+
+        function initLandscape(){landscapeLayers=[],stars=[],clouds=[],airborneObjects=[];const RENDER_WIDTH=canvas.width*3;for(let i=0;i<150;i++){stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height*0.6,r:Math.random()*1.8});} for(let i=0;i<15;i++){clouds.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height*0.3,r:20+Math.random()*20,speed:5+Math.random()*5});} for(let i=0;i<5;i++){airborneObjects.push({type:'birds',x:canvas.width+Math.random()*canvas.width,y:Math.random()*canvas.height*0.25,speed:20+Math.random()*15});} let p1=[];for(let x=0;x<=RENDER_WIDTH;x+=150)p1.push({x:x,y:GROUND_Y-100-Math.random()*50});landscapeLayers.push({points:p1,color:'#CAD8DE',speedMultiplier:0.1,offsetX:0,objects:[]});let p2=[];for(let x=0;x<=RENDER_WIDTH;x+=100)p2.push({x:x,y:GROUND_Y-50-Math.random()*40});landscapeLayers.push({points:p2,color:'#A5C8A5',speedMultiplier:0.2,offsetX:0,objects:[]});let p3=[];for(let x=0;x<=RENDER_WIDTH;x+=80)p3.push({x:x,y:GROUND_Y-15-Math.random()*25});const obj3=[];const objectTypes=['house','sheep','tree','horse','tractor','car'];for(let i=0;i<60;i++){const x=Math.random()*RENDER_WIDTH;let randType=objectTypes[Math.floor(Math.random()*objectTypes.length)];const objData={type:randType,x:x,y:getTerrainY(x,p3)};obj3.push(objData);} obj3.sort((a,b)=>a.x-b.x);landscapeLayers.push({points:p3,color:'#8FBC8F',speedMultiplier:0.4,offsetX:0,objects:obj3});}
         function getTerrainY(x,points){const p1=points.slice().reverse().find(p=>p.x<=x);const p2=points.find(p=>p.x>x);if(p1&&p2){const m=(p2.y-p1.y)/(p2.x-p1.x);return p1.y+m*(x-p1.x);}return p1?p1.y:GROUND_Y;}
-        function drawSky(){ctx.fillStyle=getSkyColor();ctx.fillRect(0,0,canvas.width,canvas.height);const nightFactor=Math.max(0,1-Math.abs(timeOfDay-DAY_CYCLE_DURATION*0.75)/(DAY_CYCLE_DURATION*0.25));const dayFactor=1-nightFactor;const angle=(timeOfDay/DAY_CYCLE_DURATION)*2*Math.PI-Math.PI/2;const cX=canvas.width/2-Math.cos(angle)*canvas.width*0.4;const cY=canvas.height*0.7-Math.sin(angle)*canvas.height*0.6;if(dayFactor>0.1){ctx.fillStyle=`rgba(255,255,0,${dayFactor*0.8})`;ctx.beginPath();ctx.arc(cX,cY,20,0,Math.PI*2);ctx.fill();} if(nightFactor>0.1){ctx.fillStyle=`rgba(240,240,240,${nightFactor*0.8})`;ctx.beginPath();ctx.arc(cX,cY,15,0,Math.PI*2);ctx.fill();} if(nightFactor>0){stars.forEach(s=>{ctx.fillStyle=`rgba(255,255,255,${nightFactor*(0.5+Math.random()*0.5)})`;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,2*Math.PI);ctx.fill();});}}
-        function drawClouds(dt){clouds.forEach(c=>{c.x-=c.speed*dt;if(c.x+c.r*2<0)c.x=canvas.width+c.r*2;ctx.fillStyle='rgba(255,255,255,0.7)';ctx.beginPath();ctx.arc(c.x,c.y,c.r,0,Math.PI*2);ctx.arc(c.x+c.r/2,c.y,c.r,0,Math.PI*2);ctx.arc(c.x-c.r/2,c.y,c.r,0,Math.PI*2);ctx.fill();});}
+        
+        function drawSky(simulatedHour){ctx.fillStyle=getSkyColor(simulatedHour);ctx.fillRect(0,0,canvas.width,canvas.height);if(simulatedHour>6&&simulatedHour<18){const sunProgress=(simulatedHour-6)/12;const sunAngle=sunProgress*Math.PI;const sunX=sunProgress*canvas.width;const sunY=GROUND_Y-Math.sin(sunAngle)*(canvas.height*0.7);ctx.fillStyle=`rgba(255,255,0,0.8)`;ctx.beginPath();ctx.arc(sunX,sunY,20,0,Math.PI*2);ctx.fill();}if(simulatedHour>18||simulatedHour<6){let moonProgress=(simulatedHour>18)?(simulatedHour-18)/12:(simulatedHour+6)/12;const moonAngle=moonProgress*Math.PI;const moonX=moonProgress*canvas.width;const moonY=GROUND_Y-Math.sin(moonAngle)*(canvas.height*0.6);const nightIntensity=1-(Math.abs(simulatedHour-12)/12);ctx.fillStyle=`rgba(240,240,240,0.8)`;ctx.beginPath();ctx.arc(moonX,moonY,15,0,Math.PI*2);ctx.fill();ctx.fillStyle=getSkyColor(simulatedHour);ctx.beginPath();ctx.arc(moonX-5,moonY-5,14,0,Math.PI*2);ctx.fill();stars.forEach(s=>{ctx.fillStyle=`rgba(255,255,255,${nightIntensity*(0.7+Math.random()*0.3)})`;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,2*Math.PI);ctx.fill();});}}
+        
+        function drawClouds(dt){const simulatedHour=(7+(timeOfDay/DAY_CYCLE_DURATION)*24)%24;let opacity=0.75;if(simulatedHour>21||simulatedHour<5){opacity=0.2;}else if(simulatedHour>=18&&simulatedHour<=21||simulatedHour>=5&&simulatedHour<=7){opacity=0.4;}clouds.forEach(c=>{c.x-=c.speed*dt;if(c.x+c.r*2<0)c.x=canvas.width+c.r*2;ctx.fillStyle=`rgba(255,255,255,${opacity})`;ctx.beginPath();ctx.arc(c.x,c.y,c.r,0,Math.PI*2);ctx.arc(c.x+c.r/2,c.y,c.r,0,Math.PI*2);ctx.arc(c.x-c.r/2,c.y,c.r,0,Math.PI*2);ctx.fill();});}
         function drawAirborneObjects(dt){airborneObjects.forEach(a=>{a.x-=a.speed*dt;if(a.x<-50)a.x=canvas.width+50;if(a.type==='birds'){ctx.strokeStyle='black';ctx.lineWidth=2;ctx.beginPath();for(let i=0;i<5;i++){const bX=a.x+i*20,bY=a.y+Math.sin(totalTime*5+i)*5;ctx.moveTo(bX-10,bY);ctx.quadraticCurveTo(bX,bY-10,bX+10,bY);}}ctx.stroke();});}
         
-        function drawLandscapeObject(obj,offsetX){const x=obj.x+offsetX;const y=obj.y;const isNight=timeOfDay/DAY_CYCLE_DURATION>0.6&&timeOfDay/DAY_CYCLE_DURATION<0.9;if(!obj.details){obj.details={};} switch(obj.type){case 'house':if(!obj.details.width){obj.details={width:40+Math.random()*20,height:30+Math.random()*15,color:`hsl(${Math.random()*30+10},40%,70%)`,roofColor:`hsl(${Math.random()*20+5},50%,45%)`};} const h=obj.details;ctx.fillStyle=h.color;ctx.fillRect(x-h.width/2,y-h.height,h.width,h.height);if(isNight){ctx.fillStyle='yellow';ctx.fillRect(x-h.width/4,y-h.height/2,h.width/4,h.height/4);} ctx.fillStyle=h.roofColor;ctx.beginPath();ctx.moveTo(x-h.width/2-5,y-h.height);ctx.lineTo(x+h.width/2+5,y-h.height);ctx.lineTo(x,y-h.height-20);ctx.closePath();ctx.fill();break;case 'sheep':if(!obj.details.state){obj.details={state:'down',timer:Math.random()*3};} const s=obj.details;ctx.fillStyle='#FFFFFF';ctx.beginPath();ctx.arc(x,y-10,6,0,Math.PI*2);ctx.arc(x+5,y-12,5,0,Math.PI*2);ctx.arc(x-5,y-12,5,0,Math.PI*2);ctx.fill();let sHeadY=(s.state==='down')?y-8:y-18;ctx.fillStyle='#333333';ctx.beginPath();ctx.arc(x+10,sHeadY,4,0,Math.PI*2);ctx.fill();break;case 'horse':if(!obj.details.state){obj.details={state:'down',timer:Math.random()*3,color:`hsl(30,50%,${20+Math.random()*15}%)`};} const p=obj.details;ctx.fillStyle=p.color;ctx.beginPath();ctx.ellipse(x,y-15,12,8,0,0,Math.PI*2);ctx.fill();let pHeadY=(p.state==='down')?y-15:y-25;ctx.beginPath();ctx.arc(x+15,pHeadY,5,0,Math.PI*2);ctx.fill();ctx.fillRect(x-10,y-10,2,10);ctx.fillRect(x+5,y-10,2,10);break;case 'tree':if(!obj.details.height){obj.details={height:20+Math.random()*30,radius:6+Math.random()*6};} const t=obj.details;ctx.fillStyle='#8B4513';ctx.fillRect(x-2,y-t.height,4,t.height);ctx.fillStyle=`hsl(120,60%,${25+Math.random()*10}%)`;ctx.beginPath();ctx.arc(x,y-t.height,t.radius,0,Math.PI*2);ctx.arc(x+t.radius/2,y-t.height-5,t.radius,0,Math.PI*2);ctx.arc(x-t.radius/2,y-t.height-5,t.radius,0,Math.PI*2);ctx.fill();break;case 'tractor':ctx.fillStyle='red';ctx.fillRect(x-15,y-20,30,15);ctx.fillRect(x,y-30,10,10);ctx.fillStyle='black';ctx.beginPath();ctx.arc(x+10,y-8,8,0,Math.PI*2);ctx.arc(x-12,y-5,4,0,Math.PI*2);ctx.fill();break;case 'car':if(!obj.details.color){obj.details.color=`hsl(${180+Math.random()*60},50%,50%)`;} ctx.fillStyle=obj.details.color;ctx.fillRect(x-20,y-15,40,10);ctx.beginPath();ctx.roundRect(x-15,y-25,30,10,[5,5,0,0]);ctx.fill();ctx.fillStyle='black';ctx.beginPath();ctx.arc(x-10,y-5,4,0,Math.PI*2);ctx.arc(x+10,y-5,4,0,Math.PI*2);ctx.fill();break;}}
-        function updateLandscape(dt){landscapeLayers.forEach(l=>{l.offsetX-=gameSpeed*l.speedMultiplier*dt;if(l.offsetX<-canvas.width*3){l.offsetX+=canvas.width*3;} l.objects.forEach(obj=>{if(obj.type==='sheep'||obj.type==='horse'){obj.details.timer-=dt;if(obj.details.timer<=0){obj.details.state=(obj.details.state==='down')?'up':'down';obj.details.timer=1+Math.random()*2;}}});});}
-        function drawLandscape(){landscapeLayers.forEach(l=>{ctx.fillStyle=l.color;ctx.beginPath();ctx.moveTo(l.points[0].x+l.offsetX,canvas.height);l.points.forEach(p=>{ctx.lineTo(p.x+l.offsetX,p.y);});ctx.lineTo(l.points[l.points.length-1].x+l.offsetX,canvas.height);ctx.closePath();ctx.fill();l.objects.forEach(obj=>{drawLandscapeObject(obj,l.offsetX);});});}
+        function drawLandscapeObject(obj,offsetX,simulatedHour){const x=obj.x+offsetX;const y=obj.y;const isNight=simulatedHour>19||simulatedHour<6;if(!obj.details)obj.details={};switch(obj.type){case 'house':if(!obj.details.width)obj.details={width:40+Math.random()*20,height:30+Math.random()*15,color:`hsl(${Math.random()*30+10},40%,70%)`,roofColor:`hsl(${Math.random()*20+5},50%,45%)`};const h=obj.details;ctx.fillStyle=h.color;ctx.fillRect(x-h.width/2,y-h.height,h.width,h.height);if(isNight){ctx.fillStyle='yellow';ctx.fillRect(x-h.width/4,y-h.height/2,h.width/4,h.height/4);} ctx.fillStyle=h.roofColor;ctx.beginPath();ctx.moveTo(x-h.width/2-5,y-h.height);ctx.lineTo(x+h.width/2+5,y-h.height);ctx.lineTo(x,y-h.height-20);ctx.closePath();ctx.fill();break;case 'tree':if(!obj.details.height)obj.details={height:20+Math.random()*30,radius:6+Math.random()*6};const t=obj.details;ctx.fillStyle='#8B4513';ctx.fillRect(x-2,y-t.height,4,t.height);ctx.fillStyle=`hsl(120,60%,${25+Math.random()*10}%)`;ctx.beginPath();ctx.arc(x,y-t.height,t.radius,0,Math.PI*2);ctx.arc(x+t.radius/2,y-t.height-5,t.radius,0,Math.PI*2);ctx.arc(x-t.radius/2,y-t.height-5,t.radius,0,Math.PI*2);ctx.fill();break;case 'sheep':case 'horse':case 'tractor':case 'car':if(isNight)return;if(obj.type==='sheep'){if(!obj.details.state)obj.details={state:'down',timer:Math.random()*3};const s=obj.details;ctx.fillStyle='#FFFFFF';ctx.beginPath();ctx.arc(x,y-10,6,0,Math.PI*2);ctx.arc(x+5,y-12,5,0,Math.PI*2);ctx.arc(x-5,y-12,5,0,Math.PI*2);ctx.fill();let sHeadY=(s.state==='down')?y-8:y-18;ctx.fillStyle='#333333';ctx.beginPath();ctx.arc(x+10,sHeadY,4,0,Math.PI*2);ctx.fill();}else if(obj.type==='horse'){if(!obj.details.state)obj.details={state:'down',timer:Math.random()*3,color:`hsl(30,50%,${20+Math.random()*15}%)`};const p=obj.details;ctx.fillStyle=p.color;ctx.beginPath();ctx.ellipse(x,y-15,12,8,0,0,Math.PI*2);ctx.fill();let pHeadY=(p.state==='down')?y-15:y-25;ctx.beginPath();ctx.arc(x+15,pHeadY,5,0,Math.PI*2);ctx.fill();ctx.fillRect(x-10,y-10,2,10);ctx.fillRect(x+5,y-10,2,10);}else if(obj.type==='tractor'){ctx.fillStyle='red';ctx.fillRect(x-15,y-20,30,15);ctx.fillRect(x,y-30,10,10);ctx.fillStyle='black';ctx.beginPath();ctx.arc(x+10,y-8,8,0,Math.PI*2);ctx.arc(x-12,y-5,4,0,Math.PI*2);ctx.fill();}else if(obj.type==='car'){if(!obj.details.color)obj.details.color=`hsl(${180+Math.random()*60},50%,50%)`;ctx.fillStyle=obj.details.color;ctx.fillRect(x-20,y-15,40,10);ctx.beginPath();ctx.roundRect(x-15,y-25,30,10,[5,5,0,0]);ctx.fill();ctx.fillStyle='black';ctx.beginPath();ctx.arc(x-10,y-5,4,0,Math.PI*2);ctx.arc(x+10,y-5,4,0,Math.PI*2);ctx.fill();}break;}}
+        function updateLandscape(dt){landscapeLayers.forEach(l=>{l.offsetX-=gameSpeed*l.speedMultiplier*dt;if(l.offsetX<-canvas.width*3)l.offsetX+=canvas.width*3;l.objects.forEach(obj=>{if(obj.type==='sheep'||obj.type==='horse'){obj.details.timer-=dt;if(obj.details.timer<=0){obj.details.state=(obj.details.state==='down')?'up':'down';obj.details.timer=1+Math.random()*2;}}});});}
+        function drawLandscape(simulatedHour){landscapeLayers.forEach(l=>{ctx.fillStyle=l.color;ctx.beginPath();ctx.moveTo(l.points[0].x+l.offsetX,canvas.height);l.points.forEach(p=>{ctx.lineTo(p.x+l.offsetX,p.y);});ctx.lineTo(l.points[l.points.length-1].x+l.offsetX,canvas.height);ctx.closePath();ctx.fill();l.objects.forEach(obj=>{drawLandscapeObject(obj,l.offsetX,simulatedHour);});});}
 
-        // --- Giocatore ---
-        const player = {x:50,y:GROUND_Y,width:30,height:50,velocityY:0,isJumping:false,draw(){ctx.save();ctx.strokeStyle='black';ctx.lineWidth=3;ctx.lineCap='round';const cX=this.x+this.width/2,bY=this.y-1,hR=8;const hY=bY-this.height+hR;ctx.beginPath();ctx.arc(cX,hY,hR,0,Math.PI*2);ctx.stroke();const tSY=hY+hR,tEY=bY-this.height/2;ctx.beginPath();ctx.moveTo(cX,tSY);ctx.lineTo(cX,tEY);ctx.stroke();const aF=Math.floor(totalTime*10)%2;if(this.isJumping){ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX-10,tEY+10);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX+10,tEY+10);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX-5,bY-10);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX+5,bY);ctx.stroke();}else if(aF===0){ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX-15,tEY+5);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX+15,tEY+5);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX-10,bY);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX+15,bY);ctx.stroke();}else{ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX+15,tEY-5);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX-15,tEY-5);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX+10,bY);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX-15,bY);ctx.stroke();} ctx.restore();this.drawLabel();},drawLabel(){const oY=25,rW=60,rH=25,pX=this.x+this.width/2;const pY=this.y-this.height;ctx.beginPath();ctx.moveTo(pX,pY);ctx.lineTo(pX,pY-oY);ctx.strokeStyle='black';ctx.stroke();const rX=pX-rW/2,rY=pY-oY-rH;ctx.fillStyle='white';ctx.strokeStyle='black';ctx.fillRect(rX,rY,rW,rH);ctx.strokeRect(rX,rY,rW,rH);ctx.fillStyle='black';ctx.font='16px "Courier New"';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(PLAYER_NAME,pX,rY+rH/2);},update(dt){this.velocityY+=GRAVITY*dt;this.y+=this.velocityY*dt;if(this.y>GROUND_Y){this.y=GROUND_Y;this.velocityY=0;this.isJumping=false;}},jump(){if(!this.isJumping&&isAlive){this.velocityY=JUMP_FORCE;this.isJumping=true;playSound('jump');}}};
-
-        // --- Ostacoli ---
+        // --- Giocatore e Pilota Automatico ---
+        const player = {x:0,y:GROUND_Y,width:30,height:50,velocityY:0,isJumping:false,draw(){ctx.save();ctx.strokeStyle='black';ctx.lineWidth=3;ctx.lineCap='round';const cX=this.x+this.width/2,bY=this.y-1,hR=8;const hY=bY-this.height+hR;ctx.beginPath();ctx.arc(cX,hY,hR,0,Math.PI*2);ctx.stroke();const tSY=hY+hR,tEY=bY-this.height/2;ctx.beginPath();ctx.moveTo(cX,tSY);ctx.lineTo(cX,tEY);ctx.stroke();const aF=Math.floor(totalTime*10)%2;if(this.isJumping){ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX-10,tEY+10);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX+10,tEY+10);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX-5,bY-10);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX+5,bY);ctx.stroke();}else if(aF===0){ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX-15,tEY+5);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX+15,tEY+5);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX-10,bY);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX+15,bY);ctx.stroke();}else{ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX+15,tEY-5);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX-15,tEY-5);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX+10,bY);ctx.stroke();ctx.beginPath();ctx.moveTo(cX,tEY);ctx.lineTo(cX-15,bY);ctx.stroke();} ctx.restore();this.drawLabel();},drawLabel(){const oY=25,rW=60,rH=25,pX=this.x+this.width/2;const pY=this.y-this.height;ctx.beginPath();ctx.moveTo(pX,pY);ctx.lineTo(pX,pY-oY);ctx.strokeStyle='black';ctx.stroke();const rX=pX-rW/2,rY=pY-oY-rH;ctx.fillStyle='white';ctx.strokeStyle='black';ctx.fillRect(rX,rY,rW,rH);ctx.strokeRect(rX,rY,rW,rH);ctx.fillStyle='black';ctx.font='16px "Courier New"';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(PLAYER_NAME,pX,rY+rH/2);},update(dt){this.velocityY+=GRAVITY*dt;this.y+=this.velocityY*dt;if(this.y>GROUND_Y){this.y=GROUND_Y;this.velocityY=0;this.isJumping=false;}},jump(){if(!this.isJumping&&isAlive){this.velocityY=JUMP_FORCE;this.isJumping=true;if(!isDemoMode)playSound('jump');}}};
+        function autopilot(){const o=obstacles.find(obs=>obs.x+obs.width>player.x);if(!o)return;const d=o.x-(player.x+player.width);const rD=gameSpeed*0.45;if(o.type==='ground'&&d>0&&d<rD){player.jump();}}
+        
+        // --- Ostacoli e Segnali ---
         let obstacles = [];
+        function calculateNextSignTime(){nextSignTime=totalTime+10+Math.random()*5;}
+        function generateSign(){const sign={x:canvas.width+100,y:GROUND_Y,text:SIGN_TEXTS[currentSignIndex]};signs.push(sign);currentSignIndex=(currentSignIndex+1)%SIGN_TEXTS.length;}
+        function updateAndDrawSigns(dt){for(let i=signs.length-1;i>=0;i--){const sign=signs[i];sign.x-=gameSpeed*0.4*dt;const x=sign.x,y=sign.y;ctx.fillStyle='#8B4513';ctx.fillRect(x-3,y-50,6,50);ctx.fillStyle='#1E90FF';ctx.strokeStyle='white';ctx.lineWidth=3;ctx.fillRect(x-50,y-90,100,40);ctx.strokeRect(x-50,y-90,100,40);ctx.fillStyle='white';ctx.font='bold 16px "Courier New"';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(sign.text,x,y-70);if(sign.x<-100)signs.splice(i,1);}}
         function calculateNextObstacleTime(){const{minObstacleInterval,maxObstacleInterval}=currentDifficulty;nextObstacleTime=totalTime+(Math.random()*(maxObstacleInterval-minObstacleInterval)+minObstacleInterval);}
         function generateObstacle(){const r=Math.random();let o={x:canvas.width,width:20,height:40,y:0,type:'ground'};if(r<0.65){o.height=25;o.width=25;o.y=GROUND_Y-o.height;}else if(r<0.85){o.height=50;o.y=GROUND_Y-o.height;}else{o.type='flying';o.width=35;o.height=20;o.y=GROUND_Y-player.height-(25+Math.random()*20);}obstacles.push(o);}
-        function updateObstacles(dt){if(totalTime>=nextObstacleTime){generateObstacle();calculateNextObstacleTime();} for(let i=obstacles.length-1;i>=0;i--){const o=obstacles[i];o.x-=gameSpeed*dt;if(o.type==='flying'){ctx.fillStyle='#4169E1';}else{ctx.fillStyle='#DC143C';} ctx.fillRect(o.x,o.y,o.width,o.height);const pH={x:player.x,y:player.y-player.height,width:player.width,height:player.height};const oH={x:o.x,y:o.y,width:o.width,height:o.height};if(!isInvincible&&pH.x<oH.x+oH.width&&pH.x+pH.width>oH.x&&pH.y<oH.y+oH.height&&pH.y+pH.height>oH.y){handleCollision();} if(o.x+o.width<0){obstacles.splice(i,1);}}}
+        function updateObstacles(dt){if(totalTime>=nextObstacleTime){generateObstacle();calculateNextObstacleTime();} for(let i=obstacles.length-1;i>=0;i--){const o=obstacles[i];o.x-=gameSpeed*dt;if(o.type==='flying'){ctx.fillStyle='#4169E1';}else{ctx.fillStyle='#DC143C';} ctx.fillRect(o.x,o.y,o.width,o.height);const pH={x:player.x,y:player.y-player.height,width:player.width,height:player.height};const oH={x:o.x,y:o.y,width:o.width,height:o.height};if(!isInvincible&&!isDemoMode&&pH.x<oH.x+oH.width&&pH.x+pH.width>oH.x&&pH.y<oH.y+oH.height&&pH.y+pH.height>oH.y){handleCollision();} if(o.x+o.width<0){obstacles.splice(i,1);}}}
         
         // --- Funzioni di Gioco e UI ---
-        function startGame(){isAlive=true;hasStarted=true;score=0;gameSpeed=currentDifficulty.initialSpeed;obstacles=[];player.y=GROUND_Y;player.velocityY=0;totalTime=0;lastTime=0;lives=INITIAL_LIVES;isInvincible=false;invincibilityTimer=0;initLandscape();calculateNextObstacleTime();}
+        function startGame(){
+            isAlive=true;hasStarted=true;score=0;gameSpeed=currentDifficulty.initialSpeed;
+            obstacles=[];signs=[];currentSignIndex=0;
+            player.y=GROUND_Y;player.velocityY=0;
+            totalTime=0;lastTime=0;lives=INITIAL_LIVES;
+            isInvincible=false;invincibilityTimer=0;timeOfDay=0;
+            if(!isDemoMode){demoDayCount=0;}
+            initLandscape();
+            calculateNextObstacleTime();
+            // *** MODIFICA: Imposta il primo cartello entro 3 secondi ***
+            nextSignTime = 0.5 + Math.random() * 2.5; 
+        }
         function triggerGameOver(){isAlive=false;if(score>highscore){highscore=score;}}
         function handleCollision(){playSound('fail');screenFlashTimer=0.2;lives--;if(lives<=0){triggerGameOver();}else{isInvincible=true;invincibilityTimer=2.0;}}
-        function setupDifficultyButtons(){difficultyButtons.length=0;const bW=150,bH=40,s=15;const tH=(Object.keys(difficulties).length*(bH+s))-s;const sY=(canvas.height/2)-(tH/2)+20;Object.values(difficulties).forEach((l,i)=>{const btn={x:canvas.width/2-bW/2,y:sY+i*(bH+s),width:bW,height:bH,level:l};difficultyButtons.push(btn);});}
+        function setupDifficultyButtons(){difficultyButtons.length=0;const btnW=150,btnH=40,sp=15;const numButtons=Object.keys(difficulties).length+1;const tH=(numButtons*btnH)+((numButtons-1)*sp);const titleY=canvas.height/2-115;const panelBottom=canvas.height/2+160;const availableSpace=panelBottom-titleY-60;const sY=titleY+60+(availableSpace-tH)/2-20;Object.values(difficulties).forEach((l,i)=>{const btn={x:canvas.width/2-btnW/2,y:sY+i*(btnH+sp),width:btnW,height:btnH,level:l};difficultyButtons.push(btn);});const demoBtn={x:canvas.width/2-btnW/2,y:sY+(numButtons-1)*(btnH+sp),width:btnW,height:btnH,level:{name:'Demo'},type:'demo'};difficultyButtons.push(demoBtn);}
+        function drawLives(){const t=`Vite: ${lives}`;ctx.font='20px "Courier New"';const m=ctx.measureText(t);const bW=m.width+20,bH=30,bX=15,bY=15;ctx.fillStyle='rgba(255,255,255,0.6)';ctx.beginPath();ctx.roundRect(bX,bY,bW,bH,8);ctx.fill();ctx.fillStyle='black';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(t,bX+10,bY+bH/2+1);}
         
-        function drawLives() {
-            const text = `Vite: ${lives}`;
-            ctx.font = '20px "Courier New"';
-            const textMetrics = ctx.measureText(text);
-            const boxWidth = textMetrics.width + 20;
-            const boxHeight = 30;
-            const boxX = 15;
-            const boxY = 15;
-
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-            ctx.beginPath();
-            ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 8);
-            ctx.fill();
-
-            ctx.fillStyle = 'black';
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(text, boxX + 10, boxY + boxHeight / 2 + 1);
-        }
-
+        // *** MODIFICA: Funzione per disegnare Punteggio e Record ***
         function drawScore() {
-            const text = `${PLAYER_NAME} HI ${formatTime(highscore)} ${formatTime(score)}`;
-            ctx.font = '20px "Courier New"';
-            const textMetrics = ctx.measureText(text);
-            const boxWidth = textMetrics.width + 20;
-            const boxHeight = 30;
-            const boxX = canvas.width - boxWidth - 15;
-            const boxY = 15;
+            const scoreText = `Punteggio: ${formatTime(score)}`;
+            const hiScoreText = `HI ${formatTime(highscore)}`;
+            const fullText = `${scoreText}   ${hiScoreText}`;
 
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.font = '20px "Courier New"';
+            const m = ctx.measureText(fullText);
+            const bW = m.width + 20, bH = 30;
+            const bX = canvas.width - bW - 15, bY = 15;
+
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
             ctx.beginPath();
-            ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 8);
+            ctx.roundRect(bX, bY, bW, bH, 8);
             ctx.fill();
-            
+
             ctx.fillStyle = 'black';
-            ctx.textAlign = 'right';
             ctx.textBaseline = 'middle';
-            ctx.fillText(text, canvas.width - 15 - 10, boxY + boxHeight / 2 + 1);
+
+            // Disegna il punteggio allineato a sinistra nel riquadro
+            ctx.textAlign = 'left';
+            ctx.fillText(scoreText, bX + 10, bY + bH / 2 + 1);
+
+            // Disegna il record allineato a destra nel riquadro
+            ctx.textAlign = 'right';
+            ctx.fillText(hiScoreText, bX + bW - 10, bY + bH / 2 + 1);
         }
+
+        function drawDigitalClock(simulatedHour){const hour=Math.floor(simulatedHour);const minute=Math.floor((simulatedHour*60)%60);const timeString=`${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`;ctx.font='22px "Courier New"';const textMetrics=ctx.measureText(timeString);const boxWidth=textMetrics.width+20;const boxX=canvas.width/2-boxWidth/2;ctx.fillStyle='rgba(255,255,255,0.6)';ctx.beginPath();ctx.roundRect(boxX,15,boxWidth,30,8);ctx.fill();ctx.fillStyle='black';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(timeString,canvas.width/2,15+15+1);}
 
         function gameLoop(timestamp) {
             if(!lastTime){lastTime=timestamp;requestAnimationFrame(gameLoop);return;}
             const deltaTime=(timestamp-lastTime)/1000;lastTime=timestamp;
             if(deltaTime>0.1){requestAnimationFrame(gameLoop);return;}
-
-            drawSky();
-            drawAirborneObjects(deltaTime);
-            drawClouds(deltaTime);
-            drawLandscape();
-
-            if(screenFlashTimer>0){ctx.fillStyle='rgba(255,0,0,0.3)';ctx.fillRect(0,0,canvas.width,canvas.height);screenFlashTimer-=deltaTime;}
-
+            
             if(!hasStarted){
                 drawDifficultyScreen();
             } else {
-                drawGround();drawScore();drawLives();
+                const simulatedHour=(7+(timeOfDay/DAY_CYCLE_DURATION)*24)%24;
+                drawSky(simulatedHour);drawAirborneObjects(deltaTime);drawClouds(deltaTime);drawLandscape(simulatedHour);updateAndDrawSigns(deltaTime);drawGround();drawScore();drawLives();drawDigitalClock(simulatedHour);
                 if(isAlive){
                     timeOfDay=(timeOfDay+deltaTime)%DAY_CYCLE_DURATION;
+                    if(isDemoMode&&timeOfDay<deltaTime){demoDayCount++;const difficultyNames=['facile','medio','difficile'];const currentDifficultyName=difficultyNames[demoDayCount%3];currentDifficulty=difficulties[currentDifficultyName];gameSpeed=currentDifficulty.initialSpeed;calculateNextObstacleTime();}
+                    if(totalTime>=nextSignTime){generateSign();calculateNextSignTime();}
                     totalTime+=deltaTime;score+=deltaTime*10;gameSpeed+=currentDifficulty.speedIncrement*deltaTime;
                     if(isInvincible){invincibilityTimer-=deltaTime;if(invincibilityTimer<=0)isInvincible=false;}
+                    if(isDemoMode)autopilot();
                     player.update(deltaTime);
                     updateLandscape(deltaTime);
                     updateObstacles(deltaTime);
@@ -186,25 +209,21 @@
                 }
                 if(isInvincible&&Math.floor(totalTime*10)%2!==0){}else{player.draw();}
                 ctx.fillStyle='rgba(0,0,0,0.3)';ctx.font='12px "Courier New"';ctx.textAlign='left';ctx.fillText(`v${gameVersion}`,10,canvas.height-10);
+                if(isDemoMode){ctx.fillStyle='rgba(255,255,255,0.8)';ctx.font='16px "Courier New"';ctx.textAlign='center';ctx.fillText(`Demo - ${currentDifficulty.name} (Giorno ${demoDayCount+1})`,canvas.width/2,canvas.height-30);}
             }
             requestAnimationFrame(gameLoop);
         }
         
-        function handleInteraction(event){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();const r=canvas.getBoundingClientRect();const x=(event.clientX||event.touches[0].clientX)-r.left;const y=(event.clientY||event.touches[0].clientY)-r.top;if(!hasStarted){difficultyButtons.forEach(btn=>{if(x>btn.x&&x<btn.x+btn.width&&y>btn.y&&y<btn.y+btn.height){currentDifficulty=btn.level;startGame();}});
-        }else if(!isAlive){startGame();}else{player.jump();}}
+        function handleInteraction(event){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();const r=canvas.getBoundingClientRect();const x=(event.clientX||event.touches[0].clientX)-r.left;const y=(event.clientY||event.touches[0].clientY)-r.top;if(!hasStarted){const clickedBtn=difficultyButtons.find(btn=>x>btn.x&&x<btn.x+btn.width&&y>btn.y&&y<btn.y+btn.height);if(clickedBtn){if(clickedBtn.type==='demo'){isDemoMode=true;demoDayCount=0;currentDifficulty=difficulties.facile;startGame();}else{isDemoMode=false;currentDifficulty=clickedBtn.level;startGame();}}}else if(!isAlive){startGame();}else{player.jump();}}
         function drawGround(){ctx.fillStyle='#A0522D';ctx.fillRect(0,GROUND_Y,canvas.width,canvas.height-GROUND_Y);ctx.strokeStyle='#333';ctx.beginPath();ctx.moveTo(0,GROUND_Y);ctx.lineTo(canvas.width,GROUND_Y);ctx.stroke();}
         function formatTime(s){const tS=Math.floor(s/10);const m=Math.floor(tS/60);const sec=tS%60;return`${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;}
-        
-        function showGameOverOverlay(){ctx.fillStyle='rgba(255,255,224,0.7)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='black';ctx.font='40px "Courier New"';ctx.textAlign='center';ctx.fillText('Game Over!',canvas.width/2,canvas.height/2-20);ctx.font='20px "Courier New"';ctx.fillText(`Tempo: ${formatTime(score)}. Clicca per riprovare.`,canvas.width/2,canvas.height/2+20);}
-        function drawDifficultyScreen(){drawGround();player.draw();ctx.fillStyle='rgba(255,255,224,0.7)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='black';ctx.font='30px "Courier New"';ctx.textAlign='center';ctx.fillText('Scegli la difficoltà',canvas.width/2,canvas.height/2-80);difficultyButtons.forEach(btn=>{ctx.fillStyle='#FFFACD';ctx.strokeStyle='black';ctx.fillRect(btn.x,btn.y,btn.width,btn.height);ctx.strokeRect(btn.x,btn.y,btn.width,btn.height);ctx.fillStyle='black';ctx.font='20px "Courier New"';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(btn.level.name,btn.x+btn.width/2,btn.y+btn.height/2);});ctx.fillStyle='rgba(0,0,0,0.4)';ctx.font='12px "Courier New"';ctx.textAlign='left';ctx.fillText(`v${gameVersion}`,10,canvas.height-10);}
-        function resetToMenu(){hasStarted=false;isAlive=false;score=0;obstacles=[];player.y=GROUND_Y;player.velocityY=0;setupDifficultyButtons();}
-        
-        function resizeCanvas(){const ar=800/300;const nW=window.innerWidth,nH=window.innerHeight;if(nW/nH>ar){canvas.height=nH;canvas.width=nH*ar;}else{canvas.width=nW;canvas.height=nW/ar;}GROUND_Y=canvas.height-50;initLandscape();setupDifficultyButtons();}
-        window.addEventListener('keydown',(e)=>{if(e.code==='Space'){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(hasStarted){e.preventDefault();if(isAlive)player.jump();else startGame();}} if(e.code==='Escape'){e.preventDefault();resetToMenu();}});
+        function showGameOverOverlay(){ctx.fillStyle='rgba(255,255,224,0.7)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='black';ctx.font='40px "Courier New"';ctx.textAlign='center';ctx.fillText('Game Over!',canvas.width/2,canvas.height/2-20);ctx.font='20px "Courier New"';ctx.fillText(`Punteggio: ${formatTime(score)}. Clicca per riprovare.`,canvas.width/2,canvas.height/2+20);}
+        function drawDifficultyScreen(){ctx.fillStyle='#87CEEB';ctx.fillRect(0,0,canvas.width,canvas.height);drawGround();const originalY=player.y;player.y=GROUND_Y;player.draw();player.y=originalY;ctx.fillStyle='rgba(245,245,245,0.9)';ctx.beginPath();ctx.roundRect(canvas.width/2-200,canvas.height/2-160,400,320,15);ctx.fill();ctx.fillStyle='black';ctx.font='30px "Courier New"';ctx.textAlign='center';ctx.fillText('Scegli la difficoltà',canvas.width/2,canvas.height/2-115);difficultyButtons.forEach(btn=>{ctx.fillStyle='#FFFACD';ctx.strokeStyle='black';ctx.fillRect(btn.x,btn.y,btn.width,btn.height);ctx.strokeRect(btn.x,btn.y,btn.width,btn.height);ctx.fillStyle='black';ctx.font='20px "Courier New"';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(btn.level.name,btn.x+btn.width/2,btn.y+btn.height/2);});ctx.fillStyle='rgba(0,0,0,0.4)';ctx.font='12px "Courier New"';ctx.textAlign='left';ctx.fillText(`v${gameVersion}`,10,canvas.height-10);}
+        function resetToMenu(){hasStarted=false;isAlive=false;isDemoMode=false;demoDayCount=0;score=0;obstacles=[];player.y=GROUND_Y;player.velocityY=0;setupDifficultyButtons();}
+        function resizeCanvas(){const ar=800/300;const nW=window.innerWidth,nH=window.innerHeight;if(nW/nH>ar){canvas.height=nH;canvas.width=nH*ar;}else{canvas.width=nW;canvas.height=nW/ar;}GROUND_Y=canvas.height-50;player.x=canvas.width*0.25;initLandscape();setupDifficultyButtons();}
+        window.addEventListener('keydown',(e)=>{if(e.code==='Space'){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(hasStarted){e.preventDefault();if(isAlive&&!isDemoMode)player.jump();else startGame();}} if(e.code==='Escape'){e.preventDefault();resetToMenu();}});
         canvas.addEventListener('mousedown',handleInteraction);canvas.addEventListener('touchstart',(e)=>{e.preventDefault();handleInteraction(e);});
         window.addEventListener('resize',resizeCanvas);
-
-        // --- Inizializzazione ---
         resizeCanvas();
         requestAnimationFrame(gameLoop);
     </script>
