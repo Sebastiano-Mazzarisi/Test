@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Gioco Runner</title>
+    <title>Runner</title> <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏃</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏃</text></svg>">
+    
+    <meta name="apple-mobile-web-app-title" content="Runner"> <meta name="application-name" content="Runner"> <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#f0f0f0">
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Runner","short_name":"Runner","start_url":".","display":"standalone","background_color":"#f0f0f0","theme_color":"#f0f0f0","icons":[{"src":"data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏃</text></svg>","sizes":"192x192","type":"image/svg+xml"}]}' />
+
     <style>
         body {
             margin: 0;
@@ -23,10 +30,8 @@
             max-width: 100%;
             height: auto;
         }
-
-        /* NUOVO: Stili per il messaggio di rotazione */
         #rotate-message {
-            display: none; /* Nascosto di default */
+            display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -36,22 +41,15 @@
             text-align: center;
             font-size: 1.2em;
         }
-
-        /* NUOVO: Media Query per mostrare il messaggio solo in verticale */
         @media (orientation: portrait) {
-            #gameCanvas {
-                display: none; /* Nasconde il gioco */
-            }
-            #rotate-message {
-                display: flex; /* Mostra il messaggio */
-            }
+            #gameCanvas { display: none; }
+            #rotate-message { display: flex; }
         }
     </style>
 </head>
 <body>
 
     <canvas id="gameCanvas" width="800" height="300"></canvas>
-
     <div id="rotate-message">
         <p style="font-size: 3em;">🔄</p>
         <p>Per favore, ruota il dispositivo<br>in orizzontale per giocare.</p>
@@ -60,9 +58,38 @@
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const gameVersion = "1.2"; // Versione aggiornata per verifica
+        const gameVersion = "2.1"; // Versione aggiornata
+        const PLAYER_NAME = "Ony";
 
-        // --- IMPOSTAZIONI DI DIFFICOLTÀ (CON INTERVALLI CASUALI) ---
+        // --- GESTIONE AUDIO ---
+        let audioCtx;
+        function playSound(type) {
+            if (!audioCtx) return;
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            if (type === 'jump') {
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(600, audioCtx.currentTime);
+                oscillator.frequency.linearRampToValueAtTime(900, audioCtx.currentTime + 0.05);
+                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                oscillator.start(audioCtx.currentTime);
+                oscillator.stop(audioCtx.currentTime + 0.1);
+            } else if (type === 'fail') {
+                oscillator.type = 'sawtooth';
+                oscillator.frequency.setValueAtTime(220, audioCtx.currentTime);
+                oscillator.frequency.linearRampToValueAtTime(110, audioCtx.currentTime + 0.2);
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+                oscillator.start(audioCtx.currentTime);
+                oscillator.stop(audioCtx.currentTime + 0.25);
+            }
+        }
+
+        // --- IMPOSTAZIONI DI DIFFICOLTÀ ---
         const difficulties = {
             facile: { name: 'Facile', initialSpeed: 3.5, speedIncrement: 0.0005, minObstacleInterval: 130, maxObstacleInterval: 180 },
             medio: { name: 'Medio', initialSpeed: 5, speedIncrement: 0.0015, minObstacleInterval: 90, maxObstacleInterval: 140 },
@@ -73,24 +100,56 @@
         // --- Variabili di Gioco ---
         let score = 0, highscore = 0, isAlive = false, hasStarted = false, frameCount = 0, gameSpeed = 0, nextObstacleFrame = 0;
         const GRAVITY = 0.6, JUMP_FORCE = -12, GROUND_Y = canvas.height - 50;
-        
+        const INITIAL_LIVES = 3;
+        let lives = 0;
+        let isInvincible = false;
+        let invincibilityTimer = 0;
+        let screenFlashTimer = 0;
+
         // --- Giocatore ---
         const player = {
             x: 50, y: GROUND_Y, width: 30, height: 50, velocityY: 0, isJumping: false,
             draw() {
-                ctx.fillStyle = 'black';
-                ctx.fillRect(this.x, this.y - this.height, this.width, this.height);
+                ctx.save();
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 3;
+                ctx.lineCap = 'round';
+                const centerX = this.x + this.width / 2;
+                const baseY = this.y - 1;
+                const headRadius = 8;
+                const headY = baseY - this.height + headRadius;
+                ctx.beginPath(); ctx.arc(centerX, headY, headRadius, 0, Math.PI * 2); ctx.stroke();
+                const torsoStartY = headY + headRadius;
+                const torsoEndY = baseY - this.height / 2;
+                ctx.beginPath(); ctx.moveTo(centerX, torsoStartY); ctx.lineTo(centerX, torsoEndY); ctx.stroke();
+                const animationFrame = Math.floor(frameCount / 12) % 2;
+                if (animationFrame === 0) {
+                    ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX - 15, torsoEndY + 5); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX + 15, torsoEndY + 5); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX - 10, baseY); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX + 15, baseY); ctx.stroke();
+                } else {
+                    ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX + 15, torsoEndY - 5); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX - 15, torsoEndY - 5); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX + 10, baseY); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX - 15, baseY); ctx.stroke();
+                }
+                ctx.restore();
                 this.drawLabel();
             },
             drawLabel() {
-                const labelText = 'Ony', labelOffsetY = 25, rectWidth = 60, rectHeight = 25;
-                const playerTopX = this.x + this.width / 2, playerTopY = this.y - this.height;
+                const labelOffsetY = 25;
+                const rectWidth = 60;
+                const rectHeight = 25;
+                const playerTopX = this.x + this.width / 2;
+                const playerTopY = this.y - this.height;
                 ctx.beginPath();
                 ctx.moveTo(playerTopX, playerTopY);
                 ctx.lineTo(playerTopX, playerTopY - labelOffsetY);
                 ctx.strokeStyle = 'black';
                 ctx.stroke();
-                const rectX = playerTopX - rectWidth / 2, rectY = playerTopY - labelOffsetY - rectHeight;
+                const rectX = playerTopX - rectWidth / 2;
+                const rectY = playerTopY - labelOffsetY - rectHeight;
                 ctx.fillStyle = 'white';
                 ctx.strokeStyle = 'black';
                 ctx.fillRect(rectX, rectY, rectWidth, rectHeight);
@@ -99,23 +158,25 @@
                 ctx.font = '16px "Courier New"';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(labelText, playerTopX, rectY + rectHeight / 2);
+                ctx.fillText(PLAYER_NAME, playerTopX, rectY + rectHeight / 2);
             },
             update() {
                 this.velocityY += GRAVITY;
                 this.y += this.velocityY;
                 if (this.y > GROUND_Y) { this.y = GROUND_Y; this.velocityY = 0; this.isJumping = false; }
             },
-            jump() { if (!this.isJumping) { this.velocityY = JUMP_FORCE; this.isJumping = true; } }
+            jump() {
+                if (!this.isJumping && isAlive) {
+                    this.velocityY = JUMP_FORCE;
+                    this.isJumping = true;
+                    playSound('jump');
+                }
+            }
         };
 
         // --- Ostacoli ---
         let obstacles = [];
-        function calculateNextObstacleFrame() {
-            const { minObstacleInterval, maxObstacleInterval } = currentDifficulty;
-            const randomInterval = Math.floor(Math.random() * (maxObstacleInterval - minObstacleInterval + 1)) + minObstacleInterval;
-            nextObstacleFrame = frameCount + randomInterval;
-        }
+        function calculateNextObstacleFrame() { /* ... */ }
         function updateObstacles() {
             if (frameCount >= nextObstacleFrame) {
                 const type = { width: 20, height: 40 };
@@ -127,96 +188,84 @@
                 obs.x -= gameSpeed;
                 ctx.fillStyle = 'red';
                 ctx.fillRect(obs.x, obs.y - obs.height, obs.width, obs.height);
-                if (player.x < obs.x + obs.width && player.x + player.width > obs.x && player.y > obs.y - obs.height) { endGame(); }
+                const playerHitbox = { x: player.x, y: player.y - player.height, width: player.width, height: player.height };
+                if (!isInvincible && playerHitbox.x < obs.x + obs.width && playerHitbox.x + playerHitbox.width > obs.x && playerHitbox.y < obs.y && playerHitbox.y + playerHitbox.height > obs.y - obs.height) {
+                    handleCollision();
+                }
                 if (obs.x + obs.width < 0) { obstacles.splice(i, 1); }
             }
         }
         
         // --- Funzioni di Gioco ---
-        function drawGround() {
-            ctx.strokeStyle = '#333';
-            ctx.beginPath();
-            ctx.moveTo(0, GROUND_Y);
-            ctx.lineTo(canvas.width, GROUND_Y);
-            ctx.stroke();
-        }
         function drawScore() {
+            const currentTimeFormatted = formatTime(score);
+            const recordTimeFormatted = formatTime(highscore);
             ctx.fillStyle = 'black';
             ctx.font = '20px "Courier New"';
             ctx.textAlign = 'right';
-            ctx.fillText(`HI ${String(highscore).padStart(5, '0')} ${String(Math.floor(score)).padStart(5, '0')}`, canvas.width - 20, 30);
+            ctx.fillText(`${PLAYER_NAME} HI ${recordTimeFormatted} ${currentTimeFormatted}`, canvas.width - 20, 30);
         }
-        function showGameOverOverlay() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = 'white';
-            ctx.font = '40px "Courier New"';
-            ctx.textAlign = 'center';
-            ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2 - 20);
-            ctx.font = '20px "Courier New"';
-            ctx.fillText(`Punteggio: ${Math.floor(score)}. Clicca per riprovare.`, canvas.width / 2, canvas.height / 2 + 20);
-        }
+        function drawLives() { /* ... */ }
+        function showGameOverOverlay() { /* ... */ }
         function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
         function startGame() {
             isAlive = true; hasStarted = true; score = 0; gameSpeed = currentDifficulty.initialSpeed;
             obstacles = []; player.y = GROUND_Y; player.velocityY = 0; frameCount = 0;
+            lives = INITIAL_LIVES;
+            isInvincible = false; invincibilityTimer = 0;
             calculateNextObstacleFrame();
         }
-        function endGame() {
+        function triggerGameOver() {
             isAlive = false;
-            if (Math.floor(score) > highscore) { highscore = Math.floor(score); }
+            if (score > highscore) { highscore = score; }
+        }
+        function handleCollision() {
+            playSound('fail');
+            screenFlashTimer = 10;
+            lives--;
+            if (lives <= 0) {
+                triggerGameOver();
+            } else {
+                isInvincible = true;
+                invincibilityTimer = 120;
+            }
         }
         const difficultyButtons = [];
-        function drawDifficultyScreen() {
-            clearCanvas();
-            drawGround();
-            player.draw();
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = 'white';
-            ctx.font = '30px "Courier New"';
-            ctx.textAlign = 'center';
-            ctx.fillText('Scegli la difficoltà', canvas.width / 2, canvas.height / 2 - 80);
-            const buttonWidth = 150, buttonHeight = 40, spacing = 15;
-            const totalButtonHeight = (buttonHeight * 3) + (spacing * 2);
-            const startY = (canvas.height / 2) - (totalButtonHeight / 2) + 20;
-            difficultyButtons.length = 0;
-            Object.values(difficulties).forEach((level, index) => {
-                const btn = { x: canvas.width / 2 - buttonWidth / 2, y: startY + index * (buttonHeight + spacing), width: buttonWidth, height: buttonHeight, level: level };
-                difficultyButtons.push(btn);
-                ctx.fillStyle = 'white';
-                ctx.strokeStyle = 'black';
-                ctx.strokeRect(btn.x, btn.y, btn.width, btn.height);
-                ctx.fillStyle = 'black';
-                ctx.font = '20px "Courier New"';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(level.name, btn.x + btn.width / 2, btn.y + btn.height / 2);
-            });
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-            ctx.font = '12px "Courier New"';
-            ctx.textAlign = 'left';
-            ctx.fillText(`v${gameVersion}`, 10, canvas.height - 10);
-        }
-        function resetToMenu() {
-            hasStarted = false; isAlive = false; score = 0; obstacles = [];
-            player.y = GROUND_Y; player.velocityY = 0;
-        }
+        
+        // --- Game Loop Principale ---
         function gameLoop() {
             clearCanvas();
+            if (screenFlashTimer > 0) {
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                screenFlashTimer--;
+            }
+
             if (!hasStarted) {
                 drawDifficultyScreen();
             } else {
                 drawGround();
                 drawScore();
-                player.draw();
+                drawLives();
+                
                 if (isAlive) {
                     frameCount++; score++; gameSpeed += currentDifficulty.speedIncrement;
+                    if (isInvincible) {
+                        invincibilityTimer--;
+                        if (invincibilityTimer <= 0) isInvincible = false;
+                    }
                     player.update();
                     updateObstacles();
                 } else {
                     showGameOverOverlay();
                 }
+                
+                if (isInvincible && Math.floor(frameCount / 10) % 2 !== 0) {
+                    // Non disegna l'omino per l'effetto lampeggiante
+                } else {
+                    player.draw();
+                }
+
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
                 ctx.font = '12px "Courier New"';
                 ctx.textAlign = 'left';
@@ -224,7 +273,9 @@
             }
             requestAnimationFrame(gameLoop);
         }
+        
         function handleInteraction(event) {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const rect = canvas.getBoundingClientRect();
             const x = (event.clientX || event.touches[0].clientX) - rect.left;
             const y = (event.clientY || event.touches[0].clientY) - rect.top;
@@ -241,10 +292,16 @@
                 player.jump();
             }
         }
-        window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' && hasStarted) { e.preventDefault(); if (isAlive) player.jump(); else startGame(); }
-            if (e.code === 'Escape') { e.preventDefault(); resetToMenu(); }
-        });
+        
+        // Funzioni non modificate e listener (compattati)
+        calculateNextObstacleFrame = function() { const { minObstacleInterval, maxObstacleInterval } = currentDifficulty; const randomInterval = Math.floor(Math.random() * (maxObstacleInterval - minObstacleInterval + 1)) + minObstacleInterval; nextObstacleFrame = frameCount + randomInterval; }
+        function drawGround() { ctx.strokeStyle = '#333'; ctx.beginPath(); ctx.moveTo(0, GROUND_Y); ctx.lineTo(canvas.width, GROUND_Y); ctx.stroke(); }
+        function formatTime(totalFrames) { const totalSeconds = Math.floor(totalFrames / 60); const minutes = Math.floor(totalSeconds / 60); const seconds = totalSeconds % 60; return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`; }
+        function drawLives() { ctx.fillStyle = 'black'; ctx.font = '20px "Courier New"'; ctx.textAlign = 'left'; ctx.fillText(`Vite: ${lives}`, 20, 30); }
+        function showGameOverOverlay() { ctx.fillStyle = 'rgba(255, 255, 224, 0.7)'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = 'black'; ctx.font = '40px "Courier New"'; ctx.textAlign = 'center'; ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2 - 20); ctx.font = '20px "Courier New"'; ctx.fillText(`Tempo: ${formatTime(score)}. Clicca per riprovare.`, canvas.width / 2, canvas.height / 2 + 20); }
+        function drawDifficultyScreen() { clearCanvas(); drawGround(); player.draw(); ctx.fillStyle = 'rgba(255, 255, 224, 0.7)'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = 'black'; ctx.font = '30px "Courier New"'; ctx.textAlign = 'center'; ctx.fillText('Scegli la difficoltà', canvas.width / 2, canvas.height / 2 - 80); const buttonWidth = 150, buttonHeight = 40, spacing = 15; const totalButtonHeight = (buttonHeight * 3) + (spacing * 2); const startY = (canvas.height / 2) - (totalButtonHeight / 2) + 20; difficultyButtons.length = 0; Object.values(difficulties).forEach((level, index) => { const btn = { x: canvas.width / 2 - buttonWidth / 2, y: startY + index * (buttonHeight + spacing), width: buttonWidth, height: buttonHeight, level: level }; difficultyButtons.push(btn); ctx.fillStyle = '#FFFACD'; ctx.strokeStyle = 'black'; ctx.fillRect(btn.x, btn.y, btn.width, btn.height); ctx.strokeRect(btn.x, btn.y, btn.width, btn.height); ctx.fillStyle = 'black'; ctx.font = '20px "Courier New"'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(level.name, btn.x + btn.width / 2, btn.y + btn.height / 2); }); ctx.fillStyle = 'rgba(0, 0, 0, 0.4)'; ctx.font = '12px "Courier New"'; ctx.textAlign = 'left'; ctx.fillText(`v${gameVersion}`, 10, canvas.height - 10); }
+        function resetToMenu() { hasStarted = false; isAlive = false; score = 0; obstacles = []; player.y = GROUND_Y; player.velocityY = 0; }
+        window.addEventListener('keydown', (e) => { if(e.code === 'Space'){if(!audioCtx)audioCtx = new (window.AudioContext || window.webkitAudioContext)();if(hasStarted){e.preventDefault();if(isAlive)player.jump();else startGame();}} if(e.code === 'Escape'){e.preventDefault();resetToMenu();}});
         canvas.addEventListener('mousedown', handleInteraction);
         canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleInteraction(e); });
         requestAnimationFrame(gameLoop);
