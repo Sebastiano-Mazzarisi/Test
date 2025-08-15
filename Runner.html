@@ -9,18 +9,19 @@
     <meta property="og:description" content="Un gioco endless runner creato con HTML e JavaScript.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://sebastiano-mazzarisi.github.io/Test/Runner.html">
-    <meta property="og:image" content="https://raw.githubusercontent.com/sebastiano-mazzarisi/Test/main/Runner.png">
-    <meta property="og:image:width" content="512">
-    <meta property="og:image:height" content="512">
+    <meta property="og:image" content="https://github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png?raw=true">
+    <meta property="og:image:width" content="192">
+    <meta property="og:image:height" content="192">
     
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏃</text></svg>">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏃</text></svg>">
+    <link rel="icon" href="https://github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png?raw=true">
+    <link rel="apple-touch-icon" href="https://github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png?raw=true">
+
     <meta name="apple-mobile-web-app-title" content="Runner">
     <meta name="application-name" content="Runner">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#f0f0f0">
-    <link rel="manifest" href='data:application/manifest+json,{"name":"Runner","short_name":"Runner","start_url":".","display":"standalone","background_color":"#f0f0f0","theme_color":"#f0f0f0","icons":[{"src":"data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏃</text></svg>","sizes":"192x192","type":"image/svg+xml"}]}' />
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Runner","short_name":"Runner","start_url":".","display":"standalone","background_color":"#f0f0f0","theme_color":"#f0f0f0","icons":[{"src":"https://github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png?raw=true","sizes":"192x192","type":"image/png"}]}' />
 
     <style>
         body {
@@ -62,14 +63,14 @@
 
     <canvas id="gameCanvas" width="800" height="300"></canvas>
     <div id="rotate-message">
-        <p style="font-size: 3em;">🔄</p>
+        <p style="font-size: 3em;">売</p>
         <p>Per favore, ruota il dispositivo<br>in orizzontale per giocare.</p>
     </div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const gameVersion = "2.2"; // Versione aggiornata
+        const gameVersion = "2.8"; // Versione aggiornata
         const PLAYER_NAME = "Ony";
 
         // --- GESTIONE AUDIO ---
@@ -102,9 +103,9 @@
 
         // --- IMPOSTAZIONI DI DIFFICOLTÀ ---
         const difficulties = {
-            facile: { name: 'Facile', initialSpeed: 3.5, speedIncrement: 0.0005, minObstacleInterval: 130, maxObstacleInterval: 180 },
-            medio: { name: 'Medio', initialSpeed: 5, speedIncrement: 0.0015, minObstacleInterval: 90, maxObstacleInterval: 140 },
-            difficile: { name: 'Difficile', initialSpeed: 6, speedIncrement: 0.002, minObstacleInterval: 75, maxObstacleInterval: 110 }
+            facile: { name: 'Facile', initialSpeed: 2.8, speedIncrement: 0.0005, minObstacleInterval: 130, maxObstacleInterval: 180 },
+            medio: { name: 'Medio', initialSpeed: 6, speedIncrement: 0.0018, minObstacleInterval: 80, maxObstacleInterval: 130 },
+            difficile: { name: 'Difficile', initialSpeed: 8, speedIncrement: 0.0025, minObstacleInterval: 65, maxObstacleInterval: 100 }
         };
         let currentDifficulty = {};
 
@@ -117,7 +118,160 @@
         let invincibilityTimer = 0;
         let screenFlashTimer = 0;
 
-        // --- Giocatore ---
+        // --- PAESAGGIO DETTAGLIATO ---
+        let landscapeLayers = [];
+
+        function getTerrainY(x, points) {
+            const p1 = points.slice().reverse().find(p => p.x <= x);
+            const p2 = points.find(p => p.x > x);
+            if (p1 && p2) {
+                const slope = (p2.y - p1.y) / (p2.x - p1.x);
+                return p1.y + slope * (x - p1.x);
+            }
+            return p1 ? p1.y : GROUND_Y;
+        }
+
+        function initLandscape() {
+            landscapeLayers = [];
+            const RENDER_WIDTH = canvas.width * 2;
+
+            // Layer 1: Montagne distanti
+            let points1 = [];
+            for (let x = 0; x <= RENDER_WIDTH; x += 150) {
+                points1.push({ x: x, y: GROUND_Y - 100 - Math.random() * 50 });
+            }
+            landscapeLayers.push({ points: points1, color: '#CAD8DE', speedMultiplier: 0.1, offsetX: 0, objects: [] });
+
+            // Layer 2: Colline medie
+            let points2 = [];
+            for (let x = 0; x <= RENDER_WIDTH; x += 100) {
+                points2.push({ x: x, y: GROUND_Y - 50 - Math.random() * 40 });
+            }
+            landscapeLayers.push({ points: points2, color: '#A5C8A5', speedMultiplier: 0.2, offsetX: 0, objects: [] });
+
+            // Layer 3: Colline vicine con case, pecore, alberi
+            let points3 = [];
+            for (let x = 0; x <= RENDER_WIDTH; x += 80) {
+                points3.push({ x: x, y: GROUND_Y - 15 - Math.random() * 25 });
+            }
+            const objects3 = [];
+            for (let i = 0; i < 10; i++) { // Aggiungi case
+                const x = Math.random() * RENDER_WIDTH;
+                objects3.push({ type: 'house', x: x, y: getTerrainY(x, points3) });
+            }
+            for (let i = 0; i < 25; i++) { // Aggiungi pecore
+                const x = Math.random() * RENDER_WIDTH;
+                objects3.push({ type: 'sheep', x: x, y: getTerrainY(x, points3) });
+            }
+            for (let i = 0; i < 20; i++) { // Aggiungi alberi
+                 const x = Math.random() * RENDER_WIDTH;
+                objects3.push({ type: 'tree', x: x, y: getTerrainY(x, points3) });
+            }
+            objects3.sort((a, b) => a.x - b.x); // Ordina per disegnare correttamente
+            landscapeLayers.push({ points: points3, color: '#8FBC8F', speedMultiplier: 0.4, offsetX: 0, objects: objects3 });
+        }
+
+        function drawLandscapeObject(obj, offsetX) {
+            const x = obj.x + offsetX;
+            const y = obj.y;
+
+            if (obj.type === 'house') {
+                if (!obj.details) { // Inizializza dettagli se non esistono
+                    obj.details = {
+                        width: 40 + Math.random() * 20,
+                        height: 30 + Math.random() * 15,
+                        color: `hsl(${Math.random() * 30 + 10}, 40%, 70%)`,
+                        roofColor: `hsl(${Math.random() * 20 + 5}, 50%, 45%)`
+                    };
+                }
+                const d = obj.details;
+                ctx.fillStyle = d.color;
+                ctx.fillRect(x - d.width / 2, y - d.height, d.width, d.height);
+                ctx.fillStyle = d.roofColor;
+                ctx.beginPath();
+                ctx.moveTo(x - d.width / 2 - 5, y - d.height);
+                ctx.lineTo(x + d.width / 2 + 5, y - d.height);
+                ctx.lineTo(x, y - d.height - 20);
+                ctx.closePath();
+                ctx.fill();
+            } else if (obj.type === 'sheep') {
+                if (!obj.details) { // Inizializza dettagli
+                    obj.details = {
+                        state: 'down',
+                        timer: Math.random() * 180,
+                    };
+                }
+                const d = obj.details;
+                ctx.fillStyle = '#FFFFFF';
+                // Corpo a nuvoletta
+                ctx.beginPath();
+                ctx.arc(x, y - 10, 6, 0, Math.PI * 2);
+                ctx.arc(x + 5, y - 12, 5, 0, Math.PI * 2);
+                ctx.arc(x - 5, y - 12, 5, 0, Math.PI * 2);
+                ctx.fill();
+                // Testa
+                let headY = (d.state === 'down') ? y - 8 : y - 18;
+                ctx.fillStyle = '#333333';
+                ctx.beginPath();
+                ctx.arc(x + 10, headY, 4, 0, Math.PI * 2);
+                ctx.fill();
+
+            } else if (obj.type === 'tree') {
+                 if (!obj.details) { // Inizializza dettagli
+                    obj.details = {
+                        height: 20 + Math.random() * 30,
+                        radius: 6 + Math.random() * 6
+                    };
+                }
+                const d = obj.details;
+                ctx.fillStyle = '#8B4513';
+                ctx.fillRect(x - 2, y - d.height, 4, d.height);
+                ctx.fillStyle = `hsl(120, 60%, ${25 + Math.random() * 10}%)`;
+                ctx.beginPath();
+                ctx.arc(x, y - d.height, d.radius, 0, Math.PI * 2);
+                ctx.arc(x + d.radius/2, y - d.height - 5, d.radius, 0, Math.PI * 2);
+                ctx.arc(x - d.radius/2, y - d.height - 5, d.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        function updateLandscape() {
+            landscapeLayers.forEach(layer => {
+                layer.offsetX -= gameSpeed * layer.speedMultiplier;
+                if (layer.offsetX < -canvas.width * 2) {
+                    layer.offsetX += canvas.width * 2;
+                }
+                layer.objects.forEach(obj => {
+                    if (obj.type === 'sheep') {
+                        obj.details.timer--;
+                        if (obj.details.timer <= 0) {
+                            obj.details.state = (obj.details.state === 'down') ? 'up' : 'down';
+                            obj.details.timer = 60 + Math.random() * 120; // tra 1 e 3 secondi
+                        }
+                    }
+                });
+            });
+        }
+
+        function drawLandscape() {
+            landscapeLayers.forEach(layer => {
+                ctx.fillStyle = layer.color;
+                ctx.beginPath();
+                ctx.moveTo(layer.points[0].x + layer.offsetX, canvas.height);
+                layer.points.forEach(p => {
+                    ctx.lineTo(p.x + layer.offsetX, p.y);
+                });
+                ctx.lineTo(layer.points[layer.points.length - 1].x + layer.offsetX, canvas.height);
+                ctx.closePath();
+                ctx.fill();
+
+                layer.objects.forEach(obj => {
+                    drawLandscapeObject(obj, layer.offsetX);
+                });
+            });
+        }
+
+        // --- Giocatore (Omino stilizzato originale) ---
         const player = {
             x: 50, y: GROUND_Y, width: 30, height: 50, velocityY: 0, isJumping: false,
             draw() {
@@ -134,7 +288,12 @@
                 const torsoEndY = baseY - this.height / 2;
                 ctx.beginPath(); ctx.moveTo(centerX, torsoStartY); ctx.lineTo(centerX, torsoEndY); ctx.stroke();
                 const animationFrame = Math.floor(frameCount / 12) % 2;
-                if (animationFrame === 0) {
+                if (this.isJumping) {
+                    ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX - 10, torsoEndY + 10); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX + 10, torsoEndY + 10); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX - 5, baseY - 10); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX + 5, baseY); ctx.stroke();
+                } else if (animationFrame === 0) {
                     ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX - 15, torsoEndY + 5); ctx.stroke();
                     ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX + 15, torsoEndY + 5); ctx.stroke();
                     ctx.beginPath(); ctx.moveTo(centerX, torsoEndY); ctx.lineTo(centerX - 10, baseY); ctx.stroke();
@@ -187,20 +346,56 @@
 
         // --- Ostacoli ---
         let obstacles = [];
-        function calculateNextObstacleFrame() { /* ... */ }
+        function calculateNextObstacleFrame() { 
+            const { minObstacleInterval, maxObstacleInterval } = currentDifficulty;
+            const randomInterval = Math.floor(Math.random() * (maxObstacleInterval - minObstacleInterval + 1)) + minObstacleInterval;
+            nextObstacleFrame = frameCount + randomInterval;
+        }
+        function generateObstacle() {
+            const rand = Math.random();
+            let newObstacle = { x: canvas.width, width: 20, height: 40, y: 0, type: 'ground' };
+
+            if (rand < 0.4) {
+                newObstacle.height = 25;
+                newObstacle.width = 25;
+                newObstacle.y = GROUND_Y - newObstacle.height;
+            } else if (rand < 0.8) {
+                newObstacle.height = 50;
+                newObstacle.y = GROUND_Y - newObstacle.height;
+            } else {
+                newObstacle.type = 'flying';
+                newObstacle.width = 35;
+                newObstacle.height = 20;
+                newObstacle.y = GROUND_Y - player.height - (25 + Math.random() * 20);
+            }
+            obstacles.push(newObstacle);
+        }
+
         function updateObstacles() {
             if (frameCount >= nextObstacleFrame) {
-                const type = { width: 20, height: 40 };
-                obstacles.push({ x: canvas.width, y: GROUND_Y, width: type.width, height: type.height });
+                generateObstacle();
                 calculateNextObstacleFrame();
             }
             for (let i = obstacles.length - 1; i >= 0; i--) {
                 const obs = obstacles[i];
                 obs.x -= gameSpeed;
-                ctx.fillStyle = 'red';
-                ctx.fillRect(obs.x, obs.y - obs.height, obs.width, obs.height);
+
+                if (obs.type === 'flying') {
+                    ctx.fillStyle = '#4169E1';
+                } else {
+                    ctx.fillStyle = '#DC143C';
+                }
+                ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+
                 const playerHitbox = { x: player.x, y: player.y - player.height, width: player.width, height: player.height };
-                if (!isInvincible && playerHitbox.x < obs.x + obs.width && playerHitbox.x + playerHitbox.width > obs.x && playerHitbox.y < obs.y && playerHitbox.y + playerHitbox.height > obs.y - obs.height) {
+                const obsHitbox = { x: obs.x, y: obs.y, width: obs.width, height: obs.height };
+
+                if (!isInvincible && 
+                    playerHitbox.x < obsHitbox.x + obsHitbox.width &&
+                    playerHitbox.x + playerHitbox.width > obsHitbox.x &&
+                    playerHitbox.y < obsHitbox.y + obsHitbox.height &&
+                    playerHitbox.y + playerHitbox.height > obsHitbox.y)
+                {
                     handleCollision();
                 }
                 if (obs.x + obs.width < 0) { obstacles.splice(i, 1); }
@@ -216,14 +411,17 @@
             ctx.textAlign = 'right';
             ctx.fillText(`${PLAYER_NAME} HI ${recordTimeFormatted} ${currentTimeFormatted}`, canvas.width - 20, 30);
         }
-        function drawLives() { /* ... */ }
-        function showGameOverOverlay() { /* ... */ }
-        function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+        
+        function clearCanvas() {
+            ctx.fillStyle = '#87CEEB';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
         function startGame() {
             isAlive = true; hasStarted = true; score = 0; gameSpeed = currentDifficulty.initialSpeed;
             obstacles = []; player.y = GROUND_Y; player.velocityY = 0; frameCount = 0;
             lives = INITIAL_LIVES;
             isInvincible = false; invincibilityTimer = 0;
+            initLandscape();
             calculateNextObstacleFrame();
         }
         function triggerGameOver() {
@@ -246,6 +444,8 @@
         // --- Game Loop Principale ---
         function gameLoop() {
             clearCanvas();
+            drawLandscape();
+
             if (screenFlashTimer > 0) {
                 ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -266,13 +466,14 @@
                         if (invincibilityTimer <= 0) isInvincible = false;
                     }
                     player.update();
+                    updateLandscape();
                     updateObstacles();
                 } else {
                     showGameOverOverlay();
                 }
                 
                 if (isInvincible && Math.floor(frameCount / 10) % 2 !== 0) {
-                    // Non disegna l'omino per l'effetto lampeggiante
+                    // Effetto lampeggiante
                 } else {
                     player.draw();
                 }
@@ -304,17 +505,19 @@
             }
         }
         
-        // Funzioni non modificate e listener (compattati)
-        calculateNextObstacleFrame = function() { const { minObstacleInterval, maxObstacleInterval } = currentDifficulty; const randomInterval = Math.floor(Math.random() * (maxObstacleInterval - minObstacleInterval + 1)) + minObstacleInterval; nextObstacleFrame = frameCount + randomInterval; }
-        function drawGround() { ctx.strokeStyle = '#333'; ctx.beginPath(); ctx.moveTo(0, GROUND_Y); ctx.lineTo(canvas.width, GROUND_Y); ctx.stroke(); }
+        // Funzioni di utilità e listener
+        function drawGround() { ctx.fillStyle = '#A0522D'; ctx.fillRect(0, GROUND_Y, canvas.width, canvas.height - GROUND_Y); ctx.strokeStyle = '#333'; ctx.beginPath(); ctx.moveTo(0, GROUND_Y); ctx.lineTo(canvas.width, GROUND_Y); ctx.stroke(); }
         function formatTime(totalFrames) { const totalSeconds = Math.floor(totalFrames / 60); const minutes = Math.floor(totalSeconds / 60); const seconds = totalSeconds % 60; return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`; }
         function drawLives() { ctx.fillStyle = 'black'; ctx.font = '20px "Courier New"'; ctx.textAlign = 'left'; ctx.fillText(`Vite: ${lives}`, 20, 30); }
         function showGameOverOverlay() { ctx.fillStyle = 'rgba(255, 255, 224, 0.7)'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = 'black'; ctx.font = '40px "Courier New"'; ctx.textAlign = 'center'; ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2 - 20); ctx.font = '20px "Courier New"'; ctx.fillText(`Tempo: ${formatTime(score)}. Clicca per riprovare.`, canvas.width / 2, canvas.height / 2 + 20); }
-        function drawDifficultyScreen() { clearCanvas(); drawGround(); player.draw(); ctx.fillStyle = 'rgba(255, 255, 224, 0.7)'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = 'black'; ctx.font = '30px "Courier New"'; ctx.textAlign = 'center'; ctx.fillText('Scegli la difficoltà', canvas.width / 2, canvas.height / 2 - 80); const buttonWidth = 150, buttonHeight = 40, spacing = 15; const totalButtonHeight = (buttonHeight * 3) + (spacing * 2); const startY = (canvas.height / 2) - (totalButtonHeight / 2) + 20; difficultyButtons.length = 0; Object.values(difficulties).forEach((level, index) => { const btn = { x: canvas.width / 2 - buttonWidth / 2, y: startY + index * (buttonHeight + spacing), width: buttonWidth, height: buttonHeight, level: level }; difficultyButtons.push(btn); ctx.fillStyle = '#FFFACD'; ctx.strokeStyle = 'black'; ctx.fillRect(btn.x, btn.y, btn.width, btn.height); ctx.strokeRect(btn.x, btn.y, btn.width, btn.height); ctx.fillStyle = 'black'; ctx.font = '20px "Courier New"'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(level.name, btn.x + btn.width / 2, btn.y + btn.height / 2); }); ctx.fillStyle = 'rgba(0, 0, 0, 0.4)'; ctx.font = '12px "Courier New"'; ctx.textAlign = 'left'; ctx.fillText(`v${gameVersion}`, 10, canvas.height - 10); }
+        function drawDifficultyScreen() { drawGround(); player.draw(); ctx.fillStyle = 'rgba(255, 255, 224, 0.7)'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = 'black'; ctx.font = '30px "Courier New"'; ctx.textAlign = 'center'; ctx.fillText('Scegli la difficoltà', canvas.width / 2, canvas.height / 2 - 80); const buttonWidth = 150, buttonHeight = 40, spacing = 15; const totalButtonHeight = (buttonHeight * 3) + (spacing * 2); const startY = (canvas.height / 2) - (totalButtonHeight / 2) + 20; difficultyButtons.length = 0; Object.values(difficulties).forEach((level, index) => { const btn = { x: canvas.width / 2 - buttonWidth / 2, y: startY + index * (buttonHeight + spacing), width: buttonWidth, height: buttonHeight, level: level }; difficultyButtons.push(btn); ctx.fillStyle = '#FFFACD'; ctx.strokeStyle = 'black'; ctx.fillRect(btn.x, btn.y, btn.width, btn.height); ctx.strokeRect(btn.x, btn.y, btn.width, btn.height); ctx.fillStyle = 'black'; ctx.font = '20px "Courier New"'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(level.name, btn.x + btn.width / 2, btn.y + btn.height / 2); }); ctx.fillStyle = 'rgba(0, 0, 0, 0.4)'; ctx.font = '12px "Courier New"'; ctx.textAlign = 'left'; ctx.fillText(`v${gameVersion}`, 10, canvas.height - 10); }
         function resetToMenu() { hasStarted = false; isAlive = false; score = 0; obstacles = []; player.y = GROUND_Y; player.velocityY = 0; }
         window.addEventListener('keydown', (e) => { if(e.code === 'Space'){if(!audioCtx)audioCtx = new (window.AudioContext || window.webkitAudioContext)();if(hasStarted){e.preventDefault();if(isAlive)player.jump();else startGame();}} if(e.code === 'Escape'){e.preventDefault();resetToMenu();}});
         canvas.addEventListener('mousedown', handleInteraction);
         canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleInteraction(e); });
+        
+        // --- Inizializzazione ---
+        initLandscape();
         requestAnimationFrame(gameLoop);
     </script>
 </body>
