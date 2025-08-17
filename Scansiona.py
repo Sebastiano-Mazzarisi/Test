@@ -2,28 +2,50 @@ import os
 import requests
 from bs4 import BeautifulSoup
 from github import Github
+from datetime import datetime
 
 # --- Configurazione GitHub ---
-# La variabile d'ambiente GITHUB_TOKEN verrà fornita automaticamente da GitHub Actions.
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 REPO_OWNER = "Sebastiano-Mazzarisi"
 REPO_NAME = "Test"
-FILE_PATH = "Monitorizza.html"
+# Modificato per salvare il file come Monitora.html
+FILE_PATH = "Monitora.html"
 # --- ---
 
 def get_zip_files(url):
-    """Recupera e analizza la pagina web per trovare tutti i file .zip."""
+    """
+    Recupera e analizza la pagina web per trovare tutti i file .zip e la loro data.
+    NOTA: La logica per estrarre la data è una stima e potrebbe richiedere
+    modifiche in base alla struttura HTML del sito.
+    """
     try:
         response = requests.get(url)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, 'html.parser')
 
+        # Cerca tutti i tag <a> che terminano con .zip
         links = soup.find_all('a', href=lambda href: href and href.endswith('.zip'))
         
         zip_files = []
         for link in links:
             file_name = os.path.basename(link['href'])
-            mod_date = "Data sconosciuta" 
+            
+            # --- IPOTESI DI ESTRAZIONE DATA ---
+            # Questo è un esempio basato sul tuo formato "YYYY-MM-DD --- nome_file"
+            # Cerca nel testo precedente al link un formato di data YYYY-MM-DD
+            date_str = "Data non trovata"
+            if link.previous_sibling and isinstance(link.previous_sibling, str):
+                parts = link.previous_sibling.split('---')
+                if len(parts) > 0:
+                    date_str = parts[0].strip()
+
+            try:
+                # Prova a convertire la stringa in un oggetto data per l'ordinamento
+                mod_date = datetime.strptime(date_str, '%Y-%m-%d')
+            except ValueError:
+                # Se la conversione fallisce, usa una data di default o la data attuale
+                mod_date = datetime(1900, 1, 1) # Data fittizia per mettere i file non datati per primi
+            
             zip_files.append((mod_date, file_name))
             
         return zip_files
@@ -33,7 +55,7 @@ def get_zip_files(url):
         return None
 
 def create_html_content(file_list):
-    """Genera il contenuto HTML per il file Monitorizza.html."""
+    """Genera il contenuto HTML per il file Monitora.html."""
     if not file_list:
         return "<html><body><p>Nessun file .zip trovato.</p></body></html>"
 
@@ -42,7 +64,9 @@ def create_html_content(file_list):
     html_content += "<ul>\n"
     
     for date, name in file_list:
-        html_content += f"    <li><b>{date}</b> --- {name}</li>\n"
+        # Formatta la data per l'output HTML se valida, altrimenti usa un placeholder
+        date_str = date.strftime('%Y-%m-%d') if date.year > 1900 else "Data non trovata"
+        html_content += f"    <li><b>{date_str}</b> --- {name}</li>\n"
     
     html_content += "</ul>\n</body>\n</html>"
     return html_content
@@ -85,7 +109,8 @@ if __name__ == "__main__":
         zip_files = get_zip_files(URL_TO_SCRAPE)
         
         if zip_files is not None:
-            zip_files.sort(key=lambda x: x[1], reverse=True)
+            # Ordina i file in ordine cronologico (dal più vecchio al più nuovo)
+            zip_files.sort(key=lambda x: x[0])
             html_output = create_html_content(zip_files)
             commit_msg = "Aggiornamento automatico elenco file .zip"
             update_github_file(REPO_OWNER, REPO_NAME, FILE_PATH, html_output, commit_msg)
