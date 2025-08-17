@@ -21,28 +21,31 @@ def get_zip_files(url):
         response.raise_for_status()
         soup = BeautifulSoup(response.content, 'html.parser')
 
-        # Cerca tutti i tag <a> che terminano con .zip
-        links = soup.find_all('a', href=lambda href: href and href.endswith('.zip'))
+        # Trova tutti i blocchi di notizie che contengono i link.
+        news_items = soup.find_all('div', class_='news_list-item')
         
         zip_files = []
-        for link in links:
-            file_name = os.path.basename(link['href'])
+        for item in news_items:
+            # All'interno di ogni blocco, cerca il tag della data
+            date_tag = item.find('span', class_='news-date')
             
-            # --- LOGICA DI ESTRAZIONE DATA ---
-            # Questa parte cerca nel testo precedente al link un formato di data YYYY-MM-DD
-            date_str = "Data non trovata"
-            if link.previous_sibling and isinstance(link.previous_sibling, str):
-                parts = link.previous_sibling.split('---')
-                if len(parts) > 0:
-                    date_str = parts[0].strip()
-
-            try:
-                mod_date = datetime.strptime(date_str, '%Y-%m-%d')
-            except (ValueError, IndexError):
-                # Se la data non viene trovata, usa una data fittizia per l'ordinamento
-                mod_date = datetime(1900, 1, 1)
+            # E cerca il link al file .zip
+            link = item.find('a', href=lambda href: href and href.endswith('.zip'))
             
-            zip_files.append((mod_date, file_name))
+            # Se entrambi vengono trovati, estrai le informazioni
+            if date_tag and link:
+                file_name = os.path.basename(link['href'])
+                date_str = date_tag.text.strip()
+                
+                # Estrae la data dalla stringa (es. "Pubblicato: Sabato, 16 Agosto 2025 18:00")
+                try:
+                    parts = date_str.split(',')
+                    date_part = parts[1].strip() if len(parts) > 1 else parts[0].strip()
+                    mod_date = datetime.strptime(date_part, '%d %B %Y') 
+                except (ValueError, IndexError):
+                    mod_date = datetime(1900, 1, 1)
+                
+                zip_files.append((mod_date, file_name))
             
         return zip_files
     
@@ -83,7 +86,6 @@ def update_github_file(repo_owner, repo_name, file_path, new_content, commit_mes
             )
             print(f"File '{file_path}' aggiornato con successo su GitHub.")
         except Exception as e:
-            # Cattura l'eccezione se il file non esiste, e lo crea
             repo.create_file(
                 path=file_path,
                 message=commit_message,
@@ -105,10 +107,8 @@ if __name__ == "__main__":
         zip_files = get_zip_files(URL_TO_SCRAPE)
         
         if zip_files is not None:
-            # Ordina i file in ordine cronologico (dal più vecchio al più nuovo)
             zip_files.sort(key=lambda x: x[0])
             
-            # Prendi solo i primi 15 file se ne vengono trovati di più
             if len(zip_files) > 15:
                 zip_files = zip_files[:15]
             
