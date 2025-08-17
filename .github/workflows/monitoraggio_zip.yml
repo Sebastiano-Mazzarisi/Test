@@ -1,37 +1,31 @@
 name: Monitoraggio File ZIP
 
-# Questo workflow si avvia ogni 5 minuti in automatico,
-# ma può anche essere avviato manualmente.
+# Aggiungi questa sezione per dare i permessi di scrittura al workflow
+permissions:
+  contents: write
+
 on:
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch:
 
-# Definizione dei job del workflow
 jobs:
   run-scan:
-    # L'ambiente virtuale dove il codice verrà eseguito.
     runs-on: ubuntu-latest
     
-    # Gli step sono le azioni eseguite in sequenza.
     steps:
-      # Step 1: Clona il tuo repository nel runner di GitHub.
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: Configura Python nell'ambiente.
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
-      # Step 3: Installa le librerie necessarie (elencate nel file requirements.txt).
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      # Step 4: Esegui lo script Python.
       - name: Run Python script
         env:
-          # Il GITHUB_TOKEN è fornito automaticamente da GitHub per le azioni di scrittura.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python Scansiona.py
