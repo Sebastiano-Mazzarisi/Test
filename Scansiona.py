@@ -15,33 +15,37 @@ FILE_PATH = "Monitorizza.html"
 def get_zip_files(url):
     """
     Recupera e analizza la pagina web per trovare tutti i file .zip e la loro data
-    di modifica dal server (se disponibile).
+    di pubblicazione in base al testo "Pubblicato:".
     """
     try:
         response = requests.get(url)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, 'html.parser')
 
-        links = soup.find_all('a', href=lambda href: href and href.endswith('.zip'))
-        
         zip_files = []
-        for link in links:
-            file_url = link['href']
-            file_name = os.path.basename(file_url)
-            mod_date = "Data non trovata"
-
-            # Tenta di ottenere la data dall'header HTTP 'Last-Modified'
-            try:
-                head_response = requests.head(file_url)
-                if 'Last-Modified' in head_response.headers:
-                    date_str = head_response.headers['Last-Modified']
-                    mod_date = datetime.strptime(date_str, '%a, %d %b %Y %H:%M:%S GMT')
-                else:
-                    mod_date = "Data non trovata"
-            except Exception:
-                mod_date = "Data non trovata"
-
-            zip_files.append((mod_date, file_name))
+        
+        # Trova tutti i tag che contengono la data di pubblicazione.
+        pubb_tags = soup.find_all(lambda tag: 'Pubblicato:' in tag.get_text())
+        
+        for tag in pubb_tags:
+            # Trova il link .zip successivo o adiacente al tag della data
+            # Cerchiamo nei fratelli o nei genitori, la navigazione HTML può variare.
+            link = tag.find_next('a', href=lambda href: href and href.endswith('.zip'))
+            
+            if link:
+                file_name = os.path.basename(link['href'])
+                date_str = tag.get_text().strip()
+                
+                # Estrae la data dalla stringa "Pubblicato: Mercoledì, 18 Settembre 2025 18:00"
+                try:
+                    parts = date_str.split(',')
+                    date_part = parts[1].strip() if len(parts) > 1 else parts[0].strip()
+                    date_part = date_part.replace('alle', '').strip()
+                    mod_date = datetime.strptime(date_part, '%d %B %Y %H:%M')
+                except (ValueError, IndexError):
+                    mod_date = datetime(1900, 1, 1) # Data fittizia se l'estrazione fallisce
+                
+                zip_files.append((mod_date, file_name))
             
         return zip_files
     
@@ -103,8 +107,10 @@ if __name__ == "__main__":
         zip_files = get_zip_files(URL_TO_SCRAPE)
         
         if zip_files is not None:
-            # Ordina i file in base alla data, se trovata
-            zip_files.sort(key=lambda x: x[0] if isinstance(x[0], datetime) else datetime.min, reverse=True)
+            zip_files.sort(key=lambda x: x[0], reverse=True)
+            
+            if len(zip_files) > 15:
+                zip_files = zip_files[:15]
             
             html_output = create_html_content(zip_files)
             commit_msg = "Aggiornamento automatico elenco file .zip"
