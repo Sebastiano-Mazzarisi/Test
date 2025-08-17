@@ -14,20 +14,33 @@ FILE_PATH = "Monitorizza.html"
 
 def get_zip_files(url):
     """
-    Recupera e analizza la pagina web per trovare tutti i file .zip.
+    Recupera e analizza la pagina web per trovare tutti i file .zip e la loro data
+    di modifica dal server (se disponibile).
     """
     try:
         response = requests.get(url)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, 'html.parser')
 
-        # Cerca tutti i tag <a> che terminano con .zip, ovunque si trovino nella pagina.
         links = soup.find_all('a', href=lambda href: href and href.endswith('.zip'))
         
         zip_files = []
         for link in links:
-            file_name = os.path.basename(link['href'])
-            mod_date = "Data non trovata" # Non estraiamo la data per evitare errori
+            file_url = link['href']
+            file_name = os.path.basename(file_url)
+            mod_date = "Data non trovata"
+
+            # Tenta di ottenere la data dall'header HTTP 'Last-Modified'
+            try:
+                head_response = requests.head(file_url)
+                if 'Last-Modified' in head_response.headers:
+                    date_str = head_response.headers['Last-Modified']
+                    mod_date = datetime.strptime(date_str, '%a, %d %b %Y %H:%M:%S GMT')
+                else:
+                    mod_date = "Data non trovata"
+            except Exception:
+                mod_date = "Data non trovata"
+
             zip_files.append((mod_date, file_name))
             
         return zip_files
@@ -46,7 +59,8 @@ def create_html_content(file_list):
     html_content += "<ul>\n"
     
     for date, name in file_list:
-        html_content += f"    <li><b>{date}</b> --- {name}</li>\n"
+        date_str = date.strftime('%Y-%m-%d') if isinstance(date, datetime) else "Data non trovata"
+        html_content += f"    <li><b>{date_str}</b> --- {name}</li>\n"
     
     html_content += "</ul>\n</body>\n</html>"
     return html_content
@@ -67,7 +81,7 @@ def update_github_file(repo_owner, repo_name, file_path, new_content, commit_mes
                 branch="main"
             )
             print(f"File '{file_path}' aggiornato con successo su GitHub.")
-        except Exception as e:
+        except Exception:
             repo.create_file(
                 path=file_path,
                 message=commit_message,
@@ -89,6 +103,9 @@ if __name__ == "__main__":
         zip_files = get_zip_files(URL_TO_SCRAPE)
         
         if zip_files is not None:
+            # Ordina i file in base alla data, se trovata
+            zip_files.sort(key=lambda x: x[0] if isinstance(x[0], datetime) else datetime.min, reverse=True)
+            
             html_output = create_html_content(zip_files)
             commit_msg = "Aggiornamento automatico elenco file .zip"
             update_github_file(REPO_OWNER, REPO_NAME, FILE_PATH, html_output, commit_msg)
