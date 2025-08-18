@@ -16,7 +16,7 @@ logging.getLogger("PyPDF2").setLevel(logging.ERROR)
 
 # --- Configurazione Globale ---
 FILE_PATH = "Monitorizza.html"
-SEARCH_STRING = "Mazzarisi"
+SEARCH_STRINGS = ["Mazzarisi", "Vetrugno"]
 ROOT_URL = "https://www.pugliausr.gov.it/"
 # --- ---
 
@@ -140,8 +140,11 @@ def get_zip_files(url):
     except requests.exceptions.RequestException:
         return None
 
-def find_string_in_pdfs(zip_url, search_string):
+def find_string_in_pdfs(zip_url, search_strings):
     found_pdfs = []
+    # Crea una singola regex unendo le stringhe con un operatore OR
+    search_pattern = "|".join(re.escape(s) for s in search_strings)
+    
     try:
         with requests.get(zip_url, stream=True, timeout=60) as r:
             r.raise_for_status()
@@ -159,7 +162,9 @@ def find_string_in_pdfs(zip_url, search_string):
                                     text_content = ""
                                     for page in reader.pages:
                                         text_content += page.extract_text() or ""
-                                    if re.search(search_string, text_content, re.IGNORECASE):
+                                    
+                                    # Cerca una qualsiasi delle stringhe
+                                    if re.search(search_pattern, text_content, re.IGNORECASE):
                                         found_pdfs.append(filename)
                 except zipfile.BadZipFile:
                     pass
@@ -174,10 +179,17 @@ def create_output_content(file_list, html_format=False):
     if not file_list:
         return "Nessun file .zip trovato." if not html_format else "<html><body><p>Nessun file .zip trovato.</p></body></html>"
 
+    prev_date = None
     for file_info in file_list:
         date_str = file_info["date"].strftime("%Y-%m-%d %H:%M") if isinstance(file_info["date"], datetime) else "Data non trovata"
-        output_lines.append(f"{date_str} --- {file_info['name']}")
 
+        # Aggiunge il separatore se il giorno cambia
+        current_date = file_info["date"].date() if isinstance(file_info["date"], datetime) else None
+        if prev_date and current_date and current_date != prev_date:
+            output_lines.append("-" * 20)
+        
+        output_lines.append(f"{date_str} --- {file_info['name']}")
+        
         if file_info["found_pdfs"]:
             pdfs_to_add = [pdf for pdf in file_info["found_pdfs"] if pdf not in processed_pdfs]
             if pdfs_to_add:
@@ -186,6 +198,8 @@ def create_output_content(file_list, html_format=False):
                     output_lines.append(pdf_name)
                     processed_pdfs.add(pdf_name)
                 output_lines.append("-" * 50)
+        
+        prev_date = current_date
     
     if html_format:
         current_time = datetime.now().strftime("%H:%M")
@@ -196,24 +210,42 @@ def create_output_content(file_list, html_format=False):
     <title>Monitoraggio</title>
     <style>
         body {{ font-family: sans-serif; line-height: 1.6; padding: 10px; }}
-        .item {{ margin-bottom: 20px; }}
+        h1 {{ font-size: 1.5em; }}
+        .item {{ margin-bottom: 10px; }}
         .separator {{ margin: 10px 0; border: 0; border-top: 1px solid #ccc; }}
+        .day-separator {{ margin: 20px 0; border: 0; border-top: 2px solid #333; }}
+        .pdf-list {{ margin-left: 20px; }}
+        .file-entry {{ margin-bottom: 5px; }}
     </style>
 </head>
 <body>
     <h1>Elenco .zip alle {current_time}</h1>
 """
-        for line in output_lines:
-            if line.startswith('---'):
-                content += '    <hr class="separator">\n'
-            else:
-                content += f"    <p>{line}</p>\n"
+        prev_date = None
+        for file_info in file_list:
+            date_str = file_info["date"].strftime("%Y-%m-%d %H:%M") if isinstance(file_info["date"], datetime) else "Data non trovata"
+            current_date = file_info["date"].date() if isinstance(file_info["date"], datetime) else None
+
+            if prev_date and current_date and current_date != prev_date:
+                content += '    <hr class="day-separator">\n'
+
+            content += f'    <div class="file-entry"><b>{date_str}</b> --- {file_info["name"]}</div>\n'
+            
+            if file_info["found_pdfs"]:
+                content += '    <ul class="pdf-list">\n'
+                for pdf_name in file_info["found_pdfs"]:
+                    content += f'        <li>{pdf_name}</li>\n'
+                content += '    </ul>\n'
+            
+            prev_date = current_date
+
         content += """
 </body>
 </html>"""
         return content
     else:
         return "\n".join(output_lines)
+
 
 def update_github_file(repo_owner, repo_name, file_path, new_content, commit_message):
     try:
@@ -250,7 +282,7 @@ if __name__ == "__main__":
             zip_files = zip_files[:15]
             
         for fi in zip_files:
-            fi["found_pdfs"] = find_string_in_pdfs(fi["url"], SEARCH_STRING)
+            fi["found_pdfs"] = find_string_in_pdfs(fi["url"], SEARCH_STRINGS)
 
         html_output = create_output_content(zip_files, html_format=True)
         commit_msg = "Aggiornamento automatico elenco file .zip"
