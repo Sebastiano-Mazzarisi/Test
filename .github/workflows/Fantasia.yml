@@ -1,0 +1,34 @@
+name: Aggiorna Menù Fantasia
+
+on:
+  schedule:
+    - cron: '*/10 * * * *' # Esegue ogni 10 minuti
+
+jobs:
+  update-menu:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout del repository
+        uses: actions/checkout@v3
+      
+      - name: Configurazione di Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Installazione delle dipendenze
+        run: |
+          pip install playwright requests
+          playwright install --with-deps
+      
+      - name: Esecuzione dello script Python
+        run: python Fantasia.py
+      
+      - name: Caricamento del file HTML e dell'immagine
+        uses: actions/upload-artifact@v3
+        with:
+          name: fantasia-menu-files
+          path: |
+            Fantasia.html
+            menu_*.jpg
