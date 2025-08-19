@@ -134,14 +134,16 @@ def get_zip_files(url):
                 "date": mod_date,
                 "name": file_name,
                 "url": file_url,
-                "found_pdfs": []
+                "found_pdfs": [],
+                "all_pdfs": []
             })
         return zip_files
     except requests.exceptions.RequestException:
         return None
 
-def find_string_in_pdfs(zip_url, search_strings):
-    found_pdfs_with_words = []
+def find_pdfs_and_strings_in_zip(zip_url, search_strings):
+    found_with_words = []
+    all_pdfs = []
     search_pattern = "|".join(re.escape(s) for s in search_strings)
     
     try:
@@ -156,6 +158,8 @@ def find_string_in_pdfs(zip_url, search_strings):
                     with zipfile.ZipFile(tmp_zip_path, "r") as zip_ref:
                         for filename in zip_ref.namelist():
                             if filename.lower().endswith(".pdf"):
+                                all_pdfs.append({"name": filename, "url": f"{zip_url}/{filename}"})
+                                
                                 with zip_ref.open(filename, "r") as pdf_file:
                                     reader = PdfReader(pdf_file)
                                     text_content = ""
@@ -165,12 +169,13 @@ def find_string_in_pdfs(zip_url, search_strings):
                                     match = re.search(search_pattern, text_content, re.IGNORECASE)
                                     if match:
                                         found_word = match.group(0)
-                                        found_pdfs_with_words.append((filename, found_word))
+                                        found_with_words.append((filename, found_word))
                 except zipfile.BadZipFile:
                     pass
     except Exception:
         pass
-    return found_pdfs_with_words
+    return {"found_with_words": found_with_words, "all_pdfs": all_pdfs}
+
 
 def create_output_content(file_list, html_format=False):
     output_lines = []
@@ -180,30 +185,10 @@ def create_output_content(file_list, html_format=False):
     if not file_list:
         return "Nessun file .zip trovato." if not html_format else "<html><body><p>Nessun file .zip trovato.</p></body></html>"
 
-    for file_info in file_list:
-        current_date = file_info["date"].date()
-        if last_date and current_date != last_date:
-            output_lines.append("..................................................")
-        last_date = current_date
-
-        date_str = file_info["date"].strftime("%Y-%m-%d %H:%M") if isinstance(file_info["date"], datetime) else "Data non trovata"
-        output_lines.append(f"{date_str} --- {file_info['name']}")
-
-        if file_info["found_pdfs"]:
-            pdfs_to_add = []
-            for pdf_name, found_word in file_info["found_pdfs"]:
-                if (pdf_name, found_word) not in processed_pdfs:
-                    pdfs_to_add.append((pdf_name, found_word))
-                    processed_pdfs.add((pdf_name, found_word))
-            
-            if pdfs_to_add:
-                output_lines.append("-" * 50)
-                for pdf_name, found_word in pdfs_to_add:
-                    output_lines.append(f"{pdf_name} (<b>{found_word}</b>)")
-                output_lines.append("-" * 50)
-    
     if html_format:
+        import json
         current_time = (datetime.now() + timedelta(hours=2)).strftime("%H:%M")
+        
         content = f"""<!DOCTYPE html>
 <html>
 <head>
@@ -214,9 +199,55 @@ def create_output_content(file_list, html_format=False):
         .item {{ margin-bottom: 20px; }}
         .separator {{ margin: 10px 0; border: 0; border-top: 1px solid #ccc; }}
         .file-entry {{ margin-bottom: 5px; }}
+        .popup-content {{ padding: 20px; }}
+        .overlay {{
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            transition: opacity 500ms;
+            visibility: hidden;
+            opacity: 0;
+            z-index: 1000;
+        }}
+        .overlay:target {{
+            visibility: visible;
+            opacity: 1;
+        }}
+        .popup {{
+            margin: 70px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 5px;
+            width: 70%;
+            position: relative;
+            transition: all 5s ease-in-out;
+            max-height: 80vh;
+            overflow-y: auto;
+        }}
+        .popup h2 {{ margin-top: 0; color: #333; font-family: Tahoma, Arial, sans-serif; }}
+        .popup .close {{
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            transition: all 200ms;
+            font-size: 30px;
+            font-weight: bold;
+            text-decoration: none;
+            color: #333;
+        }}
+        .popup .close:hover {{ color: #06D85F; }}
+        .popup-content a {{ color: #007bff; text-decoration: none; }}
+        .popup-content a:hover {{ text-decoration: underline; }}
         @media (max-width: 600px) {{
-            body {{
-                line-height: 1.0;
+            .popup {{
+                width: 90%;
+            }}
+            .popup .close {{
+                top: 10px;
+                right: 20px;
             }}
         }}
     </style>
@@ -224,18 +255,83 @@ def create_output_content(file_list, html_format=False):
 <body>
     <h1>Elenco .zip alle {current_time}</h1>
 """
-        for line in output_lines:
-            if line.startswith('---'):
+        for file_info in file_list:
+            current_date = file_info["date"].date()
+            if last_date and current_date != last_date:
                 content += '    <hr class="separator">\n'
-            elif line.startswith('....'):
-                content += '    <hr class="separator">\n'
-            else:
-                content += f"    <p>{line}</p>\n"
+            last_date = current_date
+            
+            date_str = file_info["date"].strftime("%Y-%m-%d %H:%M") if isinstance(file_info["date"], datetime) else "Data non trovata"
+            
+            all_pdfs_json = json.dumps(file_info["all_pdfs"])
+            
+            content += f"""    <p><b>{date_str}</b> --- <a href="#popup-zip" onclick='openPopup("{file_info['name']}", {all_pdfs_json})'>{file_info['name']}</a></p>\n"""
+            
+            if file_info["found_pdfs"]:
+                content += '    <div style="padding-left: 20px;">\n'
+                content += '    <small><b>Contiene le stringhe di ricerca:</b></small>\n'
+                content += '    <ul>\n'
+                for pdf_name, found_word in file_info["found_pdfs"]:
+                    content += f'        <li>{pdf_name} (<b>{found_word}</b>)</li>\n'
+                content += '    </ul>\n'
+                content += '    </div>\n'
+        
         content += """
+    <div id="popup-zip" class="overlay">
+        <div class="popup">
+            <h2 id="popup-title"></h2>
+            <a class="close" href="#">&times;</a>
+            <div class="popup-content">
+                <ul id="popup-pdf-list"></ul>
+            </div>
+        </div>
+    </div>
+    <script>
+        function openPopup(zipName, pdfList) {
+            const popupTitle = document.getElementById('popup-title');
+            const pdfListElement = document.getElementById('popup-pdf-list');
+            const overlay = document.getElementById('popup-zip');
+
+            popupTitle.innerText = "Contenuto di " + zipName;
+            
+            pdfListElement.innerHTML = '';
+            if (pdfList.length > 0) {
+                pdfList.forEach(pdf => {
+                    const listItem = document.createElement('li');
+                    const link = document.createElement('a');
+                    link.href = pdf.url;
+                    link.target = '_blank';
+                    link.innerText = pdf.name;
+                    listItem.appendChild(link);
+                    pdfListElement.appendChild(listItem);
+                });
+            } else {
+                const listItem = document.createElement('li');
+                listItem.innerText = "Nessun file PDF trovato.";
+                pdfListElement.appendChild(listItem);
+            }
+            window.location.href = '#popup-zip';
+        }
+    </script>
 </body>
-</html>"""
+</html>
+"""
         return content
     else:
+        for file_info in file_list:
+            current_date = file_info["date"].date()
+            if last_date and current_date != last_date:
+                output_lines.append("..................................................")
+            last_date = current_date
+
+            date_str = file_info["date"].strftime("%Y-%m-%d %H:%M") if isinstance(file_info["date"], datetime) else "Data non trovata"
+            output_lines.append(f"{date_str} --- {file_info['name']}")
+
+            if file_info["found_pdfs"]:
+                output_lines.append("-" * 50)
+                for pdf_name, found_word in file_info["found_pdfs"]:
+                    output_lines.append(f"{pdf_name} (<b>{found_word}</b>)")
+                output_lines.append("-" * 50)
         return "\n".join(output_lines)
 
 def update_github_file(repo_owner, repo_name, file_path, new_content, commit_message):
@@ -273,10 +369,12 @@ if __name__ == "__main__":
             zip_files = zip_files[:15]
             
         for fi in zip_files:
-            fi["found_pdfs"] = find_string_in_pdfs(fi["url"], SEARCH_STRINGS)
+            results = find_pdfs_and_strings_in_zip(fi["url"], SEARCH_STRINGS)
+            fi["found_pdfs"] = results["found_with_words"]
+            fi["all_pdfs"] = results["all_pdfs"]
 
         html_output = create_output_content(zip_files, html_format=True)
-        commit_msg = "Aggiornamento automatico elenco file .zip"
+        commit_msg = "Aggiornamento automatico elenco file .zip con pop-up"
         
         update_github_file(REPO_OWNER, REPO_NAME, FILE_PATH, html_output, commit_msg)
         print("Il programma ha terminato l'esecuzione. L'output è stato caricato su GitHub.")
