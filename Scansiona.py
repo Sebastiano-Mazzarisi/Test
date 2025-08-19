@@ -16,7 +16,7 @@ logging.getLogger("PyPDF2").setLevel(logging.ERROR)
 
 # --- Configurazione Globale ---
 FILE_PATH = "Monitorizza.html"
-SEARCH_STRINGS = ["Mazzarisi", "Ximenes", "Occhiuto"]
+SEARCH_STRINGS = ["Mazzarisi", "Ximenes", "Occhiuto", "A045"]
 ROOT_URL = "https://www.pugliausr.gov.it/"
 # --- ---
 
@@ -175,11 +175,17 @@ def find_string_in_pdfs(zip_url, search_strings):
 def create_output_content(file_list, html_format=False):
     output_lines = []
     processed_pdfs = set()
+    last_date = None
     
     if not file_list:
         return "Nessun file .zip trovato." if not html_format else "<html><body><p>Nessun file .zip trovato.</p></body></html>"
 
     for file_info in file_list:
+        current_date = file_info["date"].date()
+        if last_date and current_date != last_date:
+            output_lines.append("..................................................")
+        last_date = current_date
+
         date_str = file_info["date"].strftime("%Y-%m-%d %H:%M") if isinstance(file_info["date"], datetime) else "Data non trovata"
         output_lines.append(f"{date_str} --- {file_info['name']}")
 
@@ -210,7 +216,7 @@ def create_output_content(file_list, html_format=False):
         .file-entry {{ margin-bottom: 5px; }}
         @media (max-width: 600px) {{
             body {{
-                line-height: 1.2;
+                line-height: 1.0;
             }}
         }}
     </style>
@@ -220,6 +226,8 @@ def create_output_content(file_list, html_format=False):
 """
         for line in output_lines:
             if line.startswith('---'):
+                content += '    <hr class="separator">\n'
+            elif line.startswith('....'):
                 content += '    <hr class="separator">\n'
             else:
                 content += f"    <p>{line}</p>\n"
