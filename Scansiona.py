@@ -159,7 +159,7 @@ def find_pdfs_and_strings_in_zip(zip_url, search_strings):
                     with zipfile.ZipFile(tmp_zip_path, "r") as zip_ref:
                         for filename in zip_ref.namelist():
                             if filename.lower().endswith(".pdf"):
-                                all_pdfs.append({"name": filename, "url": zip_url}) # Modifica qui
+                                all_pdfs.append({"name": filename, "url": zip_url})
                                 
                                 with zip_ref.open(filename, "r") as pdf_file:
                                     reader = PdfReader(pdf_file)
@@ -180,7 +180,6 @@ def find_pdfs_and_strings_in_zip(zip_url, search_strings):
 
 def create_output_content(file_list, html_format=False):
     output_lines = []
-    processed_pdfs = set()
     last_date = None
     
     if not file_list:
@@ -196,58 +195,10 @@ def create_output_content(file_list, html_format=False):
     <title>Monitoraggio</title>
     <style>
         body {{ font-family: sans-serif; line-height: 1.6; padding: 10px; }}
-        .item {{ margin-bottom: 20px; }}
         .separator {{ margin: 10px 0; border: 0; border-top: 1px solid #ccc; }}
-        .file-entry {{ margin-bottom: 5px; }}
-        .popup-content {{ padding: 20px; }}
-        .overlay {{
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.7);
-            transition: opacity 500ms;
-            visibility: hidden;
-            opacity: 0;
-            z-index: 1000;
-        }}
-        .overlay:target {{
-            visibility: visible;
-            opacity: 1;
-        }}
-        .popup {{
-            margin: 70px auto;
-            padding: 20px;
-            background: #fff;
-            border-radius: 5px;
-            width: 70%;
-            position: relative;
-            transition: all 5s ease-in-out;
-            max-height: 80vh;
-            overflow-y: auto;
-        }}
-        .popup h2 {{ margin-top: 0; color: #333; font-family: Tahoma, Arial, sans-serif; }}
-        .popup .close {{
-            position: absolute;
-            top: 20px;
-            right: 30px;
-            transition: all 200ms;
-            font-size: 30px;
-            font-weight: bold;
-            text-decoration: none;
-            color: #333;
-        }}
-        .popup .close:hover {{ color: #06D85F; }}
-        .popup-content a {{ color: #007bff; text-decoration: none; }}
-        .popup-content a:hover {{ text-decoration: underline; }}
         @media (max-width: 600px) {{
-            .popup {{
-                width: 90%;
-            }}
-            .popup .close {{
-                top: 10px;
-                right: 20px;
+            body {{
+                line-height: 1.0;
             }}
         }}
     </style>
@@ -263,7 +214,8 @@ def create_output_content(file_list, html_format=False):
             
             date_str = file_info["date"].strftime("%Y-%m-%d %H:%M") if isinstance(file_info["date"], datetime) else "Data non trovata"
             
-            content += f"""    <p><b>{date_str}</b> --- <a href="#popup-zip" onclick='openPopup("{file_info['name']}", "{file_info['url']}", {json.dumps(file_info['all_pdfs'])})'>{file_info['name']}</a></p>\n"""
+            # Modifica: link diretto al file .zip
+            content += f"""    <p><b>{date_str}</b> --- <a href="{file_info['url']}" download>{file_info['name']}</a></p>\n"""
             
             if file_info["found_pdfs"]:
                 content += '    <div style="padding-left: 20px;">\n'
@@ -275,46 +227,8 @@ def create_output_content(file_list, html_format=False):
                 content += '    </div>\n'
         
         content += """
-    <div id="popup-zip" class="overlay">
-        <div class="popup">
-            <h2 id="popup-title"></h2>
-            <a class="close" href="#">&times;</a>
-            <div class="popup-content">
-                <ul id="popup-pdf-list"></ul>
-                <p><b>Nota:</b> Per aprire i file, devi prima scaricare e decomprimere il file .zip.</p>
-            </div>
-        </div>
-    </div>
-    <script>
-        function openPopup(zipName, zipUrl, pdfList) {
-            const popupTitle = document.getElementById('popup-title');
-            const pdfListElement = document.getElementById('popup-pdf-list');
-            const overlay = document.getElementById('popup-zip');
-
-            popupTitle.innerText = "Contenuto di " + zipName;
-            
-            pdfListElement.innerHTML = '';
-            if (pdfList.length > 0) {
-                pdfList.forEach(pdf => {
-                    const listItem = document.createElement('li');
-                    const link = document.createElement('a');
-                    link.href = zipUrl;
-                    link.target = '_blank';
-                    link.innerText = pdf.name;
-                    listItem.appendChild(link);
-                    pdfListElement.appendChild(listItem);
-                });
-            } else {
-                const listItem = document.createElement('li');
-                listItem.innerText = "Nessun file PDF trovato.";
-                pdfListElement.appendChild(listItem);
-            }
-            window.location.href = '#popup-zip';
-        }
-    </script>
 </body>
-</html>
-"""
+</html>"""
         return content
     else:
         for file_info in file_list:
@@ -373,7 +287,7 @@ if __name__ == "__main__":
             fi["all_pdfs"] = results["all_pdfs"]
 
         html_output = create_output_content(zip_files, html_format=True)
-        commit_msg = "Aggiornamento automatico elenco file .zip con pop-up"
+        commit_msg = "Aggiornamento automatico elenco file .zip"
         
         update_github_file(REPO_OWNER, REPO_NAME, FILE_PATH, html_output, commit_msg)
         print("Il programma ha terminato l'esecuzione. L'output è stato caricato su GitHub.")
