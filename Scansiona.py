@@ -10,6 +10,7 @@ from PyPDF2 import PdfReader
 import logging
 from urllib.parse import urljoin
 from github import Github
+import json
 
 # Configurazione per sopprimere gli avvisi di PyPDF2
 logging.getLogger("PyPDF2").setLevel(logging.ERROR)
@@ -158,7 +159,7 @@ def find_pdfs_and_strings_in_zip(zip_url, search_strings):
                     with zipfile.ZipFile(tmp_zip_path, "r") as zip_ref:
                         for filename in zip_ref.namelist():
                             if filename.lower().endswith(".pdf"):
-                                all_pdfs.append({"name": filename, "url": f"{zip_url}/{filename}"})
+                                all_pdfs.append({"name": filename, "url": zip_url}) # Modifica qui
                                 
                                 with zip_ref.open(filename, "r") as pdf_file:
                                     reader = PdfReader(pdf_file)
@@ -186,7 +187,6 @@ def create_output_content(file_list, html_format=False):
         return "Nessun file .zip trovato." if not html_format else "<html><body><p>Nessun file .zip trovato.</p></body></html>"
 
     if html_format:
-        import json
         current_time = (datetime.now() + timedelta(hours=2)).strftime("%H:%M")
         
         content = f"""<!DOCTYPE html>
@@ -263,9 +263,7 @@ def create_output_content(file_list, html_format=False):
             
             date_str = file_info["date"].strftime("%Y-%m-%d %H:%M") if isinstance(file_info["date"], datetime) else "Data non trovata"
             
-            all_pdfs_json = json.dumps(file_info["all_pdfs"])
-            
-            content += f"""    <p><b>{date_str}</b> --- <a href="#popup-zip" onclick='openPopup("{file_info['name']}", {all_pdfs_json})'>{file_info['name']}</a></p>\n"""
+            content += f"""    <p><b>{date_str}</b> --- <a href="#popup-zip" onclick='openPopup("{file_info['name']}", "{file_info['url']}", {json.dumps(file_info['all_pdfs'])})'>{file_info['name']}</a></p>\n"""
             
             if file_info["found_pdfs"]:
                 content += '    <div style="padding-left: 20px;">\n'
@@ -283,11 +281,12 @@ def create_output_content(file_list, html_format=False):
             <a class="close" href="#">&times;</a>
             <div class="popup-content">
                 <ul id="popup-pdf-list"></ul>
+                <p><b>Nota:</b> Per aprire i file, devi prima scaricare e decomprimere il file .zip.</p>
             </div>
         </div>
     </div>
     <script>
-        function openPopup(zipName, pdfList) {
+        function openPopup(zipName, zipUrl, pdfList) {
             const popupTitle = document.getElementById('popup-title');
             const pdfListElement = document.getElementById('popup-pdf-list');
             const overlay = document.getElementById('popup-zip');
@@ -299,7 +298,7 @@ def create_output_content(file_list, html_format=False):
                 pdfList.forEach(pdf => {
                     const listItem = document.createElement('li');
                     const link = document.createElement('a');
-                    link.href = pdf.url;
+                    link.href = zipUrl;
                     link.target = '_blank';
                     link.innerText = pdf.name;
                     listItem.appendChild(link);
