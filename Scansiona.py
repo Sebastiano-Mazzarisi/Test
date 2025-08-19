@@ -16,7 +16,7 @@ logging.getLogger("PyPDF2").setLevel(logging.ERROR)
 
 # --- Configurazione Globale ---
 FILE_PATH = "Monitorizza.html"
-SEARCH_STRINGS = ["Mazzarisi", "Vetrugno"]
+SEARCH_STRINGS = ["Mazzarisi", "Ximenes", "Occhiuto"]
 ROOT_URL = "https://www.pugliausr.gov.it/"
 # --- ---
 
@@ -193,7 +193,7 @@ def create_output_content(file_list, html_format=False):
             if pdfs_to_add:
                 output_lines.append("-" * 50)
                 for pdf_name, found_word in pdfs_to_add:
-                    output_lines.append(f"{pdf_name} ({found_word})")
+                    output_lines.append(f"{pdf_name} (<b>{found_word}</b>)")
                 output_lines.append("-" * 50)
     
     if html_format:
@@ -208,6 +208,11 @@ def create_output_content(file_list, html_format=False):
         .item {{ margin-bottom: 20px; }}
         .separator {{ margin: 10px 0; border: 0; border-top: 1px solid #ccc; }}
         .file-entry {{ margin-bottom: 5px; }}
+        @media (max-width: 600px) {{
+            body {{
+                line-height: 1.2;
+            }}
+        }}
     </style>
 </head>
 <body>
