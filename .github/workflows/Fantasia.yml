@@ -2,7 +2,7 @@ name: Aggiorna Menù Fantasia
 
 on:
   schedule:
-    - cron: '* * * * *' # Esegue ogni minuto
+    - cron: '*/10 * * * *' # Puoi cambiare in '* * * * *' se vuoi ogni minuto
 
 jobs:
   update-menu:
@@ -25,10 +25,8 @@ jobs:
       - name: Esecuzione dello script Python
         run: python Fantasia.py
       
-      - name: Caricamento del file HTML e dell'immagine
-        uses: actions/upload-artifact@v3
+      - name: Commit e push dei file aggiornati
+        uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          name: fantasia-menu-files
-          path: |
-            Fantasia.html
-            menu_*.jpg
+          commit_message: "Aggiorna menu e immagine"
+          file_pattern: "Fantasia.html menu_*.jpg"
