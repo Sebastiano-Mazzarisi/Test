@@ -19,6 +19,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
       
       - name: 🐍 Configurazione di Python
         uses: actions/setup-python@v4
@@ -93,12 +94,25 @@ jobs:
           fi
       
       - name: 🗂️ Commit e push dei file aggiornati
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "🍽️ Aggiorna menù Fantasia - $(date +'%d/%m/%Y %H:%M')"
-          file_pattern: "Fantasia.html menu_*.jpg"
-          commit_user_name: "Fantasia Bot"
-          commit_user_email: "actions@github.com"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Configura Git
+          git config --local user.email "actions@github.com"
+          git config --local user.name "Fantasia Bot"
+          
+          # Aggiungi i file generati
+          git add -A
+          
+          # Controlla se ci sono modifiche da committare
+          if git diff --staged --quiet; then
+            echo "📝 Nessuna modifica da committare"
+          else
+            echo "📝 Commit delle modifiche..."
+            git commit -m "🍽️ Aggiorna menù Fantasia - $(date +'%d/%m/%Y %H:%M')"
+            git push
+            echo "✅ Push completato!"
+          fi
         
       - name: 📊 Riepilogo finale
         if: always()
