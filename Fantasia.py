@@ -138,7 +138,7 @@ class HTMLGenerator:
     <div class="container">
         <h1>🍽️ Rosticceria Fantasia</h1>
         
-        {f'<div class="menu-text">{cleaned_text}</div>' if cleaned_text else ''}
+        {f'<div class="menu-text" style="text-align: center;">{cleaned_text}</div>' if cleaned_text else ''}
         
         {f'<div class="menu-image"><img src="{image_filename}" alt="Menù del giorno" /></div>' if image_filename else ''}
         
@@ -482,12 +482,14 @@ class MenuExtractor:
             logging.error("❌ Processo interrotto: generazione HTML fallita.")
             return False
         
-        # Passo 4: Invia email (opzionale)
-        email_sent = self.notifier.send_menu_email(image_path, post.get("text", ""))
+        # Passo 4: Invia email (DISABILITATO)
+        logging.info("📧 Invio email disabilitato per scelta dell'utente.")
+        email_sent = False
+        # email_sent = self.notifier.send_menu_email(image_path, post.get("text", ""))
         if email_sent:
             logging.info("✅ Email inviata con successo!")
         else:
-            logging.warning("⚠️ Email non inviata, ma il processo continua.")
+            logging.info("📧 Email non inviata (disabilitata).")
         
         logging.info("🎉 --- Flusso Completato con Successo ---")
         return True
