@@ -1,5 +1,10 @@
 name: Aggiorna Menù Fantasia
 
+# Permessi espliciti per il token
+permissions:
+  contents: write
+  actions: read
+
 on:
   schedule:
     # Esegui alle 8:00, 9:00, e 10:00 UTC (10:00, 11:00, 12:00 ora italiana)
@@ -93,26 +98,25 @@ jobs:
             tail -20 menu_extractor.log
           fi
       
-      - name: 🗂️ Prepara file per commit (SENZA PUSH per ora)
+      - name: 🗂️ Commit e push dei file aggiornati
         run: |
-          echo "📁 File generati:"
-          ls -la *.html *.jpg *.log 2>/dev/null || echo "Alcuni file potrebbero non essere stati generati"
+          # Configura Git con token esplicito
+          git config --local user.email "actions@github.com"
+          git config --local user.name "Fantasia Bot"
           
-          echo ""
-          echo "🔍 Contenuto HTML generato:"
-          if [ -f "Fantasia.html" ]; then
-            echo "✅ Fantasia.html trovato!"
-            head -10 Fantasia.html
+          # Aggiungi tutti i file generati
+          git add Fantasia.html menu_*.jpg menu_extractor.log
+          
+          # Controlla se ci sono modifiche
+          if git diff --staged --quiet; then
+            echo "📝 Nessuna modifica da committare"
+          else
+            echo "📝 Commit delle modifiche..."
+            git commit -m "🍽️ Aggiorna menù Fantasia - $(date +'%d/%m/%Y %H:%M')"
+            echo "📤 Push in corso..."
+            git push
+            echo "✅ File committati con successo nel repository!"
           fi
-          
-          echo ""
-          echo "📸 Immagini generate:"
-          if ls menu_*.jpg 1> /dev/null 2>&1; then
-            ls -la menu_*.jpg
-          fi
-          
-          echo ""
-          echo "⚠️ NOTA: Push Git temporaneamente disabilitato per debug"
         
       - name: 📊 Riepilogo finale
         if: always()
