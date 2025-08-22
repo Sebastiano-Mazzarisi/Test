@@ -125,6 +125,31 @@
         const difficultyButtons = [];
         let currentDifficulty = {};
 
+        // --- MENU LAYOUT (pannello titolo+bottoni) ---
+        let menuLayout = null;
+        function computeMenuLayout() {
+            // Dimensioni pannello responsive con ampi margini interni
+            const maxW = canvas.width - 80;   // margine 40px per lato
+            const maxH = canvas.height - 140; // margine alto/basso
+            const panelW = Math.min(Math.max(520, canvas.width * 0.62), maxW);
+            const panelH = Math.min(Math.max(400, canvas.height * 0.62), maxH);
+            const panelX = (canvas.width  - panelW) / 2;
+            const panelY = (canvas.height - panelH) / 2;
+
+            // Bottoni più comodi
+            const btnW = Math.min(280, panelW - 160); // almeno 80px di padding a sinistra e destra
+            const btnH = 48;
+            const btnSpacing = 18;
+            const titleFont = 34; // più grande
+            const titleY = panelY + 70;
+            const numButtons = Object.keys(difficulties).length + 2; // 3 diff + demo + info
+            const contentH = numButtons * btnH + (numButtons - 1) * btnSpacing;
+            const startYCentered = panelY + (panelH - contentH) / 2 + 10;
+            const startY = Math.max(panelY + 120, startYCentered); // evita di avvicinarti troppo al titolo
+
+            menuLayout = { panelW, panelH, panelX, panelY, btnW, btnH, btnSpacing, titleFont, titleY, startY };
+        }
+
         // --- POPUP INFO ---
         let showInfoPopup = false;
 
@@ -286,8 +311,82 @@
         function drawDigitalClock(simulatedHour) { const hour = Math.floor(simulatedHour); const minute = Math.floor((simulatedHour * 60) % 60); const timeString = `${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`; ctx.font = '20px "Courier New"'; const textMetrics = ctx.measureText(timeString); const boxWidth = textMetrics.width + 20; const livesText = `Vite: ${lives}`; const livesMetrics = ctx.measureText(livesText); const livesBoxWidth = livesMetrics.width + 20; const clockX = 15 + livesBoxWidth + 10; ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.roundRect(clockX, 15, boxWidth, 30, 8); ctx.fill(); ctx.fillStyle = 'black'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(timeString, clockX + 10, 15 + 15 + 1); }
         function drawScore() { const scoreText = `${formatTime(score)}`; const hiScoreText = `HI ${formatTime(highscore)}`; ctx.font = '20px "Courier New"'; const scoreMetrics = ctx.measureText(scoreText); const hiScoreMetrics = ctx.measureText(hiScoreText); const scoreBW = scoreMetrics.width + 20; const hiScoreBW = hiScoreMetrics.width + 20; const bH = 30; const hiScoreBX = canvas.width - hiScoreBW - 15; const scoreBX = hiScoreBX - scoreBW - 10; const bY = 15; ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.roundRect(scoreBX, bY, scoreBW, bH, 8); ctx.fill(); ctx.fillStyle = 'black'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(scoreText, scoreBX + 10, bY + bH / 2 + 1); ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.roundRect(hiScoreBX, bY, hiScoreBW, bH, 8); ctx.fill(); ctx.fillStyle = 'black'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(hiScoreText, hiScoreBX + 10, bY + bH / 2 + 1); }
         function showGameOverOverlay() { ctx.fillStyle = 'rgba(255,255,224,0.7)'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = 'black'; ctx.font = '40px "Courier New"'; ctx.textAlign = 'center'; ctx.fillText('Game Over!', canvas.width/2, canvas.height/2 - 20); ctx.font = '20px "Courier New"'; ctx.fillText(`Punteggio: ${formatTime(score)}. Clicca per riprovare.`, canvas.width/2, canvas.height/2 + 20); }
-        function drawDifficultyScreen() { ctx.fillStyle = '#87CEEB'; ctx.fillRect(0,0,canvas.width,canvas.height); drawGround(); const originalY = personaggio.y; personaggio.y = GROUND_Y; personaggio.draw(); personaggio.y = originalY; ctx.fillStyle = 'rgba(245,245,245,0.9)'; ctx.beginPath(); ctx.roundRect(canvas.width/2 - 200, canvas.height/2 - 160, 400, 320, 15); ctx.fill(); ctx.fillStyle = 'black'; ctx.font = '30px "Courier New"'; ctx.textAlign = 'center'; ctx.fillText('Scegli la difficoltà', canvas.width/2, canvas.height/2 - 115); difficultyButtons.forEach(btn => { ctx.fillStyle = '#FFFACD'; ctx.strokeStyle = 'black'; ctx.fillRect(btn.x, btn.y, btn.width, btn.height); ctx.strokeRect(btn.x, btn.y, btn.width, btn.height); ctx.fillStyle = 'black'; ctx.font = '20px "Courier New"'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(btn.level.name, btn.x + btn.width/2, btn.y + btn.height/2); }); ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.font = '12px "Courier New"'; ctx.textAlign = 'left'; ctx.fillText(`v${gameVersion}`, 10, canvas.height - 10); if (showInfoPopup) { drawInfoPopup(); } }
-        function setupDifficultyButtons() { difficultyButtons.length = 0; const btnW = 150, btnH = 40, sp = 15; const numButtons = Object.keys(difficulties).length + 2; const titleY = canvas.height / 2 - 115; const panelBottom = canvas.height / 2 + 160; const availableSpace = panelBottom - titleY - 60; const tH = (numButtons * btnH) + ((numButtons - 1) * sp); const sY = titleY + 60 + (availableSpace - tH) / 2 - 20; Object.values(difficulties).forEach((l, i) => { const btn = { x: canvas.width / 2 - btnW / 2, y: sY + i * (btnH + sp), width: btnW, height: btnH, level: l }; difficultyButtons.push(btn); }); const demoBtn = { x: canvas.width / 2 - btnW / 2, y: sY + (numButtons - 2) * (btnH + sp), width: btnW, height: btnH, level: { name: 'Demo' }, type: 'demo' }; difficultyButtons.push(demoBtn); const infoBtn = { x: canvas.width / 2 - btnW / 2, y: sY + (numButtons - 1) * (btnH + sp), width: btnW, height: btnH, level: { name: 'Info' }, type: 'info' }; difficultyButtons.push(infoBtn); }
+        function drawDifficultyScreen() {
+            // Sfondo
+            ctx.fillStyle = '#87CEEB';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            drawGround();
+
+            // Piccolo Andrea a sinistra come mascotte
+            const originalY = personaggio.y; personaggio.y = GROUND_Y; personaggio.draw(); personaggio.y = originalY;
+
+            // Pannello
+            if (!menuLayout) computeMenuLayout();
+            const { panelX, panelY, panelW, panelH, titleFont, titleY } = menuLayout;
+            ctx.fillStyle = 'rgba(245,245,245,0.95)';
+            ctx.beginPath();
+            ctx.roundRect(panelX, panelY, panelW, panelH, 18);
+            ctx.fill();
+
+            // Titolo
+            ctx.fillStyle = 'black';
+            ctx.font = `${titleFont}px "Courier New"`;
+            ctx.textAlign = 'center';
+            ctx.fillText('Scegli la difficoltà', panelX + panelW / 2, titleY);
+
+            // Bottoni
+            difficultyButtons.forEach(btn => {
+                ctx.fillStyle = '#FFFACD';
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 2;
+                ctx.fillRect(btn.x, btn.y, btn.width, btn.height);
+                ctx.strokeRect(btn.x, btn.y, btn.width, btn.height);
+                ctx.fillStyle = 'black';
+                ctx.font = '22px "Courier New"';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(btn.level.name, btn.x + btn.width / 2, btn.y + btn.height / 2);
+            });
+
+            // Versione
+            ctx.fillStyle = 'rgba(0,0,0,0.4)';
+            ctx.font = '12px "Courier New"';
+            ctx.textAlign = 'left';
+            ctx.fillText(`v${gameVersion}`, 10, canvas.height - 10);
+
+            // Popup info, se attivo
+            if (showInfoPopup) { drawInfoPopup(); }
+        }); ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.font = '12px "Courier New"'; ctx.textAlign = 'left'; ctx.fillText(`v${gameVersion}`, 10, canvas.height - 10); if (showInfoPopup) { drawInfoPopup(); } }
+        function setupDifficultyButtons() {
+            // Calcola layout aggiornato ad ogni resize
+            computeMenuLayout();
+            difficultyButtons.length = 0;
+
+            const btnX = menuLayout.panelX + (menuLayout.panelW - menuLayout.btnW) / 2;
+            const sp = menuLayout.btnSpacing;
+            const btnW = menuLayout.btnW;
+            const btnH = menuLayout.btnH;
+
+            const entries = [
+                { key: 'facile',  data: difficulties.facile  },
+                { key: 'medio',   data: difficulties.medio   },
+                { key: 'difficile', data: difficulties.difficile },
+            ];
+
+            // Posiziona i tre livelli di difficoltà
+            entries.forEach((e, i) => {
+                const y = menuLayout.startY + i * (btnH + sp);
+                difficultyButtons.push({ x: btnX, y, width: btnW, height: btnH, level: e.data });
+            });
+
+            // Demo
+            const demoY = menuLayout.startY + entries.length * (btnH + sp);
+            difficultyButtons.push({ x: btnX, y: demoY, width: btnW, height: btnH, level: { name: 'Demo' }, type: 'demo' });
+
+            // Info
+            const infoY = demoY + (btnH + sp);
+            difficultyButtons.push({ x: btnX, y: infoY, width: btnW, height: btnH, level: { name: 'Info' }, type: 'info' });
+        }; difficultyButtons.push(btn); }); const demoBtn = { x: canvas.width / 2 - btnW / 2, y: sY + (numButtons - 2) * (btnH + sp), width: btnW, height: btnH, level: { name: 'Demo' }, type: 'demo' }; difficultyButtons.push(demoBtn); const infoBtn = { x: canvas.width / 2 - btnW / 2, y: sY + (numButtons - 1) * (btnH + sp), width: btnW, height: btnH, level: { name: 'Info' }, type: 'info' }; difficultyButtons.push(infoBtn); }
         function drawInfoPopup() { ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(0,0,canvas.width,canvas.height); const popupWidth = Math.min(700, canvas.width - 20); const popupHeight = Math.min(550, canvas.height - 20); const popupX = (canvas.width - popupWidth) / 2; const popupY = (canvas.height - popupHeight) / 2; ctx.fillStyle = 'white'; ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(popupX, popupY, popupWidth, popupHeight, 10); ctx.fill(); ctx.stroke(); const closeX = popupX + popupWidth - 40; const closeY = popupY + 10; const closeSize = 30; ctx.fillStyle = '#ff4444'; ctx.beginPath(); ctx.roundRect(closeX, closeY, closeSize, closeSize, 5); ctx.fill(); ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(closeX + 7, closeY + 7); ctx.lineTo(closeX + 23, closeY + 23); ctx.moveTo(closeX + 23, closeY + 7); ctx.lineTo(closeX + 7, closeY + 23); ctx.stroke(); ctx.fillStyle = 'black'; ctx.font = 'bold 28px "Courier New"'; ctx.textAlign = 'center'; ctx.fillText('Istruzioni', canvas.width / 2, popupY + 60); const margin = 40; ctx.font = '18px "Courier New"'; const lines = ['', 'Per un\'esperienza ottimale, aggiungi', 'questa pagina alla schermata Home', 'del tuo dispositivo.', '', 'Su iPhone/iPad:', 'Clicca sull\'icona "Condividi"', '(il quadrato con la freccia in alto)', 'e poi "Aggiungi alla schermata Home".', '', 'Su Android:', 'Clicca sul menu (i tre puntini', 'in alto a destra) e poi', '"Aggiungi a schermata Home".']; let currentY = popupY + 110; lines.forEach((line) => { if (line.includes('iPhone/iPad:') || line.includes('Su Android:')) { ctx.font = 'bold 20px "Courier New"'; } else { ctx.font = '18px "Courier New"'; } ctx.fillText(line, canvas.width / 2, currentY); currentY += 26; }); window.closeButtonBounds = { x: closeX, y: closeY, width: closeSize, height: closeSize };
         }
 
