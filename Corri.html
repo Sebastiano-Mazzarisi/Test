@@ -125,31 +125,6 @@
         const difficultyButtons = [];
         let currentDifficulty = {};
 
-        // --- MENU LAYOUT (pannello titolo+bottoni) ---
-        let menuLayout = null;
-        function computeMenuLayout() {
-            // Dimensioni pannello responsive con ampi margini interni
-            const maxW = canvas.width - 80;   // margine 40px per lato
-            const maxH = canvas.height - 140; // margine alto/basso
-            const panelW = Math.min(Math.max(520, canvas.width * 0.62), maxW);
-            const panelH = Math.min(Math.max(400, canvas.height * 0.62), maxH);
-            const panelX = (canvas.width  - panelW) / 2;
-            const panelY = (canvas.height - panelH) / 2;
-
-            // Bottoni più comodi
-            const btnW = Math.min(280, panelW - 160); // almeno 80px di padding a sinistra e destra
-            const btnH = 48;
-            const btnSpacing = 18;
-            const titleFont = 34; // più grande
-            const titleY = panelY + 70;
-            const numButtons = Object.keys(difficulties).length + 2; // 3 diff + demo + info
-            const contentH = numButtons * btnH + (numButtons - 1) * btnSpacing;
-            const startYCentered = panelY + (panelH - contentH) / 2 + 10;
-            const startY = Math.max(panelY + 120, startYCentered); // evita di avvicinarti troppo al titolo
-
-            menuLayout = { panelW, panelH, panelX, panelY, btnW, btnH, btnSpacing, titleFont, titleY, startY };
-        }
-
         // --- POPUP INFO ---
         let showInfoPopup = false;
 
@@ -273,7 +248,17 @@
         function calculateNextSignTime() { nextSignTime = totalTime + 10 + Math.random() * 5; }
         function generateSign() { const sign = { x: canvas.width + 100, y: GROUND_Y, text: SIGN_TEXTS[currentSignIndex] }; signs.push(sign); currentSignIndex = (currentSignIndex + 1) % SIGN_TEXTS.length; }
         function updateAndDrawSigns(dt) { for (let i = signs.length - 1; i >= 0; i--) { const sign = signs[i]; sign.x -= gameSpeed * 0.4 * dt; const x = sign.x, y = sign.y; ctx.fillStyle = '#8B4513'; ctx.fillRect(x - 3, y - 50, 6, 50); ctx.fillStyle = '#1E90FF'; ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.fillRect(x - 50, y - 90, 100, 40); ctx.strokeRect(x - 50, y - 90, 100, 40); ctx.fillStyle = 'white'; ctx.font = 'bold 16px "Courier New"'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(sign.text, x, y - 70); if (sign.x < -100) signs.splice(i, 1); } }
-        function calculateNextSpectatorTime() { nextSpectatorTime = totalTime + 3 + Math.random() * 5; }
+        
+        function calculateNextSpectatorTime() {
+            let proposedTime = totalTime + 3 + Math.random() * 5;
+            // MODIFICA: Se l'orario proposto per il tifoso è troppo vicino a quello del prossimo cartello,
+            // lo posticipa per evitare che non venga visualizzato.
+            if (Math.abs(proposedTime - nextSignTime) < 2.0) {
+                proposedTime = nextSignTime + 2.0 + Math.random(); // Appare 2-3 secondi dopo il cartello
+            }
+            nextSpectatorTime = proposedTime;
+        }
+
         function generateSpectator() { const spectatorName = SPECTATOR_NAMES[currentSpectatorIndex]; currentSpectatorIndex = (currentSpectatorIndex + 1) % SPECTATOR_NAMES.length; const side = Math.random() < 0.5 ? 'left' : 'right'; const spectator = { x: canvas.width + 50, y: GROUND_Y, name: spectatorName, side: side, signColor: '#FFD700', animationTime: 0 }; spectators.push(spectator); }
         function isNearSign(spectatorX) { for (let sign of signs) { const distance = Math.abs(spectatorX - sign.x); if (distance < 150) { return true; } } return false; }
         function drawSpectator(spectator, x, y, dt) {
@@ -301,92 +286,134 @@
             obstacles = []; signs = []; spectators = []; currentSignIndex = 0; currentSpectatorIndex = 0;
             personaggio.y = GROUND_Y; personaggio.velocityY = 0; leon.x = personaggio.x - 30; leon.y = GROUND_Y; leon.direction = 1; leon.animationTime = 0; leon.movementPhase = 'forward';
             totalTime = 0; lastTime = 0; lives = INITIAL_LIVES; isInvincible = false; invincibilityTimer = 0; timeOfDay = 0; isRaining = false; if (!isDemoMode) demoDayCount = 0;
-            initLandscape(); calculateNextObstacleTime(); nextSignTime = 0.5 + Math.random() * 2.5; nextSpectatorTime = Math.random() * 5; // Pierluigi entro 5s
+            initLandscape(); 
+            calculateNextObstacleTime(); 
+            nextSignTime = 0.5 + Math.random() * 2.5; 
+            nextSpectatorTime = 5 + Math.random() * 3;
         }
         function triggerGameOver() { isAlive = false; if (score > highscore) highscore = score; }
         function handleCollision() { playSound('fail'); screenFlashTimer = 0.2; lives--; if (lives <= 0) { triggerGameOver(); } else { isInvincible = true; invincibilityTimer = 2.0; } }
 
         // --- UI ---
-        function drawLives() { const t = `Vite: ${lives}`; ctx.font = '20px "Courier New"'; const m = ctx.measureText(t); const bW = m.width + 20, bH = 30, bX = 15, bY = 15; ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.roundRect(bX, bY, bW, bH, 8); ctx.fill(); ctx.fillStyle = 'black'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(t, bX + 10, bY + bH / 2 + 1); }
-        function drawDigitalClock(simulatedHour) { const hour = Math.floor(simulatedHour); const minute = Math.floor((simulatedHour * 60) % 60); const timeString = `${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`; ctx.font = '20px "Courier New"'; const textMetrics = ctx.measureText(timeString); const boxWidth = textMetrics.width + 20; const livesText = `Vite: ${lives}`; const livesMetrics = ctx.measureText(livesText); const livesBoxWidth = livesMetrics.width + 20; const clockX = 15 + livesBoxWidth + 10; ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.roundRect(clockX, 15, boxWidth, 30, 8); ctx.fill(); ctx.fillStyle = 'black'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(timeString, clockX + 10, 15 + 15 + 1); }
-        function drawScore() { const scoreText = `${formatTime(score)}`; const hiScoreText = `HI ${formatTime(highscore)}`; ctx.font = '20px "Courier New"'; const scoreMetrics = ctx.measureText(scoreText); const hiScoreMetrics = ctx.measureText(hiScoreText); const scoreBW = scoreMetrics.width + 20; const hiScoreBW = hiScoreMetrics.width + 20; const bH = 30; const hiScoreBX = canvas.width - hiScoreBW - 15; const scoreBX = hiScoreBX - scoreBW - 10; const bY = 15; ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.roundRect(scoreBX, bY, scoreBW, bH, 8); ctx.fill(); ctx.fillStyle = 'black'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(scoreText, scoreBX + 10, bY + bH / 2 + 1); ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.roundRect(hiScoreBX, bY, hiScoreBW, bH, 8); ctx.fill(); ctx.fillStyle = 'black'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(hiScoreText, hiScoreBX + 10, bY + bH / 2 + 1); }
+        function drawLives() { 
+            const t = `Vite: ${lives}`; 
+            ctx.font = '22px "Courier New"';
+            const m = ctx.measureText(t); 
+            const bW = m.width + 20;
+            const bH = 35;
+            const bX = 50, bY = 50;
+            ctx.fillStyle = 'rgba(255,255,255,0.6)'; 
+            ctx.beginPath(); 
+            ctx.roundRect(bX, bY, bW, bH, 8); 
+            ctx.fill(); 
+            ctx.fillStyle = 'black'; 
+            ctx.textAlign = 'left'; 
+            ctx.textBaseline = 'middle'; 
+            ctx.fillText(t, bX + 10, bY + bH / 2 + 1); 
+        }
+        function drawDigitalClock(simulatedHour) { 
+            const hour = Math.floor(simulatedHour); 
+            const minute = Math.floor((simulatedHour * 60) % 60); 
+            const timeString = `${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`; 
+            ctx.font = '22px "Courier New"';
+            const textMetrics = ctx.measureText(timeString); 
+            const boxWidth = textMetrics.width + 20; 
+            const livesText = `Vite: ${lives}`; 
+            ctx.font = '22px "Courier New"'; // Assicura che la misurazione usi lo stesso font
+            const livesMetrics = ctx.measureText(livesText); 
+            const livesBoxWidth = livesMetrics.width + 20; 
+            const clockX = 50 + livesBoxWidth + 15;
+            ctx.fillStyle = 'rgba(255,255,255,0.6)'; 
+            ctx.beginPath(); 
+            ctx.roundRect(clockX, 50, boxWidth, 35, 8);
+            ctx.fill(); 
+            ctx.fillStyle = 'black'; 
+            ctx.textAlign = 'left'; 
+            ctx.textBaseline = 'middle'; 
+            ctx.font = '22px "Courier New"';
+            ctx.fillText(timeString, clockX + 10, 50 + 35 / 2 + 1); 
+        }
+        function drawScore() { 
+            const scoreText = `${formatTime(score)}`; 
+            const hiScoreText = `HI ${formatTime(highscore)}`; 
+            ctx.font = '22px "Courier New"';
+            const scoreMetrics = ctx.measureText(scoreText); 
+            const hiScoreMetrics = ctx.measureText(hiScoreText); 
+            const scoreBW = scoreMetrics.width + 20; 
+            const hiScoreBW = hiScoreMetrics.width + 20; 
+            const bH = 35;
+            const hiScoreBX = canvas.width - hiScoreBW - 50;
+            const scoreBX = hiScoreBX - scoreBW - 15;
+            const bY = 50;
+            ctx.fillStyle = 'rgba(255,255,255,0.6)'; 
+            ctx.beginPath(); 
+            ctx.roundRect(scoreBX, bY, scoreBW, bH, 8); 
+            ctx.fill(); 
+            ctx.fillStyle = 'black'; 
+            ctx.textAlign = 'left'; 
+            ctx.textBaseline = 'middle'; 
+            ctx.fillText(scoreText, scoreBX + 10, bY + bH / 2 + 1); 
+            ctx.fillStyle = 'rgba(255,255,255,0.6)'; 
+            ctx.beginPath(); 
+            ctx.roundRect(hiScoreBX, bY, hiScoreBW, bH, 8); 
+            ctx.fill(); 
+            ctx.fillStyle = 'black'; 
+            ctx.textAlign = 'left'; 
+            ctx.textBaseline = 'middle'; 
+            ctx.fillText(hiScoreText, hiScoreBX + 10, bY + bH / 2 + 1); 
+        }
         function showGameOverOverlay() { ctx.fillStyle = 'rgba(255,255,224,0.7)'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = 'black'; ctx.font = '40px "Courier New"'; ctx.textAlign = 'center'; ctx.fillText('Game Over!', canvas.width/2, canvas.height/2 - 20); ctx.font = '20px "Courier New"'; ctx.fillText(`Punteggio: ${formatTime(score)}. Clicca per riprovare.`, canvas.width/2, canvas.height/2 + 20); }
-        function drawDifficultyScreen() {
-            // Sfondo
-            ctx.fillStyle = '#87CEEB';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            drawGround();
-
-            // Piccolo Andrea a sinistra come mascotte
-            const originalY = personaggio.y; personaggio.y = GROUND_Y; personaggio.draw(); personaggio.y = originalY;
-
-            // Pannello
-            if (!menuLayout) computeMenuLayout();
-            const { panelX, panelY, panelW, panelH, titleFont, titleY } = menuLayout;
-            ctx.fillStyle = 'rgba(245,245,245,0.95)';
-            ctx.beginPath();
-            ctx.roundRect(panelX, panelY, panelW, panelH, 18);
-            ctx.fill();
-
-            // Titolo
-            ctx.fillStyle = 'black';
-            ctx.font = `${titleFont}px "Courier New"`;
-            ctx.textAlign = 'center';
-            ctx.fillText('Scegli la difficoltà', panelX + panelW / 2, titleY);
-
-            // Bottoni
-            difficultyButtons.forEach(btn => {
-                ctx.fillStyle = '#FFFACD';
-                ctx.strokeStyle = 'black';
-                ctx.lineWidth = 2;
-                ctx.fillRect(btn.x, btn.y, btn.width, btn.height);
-                ctx.strokeRect(btn.x, btn.y, btn.width, btn.height);
-                ctx.fillStyle = 'black';
-                ctx.font = '22px "Courier New"';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(btn.level.name, btn.x + btn.width / 2, btn.y + btn.height / 2);
-            });
-
-            // Versione
-            ctx.fillStyle = 'rgba(0,0,0,0.4)';
-            ctx.font = '12px "Courier New"';
-            ctx.textAlign = 'left';
-            ctx.fillText(`v${gameVersion}`, 10, canvas.height - 10);
-
-            // Popup info, se attivo
-            if (showInfoPopup) { drawInfoPopup(); }
-        }); ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.font = '12px "Courier New"'; ctx.textAlign = 'left'; ctx.fillText(`v${gameVersion}`, 10, canvas.height - 10); if (showInfoPopup) { drawInfoPopup(); } }
-        function setupDifficultyButtons() {
-            // Calcola layout aggiornato ad ogni resize
-            computeMenuLayout();
-            difficultyButtons.length = 0;
-
-            const btnX = menuLayout.panelX + (menuLayout.panelW - menuLayout.btnW) / 2;
-            const sp = menuLayout.btnSpacing;
-            const btnW = menuLayout.btnW;
-            const btnH = menuLayout.btnH;
-
-            const entries = [
-                { key: 'facile',  data: difficulties.facile  },
-                { key: 'medio',   data: difficulties.medio   },
-                { key: 'difficile', data: difficulties.difficile },
-            ];
-
-            // Posiziona i tre livelli di difficoltà
-            entries.forEach((e, i) => {
-                const y = menuLayout.startY + i * (btnH + sp);
-                difficultyButtons.push({ x: btnX, y, width: btnW, height: btnH, level: e.data });
-            });
-
-            // Demo
-            const demoY = menuLayout.startY + entries.length * (btnH + sp);
-            difficultyButtons.push({ x: btnX, y: demoY, width: btnW, height: btnH, level: { name: 'Demo' }, type: 'demo' });
-
-            // Info
-            const infoY = demoY + (btnH + sp);
-            difficultyButtons.push({ x: btnX, y: infoY, width: btnW, height: btnH, level: { name: 'Info' }, type: 'info' });
-        }; difficultyButtons.push(btn); }); const demoBtn = { x: canvas.width / 2 - btnW / 2, y: sY + (numButtons - 2) * (btnH + sp), width: btnW, height: btnH, level: { name: 'Demo' }, type: 'demo' }; difficultyButtons.push(demoBtn); const infoBtn = { x: canvas.width / 2 - btnW / 2, y: sY + (numButtons - 1) * (btnH + sp), width: btnW, height: btnH, level: { name: 'Info' }, type: 'info' }; difficultyButtons.push(infoBtn); }
+        function drawDifficultyScreen() { 
+            ctx.fillStyle = '#87CEEB'; 
+            ctx.fillRect(0,0,canvas.width,canvas.height); 
+            drawGround(); 
+            const originalY = personaggio.y; 
+            personaggio.y = GROUND_Y; 
+            personaggio.draw(); 
+            personaggio.y = originalY; 
+            ctx.fillStyle = 'rgba(245,245,245,0.9)'; 
+            ctx.beginPath(); 
+            ctx.roundRect(canvas.width/2 - 300, canvas.height/2 - 240, 600, 480, 15); 
+            ctx.fill(); 
+            ctx.fillStyle = 'black'; 
+            ctx.font = '30px "Courier New"'; 
+            ctx.textAlign = 'center'; 
+            ctx.fillText('Scegli la difficoltà', canvas.width/2, canvas.height/2 - 190); 
+            difficultyButtons.forEach(btn => { 
+                ctx.fillStyle = '#FFFACD'; 
+                ctx.strokeStyle = 'black'; 
+                ctx.fillRect(btn.x, btn.y, btn.width, btn.height); 
+                ctx.strokeRect(btn.x, btn.y, btn.width, btn.height); 
+                ctx.fillStyle = 'black'; 
+                ctx.font = '20px "Courier New"'; 
+                ctx.textAlign = 'center'; 
+                ctx.textBaseline = 'middle'; 
+                ctx.fillText(btn.level.name, btn.x + btn.width/2, btn.y + btn.height/2); 
+            }); 
+            ctx.fillStyle = 'rgba(0,0,0,0.4)'; 
+            ctx.font = '12px "Courier New"'; 
+            ctx.textAlign = 'left'; 
+            ctx.fillText(`v${gameVersion}`, 50, canvas.height - 50);
+            if (showInfoPopup) { drawInfoPopup(); } 
+        }
+        function setupDifficultyButtons() { 
+            difficultyButtons.length = 0; 
+            const btnW = 150, btnH = 40, sp = 15; 
+            const numButtons = Object.keys(difficulties).length + 2; 
+            const titleY = canvas.height / 2 - 190;
+            const panelBottom = canvas.height / 2 + 240;
+            const availableSpace = panelBottom - titleY - 60; 
+            const tH = (numButtons * btnH) + ((numButtons - 1) * sp); 
+            const sY = titleY + 60 + (availableSpace - tH) / 2 - 20; 
+            Object.values(difficulties).forEach((l, i) => { 
+                const btn = { x: canvas.width / 2 - btnW / 2, y: sY + i * (btnH + sp), width: btnW, height: btnH, level: l }; 
+                difficultyButtons.push(btn); 
+            }); 
+            const demoBtn = { x: canvas.width / 2 - btnW / 2, y: sY + (numButtons - 2) * (btnH + sp), width: btnW, height: btnH, level: { name: 'Demo' }, type: 'demo' }; 
+            difficultyButtons.push(demoBtn); 
+            const infoBtn = { x: canvas.width / 2 - btnW / 2, y: sY + (numButtons - 1) * (btnH + sp), width: btnW, height: btnH, level: { name: 'Info' }, type: 'info' }; 
+            difficultyButtons.push(infoBtn); 
+        }
         function drawInfoPopup() { ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(0,0,canvas.width,canvas.height); const popupWidth = Math.min(700, canvas.width - 20); const popupHeight = Math.min(550, canvas.height - 20); const popupX = (canvas.width - popupWidth) / 2; const popupY = (canvas.height - popupHeight) / 2; ctx.fillStyle = 'white'; ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(popupX, popupY, popupWidth, popupHeight, 10); ctx.fill(); ctx.stroke(); const closeX = popupX + popupWidth - 40; const closeY = popupY + 10; const closeSize = 30; ctx.fillStyle = '#ff4444'; ctx.beginPath(); ctx.roundRect(closeX, closeY, closeSize, closeSize, 5); ctx.fill(); ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(closeX + 7, closeY + 7); ctx.lineTo(closeX + 23, closeY + 23); ctx.moveTo(closeX + 23, closeY + 7); ctx.lineTo(closeX + 7, closeY + 23); ctx.stroke(); ctx.fillStyle = 'black'; ctx.font = 'bold 28px "Courier New"'; ctx.textAlign = 'center'; ctx.fillText('Istruzioni', canvas.width / 2, popupY + 60); const margin = 40; ctx.font = '18px "Courier New"'; const lines = ['', 'Per un\'esperienza ottimale, aggiungi', 'questa pagina alla schermata Home', 'del tuo dispositivo.', '', 'Su iPhone/iPad:', 'Clicca sull\'icona "Condividi"', '(il quadrato con la freccia in alto)', 'e poi "Aggiungi alla schermata Home".', '', 'Su Android:', 'Clicca sul menu (i tre puntini', 'in alto a destra) e poi', '"Aggiungi a schermata Home".']; let currentY = popupY + 110; lines.forEach((line) => { if (line.includes('iPhone/iPad:') || line.includes('Su Android:')) { ctx.font = 'bold 20px "Courier New"'; } else { ctx.font = '18px "Courier New"'; } ctx.fillText(line, canvas.width / 2, currentY); currentY += 26; }); window.closeButtonBounds = { x: closeX, y: closeY, width: closeSize, height: closeSize };
         }
 
@@ -407,7 +434,7 @@
                     if (isDemoMode) autopilot(); personaggio.update(deltaTime); leon.update(deltaTime); updateLandscape(deltaTime); updateObstacles(deltaTime);
                 } else { showGameOverOverlay(); }
                 leon.draw(); if (!(isInvincible && Math.floor(totalTime * 10) % 2 !== 0)) { personaggio.draw(); }
-                ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.font = '12px "Courier New"'; ctx.textAlign = 'left'; ctx.fillText(`v${gameVersion}`, 10, canvas.height - 10);
+                ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.font = '12px "Courier New"'; ctx.textAlign = 'left'; ctx.fillText(`v${gameVersion}`, 50, canvas.height - 50);
                 if (isDemoMode) { ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.font = '16px "Courier New"'; ctx.textAlign = 'center'; ctx.fillText(`Demo - ${currentDifficulty.name} (Giorno ${demoDayCount + 1})`, canvas.width / 2, canvas.height - 30); }
             }
             requestAnimationFrame(gameLoop);
@@ -416,7 +443,17 @@
         function drawGround() { ctx.fillStyle = '#A0522D'; ctx.fillRect(0, GROUND_Y, canvas.width, canvas.height - GROUND_Y); ctx.strokeStyle = '#333'; ctx.beginPath(); ctx.moveTo(0, GROUND_Y); ctx.lineTo(canvas.width, GROUND_Y); ctx.stroke(); }
         function formatTime(s) { const tS = Math.floor(s / 10); const m = Math.floor(tS / 60); const sec = tS % 60; return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`; }
         function resetToMenu() { hasStarted = false; isAlive = false; isDemoMode = false; demoDayCount = 0; score = 0; obstacles = []; spectators = []; personaggio.y = GROUND_Y; personaggio.velocityY = 0; setupDifficultyButtons(); }
-        function resizeCanvas() { const ar = 800 / 300; const nW = window.innerWidth, nH = window.innerHeight; if (nW / nH > ar) { canvas.height = nH; canvas.width = nH * ar; } else { canvas.width = nW; canvas.height = nW / ar; } GROUND_Y = canvas.height - 50; personaggio.x = canvas.width * 0.08; leon.y = GROUND_Y; initLandscape(); setupDifficultyButtons(); }
+        function resizeCanvas() { 
+            const ar = 800 / 300; 
+            const nW = window.innerWidth, nH = window.innerHeight; 
+            if (nW / nH > ar) { canvas.height = nH; canvas.width = nH * ar; } 
+            else { canvas.width = nW; canvas.height = nW / ar; } 
+            GROUND_Y = canvas.height - 50; 
+            personaggio.x = canvas.width * 0.15;
+            leon.y = GROUND_Y; 
+            initLandscape(); 
+            setupDifficultyButtons(); 
+        }
 
         // --- INPUT ---
         window.addEventListener('keydown', (e) => {
