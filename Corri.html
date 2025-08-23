@@ -14,7 +14,7 @@
     <meta property="og:image:height" content="192">
     
     <link rel="icon" href="https://github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png?raw=true">
-    <link rel="apple-touch-icon" href="https://github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png?raw=true">
+    <link rel="apple-touch-icon" href="https://github.com/Sebastiano-Mazzarisi/Test/blob_main/Runner.png?raw=true">
 
     <meta name="apple-mobile-web-app-title" content="Corri">
     <meta name="application-name" content="Corri">
@@ -25,7 +25,7 @@
     <link rel="manifest" href='data:application/manifest+json,{"name":"Corri","short_name":"Corri","start_url":".","display":"standalone","background_color":"#f0f0f0","theme_color":"#f0f0f0","icons":[{"src":"https://github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png?raw=true","sizes":"192x192","type":"image/png"}]}' />
 
     <style>
-        body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f0f0; font-family: 'Courier New', Courier, monospace; overflow: hidden; }
+        body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f0f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
         canvas { cursor: pointer; width: 100vw; height: 100vh; display: block; }
         #rotate-message { display: none; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; background-color: #f0f0f0; text-align: center; font-size: 1.2em; }
         #rotate-message img { width: 100px; height: 100px; margin-bottom: 20px; }
@@ -45,13 +45,13 @@
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const gameVersion = "1.4 Corri (mp3)";
-        document.getElementById('version-text-rotate').textContent = `Corri v1.4 (mp3)`;
+        const gameVersion = "1.6 Corri (Joy)";
+        document.getElementById('version-text-rotate').textContent = `Corri v1.6 (Joy)`;
 
         // === CONFIG AUDIO MP3 ===
         const MP3_JUMP_URL = "jump.mp3";
         const MP3_FAIL_URL = "fail.mp3";
-        const MP3_INFO_URL = "info.mp3"; // Nome corretto
+        const MP3_INFO_URL = "info.mp3";
 
         const jumpSound = new Audio(MP3_JUMP_URL);
         const failSound = new Audio(MP3_FAIL_URL);
@@ -87,29 +87,15 @@
         }
 
         function playInfoAudio() {
-            // Non tentare di riprodurre l'audio se l'URL non è definito
-            if (!MP3_INFO_URL) {
-                console.log("Info audio file not available or not specified");
-                return;
-            }
-            
-            // Sblocca l'audio se necessario
+            if (!MP3_INFO_URL) return;
             unlockAudio();
-            
             if (!infoAudio) {
                 infoAudio = new Audio(MP3_INFO_URL);
                 infoAudio.preload = 'auto';
                 infoAudio.volume = 0.6;
             }
-            
-            // Reset e play
             infoAudio.currentTime = 0;
-            infoAudio.play().then(() => {
-                console.log("Info audio started successfully");
-            }).catch((error) => {
-                console.log("Info audio not available:", error.message);
-                // Non fare nulla se il file non esiste, è normale
-            });
+            infoAudio.play().catch(()=>{});
         }
 
         function stopInfoAudio() {
@@ -130,18 +116,16 @@
         let score = 0, highscore = 0, isAlive = false, hasStarted = false, totalTime = 0, gameSpeed = 0, nextObstacleTime = 0;
         let isDemoMode = false, demoDayCount = 0;
         const GRAVITY = 2200, JUMP_FORCE = -750;
-        let GROUND_Y = canvas.height - 50;
+        let GROUND_Y;
         const INITIAL_LIVES = 3; let lives = 0; let isInvincible = false;
         let invincibilityTimer = 0, screenFlashTimer = 0, lastTime = 0;
         const difficultyButtons = [];
         let currentDifficulty = {};
-
-        // --- STATO INFO ---
         let showInfoScreen = false;
 
         // --- PAESAGGIO E OGGETTI ---
         const DAY_CYCLE_DURATION = 120;
-        let landscapeLayers = [], mountains = [], stars = [], clouds = [], airborneObjects = [], signs = [], spectators = [];
+        let landscapeLayers = [], mountains = [], stars = [], clouds = [], signs = [], spectators = [];
         let timeOfDay = 0;
         let currentSignIndex = 0, nextSignTime = 0, nextSpectatorTime = 0;
         let currentSpectatorIndex = 0;
@@ -149,12 +133,12 @@
         
         // --- CAGNOLINO LEON ---
         const leon = {
-            x: 0, y: GROUND_Y, width: 18, height: 12, velocityX: 0, direction: 1, baseSpeed: 200, animationTime: 0,
+            x: 0, y: 0, width: 18, height: 12, velocityX: 0, direction: 1, baseSpeed: 200, animationTime: 0,
             movementPhase: 'forward', minX: 0, maxX: 0,
-            update(dt) {
+            update(dt, viewWidth) {
                 this.animationTime += dt * 15;
                 this.minX = personaggio.x - 50;
-                this.maxX = personaggio.x + canvas.width * 0.5;
+                this.maxX = personaggio.x + viewWidth * 0.5;
                 if (this.movementPhase === 'forward') {
                     this.velocityX = gameSpeed * 0.12 + this.baseSpeed * 0.7; this.direction = 1;
                     if (this.x >= this.maxX) { this.movementPhase = 'backward'; this.direction = -1; }
@@ -192,14 +176,14 @@
                 const boxWidth = 50, boxHeight = 25; const nameX = this.x; const nameY = this.y - 20; const boxX = nameX - boxWidth / 2; const boxY = nameY - boxHeight;
                 ctx.strokeStyle = 'black'; ctx.lineWidth = 0.8; ctx.beginPath(); ctx.moveTo(nameX, this.y - 12); ctx.lineTo(nameX, boxY + boxHeight); ctx.stroke();
                 ctx.fillStyle = 'rgba(255,255,255,0.95)'; ctx.strokeStyle = 'black'; ctx.lineWidth = 1; ctx.fillRect(boxX, boxY, boxWidth, boxHeight); ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
-                ctx.fillStyle = 'black'; ctx.font = '16px "Courier New"'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('Leon', nameX, boxY + boxHeight / 2);
+                ctx.fillStyle = 'black'; ctx.font = '16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('Leon', nameX, boxY + boxHeight / 2);
             }
         };
         
         // --- EFFETTI METEO ---
         let isRaining = false; let rainDuration = 0; let rainIntensity = 0; let rainParticles = []; let timeToNextRain = 30 + Math.random() * 60; const RAIN_DURATION_MIN = 20, RAIN_DURATION_MAX = 30;
-        function toggleRain(dt) { timeToNextRain -= dt; if (!isRaining && timeToNextRain <= 0) { isRaining = true; rainDuration = RAIN_DURATION_MIN + Math.random() * (RAIN_DURATION_MAX - RAIN_DURATION_MIN); rainIntensity = 0; rainParticles = []; for(let i=0; i<300; i++) { rainParticles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, length: 5 + Math.random() * 10 }); } } if (isRaining) { rainDuration -= dt; if (rainDuration <= 0) { isRaining = false; timeToNextRain = 30 + Math.random() * 60; } rainIntensity = Math.min(1, rainIntensity + dt / 5); } }
-        function drawRain(dt) { if (!isRaining && rainIntensity <= 0) return; ctx.strokeStyle = `rgba(173, 216, 230, ${rainIntensity * 0.7})`; ctx.lineWidth = 1; for(let i=0; i<rainParticles.length; i++) { const p = rainParticles[i]; p.x -= gameSpeed * dt * 0.5; p.y += (gameSpeed * 0.5 + 200) * dt; if (p.y > canvas.height) { p.y = 0; p.x = Math.random() * canvas.width; } ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - 2, p.y + p.length); ctx.stroke(); } }
+        function toggleRain(dt) { timeToNextRain -= dt; if (!isRaining && timeToNextRain <= 0) { isRaining = true; rainDuration = RAIN_DURATION_MIN + Math.random() * (RAIN_DURATION_MAX - RAIN_DURATION_MIN); rainIntensity = 0; rainParticles = []; const viewWidth = window.innerWidth; const viewHeight = window.innerHeight; for(let i=0; i<300; i++) { rainParticles.push({ x: Math.random() * viewWidth, y: Math.random() * viewHeight, length: 5 + Math.random() * 10 }); } } if (isRaining) { rainDuration -= dt; if (rainDuration <= 0) { isRaining = false; timeToNextRain = 30 + Math.random() * 60; } rainIntensity = Math.min(1, rainIntensity + dt / 5); } }
+        function drawRain(dt) { if (!isRaining && rainIntensity <= 0) return; const viewWidth = window.innerWidth; const viewHeight = window.innerHeight; ctx.strokeStyle = `rgba(173, 216, 230, ${rainIntensity * 0.7})`; ctx.lineWidth = 1; for(let i=0; i<rainParticles.length; i++) { const p = rainParticles[i]; p.x -= gameSpeed * dt * 0.5; p.y += (gameSpeed * 0.5 + 200) * dt; if (p.y > viewHeight) { p.y = 0; p.x = Math.random() * viewWidth; } ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - 2, p.y + p.length); ctx.stroke(); } }
 
         // --- FUNZIONI DI DISEGNO PAESAGGIO ---
         function lerpColor(c1, c2, f) { const r = Math.round(c1.r + f * (c2.r - c1.r)), g = Math.round(c1.g + f * (c2.g - c1.g)), b = Math.round(c1.b + f * (c2.b - c1.b)); return `rgb(${r},${g},${b})`; }
@@ -214,15 +198,19 @@
             return color;
         }
         function drawSky(simulatedHour) {
-            ctx.fillStyle = getSkyColor(simulatedHour); ctx.fillRect(0, 0, canvas.width, canvas.height);
-            if (simulatedHour > 6 && simulatedHour < 18 && !isRaining) { const sunProgress = (simulatedHour - 6) / 12; const sunAngle = sunProgress * Math.PI; const sunX = sunProgress * canvas.width; const sunY = GROUND_Y - Math.sin(sunAngle) * (canvas.height * 0.7); ctx.fillStyle = `rgba(255,255,0,0.8)`; ctx.beginPath(); ctx.arc(sunX, sunY, 20, 0, Math.PI * 2); ctx.fill(); }
-            if (simulatedHour > 18 || simulatedHour < 6 || isRaining) { let moonProgress = (simulatedHour > 18) ? (simulatedHour - 18) / 12 : (simulatedHour + 6) / 12; const moonAngle = moonProgress * Math.PI; const moonX = moonProgress * canvas.width; const moonY = GROUND_Y - Math.sin(moonAngle) * (canvas.height * 0.6); const nightIntensity = 1 - (Math.abs(simulatedHour - 12) / 12); ctx.fillStyle = `rgba(240,240,240,0.8)`; ctx.beginPath(); ctx.arc(moonX, moonY, 15, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = getSkyColor(simulatedHour); ctx.beginPath(); ctx.arc(moonX - 5, moonY - 5, 14, 0, Math.PI * 2); ctx.fill(); stars.forEach(s => { ctx.fillStyle = `rgba(255,255,255,${nightIntensity * (0.7 + Math.random() * 0.3)})`; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 2 * Math.PI); ctx.fill(); }); }
+            const viewWidth = window.innerWidth;
+            const viewHeight = window.innerHeight;
+            ctx.fillStyle = getSkyColor(simulatedHour); ctx.fillRect(0, 0, viewWidth, viewHeight);
+            if (simulatedHour > 6 && simulatedHour < 18 && !isRaining) { const sunProgress = (simulatedHour - 6) / 12; const sunAngle = sunProgress * Math.PI; const sunX = sunProgress * viewWidth; const sunY = GROUND_Y - Math.sin(sunAngle) * (viewHeight * 0.7); ctx.fillStyle = `rgba(255,255,0,0.8)`; ctx.beginPath(); ctx.arc(sunX, sunY, 20, 0, Math.PI * 2); ctx.fill(); }
+            if (simulatedHour > 18 || simulatedHour < 6 || isRaining) { let moonProgress = (simulatedHour > 18) ? (simulatedHour - 18) / 12 : (simulatedHour + 6) / 12; const moonAngle = moonProgress * Math.PI; const moonX = moonProgress * viewWidth; const moonY = GROUND_Y - Math.sin(moonAngle) * (viewHeight * 0.6); const nightIntensity = 1 - (Math.abs(simulatedHour - 12) / 12); ctx.fillStyle = `rgba(240,240,240,0.8)`; ctx.beginPath(); ctx.arc(moonX, moonY, 15, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = getSkyColor(simulatedHour); ctx.beginPath(); ctx.arc(moonX - 5, moonY - 5, 14, 0, Math.PI * 2); ctx.fill(); stars.forEach(s => { ctx.fillStyle = `rgba(255,255,255,${nightIntensity * (0.7 + Math.random() * 0.3)})`; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 2 * Math.PI); ctx.fill(); }); }
         }
         function initLandscape() {
-            landscapeLayers = []; mountains = []; stars = [], clouds = []; airborneObjects = [], signs = [], spectators = [];
-            const RENDER_WIDTH = canvas.width * 4;
-            for (let i = 0; i < 150; i++) { stars.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height * 0.6, r: Math.random() * 1.8 }); }
-            for (let i = 0; i < 15; i++) { clouds.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height * 0.3, r: 20 + Math.random() * 20, speed: 5 + Math.random() * 5 }); }
+            const viewWidth = window.innerWidth;
+            const viewHeight = window.innerHeight;
+            landscapeLayers = []; mountains = []; stars = [], clouds = []; signs = [], spectators = [];
+            const RENDER_WIDTH = viewWidth * 4;
+            for (let i = 0; i < 150; i++) { stars.push({ x: Math.random() * viewWidth, y: Math.random() * viewHeight * 0.6, r: Math.random() * 1.8 }); }
+            for (let i = 0; i < 15; i++) { clouds.push({ x: Math.random() * viewWidth, y: Math.random() * viewHeight * 0.3, r: 20 + Math.random() * 20, speed: 5 + Math.random() * 5 }); }
             let mPoints = []; for (let x = -RENDER_WIDTH; x <= RENDER_WIDTH * 2; x += 100) { mPoints.push({ x: x, y: GROUND_Y - 150 - Math.random() * 50 }); } mountains.push({ points: mPoints, color: '#A0A0A0', speedMultiplier: 0.1, offsetX: 0 });
             let p3 = []; for (let x = -RENDER_WIDTH; x <= RENDER_WIDTH * 2; x += 60) { p3.push({ x: x, y: GROUND_Y - 15 - Math.random() * 25 }); }
             const obj3 = []; const objectTypes = ['house', 'sheep', 'tree', 'horse', 'tractor', 'car'];
@@ -231,8 +219,9 @@
         }
         function getTerrainY(x, points) { const p1 = points.slice().reverse().find(p => p.x <= x); const p2 = points.find(p => p.x > x); if (p1 && p2) { const m = (p2.y - p1.y) / (p2.x - p1.x); return p1.y + m * (x - p1.x); } return p1 ? p1.y : GROUND_Y; }
         function drawLandscape(simulatedHour) {
-            mountains.forEach(l => { ctx.fillStyle = l.color; ctx.beginPath(); ctx.moveTo(l.points[0].x + l.offsetX - canvas.width, canvas.height); l.points.forEach(p => { ctx.lineTo(p.x + l.offsetX, p.y); }); ctx.lineTo(l.points[l.points.length - 1].x + l.offsetX + canvas.width, canvas.height); ctx.closePath(); ctx.fill(); });
-            landscapeLayers.forEach(l => { ctx.fillStyle = l.color; ctx.beginPath(); ctx.moveTo(l.points[0].x + l.offsetX - canvas.width, canvas.height); l.points.forEach(p => { ctx.lineTo(p.x + l.offsetX, p.y); }); ctx.lineTo(l.points[l.points.length - 1].x + l.offsetX + canvas.width, canvas.height); ctx.closePath(); ctx.fill(); l.objects.forEach(obj => { drawLandscapeObject(obj, l.offsetX, simulatedHour); }); });
+            const viewWidth = window.innerWidth;
+            mountains.forEach(l => { ctx.fillStyle = l.color; ctx.beginPath(); ctx.moveTo(l.points[0].x + l.offsetX - viewWidth, window.innerHeight); l.points.forEach(p => { ctx.lineTo(p.x + l.offsetX, p.y); }); ctx.lineTo(l.points[l.points.length - 1].x + l.offsetX + viewWidth, window.innerHeight); ctx.closePath(); ctx.fill(); });
+            landscapeLayers.forEach(l => { ctx.fillStyle = l.color; ctx.beginPath(); ctx.moveTo(l.points[0].x + l.offsetX - viewWidth, window.innerHeight); l.points.forEach(p => { ctx.lineTo(p.x + l.offsetX, p.y); }); ctx.lineTo(l.points[l.points.length - 1].x + l.offsetX + viewWidth, window.innerHeight); ctx.closePath(); ctx.fill(); l.objects.forEach(obj => { drawLandscapeObject(obj, l.offsetX, simulatedHour); }); });
         }
         function drawLandscapeObject(obj, offsetX, simulatedHour) {
             const x = obj.x + offsetX; const y = obj.y; const isNight = simulatedHour > 19 || simulatedHour < 6; if (!obj.details) obj.details = {};
@@ -244,45 +233,39 @@
             }
         }
         function updateLandscape(dt) {
-            mountains.forEach(l => { l.offsetX -= gameSpeed * l.speedMultiplier * dt; if (l.offsetX < -canvas.width * 2) l.offsetX += canvas.width * 2; });
-            landscapeLayers.forEach(l => { l.offsetX -= gameSpeed * l.speedMultiplier * dt; if (l.offsetX < -canvas.width * 2) l.offsetX += canvas.width * 2; l.objects.forEach(obj => { if (obj.type === 'sheep' || obj.type === 'horse') { obj.details.timer -= dt; if (obj.details.timer <= 0) { obj.details.state = (obj.details.state === 'down') ? 'up' : 'down'; obj.details.timer = 1 + Math.random() * 2; } } }); });
+            const viewWidth = window.innerWidth;
+            mountains.forEach(l => { l.offsetX -= gameSpeed * l.speedMultiplier * dt; if (l.offsetX < -viewWidth * 2) l.offsetX += viewWidth * 2; });
+            landscapeLayers.forEach(l => { l.offsetX -= gameSpeed * l.speedMultiplier * dt; if (l.offsetX < -viewWidth * 2) l.offsetX += viewWidth * 2; l.objects.forEach(obj => { if (obj.type === 'sheep' || obj.type === 'horse') { obj.details.timer -= dt; if (obj.details.timer <= 0) { obj.details.state = (obj.details.state === 'down') ? 'up' : 'down'; obj.details.timer = 1 + Math.random() * 2; } } }); });
         }
         
         // --- OGGETTI DI GIOCO ---
         let obstacles = [];
         function calculateNextObstacleTime() { const { minObstacleInterval, maxObstacleInterval } = currentDifficulty; nextObstacleTime = totalTime + (Math.random() * (maxObstacleInterval - minObstacleInterval) + minObstacleInterval); }
-        function generateObstacle() { const r = Math.random(); let o = { x: canvas.width, width: 20, height: 40, y: 0, type: 'ground' }; if (r < 0.7) { o.height = 25; o.width = 25; o.y = GROUND_Y - o.height; } else { o.height = 50; o.y = GROUND_Y - o.height; } obstacles.push(o); }
+        function generateObstacle() { const r = Math.random(); let o = { x: window.innerWidth, width: 20, height: 40, y: 0, type: 'ground' }; if (r < 0.7) { o.height = 25; o.width = 25; o.y = GROUND_Y - o.height; } else { o.height = 50; o.y = GROUND_Y - o.height; } obstacles.push(o); }
         function updateObstacles(dt) {
             if (totalTime >= nextObstacleTime) { generateObstacle(); calculateNextObstacleTime(); }
             for (let i = obstacles.length - 1; i >= 0; i--) { const o = obstacles[i]; o.x -= gameSpeed * dt; ctx.fillStyle = '#DC143C'; ctx.fillRect(o.x, o.y, o.width, o.height); const pH = { x: personaggio.x, y: personaggio.y - personaggio.height, width: personaggio.width, height: personaggio.height }; const oH = { x: o.x, y: o.y, width: o.width, height: o.height }; if (!isInvincible && !isDemoMode && pH.x < oH.x + oH.width && pH.x + pH.width > oH.x && pH.y < oH.y + oH.height && pH.y + pH.height > oH.y) { handleCollision(); } if (o.x + o.width < 0) { obstacles.splice(i, 1); } }
         }
         function calculateNextSignTime() { nextSignTime = totalTime + 10 + Math.random() * 5; }
-        function generateSign() { const sign = { x: canvas.width + 100, y: GROUND_Y, text: SIGN_TEXTS[currentSignIndex] }; signs.push(sign); currentSignIndex = (currentSignIndex + 1) % SIGN_TEXTS.length; }
-        function updateAndDrawSigns(dt) { for (let i = signs.length - 1; i >= 0; i--) { const sign = signs[i]; sign.x -= gameSpeed * 0.4 * dt; const x = sign.x, y = sign.y; ctx.fillStyle = '#8B4513'; ctx.fillRect(x - 3, y - 50, 6, 50); ctx.fillStyle = '#1E90FF'; ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.fillRect(x - 50, y - 90, 100, 40); ctx.strokeRect(x - 50, y - 90, 100, 40); ctx.fillStyle = 'white'; ctx.font = 'bold 16px "Courier New"'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(sign.text, x, y - 70); if (sign.x < -100) signs.splice(i, 1); } }
+        function generateSign() { const sign = { x: window.innerWidth + 100, y: GROUND_Y, text: SIGN_TEXTS[currentSignIndex] }; signs.push(sign); currentSignIndex = (currentSignIndex + 1) % SIGN_TEXTS.length; }
+        function updateAndDrawSigns(dt) { for (let i = signs.length - 1; i >= 0; i--) { const sign = signs[i]; sign.x -= gameSpeed * 0.4 * dt; const x = sign.x, y = sign.y; ctx.fillStyle = '#8B4513'; ctx.fillRect(x - 3, y - 50, 6, 50); ctx.fillStyle = '#1E90FF'; ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.fillRect(x - 50, y - 90, 100, 40); ctx.strokeRect(x - 50, y - 90, 100, 40); ctx.fillStyle = 'white'; ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(sign.text, x, y - 70); if (sign.x < -100) signs.splice(i, 1); } }
         
-        function calculateNextSpectatorTime() {
-            let proposedTime = totalTime + 3 + Math.random() * 5;
-            if (Math.abs(proposedTime - nextSignTime) < 2.0) {
-                proposedTime = nextSignTime + 2.0 + Math.random();
-            }
-            nextSpectatorTime = proposedTime;
-        }
-
-        function generateSpectator() { const spectatorName = SPECTATOR_NAMES[currentSpectatorIndex]; currentSpectatorIndex = (currentSpectatorIndex + 1) % SPECTATOR_NAMES.length; const side = Math.random() < 0.5 ? 'left' : 'right'; const spectator = { x: canvas.width + 50, y: GROUND_Y, name: spectatorName, side: side, signColor: '#FFD700', animationTime: 0 }; spectators.push(spectator); }
+        function calculateNextSpectatorTime() { let proposedTime = totalTime + 3 + Math.random() * 5; if (Math.abs(proposedTime - nextSignTime) < 2.0) { proposedTime = nextSignTime + 2.0 + Math.random(); } nextSpectatorTime = proposedTime; }
+        function generateSpectator() { const spectatorName = SPECTATOR_NAMES[currentSpectatorIndex]; currentSpectatorIndex = (currentSpectatorIndex + 1) % SPECTATOR_NAMES.length; const side = Math.random() < 0.5 ? 'left' : 'right'; const spectator = { x: window.innerWidth + 50, y: GROUND_Y, name: spectatorName, side: side, signColor: '#FFD700', animationTime: 0 }; spectators.push(spectator); }
         function isNearSign(spectatorX) { for (let sign of signs) { const distance = Math.abs(spectatorX - sign.x); if (distance < 150) { return true; } } return false; }
         function drawSpectator(spectator, x, y, dt) {
-            const simulatedHour = (7 + (timeOfDay / DAY_CYCLE_DURATION) * 24) % 24; const spectatorX = spectator.side === 'left' ? x - 60 : x + 60; const spectatorY = y; if (isNearSign(spectatorX)) return; spectator.animationTime += dt * 30; ctx.save(); ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.lineCap = 'round'; const headRadius = 6; const headY = spectatorY - 40; ctx.beginPath(); ctx.arc(spectatorX, headY, headRadius, 0, Math.PI * 2); ctx.stroke(); const torsoStartY = headY + headRadius; const torsoEndY = spectatorY - 15; ctx.beginPath(); ctx.moveTo(spectatorX, torsoStartY); ctx.lineTo(spectatorX, torsoEndY); ctx.stroke(); const armAnimationOffset = Math.sin(spectator.animationTime) * 15; const leftArmX = spectatorX - 10 + armAnimationOffset; const rightArmX = spectatorX + 10 - armAnimationOffset; const armY = torsoEndY - 5 + Math.abs(armAnimationOffset) * 0.3; ctx.beginPath(); ctx.moveTo(spectatorX, torsoEndY - 10); ctx.lineTo(leftArmX, armY); ctx.stroke(); ctx.beginPath(); ctx.moveTo(spectatorX, torsoEndY - 10); ctx.lineTo(rightArmX, armY); ctx.stroke(); ctx.beginPath(); ctx.moveTo(spectatorX, torsoEndY); ctx.lineTo(spectatorX - 8, spectatorY); ctx.stroke(); ctx.beginPath(); ctx.moveTo(spectatorX, torsoEndY); ctx.lineTo(spectatorX + 8, spectatorY); ctx.stroke(); ctx.restore(); const signX = spectatorX; const signY = headY - 20; const signWidth = Math.max(80, spectator.name.length * 10); const signHeight = 28; ctx.strokeStyle = '#8B4513'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(signX, signY); ctx.lineTo(signX, headY - headRadius); ctx.stroke(); ctx.fillStyle = spectator.signColor; ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.fillRect(signX - signWidth / 2, signY - signHeight, signWidth, signHeight); ctx.strokeRect(signX - signWidth / 2, signY - signHeight, signWidth, signHeight); ctx.fillStyle = 'black'; ctx.font = 'bold 16px "Courier New"'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(spectator.name, signX, signY - signHeight / 2);
+            const spectatorX = spectator.side === 'left' ? x - 60 : x + 60; const spectatorY = y; if (isNearSign(spectatorX)) return; spectator.animationTime += dt * 30; ctx.save(); ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.lineCap = 'round'; const headRadius = 6; const headY = spectatorY - 40; ctx.beginPath(); ctx.arc(spectatorX, headY, headRadius, 0, Math.PI * 2); ctx.stroke(); const torsoStartY = headY + headRadius; const torsoEndY = spectatorY - 15; ctx.beginPath(); ctx.moveTo(spectatorX, torsoStartY); ctx.lineTo(spectatorX, torsoEndY); ctx.stroke(); const armAnimationOffset = Math.sin(spectator.animationTime) * 15; const leftArmX = spectatorX - 10 + armAnimationOffset; const rightArmX = spectatorX + 10 - armAnimationOffset; const armY = torsoEndY - 5 + Math.abs(armAnimationOffset) * 0.3; ctx.beginPath(); ctx.moveTo(spectatorX, torsoEndY - 10); ctx.lineTo(leftArmX, armY); ctx.stroke(); ctx.beginPath(); ctx.moveTo(spectatorX, torsoEndY - 10); ctx.lineTo(rightArmX, armY); ctx.stroke(); ctx.beginPath(); ctx.moveTo(spectatorX, torsoEndY); ctx.lineTo(spectatorX - 8, spectatorY); ctx.stroke(); ctx.beginPath(); ctx.moveTo(spectatorX, torsoEndY); ctx.lineTo(spectatorX + 8, spectatorY); ctx.stroke(); ctx.restore(); const signX = spectatorX; const signY = headY - 20; const signWidth = Math.max(80, spectator.name.length * 10); const signHeight = 28; ctx.strokeStyle = '#8B4513'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(signX, signY); ctx.lineTo(signX, headY - headRadius); ctx.stroke(); ctx.fillStyle = spectator.signColor; ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.fillRect(signX - signWidth / 2, signY - signHeight, signWidth, signHeight); ctx.strokeRect(signX - signWidth / 2, signY - signHeight, signWidth, signHeight); ctx.fillStyle = 'black'; ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(spectator.name, signX, signY - signHeight / 2);
         }
         function updateAndDrawSpectators(dt) { for (let i = spectators.length - 1; i >= 0; i--) { const spectator = spectators[i]; spectator.x -= gameSpeed * 0.4 * dt; drawSpectator(spectator, spectator.x, spectator.y, dt); if (spectator.x < -100) spectators.splice(i, 1); } }
         
         // --- GIOCATORE & AUTOPILOTA ---
         const personaggio = {
-            x: 0, y: GROUND_Y, width: 30, height: 50, velocityY: 0, isJumping: false,
+            x: 0, y: 0, width: 30, height: 50, velocityY: 0, isJumping: false,
             draw() {
                 ctx.save(); ctx.fillStyle = 'black'; const runCycle = Math.floor(totalTime * 15) % 2; const legAngle = runCycle === 0 ? Math.PI / 10 : -Math.PI / 10; const armAngle = runCycle === 0 ? -Math.PI / 8 : Math.PI / 8; ctx.fillStyle = '#333333'; ctx.beginPath(); ctx.roundRect(this.x + 5, this.y - 45, 20, 30, 5); ctx.fill(); ctx.fillStyle = '#FFD700'; ctx.beginPath(); ctx.arc(this.x + this.width / 2, this.y - 50, 10, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = '#333333'; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.save(); ctx.translate(this.x + 5, this.y - 40); ctx.rotate(armAngle); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 20); ctx.stroke(); ctx.restore(); ctx.save(); ctx.translate(this.x + 25, this.y - 40); ctx.rotate(-armAngle); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 20); ctx.stroke(); ctx.restore(); ctx.strokeStyle = '#333333'; ctx.lineWidth = 5; ctx.save(); ctx.translate(this.x + 10, this.y - 15); ctx.rotate(legAngle); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 15); ctx.stroke(); ctx.restore(); ctx.save(); ctx.translate(this.x + 20, this.y - 15); ctx.rotate(-legAngle); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 15); ctx.stroke(); ctx.restore(); ctx.restore(); this.disegnaNome();
             },
             disegnaNome() {
-                const offsetLineY = 30; const boxWidth = 70, boxHeight = 25; const lineX = this.x + this.width / 2; const lineY = this.y - this.height - 10; const boxX = lineX - boxWidth / 2; const boxY = lineY - offsetLineY - boxHeight; ctx.beginPath(); ctx.moveTo(lineX, lineY); ctx.lineTo(lineX, boxY + boxHeight); ctx.strokeStyle = 'black'; ctx.stroke(); ctx.fillStyle = 'white'; ctx.strokeStyle = 'black'; ctx.fillRect(boxX, boxY, boxWidth, boxHeight); ctx.strokeRect(boxX, boxY, boxWidth, boxHeight); ctx.fillStyle = 'black'; ctx.font = '16px "Courier New"'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(PLAYER_NAME, boxX + boxWidth / 2, boxY + boxHeight / 2);
+                const offsetLineY = 30; const boxWidth = 70, boxHeight = 25; const lineX = this.x + this.width / 2; const lineY = this.y - this.height - 10; const boxX = lineX - boxWidth / 2; const boxY = lineY - offsetLineY - boxHeight; ctx.beginPath(); ctx.moveTo(lineX, lineY); ctx.lineTo(lineX, boxY + boxHeight); ctx.strokeStyle = 'black'; ctx.stroke(); ctx.fillStyle = 'white'; ctx.strokeStyle = 'black'; ctx.fillRect(boxX, boxY, boxWidth, boxHeight); ctx.strokeRect(boxX, boxY, boxWidth, boxHeight); ctx.fillStyle = 'black'; ctx.font = '16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(PLAYER_NAME, boxX + boxWidth / 2, boxY + boxHeight / 2);
             },
             update(dt) { this.velocityY += GRAVITY * dt; this.y += this.velocityY * dt; if (this.y > GROUND_Y) { this.y = GROUND_Y; this.velocityY = 0; this.isJumping = false; } },
             jump() { if (!this.isJumping && isAlive) { this.velocityY = JUMP_FORCE; this.isJumping = true; if (!isDemoMode) playSound('jump'); } }
@@ -302,304 +285,211 @@
 
         // --- UI ---
         function drawLives() { 
-            const t = `Vite: ${lives}`; 
-            ctx.font = '22px "Courier New"';
-            const m = ctx.measureText(t); 
-            const bW = m.width + 20;
-            const bH = 35;
-            const bX = 50, bY = 50;
-            ctx.fillStyle = 'rgba(255,255,255,0.6)'; 
-            ctx.beginPath(); 
-            ctx.roundRect(bX, bY, bW, bH, 8); 
-            ctx.fill(); 
-            ctx.fillStyle = 'black'; 
-            ctx.textAlign = 'left'; 
-            ctx.textBaseline = 'middle'; 
-            ctx.fillText(t, bX + 10, bY + bH / 2 + 1); 
+            const t = `Vite: ${lives}`; ctx.font = '22px sans-serif'; const m = ctx.measureText(t); const bW = m.width + 20; const bH = 35; const bX = 50, bY = 50;
+            ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.roundRect(bX, bY, bW, bH, 8); ctx.fill(); 
+            ctx.fillStyle = 'black'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(t, bX + 10, bY + bH / 2 + 1); 
         }
         function drawDigitalClock(simulatedHour) { 
-            const hour = Math.floor(simulatedHour); 
-            const minute = Math.floor((simulatedHour * 60) % 60); 
-            const timeString = `${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`; 
-            ctx.font = '22px "Courier New"';
-            const textMetrics = ctx.measureText(timeString); 
-            const boxWidth = textMetrics.width + 20; 
-            const livesText = `Vite: ${lives}`; 
-            ctx.font = '22px "Courier New"';
-            const livesMetrics = ctx.measureText(livesText); 
-            const livesBoxWidth = livesMetrics.width + 20; 
+            const hour = Math.floor(simulatedHour); const minute = Math.floor((simulatedHour * 60) % 60); const timeString = `${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`; 
+            ctx.font = '22px sans-serif'; const textMetrics = ctx.measureText(timeString); const boxWidth = textMetrics.width + 20; 
+            const livesText = `Vite: ${lives}`; ctx.font = '22px sans-serif'; const livesMetrics = ctx.measureText(livesText); const livesBoxWidth = livesMetrics.width + 20; 
             const clockX = 50 + livesBoxWidth + 15;
-            ctx.fillStyle = 'rgba(255,255,255,0.6)'; 
-            ctx.beginPath(); 
-            ctx.roundRect(clockX, 50, boxWidth, 35, 8);
-            ctx.fill(); 
-            ctx.fillStyle = 'black'; 
-            ctx.textAlign = 'left'; 
-            ctx.textBaseline = 'middle'; 
-            ctx.font = '22px "Courier New"';
-            ctx.fillText(timeString, clockX + 10, 50 + 35 / 2 + 1); 
+            ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.roundRect(clockX, 50, boxWidth, 35, 8); ctx.fill(); 
+            ctx.fillStyle = 'black'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.font = '22px sans-serif'; ctx.fillText(timeString, clockX + 10, 50 + 35 / 2 + 1); 
         }
         function drawScore() { 
-            const scoreText = `${formatTime(score)}`; 
-            const hiScoreText = `HI ${formatTime(highscore)}`; 
-            ctx.font = '22px "Courier New"';
-            const scoreMetrics = ctx.measureText(scoreText); 
-            const hiScoreMetrics = ctx.measureText(hiScoreText); 
-            const scoreBW = scoreMetrics.width + 20; 
-            const hiScoreBW = hiScoreMetrics.width + 20; 
-            const bH = 35;
+            const viewWidth = window.innerWidth;
+            const scoreText = `${formatTime(score)}`; const hiScoreText = `HI ${formatTime(highscore)}`; 
+            ctx.font = '22px sans-serif';
+            const scoreMetrics = ctx.measureText(scoreText); const hiScoreMetrics = ctx.measureText(hiScoreText); 
+            const scoreBW = scoreMetrics.width + 20; const hiScoreBW = hiScoreMetrics.width + 20; const bH = 35;
             
-            // Pulsante X rosso al centro dello schermo sulla stessa riga
-            const exitButtonSize = 35;
-            const exitButtonX = (canvas.width - exitButtonSize) / 2; // Centrato orizzontalmente
-            const exitButtonY = 50;
-            
-            // Disegna il pulsante X rosso
-            ctx.fillStyle = '#ff4444';
-            ctx.beginPath();
-            ctx.roundRect(exitButtonX, exitButtonY, exitButtonSize, exitButtonSize, 8);
-            ctx.fill();
-            
-            // Disegna la X bianca
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(exitButtonX + 10, exitButtonY + 10);
-            ctx.lineTo(exitButtonX + 25, exitButtonY + 25);
-            ctx.moveTo(exitButtonX + 25, exitButtonY + 10);
-            ctx.lineTo(exitButtonX + 10, exitButtonY + 25);
-            ctx.stroke();
-            
-            // Salva i bounds del pulsante per il click
+            const exitButtonSize = 35; const exitButtonX = (viewWidth - exitButtonSize) / 2; const exitButtonY = 50;
+            ctx.fillStyle = '#ff4444'; ctx.beginPath(); ctx.roundRect(exitButtonX, exitButtonY, exitButtonSize, exitButtonSize, 8); ctx.fill();
+            ctx.strokeStyle = 'white'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(exitButtonX + 10, exitButtonY + 10); ctx.lineTo(exitButtonX + 25, exitButtonY + 25);
+            ctx.moveTo(exitButtonX + 25, exitButtonY + 10); ctx.lineTo(exitButtonX + 10, exitButtonY + 25); ctx.stroke();
             window.exitGameButtonBounds = { x: exitButtonX, y: exitButtonY, width: exitButtonSize, height: exitButtonSize };
             
-            const hiScoreBX = canvas.width - hiScoreBW - 50;
-            const scoreBX = hiScoreBX - scoreBW - 15;
-            const bY = 50;
-            ctx.fillStyle = 'rgba(255,255,255,0.6)'; 
-            ctx.beginPath(); 
-            ctx.roundRect(scoreBX, bY, scoreBW, bH, 8); 
-            ctx.fill(); 
-            ctx.fillStyle = 'black'; 
-            ctx.textAlign = 'left'; 
-            ctx.textBaseline = 'middle'; 
-            ctx.fillText(scoreText, scoreBX + 10, bY + bH / 2 + 1); 
-            ctx.fillStyle = 'rgba(255,255,255,0.6)'; 
-            ctx.beginPath(); 
-            ctx.roundRect(hiScoreBX, bY, hiScoreBW, bH, 8); 
-            ctx.fill(); 
-            ctx.fillStyle = 'black'; 
-            ctx.textAlign = 'left'; 
-            ctx.textBaseline = 'middle'; 
-            ctx.fillText(hiScoreText, hiScoreBX + 10, bY + bH / 2 + 1); 
+            const hiScoreBX = viewWidth - hiScoreBW - 50; const scoreBX = hiScoreBX - scoreBW - 15; const bY = 50;
+            ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.roundRect(scoreBX, bY, scoreBW, bH, 8); ctx.fill(); 
+            ctx.fillStyle = 'black'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(scoreText, scoreBX + 10, bY + bH / 2 + 1); 
+            ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.roundRect(hiScoreBX, bY, hiScoreBW, bH, 8); ctx.fill(); 
+            ctx.fillStyle = 'black'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(hiScoreText, hiScoreBX + 10, bY + bH / 2 + 1); 
         }
-        function showGameOverOverlay() { ctx.fillStyle = 'rgba(255,255,224,0.7)'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = 'black'; ctx.font = '40px "Courier New"'; ctx.textAlign = 'center'; ctx.fillText('Game Over!', canvas.width/2, canvas.height/2 - 20); ctx.font = '20px "Courier New"'; ctx.fillText(`Punteggio: ${formatTime(score)}. Clicca per riprovare.`, canvas.width/2, canvas.height/2 + 20); }
+        function showGameOverOverlay() { 
+            const viewWidth = window.innerWidth; const viewHeight = window.innerHeight;
+            ctx.fillStyle = 'rgba(255,255,224,0.7)'; ctx.fillRect(0,0,viewWidth,viewHeight); 
+            ctx.fillStyle = 'black'; ctx.font = '40px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('Game Over!', viewWidth/2, viewHeight/2 - 20); 
+            ctx.font = '20px sans-serif'; ctx.fillText(`Punteggio: ${formatTime(score)}. Clicca per riprovare.`, viewWidth/2, viewHeight/2 + 20); 
+        }
         
-        // --- MENU PRINCIPALE SEMPLIFICATO ---
-        function drawDifficultyScreen() { 
-            // Sfondo azzurro che copre tutto lo schermo
-            ctx.fillStyle = '#87CEEB'; 
-            ctx.fillRect(0, 0, canvas.width, canvas.height); 
+        // --- MENU CON STILE JOY ---
+        function drawDifficultyScreen() {
+            const viewWidth = window.innerWidth;
+            const viewHeight = window.innerHeight;
             
-            // Margini più generosi sopra e sotto
-            const topMargin = Math.max(80, canvas.height * 0.12); // Più spazio sopra
-            const bottomMargin = Math.max(80, canvas.height * 0.12); // Più spazio sotto
-            const sideMargin = Math.max(40, canvas.width * 0.08);
+            ctx.fillStyle = '#e0e0e0'; // Sfondo grigio chiaro per contrasto
+            ctx.fillRect(0, 0, viewWidth, viewHeight);
+
+            const totalButtons = difficultyButtons.length;
+            const buttonSpacing = 20;
             
-            // Calcola l'area disponibile per i pulsanti
-            const availableHeight = canvas.height - topMargin - bottomMargin;
-            const availableWidth = canvas.width - (sideMargin * 2);
+            const fontSize = Math.max(18, viewHeight * 0.04);
+            const textPaddingY = fontSize * 0.6; // Aumenta padding verticale
+            const buttonHeight = fontSize + textPaddingY * 2;
             
-            // Dimensioni pulsanti moderne e larghe
-            const buttonWidth = Math.min(400, availableWidth * 0.95);
-            const buttonHeight = Math.floor(availableHeight / difficultyButtons.length * 0.75); // Ridotto per dare più spazio
-            const totalButtonsHeight = difficultyButtons.length * buttonHeight;
-            const totalSpacing = availableHeight - totalButtonsHeight;
-            const buttonSpacing = totalSpacing / (difficultyButtons.length + 1); // Distribuzione uniforme
-            
-            // Pulsanti distribuiti uniformemente con margini
-            difficultyButtons.forEach((btn, index) => { 
-                const btnY = topMargin + buttonSpacing + (index * (buttonHeight + buttonSpacing));
-                btn.x = canvas.width/2 - buttonWidth/2;
-                btn.y = btnY;
-                btn.width = buttonWidth;
+            const totalButtonsHeight = (buttonHeight * totalButtons) + (buttonSpacing * (totalButtons - 1));
+            let currentY = (viewHeight - totalButtonsHeight) / 2;
+
+            difficultyButtons.forEach((btn) => {
+                ctx.font = `bold ${fontSize}px sans-serif`;
+                const textMetrics = ctx.measureText(btn.level.name);
+                const textPaddingX = fontSize * 2.5; // Aumenta padding orizzontale
+                btn.width = textMetrics.width + textPaddingX * 2;
                 btn.height = buttonHeight;
-                
-                // Sfondo pulsante moderno con gradiente
-                const gradient = ctx.createLinearGradient(btn.x, btn.y, btn.x, btn.y + btn.height);
-                gradient.addColorStop(0, '#FFFEF7');
-                gradient.addColorStop(1, '#F5E6A3');
-                ctx.fillStyle = gradient;
-                
-                ctx.strokeStyle = '#333333'; 
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.roundRect(btn.x, btn.y, btn.width, btn.height, 15); // Angoli più arrotondati
-                ctx.fill();
-                ctx.stroke();
-                
-                // Ombra leggera per effetto moderno
-                ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-                ctx.shadowBlur = 5;
-                ctx.shadowOffsetX = 2;
-                ctx.shadowOffsetY = 2;
-                ctx.fill();
-                ctx.shadowColor = 'transparent';
-                ctx.shadowBlur = 0;
+                btn.x = (viewWidth - btn.width) / 2;
+                btn.y = currentY;
+
+                // Disegna ombra
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+                ctx.shadowBlur = 10;
                 ctx.shadowOffsetX = 0;
-                ctx.shadowOffsetY = 0;
+                ctx.shadowOffsetY = 4;
                 
-                // Testo pulsante con font grande
-                ctx.fillStyle = '#333333'; 
-                const fontSize = Math.min(28, buttonHeight * 0.4);
-                ctx.font = `bold ${fontSize}px "Courier New"`; 
-                ctx.textAlign = 'center'; 
-                ctx.textBaseline = 'middle'; 
-                ctx.fillText(btn.level.name, btn.x + btn.width/2, btn.y + btn.height/2); 
-            }); 
-            
-            
-            if (showInfoScreen) { drawInfoScreen(); } 
+                // Disegna pulsante
+                ctx.fillStyle = '#3498db'; // Blu solido
+                ctx.beginPath();
+                ctx.roundRect(btn.x, btn.y, btn.width, btn.height, 10); // Raggio 10px
+                ctx.fill();
+
+                // Reset ombra per non applicarla al testo
+                ctx.shadowColor = 'transparent';
+                
+                // Disegna testo
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(btn.level.name, btn.x + btn.width / 2, btn.y + btn.height / 2 + 2); // Leggero offset per centrare meglio
+
+                currentY += btn.height + buttonSpacing;
+            });
+
+            if (showInfoScreen) {
+                drawInfoScreen();
+            }
         }
         
         function setupDifficultyButtons() { 
             difficultyButtons.length = 0; 
-            
-            // Aggiungi i pulsanti delle difficoltà
             Object.values(difficulties).forEach((level) => { 
-                const btn = { x: 0, y: 0, width: 0, height: 0, level: level }; 
-                difficultyButtons.push(btn); 
+                difficultyButtons.push({ level: level }); 
             }); 
-            
-            // Pulsante Demo
-            const demoBtn = { x: 0, y: 0, width: 0, height: 0, level: { name: 'Demo' }, type: 'demo' }; 
-            difficultyButtons.push(demoBtn); 
-            
-            // Pulsante Info
-            const infoBtn = { x: 0, y: 0, width: 0, height: 0, level: { name: 'Info' }, type: 'info' }; 
-            difficultyButtons.push(infoBtn); 
+            difficultyButtons.push({ level: { name: 'Demo' }, type: 'demo' });
+            difficultyButtons.push({ level: { name: 'Info' }, type: 'info' });
         }
         
-        // --- SCHERMATA INFO A SCHERMO INTERO ---
+        // --- PAGINA INFO AD ALTA DEFINIZIONE ---
         function drawInfoScreen() {
-            // Sfondo celeste tenue ma più vivo (stesso colore del menu)
+            const viewWidth = window.innerWidth;
+            const viewHeight = window.innerHeight;
+
             ctx.fillStyle = '#E6F3FF';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillRect(0, 0, viewWidth, viewHeight);
+
+            const panelWidth = Math.min(600, viewWidth * 0.9);
+            const panelHeight = Math.min(700, viewHeight * 0.85);
+            const panelX = (viewWidth - panelWidth) / 2;
+            const panelY = (viewHeight - panelHeight) / 2;
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.98)';
+            ctx.strokeStyle = '#CCCCCC';
+            ctx.lineWidth = 1;
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+            ctx.shadowBlur = 15;
+            ctx.shadowOffsetY = 5;
+            ctx.beginPath();
+            ctx.roundRect(panelX, panelY, panelWidth, panelHeight, 20);
+            ctx.fill();
+            ctx.stroke();
+            ctx.shadowColor = 'transparent';
+
+            const headerY = panelY + 50;
+            const closeSize = 40;
+            const closeX = panelX + panelWidth - closeSize - 20;
+            const closeY = headerY - (closeSize / 2);
+
+            const titleFontSize = Math.min(28, panelWidth * 0.07);
+            ctx.fillStyle = '#333333';
+            ctx.font = `bold ${titleFontSize}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('Istruzioni', viewWidth / 2, headerY);
             
-            // Pulsante X di chiusura in alto a destra
-            const closeSize = 50;
-            const closeX = canvas.width - 70;
-            const closeY = 20;
-            
-            ctx.fillStyle = '#ff4444'; 
+            ctx.fillStyle = '#333333'; 
             ctx.beginPath(); 
             ctx.roundRect(closeX, closeY, closeSize, closeSize, 8); 
             ctx.fill(); 
-            
             ctx.strokeStyle = 'white'; 
             ctx.lineWidth = 4; 
             ctx.beginPath(); 
-            ctx.moveTo(closeX + 15, closeY + 15); 
-            ctx.lineTo(closeX + 35, closeY + 35); 
-            ctx.moveTo(closeX + 35, closeY + 15); 
-            ctx.lineTo(closeX + 15, closeY + 35); 
+            ctx.moveTo(closeX + 10, closeY + 10); ctx.lineTo(closeX + 30, closeY + 30); 
+            ctx.moveTo(closeX + 30, closeY + 10); ctx.lineTo(closeX + 10, closeY + 30); 
             ctx.stroke();
             
-            // Salva i bounds del pulsante di chiusura per il click
             window.closeButtonBounds = { x: closeX, y: closeY, width: closeSize, height: closeSize };
             
-            // Titolo "Istruzioni"
-            ctx.fillStyle = 'black';
-            ctx.font = 'bold 28px "Courier New"';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'top';
-            ctx.fillText('Istruzioni', canvas.width / 2, 30);
-            
-            // Contenuto delle istruzioni
-            ctx.font = '16px "Courier New"';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'top';
-            
+            const padding = 30;
+            const textY = headerY + 50;
+            const textAreaHeight = panelY + panelHeight - textY - padding;
             const lines = [
-                'Clicca o premi SPAZIO per saltare',
-                'Evita gli ostacoli rossi!', 
-                'Raccogli punti correndo il più lontano possibile',
-                '',
-                'Per dispositivi mobili:',
-                'Aggiungi questa pagina alla schermata Home',
-                'per un\'esperienza migliore.',
-                '',
-                'Su iPhone/iPad:',
-                'Usa l\'icona "Condividi" e seleziona',
-                '"Aggiungi alla schermata Home"',
-                '',
-                'Su Android:',
-                'Usa il menu (⋮) e seleziona',
-                '"Aggiungi a schermata Home"'
+                { text: 'Clicca o premi SPAZIO per saltare.', style: 'normal' },
+                { text: 'Evita gli ostacoli rossi!', style: 'normal' },
+                { text: 'Corri il più lontano possibile.', style: 'normal' }, { text: '', style: 'normal' },
+                { text: 'Per dispositivi mobili:', style: 'header' },
+                { text: 'Aggiungi questa pagina alla schermata', style: 'small' },
+                { text: 'Home per un\'esperienza a schermo intero.', style: 'small' }, { text: '', style: 'normal' },
+                { text: 'Su iPhone/iPad:', style: 'header' },
+                { text: 'Usa l\'icona "Condividi" e seleziona', style: 'small' },
+                { text: '"Aggiungi alla schermata Home".', style: 'small' }, { text: '', style: 'normal' },
+                { text: 'Su Android:', style: 'header' },
+                { text: 'Usa il menu (⋮) e seleziona', style: 'small' },
+                { text: '"Aggiungi a schermata Home".', style: 'small' }
             ];
             
-            // Inizia il contenuto dopo il titolo con spazio adeguato
-            let currentY = 100;
-            const lineHeight = 24; // Interlinea standard
+            const normalFontSize = Math.max(14, Math.min(18, panelWidth * 0.035));
+            const headerFontSize = normalFontSize * 1.1;
+            const smallFontSize = normalFontSize * 0.9;
+            const lineHeight = normalFontSize * 1.5;
+
             const totalTextHeight = lines.length * lineHeight;
-            const availableHeight = canvas.height - currentY - 40;
-            
-            // Sistema di scroll se necessario
             if (!window.infoScrollY) window.infoScrollY = 0;
-            const maxScrollY = Math.max(0, totalTextHeight - availableHeight);
+            const maxScrollY = Math.max(0, totalTextHeight - textAreaHeight);
             window.infoScrollY = Math.max(0, Math.min(window.infoScrollY, maxScrollY));
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(panelX + padding, textY, panelWidth - (padding*2), textAreaHeight);
+            ctx.clip();
             
-            // Area di clipping per il contenuto
-            if (maxScrollY > 0) {
-                ctx.save();
-                ctx.beginPath();
-                ctx.rect(40, currentY, canvas.width - 80, availableHeight);
-                ctx.clip();
-            }
-            
-            // Disegna le righe di testo
+            ctx.textAlign = 'center'; ctx.textBaseline = 'top';
             lines.forEach((line, index) => {
-                const y = currentY + (index * lineHeight) - window.infoScrollY;
-                
-                // Disegna solo le righe visibili
-                if (y >= currentY - lineHeight && y <= currentY + availableHeight + lineHeight) {
-                    if (line.includes('Per dispositivi mobili:') || line.includes('Su iPhone/iPad:') || line.includes('Su Android:')) {
-                        ctx.font = 'bold 18px "Courier New"';
-                    } else {
-                        ctx.font = '16px "Courier New"';
-                    }
-                    ctx.fillText(line, canvas.width / 2, y);
-                }
+                const lineY = textY + (index * lineHeight) - window.infoScrollY;
+                if (line.style === 'header') ctx.font = `bold ${headerFontSize}px sans-serif`;
+                else if (line.style === 'small') ctx.font = `${smallFontSize}px sans-serif`;
+                else ctx.font = `${normalFontSize}px sans-serif`;
+                ctx.fillText(line.text, panelX + panelWidth / 2, lineY);
             });
-            
+            ctx.restore();
+
             if (maxScrollY > 0) {
-                ctx.restore();
-                
-                // Barra di scorrimento
-                const scrollBarWidth = 10;
-                const scrollBarX = canvas.width - 30;
-                const scrollBarHeight = availableHeight;
-                const scrollBarY = currentY;
-                
-                // Sfondo barra
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-                ctx.fillRect(scrollBarX, scrollBarY, scrollBarWidth, scrollBarHeight);
-                
-                // Cursore barra
-                const cursorHeight = Math.max(20, (availableHeight / totalTextHeight) * scrollBarHeight);
+                const scrollBarWidth = 12; const scrollBarX = panelX + panelWidth - padding + 5;
+                const scrollBarY = textY; const scrollBarHeight = textAreaHeight;
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'; ctx.beginPath(); ctx.roundRect(scrollBarX, scrollBarY, scrollBarWidth, scrollBarHeight, 6); ctx.fill();
+                const cursorHeight = Math.max(30, (textAreaHeight / totalTextHeight) * scrollBarHeight);
                 const cursorY = scrollBarY + (window.infoScrollY / maxScrollY) * (scrollBarHeight - cursorHeight);
-                
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-                ctx.fillRect(scrollBarX, cursorY, scrollBarWidth, cursorHeight);
-                
-                window.scrollBarBounds = {
-                    x: scrollBarX,
-                    y: scrollBarY,
-                    width: scrollBarWidth,
-                    height: scrollBarHeight,
-                    maxScrollY: maxScrollY,
-                    availableHeight: availableHeight
-                };
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.4)'; ctx.beginPath(); ctx.roundRect(scrollBarX, cursorY, scrollBarWidth, cursorHeight, 6); ctx.fill();
+                window.scrollBarBounds = { x: scrollBarX, y: scrollBarY, width: scrollBarWidth, height: scrollBarHeight, maxScrollY: maxScrollY };
             } else {
                 window.scrollBarBounds = null;
             }
@@ -612,11 +502,10 @@
             
             if (showInfoScreen) { 
                 drawInfoScreen(); 
-            }
-            else if (!hasStarted) { 
+            } else if (!hasStarted) { 
                 drawDifficultyScreen(); 
-            }
-            else {
+            } else {
+                const viewWidth = window.innerWidth;
                 const simulatedHour = (7 + (timeOfDay / DAY_CYCLE_DURATION) * 24) % 24;
                 drawSky(simulatedHour); drawLandscape(simulatedHour); updateAndDrawSigns(deltaTime); updateAndDrawSpectators(deltaTime); drawGround(); drawRain(deltaTime); drawScore(); drawLives(); drawDigitalClock(simulatedHour);
                 if (isAlive) {
@@ -625,26 +514,34 @@
                     if (totalTime >= nextSignTime) { generateSign(); calculateNextSignTime(); }
                     if (totalTime >= nextSpectatorTime) { generateSpectator(); calculateNextSpectatorTime(); }
                     totalTime += deltaTime; score += deltaTime * 10; gameSpeed += currentDifficulty.speedIncrement * deltaTime; if (isInvincible) { invincibilityTimer -= deltaTime; if (invincibilityTimer <= 0) isInvincible = false; }
-                    if (isDemoMode) autopilot(); personaggio.update(deltaTime); leon.update(deltaTime); updateLandscape(deltaTime); updateObstacles(deltaTime);
+                    if (isDemoMode) autopilot(); personaggio.update(deltaTime); leon.update(deltaTime, viewWidth); updateLandscape(deltaTime); updateObstacles(deltaTime);
                 } else { showGameOverOverlay(); }
                 leon.draw(); if (!(isInvincible && Math.floor(totalTime * 10) % 2 !== 0)) { personaggio.draw(); }
-                if (isDemoMode) { ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.font = '16px "Courier New"'; ctx.textAlign = 'center'; ctx.fillText(`Demo - ${currentDifficulty.name} (Giorno ${demoDayCount + 1})`, canvas.width / 2, canvas.height - 30); }
+                if (isDemoMode) { ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.font = '16px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(`Demo - ${currentDifficulty.name} (Giorno ${demoDayCount + 1})`, viewWidth / 2, window.innerHeight - 30); }
             }
             requestAnimationFrame(gameLoop);
         }
 
-        function drawGround() { ctx.fillStyle = '#A0522D'; ctx.fillRect(0, GROUND_Y, canvas.width, canvas.height - GROUND_Y); ctx.strokeStyle = '#333'; ctx.beginPath(); ctx.moveTo(0, GROUND_Y); ctx.lineTo(canvas.width, GROUND_Y); ctx.stroke(); }
+        function drawGround() { ctx.fillStyle = '#A0522D'; ctx.fillRect(0, GROUND_Y, window.innerWidth, window.innerHeight - GROUND_Y); ctx.strokeStyle = '#333'; ctx.beginPath(); ctx.moveTo(0, GROUND_Y); ctx.lineTo(window.innerWidth, GROUND_Y); ctx.stroke(); }
         function formatTime(s) { const tS = Math.floor(s / 10); const m = Math.floor(tS / 60); const sec = tS % 60; return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`; }
         function resetToMenu() { hasStarted = false; isAlive = false; isDemoMode = false; demoDayCount = 0; score = 0; obstacles = []; spectators = []; personaggio.y = GROUND_Y; personaggio.velocityY = 0; showInfoScreen = false; stopInfoAudio(); window.infoScrollY = 0; setupDifficultyButtons(); }
-        function resizeCanvas() { 
-            // Il canvas occupa TUTTO lo schermo senza bordi
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            canvas.style.width = '100%';
-            canvas.style.height = '100%';
+        
+        // --- FUNZIONE RESIZE PER ALTA DEFINIZIONE ---
+        function resizeCanvas() {
+            const dpr = window.devicePixelRatio || 1;
+            const viewWidth = window.innerWidth;
+            const viewHeight = window.innerHeight;
+
+            canvas.width = viewWidth * dpr;
+            canvas.height = viewHeight * dpr;
             
-            GROUND_Y = canvas.height - 50; 
-            personaggio.x = canvas.width * 0.15;
+            canvas.style.width = viewWidth + 'px';
+            canvas.style.height = viewHeight + 'px';
+            
+            ctx.scale(dpr, dpr);
+            
+            GROUND_Y = viewHeight - 50; 
+            personaggio.x = viewWidth * 0.15;
             leon.y = GROUND_Y; 
             initLandscape(); 
             setupDifficultyButtons(); 
@@ -652,20 +549,15 @@
 
         // --- INPUT ---
         window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') { e.preventDefault(); unlockAudio(); if (hasStarted) { if (isAlive && !isDemoMode) personaggio.jump(); else startGame(); } }
+            if (e.code === 'Space') { e.preventDefault(); unlockAudio(); if (hasStarted) { if (isAlive && !isDemoMode) personaggio.jump(); else if (!showInfoScreen) startGame(); } }
             if (e.code === 'Escape') { e.preventDefault(); resetToMenu(); }
-            // Gestisci scroll con frecce nella schermata info
             if (showInfoScreen) {
                 if (e.code === 'ArrowUp' || e.code === 'ArrowDown') {
                     e.preventDefault();
                     if (!window.infoScrollY) window.infoScrollY = 0;
                     const scrollAmount = 30;
-                    if (e.code === 'ArrowUp') {
-                        window.infoScrollY = Math.max(0, window.infoScrollY - scrollAmount);
-                    } else {
-                        const maxScroll = window.scrollBarBounds ? window.scrollBarBounds.maxScrollY : 0;
-                        window.infoScrollY = Math.min(maxScroll, window.infoScrollY + scrollAmount);
-                    }
+                    if (e.code === 'ArrowUp') window.infoScrollY = Math.max(0, window.infoScrollY - scrollAmount);
+                    else { const maxScroll = window.scrollBarBounds ? window.scrollBarBounds.maxScrollY : 0; window.infoScrollY = Math.min(maxScroll, window.infoScrollY + scrollAmount); }
                 }
             }
         });
@@ -688,50 +580,27 @@
             const y = (event.clientY || (event.touches && event.touches[0].clientY) || 0) - r.top;
             
             if (showInfoScreen) {
-                // Gestisci scroll nella schermata info
                 if (window.scrollBarBounds && x >= window.scrollBarBounds.x && x <= window.scrollBarBounds.x + window.scrollBarBounds.width && y >= window.scrollBarBounds.y && y <= window.scrollBarBounds.y + window.scrollBarBounds.height) {
                     const relativeY = y - window.scrollBarBounds.y;
-                    const scrollPercent = relativeY / window.scrollBarBounds.height;
-                    window.infoScrollY = scrollPercent * window.scrollBarBounds.maxScrollY;
+                    window.infoScrollY = (relativeY / window.scrollBarBounds.height) * window.scrollBarBounds.maxScrollY;
                     return;
                 }
-                
-                // Gestisci click sulla X per chiudere la schermata info
                 if (window.closeButtonBounds && x >= window.closeButtonBounds.x && x <= window.closeButtonBounds.x + window.closeButtonBounds.width && y >= window.closeButtonBounds.y && y <= window.closeButtonBounds.y + window.closeButtonBounds.height) { 
-                    showInfoScreen = false; 
-                    stopInfoAudio(); 
-                    window.infoScrollY = 0; // Reset scroll
-                    return; 
+                    showInfoScreen = false; stopInfoAudio(); window.infoScrollY = 0; return; 
                 }
-                // Ignora altri click nella schermata info
                 return;
             }
             
             if (!hasStarted) {
                 const clickedBtn = difficultyButtons.find(btn => x > btn.x && x < btn.x + btn.width && y > btn.y && y < btn.y + btn.height);
                 if (clickedBtn) {
-                    if (clickedBtn.type === 'demo') { 
-                        isDemoMode = true; 
-                        demoDayCount = 0; 
-                        currentDifficulty = difficulties.facile; 
-                        startGame(); 
-                    }
-                    else if (clickedBtn.type === 'info') { 
-                        showInfoScreen = true; 
-                        window.infoScrollY = 0; // Reset scroll quando si apre
-                        playInfoAudio(); 
-                    }
-                    else { 
-                        isDemoMode = false; 
-                        currentDifficulty = clickedBtn.level; 
-                        startGame(); 
-                    }
+                    if (clickedBtn.type === 'demo') { isDemoMode = true; demoDayCount = 0; currentDifficulty = difficulties.facile; startGame(); }
+                    else if (clickedBtn.type === 'info') { showInfoScreen = true; window.infoScrollY = 0; playInfoAudio(); }
+                    else { isDemoMode = false; currentDifficulty = clickedBtn.level; startGame(); }
                 }
             } else if (!isAlive) { 
                 startGame(); 
-            }
-            else { 
-                // Gestisci click sul pulsante X di uscita durante il gioco
+            } else { 
                 if (window.exitGameButtonBounds && x >= window.exitGameButtonBounds.x && x <= window.exitGameButtonBounds.x + window.exitGameButtonBounds.width && y >= window.exitGameButtonBounds.y && y <= window.exitGameButtonBounds.y + window.exitGameButtonBounds.height) {
                     resetToMenu();
                     return;
