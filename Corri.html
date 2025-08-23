@@ -26,7 +26,7 @@
 
     <style>
         body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f0f0; font-family: 'Courier New', Courier, monospace; overflow: hidden; }
-        canvas { border: 2px solid #333; background-color: #fff; cursor: pointer; max-width: 100%; max-height: 100%; }
+        canvas { cursor: pointer; width: 100vw; height: 100vh; display: block; }
         #rotate-message { display: none; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; background-color: #f0f0f0; text-align: center; font-size: 1.2em; }
         #rotate-message img { width: 100px; height: 100px; margin-bottom: 20px; }
         @media (orientation: portrait) { #gameCanvas { display: none; } #rotate-message { display: flex; } }
@@ -49,27 +49,23 @@
         document.getElementById('version-text-rotate').textContent = `Corri v1.4 (mp3)`;
 
         // === CONFIG AUDIO MP3 ===
-        // Modifica questi tre URL se i file hanno nomi/percorsi diversi nel tuo GitHub
         const MP3_JUMP_URL = "jump.mp3";
         const MP3_FAIL_URL = "fail.mp3";
-        const MP3_INFO_URL = "info.mp3"; // opzionale, usato nel popup "Info"
+        const MP3_INFO_URL = "info.mp3"; // Nome corretto
 
         const jumpSound = new Audio(MP3_JUMP_URL);
         const failSound = new Audio(MP3_FAIL_URL);
-        let infoAudio = null; // creato lazy
+        let infoAudio = null;
 
-        // impostazioni base
         jumpSound.preload = 'auto';
         failSound.preload = 'auto';
         jumpSound.volume = 0.35;
         failSound.volume = 0.45;
 
-        // iOS/Android: sblocchiamo l'audio al primo tap
         let audioUnlocked = false;
         function unlockAudio() {
             if (audioUnlocked) return;
             audioUnlocked = true;
-            // Tentiamo una riproduzione brevissima in mute per sbloccare
             const tryPlay = (el) => {
                 if (!el) return;
                 const prevVol = el.volume;
@@ -91,14 +87,29 @@
         }
 
         function playInfoAudio() {
-            if (!MP3_INFO_URL) return;
+            // Non tentare di riprodurre l'audio se l'URL non è definito
+            if (!MP3_INFO_URL) {
+                console.log("Info audio file not available or not specified");
+                return;
+            }
+            
+            // Sblocca l'audio se necessario
+            unlockAudio();
+            
             if (!infoAudio) {
                 infoAudio = new Audio(MP3_INFO_URL);
                 infoAudio.preload = 'auto';
                 infoAudio.volume = 0.6;
             }
+            
+            // Reset e play
             infoAudio.currentTime = 0;
-            infoAudio.play().catch(()=>{});
+            infoAudio.play().then(() => {
+                console.log("Info audio started successfully");
+            }).catch((error) => {
+                console.log("Info audio not available:", error.message);
+                // Non fare nulla se il file non esiste, è normale
+            });
         }
 
         function stopInfoAudio() {
@@ -125,11 +136,11 @@
         const difficultyButtons = [];
         let currentDifficulty = {};
 
-        // --- POPUP INFO ---
-        let showInfoPopup = false;
+        // --- STATO INFO ---
+        let showInfoScreen = false;
 
         // --- PAESAGGIO E OGGETTI ---
-        const DAY_CYCLE_DURATION = 120; // 2 minuti
+        const DAY_CYCLE_DURATION = 120;
         let landscapeLayers = [], mountains = [], stars = [], clouds = [], airborneObjects = [], signs = [], spectators = [];
         let timeOfDay = 0;
         let currentSignIndex = 0, nextSignTime = 0, nextSpectatorTime = 0;
@@ -251,10 +262,8 @@
         
         function calculateNextSpectatorTime() {
             let proposedTime = totalTime + 3 + Math.random() * 5;
-            // MODIFICA: Se l'orario proposto per il tifoso è troppo vicino a quello del prossimo cartello,
-            // lo posticipa per evitare che non venga visualizzato.
             if (Math.abs(proposedTime - nextSignTime) < 2.0) {
-                proposedTime = nextSignTime + 2.0 + Math.random(); // Appare 2-3 secondi dopo il cartello
+                proposedTime = nextSignTime + 2.0 + Math.random();
             }
             nextSpectatorTime = proposedTime;
         }
@@ -286,10 +295,7 @@
             obstacles = []; signs = []; spectators = []; currentSignIndex = 0; currentSpectatorIndex = 0;
             personaggio.y = GROUND_Y; personaggio.velocityY = 0; leon.x = personaggio.x - 30; leon.y = GROUND_Y; leon.direction = 1; leon.animationTime = 0; leon.movementPhase = 'forward';
             totalTime = 0; lastTime = 0; lives = INITIAL_LIVES; isInvincible = false; invincibilityTimer = 0; timeOfDay = 0; isRaining = false; if (!isDemoMode) demoDayCount = 0;
-            initLandscape(); 
-            calculateNextObstacleTime(); 
-            nextSignTime = 0.5 + Math.random() * 2.5; 
-            nextSpectatorTime = 5 + Math.random() * 3;
+            initLandscape(); calculateNextObstacleTime(); nextSignTime = 0.5 + Math.random() * 2.5; nextSpectatorTime = 5 + Math.random() * 3;
         }
         function triggerGameOver() { isAlive = false; if (score > highscore) highscore = score; }
         function handleCollision() { playSound('fail'); screenFlashTimer = 0.2; lives--; if (lives <= 0) { triggerGameOver(); } else { isInvincible = true; invincibilityTimer = 2.0; } }
@@ -319,7 +325,7 @@
             const textMetrics = ctx.measureText(timeString); 
             const boxWidth = textMetrics.width + 20; 
             const livesText = `Vite: ${lives}`; 
-            ctx.font = '22px "Courier New"'; // Assicura che la misurazione usi lo stesso font
+            ctx.font = '22px "Courier New"';
             const livesMetrics = ctx.measureText(livesText); 
             const livesBoxWidth = livesMetrics.width + 20; 
             const clockX = 50 + livesBoxWidth + 15;
@@ -342,6 +348,31 @@
             const scoreBW = scoreMetrics.width + 20; 
             const hiScoreBW = hiScoreMetrics.width + 20; 
             const bH = 35;
+            
+            // Pulsante X rosso al centro dello schermo sulla stessa riga
+            const exitButtonSize = 35;
+            const exitButtonX = (canvas.width - exitButtonSize) / 2; // Centrato orizzontalmente
+            const exitButtonY = 50;
+            
+            // Disegna il pulsante X rosso
+            ctx.fillStyle = '#ff4444';
+            ctx.beginPath();
+            ctx.roundRect(exitButtonX, exitButtonY, exitButtonSize, exitButtonSize, 8);
+            ctx.fill();
+            
+            // Disegna la X bianca
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(exitButtonX + 10, exitButtonY + 10);
+            ctx.lineTo(exitButtonX + 25, exitButtonY + 25);
+            ctx.moveTo(exitButtonX + 25, exitButtonY + 10);
+            ctx.lineTo(exitButtonX + 10, exitButtonY + 25);
+            ctx.stroke();
+            
+            // Salva i bounds del pulsante per il click
+            window.exitGameButtonBounds = { x: exitButtonX, y: exitButtonY, width: exitButtonSize, height: exitButtonSize };
+            
             const hiScoreBX = canvas.width - hiScoreBW - 50;
             const scoreBX = hiScoreBX - scoreBW - 15;
             const bY = 50;
@@ -363,65 +394,228 @@
             ctx.fillText(hiScoreText, hiScoreBX + 10, bY + bH / 2 + 1); 
         }
         function showGameOverOverlay() { ctx.fillStyle = 'rgba(255,255,224,0.7)'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle = 'black'; ctx.font = '40px "Courier New"'; ctx.textAlign = 'center'; ctx.fillText('Game Over!', canvas.width/2, canvas.height/2 - 20); ctx.font = '20px "Courier New"'; ctx.fillText(`Punteggio: ${formatTime(score)}. Clicca per riprovare.`, canvas.width/2, canvas.height/2 + 20); }
+        
+        // --- MENU PRINCIPALE SEMPLIFICATO ---
         function drawDifficultyScreen() { 
+            // Sfondo azzurro che copre tutto lo schermo
             ctx.fillStyle = '#87CEEB'; 
-            ctx.fillRect(0,0,canvas.width,canvas.height); 
-            drawGround(); 
-            const originalY = personaggio.y; 
-            personaggio.y = GROUND_Y; 
-            personaggio.draw(); 
-            personaggio.y = originalY; 
-            ctx.fillStyle = 'rgba(245,245,245,0.9)'; 
-            ctx.beginPath(); 
-            ctx.roundRect(canvas.width/2 - 300, canvas.height/2 - 240, 600, 480, 15); 
-            ctx.fill(); 
-            ctx.fillStyle = 'black'; 
-            ctx.font = '30px "Courier New"'; 
-            ctx.textAlign = 'center'; 
-            ctx.fillText('Scegli la difficoltà', canvas.width/2, canvas.height/2 - 190); 
-            difficultyButtons.forEach(btn => { 
-                ctx.fillStyle = '#FFFACD'; 
-                ctx.strokeStyle = 'black'; 
-                ctx.fillRect(btn.x, btn.y, btn.width, btn.height); 
-                ctx.strokeRect(btn.x, btn.y, btn.width, btn.height); 
-                ctx.fillStyle = 'black'; 
-                ctx.font = '20px "Courier New"'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height); 
+            
+            // Margini più generosi sopra e sotto
+            const topMargin = Math.max(80, canvas.height * 0.12); // Più spazio sopra
+            const bottomMargin = Math.max(80, canvas.height * 0.12); // Più spazio sotto
+            const sideMargin = Math.max(40, canvas.width * 0.08);
+            
+            // Calcola l'area disponibile per i pulsanti
+            const availableHeight = canvas.height - topMargin - bottomMargin;
+            const availableWidth = canvas.width - (sideMargin * 2);
+            
+            // Dimensioni pulsanti moderne e larghe
+            const buttonWidth = Math.min(400, availableWidth * 0.95);
+            const buttonHeight = Math.floor(availableHeight / difficultyButtons.length * 0.75); // Ridotto per dare più spazio
+            const totalButtonsHeight = difficultyButtons.length * buttonHeight;
+            const totalSpacing = availableHeight - totalButtonsHeight;
+            const buttonSpacing = totalSpacing / (difficultyButtons.length + 1); // Distribuzione uniforme
+            
+            // Pulsanti distribuiti uniformemente con margini
+            difficultyButtons.forEach((btn, index) => { 
+                const btnY = topMargin + buttonSpacing + (index * (buttonHeight + buttonSpacing));
+                btn.x = canvas.width/2 - buttonWidth/2;
+                btn.y = btnY;
+                btn.width = buttonWidth;
+                btn.height = buttonHeight;
+                
+                // Sfondo pulsante moderno con gradiente
+                const gradient = ctx.createLinearGradient(btn.x, btn.y, btn.x, btn.y + btn.height);
+                gradient.addColorStop(0, '#FFFEF7');
+                gradient.addColorStop(1, '#F5E6A3');
+                ctx.fillStyle = gradient;
+                
+                ctx.strokeStyle = '#333333'; 
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.roundRect(btn.x, btn.y, btn.width, btn.height, 15); // Angoli più arrotondati
+                ctx.fill();
+                ctx.stroke();
+                
+                // Ombra leggera per effetto moderno
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+                ctx.shadowBlur = 5;
+                ctx.shadowOffsetX = 2;
+                ctx.shadowOffsetY = 2;
+                ctx.fill();
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+                
+                // Testo pulsante con font grande
+                ctx.fillStyle = '#333333'; 
+                const fontSize = Math.min(28, buttonHeight * 0.4);
+                ctx.font = `bold ${fontSize}px "Courier New"`; 
                 ctx.textAlign = 'center'; 
                 ctx.textBaseline = 'middle'; 
                 ctx.fillText(btn.level.name, btn.x + btn.width/2, btn.y + btn.height/2); 
             }); 
-            ctx.fillStyle = 'rgba(0,0,0,0.4)'; 
-            ctx.font = '12px "Courier New"'; 
-            ctx.textAlign = 'left'; 
-            ctx.fillText(`v${gameVersion}`, 50, canvas.height - 50);
-            if (showInfoPopup) { drawInfoPopup(); } 
+            
+            
+            if (showInfoScreen) { drawInfoScreen(); } 
         }
+        
         function setupDifficultyButtons() { 
             difficultyButtons.length = 0; 
-            const btnW = 150, btnH = 40, sp = 15; 
-            const numButtons = Object.keys(difficulties).length + 2; 
-            const titleY = canvas.height / 2 - 190;
-            const panelBottom = canvas.height / 2 + 240;
-            const availableSpace = panelBottom - titleY - 60; 
-            const tH = (numButtons * btnH) + ((numButtons - 1) * sp); 
-            const sY = titleY + 60 + (availableSpace - tH) / 2 - 20; 
-            Object.values(difficulties).forEach((l, i) => { 
-                const btn = { x: canvas.width / 2 - btnW / 2, y: sY + i * (btnH + sp), width: btnW, height: btnH, level: l }; 
+            
+            // Aggiungi i pulsanti delle difficoltà
+            Object.values(difficulties).forEach((level) => { 
+                const btn = { x: 0, y: 0, width: 0, height: 0, level: level }; 
                 difficultyButtons.push(btn); 
             }); 
-            const demoBtn = { x: canvas.width / 2 - btnW / 2, y: sY + (numButtons - 2) * (btnH + sp), width: btnW, height: btnH, level: { name: 'Demo' }, type: 'demo' }; 
+            
+            // Pulsante Demo
+            const demoBtn = { x: 0, y: 0, width: 0, height: 0, level: { name: 'Demo' }, type: 'demo' }; 
             difficultyButtons.push(demoBtn); 
-            const infoBtn = { x: canvas.width / 2 - btnW / 2, y: sY + (numButtons - 1) * (btnH + sp), width: btnW, height: btnH, level: { name: 'Info' }, type: 'info' }; 
+            
+            // Pulsante Info
+            const infoBtn = { x: 0, y: 0, width: 0, height: 0, level: { name: 'Info' }, type: 'info' }; 
             difficultyButtons.push(infoBtn); 
         }
-        function drawInfoPopup() { ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(0,0,canvas.width,canvas.height); const popupWidth = Math.min(700, canvas.width - 20); const popupHeight = Math.min(550, canvas.height - 20); const popupX = (canvas.width - popupWidth) / 2; const popupY = (canvas.height - popupHeight) / 2; ctx.fillStyle = 'white'; ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(popupX, popupY, popupWidth, popupHeight, 10); ctx.fill(); ctx.stroke(); const closeX = popupX + popupWidth - 40; const closeY = popupY + 10; const closeSize = 30; ctx.fillStyle = '#ff4444'; ctx.beginPath(); ctx.roundRect(closeX, closeY, closeSize, closeSize, 5); ctx.fill(); ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(closeX + 7, closeY + 7); ctx.lineTo(closeX + 23, closeY + 23); ctx.moveTo(closeX + 23, closeY + 7); ctx.lineTo(closeX + 7, closeY + 23); ctx.stroke(); ctx.fillStyle = 'black'; ctx.font = 'bold 28px "Courier New"'; ctx.textAlign = 'center'; ctx.fillText('Istruzioni', canvas.width / 2, popupY + 60); const margin = 40; ctx.font = '18px "Courier New"'; const lines = ['', 'Per un\'esperienza ottimale, aggiungi', 'questa pagina alla schermata Home', 'del tuo dispositivo.', '', 'Su iPhone/iPad:', 'Clicca sull\'icona "Condividi"', '(il quadrato con la freccia in alto)', 'e poi "Aggiungi alla schermata Home".', '', 'Su Android:', 'Clicca sul menu (i tre puntini', 'in alto a destra) e poi', '"Aggiungi a schermata Home".']; let currentY = popupY + 110; lines.forEach((line) => { if (line.includes('iPhone/iPad:') || line.includes('Su Android:')) { ctx.font = 'bold 20px "Courier New"'; } else { ctx.font = '18px "Courier New"'; } ctx.fillText(line, canvas.width / 2, currentY); currentY += 26; }); window.closeButtonBounds = { x: closeX, y: closeY, width: closeSize, height: closeSize };
+        
+        // --- SCHERMATA INFO A SCHERMO INTERO ---
+        function drawInfoScreen() {
+            // Sfondo celeste tenue ma più vivo (stesso colore del menu)
+            ctx.fillStyle = '#E6F3FF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Pulsante X di chiusura in alto a destra
+            const closeSize = 50;
+            const closeX = canvas.width - 70;
+            const closeY = 20;
+            
+            ctx.fillStyle = '#ff4444'; 
+            ctx.beginPath(); 
+            ctx.roundRect(closeX, closeY, closeSize, closeSize, 8); 
+            ctx.fill(); 
+            
+            ctx.strokeStyle = 'white'; 
+            ctx.lineWidth = 4; 
+            ctx.beginPath(); 
+            ctx.moveTo(closeX + 15, closeY + 15); 
+            ctx.lineTo(closeX + 35, closeY + 35); 
+            ctx.moveTo(closeX + 35, closeY + 15); 
+            ctx.lineTo(closeX + 15, closeY + 35); 
+            ctx.stroke();
+            
+            // Salva i bounds del pulsante di chiusura per il click
+            window.closeButtonBounds = { x: closeX, y: closeY, width: closeSize, height: closeSize };
+            
+            // Titolo "Istruzioni"
+            ctx.fillStyle = 'black';
+            ctx.font = 'bold 28px "Courier New"';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.fillText('Istruzioni', canvas.width / 2, 30);
+            
+            // Contenuto delle istruzioni
+            ctx.font = '16px "Courier New"';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            
+            const lines = [
+                'Clicca o premi SPAZIO per saltare',
+                'Evita gli ostacoli rossi!', 
+                'Raccogli punti correndo il più lontano possibile',
+                '',
+                'Per dispositivi mobili:',
+                'Aggiungi questa pagina alla schermata Home',
+                'per un\'esperienza migliore.',
+                '',
+                'Su iPhone/iPad:',
+                'Usa l\'icona "Condividi" e seleziona',
+                '"Aggiungi alla schermata Home"',
+                '',
+                'Su Android:',
+                'Usa il menu (⋮) e seleziona',
+                '"Aggiungi a schermata Home"'
+            ];
+            
+            // Inizia il contenuto dopo il titolo con spazio adeguato
+            let currentY = 100;
+            const lineHeight = 24; // Interlinea standard
+            const totalTextHeight = lines.length * lineHeight;
+            const availableHeight = canvas.height - currentY - 40;
+            
+            // Sistema di scroll se necessario
+            if (!window.infoScrollY) window.infoScrollY = 0;
+            const maxScrollY = Math.max(0, totalTextHeight - availableHeight);
+            window.infoScrollY = Math.max(0, Math.min(window.infoScrollY, maxScrollY));
+            
+            // Area di clipping per il contenuto
+            if (maxScrollY > 0) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(40, currentY, canvas.width - 80, availableHeight);
+                ctx.clip();
+            }
+            
+            // Disegna le righe di testo
+            lines.forEach((line, index) => {
+                const y = currentY + (index * lineHeight) - window.infoScrollY;
+                
+                // Disegna solo le righe visibili
+                if (y >= currentY - lineHeight && y <= currentY + availableHeight + lineHeight) {
+                    if (line.includes('Per dispositivi mobili:') || line.includes('Su iPhone/iPad:') || line.includes('Su Android:')) {
+                        ctx.font = 'bold 18px "Courier New"';
+                    } else {
+                        ctx.font = '16px "Courier New"';
+                    }
+                    ctx.fillText(line, canvas.width / 2, y);
+                }
+            });
+            
+            if (maxScrollY > 0) {
+                ctx.restore();
+                
+                // Barra di scorrimento
+                const scrollBarWidth = 10;
+                const scrollBarX = canvas.width - 30;
+                const scrollBarHeight = availableHeight;
+                const scrollBarY = currentY;
+                
+                // Sfondo barra
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                ctx.fillRect(scrollBarX, scrollBarY, scrollBarWidth, scrollBarHeight);
+                
+                // Cursore barra
+                const cursorHeight = Math.max(20, (availableHeight / totalTextHeight) * scrollBarHeight);
+                const cursorY = scrollBarY + (window.infoScrollY / maxScrollY) * (scrollBarHeight - cursorHeight);
+                
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                ctx.fillRect(scrollBarX, cursorY, scrollBarWidth, cursorHeight);
+                
+                window.scrollBarBounds = {
+                    x: scrollBarX,
+                    y: scrollBarY,
+                    width: scrollBarWidth,
+                    height: scrollBarHeight,
+                    maxScrollY: maxScrollY,
+                    availableHeight: availableHeight
+                };
+            } else {
+                window.scrollBarBounds = null;
+            }
         }
 
         // --- LOOP ---
         function gameLoop(timestamp) {
             if (!lastTime) { lastTime = timestamp; requestAnimationFrame(gameLoop); return; }
             let deltaTime = (timestamp - lastTime) / 1000; lastTime = timestamp; if (deltaTime > 0.1) { deltaTime = 1 / 60; }
-            if (!hasStarted) { drawDifficultyScreen(); }
+            
+            if (showInfoScreen) { 
+                drawInfoScreen(); 
+            }
+            else if (!hasStarted) { 
+                drawDifficultyScreen(); 
+            }
             else {
                 const simulatedHour = (7 + (timeOfDay / DAY_CYCLE_DURATION) * 24) % 24;
                 drawSky(simulatedHour); drawLandscape(simulatedHour); updateAndDrawSigns(deltaTime); updateAndDrawSpectators(deltaTime); drawGround(); drawRain(deltaTime); drawScore(); drawLives(); drawDigitalClock(simulatedHour);
@@ -434,7 +628,6 @@
                     if (isDemoMode) autopilot(); personaggio.update(deltaTime); leon.update(deltaTime); updateLandscape(deltaTime); updateObstacles(deltaTime);
                 } else { showGameOverOverlay(); }
                 leon.draw(); if (!(isInvincible && Math.floor(totalTime * 10) % 2 !== 0)) { personaggio.draw(); }
-                ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.font = '12px "Courier New"'; ctx.textAlign = 'left'; ctx.fillText(`v${gameVersion}`, 50, canvas.height - 50);
                 if (isDemoMode) { ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.font = '16px "Courier New"'; ctx.textAlign = 'center'; ctx.fillText(`Demo - ${currentDifficulty.name} (Giorno ${demoDayCount + 1})`, canvas.width / 2, canvas.height - 30); }
             }
             requestAnimationFrame(gameLoop);
@@ -442,12 +635,14 @@
 
         function drawGround() { ctx.fillStyle = '#A0522D'; ctx.fillRect(0, GROUND_Y, canvas.width, canvas.height - GROUND_Y); ctx.strokeStyle = '#333'; ctx.beginPath(); ctx.moveTo(0, GROUND_Y); ctx.lineTo(canvas.width, GROUND_Y); ctx.stroke(); }
         function formatTime(s) { const tS = Math.floor(s / 10); const m = Math.floor(tS / 60); const sec = tS % 60; return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`; }
-        function resetToMenu() { hasStarted = false; isAlive = false; isDemoMode = false; demoDayCount = 0; score = 0; obstacles = []; spectators = []; personaggio.y = GROUND_Y; personaggio.velocityY = 0; setupDifficultyButtons(); }
+        function resetToMenu() { hasStarted = false; isAlive = false; isDemoMode = false; demoDayCount = 0; score = 0; obstacles = []; spectators = []; personaggio.y = GROUND_Y; personaggio.velocityY = 0; showInfoScreen = false; stopInfoAudio(); window.infoScrollY = 0; setupDifficultyButtons(); }
         function resizeCanvas() { 
-            const ar = 800 / 300; 
-            const nW = window.innerWidth, nH = window.innerHeight; 
-            if (nW / nH > ar) { canvas.height = nH; canvas.width = nH * ar; } 
-            else { canvas.width = nW; canvas.height = nW / ar; } 
+            // Il canvas occupa TUTTO lo schermo senza bordi
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            
             GROUND_Y = canvas.height - 50; 
             personaggio.x = canvas.width * 0.15;
             leon.y = GROUND_Y; 
@@ -459,26 +654,90 @@
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Space') { e.preventDefault(); unlockAudio(); if (hasStarted) { if (isAlive && !isDemoMode) personaggio.jump(); else startGame(); } }
             if (e.code === 'Escape') { e.preventDefault(); resetToMenu(); }
+            // Gestisci scroll con frecce nella schermata info
+            if (showInfoScreen) {
+                if (e.code === 'ArrowUp' || e.code === 'ArrowDown') {
+                    e.preventDefault();
+                    if (!window.infoScrollY) window.infoScrollY = 0;
+                    const scrollAmount = 30;
+                    if (e.code === 'ArrowUp') {
+                        window.infoScrollY = Math.max(0, window.infoScrollY - scrollAmount);
+                    } else {
+                        const maxScroll = window.scrollBarBounds ? window.scrollBarBounds.maxScrollY : 0;
+                        window.infoScrollY = Math.min(maxScroll, window.infoScrollY + scrollAmount);
+                    }
+                }
+            }
         });
         canvas.addEventListener('mousedown', (e) => { unlockAudio(); handleInteraction(e); });
         canvas.addEventListener('touchstart', (e) => { e.preventDefault(); unlockAudio(); handleInteraction(e); }, {passive:false});
+        canvas.addEventListener('wheel', (e) => {
+            if (showInfoScreen) {
+                e.preventDefault();
+                if (!window.infoScrollY) window.infoScrollY = 0;
+                const scrollAmount = e.deltaY > 0 ? 30 : -30;
+                const maxScroll = window.scrollBarBounds ? window.scrollBarBounds.maxScrollY : 0;
+                window.infoScrollY = Math.max(0, Math.min(maxScroll, window.infoScrollY + scrollAmount));
+            }
+        });
         window.addEventListener('resize', resizeCanvas);
 
         function handleInteraction(event) {
-            const r = canvas.getBoundingClientRect(); const x = (event.clientX || (event.touches && event.touches[0].clientX) || 0) - r.left; const y = (event.clientY || (event.touches && event.touches[0].clientY) || 0) - r.top;
-            if (showInfoPopup) {
-                if (window.closeButtonBounds && x >= window.closeButtonBounds.x && x <= window.closeButtonBounds.x + window.closeButtonBounds.width && y >= window.closeButtonBounds.y && y <= window.closeButtonBounds.y + window.closeButtonBounds.height) { showInfoPopup = false; stopInfoAudio(); return; }
-                const popupWidth = Math.min(700, canvas.width - 20); const popupHeight = Math.min(550, canvas.height - 20); const popupX = (canvas.width - popupWidth) / 2; const popupY = (canvas.height - popupHeight) / 2; if (x < popupX || x > popupX + popupWidth || y < popupY || y > popupY + popupHeight) { showInfoPopup = false; stopInfoAudio(); } return;
+            const r = canvas.getBoundingClientRect(); 
+            const x = (event.clientX || (event.touches && event.touches[0].clientX) || 0) - r.left; 
+            const y = (event.clientY || (event.touches && event.touches[0].clientY) || 0) - r.top;
+            
+            if (showInfoScreen) {
+                // Gestisci scroll nella schermata info
+                if (window.scrollBarBounds && x >= window.scrollBarBounds.x && x <= window.scrollBarBounds.x + window.scrollBarBounds.width && y >= window.scrollBarBounds.y && y <= window.scrollBarBounds.y + window.scrollBarBounds.height) {
+                    const relativeY = y - window.scrollBarBounds.y;
+                    const scrollPercent = relativeY / window.scrollBarBounds.height;
+                    window.infoScrollY = scrollPercent * window.scrollBarBounds.maxScrollY;
+                    return;
+                }
+                
+                // Gestisci click sulla X per chiudere la schermata info
+                if (window.closeButtonBounds && x >= window.closeButtonBounds.x && x <= window.closeButtonBounds.x + window.closeButtonBounds.width && y >= window.closeButtonBounds.y && y <= window.closeButtonBounds.y + window.closeButtonBounds.height) { 
+                    showInfoScreen = false; 
+                    stopInfoAudio(); 
+                    window.infoScrollY = 0; // Reset scroll
+                    return; 
+                }
+                // Ignora altri click nella schermata info
+                return;
             }
+            
             if (!hasStarted) {
                 const clickedBtn = difficultyButtons.find(btn => x > btn.x && x < btn.x + btn.width && y > btn.y && y < btn.y + btn.height);
                 if (clickedBtn) {
-                    if (clickedBtn.type === 'demo') { isDemoMode = true; demoDayCount = 0; currentDifficulty = difficulties.facile; startGame(); }
-                    else if (clickedBtn.type === 'info') { showInfoPopup = true; playInfoAudio(); }
-                    else { isDemoMode = false; currentDifficulty = clickedBtn.level; startGame(); }
+                    if (clickedBtn.type === 'demo') { 
+                        isDemoMode = true; 
+                        demoDayCount = 0; 
+                        currentDifficulty = difficulties.facile; 
+                        startGame(); 
+                    }
+                    else if (clickedBtn.type === 'info') { 
+                        showInfoScreen = true; 
+                        window.infoScrollY = 0; // Reset scroll quando si apre
+                        playInfoAudio(); 
+                    }
+                    else { 
+                        isDemoMode = false; 
+                        currentDifficulty = clickedBtn.level; 
+                        startGame(); 
+                    }
                 }
-            } else if (!isAlive) { startGame(); }
-            else { personaggio.jump(); }
+            } else if (!isAlive) { 
+                startGame(); 
+            }
+            else { 
+                // Gestisci click sul pulsante X di uscita durante il gioco
+                if (window.exitGameButtonBounds && x >= window.exitGameButtonBounds.x && x <= window.exitGameButtonBounds.x + window.exitGameButtonBounds.width && y >= window.exitGameButtonBounds.y && y <= window.exitGameButtonBounds.y + window.exitGameButtonBounds.height) {
+                    resetToMenu();
+                    return;
+                }
+                personaggio.jump(); 
+            }
         }
 
         // --- INIT ---
