@@ -22,21 +22,31 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#f0f0f0">
     
-    <link rel="manifest" href='data:application/manifest+json,%7B%22name%22%3A%22Corri%22%2C%22short_name%22%3A%22Corri%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f0f0f0%22%2C%22theme_color%22%3A%22%23f0f0f0%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A//github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png%3Fraw%3Dtrue%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image/png%22%7D%2C%7B%22src%22%3A%22https%3A//github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png%3Fraw%3Dtrue%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image/png%22%7D%5D%7D' />
+    <link rel="manifest" href='data:application/manifest+json,%7B%22name%22%3A%22Corri%22%2C%22short_name%22%3A%22Corri%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f0f0f0%22%2C%22theme_color%22%3A%22%23f0f0f0%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A//github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png%3Fraw%3Dtrue%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image/png%22%7D%2C%7B%22src%22%3A%22https" rel="noopener noreferrer" target="_blank">https://github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png%3Fraw%3Dtrue%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image/png%22%7D%5D%7D' />
+    
     <style>
         body { margin:0; padding:0; display:flex; justify-content:center; align-items:center; height:100vh; background:#f0f0f0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow:hidden; }
         canvas { cursor:pointer; width:100vw; height:100vh; display:block; touch-action: none; }
         #rotate-message { display:none; flex-direction:column; justify-content:center; align-items:center; width:100%; height:100%; background:#f0f0f0; text-align:center; font-size:1.2em; }
-        #rotate-message img { width:100px; height:100px; margin-bottom:20px; }
+        #rotate-message img {
+            width: 400px;
+            height: 400px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            border: 5px solid #3498db;
+            box-sizing: border-box;
+            box-shadow: 4px 4px 8px rgba(0,0,0,0.2);
+            border-radius: 4px;
+        }
         @media (orientation:portrait){ #gameCanvas{display:none;} #rotate-message{display:flex;} }
     </style>
 </head>
 <body>
 
   <canvas id="gameCanvas"></canvas>
+  
   <div id="rotate-message">
-    <img src="https://github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png?raw=true" alt="Runner Icon">
-    <h2 id="version-text-rotate"></h2>
+    <img id="rotate-image" src="https://github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png?raw=true" alt="Runner Icon">
     <p>Per favore, ruota il dispositivo<br>in orizzontale per giocare.</p>
   </div>
 
@@ -53,20 +63,26 @@
     // ====== CANVAS & STATE ======
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    document.getElementById('version-text-rotate').textContent = 'Corri';
     let lastTime = 0;
 
-    // ====== RUNNER IMAGE (menu) ======
+    // ====== IMMAGINI DEL MENU ======
     const runnerImage = new Image();
     runnerImage.src = 'https://github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png?raw=true';
-    let runnerLoaded = false;
-    runnerImage.onload = ()=> runnerLoaded = true;
-    runnerImage.onerror = ()=> runnerLoaded = false;
+    const runnerImage2 = new Image();
+    runnerImage2.src = 'https://github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner2.jpg?raw=true';
+    let isRunnerImage1 = true;
+    window.runnerImageBounds = {};
 
+    // Al caricamento dell'immagine, ridisegna il menu per un layout perfetto
+    runnerImage.onload = () => {
+        if (!hasStarted) {
+            drawDifficultyScreen();
+        }
+    };
+    
     // ====== GESTIONE AUDIO ======
     let audioCtx = null;
     let isMuted = false;
-
     const MP3_INFO_URL = "info.mp3";
     let infoAudio = null;
 
@@ -243,7 +259,7 @@
         this.drawName(); ctx.restore();
       },
       drawName(){
-        const boxWidth=80, boxHeight=25; const nameX=this.x, nameY=this.y-20, boxX=nameX - boxWidth/2, boxY=nameY - boxHeight;
+        const boxWidth=80, boxHeight=25; const nameX=this.x, nameY=this.y-20, boxX=nameX - boxWidth/2; const boxY=nameY - boxHeight;
         ctx.strokeStyle='black'; ctx.lineWidth=0.8; ctx.beginPath(); ctx.moveTo(nameX, this.y-12); ctx.lineTo(nameX, boxY+boxHeight); ctx.stroke();
         ctx.fillStyle='rgba(255,255,255,0.95)'; ctx.strokeStyle='black'; ctx.lineWidth=1; ctx.fillRect(boxX, boxY, boxWidth, boxHeight); ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
         ctx.fillStyle='black'; ctx.font='16px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('Leon', nameX, boxY+boxHeight/2);
@@ -378,31 +394,68 @@
       difficultyButtons.length=0; Object.values(difficulties).forEach(level=>difficultyButtons.push({level}));
       difficultyButtons.push({level:{name:'Demo'},type:'demo'}); difficultyButtons.push({level:{name:'Cast'},type:'cast'}); difficultyButtons.push({level:{name:'Info'},type:'info'});
     }
-    function drawDifficultyScreen(){
-        const vw=window.innerWidth,vh=window.innerHeight; ctx.fillStyle='#e0e0e0'; ctx.fillRect(0,0,vw,vh);
-        const fontSize=Math.max(18,Math.min(22,vw*0.04)); ctx.font=`bold ${fontSize}px sans-serif`;
-        difficultyButtons.forEach(btn=>{const tm=ctx.measureText(btn.level.name);const padX=fontSize*2.5,padY=fontSize*0.8;btn.width=tm.width+padX*2;btn.height=fontSize+padY*2;});
-        const maxRowW=difficultyButtons.slice(0,3).reduce((s,b)=>s+b.width,0)+40; const perRow=(maxRowW<vw*0.9)?3:2;
-        const rows=[]; for(let i=0;i<difficultyButtons.length;i+=perRow){rows.push(difficultyButtons.slice(i,i+perRow));}
-        const rowSpacing=20; const totalButtonHeight=rows.length*difficultyButtons[0].height+(rows.length-1)*rowSpacing;
-        const bottomPadding=40; const spaceBetweenImgAndButtons=20; const gridTopY=vh-bottomPadding-totalButtonHeight; const imageAreaHeight=gridTopY-spaceBetweenImgAndButtons;
-        let imgSize=Math.min(160,Math.max(96,vw*0.18)); imgSize=Math.min(imgSize,imageAreaHeight*0.9,160);
-        const imgX=(vw-imgSize)/2; const imgY=(imageAreaHeight-imgSize)/2;
-        if(runnerLoaded){ctx.drawImage(runnerImage,imgX,imgY,imgSize,imgSize);}else{ctx.fillStyle='#d0d0d0';ctx.beginPath();ctx.arc(imgX+imgSize/2,imgY+imgSize/2,imgSize/2,0,Math.PI*2);ctx.fill();}
-        let currentY=gridTopY;
-        rows.forEach(row=>{
-            const rowW=row.reduce((s,b)=>s+b.width,0)+(row.length-1)*20; let currentX=(vw-rowW)/2;
-            row.forEach(btn=>{
-                btn.x=currentX; btn.y=currentY; const mainColor='#3498db'; const edgeColor='#2980b9'; const edgeHeight=4;
-                ctx.save(); ctx.shadowColor='rgba(0,0,0,0.3)'; ctx.shadowBlur=8; ctx.shadowOffsetX=4; ctx.shadowOffsetY=4;
-                ctx.fillStyle=edgeColor; ctx.beginPath(); ctx.roundRect(currentX,currentY,btn.width,btn.height,12); ctx.fill();
-                ctx.restore(); ctx.fillStyle=mainColor; ctx.beginPath(); ctx.roundRect(currentX,currentY,btn.width,btn.height-edgeHeight,12); ctx.fill();
-                ctx.fillStyle='white'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(btn.level.name,currentX+btn.width/2,currentY+(btn.height-edgeHeight)/2+1);
-                currentX+=btn.width+20;
-            });
-            currentY+=difficultyButtons[0].height+rowSpacing;
+    
+    function drawSingleButton(btn) {
+        const mainColor = '#3498db'; const edgeColor = '#2980b9'; const edgeHeight = 4;
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 8; ctx.shadowOffsetX = 4; ctx.shadowOffsetY = 4;
+        ctx.fillStyle = edgeColor; ctx.beginPath(); ctx.roundRect(btn.x, btn.y, btn.width, btn.height, 12); ctx.fill();
+        ctx.restore();
+        ctx.fillStyle = mainColor; ctx.beginPath(); ctx.roundRect(btn.x, btn.y, btn.width, btn.height - edgeHeight, 12); ctx.fill();
+        ctx.fillStyle = 'white'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(btn.level.name, btn.x + btn.width / 2, btn.y + (btn.height - edgeHeight) / 2 + 1);
+    }
+
+    // ========== MODIFIED FUNCTION drawDifficultyScreen (FINAL) ==========
+    function drawDifficultyScreen() {
+        const vw = window.innerWidth, vh = window.innerHeight;
+        ctx.fillStyle = '#e0e0e0';
+        ctx.fillRect(0, 0, vw, vh);
+
+        // --- Layout Unico e Fluido ---
+        const imgSize = Math.min(vh * 0.7, vw * 0.35, 400); 
+        const imgX = (vw - imgSize) / 2;
+        const imgY = (vh - imgSize) / 2;
+        
+        const imageToDraw = isRunnerImage1 ? runnerImage : runnerImage2;
+        ctx.drawImage(imageToDraw, imgX, imgY, imgSize, imgSize);
+        ctx.strokeStyle = '#3498db'; ctx.lineWidth = 5; ctx.strokeRect(imgX, imgY, imgSize, imgSize);
+        window.runnerImageBounds = { x: imgX, y: imgY, width: imgSize, height: imgSize };
+        
+        const spacing = vh * 0.03;
+        const buttonHeight = (imgSize - (2 * spacing)) / 3;
+        const fontSize = buttonHeight * 0.4;
+        ctx.font = `bold ${fontSize}px sans-serif`;
+
+        let maxWidth = 0;
+        difficultyButtons.forEach(btn => {
+            const tm = ctx.measureText(btn.level.name);
+            const padX = fontSize * 1.5;
+            const tempWidth = tm.width + padX * 2;
+            if (tempWidth > maxWidth) maxWidth = tempWidth;
+            btn.height = buttonHeight;
+        });
+        difficultyButtons.forEach(btn => { btn.width = maxWidth; });
+
+        const leftButtons = difficultyButtons.slice(0, 3);
+        const rightButtons = difficultyButtons.slice(3, 6);
+        
+        const leftColumnX = imgX - maxWidth - (vw * 0.02);
+        const rightColumnX = imgX + imgSize + (vw * 0.02);
+
+        leftButtons.forEach((btn, index) => {
+            btn.x = leftColumnX;
+            btn.y = imgY + (index * (buttonHeight + spacing));
+            drawSingleButton(btn);
+        });
+        
+        rightButtons.forEach((btn, index) => {
+            btn.x = rightColumnX;
+            btn.y = imgY + (index * (buttonHeight + spacing));
+            drawSingleButton(btn);
         });
     }
+    
     function drawCastScreen(){
       const vw=window.innerWidth,vh=window.innerHeight; ctx.fillStyle='#E6F3FF'; ctx.fillRect(0,0,vw,vh);
       const titleFS=Math.max(24,vw*0.05); ctx.fillStyle='#333'; ctx.font=`bold ${titleFS}px sans-serif`; ctx.textAlign='center'; ctx.fillText('Cast',vw/2,60);
@@ -483,6 +536,10 @@
         return;
       }
       if(!hasStarted){
+        if (window.runnerImageBounds && x > window.runnerImageBounds.x && x < window.runnerImageBounds.x + window.runnerImageBounds.width && y > window.runnerImageBounds.y && y < window.runnerImageBounds.y + window.runnerImageBounds.height) {
+            isRunnerImage1 = !isRunnerImage1;
+            return;
+        }
         const btn=difficultyButtons.find(b=>x>b.x&&x<b.x+b.width&&y>b.y&&y<b.y+b.height);
         if(btn){if(btn.type==='demo'){isDemoMode=true;demoDayCount=0;currentDifficulty=difficulties.facile;startGame();}else if(btn.type==='info'){showInfoScreen=true;window.infoScrollY=0;playInfoAudio();}else if(btn.type==='cast'){showCastScreen=true;window.castScrollY=0;}else{isDemoMode=false;currentDifficulty=btn.level;startGame();}}
       }else if(!isAlive){startGame();}
@@ -532,6 +589,14 @@
       GROUND_Y=vh-50;personaggio.x=vw*0.15;leon.y=GROUND_Y;
       initLandscape();setupDifficultyButtons();
     }
+    
+    // Gestione click su immagine in modalità portrait
+    const rotateImage = document.getElementById('rotate-image');
+    document.getElementById('rotate-message').addEventListener('click', () => {
+        isRunnerImage1 = !isRunnerImage1;
+        rotateImage.src = isRunnerImage1 ? runnerImage.src : runnerImage2.src;
+    });
+
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
     requestAnimationFrame(gameLoop);
