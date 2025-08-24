@@ -54,8 +54,13 @@
     runnerImage.onload = ()=> runnerLoaded = true;
     runnerImage.onerror = ()=> runnerLoaded = false;
 
-    // ====== GESTIONE AUDIO (SENZA FILE MP3) ======
+    // ====== GESTIONE AUDIO ======
     let audioCtx = null;
+    let isMuted = false;
+
+    // Logica per info.mp3 ripristinata
+    const MP3_INFO_URL = "info.mp3";
+    let infoAudio = null;
 
     function unlockAudio() {
         if (audioCtx) return;
@@ -65,9 +70,19 @@
             console.error("Web Audio API non è supportata in questo browser.");
         }
     }
-
+    
+    // Suono per la schermata Info
+    function playInfoAudio(){
+      if (!MP3_INFO_URL) return;
+      if (!infoAudio) { infoAudio = new Audio(MP3_INFO_URL); infoAudio.preload='auto'; infoAudio.volume=0.6; }
+      if (isMuted) return;
+      infoAudio.currentTime=0; infoAudio.play().catch(()=>{});
+    }
+    function stopInfoAudio(){ if (infoAudio){ infoAudio.pause(); infoAudio.currentTime=0; } }
+    
+    // Suoni di gioco generati
     function playBeep(config) {
-        if (!audioCtx) return;
+        if (!audioCtx || isMuted) return;
         const oscillator = audioCtx.createOscillator();
         const gainNode = audioCtx.createGain();
         const volume = config.volume || 0.1;
@@ -273,7 +288,7 @@
     }
     
     // ====== LOGICA GIOCO (OSTACOLI, TIFOSI...) ======
-    let obstacles = [];
+    let obstacles=[];
     function calculateNextObstacleTime(){ const {minObstacleInterval,maxObstacleInterval}=currentDifficulty; nextObstacleTime=totalTime+(Math.random()*(maxObstacleInterval-minObstacleInterval)+minObstacleInterval); }
     function generateObstacle(){ const vw=window.innerWidth; const r=Math.random(); let o={x:vw,width:20,height:40,y:0,type:'ground'}; if(r<0.7){o.height=25;o.width=25;o.y=GROUND_Y-o.height;}else{o.height=50;o.y=GROUND_Y-o.height;} obstacles.push(o); }
     function updateObstacles(dt){
@@ -332,14 +347,23 @@
       const scoreText=`${formatTime(score)}`; const hiText=`${levelIndicator} ${formatTime(highscore)}`;
       ctx.font='22px sans-serif'; const sm=ctx.measureText(scoreText),hm=ctx.measureText(hiText);
       const scoreBW=sm.width+20,hiBW=hm.width+20,bH=35; const exitSize=35,exitX=(vw-exitSize)/2,exitY=50;
+      
       ctx.fillStyle='#ff4444'; ctx.beginPath(); ctx.roundRect(exitX,exitY,exitSize,exitSize,8); ctx.fill();
       ctx.strokeStyle='white'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(exitX+10,exitY+10); ctx.lineTo(exitX+25,exitY+25); ctx.moveTo(exitX+25,exitY+10); ctx.lineTo(exitX+10,exitY+25); ctx.stroke();
       window.exitGameButtonBounds={x:exitX,y:exitY,width:exitSize,height:exitSize};
+
+      const muteButtonSize=35; const muteButtonX=exitX+exitSize+15; const muteButtonY=50;
+      window.muteButtonBounds={x:muteButtonX,y:muteButtonY,width:muteButtonSize,height:muteButtonSize};
+      ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.roundRect(muteButtonX,muteButtonY,muteButtonSize,muteButtonSize,8); ctx.fill();
+      ctx.font='24px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      const speakerIcon=isMuted?'🔇':'🔊';
+      ctx.fillText(speakerIcon,muteButtonX+muteButtonSize/2,muteButtonY+muteButtonSize/2+1);
+
       const hiBX=vw-hiBW-50; const scoreBX=hiBX-scoreBW-15; const bY=50;
       ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.roundRect(scoreBX,bY,scoreBW,bH,8); ctx.fill();
-      ctx.fillStyle='black'; ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.fillText(scoreText,scoreBX+10,bY+bH/2+1);
+      ctx.fillStyle='black'; ctx.font='22px sans-serif'; ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.fillText(scoreText,scoreBX+10,bY+bH/2+1);
       ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.roundRect(hiBX,bY,hiBW,bH,8); ctx.fill();
-      ctx.fillStyle='black'; ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.fillText(hiText,hiBX+10,bY+bH/2+1);
+      ctx.fillStyle='black'; ctx.fillText(hiText,hiBX+10,bY+bH/2+1);
     }
     function showGameOverOverlay(){
       const vw=window.innerWidth,vh=window.innerHeight; ctx.fillStyle='rgba(255,255,224,0.7)'; ctx.fillRect(0,0,vw,vh);
@@ -415,7 +439,7 @@
 
     // ====== CONTROLLO GIOCO & MAIN LOOP ======
     function startGame(){ isAlive=true; hasStarted=true; score=0; gameSpeed=currentDifficulty.initialSpeed; obstacles=[]; signs=[]; spectators=[]; currentSignIndex=0; currentSpectatorIndex=0; personaggio.y=GROUND_Y; personaggio.velocityY=0; leon.x=personaggio.x-30; leon.y=GROUND_Y; leon.direction=1; leon.animationTime=0; leon.movementPhase='forward'; totalTime=0; lastTime=0; lives=INITIAL_LIVES; isInvincible=false; timeOfDay=0; if(!isDemoMode)demoDayCount=0; initLandscape(); calculateNextObstacleTime(); nextSignTime=0.5+Math.random()*2.5; nextSpectatorTime=5+Math.random()*3; }
-    function resetToMenu(){ hasStarted=false; isAlive=false; isDemoMode=false; showInfoScreen=false; showCastScreen=false; score=0; obstacles=[]; spectators=[]; personaggio.y=GROUND_Y; personaggio.velocityY=0; window.infoScrollY=0; window.castScrollY=0; setupDifficultyButtons(); }
+    function resetToMenu(){ hasStarted=false; isAlive=false; isDemoMode=false; showInfoScreen=false; showCastScreen=false; score=0; obstacles=[]; spectators=[]; personaggio.y=GROUND_Y; personaggio.velocityY=0; window.infoScrollY=0; window.castScrollY=0; stopInfoAudio(); setupDifficultyButtons(); }
     function autopilot(){ const o=obstacles.find(obs=>obs.x+obs.width>personaggio.x); if(!o)return; const d=o.x-(personaggio.x+personaggio.width); const reactDist=gameSpeed*0.45; if(d>0&&d<reactDist)personaggio.jump(); }
     function gameLoop(ts){
       if(!lastTime){lastTime=ts;requestAnimationFrame(gameLoop);return;}
@@ -449,16 +473,20 @@
       unlockAudio();
       const r=canvas.getBoundingClientRect(); const x=(e.clientX||(e.touches&&e.touches[0].clientX)||0)-r.left; const y=(e.clientY||(e.touches&&e.touches[0].clientY)||0)-r.top;
       if(showInfoScreen||showCastScreen){
-        if(window.closeButtonBounds&&x>window.closeButtonBounds.x&&x<window.closeButtonBounds.x+window.closeButtonBounds.width&&y>window.closeButtonBounds.y&&y<window.closeButtonBounds.y+window.closeButtonBounds.height){showInfoScreen=false;showCastScreen=false;return;}
+        if(window.closeButtonBounds&&x>window.closeButtonBounds.x&&x<window.closeButtonBounds.x+window.closeButtonBounds.width&&y>window.closeButtonBounds.y&&y<window.closeButtonBounds.y+window.closeButtonBounds.height){showInfoScreen=false;showCastScreen=false;stopInfoAudio();return;}
         if(showInfoScreen&&window.infoScrollBar&&x>window.infoScrollBar.x&&x<window.infoScrollBar.x+window.infoScrollBar.width&&y>window.infoScrollBar.y&&y<window.infoScrollBar.y+window.infoScrollBar.height){const rel=(y-window.infoScrollBar.y)/window.infoScrollBar.height;window.infoScrollY=Math.max(0,Math.min(window.infoScrollBar.maxScrollY,rel*window.infoScrollBar.maxScrollY));return;}
         if(showCastScreen&&window.castScrollBar&&x>window.castScrollBar.x&&x<window.castScrollBar.x+window.castScrollBar.width&&y>window.castScrollBar.y&&y<window.castScrollBar.y+window.castScrollBar.height){const rel=(y-window.castScrollBar.y)/window.castScrollBar.height;window.castScrollY=Math.max(0,Math.min(window.castScrollBar.maxScrollY,rel*window.castScrollBar.maxScrollY));return;}
         return;
       }
       if(!hasStarted){
         const btn=difficultyButtons.find(b=>x>b.x&&x<b.x+b.width&&y>b.y&&y<b.y+b.height);
-        if(btn){if(btn.type==='demo'){isDemoMode=true;demoDayCount=0;currentDifficulty=difficulties.facile;startGame();}else if(btn.type==='info'){showInfoScreen=true;window.infoScrollY=0;}else if(btn.type==='cast'){showCastScreen=true;window.castScrollY=0;}else{isDemoMode=false;currentDifficulty=btn.level;startGame();}}
+        if(btn){if(btn.type==='demo'){isDemoMode=true;demoDayCount=0;currentDifficulty=difficulties.facile;startGame();}else if(btn.type==='info'){showInfoScreen=true;window.infoScrollY=0;playInfoAudio();}else if(btn.type==='cast'){showCastScreen=true;window.castScrollY=0;}else{isDemoMode=false;currentDifficulty=btn.level;startGame();}}
       }else if(!isAlive){startGame();}
-      else{if(window.exitGameButtonBounds&&x>window.exitGameButtonBounds.x&&x<window.exitGameButtonBounds.x+window.exitGameButtonBounds.width&&y>window.exitGameButtonBounds.y&&y<window.exitGameButtonBounds.y+window.exitGameButtonBounds.height){resetToMenu();return;} personaggio.jump();}
+      else{
+          if(window.exitGameButtonBounds&&x>window.exitGameButtonBounds.x&&x<window.exitGameButtonBounds.x+window.exitGameButtonBounds.width&&y>window.exitGameButtonBounds.y&&y<window.exitGameButtonBounds.y+window.exitGameButtonBounds.height){resetToMenu();return;}
+          if(window.muteButtonBounds&&x>window.muteButtonBounds.x&&x<window.muteButtonBounds.x+window.muteButtonBounds.width&&y>window.muteButtonBounds.y&&y<window.muteButtonBounds.y+window.muteButtonBounds.height){isMuted=!isMuted; if (isMuted) stopInfoAudio(); return;}
+          personaggio.jump();
+      }
     }
     
     let tapStart=null;
