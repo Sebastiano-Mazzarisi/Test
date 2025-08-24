@@ -1,26 +1,35 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-  <title>Corri</title>
-  <meta name="theme-color" content="#f0f0f0">
-  <style>
-    body {
-      margin:0; padding:0;
-      display:flex; justify-content:center; align-items:center;
-      height:100vh; background:#f0f0f0;
-      font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      overflow:hidden;
-    }
-    canvas {
-      cursor:pointer; width:100vw; height:100vh; display:block;
-      touch-action: none;
-    }
-    #rotate-message { display:none; flex-direction:column; justify-content:center; align-items:center; width:100%; height:100%; background:#f0f0f0; text-align:center; font-size:1.2em; }
-    #rotate-message img { width:100px; height:100px; margin-bottom:20px; }
-    @media (orientation:portrait){ #gameCanvas{display:none;} #rotate-message{display:flex;} }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+    <title>Corri</title>
+
+    <meta property="og:title" content="Corri">
+    <meta property="og:description" content="Corri - Un gioco endless runner creato con HTML e JavaScript.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sebastiano-mazzarisi.github.io/Test/Corri.html">
+    <meta property="og:image" content="https://github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png?raw=true">
+    <meta property="og:image:width" content="192">
+    <meta property="og:image:height" content="192">
+    
+    <link rel="icon" href="https://github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png?raw=true">
+    <link rel="apple-touch-icon" href="https://github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png?raw=true">
+
+    <meta name="apple-mobile-web-app-title" content="Corri">
+    <meta name="application-name" content="Corri">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#f0f0f0">
+    
+    <link rel="manifest" href='data:application/manifest+json,%7B%22name%22%3A%22Corri%22%2C%22short_name%22%3A%22Corri%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f0f0f0%22%2C%22theme_color%22%3A%22%23f0f0f0%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A//github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png%3Fraw%3Dtrue%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image/png%22%7D%2C%7B%22src%22%3A%22https%3A//github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png%3Fraw%3Dtrue%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image/png%22%7D%5D%7D' />
+    <style>
+        body { margin:0; padding:0; display:flex; justify-content:center; align-items:center; height:100vh; background:#f0f0f0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow:hidden; }
+        canvas { cursor:pointer; width:100vw; height:100vh; display:block; touch-action: none; }
+        #rotate-message { display:none; flex-direction:column; justify-content:center; align-items:center; width:100%; height:100%; background:#f0f0f0; text-align:center; font-size:1.2em; }
+        #rotate-message img { width:100px; height:100px; margin-bottom:20px; }
+        @media (orientation:portrait){ #gameCanvas{display:none;} #rotate-message{display:flex;} }
+    </style>
 </head>
 <body>
 
@@ -58,7 +67,6 @@
     let audioCtx = null;
     let isMuted = false;
 
-    // Logica per info.mp3 ripristinata
     const MP3_INFO_URL = "info.mp3";
     let infoAudio = null;
 
@@ -66,12 +74,9 @@
         if (audioCtx) return;
         try {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        } catch (e) {
-            console.error("Web Audio API non è supportata in questo browser.");
-        }
+        } catch (e) { console.error("Web Audio API non è supportata in questo browser."); }
     }
     
-    // Suono per la schermata Info
     function playInfoAudio(){
       if (!MP3_INFO_URL) return;
       if (!infoAudio) { infoAudio = new Audio(MP3_INFO_URL); infoAudio.preload='auto'; infoAudio.volume=0.6; }
@@ -80,7 +85,6 @@
     }
     function stopInfoAudio(){ if (infoAudio){ infoAudio.pause(); infoAudio.currentTime=0; } }
     
-    // Suoni di gioco generati
     function playBeep(config) {
         if (!audioCtx || isMuted) return;
         const oscillator = audioCtx.createOscillator();
@@ -484,7 +488,7 @@
       }else if(!isAlive){startGame();}
       else{
           if(window.exitGameButtonBounds&&x>window.exitGameButtonBounds.x&&x<window.exitGameButtonBounds.x+window.exitGameButtonBounds.width&&y>window.exitGameButtonBounds.y&&y<window.exitGameButtonBounds.y+window.exitGameButtonBounds.height){resetToMenu();return;}
-          if(window.muteButtonBounds&&x>window.muteButtonBounds.x&&x<window.muteButtonBounds.x+window.muteButtonBounds.width&&y>window.muteButtonBounds.y&&y<window.muteButtonBounds.y+window.muteButtonBounds.height){isMuted=!isMuted; if (isMuted) stopInfoAudio(); return;}
+          if(window.muteButtonBounds&&x>window.muteButtonBounds.x&&x<window.muteButtonBounds.x+window.muteButtonBounds.width&&y>window.muteButtonBounds.y&&y<window.muteButtonBounds.y+window.muteButtonBounds.height){isMuted=!isMuted; if(isMuted) stopInfoAudio(); return;}
           personaggio.jump();
       }
     }
