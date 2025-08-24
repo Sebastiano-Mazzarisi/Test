@@ -6,8 +6,18 @@
   <title>Corri</title>
   <meta name="theme-color" content="#f0f0f0">
   <style>
-    body { margin:0; padding:0; display:flex; justify-content:center; align-items:center; height:100vh; background:#f0f0f0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow:hidden; }
-    canvas { cursor:pointer; width:100vw; height:100vh; display:block; touch-action: none; }
+    body {
+      margin:0; padding:0;
+      display:flex; justify-content:center; align-items:center;
+      height:100vh; background:#f0f0f0;
+      font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow:hidden; /* full-screen canvas, nessun scroll pagina */
+    }
+    canvas {
+      cursor:pointer; width:100vw; height:100vh; display:block;
+      /* Scroll interno a Info/Cast gestito via JS: teniamo none */
+      touch-action: none;
+    }
     #rotate-message { display:none; flex-direction:column; justify-content:center; align-items:center; width:100%; height:100%; background:#f0f0f0; text-align:center; font-size:1.2em; }
     #rotate-message img { width:100px; height:100px; margin-bottom:20px; }
     @media (orientation:portrait){ #gameCanvas{display:none;} #rotate-message{display:flex;} }
@@ -23,7 +33,7 @@
   </div>
 
   <script>
-    // ====== Polyfill roundRect (per evitare crash in alcuni browser) ======
+    // ====== Polyfill roundRect ======
     if (!CanvasRenderingContext2D.prototype.roundRect) {
       CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
         const rr = Array.isArray(r) ? r : [r,r,r,r].map(v => v||0);
@@ -38,7 +48,6 @@
         this.quadraticCurveTo(x, y + h, x, y + h - r4);
         this.lineTo(x, y + r1);
         this.quadraticCurveTo(x, y, x + r1, y);
-        // non chiudo per permettere fill/stroke separati, come API reali
       };
     }
 
@@ -48,7 +57,7 @@
     document.getElementById('version-text-rotate').textContent = 'Corri';
     let lastTime = 0;
 
-    // ====== RUNNER IMAGE (per il menu) ======
+    // ====== RUNNER IMAGE (menu) ======
     const runnerImage = new Image();
     runnerImage.src = 'https://github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png?raw=true';
     let runnerLoaded = false;
@@ -59,7 +68,6 @@
     const MP3_JUMP_URL = "jump.mp3";
     const MP3_FAIL_URL = "fail.mp3";
     const MP3_INFO_URL = "info.mp3";
-
     const jumpSound = new Audio(MP3_JUMP_URL);
     const failSound = new Audio(MP3_FAIL_URL);
     let infoAudio = null;
@@ -93,7 +101,6 @@
     const PLAYER_NAME = "Andrea";
     const SIGN_TEXTS = ['Bari','Altamura','Trento','Ferrara','Roma','Napoli'];
     const SPECTATOR_NAMES = ['Pierluigi','Miriam','Mariasofia','Rino','Anna','Maria','Angelo','Mauro','Diletta','Sara','Pietro','Thomas','Alessio','Luigi'];
-
     const difficulties = {
       facile:    { name: 'Facile',    initialSpeed: 220, speedIncrement:  4, minObstacleInterval: 1.6, maxObstacleInterval: 3.0 },
       medio:     { name: 'Medio',     initialSpeed: 370, speedIncrement: 10, minObstacleInterval: 1.3, maxObstacleInterval: 2.4 },
@@ -109,14 +116,14 @@
 
     const INITIAL_LIVES = 3;
     let lives = INITIAL_LIVES;
-    let isInvincible = false, invincibilityTimer = 0, screenFlashTimer = 0;
+    let isInvincible = false, invincibilityTimer = 0;
 
     const difficultyButtons = [];
     let currentDifficulty = {};
     let showInfoScreen = false;
     let showCastScreen = false;
 
-    // Scroll state per Info & Cast (anche touch)
+    // Scroll state Info/Cast (touch incluso)
     window.infoScrollY = 0;
     window.castScrollY = 0;
     window.infoScrollBar = null;
@@ -143,20 +150,14 @@
         const runCycle = Math.floor(totalTime*15) % 2;
         const legAngle = runCycle === 0 ? Math.PI/10 : -Math.PI/10;
         const armAngle = runCycle === 0 ? -Math.PI/8 : Math.PI/8;
-
-        // Corpo
         ctx.fillStyle='#333'; ctx.beginPath(); ctx.roundRect(this.x+5, this.y-45, 20, 30, 5); ctx.fill();
-        // Testa
         ctx.fillStyle='#FFD700'; ctx.beginPath(); ctx.arc(this.x+this.width/2, this.y-50, 10, 0, Math.PI*2); ctx.fill();
-        // Braccia
         ctx.strokeStyle='#333'; ctx.lineWidth=4; ctx.lineCap='round';
         ctx.save(); ctx.translate(this.x+5, this.y-40); ctx.rotate(armAngle); ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,20); ctx.stroke(); ctx.restore();
         ctx.save(); ctx.translate(this.x+25, this.y-40); ctx.rotate(-armAngle); ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,20); ctx.stroke(); ctx.restore();
-        // Gambe
         ctx.strokeStyle='#333'; ctx.lineWidth=5;
         ctx.save(); ctx.translate(this.x+10, this.y-15); ctx.rotate(legAngle); ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,15); ctx.stroke(); ctx.restore();
         ctx.save(); ctx.translate(this.x+20, this.y-15); ctx.rotate(-legAngle); ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,15); ctx.stroke(); ctx.restore();
-
         ctx.restore();
         this.drawName();
       },
@@ -166,7 +167,6 @@
         const lineY = this.y - this.height - 10;
         const boxX = lineX - boxWidth/2;
         const boxY = lineY - offsetLineY - boxHeight;
-
         ctx.beginPath(); ctx.moveTo(lineX, lineY); ctx.lineTo(lineX, boxY + boxHeight); ctx.strokeStyle='black'; ctx.stroke();
         ctx.fillStyle='white'; ctx.strokeStyle='black';
         ctx.fillRect(boxX, boxY, boxWidth, boxHeight); ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
@@ -205,25 +205,19 @@
       draw(){
         ctx.save();
         ctx.fillStyle='#FFF'; ctx.strokeStyle='#CCC'; ctx.lineWidth=1;
-        // Corpo
         ctx.beginPath(); ctx.ellipse(this.x, this.y-6, 10, 5, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-        // Testa
         ctx.beginPath(); ctx.arc(this.x + (this.direction*6), this.y-8, 4, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-        // Nasino
         ctx.fillStyle='#FFB6C1'; ctx.beginPath(); ctx.arc(this.x + (this.direction*8), this.y-8, 1.5, 0, Math.PI*2); ctx.fill();
-        // Orecchie/occhio
         ctx.fillStyle='#F0F0F0'; ctx.strokeStyle='#CCC'; ctx.lineWidth=0.5;
         ctx.beginPath(); ctx.ellipse(this.x + (this.direction*4), this.y-10, 2, 3, this.direction*0.3, 0, Math.PI*2); ctx.fill(); ctx.stroke();
         ctx.beginPath(); ctx.ellipse(this.x + (this.direction*7), this.y-10, 2, 3, this.direction*-0.2, 0, Math.PI*2); ctx.fill(); ctx.stroke();
         ctx.fillStyle='#000'; ctx.beginPath(); ctx.arc(this.x + (this.direction*7), this.y-9, 0.8, 0, Math.PI*2); ctx.fill();
-        // Zampette animate
         const speedMultiplier = Math.abs(this.velocityX)/this.baseSpeed;
         const legAnimation = Math.sin(this.animationTime*(1.5+speedMultiplier))*2;
         ctx.fillStyle='#FFF'; ctx.strokeStyle='#CCC'; ctx.lineWidth=0.5;
         [{x:this.x-6, offset:legAnimation},{x:this.x-2, offset:-legAnimation},{x:this.x+2, offset:legAnimation},{x:this.x+6, offset:-legAnimation}].forEach(leg=>{
           ctx.beginPath(); ctx.arc(leg.x, this.y-2+leg.offset, 1, 0, Math.PI*2); ctx.fill(); ctx.stroke();
         });
-        // Coda
         const tailSpeed=3 + (Math.abs(this.velocityX)/this.baseSpeed);
         const tailWag=Math.sin(this.animationTime*tailSpeed)*6;
         let tailDir = (this.movementPhase==='forward') ? -1 : 1;
@@ -231,7 +225,6 @@
         const tbx=this.x-(tailDir*8), tby=this.y-6, tex=tbx-(tailDir*8)+tailWag, tey=tby-4;
         ctx.beginPath(); ctx.moveTo(tbx,tby); ctx.quadraticCurveTo(tbx-(tailDir*4), tby-2, tex, tey); ctx.stroke();
         ctx.beginPath(); ctx.arc(tex,tey,1.5,0,Math.PI*2); ctx.fill();
-
         this.drawName();
         ctx.restore();
       },
@@ -265,31 +258,16 @@
     function drawSky(simHour){
       const vw=window.innerWidth, vh=window.innerHeight;
       ctx.fillStyle=getSkyColor(simHour); ctx.fillRect(0,0,vw,vh);
-      if (simHour>6 && simHour<18 && !isRaining){
-        const p=(simHour-6)/12, a=p*Math.PI, x=p*vw, y=GROUND_Y - Math.sin(a)*(vh*0.7);
-        ctx.fillStyle='rgba(255,255,0,0.8)'; ctx.beginPath(); ctx.arc(x,y,20,0,Math.PI*2); ctx.fill();
-      }
-      if (simHour>18 || simHour<6 || isRaining){
-        const p = (simHour>18) ? (simHour-18)/12 : (simHour+6)/12;
-        const a=p*Math.PI, x=p*vw, y=GROUND_Y - Math.sin(a)*(vh*0.6);
-        const nightIntensity = 1 - (Math.abs(simHour-12)/12);
-        ctx.fillStyle='rgba(240,240,240,0.8)'; ctx.beginPath(); ctx.arc(x,y,15,0,Math.PI*2); ctx.fill();
-        ctx.fillStyle=getSkyColor(simHour); ctx.beginPath(); ctx.arc(x-5,y-5,14,0,Math.PI*2); ctx.fill();
-        stars.forEach(s=>{ ctx.fillStyle=`rgba(255,255,255,${nightIntensity*(0.7+Math.random()*0.3)})`; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,2*Math.PI); ctx.fill(); });
-      }
     }
     function initLandscape(){
       const vw=window.innerWidth, vh=window.innerHeight;
       landscapeLayers=[]; mountains=[]; stars=[]; clouds=[]; signs=[]; spectators=[];
       const RENDER_WIDTH = vw*4;
-
       for(let i=0;i<150;i++) stars.push({x:Math.random()*vw, y:Math.random()*vh*0.6, r:Math.random()*1.8});
       for(let i=0;i<15;i++) clouds.push({x:Math.random()*vw, y:Math.random()*vh*0.3, r:20+Math.random()*20, speed:5+Math.random()*5});
-
       let mPoints=[];
       for(let x=-RENDER_WIDTH; x<=RENDER_WIDTH*2; x+=100){ mPoints.push({x:x, y:GROUND_Y-150-Math.random()*50}); }
       mountains.push({points:mPoints, color:'#A0A0A0', speedMultiplier:0.1, offsetX:0});
-
       let p3=[]; for(let x=-RENDER_WIDTH; x<=RENDER_WIDTH*2; x+=60){ p3.push({x:x, y:GROUND_Y-15-Math.random()*25}); }
       const obj3=[];
       const types=['house','sheep','tree','horse','tractor','car'];
@@ -328,104 +306,62 @@
     function drawLandscapeObject(obj, offsetX, simHour){
       const x=obj.x+offsetX, y=obj.y;
       const isNight = simHour>19 || simHour<6;
-      switch(obj.type){
-        case 'house':
-          if (isNight) return;
-          if (!obj.details.width) obj.details={width:40+Math.random()*20, height:30+Math.random()*15, color:`hsl(${Math.random()*30+10},40%,70%)`, roofColor:`hsl(${Math.random()*20+5},50%,45%)`};
-          const h=obj.details;
-          ctx.fillStyle=h.color; ctx.fillRect(x-h.width/2, y-h.height, h.width, h.height);
-          ctx.fillStyle=h.roofColor; ctx.beginPath(); ctx.moveTo(x-h.width/2-5, y-h.height); ctx.lineTo(x+h.width/2+5, y-h.height); ctx.lineTo(x, y-h.height-20); ctx.closePath(); ctx.fill();
-          break;
-        case 'tree':
-          if (!obj.details.height) obj.details={height:20+Math.random()*30, radius:6+Math.random()*6};
-          const t=obj.details;
-          ctx.fillStyle='#8B4513'; ctx.fillRect(x-2, y-t.height, 4, t.height);
-          ctx.fillStyle=`hsl(120,60%,${25+Math.random()*10}%)`;
-          ctx.beginPath();
-          ctx.arc(x, y-t.height, t.radius, 0, Math.PI*2);
-          ctx.arc(x+t.radius/2, y-t.height-5, t.radius*0.8, 0, Math.PI*2);
-          ctx.arc(x-t.radius/2, y-t.height-5, t.radius*0.8, 0, Math.PI*2);
-          ctx.arc(x, y-t.height+3, t.radius*0.7, 0, Math.PI*2);
-          ctx.arc(x+t.radius/3, y-t.height-8, t.radius*0.6, 0, Math.PI*2);
-          ctx.arc(x-t.radius/3, y-t.height-8, t.radius*0.6, 0, Math.PI*2);
-          ctx.arc(x+t.radius*0.7, y-t.height+1, t.radius*0.5, 0, Math.PI*2);
-          ctx.arc(x-t.radius*0.7, y-t.height+1, t.radius*0.5, 0, Math.PI*2);
-          ctx.fill();
-          break;
-        case 'sheep':
-          if (isNight) return;
-          if (!obj.details.state) obj.details={state:'down', timer:Math.random()*3};
-          const s=obj.details;
-          ctx.fillStyle='#FFF'; ctx.beginPath();
-          ctx.arc(x, y-10, 6, 0, Math.PI*2); ctx.arc(x+5, y-12, 5, 0, Math.PI*2); ctx.arc(x-5, y-12, 5, 0, Math.PI*2); ctx.fill();
-          ctx.fillStyle='#333'; ctx.beginPath(); ctx.arc(x+10, s.state==='down'? y-8 : y-18, 4, 0, Math.PI*2); ctx.fill();
-          break;
-        case 'horse':
-          if (isNight) return;
-          if (!obj.details.state) obj.details={state:'down', timer:Math.random()*3, color:`hsl(30,50%,${20+Math.random()*15}%)`};
-          const p=obj.details;
-          ctx.fillStyle=p.color; ctx.beginPath(); ctx.ellipse(x, y-15, 12, 8, 0, 0, Math.PI*2); ctx.fill();
-          ctx.beginPath(); ctx.arc(x+15, p.state==='down'? y-15 : y-25, 5, 0, Math.PI*2); ctx.fill();
-          ctx.fillRect(x-10, y-10, 2, 10); ctx.fillRect(x+5, y-10, 2, 10);
-          break;
-        case 'tractor':
-          if (isNight) return;
-          ctx.fillStyle='red'; ctx.fillRect(x-15, y-20, 30, 15); ctx.fillRect(x, y-30, 10, 10);
-          ctx.fillStyle='black'; ctx.beginPath(); ctx.arc(x+10, y-8, 8, 0, Math.PI*2); ctx.arc(x-12, y-5, 4, 0, Math.PI*2); ctx.fill();
-          break;
-        case 'car':
-          if (isNight) return;
-          if (!obj.details.color) obj.details.color = `hsl(${180+Math.random()*60},50%,50%)`;
-          ctx.fillStyle=obj.details.color; ctx.fillRect(x-20, y-15, 40, 10);
-          if (ctx.roundRect){ ctx.beginPath(); ctx.roundRect(x-15, y-25, 30, 10, [5,5,0,0]); ctx.fill(); }
-          ctx.fillStyle='black'; ctx.beginPath(); ctx.arc(x-10, y-5, 4, 0, Math.PI*2); ctx.arc(x+10, y-5, 4, 0, Math.PI*2); ctx.fill();
-          break;
+      if (obj.type==='house' && !isNight){
+        if (!obj.details.width) obj.details={width:40+Math.random()*20, height:30+Math.random()*15, color:`hsl(${Math.random()*30+10},40%,70%)`, roofColor:`hsl(${Math.random()*20+5},50%,45%)`};
+        const h=obj.details; ctx.fillStyle=h.color; ctx.fillRect(x-h.width/2, y-h.height, h.width, h.height);
+        ctx.fillStyle=h.roofColor; ctx.beginPath(); ctx.moveTo(x-h.width/2-5, y-h.height); ctx.lineTo(x+h.width/2+5, y-h.height); ctx.lineTo(x, y-h.height-20); ctx.closePath(); ctx.fill();
+      }
+      if (obj.type==='tree'){
+        if (!obj.details.height) obj.details={height:20+Math.random()*30, radius:6+Math.random()*6};
+        const t=obj.details; ctx.fillStyle='#8B4513'; ctx.fillRect(x-2, y-t.height, 4, t.height);
+        ctx.fillStyle=`hsl(120,60%,${25+Math.random()*10}%)`;
+        ctx.beginPath();
+        ctx.arc(x, y-t.height, t.radius, 0, Math.PI*2);
+        ctx.arc(x+t.radius/2, y-t.height-5, t.radius*0.8, 0, Math.PI*2);
+        ctx.arc(x-t.radius/2, y-t.height-5, t.radius*0.8, 0, Math.PI*2);
+        ctx.arc(x, y-t.height+3, t.radius*0.7, 0, Math.PI*2);
+        ctx.arc(x+t.radius/3, y-t.height-8, t.radius*0.6, 0, Math.PI*2);
+        ctx.arc(x-t.radius/3, y-t.height-8, t.radius*0.6, 0, Math.PI*2);
+        ctx.arc(x+t.radius*0.7, y-t.height+1, t.radius*0.5, 0, Math.PI*2);
+        ctx.arc(x-t.radius*0.7, y-t.height+1, t.radius*0.5, 0, Math.PI*2);
+        ctx.fill();
+      }
+      if (obj.type==='sheep' && !isNight){
+        if (!obj.details.state) obj.details={state:'down', timer:Math.random()*3};
+        const s=obj.details; ctx.fillStyle='#FFF'; ctx.beginPath();
+        ctx.arc(x, y-10, 6, 0, Math.PI*2); ctx.arc(x+5, y-12, 5, 0, Math.PI*2); ctx.arc(x-5, y-12, 5, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle='#333'; ctx.beginPath(); ctx.arc(x+10, s.state==='down'? y-8 : y-18, 4, 0, Math.PI*2); ctx.fill();
+      }
+      if (obj.type==='horse' && !isNight){
+        if (!obj.details.state) obj.details={state:'down', timer:Math.random()*3, color:`hsl(30,50%,${20+Math.random()*15}%)`};
+        const p=obj.details; ctx.fillStyle=p.color; ctx.beginPath(); ctx.ellipse(x, y-15, 12, 8, 0, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x+15, p.state==='down'? y-15 : y-25, 5, 0, Math.PI*2); ctx.fill();
+        ctx.fillRect(x-10, y-10, 2, 10); ctx.fillRect(x+5, y-10, 2, 10);
+      }
+      if (obj.type==='tractor' && !isNight){
+        ctx.fillStyle='red'; ctx.fillRect(x-15, y-20, 30, 15); ctx.fillRect(x, y-30, 10, 10);
+        ctx.fillStyle='black'; ctx.beginPath(); ctx.arc(x+10, y-8, 8, 0, Math.PI*2); ctx.arc(x-12, y-5, 4, 0, Math.PI*2); ctx.fill();
+      }
+      if (obj.type==='car' && !isNight){
+        if (!obj.details.color) obj.details.color = `hsl(${180+Math.random()*60},50%,50%)`;
+        ctx.fillStyle=obj.details.color; ctx.fillRect(x-20, y-15, 40, 10);
+        if (ctx.roundRect){ ctx.beginPath(); ctx.roundRect(x-15, y-25, 30, 10, [5,5,0,0]); ctx.fill(); }
+        ctx.fillStyle='black'; ctx.beginPath(); ctx.arc(x-10, y-5, 4, 0, Math.PI*2); ctx.arc(x+10, y-5, 4, 0, Math.PI*2); ctx.fill();
       }
     }
-    function updateLandscape(dt){
-      const vw=window.innerWidth;
-      mountains.forEach(l=>{ l.offsetX -= gameSpeed*l.speedMultiplier*dt; if (l.offsetX < -vw*2) l.offsetX += vw*2; });
-      landscapeLayers.forEach(l=>{
-        l.offsetX -= gameSpeed*l.speedMultiplier*dt; if (l.offsetX < -vw*2) l.offsetX += vw*2;
-        l.objects.forEach(obj=>{
-          if ((obj.type==='sheep'||obj.type==='horse') && obj.details){
-            obj.details.timer -= dt;
-            if (obj.details.timer<=0){ obj.details.state = (obj.details.state==='down')? 'up':'down'; obj.details.timer = 1 + Math.random()*2; }
-          }
-        });
-      });
-    }
 
-    // ====== RAIN ======
+    // ====== PIOGGIA, OSTACOLI, PUBBLICO, CARTELLI ======
     function toggleRain(dt){
       timeToNextRain -= dt;
       if (!isRaining && timeToNextRain<=0){
-        isRaining=true; rainDuration = RAIN_DURATION_MIN + Math.random()*(RAIN_DURATION_MAX-RAIN_DURATION_MIN);
+        isRaining=true; rainDuration = 20 + Math.random()*10;
         rainIntensity = 0; rainParticles=[];
         const vw=window.innerWidth, vh=window.innerHeight;
         for(let i=0;i<300;i++){ rainParticles.push({x:Math.random()*vw, y:Math.random()*vh, length:5+Math.random()*10}); }
       }
-      if (isRaining){
-        rainDuration -= dt;
-        if (rainDuration<=0){ isRaining=false; timeToNextRain = 30 + Math.random()*60; }
-        rainIntensity = Math.min(1, rainIntensity + dt/5);
-      } else {
-        rainIntensity = Math.max(0, rainIntensity - dt/5);
-      }
+      if (isRaining){ rainDuration -= dt; if (rainDuration<=0){ isRaining=false; timeToNextRain = 30 + Math.random()*60; } rainIntensity = Math.min(1, rainIntensity + dt/5); }
+      else { rainIntensity = Math.max(0, rainIntensity - dt/5); }
     }
-    function drawRain(dt){
-      if (!isRaining && rainIntensity<=0) return;
-      const vw=window.innerWidth, vh=window.innerHeight;
-      ctx.strokeStyle = `rgba(173,216,230,${rainIntensity*0.7})`; ctx.lineWidth=1;
-      for(let i=0;i<rainParticles.length;i++){
-        const p=rainParticles[i];
-        p.x -= gameSpeed*dt*0.5; p.y += (gameSpeed*0.5 + 200)*dt;
-        if (p.y > vh) { p.y=0; p.x=Math.random()*vw; }
-        ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(p.x-2, p.y+p.length); ctx.stroke();
-      }
-    }
-
-    // ====== SIGNS & SPECTATORS ======
     function calculateNextSignTime(){ nextSignTime = totalTime + 10 + Math.random()*5; }
     function generateSign(){ signs.push({x:window.innerWidth+100, y:GROUND_Y, text:SIGN_TEXTS[currentSignIndex]}); currentSignIndex=(currentSignIndex+1)%SIGN_TEXTS.length; }
     function updateAndDrawSigns(dt){
@@ -447,14 +383,11 @@
       const name = SPECTATOR_NAMES[currentSpectatorIndex]; currentSpectatorIndex=(currentSpectatorIndex+1)%SPECTATOR_NAMES.length;
       spectators.push({x:window.innerWidth+50, y:GROUND_Y, name, side: (Math.random()<0.5?'left':'right'), signColor:'#FFD700', animationTime:0});
     }
-    function isNearSign(x){
-      for (let s of signs){ if (Math.abs(x-s.x) < 150) return true; } return false;
-    }
+    function isNearSign(x){ for (let s of signs){ if (Math.abs(x-s.x) < 150) return true; } return false; }
     function drawSpectator(sp, x, y, dt){
       const sx = sp.side==='left'? x-60 : x+60; const sy=y;
       if (isNearSign(sx)) return;
       sp.animationTime += dt*30;
-
       ctx.save();
       ctx.strokeStyle='black'; ctx.lineWidth=2; ctx.lineCap='round';
       const headR=6, headY=sy-40;
@@ -468,7 +401,6 @@
       ctx.beginPath(); ctx.moveTo(sx, torsoEndY); ctx.lineTo(sx-8, sy); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(sx, torsoEndY); ctx.lineTo(sx+8, sy); ctx.stroke();
       ctx.restore();
-
       const signX=sx, signY=headY-20, signW=Math.max(80, sp.name.length*10), signH=28;
       ctx.strokeStyle='#8B4513'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(signX, signY); ctx.lineTo(signX, headY-headR); ctx.stroke();
       ctx.fillStyle=sp.signColor; ctx.strokeStyle='black'; ctx.lineWidth=2; ctx.fillRect(signX-signW/2, signY-signH, signW, signH); ctx.strokeRect(signX-signW/2, signY-signH, signW, signH);
@@ -480,7 +412,7 @@
       }
     }
 
-    // ====== OBSTACLES ======
+    // ====== OSTACOLI ======
     let obstacles=[];
     function calculateNextObstacleTime(){
       const {minObstacleInterval, maxObstacleInterval} = currentDifficulty;
@@ -498,18 +430,12 @@
         const o=obstacles[i]; o.x -= gameSpeed*dt; ctx.fillStyle='#DC143C'; ctx.fillRect(o.x, o.y, o.width, o.height);
         const pH = {x:personaggio.x, y:personaggio.y-personaggio.height, width:personaggio.width, height:personaggio.height};
         const oH = {x:o.x, y:o.y, width:o.width, height:o.height};
-        if (!isInvincible && !isDemoMode && pH.x < oH.x+oH.width && pH.x+pH.width > oH.x && pH.y < oH.y+oH.height && pH.y+pH.height > oH.y){ handleCollision(); }
+        if (!isInvincible && !isDemoMode && pH.x < oH.x+oH.width && pH.x+pH.width > oH.x && pH.y < oH.y+oH.height && pH.y+pH.height > oH.y){ playSound('fail'); lives--; if (lives<=0){ isAlive=false; if (score>highscore) highscore=score; } else { isInvincible=true; invincibilityTimer=2.0; } }
         if (o.x + o.width < 0) obstacles.splice(i,1);
       }
     }
-    function handleCollision(){
-      playSound('fail');
-      screenFlashTimer = 0.2; lives--;
-      if (lives<=0) triggerGameOver(); else { isInvincible=true; invincibilityTimer=2.0; }
-    }
-    function triggerGameOver(){ isAlive=false; if (score>highscore) highscore=score; }
 
-    // ====== UI ======
+    // ====== HUD ======
     function drawGround(){ ctx.fillStyle='#A0522D'; ctx.fillRect(0,GROUND_Y, window.innerWidth, window.innerHeight-GROUND_Y); ctx.strokeStyle='#333'; ctx.beginPath(); ctx.moveTo(0,GROUND_Y); ctx.lineTo(window.innerWidth,GROUND_Y); ctx.stroke(); }
     function formatTime(s){ const ts=Math.floor(s/10); const m=Math.floor(ts/60); const sec=ts%60; return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`; }
     function drawLives(){
@@ -560,59 +486,96 @@
       difficultyButtons.push({level:{name:'Cast'}, type:'cast'});
       difficultyButtons.push({level:{name:'Info'}, type:'info'});
     }
-    function drawDifficultyScreen(){
-      const vw=window.innerWidth, vh=window.innerHeight;
-      ctx.fillStyle='#e0e0e0'; ctx.fillRect(0,0,vw,vh);
+    
+    function drawDifficultyScreen() {
+        const vw = window.innerWidth, vh = window.innerHeight;
+        ctx.fillStyle = '#e0e0e0';
+        ctx.fillRect(0, 0, vw, vh);
 
-      // Runner sopra i bottoni (con fallback sicuro)
-      const imgSize = Math.min(160, Math.max(96, vw * 0.18));
-      const imgX = (vw - imgSize) / 2;
-      const imgY = Math.max(24, vh * 0.08);
-      if (runnerLoaded) {
-        ctx.drawImage(runnerImage, imgX, imgY, imgSize, imgSize);
-      } else {
-        // Segnaposto se l'immagine non è disponibile
-        ctx.fillStyle = '#d0d0d0';
-        ctx.beginPath(); ctx.arc(vw/2, imgY + imgSize/2, imgSize/2, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = '#888';
-        ctx.font = `${Math.max(16, imgSize*0.18)}px sans-serif`;
-        ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.fillText('Runner', vw/2, imgY + imgSize/2);
-      }
-
-      // Calcolo pulsanti
-      const fontSize=Math.max(16, vh*0.035); ctx.font=`bold ${fontSize}px sans-serif`;
-      difficultyButtons.forEach(btn=>{
-        const tm=ctx.measureText(btn.level.name); const padX=fontSize*2.5, padY=fontSize*0.6;
-        btn.width = tm.width + padX*2; btn.height = fontSize + padY*2;
-      });
-
-      const maxRowW = difficultyButtons.slice(0,3).reduce((s,b)=>s+b.width,0) + 2*20;
-      const perRow = (maxRowW < vw*0.9) ? 3 : 2;
-
-      const rows = [];
-      for (let i=0;i<difficultyButtons.length;i+=perRow) rows.push(difficultyButtons.slice(i,i+perRow));
-
-      const rowSpacing=20;
-      const totalH = rows.length*difficultyButtons[0].height + (rows.length-1)*rowSpacing;
-      const gridTopY = imgY + imgSize + 30; // sotto l’immagine
-      let y = gridTopY + (vh - gridTopY - totalH)/2;
-
-      rows.forEach(row=>{
-        const rowW = row.reduce((s,b)=>s+b.width,0) + (row.length-1)*20;
-        let x=(vw-rowW)/2;
-        row.forEach(btn=>{
-          ctx.fillStyle='#3498db'; ctx.beginPath(); ctx.roundRect(x, y, btn.width, btn.height, 10); ctx.fill();
-          btn.x=x; btn.y=y;
-          ctx.fillStyle='white'; ctx.textAlign='center'; ctx.textBaseline='middle';
-          ctx.fillText(btn.level.name, btn.x+btn.width/2, btn.y+btn.height/2+2);
-          x += btn.width + 20;
+        // --- SIZING LOGIC ---
+        const fontSize = Math.max(18, Math.min(22, vw * 0.04));
+        ctx.font = `bold ${fontSize}px sans-serif`;
+        
+        difficultyButtons.forEach(btn => {
+            const tm = ctx.measureText(btn.level.name);
+            const padX = fontSize * 2.5, padY = fontSize * 0.8;
+            btn.width = tm.width + padX * 2;
+            btn.height = fontSize + padY * 2;
         });
-        y += difficultyButtons[0].height + rowSpacing;
-      });
+        
+        const maxRowW = difficultyButtons.slice(0, 3).reduce((s, b) => s + b.width, 0) + 40;
+        const perRow = (maxRowW < vw * 0.9) ? 3 : 2;
+        const rows = [];
+        for (let i = 0; i < difficultyButtons.length; i += perRow) {
+            rows.push(difficultyButtons.slice(i, i + perRow));
+        }
+
+        const rowSpacing = 20;
+        const totalButtonHeight = rows.length * difficultyButtons[0].height + (rows.length - 1) * rowSpacing;
+
+        // --- NEW LAYOUT & POSITIONING LOGIC ---
+        const bottomPadding = 40;
+        const spaceBetweenImgAndButtons = 20;
+        
+        const gridTopY = vh - bottomPadding - totalButtonHeight;
+        
+        const imageAreaHeight = gridTopY - spaceBetweenImgAndButtons;
+
+        let imgSize = Math.min(160, Math.max(96, vw * 0.18));
+        imgSize = Math.min(imgSize, imageAreaHeight * 0.9, 160);
+
+        const imgX = (vw - imgSize) / 2;
+        const imgY = (imageAreaHeight - imgSize) / 2;
+
+        if (runnerLoaded) {
+            ctx.drawImage(runnerImage, imgX, imgY, imgSize, imgSize);
+        } else {
+            ctx.fillStyle = '#d0d0d0';
+            ctx.beginPath(); ctx.arc(imgX + imgSize/2, imgY + imgSize / 2, imgSize / 2, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // --- BUTTON DRAWING ---
+        let currentY = gridTopY;
+        rows.forEach(row => {
+            const rowW = row.reduce((s, b) => s + b.width, 0) + (row.length - 1) * 20;
+            let currentX = (vw - rowW) / 2;
+            row.forEach(btn => {
+                btn.x = currentX;
+                btn.y = currentY;
+
+                const mainColor = '#3498db';
+                const edgeColor = '#2980b9';
+                const edgeHeight = 4;
+                
+                ctx.save();
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                ctx.shadowBlur = 8;
+                ctx.shadowOffsetX = 4;
+                ctx.shadowOffsetY = 4;
+
+                ctx.fillStyle = edgeColor;
+                ctx.beginPath();
+                ctx.roundRect(currentX, currentY, btn.width, btn.height, 12);
+                ctx.fill();
+                ctx.restore(); 
+
+                ctx.fillStyle = mainColor;
+                ctx.beginPath();
+                ctx.roundRect(currentX, currentY, btn.width, btn.height - edgeHeight, 12);
+                ctx.fill();
+
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(btn.level.name, currentX + btn.width / 2, currentY + (btn.height - edgeHeight) / 2 + 1);
+
+                currentX += btn.width + 20;
+            });
+            currentY += difficultyButtons[0].height + rowSpacing;
+        });
     }
 
-    // ====== CAST SCREEN (emoji 2× testo + tabella + scroll) ======
+    // ====== CAST (emoji 2× + scroll) ======
     function drawCastScreen(){
       const vw=window.innerWidth, vh=window.innerHeight;
       ctx.fillStyle='#E6F3FF'; ctx.fillRect(0,0,vw,vh);
@@ -621,7 +584,6 @@
       ctx.fillStyle='#333'; ctx.font=`bold ${titleFS}px sans-serif`; ctx.textAlign='center';
       ctx.fillText('Cast', vw/2, 60);
 
-      // Close button
       const closeSize=40, closeX=vw-closeSize-20, closeY=40;
       ctx.fillStyle='#333'; ctx.beginPath(); ctx.roundRect(closeX,closeY,closeSize,closeSize,8); ctx.fill();
       ctx.strokeStyle='white'; ctx.lineWidth=4; ctx.beginPath();
@@ -631,7 +593,7 @@
 
       const padding=30;
       const normalFS=Math.max(18, Math.min(22, vw*0.04));
-      const emojiSize = normalFS * 2;        // emoji = 2× testo
+      const emojiSize = normalFS * 2;
       const lineH = normalFS * 1.5;
       let y = 120 - window.castScrollY;
 
@@ -645,38 +607,58 @@
 
       const col1W = emojiSize + 20;
       const col2X = padding + col1W;
-      const textMaxW = vw - padding - col2X;
 
-      ctx.textAlign='left'; ctx.textBaseline='top';
+      ctx.textAlign='left'; 
+      ctx.textBaseline='top';
+
       cast.forEach(item=>{
-        ctx.font = `${emojiSize}px sans-serif`; ctx.fillStyle='#222';
+        ctx.font = `${emojiSize}px sans-serif`; 
+        ctx.fillStyle='#222';
         ctx.fillText(item.emoji, padding, y);
 
-        ctx.font = `bold ${normalFS}px sans-serif`; ctx.fillStyle='#333';
-        ctx.fillText(item.title + ':', col2X, y);
+        ctx.font = `bold ${normalFS}px sans-serif`; 
+        ctx.fillStyle='#333';
+        const titleText = item.title + ': ';
+        ctx.fillText(titleText, col2X, y);
 
-        y += lineH;
-        ctx.font = `${normalFS}px sans-serif`; ctx.fillStyle='#555';
-        const words = item.text.split(' '); let line='';
-        words.forEach(w=>{
-          const test = line + w + ' ';
-          if (ctx.measureText(test).width > textMaxW && line!==''){
-            ctx.fillText(line, col2X, y); line = w+' '; y += lineH;
-          } else { line = test; }
+        const titleWidth = ctx.measureText(titleText).width;
+        let textStartX = col2X + titleWidth;
+        let availableWidth = vw - textStartX - padding;
+
+        ctx.font = `${normalFS}px sans-serif`; 
+        ctx.fillStyle='#555';
+        const words = item.text.split(' '); 
+        let currentLine = '';
+
+        words.forEach(word => {
+            const testLine = currentLine + word + ' ';
+            if (ctx.measureText(testLine).width > availableWidth && currentLine !== '') {
+                ctx.fillText(currentLine, textStartX, y);
+                currentLine = word + ' ';
+                y += lineH;
+                textStartX = col2X;
+                availableWidth = vw - col2X - padding;
+            } else {
+                currentLine = testLine;
+            }
         });
-        if (line) ctx.fillText(line, col2X, y);
-        y += lineH + 8;
+        
+        if (currentLine) {
+            ctx.fillText(currentLine, textStartX, y);
+        }
+
+        y += lineH + 12; 
       });
 
-      // Scrollbar
-      const totalHeight = y - 120;
-      const textAreaH = vh - 150;
-      const maxScroll = Math.max(0, totalHeight - textAreaH);
+      const totalHeight = y - (120 - window.castScrollY);
+      const viewableAreaH = vh - 120 - 20;
+      const maxScroll = Math.max(0, totalHeight - viewableAreaH);
       window.castMaxScrollY = maxScroll;
+
       if (maxScroll > 0){
-        const barH = textAreaH, sbW=12, sbX=vw - padding, sbY=120;
+        const barH = viewableAreaH, sbW=12, sbX=vw - padding, sbY=120;
         ctx.fillStyle='rgba(0,0,0,0.1)'; ctx.beginPath(); ctx.roundRect(sbX,sbY,sbW,barH,6); ctx.fill();
-        const cursorH = Math.max(30, (textAreaH/totalHeight)*barH);
+        const cursorH = Math.max(30, (barH/totalHeight)*barH);
         const cursorY = sbY + (window.castScrollY/maxScroll)*(barH - cursorH);
         ctx.fillStyle='rgba(0,0,0,0.4)'; ctx.beginPath(); ctx.roundRect(sbX,cursorY,sbW,cursorH,6); ctx.fill();
         window.castScrollBar = {x:sbX,y:sbY,width:sbW,height:barH,maxScrollY:maxScroll};
@@ -685,7 +667,8 @@
       }
     }
 
-    // ====== INFO SCREEN (con scroll) ======
+
+    // ====== INFO (scroll) ======
     function drawInfoScreen(){
       const vw=window.innerWidth, vh=window.innerHeight;
       ctx.fillStyle='#E6F3FF'; ctx.fillRect(0,0,vw,vh);
@@ -694,7 +677,6 @@
       ctx.fillStyle='#333'; ctx.font=`bold ${titleFS}px sans-serif`; ctx.textAlign='center';
       ctx.fillText('Istruzioni', vw/2, 60);
 
-      // Close button
       const closeSize=40, closeX=vw-closeSize-20, closeY=40;
       ctx.fillStyle='#333'; ctx.beginPath(); ctx.roundRect(closeX,closeY,closeSize,closeSize,8); ctx.fill();
       ctx.strokeStyle='white'; ctx.lineWidth=4; ctx.beginPath();
@@ -704,9 +686,7 @@
 
       const padding=30, textY=120;
       const lines = [
-        'Clicca o premi SPAZIO per saltare.',
-        'Evita gli ostacoli rossi!',
-        'Corri il più lontano possibile.',
+        'Clicca o premi SPAZIO per saltare, evita gli ostacoli e corri più lontano possibile.',
         '',
         'Per dispositivi mobili:',
         'Aggiungi questa pagina alla schermata Home per il fullscreen.',
@@ -735,19 +715,17 @@
         const cursorY = sbY + (window.infoScrollY/maxScroll)*(sbH - cursorH);
         ctx.fillStyle='rgba(0,0,0,0.4)'; ctx.beginPath(); ctx.roundRect(sbX,cursorY,sbW,cursorH,6); ctx.fill();
         window.infoScrollBar = {x:sbX,y:sbY,width:sbW,height:sbH,maxScrollY:maxScroll};
-      } else {
-        window.infoScrollBar = null;
-      }
+      } else window.infoScrollBar = null;
     }
 
-    // ====== GAME CONTROL ======
+    // ====== CONTROLLO GIOCO ======
     function startGame(){
       isAlive=true; hasStarted=true; score=0; gameSpeed=currentDifficulty.initialSpeed;
       obstacles=[]; signs=[]; spectators=[];
       currentSignIndex=0; currentSpectatorIndex=0;
       personaggio.y=GROUND_Y; personaggio.velocityY=0;
       leon.x=personaggio.x-30; leon.y=GROUND_Y; leon.direction=1; leon.animationTime=0; leon.movementPhase='forward';
-      totalTime=0; lastTime=0; lives=INITIAL_LIVES; isInvincible=false; invincibilityTimer=0; timeOfDay=0; isRaining=false;
+      totalTime=0; lastTime=0; lives=INITIAL_LIVES; isInvincible=false; timeOfDay=0; isRaining=false;
       if (!isDemoMode) demoDayCount=0;
       initLandscape(); calculateNextObstacleTime();
       nextSignTime = 0.5 + Math.random()*2.5; nextSpectatorTime = 5 + Math.random()*3;
@@ -778,7 +756,8 @@
       else {
         const vw=window.innerWidth, vh=window.innerHeight;
         const simHour = (7 + (timeOfDay / DAY_CYCLE_DURATION) * 24) % 24;
-        drawSky(simHour); drawLandscape(simHour); updateAndDrawSigns(dt); updateAndDrawSpectators(dt); drawGround(); drawRain(dt); drawScore(); drawLives(); drawDigitalClock(simHour);
+        drawSky(simHour); drawLandscape(simHour); updateAndDrawSigns(dt); updateAndDrawSpectators(dt); drawGround(); // drawRain(dt); // <- drawRain da fixare
+        drawScore(); drawLives(); drawDigitalClock(simHour);
 
         if (isAlive){
           timeOfDay = (timeOfDay + dt) % DAY_CYCLE_DURATION; toggleRain(dt);
@@ -792,35 +771,47 @@
 
           totalTime += dt; score += dt*10; gameSpeed += currentDifficulty.speedIncrement*dt;
           if (isInvincible){ invincibilityTimer -= dt; if (invincibilityTimer<=0) isInvincible=false; }
+          
           if (isDemoMode) autopilot();
-          personaggio.update(dt); leon.update(dt, vw); updateLandscape(dt); updateObstacles(dt);
+          
+          personaggio.update(dt); 
+          leon.update(dt, vw); 
+          updateLandscape(dt); 
+          updateObstacles(dt);
         } else {
           showGameOverOverlay();
         }
 
-        // Draw characters
+        // <<< INIZIO BLOCCO CORRETTO >>>
+        // Disegna i personaggi (logica ripristinata dalla versione funzionante)
         leon.draw();
-        if (!(isInvincible && Math.floor(totalTime*10)%2!==0)) personaggio.draw();
+        // Il personaggio lampeggia quando è invincibile per segnalare l'effetto
+        if (!(isInvincible && Math.floor(totalTime * 10) % 2 !== 0)) {
+            personaggio.draw();
+        }
+        // <<< FINE BLOCCO CORRETTO >>>
       }
       requestAnimationFrame(gameLoop);
     }
 
-    // ====== INPUT / INTERAZIONI ======
+    function updateLandscape(dt){
+      const vw=window.innerWidth;
+      mountains.forEach(l=>{ l.offsetX -= gameSpeed*l.speedMultiplier*dt; if (l.offsetX < -vw*2) l.offsetX += vw*2; });
+      landscapeLayers.forEach(l=>{ l.offsetX -= gameSpeed*l.speedMultiplier*dt; if (l.offsetX < -vw*2) l.offsetX += vw*2; });
+    }
 
-    // Click / tap
+    // ====== INPUT ======
     function handleInteraction(e){
       const r = canvas.getBoundingClientRect();
       const x = (e.clientX || (e.touches && e.touches[0].clientX) || 0) - r.left;
       const y = (e.clientY || (e.touches && e.touches[0].clientY) || 0) - r.top;
 
       if (showInfoScreen || showCastScreen){
-        // Chiudi
         if (window.closeButtonBounds &&
             x>window.closeButtonBounds.x && x<window.closeButtonBounds.x+window.closeButtonBounds.width &&
             y>window.closeButtonBounds.y && y<window.closeButtonBounds.y+window.closeButtonBounds.height){
           showInfoScreen=false; showCastScreen=false; stopInfoAudio(); window.infoScrollY=0; window.castScrollY=0; return;
         }
-        // Click barra Info
         if (showInfoScreen && window.infoScrollBar &&
             x>window.infoScrollBar.x && x<window.infoScrollBar.x+window.infoScrollBar.width &&
             y>window.infoScrollBar.y && y<window.infoScrollBar.y+window.infoScrollBar.height){
@@ -828,7 +819,6 @@
           window.infoScrollY = Math.max(0, Math.min(window.infoScrollBar.maxScrollY, rel * window.infoScrollBar.maxScrollY));
           return;
         }
-        // Click barra Cast
         if (showCastScreen && window.castScrollBar &&
             x>window.castScrollBar.x && x<window.castScrollBar.x+window.castScrollBar.width &&
             y>window.castScrollBar.y && y<window.castScrollBar.y+window.castScrollBar.height){
@@ -859,10 +849,22 @@
       }
     }
 
-    canvas.addEventListener('mousedown', (e)=>{ unlockAudio(); handleInteraction(e); });
-    canvas.addEventListener('touchstart', (e)=>{ unlockAudio(); handleInteraction(e); }, {passive:true});
+    // ---- Tap vs Drag: gestione corretta su mobile ----
+    let tapStart = null;
 
-    // Scroll con rotellina
+    canvas.addEventListener('mousedown', (e)=>{ unlockAudio(); handleInteraction(e); });
+
+    canvas.addEventListener('touchstart', (e) => {
+      unlockAudio();
+      const t = e.touches[0];
+      tapStart = { x: t.clientX, y: t.clientY, time: performance.now(), moved: false };
+
+      if (showInfoScreen || showCastScreen) {
+        return;
+      }
+      handleInteraction(e);
+    }, { passive: true });
+
     window.addEventListener('wheel', (e)=>{
       if (showInfoScreen){
         e.preventDefault();
@@ -876,8 +878,7 @@
       }
     }, {passive:false});
 
-    // ====== SCROLL CON LE DITA (touch drag) per Info/Cast ======
-    let touchScrolling = null; // {type:'info'|'cast', startY, lastY}
+    let touchScrolling = null;
     canvas.addEventListener('touchstart', (e)=>{
       if (!(showInfoScreen || showCastScreen)) return;
       const y = e.touches[0].clientY;
@@ -885,6 +886,12 @@
     }, {passive:true});
 
     canvas.addEventListener('touchmove', (e)=>{
+      if (tapStart) {
+        const t = e.touches[0];
+        if (Math.hypot(t.clientX - tapStart.x, t.clientY - tapStart.y) > 8) {
+          tapStart.moved = true;
+        }
+      }
       if (!touchScrolling) return;
       const y = e.touches[0].clientY;
       const dy = y - touchScrolling.lastY;
@@ -897,10 +904,25 @@
       e.preventDefault();
     }, {passive:false});
 
-    canvas.addEventListener('touchend', ()=>{ touchScrolling=null; }, {passive:true});
-    canvas.addEventListener('touchcancel', ()=>{ touchScrolling=null; }, {passive:true});
+    canvas.addEventListener('touchend', (e)=>{
+      if (showInfoScreen || showCastScreen) {
+        if (tapStart && !tapStart.moved) {
+          const t = e.changedTouches && e.changedTouches[0];
+          if (t) handleInteraction({ clientX: t.clientX, clientY: t.clientY });
+        }
+        tapStart = null;
+        touchScrolling = null;
+        return;
+      }
+      tapStart = null;
+      touchScrolling = null;
+    }, {passive:true});
 
-    // Tastiera
+    canvas.addEventListener('touchcancel', ()=>{
+      tapStart = null;
+      touchScrolling = null;
+    }, {passive:true});
+
     window.addEventListener('keydown', (e)=>{
       if (e.code==='Space'){
         e.preventDefault(); unlockAudio();
@@ -911,7 +933,6 @@
         }
       }
       if (e.code==='Escape'){ e.preventDefault(); resetToMenu(); }
-
       if (showInfoScreen || showCastScreen){
         if (e.code==='ArrowDown'){
           if (showInfoScreen) window.infoScrollY = Math.min(window.infoMaxScrollY||0, (window.infoScrollY||0)+30);
