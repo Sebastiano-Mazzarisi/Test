@@ -22,7 +22,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#f0f0f0">
     
-    <link rel="manifest" href='data:application/manifest+json,%7B%22name%22%3A%22Corri%22%2C%22short_name%22%3A%22Corri%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f0f0f0%22%2C%22theme_color%22%3A%22%23f0f0f0%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A//github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png%3Fraw%3Dtrue%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image/png%22%7D%2C%7B%22src%22%3A%22https" rel="noopener noreferrer" target="_blank">https://github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png%3Fraw%3Dtrue%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image/png%22%7D%5D%7D' />
+    <link rel="manifest" href='data:application/manifest+json,%7B%22name%22%3A%22Corri%22%2C%22short_name%22%3A%22Corri%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f0f0f0%22%2C%22theme_color%22%3A%22%23f0f0f0%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A//github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png%3Fraw%3Dtrue%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image/png%22%7D%2C%7B%22src%22%3A%22https%3A//github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png%3Fraw%3Dtrue%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image/png%22%7D%5D%7D' />
     
     <style>
         body { margin:0; padding:0; display:flex; justify-content:center; align-items:center; height:100vh; background:#f0f0f0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow:hidden; }
@@ -38,12 +38,25 @@
             box-shadow: 4px 4px 8px rgba(0,0,0,0.2);
             border-radius: 4px;
         }
+        #visitor-counter {
+            position: fixed;
+            bottom: 10px;
+            right: 10px; /* Modificato */
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 14px;
+            z-index: 100;
+        }
         @media (orientation:portrait){ #gameCanvas{display:none;} #rotate-message{display:flex;} }
     </style>
 </head>
 <body>
 
   <canvas id="gameCanvas"></canvas>
+  <div id="visitor-counter"></div>
   
   <div id="rotate-message">
     <img id="rotate-image" src="https://github.com/Sebastiano-Mazzarisi/Test/blob/main/Runner.png?raw=true" alt="Runner Icon">
@@ -73,7 +86,6 @@
     let isRunnerImage1 = true;
     window.runnerImageBounds = {};
 
-    // Al caricamento dell'immagine, ridisegna il menu per un layout perfetto
     runnerImage.onload = () => {
         if (!hasStarted) {
             drawDifficultyScreen();
@@ -133,6 +145,22 @@
             setTimeout(() => playBeep({ frequency: 300, duration: 70, volume: 0.1, waveType: 'square' }), 100);
         }
     };
+
+    // ====== GESTIONE CONTATORE VISITE ======
+    function updateVisitorCounter() {
+        const counterElement = document.getElementById('visitor-counter');
+        const apiUrl = 'https://api.countapi.xyz/hit/sebastiano-mazzarisi/corrigame';
+
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                counterElement.innerHTML = data.value; // Modificato
+            })
+            .catch(error => {
+                console.error("Errore nel caricare il contatore:", error);
+                counterElement.style.display = 'none';
+            });
+    }
     
     // ====== GAME CONFIG ======
     const PLAYER_NAME = "Andrea";
@@ -406,13 +434,11 @@
         ctx.fillText(btn.level.name, btn.x + btn.width / 2, btn.y + (btn.height - edgeHeight) / 2 + 1);
     }
 
-    // ========== MODIFIED FUNCTION drawDifficultyScreen (FINAL) ==========
     function drawDifficultyScreen() {
         const vw = window.innerWidth, vh = window.innerHeight;
         ctx.fillStyle = '#e0e0e0';
         ctx.fillRect(0, 0, vw, vh);
 
-        // --- Layout Unico e Fluido ---
         const imgSize = Math.min(vh * 0.7, vw * 0.35, 400); 
         const imgX = (vw - imgSize) / 2;
         const imgY = (vh - imgSize) / 2;
@@ -590,7 +616,6 @@
       initLandscape();setupDifficultyButtons();
     }
     
-    // Gestione click su immagine in modalità portrait
     const rotateImage = document.getElementById('rotate-image');
     document.getElementById('rotate-message').addEventListener('click', () => {
         isRunnerImage1 = !isRunnerImage1;
@@ -599,6 +624,7 @@
 
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
+    updateVisitorCounter();
     requestAnimationFrame(gameLoop);
   </script>
 </body>
