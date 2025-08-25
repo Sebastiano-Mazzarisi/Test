@@ -146,23 +146,65 @@
         }
     };
 
-// ====== GESTIONE CONTATORE VISITE (aggiornato con countapi.store) ======
-function updateVisitorCounter() {
-    const counterElement = document.getElementById('visitor-counter');
-    const apiUrl = 'https://countapi.store/hit/corri-game/visite';
 
-    fetch(apiUrl)
-        .then(response => response.json())
-        .then(data => {
-            counterElement.innerHTML = data.value;
-        })
-        .catch(error => {
-            console.error("Contatore non disponibile:", error);
-            counterElement.innerHTML = '--'; // Mostra trattino se c’è errore
-        });
+// ====== GESTIONE CONTATORE VISITE (robusto con più backend e fallback locale) ======
+function updateVisitorCounter() {
+    const el = document.getElementById('visitor-counter');
+    if (!el) return;
+
+    // Più backend in cascata: prova il primo, se fallisce passa al successivo
+    const backends = [
+        // Clone CountAPI funzionante con CORS (documentato qui: https://countapi.vercel.app/)
+        { url: 'https://countapi.mileshilliard.com/api/v1/hit/sebastiano_mazzarisi_corri', map: (j) => Number(j.value) },
+
+        // Tentativo su countapi.store (potrebbe non rispondere con CORS corretti)
+        { url: 'https://countapi.store/hit/corri-game/visite', map: (j) => Number(j.value) },
+
+        // Vecchio countapi.xyz (spesso instabile, ma resta come fallback)
+        { url: 'https://api.countapi.xyz/hit/sebastiano-mazzarisi/corri-game', map: (j) => Number(j.value) },
+    ];
+
+    const ATTEMPT_TIMEOUT_MS = 3500; // timeout per ogni backend
+
+    const tryBackend = (idx) => {
+        if (idx >= backends.length) {
+            // Fallback locale: contatore per-dispositivo
+            const k = 'corri_local_visits';
+            const v = (parseInt(localStorage.getItem(k) || '0', 10) || 0) + 1;
+            localStorage.setItem(k, String(v));
+            el.textContent = `${v} (locale)`;
+            return;
+        }
+
+        const { url, map } = backends[idx];
+        const controller = new AbortController();
+        const t = setTimeout(() => controller.abort(), ATTEMPT_TIMEOUT_MS);
+
+        fetch(url, { signal: controller.signal })
+            .then(resp => {
+                clearTimeout(t);
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                return resp.json();
+            })
+            .then(data => {
+                const val = map(data);
+                if (Number.isFinite(val)) {
+                    el.textContent = String(val);
+                } else {
+                    throw new Error('Payload non valido');
+                }
+            })
+            .catch(() => {
+                // Prossimo backend
+                tryBackend(idx + 1);
+            });
+    };
+
+    // Avvia la catena
+    tryBackend(0);
 }
-    
-    // ====== GAME CONFIG ======
+
+// ====== GAME CONFIG ======
     const PLAYER_NAME = "Andrea";
     const SIGN_TEXTS = ['Bari','Altamura','Trento','Ferrara','Roma','Napoli'];
     const SPECTATOR_NAMES = ['Pierluigi','Miriam','Mariasofia','Rino','Anna','Maria','Angelo','Mauro','Diletta','Sara','Pietro','Thomas','Alessio','Luigi'];
