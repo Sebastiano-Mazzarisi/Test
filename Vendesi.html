@@ -29,11 +29,10 @@
             width: auto;
             max-width: 100%;
             object-fit: contain;
-            border-radius: 15px;
+            border-radius: 12px;
             margin: 1rem auto;
             display: block;
             cursor: pointer;
-            box-shadow: 0 10px 30px rgba(74, 144, 226, 0.3);
         }
 
         .header h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); margin-bottom: 0.5rem; font-weight: 300; }
@@ -175,11 +174,10 @@
             width: auto;
             max-width: 100%;
             object-fit: contain;
-            border-radius: 15px;
+            border-radius: 12px;
             margin: 1rem auto;
             display: block;
             cursor: pointer;
-            box-shadow: 0 10px 30px rgba(74, 144, 226, 0.3);
         }
         }
     
@@ -200,7 +198,6 @@
     </style>
     <link rel="preconnect" href="https://www.dropbox.com">
     <link rel="preconnect" href="https://dl.dropboxusercontent.com">
-    <link rel="preconnect" href="https://res.cloudinary.com">
 </head>
 <body>
     <div class="header">
@@ -393,61 +390,9 @@
     </div>
 
     <script>
-
-        // === Cloudinary on-the-fly thumbnails (Soluzione 1) ===
-        // Imposta qui il tuo cloud name Cloudinary (es: "mio-cloud")
-        const CLOUDINARY_CLOUD = "duxgdw9c7"; // <-- INSERISCI QUI il tuo cloud name
-        let USE_CLOUDINARY = !!CLOUDINARY_CLOUD;
-        try {
-            const __u = new URL(location.href);
-            if (__u.searchParams.get("cloud") === "off") USE_CLOUDINARY = false;
-        } catch (e) {} // attivo solo se impostato
-
-        // URL HD della copertina (usato per generare la thumb 300h senza file duplicati)
-        const COVER_HD = "https://www.dropbox.com/scl/fi/qj8gcsyj8vqm25xo25z9o/CopertinaHD.png?rlkey=upgzutxo85scxorgb9ju30xpz&raw=1";
-
-        function thumbUrl(master, h=150, eco=false) {
-            if (!USE_CLOUDINARY) return master; // fallback
-            const quality = eco ? 'q_auto:eco' : 'q_auto';
-            return `https://res.cloudinary.com/${CLOUDINARY_CLOUD}
-
-        // Normalize Dropbox URLs to direct "dl.dropboxusercontent.com" + raw=1
-        function normalizeMaster(u) {
-            try {
-                const url = new URL(u);
-                if (url.hostname === 'www.dropbox.com') {
-                    url.hostname = 'dl.dropboxusercontent.com';
-                }
-                url.searchParams.delete('dl');
-                if (!url.searchParams.get('raw')) url.searchParams.set('raw', '1');
-                return url.toString();
-            } catch (e) {
-                return u;
-            }
-        }
-
-        // Optional debug overlay (?debug=1)
-        const __URL_DBG = new URL(location.href);
-        const DEBUG_OVERLAY = __URL_DBG.searchParams.get('debug') === '1';
-        let __STAT_CLOUD = 0, __STAT_DROPBOX = 0;
-        function __attachDebugOverlay(isSlow) {
-            if (!DEBUG_OVERLAY) return;
-            const box = document.createElement('div');
-            box.id = '__cloud_dbg';
-            box.style.cssText = 'position:fixed;right:8px;bottom:8px;z-index:9999;background:rgba(0,0,0,.7);color:#fff;font:12px/1.4 system-ui;padding:8px 10px;border-radius:8px;';
-            const update = () => {
-                box.innerHTML = `Cloudinary: <b>${USE_CLOUDINARY?'ON':'OFF'}</b> | Slow: <b>${isSlow?'YES':'NO'}</b><br>thumbs → cloud: ${__STAT_CLOUD} / dropbox: ${__STAT_DROPBOX}`;
-            };
-            update();
-            document.body.appendChild(box);
-            return update;
-        }
-/image/fetch/f_auto,${quality},c_fit,h_${h}/${encodeURIComponent(master)}`;
-        }/image/fetch/f_auto,q_auto,c_fit,h_${h}/${encodeURIComponent(master)}`;
-        }
-let currentImageIndex = null;
+        let currentImageIndex = null;
         const images = [
-            "https://www.dropbox.com/scl/fi/axup1qz37h4mkfbr27s1r/IMG_9792.jpg?rlkey=lzy6l9vp5kkiurym9bgl8bk8i&raw=1",
+"https://www.dropbox.com/scl/fi/axup1qz37h4mkfbr27s1r/IMG_9792.jpg?rlkey=lzy6l9vp5kkiurym9bgl8bk8i&raw=1",
             "https://www.dropbox.com/scl/fi/6dg7ctgm4isc5lfe5vovv/IMG_9793.jpg?rlkey=p7uvuqhgjmk97whrv6nws6n8t&raw=1",
             "https://www.dropbox.com/scl/fi/5c9d6n67gc2rcek4csyy5/IMG_9794.jpg?rlkey=762qmzkxjg5yp9v43oo10gy2a&raw=1",
             "https://www.dropbox.com/scl/fi/na64z4p9wjwd0q6o41icp/IMG_9795.jpg?rlkey=tg6sfsuv6doa0r3rxx2brfudc&raw=1",
@@ -477,7 +422,8 @@ let currentImageIndex = null;
             "https://www.dropbox.com/scl/fi/x7ofi2txhdsbmfiaii9dl/IMG_9831.jpg?rlkey=22yz958pyaie3bta0wbp6qlrt&raw=1",
             "https://www.dropbox.com/scl/fi/pva6mxgsktour4gn7qpvm/IMG_9833.jpg?rlkey=12ivqoo0ruko1ouony2frrtgh&raw=1",
             "https://www.dropbox.com/scl/fi/q1fe9nka0ppcr45sr048z/IMG_9840.jpg?rlkey=seu056w3og8bdum580816rzj0&raw=1",
-            "https://www.dropbox.com/scl/fi/3m32wlbdchqp6f8dgzayw/IMG_9841.jpg?rlkey=xk311dmkx6be7izueyzgp6puw&raw=1"];
+            "https://www.dropbox.com/scl/fi/3m32wlbdchqp6f8dgzayw/IMG_9841.jpg?rlkey=xk311dmkx6be7izueyzgp6puw&raw=1"
+];
 
         const prevButton = document.getElementById('prevButton');
         const nextButton = document.getElementById('nextButton');
@@ -573,10 +519,8 @@ let currentImageIndex = null;
                 galleryItem.className = 'gallery-item';
 
                 const img = document.createElement('img');
-                const master = normalizeMaster(src);
-                img.dataset.master = master;
-                img.src = placeholder;             // tiny placeholder
-                img.setAttribute('data-src', thumbUrl(master, 150, isSlow)); // try Cloudinary
+                img.src = placeholder;             // non chiede subito l'immagine vera
+                img.setAttribute('data-src', src); // carica solo quando visibile
                 img.alt = `Immagine ${index + 1}`;
                 img.loading = 'lazy';
                 img.decoding = 'async';
@@ -584,23 +528,11 @@ let currentImageIndex = null;
                 img.onclick = () => openModal(null, index);
 
                 img.addEventListener('load', () => {
+                    // quando l'immagine reale è caricata, togli blur
                     if (!img.hasAttribute('data-src')) img.classList.add('ready');
-                    // Count where it loaded from
-                    try {
-                        const host = new URL(img.currentSrc || img.src).hostname;
-                        if (/res\.cloudinary\.com$/.test(host)) __STAT_CLOUD++; else __STAT_DROPBOX++;
-                        if (typeof __DBG_UPDATE === 'function') __DBG_UPDATE();
-                    } catch (e) {}
                 });
 
-                // If Cloudinary fails, fallback to master
-                img.onerror = () => {
-                    if (img.src !== master) {
-                        img.src = master;
-                    }
-                };
-
-                if (io) io.observe(img); else img.src = thumbUrl(master, 150, isSlow); // fallback: load immediately
+                if (io) io.observe(img); else img.src = src; // fallback: carica subito
 
                 galleryItem.appendChild(img);
                 galleryContainer.appendChild(galleryItem);
@@ -609,39 +541,6 @@ let currentImageIndex = null;
 
         // Evita prefetch aggressivo su connessioni lente
         document.addEventListener('DOMContentLoaded', () => {
-            generateGallery();
-            const conn2 = navigator.connection || navigator.webkitConnection || navigator.mozConnection;
-            const isSlow2 = !!(conn2 && (conn2.saveData || /(^|-)2g$/.test(conn2.effectiveType)));
-            window.__DBG_UPDATE = __attachDebugOverlay(isSlow2);
-            if (!isSlow2) {
-                (window.requestIdleCallback || setTimeout)(() => {
-                    images.slice(0, 6).forEach(src => {
-                        const l = document.createElement('link');
-                        l.rel = 'prefetch'; l.as = 'image';
-                        l.href = thumbUrl(normalizeMaster(src), 150, false);
-                        document.head.appendChild(l);
-                    });
-                }, 1200);
-            }
-        });
-
-        // Evita prefetch aggressivo su connessioni lente
-        document.addEventListener('DOMContentLoaded', () => {
-
-            // Se Cloudinary è configurato, usa la miniatura 300h derivata dall'HD per la copertina
-            if (COVER_HD) {
-                const hi = document.querySelector('.header-image');
-                if (hi) {
-                    const masterHd = normalizeMaster(COVER_HD || hi.src);
-                    if (USE_CLOUDINARY) {
-                        hi.src = thumbUrl(masterHd, 300, isSlow);
-                        hi.onerror = () => { if (hi.src !== masterHd) hi.src = masterHd; };
-                    } else {
-                        hi.src = masterHd;
-                    }
-                }
-            }
-
             generateGallery();
             const conn = navigator.connection || navigator.webkitConnection || navigator.mozConnection;
             const isSlow = !!(conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType)));
