@@ -29,10 +29,11 @@
             width: auto;
             max-width: 100%;
             object-fit: contain;
-            border-radius: 12px;
+            border-radius: 15px;
             margin: 1rem auto;
             display: block;
             cursor: pointer;
+            box-shadow: 0 10px 30px rgba(74, 144, 226, 0.3);
         }
 
         .header h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); margin-bottom: 0.5rem; font-weight: 300; }
@@ -90,23 +91,21 @@
         .gallery-item:hover { transform: scale(1.03); }
 
         .gallery-item img {
-            height: 150px;
-            width: auto;
+            height: 150px;     /* come richiesto */
+            width: auto;       /* proporzionale */
             object-fit: contain;
             display: block;
-            border-radius: 8px;
+            border-radius: 8px; /* angoli arrotondati sull'immagine */
             cursor: pointer;
-            border: 1px solid #d0d0d0; /* sottile cornice grigio chiara solo sulle miniature */
         }
         /* Variante opzionale per mostrare l'intera immagine senza tagli: basta aggiungere la classe 'contain' a .image-gallery */
         .image-gallery.contain .gallery-item img {
-            height: 150px;
-            width: auto;
+            height: 150px;     /* come richiesto */
+            width: auto;       /* proporzionale */
             object-fit: contain;
             display: block;
-            border-radius: 8px;
+            border-radius: 8px; /* angoli arrotondati sull'immagine */
             cursor: pointer;
-            border: 1px solid #d0d0d0; /* sottile cornice grigio chiara solo sulle miniature */
         }
 
         .gallery-item .caption { display: none; }
@@ -174,26 +173,73 @@
             width: auto;
             max-width: 100%;
             object-fit: contain;
-            border-radius: 12px;
+            border-radius: 15px;
             margin: 1rem auto;
             display: block;
             cursor: pointer;
+            box-shadow: 0 10px 30px rgba(74, 144, 226, 0.3);
         }
         }
     
         /* Blur-up placeholder for perceived speed */
         .gallery-item img {
-            height: 150px;
-            width: auto;
-            object-fit: contain;
-            display: block;
-            border-radius: 8px;
-            cursor: pointer;
-            border: 1px solid #d0d0d0; /* sottile cornice grigio chiara solo sulle miniature */
+            filter: blur(6px);
+            transition: filter .25s ease;
         }
         .gallery-item img.ready {
             filter: none;
         }
+
+    
+        /* Video card thumb and modal video */
+        .video-card {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            box-shadow: 0 5px 20px rgba(135, 206, 235, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 4 / 3;
+            cursor: pointer;
+        }
+        .video-card .play {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(30,136,229,.9);
+            display: grid;
+            place-items: center;
+            box-shadow: 0 8px 18px rgba(30,136,229,.35);
+        }
+        .video-card .play:after {
+            content: "";
+            display: block;
+            width: 0; height: 0;
+            border-left: 16px solid white;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            margin-left: 4px;
+        }
+        .video-card .video-label {
+            position: absolute;
+            bottom: 10px; left: 12px;
+            padding: 6px 10px;
+            background: rgba(0,0,0,.55);
+            color: #fff;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+        .modal-video {
+            display: none;
+            width: 100%;
+            max-height: 80vh;
+            border-radius: 15px;
+            background: black;
+        }
+        .modal.show-video #modalImage { display: none; }
+        .modal.show-video .modal-video { display: block; }
 
     </style>
     <link rel="preconnect" href="https://www.dropbox.com">
@@ -204,7 +250,7 @@
         <div class="container">
             <h1>Immobile per Studi Medici</h1>
             <p>Opportunità di Investimento - Bari, Puglia</p>
-            <img class="header-image" src="https://www.dropbox.com/scl/fi/slcptm1llthu6lj8v3mcy/Copertina.jpg?rlkey=l8jydba5ghoo2wg2jgouiou21&raw=1" alt="Immobile per studi medici - Vista principale" loading="eager" fetchpriority="high" onclick="openModal('https://www.dropbox.com/scl/fi/qj8gcsyj8vqm25xo25z9o/CopertinaHD.png?rlkey=upgzutxo85scxorgb9ju30xpz&raw=1')">
+            <img id="headerImage" class="header-image" src="https://www.dropbox.com/scl/fi/slcptm1llthu6lj8v3mcy/Copertina.jpg?rlkey=l8jydba5ghoo2wg2jgouiou21&raw=1" alt="Immobile per studi medici - Vista principale" loading="eager" fetchpriority="high">
         </div>
     </div>
 
@@ -340,7 +386,6 @@
 
         <div id="gallery" class="content-section">
             <h2 class="section-title">Galleria Fotografica</h2>
-            <!-- Aggiungi la classe 'contain' a .image-gallery qui sotto se preferisci miniature non ritagliate -->
             <div class="image-gallery" id="galleryContainer"></div>
         </div>
 
@@ -384,6 +429,7 @@
         <span class="close" onclick="closeModal()" aria-label="Chiudi">×</span>
         <div class="modal-content-container">
             <img class="modal-content" id="modalImage" alt="Anteprima immagine">
+            <video id="modalVideo" class="modal-video" controls playsinline preload="metadata" type="video/mp4" poster="https://www.dropbox.com/scl/fi/slcptm1llthu6lj8v3mcy/Copertina.jpg?rlkey=l8jydba5ghoo2wg2jgouiou21&raw=1"></video>
             <span class="prev" id="prevButton" onclick="changeImage(-1)" aria-label="Precedente">❮</span>
             <span class="next" id="nextButton" onclick="changeImage(1)" aria-label="Successiva">❯</span>
         </div>
@@ -392,7 +438,7 @@
     <script>
         let currentImageIndex = null;
         const images = [
-"https://www.dropbox.com/scl/fi/axup1qz37h4mkfbr27s1r/IMG_9792.jpg?rlkey=lzy6l9vp5kkiurym9bgl8bk8i&raw=1",
+            "https://www.dropbox.com/scl/fi/axup1qz37h4mkfbr27s1r/IMG_9792.jpg?rlkey=lzy6l9vp5kkiurym9bgl8bk8i&raw=1",
             "https://www.dropbox.com/scl/fi/6dg7ctgm4isc5lfe5vovv/IMG_9793.jpg?rlkey=p7uvuqhgjmk97whrv6nws6n8t&raw=1",
             "https://www.dropbox.com/scl/fi/5c9d6n67gc2rcek4csyy5/IMG_9794.jpg?rlkey=762qmzkxjg5yp9v43oo10gy2a&raw=1",
             "https://www.dropbox.com/scl/fi/na64z4p9wjwd0q6o41icp/IMG_9795.jpg?rlkey=tg6sfsuv6doa0r3rxx2brfudc&raw=1",
@@ -422,8 +468,7 @@
             "https://www.dropbox.com/scl/fi/x7ofi2txhdsbmfiaii9dl/IMG_9831.jpg?rlkey=22yz958pyaie3bta0wbp6qlrt&raw=1",
             "https://www.dropbox.com/scl/fi/pva6mxgsktour4gn7qpvm/IMG_9833.jpg?rlkey=12ivqoo0ruko1ouony2frrtgh&raw=1",
             "https://www.dropbox.com/scl/fi/q1fe9nka0ppcr45sr048z/IMG_9840.jpg?rlkey=seu056w3og8bdum580816rzj0&raw=1",
-            "https://www.dropbox.com/scl/fi/3m32wlbdchqp6f8dgzayw/IMG_9841.jpg?rlkey=xk311dmkx6be7izueyzgp6puw&raw=1"
-];
+            "https://www.dropbox.com/scl/fi/3m32wlbdchqp6f8dgzayw/IMG_9841.jpg?rlkey=xk311dmkx6be7izueyzgp6puw&raw=1"];
 
         const prevButton = document.getElementById('prevButton');
         const nextButton = document.getElementById('nextButton');
@@ -444,6 +489,13 @@
         function openModal(src, index = null) {
             const modal = document.getElementById('imageModal');
             const modalImage = document.getElementById('modalImage');
+            const modalVideo = document.getElementById('modalVideo');
+            // reset video state
+            modal.classList.remove('show-video');
+            modalVideo.pause();
+            modalVideo.removeAttribute('src');
+            modalVideo.load();
+
             if (index !== null) {
                 currentImageIndex = index;
                 modalImage.src = images[currentImageIndex];
@@ -493,7 +545,7 @@
         function generateGallery() {
             const galleryContainer = document.getElementById('galleryContainer');
             galleryContainer.innerHTML = '';
-
+            
             const conn = navigator.connection || navigator.webkitConnection || navigator.mozConnection;
             const isSlow = !!(conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType)));
 
@@ -555,6 +607,32 @@
                         document.head.appendChild(l);
                     });
                 }, 1200);
+            }
+        });
+    
+        // ==== Video player wiring (header image -> new tab) ====
+        const VIDEO_SHARED = "https://www.dropbox.com/scl/fi/cftj9km4x18tg2whm6dqx/Vendesi.mp4?rlkey=fbysbx30j8hdse089hx10tonk&dl=0"; // link condiviso
+        
+        function normalizeDropbox(u) {
+            try {
+                const url = new URL(u);
+                if (url.hostname === "www.dropbox.com") url.hostname = "dl.dropboxusercontent.com";
+                url.searchParams.delete("dl");
+                url.searchParams.set("raw", "1");
+                return url.toString();
+            } catch { return u; }
+        }
+        
+        const VIDEO_URL = normalizeDropbox(VIDEO_SHARED);
+        
+        document.addEventListener("DOMContentLoaded", () => {
+            const header = document.getElementById("headerImage");
+            if (header) {
+                header.style.cursor = "pointer";
+                header.title = "Clicca per avviare il video";
+                header.addEventListener("click", () => {
+                    window.open(VIDEO_URL, '_blank');
+                });
             }
         });
     </script>
