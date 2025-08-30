@@ -1,640 +1,238 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Immobile per Studi Medici - Opportunità di Investimento</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
-            min-height: 100vh;
-        }
-
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-
-        /* Header - AZZURRO CHIARO */
-        .header {
-            background: linear-gradient(135deg, #4a90e2 0%, #87ceeb 100%);
-            color: white; text-align: center; padding: 2rem 0; margin-bottom: 2rem;
-            position: relative; overflow: hidden;
-        }
-
-        .header-image {
-            height: 300px;
-            width: auto;
-            max-width: 100%;
-            object-fit: contain;
-            border-radius: 15px;
-            margin: 1rem auto;
-            display: block;
-            cursor: pointer;
-            box-shadow: 0 10px 30px rgba(74, 144, 226, 0.3);
-        }
-
-        .header h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); margin-bottom: 0.5rem; font-weight: 300; }
-        .header p { font-size: clamp(1rem, 2.5vw, 1.2rem); opacity: 0.9; }
-
-        /* Navigation Tabs - BLU CHIARO */
-        .nav-tabs {
-            display: flex; justify-content: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 0.5rem;
-        }
-
-        .tab-btn {
-            background: #ffffff; border: 2px solid #87ceeb; color: #1e88e5;
-            padding: 0.8rem 1.5rem; border-radius: 25px; cursor: pointer;
-            transition: all 0.3s ease; font-size: clamp(0.9rem, 2vw, 1rem);
-            font-weight: 500; white-space: nowrap;
-            box-shadow: 0 3px 10px rgba(135, 206, 235, 0.2);
-        }
-        .tab-btn:hover, .tab-btn.active {
-            background: #1e88e5; color: white; border-color: #1e88e5; transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(30, 136, 229, 0.4);
-        }
-
-        /* Content Sections */
-        .content-section {
-            display: none; background: white; border-radius: 20px; padding: 2rem; margin-bottom: 2rem;
-            box-shadow: 0 8px 25px rgba(135, 206, 235, 0.15); animation: fadeIn 0.5s ease-in-out;
-        }
-        .content-section.active { display: block; }
-
-        /* Gallery section tighter padding */
-        #gallery.content-section { padding: 1rem; }
-
-        @keyframes fadeIn { from{opacity:0; transform: translateY(20px);} to{opacity:1; transform: translateY(0);} }
-
-        .section-title { color: #1e88e5; font-size: clamp(1.5rem, 3vw, 2rem); margin-bottom: 1.5rem; text-align: center; font-weight: 300; }
-
-        /* Image Gallery */
-        .image-gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 8px; /* più compatta */
-            margin-bottom: 1rem;
-        }
-
-        .gallery-item {
-            position: relative;
-            border-radius: 8px;
-            overflow: hidden;
-            background: transparent;   /* niente cornice bianca */
-            box-shadow: none;          /* niente ombra ampia */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .gallery-item:hover { transform: scale(1.03); }
-
-        .gallery-item img {
-            height: 150px;     /* come richiesto */
-            width: auto;       /* proporzionale */
-            object-fit: contain;
-            display: block;
-            border-radius: 8px; /* angoli arrotondati sull'immagine */
-            cursor: pointer;
-        }
-        /* Variante opzionale per mostrare l'intera immagine senza tagli: basta aggiungere la classe 'contain' a .image-gallery */
-        .image-gallery.contain .gallery-item img {
-            height: 150px;     /* come richiesto */
-            width: auto;       /* proporzionale */
-            object-fit: contain;
-            display: block;
-            border-radius: 8px; /* angoli arrotondati sull'immagine */
-            cursor: pointer;
-        }
-
-        .gallery-item .caption { display: none; }
-
-        /* Feature Cards - AZZURRO VIVACE */
-        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        .feature-card {
-            background: linear-gradient(135deg, #87ceeb 0%, #4a90e2 100%);
-            color: white; padding: 1.5rem; border-radius: 20px; text-align: center; transition: transform 0.3s ease;
-            box-shadow: 0 8px 25px rgba(135, 206, 235, 0.3); cursor: pointer;
-        }
-        .feature-card:hover { transform: translateY(-5px); box-shadow: 0 12px 35px rgba(135, 206, 235, 0.4); }
-        .feature-icon { font-size: 2.5rem; margin-bottom: 1rem; }
-        .feature-title { font-size: clamp(1.1rem, 2.5vw, 1.3rem); margin-bottom: 0.5rem; font-weight: 500; }
-        .feature-text { font-size: clamp(0.9rem, 2vw, 1rem); opacity: 0.9; }
-
-        /* Info Sections */
-        .info-section { margin-bottom: 2rem; }
-        .info-title { color: #1e88e5; font-size: clamp(1.2rem, 2.5vw, 1.4rem); margin-bottom: 1rem; font-weight: 500; }
-        .info-content { font-size: clamp(1rem, 2vw, 1.1rem); line-height: 1.8; color: #555; }
-        .highlight-box {
-            background: linear-gradient(135deg, #e8f8e8 0%, #d0f0d0 100%);
-            padding: 1.5rem; border-radius: 15px; margin: 1rem 0; color: #2e7d32;
-            border: 1px solid #81c784; box-shadow: 0 3px 10px rgba(129, 199, 132, 0.2);
-        }
-
-        /* Contact Section - AZZURRO LUMINOSO */
-        .contact-section {
-            background: linear-gradient(135deg, #4a90e2 0%, #87ceeb 100%);
-            color: white; padding: 2rem; border-radius: 20px; text-align: center; margin-top: 2rem;
-            box-shadow: 0 8px 25px rgba(74, 144, 226, 0.3);
-        }
-        .contact-title { font-size: clamp(1.5rem, 3vw, 2rem); margin-bottom: 1rem; }
-        .contact-info { font-size: clamp(1rem, 2.5vw, 1.2rem); margin-bottom: 1rem; }
-        .contact-btn {
-            background: white; color: #1e88e5; border: 2px solid #87ceeb; padding: 1rem 2rem; border-radius: 25px;
-            font-size: clamp(1rem, 2vw, 1.1rem); font-weight: 500; cursor: pointer; transition: all 0.3s ease;
-            margin: 0.5rem; box-shadow: 0 3px 10px rgba(255, 255, 255, 0.3);
-        }
-        .contact-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 255, 255, 0.4); border-color: #4a90e2; }
-
-        /* Modal per le immagini */
-        .modal {
-            display: none; position: fixed; z-index: 1000; inset: 0;
-            background-color: rgba(0,0,0,0.9); justify-content: center; align-items: center;
-        }
-        .modal-content-container { position: relative; width: 90%; max-width: 960px; }
-        .modal-content { display: block; width: 100%; height: auto; max-height: 80vh; object-fit: contain; border-radius: 15px; }
-        .close { position: absolute; top: 15px; right: 35px; color: #f1f1f1; font-size: 40px; font-weight: bold; cursor: pointer; }
-        .prev, .next {
-            cursor: pointer; position: absolute; top: 50%; width: auto; padding: 16px; color: white; font-weight: bold; font-size: 2rem;
-            transition: 0.3s ease; user-select: none; background-color: rgba(0,0,0,0.5); transform: translateY(-50%);
-        }
-        .prev { left: 0; border-radius: 0 8px 8px 0; }
-        .next { right: 0; border-radius: 8px 0 0 8px; }
-        .prev:hover, .next:hover { background-color: rgba(0,0,0,0.8); }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .nav-tabs { flex-direction: column; align-items: center; }
-            .tab-btn { width: 90%; text-align: center; }
-            .content-section { padding: 1.25rem; }
-            .header-image {
-            height: 300px;
-            width: auto;
-            max-width: 100%;
-            object-fit: contain;
-            border-radius: 15px;
-            margin: 1rem auto;
-            display: block;
-            cursor: pointer;
-            box-shadow: 0 10px 30px rgba(74, 144, 226, 0.3);
-        }
-        }
-    
-        /* Blur-up placeholder for perceived speed */
-        .gallery-item img {
-            filter: blur(6px);
-            transition: filter .25s ease;
-        }
-        .gallery-item img.ready {
-            filter: none;
-        }
-
-    
-        /* Video card thumb and modal video */
-        .video-card {
-            position: relative;
-            border-radius: 15px;
-            overflow: hidden;
-            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-            box-shadow: 0 5px 20px rgba(135, 206, 235, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            aspect-ratio: 4 / 3;
-            cursor: pointer;
-        }
-        .video-card .play {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            background: rgba(30,136,229,.9);
-            display: grid;
-            place-items: center;
-            box-shadow: 0 8px 18px rgba(30,136,229,.35);
-        }
-        .video-card .play:after {
-            content: "";
-            display: block;
-            width: 0; height: 0;
-            border-left: 16px solid white;
-            border-top: 10px solid transparent;
-            border-bottom: 10px solid transparent;
-            margin-left: 4px;
-        }
-        .video-card .video-label {
-            position: absolute;
-            bottom: 10px; left: 12px;
-            padding: 6px 10px;
-            background: rgba(0,0,0,.55);
-            color: #fff;
-            border-radius: 10px;
-            font-size: 0.9rem;
-        }
-        .modal-video {
-            display: none;
-            width: 100%;
-            max-height: 80vh;
-            border-radius: 15px;
-            background: black;
-        }
-        .modal.show-video #modalImage { display: none; }
-        .modal.show-video .modal-video { display: block; }
-
-    </style>
-    <link rel="preconnect" href="https://www.dropbox.com">
-    <link rel="preconnect" href="https://dl.dropboxusercontent.com">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Immobile per studi medici — Via Fanelli, Castellana Grotte</title>
+  <style>
+    :root{--ink:#0f172a;--muted:#475569;--brand:#2563eb;--bg:#f7fafc;--yellow-light:#fffbe0;}
+    *{box-sizing:border-box}
+    body{margin:0;line-height:1.35;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+    header{text-align:center;padding:.9rem;background:#fff;border-bottom:1px solid #eee}
+    header img{max-width:100%;height:auto;border-radius:12px;box-shadow:0 4px 18px rgba(0,0,0,.15);cursor:pointer}
+    h1{margin:.6rem 0;font-size:clamp(1.8rem,5vw,2.3rem)}
+    h2{margin:.6rem 0 .4rem}
+    p.lead{margin:0;color:var(--muted);font-size:clamp(.98rem,2.4vw,1.05rem)}
+    nav{display:flex;justify-content:center;flex-wrap:wrap;gap:.4rem;margin:.6rem 0}
+    nav button{padding:.5rem .85rem;border:1px solid #ddd;border-radius:8px;background:var(--yellow-light);cursor:pointer;font-weight:600;
+              transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.1);}
+    nav button.active{border-color:var(--brand);box-shadow:0 0 0 2px rgba(37,99,235,.3); background-color: var(--yellow-light);}
+    nav button:hover{background-color: #fffac8;}
+    main{max-width:1000px;margin:0 auto;padding:.8rem}
+    section{display:none}
+    section.active{display:block}
+    .list{list-style:none;padding:0;margin:0;display:grid;gap:.2rem;}
+    .list li{background:#fff;border:1px solid #eee;padding:.6rem;border-radius:8px}
+    .doc{display:flex;justify-content:space-between;align-items:center;padding:.5rem .7rem;background:#fff;border:1px solid #eee;border-radius:8px;margin-bottom:.35rem}
+    footer{text-align:center;padding:.8rem;color:#666;font-size:.9rem;margin-top:1.2rem;border-top:1px solid #eee}
+    .e{font-size:1.25em;margin-right:6px}
+    .image-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:6px}
+    .image-gallery .it{position:relative;border-radius:8px;overflow:hidden;cursor:pointer}
+    .image-gallery img{display:block;width:100%;height:150px;object-fit:cover;background:#fff;border:1px solid #eee}
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:50;justify-content:center;align-items:center}
+    .modal .wrap{position:relative;width:92%;max-width:960px}
+    .modal img,.modal video{display:block;max-height:80vh;width:100%;object-fit:contain;border-radius:12px;background:#000}
+    .modal .close{position:absolute;top:10px;right:16px;font-size:32px;color:#fff;cursor:pointer}
+    .modal .prev,.modal .next{position:absolute;top:50%;transform:translateY(-50%);font-size:28px;color:#fff;background:rgba(0,0,0,.5);padding:8px 12px;border-radius:8px;cursor:pointer}
+    .modal .prev{left:0}.modal .next{right:0}
+    .btns{display:flex;flex-wrap:wrap;gap:.4rem;margin:.5rem 0}
+    .btnA{background:var(--yellow-light);border:1px solid #ddd;border-radius:8px;padding:.5rem .85rem;cursor:pointer;
+          transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.1);}
+    .btnA:hover{background-color: #fffac8;}
+    @media (max-width:600px){
+      .image-gallery{grid-template-columns:repeat(2,1fr)}
+      .image-gallery img{height:120px}
+      nav button{padding:.45rem .75rem}
+      header{padding:.75rem}
+    }
+  </style>
+  <link rel="preconnect" href="https://www.dropbox.com">
+  <link rel="preconnect" href="https://dl.dropboxusercontent.com">
 </head>
 <body>
-    <div class="header">
-        <div class="container">
-            <h1>Immobile per Studi Medici</h1>
-            <p>Opportunità di Investimento - Bari, Puglia</p>
-            <img id="headerImage" class="header-image" src="https://www.dropbox.com/scl/fi/slcptm1llthu6lj8v3mcy/Copertina.jpg?rlkey=l8jydba5ghoo2wg2jgouiou21&raw=1" alt="Immobile per studi medici - Vista principale" loading="eager" fetchpriority="high">
-        </div>
+  <header>
+    <img id="headerImage" src="https://www.dropbox.com/scl/fi/slcptm1llthu6lj8v3mcy/Copertina.jpg?rlkey=l8jydba5ghoo2wg2jgouiou21&raw=1" alt="Copertina immobile — clic per video" title="Clicca per aprire il video">
+    <h1>Immobile per studi medici</h1>
+<p class="lead">Via Fanelli, 6 — 70013 Castellana Grotte (BA), Puglia</p>
+    <div style="margin:.5rem 0;font-size:1.1rem;color:var(--brand);font-weight:600">Prezzo richiesto: € 150.000</div>
+    <nav>
+      <button data-route="acquirenti" class="active"><span class="e">👤</span>Acquirenti</button>
+      <button data-route="agenzie"><span class="e">🏢</span>Agenzie</button>
+      <button data-route="imprese"><span class="e">🛠️</span>Imprese</button>
+      <button data-route="gallery"><span class="e">📸</span>Galleria</button>
+      <button data-route="documenti"><span class="e">📄</span>Documenti</button>
+      <button data-route="contatti"><span class="e">✉️</span>Contatti</button>
+    </nav>
+  </header>
+  <main id="app">
+    <section data-page="acquirenti" class="active">
+      <h2><span class="e">👤</span>Informazioni per acquirenti</h2>
+      <ul class="list">
+        <li><b>Superficie:</b> 150–168 mq (da verifica catastale)</li>
+        <li><b>Interni:</b> reception, 8 ambienti studio, 2 bagni, sala d’attesa</li>
+        <li><b>Pertinenze:</b> area scoperta, posto auto recintato</li>
+        <li><b>Accessibilità:</b> abbattimento barriere, bagno disabili</li>
+        <li><b>Area garage:</b> 240 mq sottostante, frazionabile in almeno 5 box</li>
+        <li><b>Classe energetica:</b> B — IPE 213.9</li>
+      </ul>
+      <div class="btns">
+        <button class="btnA" onclick="openMaps()"><span class="e">🗺️</span> Apri su Google Maps</button>
+        <button class="btnA" onclick="openVideo()"><span class="e">▶️</span> Guarda il video</button>
+      </div>
+    </section>
+    <section data-page="agenzie">
+      <h2><span class="e">🏢</span>Per agenzie immobiliari</h2>
+      <p>Partnership <b>senza esclusiva</b>. Disponibili scheda immobile, foto HQ e documenti societari.</p>
+    </section>
+    <section data-page="imprese">
+      <h2><span class="e">🛠️</span>Per imprese edili</h2>
+      <p>Possibilità di ristrutturazione/valorizzazione: cambio d’uso, suddivisione in abitazioni e realizzazione di garage sottostanti.</p>
+    </section>
+    <section data-page="gallery">
+      <h2><span class="e">📸</span>Galleria fotografica</h2>
+      <div id="galleryContainer" class="image-gallery"></div>
+    </section>
+    <section data-page="documenti">
+      <h2><span class="e">📄</span>Documentazione</h2>
+      <div class="doc"><span><span class="e">📜</span>Atto costitutivo Socim SAS</span><a href="https://www.dropbox.com/scl/fi/pnw7gsbsrx1ntfh5mwmza/2008-03-07-Atto-Costitutivo-Socim-SAS.pdf?rlkey=7f66nc7gxn6bvtu46a7yk7ph0&raw=1" target="_blank">Scarica</a></div>
+      <div class="doc"><span><span class="e">🏢</span>Visura camerale Socim SAS</span><a href="https://www.dropbox.com/scl/fi/v7q1oct9h67ywjg4u8qhd/2025-08-30-Visura-Socim-SAS.pdf?rlkey=is36f0czxod4rkxfvq9fbai3b&raw=1" target="_blank">Scarica</a></div>
+      <div class="doc"><span><span class="e">⚖️</span>Statuto Socim SAS</span><a href="https://www.dropbox.com/scl/fi/v1axkche6likmqzto1r6t/2008-03-13-Statuto-Socim-SAS.pdf?rlkey=7s4sofa048vj0twltyz6qrpgf&raw=1" target="_blank">Scarica</a></div>
+      <div class="doc"><span><span class="e">🌿</span>APE - Attestato di Prestazione Energetica</span><a href="https://www.dropbox.com/scl/fi/6olcvedcs47u0exu9w92r/2015-10-02-APE.pdf?rlkey=y4bkf6za0uhtgqrcvlvp0523y&raw=1" target="_blank">Scarica</a></div>
+    </section>
+    <section data-page="contatti">
+      <h2><span class="e">✉️</span>Contatti</h2>
+      <p><span class="e">☎️</span> +39 392 41 56 215<br>
+         <span class="e">✉️</span> leonardo@infostudiopl.com</p>
+      <div class="btns">
+        <button class="btnA" onclick="location.href='tel:+393924156215'">📞 Chiama</button>
+        <button class="btnA" onclick="location.href='mailto:leonardo@infostudiopl.com'">✉️ Email</button>
+        <button class="btnA" onclick="location.href='https://wa.me/393924156215'">💬 WhatsApp</button>
+      </div>
+    </section>
+  </main>
+  <footer>© <span id="year"></span> Socim S.a.s. — Tutti i diritti riservati</footer>
+  <div id="imageModal" class="modal" aria-hidden="true" role="dialog">
+    <div class="wrap">
+      <span class="close" onclick="closeModal()" aria-label="Chiudi">×</span>
+      <img id="modalImage" alt="Anteprima immagine">
+      <video id="modalVideo" class="modal-video" controls playsinline preload="metadata" type="video/mp4"></video>
+      <span class="prev" onclick="changeImage(-1)" aria-label="Precedente">❮</span>
+      <span class="next" onclick="changeImage(1)" aria-label="Successiva">❯</span>
     </div>
-
-    <div class="container">
-        <div class="nav-tabs">
-            <button type="button" class="tab-btn active" onclick="showSection('medici', this)">👩‍⚕️ Per Medici</button>
-            <button type="button" class="tab-btn" onclick="showSection('costruttori', this)">🏗️ Per Costruttori</button>
-            <button type="button" class="tab-btn" onclick="showSection('agenzie', this)">🏢 Per Agenzie</button>
-            <button type="button" class="tab-btn" onclick="showSection('gallery', this)">📸 Galleria</button>
-            <button type="button" class="tab-btn" onclick="showSection('documenti', this)">📋 Documenti</button>
-        </div>
-
-        <div id="medici" class="content-section active">
-            <h2 class="section-title">Soluzione Ideale per il Tuo Studio Medico</h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">🏥</div>
-                    <div class="feature-title">Spazi Funzionali</div>
-                    <div class="feature-text">Ambienti progettati per studi medici e fisioterapici</div>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🚗</div>
-                    <div class="feature-title">Parcheggio</div>
-                    <div class="feature-text">Facile accesso e parcheggio per i pazienti</div>
-                </div>
-                <div class="feature-card" onclick="openGoogleMaps()" title="Apri in Google Maps">
-                    <div class="feature-icon">📍</div>
-                    <div class="feature-title">Posizione Strategica</div>
-                    <div class="feature-text">Zona centrale e ben collegata di Bari</div>
-                </div>
-                <div class="feature-card" onclick="window.open('https://www.dropbox.com/scl/fi/yzjj9cpl5bh69hau2gl3f/Agevolazioni_Professionisti_Medici.pdf?rlkey=itgxcpln1pcfnijctc038yakz&raw=1', '_blank')" style="cursor: pointer;">
-                    <div class="feature-icon">💰</div>
-                    <div class="feature-title">Finanziamento Agevolato</div>
-                    <div class="feature-text">Possibilità di ottenere finanziamenti vantaggiosi</div>
-                </div>
-            </div>
-
-            <div class="info-section">
-                <div class="info-title">Caratteristiche dell'Immobile</div>
-                <div class="info-content">
-                    <div class="highlight-box">
-                        <strong>✓ Sale visite attrezzabili</strong><br>
-                        ✓ Sala d'attesa confortevole<br>
-                        ✓ Servizi igienici per disabili<br>
-                        ✓ Impianti a norma per uso sanitario<br>
-                        ✓ Possibilità di personalizzazione
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="costruttori" class="content-section">
-            <h2 class="section-title">Opportunità di Sviluppo Immobiliare</h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">📐</div>
-                    <div class="feature-title">Progetto Flessibile</div>
-                    <div class="feature-text">Spazi adattabili a diverse configurazioni</div>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <div class="feature-title">Autorizzazioni</div>
-                    <div class="feature-text">Pratiche edilizie già avviate</div>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">💼</div>
-                    <div class="feature-title">ROI Interessante</div>
-                    <div class="feature-text">Mercato sanitario in crescita</div>
-                </div>
-            </div>
-
-            <div class="info-section">
-                <div class="info-title">Dettagli Tecnici</div>
-                <div class="info-content">
-                    <div class="highlight-box">
-                        <strong>Metrature:</strong> Da definire in base al progetto<br>
-                        <strong>Destinazione d'uso:</strong> Sanitaria/Direzionale<br>
-                        <strong>Classe energetica:</strong> A+<br>
-                        <strong>Piani disponibili:</strong> Multiple opzioni<br>
-                        <strong>Ascensore:</strong> Previsto nel progetto
-                    </div>
-                </div>
-            </div>
-
-            <div class="info-section">
-                <div class="info-title">Vantaggi per Costruttori</div>
-                <div class="info-content">
-                    Immobile in zona ad alta richiesta di servizi sanitari. Possibilità di sviluppo in partnership o vendita diretta. Documentazione tecnica e autorizzazioni disponibili per valutazione approfondita.
-                </div>
-            </div>
-        </div>
-
-        <div id="agenzie" class="content-section">
-            <h2 class="section-title">Partnership Commerciale</h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">🤝</div>
-                    <div class="feature-title">Collaborazione</div>
-                    <div class="feature-text">Partnership senza esclusiva</div>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">💰</div>
-                    <div class="feature-title">Commissioni</div>
-                    <div class="feature-text">Condizioni vantaggiose per agenzie</div>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📈</div>
-                    <div class="feature-title">Mercato di Nicchia</div>
-                    <div class="feature-text">Settore sanitario in espansione</div>
-                </div>
-            </div>
-
-            <div class="info-section">
-                <div class="info-title">Supporto Marketing</div>
-                <div class="info-content">
-                    <div class="highlight-box">
-                        ✓ Materiale fotografico professionale<br>
-                        ✓ Planimetrie e documentazione tecnica<br>
-                        ✓ Supporto per presentazioni clienti<br>
-                        ✓ Flessibilità nelle trattative<br>
-                        ✓ Risposta rapida alle richieste
-                    </div>
-                </div>
-            </div>
-
-            <div class="info-section">
-                <div class="info-title">Target di Vendita</div>
-                <div class="info-content">
-                    Medici specialisti, fisioterapisti, centri medici, investitori immobiliari, costruttori interessati a sviluppi sanitari. Ampio ventaglio di potenziali acquirenti per massimizzare le opportunità di vendita.
-                </div>
-            </div>
-        </div>
-
-        <div id="gallery" class="content-section">
-            <h2 class="section-title">Galleria Fotografica</h2>
-            <div class="image-gallery" id="galleryContainer"></div>
-        </div>
-
-        <div id="documenti" class="content-section">
-            <h2 class="section-title">Documentazione Tecnica</h2>
-            <div class="info-section">
-                <div class="info-title">Documenti Disponibili</div>
-                <div class="info-content">
-                    <div class="highlight-box">
-                        📋 <strong>Planimetrie dettagliate</strong><br>
-                        🏗️ <strong>Autorizzazioni edilizie</strong><br>
-                        ⚡ <strong>Certificazioni impiantistiche</strong><br>
-                        📊 <strong>APE (Attestato Prestazione Energetica)</strong><br>
-                        📝 <strong>Documentazione catastale</strong><br>
-                        🔍 <strong>Relazione tecnica dettagliata</strong>
-                    </div>
-                </div>
-            </div>
-            <div class="info-section">
-                <div class="info-title">Richiesta Documentazione</div>
-                <div class="info-content">
-                    Per ricevere la documentazione completa, comprese le planimetrie tecniche e i certificati, contattaci utilizzando i riferimenti sottostanti. Tutti i documenti sono disponibili in formato digitale per una consultazione immediata.
-                </div>
-            </div>
-        </div>
-
-        <div class="contact-section">
-            <div class="contact-title">Contattaci per Maggiori Informazioni</div>
-            <div class="contact-info">
-                📱 Telefono: +39 392-41.56.215<br>
-                📧 Email: leonardo@infostudiopl.com<br>
-                📍 Indirizzo: Via Fanelli, 6 - 70013 Castellana Grotte (BA)
-            </div>
-            <button class="contact-btn" onclick="window.open('tel:+393924156215')">📞 Chiama Ora</button>
-            <button class="contact-btn" onclick="window.open('mailto:leonardo@infostudiopl.com')">✉️ Invia Email</button>
-            <button class="contact-btn" onclick="window.open('https://wa.me/393924156215')">💬 WhatsApp</button>
-        </div>
-    </div>
-
-    <div id="imageModal" class="modal" aria-hidden="true" role="dialog">
-        <span class="close" onclick="closeModal()" aria-label="Chiudi">×</span>
-        <div class="modal-content-container">
-            <img class="modal-content" id="modalImage" alt="Anteprima immagine">
-            <video id="modalVideo" class="modal-video" controls playsinline preload="metadata" type="video/mp4" poster="https://www.dropbox.com/scl/fi/slcptm1llthu6lj8v3mcy/Copertina.jpg?rlkey=l8jydba5ghoo2wg2jgouiou21&raw=1"></video>
-            <span class="prev" id="prevButton" onclick="changeImage(-1)" aria-label="Precedente">❮</span>
-            <span class="next" id="nextButton" onclick="changeImage(1)" aria-label="Successiva">❯</span>
-        </div>
-    </div>
-
-    <script>
-        let currentImageIndex = null;
-        const images = [
-            "https://www.dropbox.com/scl/fi/axup1qz37h4mkfbr27s1r/IMG_9792.jpg?rlkey=lzy6l9vp5kkiurym9bgl8bk8i&raw=1",
-            "https://www.dropbox.com/scl/fi/6dg7ctgm4isc5lfe5vovv/IMG_9793.jpg?rlkey=p7uvuqhgjmk97whrv6nws6n8t&raw=1",
-            "https://www.dropbox.com/scl/fi/5c9d6n67gc2rcek4csyy5/IMG_9794.jpg?rlkey=762qmzkxjg5yp9v43oo10gy2a&raw=1",
-            "https://www.dropbox.com/scl/fi/na64z4p9wjwd0q6o41icp/IMG_9795.jpg?rlkey=tg6sfsuv6doa0r3rxx2brfudc&raw=1",
-            "https://www.dropbox.com/scl/fi/6uswkjqt8laqzkirnk65o/IMG_9796.jpg?rlkey=55z2p3nkubr3q5shl3adgre93&raw=1",
-            "https://www.dropbox.com/scl/fi/0tpewlrwkgau922aowmgl/IMG_9797.jpg?rlkey=95hxu8u6rbftndr2qxyl6iwt0&raw=1",
-            "https://www.dropbox.com/scl/fi/m6xmo3o5esboh8429n0rt/IMG_9798.jpg?rlkey=msr09lfqf37nv4nlp2tu0xm1o&raw=1",
-            "https://www.dropbox.com/scl/fi/iw5fq9xx8fvwwp714n5qg/IMG_9799.jpg?rlkey=qbzc37aylxlo9cwhe2wmha6tq&raw=1",
-            "https://www.dropbox.com/scl/fi/m7w1i6ktxspkhsin5v8fk/IMG_9802.jpg?rlkey=lfezkhhskirvewr6dyuzpx5vy&raw=1",
-            "https://www.dropbox.com/scl/fi/v4wp0orsgu2buoyzdrr7e/IMG_9803.jpg?rlkey=yddga9y9xffqevfdvuekj18k3&raw=1",
-            "https://www.dropbox.com/scl/fi/8hqtjoszpizhc3snf76r7/IMG_9804.jpg?rlkey=u23c9huhq4lcw523gb99bals5&raw=1",
-            "https://www.dropbox.com/scl/fi/whxu9ah2sj5nawsgsd6pa/IMG_9805.jpg?rlkey=v7mfmhmdj549oe3rvgzb1whqv&raw=1"
-        ,
-            "https://www.dropbox.com/scl/fi/fmatftvshvwfbfmevcs9v/IMG_9806.jpg?rlkey=r6zj225238pmhrloedipqj0ji&raw=1",
-            "https://www.dropbox.com/scl/fi/2137yqwsfvuut50ozyd3t/IMG_9807.jpg?rlkey=qsy1mok0uq90ax36yohdawfci&raw=1",
-            "https://www.dropbox.com/scl/fi/r6lic5md0ua4q9ongjxac/IMG_9808.jpg?rlkey=lufthw51jww2dzy7kn6avp4ov&raw=1",
-            "https://www.dropbox.com/scl/fi/o9vop6obc89395k14hfms/IMG_9809.jpg?rlkey=iwyoybr442jlwq4sagiv1fcp0&raw=1",
-            "https://www.dropbox.com/scl/fi/rrt7q9gjsxgj8sffsfg7i/IMG_9810.jpg?rlkey=44m167nvzsiiqee48kwm88wwo&raw=1",
-            "https://www.dropbox.com/scl/fi/1zbrpatyica6bjhfjfq00/IMG_9811.jpg?rlkey=xb72v36bfi9l11kqiokektenm&raw=1",
-            "https://www.dropbox.com/scl/fi/doch971am77wyddl96ly9/IMG_9818.jpg?rlkey=mbt9grph1nnfcz08ybpepoys7&raw=1",
-            "https://www.dropbox.com/scl/fi/3ycm1i3t1a70d1w3cc1pc/IMG_9821.jpg?rlkey=kt87osf16z8xwm9fnbrn5ngxm&raw=1",
-            "https://www.dropbox.com/scl/fi/5phte5cc8egljemomcr39/IMG_9822.jpg?rlkey=28gk08gjvbm5qnpouuxybq1s3&raw=1",
-            "https://www.dropbox.com/scl/fi/kpu16838tbmwx444can35/IMG_9823.jpg?rlkey=jryccy2rnnq4w51qt3skp2oy2&raw=1",
-            "https://www.dropbox.com/scl/fi/y4x4uprnjzsh5dtalo6ts/IMG_9825.jpg?rlkey=j1v44zbfngx5bwiwm1x9khgyw&raw=1",
-            "https://www.dropbox.com/scl/fi/w4e98zaj1jt0q4yyapm9i/IMG_9826.jpg?rlkey=6xwpjrt69ewdw716q6kd4kasv&raw=1",
-            "https://www.dropbox.com/scl/fi/0qmu6e9ot0cso67m801wn/IMG_9829.jpg?rlkey=qihtedbfc56oghv1vlxya42kt&raw=1",
-            "https://www.dropbox.com/scl/fi/vxctp4cluv15b9j4fk3pu/IMG_9830.jpg?rlkey=p3xcujq3iz9wreh43bv6e4o15&raw=1",
-            "https://www.dropbox.com/scl/fi/x7ofi2txhdsbmfiaii9dl/IMG_9831.jpg?rlkey=22yz958pyaie3bta0wbp6qlrt&raw=1",
-            "https://www.dropbox.com/scl/fi/pva6mxgsktour4gn7qpvm/IMG_9833.jpg?rlkey=12ivqoo0ruko1ouony2frrtgh&raw=1",
-            "https://www.dropbox.com/scl/fi/q1fe9nka0ppcr45sr048z/IMG_9840.jpg?rlkey=seu056w3og8bdum580816rzj0&raw=1",
-            "https://www.dropbox.com/scl/fi/3m32wlbdchqp6f8dgzayw/IMG_9841.jpg?rlkey=xk311dmkx6be7izueyzgp6puw&raw=1"];
-
-        const prevButton = document.getElementById('prevButton');
-        const nextButton = document.getElementById('nextButton');
-
-        function showSection(sectionId, btn) {
-            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(sectionId).classList.add('active');
-            if (btn) btn.classList.add('active');
-        }
-
-        function openGoogleMaps() {
-            const q = encodeURIComponent("Via Fanelli, 6, 70013 Castellana Grotte BA, Italia");
-            const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${q}`;
-            window.open(mapsUrl, '_blank');
-        }
-
-        function openModal(src, index = null) {
-            const modal = document.getElementById('imageModal');
-            const modalImage = document.getElementById('modalImage');
-            const modalVideo = document.getElementById('modalVideo');
-            // reset video state
-            modal.classList.remove('show-video');
-            modalVideo.pause();
-            modalVideo.removeAttribute('src');
-            modalVideo.load();
-
-            if (index !== null) {
-                currentImageIndex = index;
-                modalImage.src = images[currentImageIndex];
-                prevButton.style.display = 'block';
-                nextButton.style.display = 'block';
-            } else {
-                currentImageIndex = null;
-                modalImage.src = src;
-                prevButton.style.display = 'none';
-                nextButton.style.display = 'none';
-            }
-            modal.style.display = 'flex';
-            modal.setAttribute('aria-hidden', 'false');
-        }
-
-        function changeImage(direction) {
-            if (currentImageIndex !== null) {
-                let newIndex = currentImageIndex + direction;
-                if (newIndex >= images.length) newIndex = 0;
-                if (newIndex < 0) newIndex = images.length - 1;
-                currentImageIndex = newIndex;
-                document.getElementById('modalImage').src = images[currentImageIndex];
-            }
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('imageModal');
-            modal.style.display = 'none';
-            modal.setAttribute('aria-hidden', 'true');
-        }
-
-        window.addEventListener('click', function(e) {
-            const modal = document.getElementById('imageModal');
-            if (e.target === modal) closeModal();
-        });
-
-        document.addEventListener('keydown', function(e) {
-            const modalOpen = document.getElementById('imageModal').style.display === 'flex';
-            if (!modalOpen) return;
-            if (currentImageIndex !== null) {
-                if (e.key === 'ArrowLeft') changeImage(-1);
-                if (e.key === 'ArrowRight') changeImage(1);
-            }
-            if (e.key === 'Escape') closeModal();
-        });
-
-        function generateGallery() {
-            const galleryContainer = document.getElementById('galleryContainer');
-            galleryContainer.innerHTML = '';
-            
-            const conn = navigator.connection || navigator.webkitConnection || navigator.mozConnection;
-            const isSlow = !!(conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType)));
-
-            // Tiny transparent SVG placeholder
-            const placeholder = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="4" height="3"></svg>');
-
-            const io = 'IntersectionObserver' in window ? new IntersectionObserver((entries, obs) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const img = entry.target;
-                        const src = img.getAttribute('data-src');
-                        if (src) {
-                            img.src = src;
-                            img.removeAttribute('data-src');
-                        }
-                        obs.unobserve(img);
-                    }
-                });
-            }, { rootMargin: '200px 0px', threshold: 0.01 }) : null;
-
-            images.forEach((src, index) => {
-                const galleryItem = document.createElement('div');
-                galleryItem.className = 'gallery-item';
-
-                const img = document.createElement('img');
-                img.src = placeholder;             // non chiede subito l'immagine vera
-                img.setAttribute('data-src', src); // carica solo quando visibile
-                img.alt = `Immagine ${index + 1}`;
-                img.loading = 'lazy';
-                img.decoding = 'async';
-                img.setAttribute('fetchpriority', isSlow ? 'low' : 'auto');
-                img.onclick = () => openModal(null, index);
-
-                img.addEventListener('load', () => {
-                    // quando l'immagine reale è caricata, togli blur
-                    if (!img.hasAttribute('data-src')) img.classList.add('ready');
-                });
-
-                if (io) io.observe(img); else img.src = src; // fallback: carica subito
-
-                galleryItem.appendChild(img);
-                galleryContainer.appendChild(galleryItem);
-            });
-        }
-
-        // Evita prefetch aggressivo su connessioni lente
-        document.addEventListener('DOMContentLoaded', () => {
-            generateGallery();
-            const conn = navigator.connection || navigator.webkitConnection || navigator.mozConnection;
-            const isSlow = !!(conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType)));
-            if (!isSlow) {
-                // Prefetch leggero delle prossime immagini (solo quando il browser è a riposo)
-                (window.requestIdleCallback || setTimeout)(() => {
-                    images.slice(0, 6).forEach(src => {
-                        const l = document.createElement('link');
-                        l.rel = 'prefetch';
-                        l.as = 'image';
-                        l.href = src;
-                        document.head.appendChild(l);
-                    });
-                }, 1200);
-            }
-        });
-    
-        // ==== Video player wiring (header image -> new tab) ====
-        const VIDEO_SHARED = "https://www.dropbox.com/scl/fi/cftj9km4x18tg2whm6dqx/Vendesi.mp4?rlkey=fbysbx30j8hdse089hx10tonk&dl=0"; // link condiviso
-        
-        function normalizeDropbox(u) {
-            try {
-                const url = new URL(u);
-                if (url.hostname === "www.dropbox.com") url.hostname = "dl.dropboxusercontent.com";
-                url.searchParams.delete("dl");
-                url.searchParams.set("raw", "1");
-                return url.toString();
-            } catch { return u; }
-        }
-        
-        const VIDEO_URL = normalizeDropbox(VIDEO_SHARED);
-        
-        document.addEventListener("DOMContentLoaded", () => {
-            const header = document.getElementById("headerImage");
-            if (header) {
-                header.style.cursor = "pointer";
-                header.title = "Clicca per avviare il video";
-                header.addEventListener("click", () => {
-                    window.open(VIDEO_URL, '_blank');
-                });
-            }
-        });
-    </script>
+  </div>
+  <script>
+    const pages = [...document.querySelectorAll('[data-page]')];
+    const navBtns = [...document.querySelectorAll('nav button')];
+    function go(to) {
+      pages.forEach(p => p.classList.toggle('active', p.dataset.page === to));
+      navBtns.forEach(b => b.classList.toggle('active', b.dataset.route === to));
+    }
+    navBtns.forEach(b => b.onclick = () => go(b.dataset.route));
+    document.getElementById('year').textContent = new Date().getFullYear();
+    function openMaps() {
+      const q = encodeURIComponent('Via Fanelli, 6, 70013 Castellana Grotte BA, Italia');
+      window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, '_blank');
+    }
+    const VIDEO_SHARED = 'https://www.dropbox.com/scl/fi/cftj9km4x18tg2whm6dqx/Vendesi.mp4?rlkey=fbysbx30j8hdse089hx10tonk&dl=0';
+    function normalizeDropbox(u) {
+      try {
+        const url = new URL(u);
+        if (url.hostname === 'www.dropbox.com') url.hostname = 'dl.dropboxusercontent.com';
+        url.searchParams.delete('dl');
+        url.searchParams.set('raw', '1');
+        return url.toString();
+      } catch {
+        return u;
+      }
+    }
+    const VIDEO_URL = normalizeDropbox(VIDEO_SHARED);
+    function openVideo() {
+      window.open(VIDEO_URL, '_blank');
+    }
+    document.getElementById('headerImage').addEventListener('click', openVideo);
+    let currentImageIndex = null;
+    const images = [
+      "https://www.dropbox.com/scl/fi/axup1qz37h4mkfbr27s1r/IMG_9792.jpg?rlkey=lzy6l9vp5kkiurym9bgl8bk8i&raw=1",
+      "https://www.dropbox.com/scl/fi/6dg7ctgm4isc5lfe5vovv/IMG_9793.jpg?rlkey=p7uvuqhgjmk97whrv6nws6n8t&raw=1",
+      "https://www.dropbox.com/scl/fi/5c9d6n67gc2rcek4csyy5/IMG_9794.jpg?rlkey=762qmzkxjg5yp9v43oo10gy2a&raw=1",
+      "https://www.dropbox.com/scl/fi/na64z4p9wjwd0q6o41icp/IMG_9795.jpg?rlkey=tg6sfsuv6doa0r3rxx2brfudc&raw=1",
+      "https://www.dropbox.com/scl/fi/6uswkjqt8laqzkirnk65o/IMG_9796.jpg?rlkey=55z2p3nkubr3q5shl3adgre93&raw=1",
+      "https://www.dropbox.com/scl/fi/0tpewlrwkgau922aowmgl/IMG_9797.jpg?rlkey=95hxu8u6rbftndr2qxyl6iwt0&raw=1",
+      "https://www.dropbox.com/scl/fi/m6xmo3o5esboh8429n0rt/IMG_9798.jpg?rlkey=msr09lfqf37nv4nlp2tu0xm1o&raw=1",
+      "https://www.dropbox.com/scl/fi/iw5fq9xx8fvwwp714n5qg/IMG_9799.jpg?rlkey=qbzc37aylxlo9cwhe2wmha6tq&raw=1",
+      "https://www.dropbox.com/scl/fi/m7w1i6ktxspkhsin5v8fk/IMG_9802.jpg?rlkey=lfezkhhskirvewr6dyuzpx5vy&raw=1",
+      "https://www.dropbox.com/scl/fi/v4wp0orsgu2buoyzdrr7e/IMG_9803.jpg?rlkey=yddga9y9xffqevfdvuekj18k3&raw=1",
+      "https://www.dropbox.com/scl/fi/8hqtjoszpizhc3snf76r7/IMG_9804.jpg?rlkey=u23c9huhq4lcw523gb99bals5&raw=1",
+      "https://www.dropbox.com/scl/fi/whxu9ah2sj5nawsgsd6pa/IMG_9805.jpg?rlkey=v7mfmhmdj549oe3rvgzb1whqv&raw=1",
+      "https://www.dropbox.com/scl/fi/fmatftvshvwfbfmevcs9v/IMG_9806.jpg?rlkey=r6zj225238pmhrloedipqj0ji&raw=1",
+      "https://www.dropbox.com/scl/fi/2137yqwsfvuut50ozyd3t/IMG_9807.jpg?rlkey=qsy1mok0uq90ax36yohdawfci&raw=1",
+      "https://www.dropbox.com/scl/fi/r6lic5md0ua4q9ongjxac/IMG_9808.jpg?rlkey=lufthw51jww2dzy7kn6avp4ov&raw=1",
+      "https://www.dropbox.com/scl/fi/o9vop6obc89395k14hfms/IMG_9809.jpg?rlkey=iwyoybr442jlwq4sagiv1fcp0&raw=1",
+      "https://www.dropbox.com/scl/fi/rrt7q9gjsxgj8sffsfg7i/IMG_9810.jpg?rlkey=44m167nvzsiiqee48kwm88wwo&raw=1",
+      "https://www.dropbox.com/scl/fi/1zbrpatyica6bjhfjfq00/IMG_9811.jpg?rlkey=xb72v36bfi9l11kqiokektenm&raw=1",
+      "https://www.dropbox.com/scl/fi/doch971am77wyddl96ly9/IMG_9818.jpg?rlkey=mbt9grph1nnfcz08ybpepoys7&raw=1",
+      "https://www.dropbox.com/scl/fi/3ycm1i3t1a70d1w3cc1pc/IMG_9821.jpg?rlkey=kt87osf16z8xwm9fnbrn5ngxm&raw=1",
+      "https://www.dropbox.com/scl/fi/5phte5cc8egljemomcr39/IMG_9822.jpg?rlkey=28gk08gjvbm5qnpouuxybq1s3&raw=1",
+      "https://www.dropbox.com/scl/fi/kpu16838tbmwx444can35/IMG_9823.jpg?rlkey=jryccy2rnnq4w51qt3skp2oy2&raw=1",
+      "https://www.dropbox.com/scl/fi/y4x4uprnjzsh5dtalo6ts/IMG_9825.jpg?rlkey=j1v44zbfngx5bwiwm1x9khgyw&raw=1",
+      "https://www.dropbox.com/scl/fi/w4e98zaj1jt0q4yyapm9i/IMG_9826.jpg?rlkey=6xwpjrt69ewdw716q6kd4kasv&raw=1",
+      "https://www.dropbox.com/scl/fi/0qmu6e9ot0cso67m801wn/IMG_9829.jpg?rlkey=qihtedbfc56oghv1vlxya42kt&raw=1",
+      "https://www.dropbox.com/scl/fi/vxctp4cluv15b9j4fk3pu/IMG_9830.jpg?rlkey=p3xcujq3iz9wreh43bv6e4o15&raw=1",
+      "https://www.dropbox.com/scl/fi/x7ofi2txhdsbmfiaii9dl/IMG_9831.jpg?rlkey=22yz958pyaie3bta0wbp6qlrt&raw=1",
+      "https://www.dropbox.com/scl/fi/pva6mxgsktour4gn7qpvm/IMG_9833.jpg?rlkey=12ivqoo0ruko1ouony2frrtgh&raw=1",
+      "https://www.dropbox.com/scl/fi/q1fe9nka0ppcr45sr048z/IMG_9840.jpg?rlkey=seu056w3og8bdum580816rzj0&raw=1",
+      "https://www.dropbox.com/scl/fi/3m32wlbdchqp6f8dgzayw/IMG_9841.jpg?rlkey=xk311dmkx6be7izueyzgp6puw&raw=1"
+    ];
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImage');
+    const modalVideo = document.getElementById('modalVideo');
+    function openModal(index) {
+      currentImageIndex = index;
+      modal.style.display = 'flex';
+      modal.setAttribute('aria-hidden', 'false');
+      renderModal();
+    }
+    function closeModal() {
+      modal.style.display = 'none';
+      modal.setAttribute('aria-hidden', 'true');
+      modalVideo.pause();
+    }
+    function changeImage(d) {
+      if (currentImageIndex === null) return;
+      currentImageIndex = (currentImageIndex + d + images.length) % images.length;
+      renderModal();
+    }
+    function renderModal() {
+      modalImg.style.display = 'block';
+      modalVideo.style.display = 'none';
+      modalImg.src = images[currentImageIndex];
+    }
+    function generateGallery() {
+      const wrap = document.getElementById('galleryContainer');
+      wrap.innerHTML = '';
+      images.forEach((src, i) => {
+        const d = document.createElement('div');
+        d.className = 'it';
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = `Foto ${i + 1}`;
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        img.onclick = () => openModal(i);
+        d.appendChild(img);
+        wrap.appendChild(d);
+      });
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      generateGallery();
+    });
+    window.addEventListener('keydown', e => {
+      if (modal.style.display === 'flex') {
+        if (e.key === 'ArrowLeft') changeImage(-1);
+        if (e.key === 'ArrowRight') changeImage(1);
+        if (e.key === 'Escape') closeModal();
+      }
+    });
+  </script>
 </body>
 </html>
