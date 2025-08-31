@@ -5,49 +5,90 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Immobile per studi medici - Via Fanelli, Castellana Grotte</title>
   <style>
-    :root{--ink:#0f172a;--muted:#475569;--brand:#2563eb;--bg:#f7fafc;--yellow-light:#fffbe0;}
+    :root{
+      --ink:#0f172a;--muted:#475569;--brand:#2563eb;--bg:#e9e9e9;--yellow-light:#fffbe0;
+      /* tipografia uniforme per tutti i contenuti */
+      --content-font-size:1.2rem;
+      --content-line:1.35;
+    }
     *{box-sizing:border-box}
-    body{margin:0;line-height:1.5;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+    body{
+      margin:0;line-height:1.5;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial,sans-serif;
+      background:var(--bg);color:var(--ink)
+    }
     header{text-align:center;padding:1.2rem;background:#fff;border-bottom:1px solid #eee}
     header img{max-width:100%;height:auto;border-radius:12px;box-shadow:0 4px 18px rgba(0,0,0,.15);cursor:pointer}
     h1{margin:.8rem 0;font-size:clamp(2.2rem, 6vw, 2.8rem);line-height:1.2;}
-    h2{margin:.8rem 0 .6rem;font-size:clamp(2rem, 6vw, 2.5rem);line-height:1.2;}
-    p.lead{margin:0;color:var(--muted);font-size:clamp(1.4rem, 4vw, 1.6rem); line-height:1.5;}
+    h2{margin:.8rem 0 .6rem;font-size:clamp(1.8rem, 5vw, 2.2rem);line-height:1.2; padding:.2rem 0;}
+    .address{margin:0;color:var(--muted);font-size:clamp(1.4rem, 4vw, 1.6rem); line-height:1.5;}
     nav{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin:.8rem 0}
-    nav button{padding:.8rem 1.2rem;border:1px solid #ddd;border-radius:8px;background:var(--yellow-light);cursor:pointer;font-weight:600;font-size:clamp(1.3rem, 4vw, 1.4rem);
-              transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-              width:140px;text-align:center;}
-    nav button.active{border-color:var(--brand);box-shadow:0 0 0 2px rgba(37,99,235,.3); background-color: var(--yellow-light);}
-    nav button:hover{background-color: #fffac8;}
+    nav button{
+      padding:.8rem 1.2rem;border:1px solid #ddd;border-radius:8px;background:var(--yellow-light);cursor:pointer;
+      font-weight:600;font-size:clamp(1.3rem,4vw,1.4rem);
+      transition:background-color .2s,border-color .2s,box-shadow .2s; box-shadow:0 1px 3px rgba(0,0,0,.1);
+      width:140px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;
+    }
+    nav button.active{border-color:var(--brand);box-shadow:0 0 0 2px rgba(37,99,235,.3);background-color:var(--yellow-light);}
+    nav button:hover{background-color:#fffac8;}
+    nav button .e{margin-right:0;line-height:1.2;font-size:1.5em;}
     main{max-width:1000px;margin:0 auto;padding:1rem}
     section{display:none}
     section.active{display:block}
+
+    /* tipografia uniforme nei contenuti */
+    section, section p, .doc, .list li, .info-box, .garage-box, .note, .doc-box {
+      font-family:inherit;
+      font-size:var(--content-font-size);
+      line-height:var(--content-line);
+    }
     .list{list-style:none;padding:0;margin:0;display:grid;gap:.3rem;}
-    .list li{background:#fff;border:1px solid #eee;padding:1.2rem;border-radius:8px;font-size:1.5rem;}
-    .doc{display:flex;justify-content:space-between;align-items:center;padding:1rem;background:#fff;border:1px solid #eee;border-radius:8px;margin-bottom:.3rem;font-size:1.3rem;}
+    .list li{background:#fff;border:1px solid #eee;padding:1.2rem;border-radius:8px;}
+
+    .info-box,.garage-box,.note,.doc-box{
+      background:#fff;border:1px solid #eee;border-radius:8px;padding:1.5rem;margin-top:1rem;
+    }
+    .info-box p,.garage-box p,.note p{margin:.4rem 0;}
+    .doc{display:flex;justify-content:space-between;align-items:center;padding:.3rem 0;margin:0;}
+    .doc a{white-space:nowrap}
+
     footer{text-align:center;padding:.8rem;color:#666;font-size:1.1rem;margin-top:1.5rem;border-top:1px solid #eee}
     .e{font-size:1.25em;margin-right:6px}
     .image-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:6px}
     .image-gallery .it{position:relative;border-radius:8px;overflow:hidden;cursor:pointer}
-    .image-gallery img{display:block;width:100%;height:150px;aspect-ratio: 4/3; object-fit: cover; background:#fff;border:1px solid #eee}
+    .image-gallery img{display:block;width:100%;height:150px;aspect-ratio:4/3;object-fit:cover;background:#fff;border:1px solid #eee}
+
+    /* Modali */
     .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:50;justify-content:center;align-items:center}
     .modal .wrap{position:relative;width:92%;max-width:960px}
     .modal img,.modal video{display:block;max-height:80vh;width:100%;object-fit:contain;border-radius:12px;background:#000}
-    .modal .close{position:absolute;top:10px;right:16px;font-size:32px;color:#fff;cursor:pointer}
-    .modal .prev,.modal .next{position:absolute;top:50%;transform:translateY(-50%);font-size:28px;color:#fff;background:rgba(0,0,0,.5);padding:8px 12px;border-radius:8px;cursor:pointer}
+    .modal .close{
+      position:absolute;top:10px;right:16px;font-size:32px;color:#fff;font-weight:700;cursor:pointer;
+      z-index:3;background:rgba(0,0,0,.6);border-radius:10px;padding:4px 10px;line-height:1;-webkit-user-select:none;user-select:none;}
+    .modal .prev,.modal .next{position:absolute;top:50%;transform:translateY(-50%);font-size:28px;color:#fff;background:rgba(0,0,0,.5);padding:8px 12px;border-radius:8px;cursor:pointer;z-index:2}
     .modal .prev{left:0}.modal .next{right:0}
-    .btns{display:flex;flex-wrap:wrap;gap:10px;margin:.6rem 0}
-    .btnA{background:var(--yellow-light);border:1px solid #ddd;border-radius:8px;padding:.8rem 1.2rem;cursor:pointer;font-size:1.3rem;
-          transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-          min-width:120px;}
-    .btnA:hover{background-color: #fffac8;}
+    .modal .modal-video{position:relative;z-index:1}
+
+    .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:2rem;}
+    .btnA{
+      background:var(--yellow-light);border:1px solid #ddd;border-radius:8px;padding:.8rem 1.2rem;cursor:pointer;
+      font-size:1.3rem;transition:background-color .2s,border-color .2s,box-shadow .2s;box-shadow:0 1px 3px rgba(0,0,0,.1);min-width:120px;
+    }
+    .btnA:hover{background-color:#fffac8;}
+
+    /* Modale iframe (documenti / mappa) */
+    .iframe-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,.7);justify-content:center;align-items:center;z-index:100;}
+    .iframe-modal-content{position:relative;width:90%;max-width:960px;height:90%;background-color:#fff;border-radius:8px;overflow:hidden;display:flex;flex-direction:column;}
+    .iframe-modal-content .close{position:absolute;top:10px;right:16px;font-size:32px;color:#fff;font-weight:bold;cursor:pointer;z-index:101;background:rgba(0,0,0,.6);border-radius:10px;padding:4px 10px;line-height:1;}
+    .iframe-modal-content iframe{flex-grow:1;width:100%;border:none;}
+
     @media (max-width:600px){
       .image-gallery{grid-template-columns:repeat(2,1fr)}
-      .image-gallery img{height:120px; aspect-ratio: 4/3;}
-      nav button{padding:.8rem 1rem; font-size: 1.3rem; width:140px;text-align:center;}
-      .btnA{padding:.8rem 1rem; font-size:1.3rem; min-width:120px;}
-      .list li{font-size:1.4rem;padding:1.1rem;}
-      .doc{font-size:1.2rem;padding:.9rem;}
+      .image-gallery img{height:120px;aspect-ratio:4/3;}
+      nav button{padding:.8rem 1rem;font-size:1.3rem;width:140px;text-align:center;}
+      .btnA{padding:.8rem 1rem;font-size:1.3rem;min-width:120px;}
+      .list li{padding:1.1rem;}
+      .doc{padding:.6rem 0;}
       header{padding:.75rem}
     }
   </style>
@@ -58,66 +99,106 @@
   <header>
     <img id="headerImage" src="https://www.dropbox.com/scl/fi/slcptm1llthu6lj8v3mcy/Copertina.jpg?rlkey=l8jydba5ghoo2wg2jgouiou21&raw=1" alt="Copertina immobile - clic per video" title="Clicca per aprire il video">
     <h1>Immobile per studi medici</h1>
-<p class="lead">Via Fanelli, 6 - Castellana Grotte (BA)</p>
-    <div style="margin:.5rem 0;font-size:1.8rem;color:var(--brand);font-weight:600">Prezzo richiesto: € 150.000</div>
+    <p class="address">Via Fanelli, 8 - Castellana Grotte (BA)</p>
     <nav>
-      <button data-route="acquirenti" class="active"><span class="e">👤</span>Acquirenti</button>
-      <button data-route="agenzie"><span class="e">🏢</span>Agenzie</button>
-      <button data-route="imprese"><span class="e">🛠️</span>Imprese</button>
-      <button data-route="gallery"><span class="e">📸</span>Galleria</button>
-      <button data-route="documenti"><span class="e">📄</span>Documenti</button>
-      <button data-route="contatti"><span class="e">✉️</span>Contatti</button>
+      <button type="button" data-route="acquirenti" class="active"><span class="e">👤</span><span class="d">Acquirenti</span></button>
+      <button type="button" data-route="agenzie"><span class="e">🏢</span><span class="d">Agenzie</span></button>
+      <button type="button" data-route="imprese"><span class="e">🛠️</span><span class="d">Imprese</span></button>
+      <button type="button" data-route="gallery"><span class="e">📸</span><span class="d">Galleria</span></button>
+      <button type="button" data-route="documenti"><span class="e">📄</span><span class="d">Documenti</span></button>
+      <button type="button" data-route="contatti"><span class="e">✉️</span><span class="d">Contatti</span></button>
     </nav>
   </header>
+
   <main id="app">
     <section data-page="acquirenti" class="active">
-      <h2><span class="e">👤</span>Informazioni per acquirenti</h2>
-      <ul class="list">
-        <li><b>Superficie:</b> 150-168 mq (da verifica catastale)</li>
-        <li><b>Interni:</b> reception, 8 ambienti studio, 2 bagni, sala d'attesa</li>
-        <li><b>Pertinenze:</b> area scoperta, posto auto recintato</li>
-        <li><b>Accessibilità:</b> abbattimento barriere, bagno disabili</li>
-        <li><b>Area garage:</b> 240 mq sottostante, frazionabile in almeno 5 box</li>
-        <li><b>Classe energetica:</b> B - IPE 213.9</li>
-      </ul>
+      <h2><span class="e">👤</span>Per Acquirenti</h2>
+
+      <div class="info-box">
+        <p><b>Superficie:</b> 150-168 mq (da verifica catastale)</p>
+        <p><b>Interni:</b> reception, 8 ambienti studio, 2 bagni, sala d'attesa</p>
+        <p><b>Pertinenze:</b> area scoperta, posto auto recintato</p>
+        <p><b>Accessibilità:</b> abbattimento barriere, bagno disabili</p>
+        <p><b>Classe energetica:</b> B - IPE 213.9</p>
+        <p><b>Prezzo richiesto:</b> € 150.000</p>
+      </div>
+
+      <!-- BOX GARAGE SEPARATO -->
+      <div class="garage-box">
+        <p><b>Area garage:</b> 240 mq sottostante, frazionabile in almeno 5 box.</p>
+        <p><b>Nota:</b> quest’area <u>non è compresa</u> nel prezzo indicato in questa pagina.</p>
+      </div>
+
+      <div class="note">
+        <p><b>Agevolazioni:</b> In Puglia i professionisti sanitari possono accedere al bando <b>MiniPIA</b> per acquistare o ristrutturare studi con contributi fino al 45%. Dettagli 👉
+          <a href="javascript:void(0)" onclick="openIframeModal('https://www.sistema.puglia.it/', 'acquirenti')">sistema.puglia.it</a>
+        </p>
+      </div>
+
       <div class="btns">
-        <button class="btnA" onclick="openMaps()"><span class="e">🗺️</span> Apri su Google Maps</button>
-        <button class="btnA" onclick="openVideo()"><span class="e">▶️</span> Guarda il video</button>
+        <button type="button" class="btnA" onclick="openGoogleMapsHere()"><span class="e">🗺️</span> Google Maps</button>
+        <button type="button" class="btnA" onclick="openVideoModal()"><span class="e">▶️</span> Guarda il video</button>
       </div>
     </section>
+
     <section data-page="agenzie">
       <h2><span class="e">🏢</span>Per agenzie immobiliari</h2>
       <p>Partnership <b>senza esclusiva</b>. Disponibili scheda immobile, foto HQ e documenti societari.</p>
     </section>
+
     <section data-page="imprese">
       <h2><span class="e">🛠️</span>Per imprese edili</h2>
       <p>Possibilità di ristrutturazione/valorizzazione: cambio d'uso, suddivisione in abitazioni e realizzazione di garage sottostanti.</p>
     </section>
+
     <section data-page="gallery">
       <h2><span class="e">📸</span>Galleria fotografica</h2>
       <div id="galleryContainer" class="image-gallery"></div>
     </section>
+
     <section data-page="documenti">
       <h2><span class="e">📄</span>Documenti</h2>
-      <div class="doc"><span><span class="e">📜</span>Atto costitutivo Socim SAS</span><a href="https://www.dropbox.com/scl/fi/pnw7gsbsrx1ntfh5mwmza/2008-03-07-Atto-Costitutivo-Socim-SAS.pdf?rlkey=7f66nc7gxn6bvtu46a7yk7ph0&raw=1" target="_blank">Scarica</a></div>
-      <div class="doc"><span><span class="e">🏢</span>Visura camerale Socim SAS</span><a href="https://www.dropbox.com/scl/fi/v7q1oct9h67ywjg4u8qhd/2025-08-30-Visura-Socim-SAS.pdf?rlkey=is36f0czxod4rkxfvq9fbai3b&raw=1" target="_blank">Scarica</a></div>
-      <div class="doc"><span><span class="e">⚖️</span>Statuto Socim SAS</span><a href="https://www.dropbox.com/scl/fi/v1axkche6likmqzto1r6t/2008-03-13-Statuto-Socim-SAS.pdf?rlkey=7s4sofa048vj0twltyz6qrpgf&raw=1" target="_blank">Scarica</a></div>
-      <div class="doc"><span><span class="e">🌿</span>APE - Attestato di Prestazione Energetica</span><a href="https://www.dropbox.com/scl/fi/6olcvedcs47u0exu9w92r/2015-10-02-APE.pdf?rlkey=y4bkf6za0uhtgqrcvlvp0523y&raw=1" target="_blank">Scarica</a></div>
+      <div class="doc-box">
+        <div class="doc"><span><span class="e">📜</span>Atto costitutivo Socim SAS</span><a href="javascript:void(0)" onclick="openIframeModal('https://www.dropbox.com/scl/fi/pnw7gsbsrx1ntfh5mwmza/2008-03-07-Atto-Costitutivo-Socim-SAS.pdf?rlkey=7f66nc7gxn6bvtu46a7yk7ph0&raw=1')">Scarica</a></div>
+        <div class="doc"><span><span class="e">🏢</span>Visura camerale Socim SAS</span><a href="javascript:void(0)" onclick="openIframeModal('https://www.dropbox.com/scl/fi/v7q1oct9h67ywjg4u8qhd/2025-08-30-Visura-Socim-SAS.pdf?rlkey=is36f0czxod4rkxfvq9fbai3b&raw=1')">Scarica</a></div>
+        <div class="doc"><span><span class="e">⚖️</span>Statuto Socim SAS</span><a href="javascript:void(0)" onclick="openIframeModal('https://www.dropbox.com/scl/fi/v1axkche6likmqzto1r6t/2008-03-13-Statuto-Socim-SAS.pdf?rlkey=7s4sofa048vj0twltyz6qrpgf&raw=1')">Scarica</a></div>
+        <div class="doc"><span><span class="e">🌿</span>APE - Attestato di Prestazione Energetica</span><a href="javascript:void(0)" onclick="openIframeModal('https://www.dropbox.com/scl/fi/6olcvedcs47u0exu9w92r/2015-10-02-APE.pdf?rlkey=y4bkf6za0uhtgqrcvlvp0523y&raw=1')">Scarica</a></div>
+      </div>
+
+      <h2 style="margin-top: 2rem;"><span class="e">📐</span>Disegni tecnici</h2>
+      <div class="doc-box">
+        <div class="doc">
+          <span><span class="e">🗺️</span>Piantina piano terra</span>
+          <a href="javascript:void(0)" onclick="openIframeModal('https://www.dropbox.com/scl/fi/nyruoo2n3faqeg9xqpdu4/Piantina-PT.pdf?rlkey=vmxbaia2q128nkk05au2l8ags&raw=1')">Scarica</a>
+        </div>
+        <div class="doc">
+          <span><span class="e">🗺️</span>Piantina garage</span>
+          <a href="javascript:void(0)" onclick="openIframeModal('https://www.dropbox.com/scl/fi/gh0ckk55ouzs35hctvgw5/Piantina-garage-Arch.-Antonella-Ivone.pdf?rlkey=kp6392gf9ujvxkdlog23fh7jg&raw=1')">Scarica</a>
+        </div>
+        <div class="doc">
+          <span><span class="e">🗺️</span>Piantina garage completati</span>
+          <a href="javascript:void(0)" onclick="openIframeModal('https://www.dropbox.com/scl/fi/zwb8q4lbubtcez36jdlvl/Piantina-garage-06-11-2015.pdf?rlkey=156ad8r3u1pijmhzrglx7xkir&raw=1')">Scarica</a>
+        </div>
+      </div>
     </section>
+
     <section data-page="contatti">
       <h2><span class="e">✉️</span>Contatti</h2>
-      <p style="font-size:1.4rem;"><span class="e">☎️</span> <b>+39 392 41 56 215</b><br>
+      <p><span class="e">☎️</span> <b>+39 392 41 56 215</b><br>
          <span class="e">✉️</span> leonardo@infostudiopl.com</p>
       <div class="btns">
-        <button class="btnA" onclick="location.href='tel:+393924156215'">📞 Chiama</button>
-        <button class="btnA" onclick="location.href='mailto:leonardo@infostudiopl.com'">✉️ Email</button>
-        <button class="btnA" onclick="location.href='https://wa.me/393924156215'">💬 WhatsApp</button>
+        <button type="button" class="btnA" onclick="location.href='tel:+393924156215'">📞 Chiama</button>
+        <button type="button" class="btnA" onclick="location.href='mailto:leonardo@infostudiopl.com'">✉️ Email</button>
+        <button type="button" class="btnA" onclick="location.href='https://wa.me/393924156215'">💬 WhatsApp</button>
       </div>
     </section>
   </main>
+
   <footer>© <span id="year"></span> Socim S.a.s. - Tutti i diritti riservati</footer>
-  <div id="imageModal" class="modal" aria-hidden="true" role="dialog">
-    <div class="wrap">
+
+  <!-- Modale immagini -->
+  <div id="imageModal" class="modal" aria-hidden="true" role="dialog" aria-label="Galleria immagini">
+    <div class="wrap" role="document">
       <span class="close" onclick="closeModal()" aria-label="Chiudi">×</span>
       <img id="modalImage" alt="Anteprima immagine">
       <video id="modalVideo" class="modal-video" controls playsinline preload="metadata" type="video/mp4"></video>
@@ -125,118 +206,176 @@
       <span class="next" onclick="changeImage(1)" aria-label="Successiva">›</span>
     </div>
   </div>
+
+  <!-- Modale video -->
+  <div id="videoModal" class="modal" aria-hidden="true" role="dialog" aria-label="Riproduzione video">
+    <div class="wrap" role="document">
+      <span class="close" onclick="closeVideoModal()" aria-label="Chiudi">×</span>
+      <video id="videoContent" class="modal-video" controls playsinline preload="metadata"></video>
+    </div>
+  </div>
+
+  <!-- Modale iframe (documenti / mappa) -->
+  <div id="iframeModal" class="iframe-modal" aria-hidden="true" role="dialog" aria-label="Anteprima contenuto">
+    <div class="iframe-modal-content" role="document">
+      <span class="close" onclick="closeIframeModal()" aria-label="Chiudi">×</span>
+      <iframe id="iframeContent" src="" frameborder="0"></iframe>
+    </div>
+  </div>
+
   <script>
-    const pages = [...document.querySelectorAll('[data-page]')];
-    const navBtns = [...document.querySelectorAll('nav button')];
-    function go(to) {
-      pages.forEach(p => p.classList.toggle('active', p.dataset.page === to));
-      navBtns.forEach(b => b.classList.toggle('active', b.dataset.route === to));
-    }
-    navBtns.forEach(b => b.onclick = () => go(b.dataset.route));
-    document.getElementById('year').textContent = new Date().getFullYear();
-    function openMaps() {
-      const q = encodeURIComponent('Via Fanelli, 6, 70013 Castellana Grotte BA, Italia');
-      window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, '_blank');
-    }
-    const VIDEO_SHARED = 'https://www.dropbox.com/scl/fi/cftj9km4x18tg2whm6dqx/Vendesi.mp4?rlkey=fbysbx30j8hdse089hx10tonk&dl=0';
-    function normalizeDropbox(u) {
-      try {
-        const url = new URL(u);
-        if (url.hostname === 'www.dropbox.com') url.hostname = 'dl.dropboxusercontent.com';
-        url.searchParams.delete('dl');
-        url.searchParams.set('raw', '1');
-        return url.toString();
-      } catch {
-        return u;
-      }
-    }
-    const VIDEO_URL = normalizeDropbox(VIDEO_SHARED);
-    function openVideo() {
-      window.open(VIDEO_URL, '_blank');
-    }
-    document.getElementById('headerImage').addEventListener('click', openVideo);
-    let currentImageIndex = null;
-    const images = [
-      "https://www.dropbox.com/scl/fi/axup1qz37h4mkfbr27s1r/IMG_9792.jpg?rlkey=lzy6l9vp5kkiurym9bgl8bk8i&raw=1",
-      "https://www.dropbox.com/scl/fi/6dg7ctgm4isc5lfe5vovv/IMG_9793.jpg?rlkey=p7uvuqhgjmk97whrv6nws6n8t&raw=1",
-      "https://www.dropbox.com/scl/fi/5c9d6n67gc2rcek4csyy5/IMG_9794.jpg?rlkey=762qmzkxjg5yp9v43oo10gy2a&raw=1",
-      "https://www.dropbox.com/scl/fi/na64z4p9wjwd0q6o41icp/IMG_9795.jpg?rlkey=tg6sfsuv6doa0r3rxx2brfudc&raw=1",
-      "https://www.dropbox.com/scl/fi/6uswkjqt8laqzkirnk65o/IMG_9796.jpg?rlkey=55z2p3nkubr3q5shl3adgre93&raw=1",
-      "https://www.dropbox.com/scl/fi/0tpewlrwkgau922aowmgl/IMG_9797.jpg?rlkey=95hxu8u6rbftndr2qxyl6iwt0&raw=1",
-      "https://www.dropbox.com/scl/fi/m6xmo3o5esboh8429n0rt/IMG_9798.jpg?rlkey=msr09lfqf37nv4nlp2tu0xm1o&raw=1",
-      "https://www.dropbox.com/scl/fi/iw5fq9xx8fvwwp714n5qg/IMG_9799.jpg?rlkey=qbzc37aylxlo9cwhe2wmha6tq&raw=1",
-      "https://www.dropbox.com/scl/fi/m7w1i6ktxspkhsin5v8fk/IMG_9802.jpg?rlkey=lfezkhhskirvewr6dyuzpx5vy&raw=1",
-      "https://www.dropbox.com/scl/fi/v4wp0orsgu2buoyzdrr7e/IMG_9803.jpg?rlkey=yddga9y9xffqevfdvuekj18k3&raw=1",
-      "https://www.dropbox.com/scl/fi/8hqtjoszpizhc3snf76r7/IMG_9804.jpg?rlkey=u23c9huhq4lcw523gb99bals5&raw=1",
-      "https://www.dropbox.com/scl/fi/whxu9ah2sj5nawsgsd6pa/IMG_9805.jpg?rlkey=v7mfmhmdj549oe3rvgzb1whqv&raw=1",
-      "https://www.dropbox.com/scl/fi/fmatftvshvwfbfmevcs9v/IMG_9806.jpg?rlkey=r6zj225238pmhrloedipqj0ji&raw=1",
-      "https://www.dropbox.com/scl/fi/2137yqwsfvuut50ozyd3t/IMG_9807.jpg?rlkey=qsy1mok0uq90ax36yohdawfci&raw=1",
-      "https://www.dropbox.com/scl/fi/r6lic5md0ua4q9ongjxac/IMG_9808.jpg?rlkey=lufthw51jww2dzy7kn6avp4ov&raw=1",
-      "https://www.dropbox.com/scl/fi/o9vop6obc89395k14hfms/IMG_9809.jpg?rlkey=iwyoybr442jlwq4sagiv1fcp0&raw=1",
-      "https://www.dropbox.com/scl/fi/rrt7q9gjsxgj8sffsfg7i/IMG_9810.jpg?rlkey=44m167nvzsiiqee48kwm88wwo&raw=1",
-      "https://www.dropbox.com/scl/fi/1zbrpatyica6bjhfjfq00/IMG_9811.jpg?rlkey=xb72v36bfi9l11kqiokektenm&raw=1",
-      "https://www.dropbox.com/scl/fi/doch971am77wyddl96ly9/IMG_9818.jpg?rlkey=mbt9grph1nnfcz08ybpepoys7&raw=1",
-      "https://www.dropbox.com/scl/fi/3ycm1i3t1a70d1w3cc1pc/IMG_9821.jpg?rlkey=kt87osf16z8xwm9fnbrn5ngxm&raw=1",
-      "https://www.dropbox.com/scl/fi/5phte5cc8egljemomcr39/IMG_9822.jpg?rlkey=28gk08gjvbm5qnpouuxybq1s3&raw=1",
-      "https://www.dropbox.com/scl/fi/kpu16838tbmwx444can35/IMG_9823.jpg?rlkey=jryccy2rnnq4w51qt3skp2oy2&raw=1",
-      "https://www.dropbox.com/scl/fi/y4x4uprnjzsh5dtalo6ts/IMG_9825.jpg?rlkey=j1v44zbfngx5bwiwm1x9khgyw&raw=1",
-      "https://www.dropbox.com/scl/fi/w4e98zaj1jt0q4yyapm9i/IMG_9826.jpg?rlkey=6xwpjrt69ewdw716q6kd4kasv&raw=1",
-      "https://www.dropbox.com/scl/fi/0qmu6e9ot0cso67m801wn/IMG_9829.jpg?rlkey=qihtedbfc56oghv1vlxya42kt&raw=1",
-      "https://www.dropbox.com/scl/fi/vxctp4cluv15b9j4fk3pu/IMG_9830.jpg?rlkey=p3xcujq3iz9wreh43bv6e4o15&raw=1",
-      "https://www.dropbox.com/scl/fi/x7ofi2txhdsbmfiaii9dl/IMG_9831.jpg?rlkey=22yz958pyaie3bta0wbp6qlrt&raw=1",
-      "https://www.dropbox.com/scl/fi/pva6mxgsktour4gn7qpvm/IMG_9833.jpg?rlkey=12ivqoo0ruko1ouony2frrtgh&raw=1",
-      "https://www.dropbox.com/scl/fi/q1fe9nka0ppcr45sr048z/IMG_9840.jpg?rlkey=seu056w3og8bdum580816rzj0&raw=1",
-      "https://www.dropbox.com/scl/fi/3m32wlbdchqp6f8dgzayw/IMG_9841.jpg?rlkey=xk311dmkx6be7izueyzgp6puw&raw=1"
-    ];
-    const modal = document.getElementById('imageModal');
-    const modalImg = document.getElementById('modalImage');
-    const modalVideo = document.getElementById('modalVideo');
-    function openModal(index) {
-      currentImageIndex = index;
-      modal.style.display = 'flex';
-      modal.setAttribute('aria-hidden', 'false');
-      renderModal();
-    }
-    function closeModal() {
-      modal.style.display = 'none';
-      modal.setAttribute('aria-hidden', 'true');
-      modalVideo.pause();
-    }
-    function changeImage(d) {
-      if (currentImageIndex === null) return;
-      currentImageIndex = (currentImageIndex + d + images.length) % images.length;
-      renderModal();
-    }
-    function renderModal() {
-      modalImg.style.display = 'block';
-      modalVideo.style.display = 'none';
-      modalImg.src = images[currentImageIndex];
-    }
-    function generateGallery() {
-      const wrap = document.getElementById('galleryContainer');
-      wrap.innerHTML = '';
-      images.forEach((src, i) => {
-        const d = document.createElement('div');
-        d.className = 'it';
-        const img = document.createElement('img');
-        img.src = src;
-        img.alt = `Foto ${i + 1}`;
-        img.loading = 'lazy';
-        img.decoding = 'async';
-        img.onclick = () => openModal(i);
-        d.appendChild(img);
-        wrap.appendChild(d);
-      });
-    }
     document.addEventListener('DOMContentLoaded', () => {
-      generateGallery();
-    });
-    window.addEventListener('keydown', e => {
-      if (modal.style.display === 'flex') {
-        if (e.key === 'ArrowLeft') changeImage(-1);
-        if (e.key === 'ArrowRight') changeImage(1);
-        if (e.key === 'Escape') closeModal();
+      /* NAV */
+      const pages=[...document.querySelectorAll('[data-page]')];
+      const navBtns=[...document.querySelectorAll('nav button')];
+      function go(to){
+        pages.forEach(p=>p.classList.toggle('active',p.dataset.page===to));
+        navBtns.forEach(b=>b.classList.toggle('active',b.dataset.route===to));
       }
+      navBtns.forEach(b=>b.addEventListener('click',()=>go(b.dataset.route)));
+      document.getElementById('year').textContent=new Date().getFullYear();
+
+      /* MODALI BASE (immagini) */
+      const modal=document.getElementById('imageModal');
+      const modalImg=document.getElementById('modalImage');
+      const modalVideo=document.getElementById('modalVideo');
+      let currentImageIndex=null;
+
+      window.openModal = (index) => {
+        currentImageIndex=index;
+        modal.style.display='flex';
+        modal.setAttribute('aria-hidden','false');
+        renderModal();
+      };
+      window.closeModal = () => {
+        modal.style.display='none';
+        modal.setAttribute('aria-hidden','true');
+        modalVideo.pause();
+      };
+      window.changeImage = (d) => {
+        if(currentImageIndex===null) return;
+        currentImageIndex=(currentImageIndex+d+images.length)%images.length;
+        renderModal();
+      };
+      function renderModal(){
+        modalImg.style.display='block';
+        modalVideo.style.display='none';
+        modalImg.src=images[currentImageIndex];
+      }
+
+      /* GALLERIA */
+      const images=[
+        "https://www.dropbox.com/scl/fi/axup1qz37h4mkfbr27s1r/IMG_9792.jpg?rlkey=lzy6l9vp5kkiurym9bgl8bk8i&raw=1",
+        "https://www.dropbox.com/scl/fi/6dg7ctgm4isc5lfe5vovv/IMG_9793.jpg?rlkey=p7uvuqhgjmk97whrv6nws6n8t&raw=1",
+        "https://www.dropbox.com/scl/fi/5c9d6n67gc2rcek4csyy5/IMG_9794.jpg?rlkey=762qmzkxjg5yp9v43oo10gy2a&raw=1",
+        "https://www.dropbox.com/scl/fi/na64z4p9wjwd0q6o41icp/IMG_9795.jpg?rlkey=tg6sfsuv6doa0r3rxx2brfudc&raw=1",
+        "https://www.dropbox.com/scl/fi/6uswkjqt8laqzkirnk65o/IMG_9796.jpg?rlkey=55z2p3nkubr3q5shl3adgre93&raw=1",
+        "https://www.dropbox.com/scl/fi/0tpewlrwkgau922aowmgl/IMG_9797.jpg?rlkey=95hxu8u6rbftndr2qxyl6iwt0&raw=1",
+        "https://www.dropbox.com/scl/fi/m6xmo3o5esboh8429n0rt/IMG_9798.jpg?rlkey=msr09lfqf37nv4nlp2tu0xm1o&raw=1",
+        "https://www.dropbox.com/scl/fi/iw5fq9xx8fvwwp714n5qg/IMG_9799.jpg?rlkey=qbzc37aylxlo9cwhe2wmha6tq&raw=1",
+        "https://www.dropbox.com/scl/fi/m7w1i6ktxspkhsin5v8fk/IMG_9802.jpg?rlkey=lfezkhhskirvewr6dyuzpx5vy&raw=1",
+        "https://www.dropbox.com/scl/fi/v4wp0orsgu2buoyzdrr7e/IMG_9803.jpg?rlkey=yddga9y9xffqevfdvuekj18k3&raw=1",
+        "https://www.dropbox.com/scl/fi/8hqtjoszpizhc3snf76r7/IMG_9804.jpg?rlkey=u23c9huhq4lcw523gb99bals5&raw=1",
+        "https://www.dropbox.com/scl/fi/whxu9ah2sj5nawsgsd6pa/IMG_9805.jpg?rlkey=v7mfmhmdj549oe3rvgzb1whqv&raw=1",
+        "https://www.dropbox.com/scl/fi/fmatftvshvmevcs9v/IMG_9806.jpg?rlkey=r6zj225238pmhrloedipqj0ji&raw=1",
+        "https://www.dropbox.com/scl/fi/2137yqwsfvuut50ozyd3t/IMG_9807.jpg?rlkey=qsy1mok0uq90ax36yohdawfci&raw=1",
+        "https://www.dropbox.com/scl/fi/r6lic5md0ua4q9ongjxac/IMG_9808.jpg?rlkey=lufthw51jww2dzy7kn6avp4ov&raw=1",
+        "https://www.dropbox.com/scl/fi/o9vop6obc89395k14hfms/IMG_9809.jpg?rlkey=iwyoybr442jlwq4sagiv1fcp0&raw=1",
+        "https://www.dropbox.com/scl/fi/rrt7q9gjsxgj8sffsfg7i/IMG_9810.jpg?rlkey=44m167nvzsiiqee48kwm88wwo&raw=1",
+        "https://www.dropbox.com/scl/fi/1zbrpatyica6bjhfjfq00/IMG_9811.jpg?rlkey=xb72v36bfi9l11kqiokektenm&raw=1",
+        "https://www.dropbox.com/scl/fi/doch971am77wyddl96ly9/IMG_9818.jpg?rlkey=mbt9grph1nnfcz08ybpepoys7&raw=1",
+        "https://www.dropbox.com/scl/fi/3ycm1i3t1a70d1w3cc1pc/IMG_9821.jpg?rlkey=kt87osf16z8xwm9fnbrn5ngxm&raw=1",
+        "https://www.dropbox.com/scl/fi/5phte5cc8egljemomcr39/IMG_9822.jpg?rlkey=28gk08gjvbm5qnpouuxybq1s3&raw=1",
+        "https://www.dropbox.com/scl/fi/kpu16838tbmwx444can35/IMG_9823.jpg?rlkey=jryccy2rnnq4w51qt3skp2oy2&raw=1",
+        "https://www.dropbox.com/scl/fi/y4x4uprnjzsh5dtalo6ts/IMG_9825.jpg?rlkey=j1v44zbfngx5bwiwm1x9khgyw&raw=1",
+        "https://www.dropbox.com/scl/fi/w4e98zaj1jt0q4yyapm9i/IMG_9826.jpg?rlkey=6xwpjrt69ewdw716q6kd4kasv&raw=1",
+        "https://www.dropbox.com/scl/fi/0qmu6e9ot0cso67m801wn/IMG_9829.jpg?rlkey=qihtedbfc56oghv1vlxya42kt&raw=1",
+        "https://www.dropbox.com/scl/fi/vxctp4cluv15b9j4fk3pu/IMG_9830.jpg?rlkey=p3xcujq3iz9wreh43bv6e4o15&raw=1",
+        "https://www.dropbox.com/scl/fi/x7ofi2txhdsbmfiaii9dl/IMG_9831.jpg?rlkey=22yz958pyaie3bta0wbp6qlrt&raw=1",
+        "https://www.dropbox.com/scl/fi/pva6mxgsktour4gn7qpvm/IMG_9833.jpg?rlkey=12ivqoo0ruko1ouony2frrtgh&raw=1",
+        "https://www.dropbox.com/scl/fi/q1fe9nka0ppcr45sr048z/IMG_9840.jpg?rlkey=seu056w3og8bdum580816rzj0&raw=1",
+        "https://www.dropbox.com/scl/fi/3m32wlbdchqp6f8dgzayw/IMG_9841.jpg?rlkey=xk311dmkx6be7izueyzgp6puw&raw=1"
+      ];
+
+      function generateGallery(){
+        const wrap=document.getElementById('galleryContainer');wrap.innerHTML='';
+        images.forEach((src,i)=>{
+          const d=document.createElement('div');d.className='it';
+          const img=document.createElement('img');
+          img.src=src;img.alt=`Foto ${i+1}`;img.loading='lazy';img.decoding='async';
+          img.addEventListener('click',()=>window.openModal(i));
+          d.appendChild(img);wrap.appendChild(d);
+        });
+      }
+      generateGallery();
+
+      /* TASTIERA per galleria */
+      window.addEventListener('keydown',e=>{
+        if(modal.style.display==='flex'){
+          if(e.key==='ArrowLeft')window.changeImage(-1);
+          if(e.key==='ArrowRight')window.changeImage(1);
+          if(e.key==='Escape')window.closeModal();
+        }
+      });
+
+      /* MODALE IFRAME (documenti / mappe) */
+      const iframeModal=document.getElementById('iframeModal');
+      const iframeContent=document.getElementById('iframeContent');
+      let iframeReturnRoute=null;
+
+      window.openIframeModal = (url,returnRoute=null)=>{
+        iframeReturnRoute=returnRoute;
+        iframeContent.src=url;
+        iframeModal.style.display='flex';
+        iframeModal.setAttribute('aria-hidden','false');
+      };
+      window.closeIframeModal = ()=>{
+        iframeModal.style.display='none';
+        iframeModal.setAttribute('aria-hidden','true');
+        iframeContent.src='';
+        if(iframeReturnRoute){go(iframeReturnRoute);iframeReturnRoute=null;}
+      };
+      // chiudi modale iframe con ESC e click sfondo
+      window.addEventListener('keydown',e=>{
+        if(iframeModal.style.display==='flex' && e.key==='Escape') window.closeIframeModal();
+      });
+      iframeModal.addEventListener('click',e=>{
+        if(e.target.id==='iframeModal') window.closeIframeModal();
+      });
+
+      /* VIDEO MODALE */
+      const videoModal=document.getElementById('videoModal');
+      const videoContent=document.getElementById('videoContent');
+      const VIDEO_SHARED='https://www.dropbox.com/scl/fi/cftj9km4x18tg2whm6dqx/Vendesi.mp4?rlkey=fbysbx30j8hdse089hx10tonk&dl=0';
+      function normalizeDropbox(u){try{const url=new URL(u);if(url.hostname==='www.dropbox.com')url.hostname='dl.dropboxusercontent.com';url.searchParams.delete('dl');url.searchParams.set('raw','1');return url.toString();}catch{return u;}}
+      const VIDEO_URL=normalizeDropbox(VIDEO_SHARED);
+
+      window.openVideoModal = ()=>{
+        if(typeof window.closeIframeModal==='function') window.closeIframeModal();
+        videoContent.src=VIDEO_URL;
+        videoModal.style.display='flex';
+        videoModal.setAttribute('aria-hidden','false');
+      };
+      window.closeVideoModal = ()=>{
+        videoContent.pause();
+        videoModal.style.display='none';
+        videoModal.setAttribute('aria-hidden','true');
+        videoContent.src='';
+      };
+      document.getElementById('headerImage').addEventListener('click',window.openVideoModal);
+      videoModal.addEventListener('click',e=>{if(e.target.id==='videoModal')window.closeVideoModal();});
+      window.addEventListener('keydown',e=>{
+        if(videoModal.style.display==='flex' && e.key==='Escape') window.closeVideoModal();
+      });
+
+      /* MAPPA (embed) */
+      const MAPS_EMBED_URL="https://www.google.com/maps?q=Via%20Fanelli%208%2C%2070013%20Castellana%20Grotte%20BA&output=embed";
+      window.openGoogleMapsHere = ()=> window.openIframeModal(MAPS_EMBED_URL,'acquirenti');
+
+      /* Stato iniziale modali (hard reset) */
+      document.getElementById('imageModal').style.display='none';
+      document.getElementById('videoModal').style.display='none';
+      document.getElementById('iframeModal').style.display='none';
     });
   </script>
 </body>
