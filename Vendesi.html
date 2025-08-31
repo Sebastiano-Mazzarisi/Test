@@ -16,11 +16,11 @@
   <meta name="theme-color" content="#2563eb">
 
   <!-- Preload copertina -->
-  <link rel="preload" as="image" href="https://www.dropbox.com/scl/fi/slcptm1llthu6lj8v3mcy/Copertina.jpg?rlkey=l8jydba5ghoo2wg2jgouiou21&raw=1">
+  <link rel="preload" as="image" href="https://dl.dropboxusercontent.com/s/slcptm1llthu6lj8v3mcy/Copertina.jpg?rlkey=l8jydba5ghoo2wg2jgouiou21">
 
   <style>
     :root{
-      --ink:#0f172a; --muted:#475569; --brand:#2563eb; --bg:#e9e9e9;
+      --ink:#0f172a; --muted:#475569; --bg:#e9e9e9;
       --yellow-light:#fffbe0; --yellow-strong:#ffd84d; --yellow-border:#f1b400;
       --content-font-size:1.2rem; --content-line:1.35;
     }
@@ -28,31 +28,22 @@
     body{margin:0;line-height:1.5;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial,sans-serif;background:var(--bg);color:var(--ink)}
     header{padding:1.2rem;background:#fff;border-bottom:1px solid #eee;text-align:center}
 
-    /* HERO 450x300 (3:2), responsive su mobile, NESSUN salto */
+    /* HERO 450x300 (3:2), responsive su mobile, nessun salto */
     .hero{
-      position:relative;
-      width:450px;                 /* desktop fisso */
-      height:300px;                /* 3:2 */
-      margin:0 auto 12px;
-      border-radius:12px;
-      overflow:hidden;
-      background:#eceff3;          /* placeholder */
-      box-shadow:0 4px 18px rgba(0,0,0,.15);
-      cursor:pointer;
+      position:relative; width:450px; height:300px; /* 3:2 */
+      margin:0 auto 12px; border-radius:12px; overflow:hidden;
+      background:#eceff3; box-shadow:0 4px 18px rgba(0,0,0,.15); cursor:pointer;
     }
     .hero img{
-      position:absolute; inset:0;
-      width:100%; height:100%;
-      object-fit:cover; display:block;
+      position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+      display:none; opacity:0; transition:opacity .25s ease;
     }
+    .hero img.loaded{ display:block; opacity:1; }
     @media (max-width:500px){
-      .hero{
-        width:min(90vw,450px);
-        height:calc(min(90vw,450px) * 2 / 3); /* mantieni 3:2 */
-      }
+      .hero{ width:min(90vw,450px); height:calc(min(90vw,450px) * 2 / 3); }
     }
 
-    /* Nascondi titolo/indirizzo/menu finché la copertina non è pronta */
+    /* Mostra titolo/nav solo quando la copertina è pronta */
     .header-below{ opacity:0; transition:opacity .18s ease; }
     .header-ready .header-below{ opacity:1; }
 
@@ -94,30 +85,18 @@
     footer{text-align:center;padding:.8rem;color:#666;font-size:1.1rem;margin-top:1.5rem;border-top:1px solid #eee}
     .e{font-size:1.25em;margin-right:6px}
 
-    /* Galleria foto: SEMPRE 4:3 responsive */
+    /* Galleria foto: sempre 4:3 responsive */
     .image-gallery{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-      gap:8px;
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:8px;
     }
     .image-gallery .it{
-      position:relative;
-      border-radius:8px;
-      overflow:hidden;
-      aspect-ratio:4/3;
-      background:#fff;
-      border:1px solid #eee;
-      cursor:pointer;
+      position:relative; border-radius:8px; overflow:hidden;
+      aspect-ratio:4/3; background:#fff; border:1px solid #eee; cursor:pointer;
     }
     .image-gallery .it img{
-      position:absolute; inset:0;
-      width:100%; height:100%;
-      object-fit:cover;
-      display:block;
+      position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;
     }
-    @media (max-width:600px){
-      .image-gallery{ grid-template-columns:repeat(2,1fr); }
-    }
+    @media (max-width:600px){ .image-gallery{ grid-template-columns:repeat(2,1fr); } }
 
     /* Modali base */
     .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:50;justify-content:center;align-items:center}
@@ -129,6 +108,13 @@
     .modal .prev,.modal .next{position:absolute;top:50%;transform:translateY(-50%);font-size:28px;color:#fff;background:rgba(0,0,0,.5);padding:8px 12px;border-radius:8px;cursor:pointer;z-index:2}
     .modal .prev{left:0}.modal .next{right:0}
 
+    /* Contatore foto nella modale */
+    .modal .counter{
+      position:absolute; right:14px; bottom:12px; z-index:5;
+      background:rgba(0,0,0,.65); color:#fff; font-weight:700; font-size:1rem;
+      padding:6px 10px; border-radius:10px; line-height:1; user-select:none;
+    }
+
     .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:2rem}
     .btnA{
       background:var(--yellow-light);border:1px solid #ddd;border-radius:8px;padding:.8rem 1.2rem;cursor:pointer;
@@ -137,8 +123,7 @@
     }
     .btnA:hover{background-color:#fffac8}
     .btnA:active,.btnA:focus-visible{
-      background:var(--yellow-strong);
-      border-color:var(--yellow-border);
+      background:var(--yellow-strong); border-color:var(--yellow-border);
       box-shadow:0 0 0 2px rgba(241,180,0,.35), 0 1px 3px rgba(0,0,0,.15);
       outline:none; transform:translateY(1px);
     }
@@ -158,19 +143,16 @@
     @media (max-width:600px){ #audioModal .close{top:auto;bottom:24px;right:24px} }
   </style>
 
-  <link rel="preconnect" href="https://www.dropbox.com">
   <link rel="preconnect" href="https://dl.dropboxusercontent.com">
+  <link rel="preconnect" href="https://www.dropbox.com">
   <link rel="preconnect" href="https://sebastiano-mazzarisi.github.io">
 </head>
 <body>
-  <!-- HEADER con copertina 3:2: titolo/nav compaiono SOLO dopo il load -->
+  <!-- HEADER con copertina 3:2 e fallback -->
   <header id="hdr">
     <div class="hero" id="hero">
-      <img id="headerImage"
-           src="https://www.dropbox.com/scl/fi/slcptm1llthu6lj8v3mcy/Copertina.jpg?rlkey=l8jydba5ghoo2wg2jgouiou21&raw=1"
-           alt="Copertina immobile - clic per videofoto"
-           title="Clicca per aprire le videofoto"
-           width="450" height="300"
+      <img id="headerImage" alt="Copertina immobile - clic per videofoto" title="Clicca per aprire le videofoto"
+           width="450" height="300" referrerpolicy="no-referrer"
            loading="eager" decoding="async" fetchpriority="high">
     </div>
 
@@ -286,6 +268,8 @@
       <video id="modalVideo" class="modal-video" controls playsinline preload="metadata" type="video/mp4"></video>
       <span class="prev" onclick="changeImage(-1)" aria-label="Precedente">‹</span>
       <span class="next" onclick="changeImage(1)" aria-label="Successiva">›</span>
+      <!-- Contatore foto -->
+      <span id="modalCounter" class="counter">1</span>
     </div>
   </div>
 
@@ -322,32 +306,82 @@
       navBtns.forEach(b=>b.addEventListener('click',()=>go(b.dataset.route)));
       document.getElementById('year').textContent=new Date().getFullYear();
 
-      /* Mostra titolo/menu solo quando la copertina è pronta */
+      /* ======= Copertina con fallback ======= */
       const hdr = document.getElementById('hdr');
       const heroImg = document.getElementById('headerImage');
       const revealHeader = ()=>hdr.classList.add('header-ready');
-      if (heroImg.complete && heroImg.naturalWidth) {
-        revealHeader();                     // già in cache
-      } else {
-        heroImg.addEventListener('load', revealHeader);
-        heroImg.addEventListener('error', revealHeader); // mostra comunque
+
+      function normalizeDropbox(u){
+        try{
+          const url=new URL(u);
+          if(url.hostname==='www.dropbox.com'){ url.hostname='dl.dropboxusercontent.com'; }
+          url.searchParams.delete('dl'); url.searchParams.delete('raw');
+          return url.toString();
+        }catch{return u;}
       }
+      const COVER_PRIMARY = "https://www.dropbox.com/scl/fi/slcptm1llthu6lj8v3mcy/Copertina.jpg?rlkey=l8jydba5ghoo2wg2jgouiou21&raw=1";
+      const COVER_SOURCES = [
+        normalizeDropbox(COVER_PRIMARY),
+        COVER_PRIMARY,
+        "https://sebastiano-mazzarisi.github.io/Test/Vendesi.jpg"
+      ];
+      function tryLoadCover(i=0){
+        if(i>=COVER_SOURCES.length){ revealHeader(); return; }
+        const test=new Image();
+        test.referrerPolicy='no-referrer';
+        test.onload=()=>{ heroImg.src=test.src; heroImg.classList.add('loaded'); revealHeader(); };
+        test.onerror=()=>tryLoadCover(i+1);
+        test.src=COVER_SOURCES[i];
+      }
+      tryLoadCover();
 
-      /* Click hero -> Videofoto */
-      document.getElementById('headerImage').addEventListener('click', ()=>openVideoModal());
+      document.getElementById('hero').addEventListener('click', ()=>openVideoModal());
 
-      /* MODALE IMMAGINI */
+      /* ======= Funzioni utili immagini ======= */
+      function normalizeDropboxImage(u){
+        try{
+          const url=new URL(u);
+          if(url.hostname==='www.dropbox.com'){ url.hostname='dl.dropboxusercontent.com'; }
+          url.searchParams.delete('dl'); url.searchParams.set('raw','1');
+          return url.toString();
+        }catch{return u;}
+      }
+      const IMAGE_FALLBACK = "https://sebastiano-mazzarisi.github.io/Test/Vendesi.jpg";
+
+      /* ======= Modale immagini ======= */
       const modal=document.getElementById('imageModal');
       const modalImg=document.getElementById('modalImage');
       const modalVideo=document.getElementById('modalVideo');
+      const counterEl=document.getElementById('modalCounter');
       let currentImageIndex=null;
 
-      window.openModal = (index) => { currentImageIndex=index; modal.style.display='flex'; modal.setAttribute('aria-hidden','false'); renderModal(); };
-      window.closeModal = () => { modal.style.display='none'; modal.setAttribute('aria-hidden','true'); modalVideo.pause(); };
-      window.changeImage = (d) => { if(currentImageIndex===null) return; currentImageIndex=(currentImageIndex+d+images.length)%images.length; renderModal(); };
-      function renderModal(){ modalImg.style.display='block'; modalVideo.style.display='none'; modalImg.src=images[currentImageIndex]; }
+      window.openModal = (index) => {
+        currentImageIndex=index;
+        modal.style.display='flex'; modal.setAttribute('aria-hidden','false');
+        renderModal();
+      };
+      window.closeModal = () => {
+        modal.style.display='none'; modal.setAttribute('aria-hidden','true'); modalVideo.pause();
+      };
+      window.changeImage = (d) => {
+        if(currentImageIndex===null) return;
+        currentImageIndex=(currentImageIndex+d+images.length)%images.length;
+        renderModal();
+      };
+      function renderModal(){
+        modalImg.style.display='block';
+        modalVideo.style.display='none';
+        const src = images[currentImageIndex];
+        modalImg.onerror = () => {
+          const alt = normalizeDropboxImage(src);
+          if (modalImg.src !== alt) { modalImg.src = alt; }
+          else { modalImg.onerror=null; modalImg.src = IMAGE_FALLBACK; }
+        };
+        modalImg.src = src;
+        counterEl.textContent = (currentImageIndex + 1).toString(); // solo numero
+      }
 
-      /* GALLERIA */
+      /* ======= Galleria ======= */
       const images=[
         "https://www.dropbox.com/scl/fi/axup1qz37h4mkfbr27s1r/IMG_9792.jpg?rlkey=lzy6l9vp5kkiurym9bgl8bk8i&raw=1",
         "https://www.dropbox.com/scl/fi/6dg7ctgm4isc5lfe5vovv/IMG_9793.jpg?rlkey=p7uvuqhgjmk97whrv6nws6n8t&raw=1",
@@ -358,7 +392,8 @@
         "https://www.dropbox.com/scl/fi/m6xmo3o5esboh8429n0rt/IMG_9798.jpg?rlkey=msr09lfqf37nv4nlp2tu0xm1o&raw=1",
         "https://www.dropbox.com/scl/fi/iw5fq9xx8fvwwp714n5qg/IMG_9799.jpg?rlkey=qbzc37aylxlo9cwhe2wmha6tq&raw=1",
         "https://www.dropbox.com/scl/fi/m7w1i6ktxspkhsin5v8fk/IMG_9802.jpg?rlkey=lfezkhhskirvewr6dyuzpx5vy&raw=1",
-        "https://www.dropbox.com/scl/fi/axf0knu3jt5m9q51e2i6c/IMG_9803.jpg?rlkey=s7z9o38b7qpwu7kzj0u3z4aoc&raw=1",
+        /* #10 corretta */
+        "https://www.dropbox.com/scl/fi/v4wp0orsgu2buoyzdrr7e/IMG_9803.jpg?rlkey=yddga9y9xffqevfdvuekj18k3&raw=1",
         "https://www.dropbox.com/scl/fi/8hqtjoszpizhc3snf76r7/IMG_9804.jpg?rlkey=u23c9huhq4lcw523gb99bals5&raw=1",
         "https://www.dropbox.com/scl/fi/whxu9ah2sj5nawsgsd6pa/IMG_9805.jpg?rlkey=v7mfmhmdj549oe3rvgzb1whqv&raw=1",
         "https://www.dropbox.com/scl/fi/fmatftvshvwfbfmevcs9v/IMG_9806.jpg?rlkey=r6zj225238pmhrloedipqj0ji&raw=1",
@@ -385,14 +420,20 @@
         const wrap=document.getElementById('galleryContainer'); wrap.innerHTML='';
         images.forEach((src,i)=>{
           const d=document.createElement('div'); d.className='it';
-          const img=document.createElement('img'); img.src=src; img.alt=`Foto ${i+1}`; img.loading='lazy'; img.decoding='async';
+          const img=document.createElement('img');
+          img.src = src; img.alt = `Foto ${i+1}`; img.loading='lazy'; img.decoding='async';
+          img.onerror = () => {
+            const alt = normalizeDropboxImage(src);
+            if (img.src !== alt) { img.src = alt; }
+            else { img.onerror=null; img.src = IMAGE_FALLBACK; }
+          };
           img.addEventListener('click',()=>window.openModal(i));
           d.appendChild(img); wrap.appendChild(d);
         });
       }
       generateGallery();
 
-      /* TASTIERA per galleria */
+      /* Tasti freccia / ESC nella modale immagini */
       window.addEventListener('keydown',e=>{
         if(modal.style.display==='flex'){
           if(e.key==='ArrowLeft')window.changeImage(-1);
@@ -401,7 +442,7 @@
         }
       });
 
-      /* MODALE IFRAME (documenti / mappe / volantino) */
+      /* ======= Modale iframe (documenti / mappe / volantino) ======= */
       const iframeModal=document.getElementById('iframeModal');
       const iframeContent=document.getElementById('iframeContent');
       let iframeReturnRoute=null;
@@ -425,20 +466,19 @@
         if(e.target.id==='iframeModal') window.closeIframeModal();
       });
 
-      /* VIDEO MODALE (Videofoto) */
+      /* ======= Video (Videofoto) ======= */
       const videoModal=document.getElementById('videoModal');
       const videoContent=document.getElementById('videoContent');
       const VIDEO_SHARED='https://www.dropbox.com/scl/fi/cftj9km4x18tg2whm6dqx/Vendesi.mp4?rlkey=fbysbx30j8hdse089hx10tonk&dl=0';
-      function normalizeDropbox(u){
+      function normalizeVideo(u){
         try{
           const url=new URL(u);
-          if(url.hostname==='www.dropbox.com') url.hostname='dl.dropboxusercontent.com';
+          if(url.hostname==='www.dropbox.com'){ url.hostname='dl.dropboxusercontent.com'; }
           url.searchParams.delete('dl'); url.searchParams.set('raw','1');
           return url.toString();
         }catch{return u;}
       }
-      const VIDEO_URL=normalizeDropbox(VIDEO_SHARED);
-
+      const VIDEO_URL=normalizeVideo(VIDEO_SHARED);
       window.openVideoModal = ()=>{
         if(typeof window.closeIframeModal==='function') window.closeIframeModal();
         videoContent.src=VIDEO_URL;
@@ -451,25 +491,31 @@
         videoModal.setAttribute('aria-hidden','true');
         videoContent.src='';
       };
-      document.getElementById('headerImage').addEventListener('click',window.openVideoModal);
-      videoModal.addEventListener('click',e=>{if(e.target.id==='videoModal')window.closeVideoModal();});
       window.addEventListener('keydown',e=>{
         if(videoModal.style.display==='flex' && e.key==='Escape') window.closeVideoModal();
       });
 
-      /* MAPPA (embed) */
+      /* ======= Google Maps (embed) ======= */
       const MAPS_EMBED_URL="https://www.google.com/maps?q=Via%20Fanelli%208%2C%2070013%20Castellana%20Grotte%20BA&output=embed";
       window.openGoogleMapsHere = ()=> window.openIframeModal(MAPS_EMBED_URL,'privati');
 
-      /* VOLANTINO (PDF in modale) */
+      /* ======= Volantino (PDF) ======= */
       const FLYER_URL="https://www.dropbox.com/scl/fi/si9wdjxybxhwantxxhq0p/Volantino-Privati.pdf?rlkey=pao0gw7irs3gzdo5rqaxtao2y&raw=1";
       window.openFlyer = ()=> window.openIframeModal(FLYER_URL,'privati');
 
-      /* AUDIO GUIDA (MP3 in modale) */
+      /* ======= Audio guida (MP3) ======= */
       const audioModal = document.getElementById('audioModal');
       const audioContent = document.getElementById('audioContent');
       const AUDIO_SHARED = "https://www.dropbox.com/scl/fi/r2qipre9swkgd0v94azva/Podcast.mp3?rlkey=9m7ko0awpm04fktlvb72c1o8q&dl=0";
-      const AUDIO_URL = normalizeDropbox(AUDIO_SHARED);
+      function normalizeAudio(u){
+        try{
+          const url=new URL(u);
+          if(url.hostname==='www.dropbox.com'){ url.hostname='dl.dropboxusercontent.com'; }
+          url.searchParams.delete('dl'); url.searchParams.set('raw','1');
+          return url.toString();
+        }catch{return u;}
+      }
+      const AUDIO_URL = normalizeAudio(AUDIO_SHARED);
 
       window.openAudioModal = ()=>{
         if(typeof window.closeIframeModal==='function') window.closeIframeModal();
@@ -486,9 +532,8 @@
         try{ if(typeof go==='function') go('privati'); }catch(e){}
       };
       audioModal.addEventListener('click',e=>{ if(e.target.id==='audioModal') window.closeAudioModal(); });
-      window.addEventListener('keydown',e=>{ if(audioModal.style.display==='flex' && e.key==='Escape') window.closeAudioModal(); });
 
-      /* Stato iniziale modali (chiusi) */
+      /* Chiudi modali all'avvio */
       document.getElementById('imageModal').style.display='none';
       document.getElementById('videoModal').style.display='none';
       document.getElementById('iframeModal').style.display='none';
