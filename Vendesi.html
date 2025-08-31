@@ -15,6 +15,9 @@
   <meta name="application-name" content="Via Fanelli">
   <meta name="theme-color" content="#2563eb">
 
+  <!-- Preload copertina -->
+  <link rel="preload" as="image" href="https://www.dropbox.com/scl/fi/slcptm1llthu6lj8v3mcy/Copertina.jpg?rlkey=l8jydba5ghoo2wg2jgouiou21&raw=1">
+
   <style>
     :root{
       --ink:#0f172a; --muted:#475569; --brand:#2563eb; --bg:#e9e9e9;
@@ -23,11 +26,39 @@
     }
     *{box-sizing:border-box}
     body{margin:0;line-height:1.5;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-    header{text-align:center;padding:1.2rem;background:#fff;border-bottom:1px solid #eee}
-    header img{max-width:100%;height:auto;border-radius:12px;box-shadow:0 4px 18px rgba(0,0,0,.15);cursor:pointer}
+    header{padding:1.2rem;background:#fff;border-bottom:1px solid #eee;text-align:center}
+
+    /* HERO 450x300 (3:2), responsive su mobile, NESSUN salto */
+    .hero{
+      position:relative;
+      width:450px;                 /* desktop fisso */
+      height:300px;                /* 3:2 */
+      margin:0 auto 12px;
+      border-radius:12px;
+      overflow:hidden;
+      background:#eceff3;          /* placeholder */
+      box-shadow:0 4px 18px rgba(0,0,0,.15);
+      cursor:pointer;
+    }
+    .hero img{
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      object-fit:cover; display:block;
+    }
+    @media (max-width:500px){
+      .hero{
+        width:min(90vw,450px);
+        height:calc(min(90vw,450px) * 2 / 3); /* mantieni 3:2 */
+      }
+    }
+
+    /* Nascondi titolo/indirizzo/menu finché la copertina non è pronta */
+    .header-below{ opacity:0; transition:opacity .18s ease; }
+    .header-ready .header-below{ opacity:1; }
+
     h1{margin:.8rem 0;font-size:clamp(2.2rem,6vw,2.8rem);line-height:1.2}
     h2{margin:.8rem 0 .6rem;font-size:clamp(1.8rem,5vw,2.2rem);line-height:1.2;padding:.2rem 0}
-    .address{margin:0;color:var(--muted);font-size:clamp(1.4rem,4vw,1.6rem);line-height:1.5}
+    .address{margin:0;color:var(--muted);font-size:clamp(1.4rem,4vw,1.6rem);line-height:1.5;text-align:center}
 
     /* NAV */
     nav{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin:.8rem 0}
@@ -39,7 +70,6 @@
     nav button:hover{background-color:#fffac8}
     nav button:active{transform:translateY(1px)}
     nav button .e{margin-right:0;line-height:1.2;font-size:1.5em}
-    /* Stato attivo più evidente */
     nav button.active{
       background:var(--yellow-strong);
       border-color:var(--yellow-border);
@@ -74,7 +104,7 @@
       position:relative;
       border-radius:8px;
       overflow:hidden;
-      aspect-ratio:4/3;               /* mantiene 4:3 su ogni schermo */
+      aspect-ratio:4/3;
       background:#fff;
       border:1px solid #eee;
       cursor:pointer;
@@ -82,7 +112,7 @@
     .image-gallery .it img{
       position:absolute; inset:0;
       width:100%; height:100%;
-      object-fit:cover;               /* ritaglio elegante, zero deformazioni */
+      object-fit:cover;
       display:block;
     }
     @media (max-width:600px){
@@ -133,19 +163,29 @@
   <link rel="preconnect" href="https://sebastiano-mazzarisi.github.io">
 </head>
 <body>
-  <header>
-    <img id="headerImage" src="https://www.dropbox.com/scl/fi/slcptm1llthu6lj8v3mcy/Copertina.jpg?rlkey=l8jydba5ghoo2wg2jgouiou21&raw=1"
-         alt="Copertina immobile - clic per videofoto" title="Clicca per aprire le videofoto">
-    <h1>Immobile per studi medici</h1>
-    <p class="address">Via Fanelli, 8 - Castellana Grotte (BA)</p>
-    <nav>
-      <button type="button" data-route="privati" class="active"><span class="e">👤</span><span class="d">Privati</span></button>
-      <button type="button" data-route="agenzie"><span class="e">🏢</span><span class="d">Agenzie</span></button>
-      <button type="button" data-route="imprese"><span class="e">🛠️</span><span class="d">Imprese</span></button>
-      <button type="button" data-route="gallery"><span class="e">📸</span><span class="d">Galleria</span></button>
-      <button type="button" data-route="documenti"><span class="e">📄</span><span class="d">Documenti</span></button>
-      <button type="button" data-route="contatti"><span class="e">✉️</span><span class="d">Contatti</span></button>
-    </nav>
+  <!-- HEADER con copertina 3:2: titolo/nav compaiono SOLO dopo il load -->
+  <header id="hdr">
+    <div class="hero" id="hero">
+      <img id="headerImage"
+           src="https://www.dropbox.com/scl/fi/slcptm1llthu6lj8v3mcy/Copertina.jpg?rlkey=l8jydba5ghoo2wg2jgouiou21&raw=1"
+           alt="Copertina immobile - clic per videofoto"
+           title="Clicca per aprire le videofoto"
+           width="450" height="300"
+           loading="eager" decoding="async" fetchpriority="high">
+    </div>
+
+    <div class="header-below">
+      <h1>Immobile per studi medici</h1>
+      <p class="address">Via Fanelli, 8 - Castellana Grotte (BA)</p>
+      <nav>
+        <button type="button" data-route="privati" class="active"><span class="e">👤</span><span class="d">Privati</span></button>
+        <button type="button" data-route="agenzie"><span class="e">🏢</span><span class="d">Agenzie</span></button>
+        <button type="button" data-route="imprese"><span class="e">🛠️</span><span class="d">Imprese</span></button>
+        <button type="button" data-route="gallery"><span class="e">📸</span><span class="d">Galleria</span></button>
+        <button type="button" data-route="documenti"><span class="e">📄</span><span class="d">Documenti</span></button>
+        <button type="button" data-route="contatti"><span class="e">✉️</span><span class="d">Contatti</span></button>
+      </nav>
+    </div>
   </header>
 
   <main id="app">
@@ -282,6 +322,20 @@
       navBtns.forEach(b=>b.addEventListener('click',()=>go(b.dataset.route)));
       document.getElementById('year').textContent=new Date().getFullYear();
 
+      /* Mostra titolo/menu solo quando la copertina è pronta */
+      const hdr = document.getElementById('hdr');
+      const heroImg = document.getElementById('headerImage');
+      const revealHeader = ()=>hdr.classList.add('header-ready');
+      if (heroImg.complete && heroImg.naturalWidth) {
+        revealHeader();                     // già in cache
+      } else {
+        heroImg.addEventListener('load', revealHeader);
+        heroImg.addEventListener('error', revealHeader); // mostra comunque
+      }
+
+      /* Click hero -> Videofoto */
+      document.getElementById('headerImage').addEventListener('click', ()=>openVideoModal());
+
       /* MODALE IMMAGINI */
       const modal=document.getElementById('imageModal');
       const modalImg=document.getElementById('modalImage');
@@ -304,10 +358,9 @@
         "https://www.dropbox.com/scl/fi/m6xmo3o5esboh8429n0rt/IMG_9798.jpg?rlkey=msr09lfqf37nv4nlp2tu0xm1o&raw=1",
         "https://www.dropbox.com/scl/fi/iw5fq9xx8fvwwp714n5qg/IMG_9799.jpg?rlkey=qbzc37aylxlo9cwhe2wmha6tq&raw=1",
         "https://www.dropbox.com/scl/fi/m7w1i6ktxspkhsin5v8fk/IMG_9802.jpg?rlkey=lfezkhhskirvewr6dyuzpx5vy&raw=1",
-        "https://www.dropbox.com/scl/fi/v4wp0orsgu2buoyzdrr7e/IMG_9803.jpg?rlkey=yddga9y9xffqevfdvuekj18k3&raw=1",
+        "https://www.dropbox.com/scl/fi/axf0knu3jt5m9q51e2i6c/IMG_9803.jpg?rlkey=s7z9o38b7qpwu7kzj0u3z4aoc&raw=1",
         "https://www.dropbox.com/scl/fi/8hqtjoszpizhc3snf76r7/IMG_9804.jpg?rlkey=u23c9huhq4lcw523gb99bals5&raw=1",
         "https://www.dropbox.com/scl/fi/whxu9ah2sj5nawsgsd6pa/IMG_9805.jpg?rlkey=v7mfmhmdj549oe3rvgzb1whqv&raw=1",
-        /* #13 corretto */
         "https://www.dropbox.com/scl/fi/fmatftvshvwfbfmevcs9v/IMG_9806.jpg?rlkey=r6zj225238pmhrloedipqj0ji&raw=1",
         "https://www.dropbox.com/scl/fi/2137yqwsfvuut50ozyd3t/IMG_9807.jpg?rlkey=qsy1mok0uq90ax36yohdawfci&raw=1",
         "https://www.dropbox.com/scl/fi/r6lic5md0ua4q9ongjxac/IMG_9808.jpg?rlkey=lufthw51jww2dzy7kn6avp4ov&raw=1",
@@ -423,7 +476,7 @@
         audioContent.src = AUDIO_URL;
         audioModal.style.display='flex';
         audioModal.setAttribute('aria-hidden','false');
-        audioContent.play().catch(()=>{}); // auto-play se consentito
+        audioContent.play().catch(()=>{});
       };
       window.closeAudioModal = ()=>{
         audioContent.pause();
@@ -435,7 +488,7 @@
       audioModal.addEventListener('click',e=>{ if(e.target.id==='audioModal') window.closeAudioModal(); });
       window.addEventListener('keydown',e=>{ if(audioModal.style.display==='flex' && e.key==='Escape') window.closeAudioModal(); });
 
-      /* Stato iniziale modali */
+      /* Stato iniziale modali (chiusi) */
       document.getElementById('imageModal').style.display='none';
       document.getElementById('videoModal').style.display='none';
       document.getElementById('iframeModal').style.display='none';
