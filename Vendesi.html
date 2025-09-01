@@ -60,6 +60,11 @@
   footer{text-align:center;padding:.8rem;color:#666;font-size:1.1rem;margin-top:1.5rem;border-top:1px solid #eee; display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:0.5rem;}
   .e{font-size:1.25em;margin-right:6px}
   .counter-box{margin-left: 0.5rem; font-size: 1rem; opacity: 0.7; }
+  
+  /* Nuova regola per nascondere il video nella modale immagine */
+  #imageModal .modal-video {
+    display: none;
+  }
 
   /* Galleria 4:3 */
   .image-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
@@ -396,11 +401,27 @@
     const IMAGE_FALLBACK="https://sebastiano-mazzarisi.github.io/Test/Vendesi.jpg";
 
     /* Modale immagini */
-    const modal=document.getElementById('imageModal'); const modalImg=document.getElementById('modalImage'); const counterEl=document.getElementById('modalCounter'); let currentImageIndex=null;
+    const modal=document.getElementById('imageModal'); const modalImg=document.getElementById('modalImage'); const counterEl=document.getElementById('modalCounter'); const modalVid = document.getElementById('modalVideo'); let currentImageIndex=null;
     window.openModal=(index)=>{currentImageIndex=index;modal.style.display='flex';modal.setAttribute('aria-hidden','false');renderModal()};
     window.closeModal=()=>{modal.style.display='none';modal.setAttribute('aria-hidden','true')};
     window.changeImage=(d)=>{if(currentImageIndex===null)return;currentImageIndex=(currentImageIndex+d+images.length)%images.length;renderModal()};
-    function renderModal(){const src=images[currentImageIndex];modalImg.onerror=()=>{const alt=normalizeDropboxImage(src);if(modalImg.src!==alt){modalImg.src=alt}else{modalImg.onerror=null;modalImg.src=IMAGE_FALLBACK}};modalImg.src=src;counterEl.textContent=(currentImageIndex+1).toString()}
+    function renderModal(){
+      const src=images[currentImageIndex];
+      modalImg.onerror=()=>{
+        const alt=normalizeDropboxImage(src);
+        if(modalImg.src!==alt){
+          modalImg.src=alt
+        } else {
+          modalImg.onerror=null;
+          modalImg.src=IMAGE_FALLBACK
+        }
+      };
+      modalImg.src=src;
+      counterEl.textContent=(currentImageIndex+1).toString();
+      // Nasconde esplicitamente il video, assicurando che l'immagine sia visibile.
+      modalVid.style.display = 'none';
+      modalImg.style.display = 'block';
+    }
 
     /* Galleria */
     const images=[
