@@ -133,6 +133,9 @@
   .docs-panel__body li{ margin:.35rem 0; }
   .docs-panel__audio{ margin-top:auto; border-top:1px solid #eee; background:#fafafa; padding:.55rem .8rem; }
   #docsModal .wrap{display:flex; justify-content:center; align-items:center}
+
+#footer-sep{margin:0 .35rem;color:#999}
+#visitCount{opacity:.6}
 </style>
 <link href="https://dl.dropboxusercontent.com" rel="preconnect"/>
 <link href="https://www.dropbox.com" rel="preconnect"/>
@@ -190,27 +193,49 @@
   </section>
 
   <section data-page="agenzie" tabindex="-1">
-    <h2><span class="e">🏢</span>Per agenzie immobiliari</h2>
-    <div class="info-box">
-      <p><b>Collaborazione aperta, senza esclusiva.</b> Provvigione garantita se l’acquirente è presentato da te.</p>
-      <p><b>Materiali disponibili:</b> scheda immobile, foto, videofoto, audio guida; planimetrie; documentazione essenziale (vedi <a href="#" onclick="go('documenti')">Documenti</a>).</p>
-      <div class="btns" style="margin-top:1rem">
-        <a class="btnA" href="https://wa.me/393356276262">💬 Scrivi su WhatsApp</a>
-        <button class="btnA" onclick="go('documenti')" type="button">📄 Documenti</button>
-      </div>
-    </div>
-  </section>
+<h2><span class="e">🏢</span>Per agenzie immobiliari</h2>
+<div class="info-box">
+<p><b>Collaborazione aperta, senza esclusiva.</b> L’incarico non è in esclusiva per nessuno, ma <b>la tua provvigione è sempre garantita</b> se l’acquirente è presentato da te.</p>
+<p><b>Cosa mettiamo subito a disposizione:</b></p>
+<ul>
+<li>Scheda immobile, foto, videofoto e audio guida.</li>
+<li>Planimetrie (piano terra, garage e “garage completati”).</li>
+<li>Documentazione essenziale: APE, atti societari, visura. Tutto in <a href="#" onclick="go('documenti')">Documenti</a>.</li>
+</ul>
+<p><b>Come tuteliamo la tua segnalazione:</b></p>
+<ul>
+<li>Riconosciamo la paternità del contatto (WhatsApp/e-mail o codice di segnalazione).</li>
+<li>Registro visite e recap trattative per massima trasparenza.</li>
+</ul>
+<p><b>Operatività snella:</b> disponibilità per sopralluoghi, materiali pronti da inviare ai tuoi clienti e risposte rapide ai quesiti tecnici.</p>
+<div class="btns" style="margin-top:1rem">
+<a class="btnA" href="https://wa.me/393356276262">💬 Scrivi su WhatsApp</a>
+<button class="btnA" onclick="go('documenti')" type="button">📄 Documenti</button>
+</div>
+</div>
+</section>
 
   <section data-page="imprese" tabindex="-1">
-    <h2><span class="e">🛠️</span>Per imprese edili</h2>
-    <div class="info-box">
-      <p><b>Riconversione flessibile</b> e ipotesi distributive per una grande abitazione o due unità. Piano garage autorizzato.</p>
-      <div class="btns" style="margin-top:1rem)">
-        <a class="btnA" href="https://wa.me/393356276262">💬 Scrivi su WhatsApp</a>
-        <button class="btnA" onclick="go('documenti')" type="button">📄 Documenti</button>
-      </div>
-    </div>
-  </section>
+<h2><span class="e">🛠️</span>Per imprese edili</h2>
+<div class="info-box">
+<p><b>Immobile flessibile con potenziale di riconversione.</b> È possibile il <b>cambio di destinazione d’uso</b> (vedi <a href="#" onclick="go('documenti')">Documenti</a>) e sono già pronte <b>ipotesi distributive</b> che valorizzano la metratura:</p>
+<ul>
+<li>una <b>grande abitazione</b> di almeno 150 mq;</li>
+<li>oppure <b>due unità</b> (esempio: ~80 mq + ~70 mq), soluzioni facili da collocare sul mercato.</li>
+</ul>
+<p><b>Piano garage già autorizzato dal condominio</b> (vedi Documenti) con possibilità di completamento per ricavare <b>box e cantinole</b>.</p>
+<p><b>Cosa forniamo:</b></p>
+<ul>
+<li>Planimetrie aggiornate e disegni (“piano terra”, “garage”, “garage completati”).</li>
+<li>Materiali fotografici e videofoto per la presentazione dei progetti.</li>
+<li>Documentazione amministrativa essenziale (APE, atti/visure) già disponibile.</li>
+</ul>
+<div class="btns" style="margin-top:1rem)">
+<a class="btnA" href="https://wa.me/393356276262">💬 Scrivi su WhatsApp</a>
+<button class="btnA" onclick="go('documenti')" type="button">📄 Documenti</button>
+</div>
+</div>
+</section>
 
   <section data-page="gallery" tabindex="-1">
     <h2><span class="e">📸</span>Galleria fotografica</h2>
@@ -257,7 +282,9 @@
   </section>
 </main>
 
-<footer>© <span id="year"></span> Socim S.a.s. - Tutti i diritti riservati</footer>
+<footer>
+  © <span id="year"></span> Socim S.a.s. - Tutti i diritti riservati <span id="footer-sep" aria-hidden="true"> · </span> <span id="visitCount" style="white-space:nowrap;"></span>
+</footer>
 
 <!-- Modali varie -->
 <div aria-hidden="true" aria-label="Galleria immagini" class="modal" id="imageModal" role="dialog">
@@ -347,7 +374,9 @@
       navBtns.forEach(b=>b.classList.toggle('active',b.dataset.route===to));
       const sect = pages.find(p=>p.dataset.page===to);
       if(sect){ sect.scrollIntoView({behavior:'smooth', block:'start'}); sect.focus({preventScroll:true}); }
-    }
+    
+  if (to === 'contatti') updateVisitorCounterVendesi();
+}
     window.go=go;
     navBtns.forEach(b=>b.addEventListener('click',()=>go(b.dataset.route)));
     document.getElementById('year').textContent=new Date().getFullYear();
@@ -602,5 +631,50 @@
     document.getElementById('docsModal').style.display='none';
   });
 </script>
+
+<script>
+// ====== CONTATORE VISITE — invisibile/anonimo nel footer ======
+function updateVisitorCounterVendesi(){
+  const el = document.getElementById('visitCount');
+  if(!el) return;
+  const backends=[
+    {url:'https://countapi.mileshilliard.com/api/v1/hit/sebastiano_mazzarisi_vendesi_contatti',map:j=>Number(j.value)},
+    {url:'https://countapi.store/hit/vendesi-contatti/visite',map:j=>Number(j.value)},
+    {url:'https://api.countapi.xyz/hit/sebastiano-mazzarisi/vendesi-contatti',map:j=>Number(j.value)},
+  ];
+  const ATTEMPT_TIMEOUT_MS=3500;
+  const tryBackend=(i)=>{
+    if(i>=backends.length){
+      const k='vendesi_contatti_local_visits';
+      const v=(parseInt(localStorage.getItem(k)||'0',10)||0)+1;
+      localStorage.setItem(k,String(v));
+      el.textContent=String(v); // mostra solo il numero, senza etichetta
+      return;
+    }
+    const {url,map}=backends[i];
+    const controller=new AbortController();
+    const t=setTimeout(()=>controller.abort(),ATTEMPT_TIMEOUT_MS);
+    fetch(url,{signal:controller.signal}).then(r=>{
+      clearTimeout(t);
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.json();
+    }).then(d=>{
+      const val=map(d);
+      if(Number.isFinite(val)){ el.textContent=String(val); }
+      else{ throw new Error('payload'); }
+    }).catch(()=>tryBackend(i+1));
+  };
+  tryBackend(0);
+}
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const active = document.querySelector('section[data-page].active');
+  if (active && active.dataset.page === 'contatti') updateVisitorCounterVendesi();
+});
+</script>
+
 </body>
 </html>
