@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Immobile per studi medici - Via Fanelli, Castellana Grotte</title>
 
-  <!-- Icone + titolo per "Aggiungi a Home" -->
   <link rel="apple-touch-icon" sizes="180x180" href="https://sebastiano-mazzarisi.github.io/Test/Vendesi.jpg">
   <link rel="icon" type="image/jpeg" sizes="192x192" href="https://sebastiano-mazzarisi.github.io/Test/Vendesi.jpg">
   <link rel="icon" href="https://sebastiano-mazzarisi.github.io/Test/Vendesi.jpg">
@@ -15,7 +14,6 @@
   <meta name="application-name" content="Via Fanelli">
   <meta name="theme-color" content="#2563eb">
 
-  <!-- Preload copertina -->
   <link rel="preload" as="image" href="https://dl.dropboxusercontent.com/s/slcptm1llthu6lj8v3mcy/Copertina.jpg?rlkey=l8jydba5ghoo2wg2jgouiou21">
 
   <style>
@@ -25,14 +23,13 @@
       --content-font-size:1.2rem; --content-line:1.35;
     }
     *{box-sizing:border-box}
-    /* barra verticale stabile per evitare micro-spostamenti */
     html{ scrollbar-gutter: stable both-edges; }
     @supports not (scrollbar-gutter: stable){ body{ overflow-y:scroll; } }
 
     body{margin:0;line-height:1.5;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial,sans-serif;background:var(--bg);color:var(--ink)}
     header{padding:1.2rem;background:#fff;border-bottom:1px solid #eee;text-align:center}
 
-    /* HERO 450x300 (3:2) – spazio prenotato */
+    /* HERO 450x300 (3:2) – spazio prenotato per evitare il "salto" del titolo */
     .hero{position:relative;width:450px;height:300px;margin:0 auto 12px;border-radius:12px;overflow:hidden;background:#eceff3;box-shadow:0 4px 18px rgba(0,0,0,.15);cursor:pointer}
     .hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;opacity:0;transition:opacity .25s}
     .hero img.loaded{display:block;opacity:1}
@@ -79,15 +76,15 @@
     /* X default in basso dx */
     .modal .close{position:absolute;right:16px;bottom:12px;top:auto;font-size:32px;color:#fff;font-weight:700;cursor:pointer;z-index:3;background:rgba(0,0,0,.6);border-radius:10px;padding:4px 10px;line-height:1;-webkit-user-select:none;user-select:none}
 
-    /* X in ALTO per Video e Copia info */
-    #videoModal .close, #copyModal .close{top:10px;bottom:auto}
+    /* X in ALTO per Video, Copia info, Google Maps */
+    #videoModal .close, #copyModal .close, .top-close .close{top:10px;bottom:auto}
 
     .modal .prev,.modal .next{position:absolute;top:50%;transform:translateY(-50%);font-size:28px;color:#fff;background:rgba(0,0,0,.5);padding:8px 12px;border-radius:8px;cursor:pointer;z-index:2}
     .modal .prev{left:0}.modal .next{right:0}
     .modal .counter{position:absolute;left:14px;bottom:12px;z-index:5;background:rgba(0,0,0,.65);color:#fff;font-weight:700;font-size:1rem;padding:6px 10px;border-radius:10px;line-height:1;user-select:none}
 
     .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:2rem}
-    .btnA{background:var(--yellow-light);border:1px solid #ddd;border-radius:8px;padding:.8rem 1.2rem;cursor:pointer;font-size:1.3rem;transition:background-color .15s,border-color .15s,box-shadow .15s,transform .02s;box-shadow:0 1px 3px rgba(0,0,0,.1);min-width:120px}
+    .btnA{background:var(--yellow-light);border:1px solid #ddd;border-radius:8px;padding:.8rem 1.2rem;cursor:pointer;font-size:1.3rem;transition:background-color .15s,border-color .15s,box-shadow .15s,transform .02s;box-shadow:0 1px 3px rgba(0,0,0,.1);min-width:120px;text-decoration:none;color:inherit;display:inline-block;text-align:center}
     .btnA:hover{background-color:#fffac8}
     .btnA:active,.btnA:focus-visible{background:var(--yellow-strong);border-color:var(--yellow-border);box-shadow:0 0 0 2px rgba(241,180,0,.35),0 1px 3px rgba(0,0,0,.15);outline:none;transform:translateY(1px)}
 
@@ -96,8 +93,6 @@
     .iframe-modal-content{position:relative;width:90%;max-width:960px;height:90%;background-color:#fff;border-radius:8px;overflow:hidden;display:flex;flex-direction:column}
     .iframe-modal-content .close{position:absolute;right:16px;bottom:12px;top:auto;font-size:32px;color:#fff;font-weight:bold;cursor:pointer;z-index:101;background:rgba(0,0,0,.6);border-radius:10px;padding:4px 10px;line-height:1}
     .iframe-modal-content iframe{flex-grow:1;width:100%;border:none}
-    /* SOLO per Google Maps: X in alto dx */
-    .iframe-modal.top-close .iframe-modal-content .close{top:10px;bottom:auto}
 
     /* Audio – X in basso, staccata dalla barra */
     .audio-player{width:100%;max-width:100%;background:#111;border-radius:12px}
@@ -116,7 +111,7 @@
     .copy-actions{margin-top:1rem;display:flex;gap:.6rem;justify-content:flex-end}
     .copy-hint{color:#475569;font-size:.95rem;margin-top:.8rem}
 
-    /* Emoji sempre a colori (Android/iOS/Win) */
+    /* Emoji a colori (dove supportato) */
     .emoji{
       font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Segoe UI Symbol","Android Emoji","EmojiOne Color","Twemoji Mozilla",sans-serif;
       font-weight: normal; font-style: normal;
@@ -147,7 +142,7 @@
   </header>
 
   <main id="app">
-    <section data-page="privati" class="active">
+    <section data-page="privati" class="active" tabindex="-1">
       <h2><span class="e">👤</span>Per privati</h2>
 
       <div class="info-box">
@@ -181,39 +176,67 @@
       </div>
     </section>
 
-    <section data-page="agenzie">
+    <section data-page="agenzie" tabindex="-1">
       <h2><span class="e">🏢</span>Per agenzie immobiliari</h2>
       <div class="info-box">
-        <p><b>Nessuna esclusiva.</b> L’incarico di vendita non è in esclusiva (vale per chiunque), ma <b>la tua provvigione è garantita</b> se l’acquirente ci viene presentato da te.</p>
-        <p>Mettiamo a disposizione scheda completa, documenti e materiale fotografico. Per i dettagli tecnici consulta la <a href="#" onclick="go('documenti')">Documentazione</a>.</p>
-        <p>Contattaci per concordare visite e modalità operative.</p>
+        <p><b>Collaborazione aperta, senza esclusiva.</b> L’incarico non è in esclusiva per nessuno, ma <b>la tua provvigione è sempre garantita</b> se l’acquirente è presentato da te.</p>
+        <p><b>Cosa mettiamo subito a disposizione:</b></p>
+        <ul>
+          <li>Scheda immobile, foto, videofoto e audio guida.</li>
+          <li>Planimetrie (piano terra, garage e “garage completati”).</li>
+          <li>Documentazione essenziale: APE, atti societari, visura. Tutto in <a href="#" onclick="go('documenti')">Documenti</a>.</li>
+        </ul>
+        <p><b>Come tuteliamo la tua segnalazione:</b></p>
+        <ul>
+          <li>Riconosciamo la paternità del contatto (WhatsApp/e-mail o codice di segnalazione).</li>
+          <li>Registro visite e recap trattative per massima trasparenza.</li>
+        </ul>
+        <p><b>Operatività snella:</b> disponibilità per sopralluoghi, materiali pronti da inviare ai tuoi clienti e risposte rapide ai quesiti tecnici.</p>
+
+        <div class="btns" style="margin-top:1rem">
+          <a class="btnA" href="https://wa.me/393356276262">💬 Scrivi su WhatsApp</a>
+          <button type="button" class="btnA" onclick="go('documenti')">📄 Documenti</button>
+        </div>
       </div>
     </section>
 
-    <section data-page="imprese">
+    <section data-page="imprese" tabindex="-1">
       <h2><span class="e">🛠️</span>Per imprese edili</h2>
       <div class="info-box">
-        <p><b>Cambio d’uso possibile</b> (vedi <a href="#" onclick="go('documenti')">Documentazione</a>) e ampia flessibilità progettuale:</p>
+        <p><b>Immobile flessibile con potenziale di riconversione.</b> È possibile il <b>cambio di destinazione d’uso</b> (vedi <a href="#" onclick="go('documenti')">Documenti</a>) e sono già pronte <b>ipotesi distributive</b> che valorizzano la metratura:</p>
         <ul>
-          <li>realizzare una <b>grande abitazione</b> (≥ 150 mq),</li>
-          <li>oppure due unità distinte, ad es. <b>80 mq</b> + <b>70 mq</b>, facilmente vendibili.</li>
+          <li>una <b>grande abitazione</b> di almeno 150 mq;</li>
+          <li>oppure <b>due unità</b> (esempio: ~80 mq + ~70 mq), soluzioni facili da collocare sul mercato.</li>
         </ul>
-        <p>È inoltre possibile <b>completare il piano garage</b>, già <b>autorizzato dal condominio</b> (vedi <a href="#" onclick="go('documenti')">Documentazione</a>), ricavando box auto e cantinole.</p>
+        <p><b>Piano garage già autorizzato dal condominio</b> (vedi Documenti) con possibilità di completamento per ricavare <b>box e cantinole</b>.</p>
+
+        <p><b>Cosa forniamo:</b></p>
+        <ul>
+          <li>Planimetrie aggiornate e disegni (“piano terra”, “garage”, “garage completati”).</li>
+          <li>Materiali fotografici e videofoto per la presentazione dei progetti.</li>
+          <li>Documentazione amministrativa essenziale (APE, atti/visure) già disponibile.</li>
+        </ul>
+
+        <div class="btns" style="margin-top:1rem)">
+          <a class="btnA" href="https://wa.me/393356276262">💬 Scrivi su WhatsApp</a>
+          <button type="button" class="btnA" onclick="go('documenti')">📄 Documenti</button>
+        </div>
       </div>
     </section>
 
-    <section data-page="gallery">
+    <section data-page="gallery" tabindex="-1">
       <h2><span class="e">📸</span>Galleria fotografica</h2>
       <div id="galleryContainer" class="image-gallery"></div>
     </section>
 
-    <section data-page="documenti">
+    <section data-page="documenti" tabindex="-1">
       <h2><span class="e">📄</span>Documenti</h2>
       <div class="doc-box">
         <div class="doc"><span><span class="e">📜</span>Atto costitutivo Socim SAS</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/pnw7gsbsrx1ntfh5mwmza/2008-03-07-Atto-Costitutivo-Socim-SAS.pdf?rlkey=7f66nc7gxn6bvtu46a7yk7ph0&dl=0')">Scarica</a></div>
         <div class="doc"><span><span class="e">🏢</span>Visura camerale Socim SAS</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/v7q1oct9h67ywjg4u8qhd/2025-08-30-Visura-Socim-SAS.pdf?rlkey=is36f0czxod4rkxfvq9fbai3b&dl=0')">Scarica</a></div>
         <div class="doc"><span><span class="e">⚖️</span>Statuto Socim SAS</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/v1axkche6likmqzto1r6t/2008-03-13-Statuto-Socim-SAS.pdf?rlkey=7s4sofa048vj0twltyz6qrpgf&dl=0')">Scarica</a></div>
         <div class="doc"><span><span class="e">🌿</span>APE - Attestato di Prestazione Energetica</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/6olcvedcs47u0exu9w92r/2015-10-02-APE.pdf?rlkey=y4bkf6za0uhtgqrcvlvp0523y&dl=0')">Scarica</a></div>
+        <div class="doc"><span><span class="e">🏛️</span>Delibere condominio</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/mpkgvoyow4evwkm03y7ej/Delibere-condominio.pdf?rlkey=ulrym00biywn9xzwg9a69k1r6&dl=0')">Scarica</a></div>
       </div>
 
       <h2 style="margin-top:2rem;"><span class="e">📐</span>Disegni tecnici</h2>
@@ -221,16 +244,17 @@
         <div class="doc"><span><span class="e">🗺️</span>Piantina piano terra</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/nyruoo2n3faqeg9xqpdu4/Piantina-PT.pdf?rlkey=vmxbaia2q128nkk05au2l8ags&dl=0')">Scarica</a></div>
         <div class="doc"><span><span class="e">🗺️</span>Piantina garage</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/gh0ckk55ouzs35hctvgw5/Piantina-garage-Arch.-Antonella-Ivone.pdf?rlkey=kp6392gf9ujvxkdlog23fh7jg&dl=0')">Scarica</a></div>
         <div class="doc"><span><span class="e">🗺️</span>Piantina garage completati</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/zwb8q4lbubtcez36jdlvl/Piantina-garage-06-11-2015.pdf?rlkey=156ad8r3u1pijmhzrglx7xkir&dl=0')">Scarica</a></div>
+        <div class="doc"><span><span class="e">🗺️️</span>Piantina esempio suddivisione</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/kw9ban3ga0i117lrj5d37/Pianta-piano-terra-Arch.-Antonella-Ivone.pdf?rlkey=n44h59v65sur42euc80van0d5&dl=0')">Scarica</a></div>
       </div>
     </section>
 
-    <section data-page="contatti">
+    <section data-page="contatti" tabindex="-1">
       <h2><span class="e">✉️</span>Contatti</h2>
-      <p><span class="e">☎️</span> <b>+39 392 41 56 215</b><br><span class="e">✉️</span> leonardo@infostudiopl.com</p>
+      <p><span class="e">☎️</span> <b>+39 335 627 6262</b><br><span class="e">✉️</span> s.mazzarisi@mazzarisi.it</p>
       <div class="btns">
-        <button type="button" class="btnA" onclick="location.href='tel:+393924156215'">📞 Chiama</button>
-        <button type="button" class="btnA" onclick="openWhatsApp()">💬 WhatsApp</button>
-        <button type="button" class="btnA" onclick="location.href='mailto:leonardo@infostudiopl.com'">✉️ Email</button>
+        <button type="button" class="btnA" onclick="location.href='tel:+393356276262'">📞 Chiama</button>
+        <a class="btnA" href="https://wa.me/393356276262">💬 WhatsApp</a>
+        <button type="button" class="btnA" onclick="location.href='mailto:s.mazzarisi@mazzarisi.it'">✉️ Email</button>
         <button type="button" class="btnA" onclick="openCopyModal()">📋 Copia info</button>
       </div>
     </section>
@@ -238,7 +262,6 @@
 
   <footer>© <span id="year"></span> Socim S.a.s. - Tutti i diritti riservati</footer>
 
-  <!-- Modali -->
   <div id="imageModal" class="modal" aria-hidden="true" role="dialog" aria-label="Galleria immagini">
     <div class="wrap" role="document">
       <span class="close" onclick="closeModal()" aria-label="Chiudi">×</span>
@@ -258,7 +281,7 @@
   </div>
 
   <div id="iframeModal" class="iframe-modal" aria-hidden="true" role="dialog" aria-label="Anteprima contenuto">
-    <div class="iframe-modal-content" role="document">
+    <div class="iframe-modal-content top-close" role="document">
       <span class="close" onclick="closeIframeModal()" aria-label="Chiudi">×</span>
       <iframe id="iframeContent" src="" frameborder="0"></iframe>
     </div>
@@ -271,7 +294,6 @@
     </div>
   </div>
 
-  <!-- Modale Copia info -->
   <div id="copyModal" class="modal" aria-hidden="true" role="dialog" aria-label="Copia informazioni">
     <div class="wrap" role="document">
       <span class="close" onclick="closeCopyModal()" aria-label="Chiudi">×</span>
@@ -283,13 +305,19 @@
       </div>
     </div>
   </div>
-
+  
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      /* NAV */
+      /* NAV + focus sulla sezione */
       const pages=[...document.querySelectorAll('[data-page]')];
       const navBtns=[...document.querySelectorAll('nav button')];
-      function go(to){pages.forEach(p=>p.classList.toggle('active',p.dataset.page===to));navBtns.forEach(b=>b.classList.toggle('active',b.dataset.route===to))}
+      function go(to){
+        pages.forEach(p=>p.classList.toggle('active',p.dataset.page===to));
+        navBtns.forEach(b=>b.classList.toggle('active',b.dataset.route===to));
+        const sect = pages.find(p=>p.dataset.page===to);
+        if(sect){ sect.scrollIntoView({behavior:'smooth', block:'start'}); sect.focus({preventScroll:true}); }
+      }
+      window.go=go;
       navBtns.forEach(b=>b.addEventListener('click',()=>go(b.dataset.route)));
       document.getElementById('year').textContent=new Date().getFullYear();
 
@@ -353,43 +381,49 @@
 
       /* Iframe/PDF/Mappe */
       const iframeModal=document.getElementById('iframeModal'); const iframeContent=document.getElementById('iframeContent'); let iframeReturnRoute=null;
-      window.openIframeModal=(url,returnRoute=null,topClose=false)=>{iframeReturnRoute=returnRoute;if(topClose)iframeModal.classList.add('top-close');else iframeModal.classList.remove('top-close');iframeContent.src=url;iframeModal.style.display='flex';iframeModal.setAttribute('aria-hidden','false')};
-      window.closeIframeModal=()=>{iframeModal.style.display='none';iframeModal.setAttribute('aria-hidden','true');iframeModal.classList.remove('top-close');iframeContent.src='';if(iframeReturnRoute){go(iframeReturnRoute);iframeReturnRoute=null}};
-      window.addEventListener('keydown',e=>{if(iframeModal.style.display==='flex'&&e.key==='Escape')window.closeIframeModal()});
-      iframeModal.addEventListener('click',e=>{if(e.target.id==='iframeModal')window.closeIframeModal()});
+      function openIframeModal(url,returnRoute=null,topClose=false){
+        iframeReturnRoute=returnRoute;
+        const cont=document.querySelector('.iframe-modal-content');
+        cont.classList.toggle('top-close', !!topClose);
+        iframeContent.src=url; iframeModal.style.display='flex'; iframeModal.setAttribute('aria-hidden','false');
+      }
+      function closeIframeModal(){
+        iframeModal.style.display='none'; iframeModal.setAttribute('aria-hidden','true');
+        iframeContent.src=''; if(iframeReturnRoute){go(iframeReturnRoute); iframeReturnRoute=null}
+      }
+      window.openIframeModal=openIframeModal; window.closeIframeModal=closeIframeModal;
+      window.addEventListener('keydown',e=>{if(iframeModal.style.display==='flex'&&e.key==='Escape')closeIframeModal()});
+      iframeModal.addEventListener('click',e=>{if(e.target.id==='iframeModal')closeIframeModal()});
       function normalizeDropboxPdf(u){try{const url=new URL(u);if(url.hostname==='www.dropbox.com'){url.hostname='dl.dropboxusercontent.com'}url.searchParams.delete('dl');url.searchParams.set('raw','1');return url.toString()}catch{return u}}
-      function openPdfModal(u,returnRoute=null){const direct=normalizeDropboxPdf(u);const viewer="https://mozilla.github.io/pdf.js/web/viewer.html";const viewerUrl=`${viewer}?file=${encodeURIComponent(direct)}#zoom=page-fit&pagemode=none`;openIframeModal(viewerUrl,returnRoute,false)}; window.openPdfModal=openPdfModal;
+      function openPdfModal(u,returnRoute=null){const direct=normalizeDropboxPdf(u);const viewer="https://mozilla.github.io/pdf.js/web/viewer.html";const viewerUrl=`${viewer}?file=${encodeURIComponent(direct)}#zoom=page-fit&pagemode=none`;openIframeModal(viewerUrl,returnRoute,true)}; window.openPdfModal=openPdfModal;
 
       /* Video (X in alto) */
       const videoModal=document.getElementById('videoModal'); const videoContent=document.getElementById('videoContent');
       const VIDEO_SHARED='https://www.dropbox.com/scl/fi/cftj9km4x18tg2whm6dqx/Vendesi.mp4?rlkey=fbysbx30j8hdse089hx10tonk&dl=0';
       function normalizeVideo(u){try{const url=new URL(u);if(url.hostname==='www.dropbox.com'){url.hostname='dl.dropboxusercontent.com'}url.searchParams.delete('dl');url.searchParams.set('raw','1');return url.toString()}catch{return u}}
       const VIDEO_URL=normalizeVideo(VIDEO_SHARED);
-      window.openVideoModal=()=>{if(typeof window.closeIframeModal==='function')window.closeIframeModal();videoContent.src=VIDEO_URL;videoModal.style.display='flex';videoModal.setAttribute('aria-hidden','false')};
-      window.closeVideoModal=()=>{videoContent.pause();videoModal.style.display='none';videoModal.setAttribute('aria-hidden','true');videoContent.src=''};
-      window.addEventListener('keydown',e=>{if(videoModal.style.display==='flex'&&e.key==='Escape')window.closeVideoModal()});
+      function openVideoModal(){try{closeIframeModal()}catch{};videoContent.src=VIDEO_URL;videoModal.style.display='flex';videoModal.setAttribute('aria-hidden','false')}
+      function closeVideoModal(){videoContent.pause();videoModal.style.display='none';videoModal.setAttribute('aria-hidden','true');videoContent.src=''}
+      window.openVideoModal=openVideoModal; window.closeVideoModal=closeVideoModal;
+      window.addEventListener('keydown',e=>{if(videoModal.style.display==='flex'&&e.key==='Escape')closeVideoModal()});
 
       /* Google Maps (X in alto) */
       const MAPS_EMBED_URL="https://www.google.com/maps?q=Via%20Fanelli%208%2C%2070013%20Castellana%20Grotte%20BA&output=embed";
-      window.openGoogleMapsHere=()=>window.openIframeModal(MAPS_EMBED_URL,'privati',true);
+      window.openGoogleMapsHere=()=>openIframeModal(MAPS_EMBED_URL,'privati',true);
 
       /* Volantino */
       const FLYER_URL="https://www.dropbox.com/scl/fi/si9wdjxybxhwantxxhq0p/Volantino-Privati.pdf?rlkey=pao0gw7irs3gzdo5rqaxtao2y&dl=0";
-      window.openFlyer=()=>window.openPdfModal(FLYER_URL,'privati');
+      window.openFlyer=()=>openPdfModal(FLYER_URL,'privati');
 
       /* Audio (X in basso) */
       const audioModal=document.getElementById('audioModal'); const audioContent=document.getElementById('audioContent');
       const AUDIO_SHARED="https://www.dropbox.com/scl/fi/r2qipre9swkgd0v94azva/Podcast.mp3?rlkey=9m7ko0awpm04fktlvb72c1o8q&dl=0";
       function normalizeAudio(u){try{const url=new URL(u);if(url.hostname==='www.dropbox.com'){url.hostname='dl.dropboxusercontent.com'}url.searchParams.delete('dl');url.searchParams.set('raw','1');return url.toString()}catch{return u}}
       const AUDIO_URL=normalizeAudio(AUDIO_SHARED);
-      window.openAudioModal=()=>{if(typeof window.closeIframeModal==='function')window.closeIframeModal();audioContent.src=AUDIO_URL;audioModal.style.display='flex';audioModal.setAttribute('aria-hidden','false');audioContent.play().catch(()=>{})};
-      window.closeAudioModal=()=>{audioContent.pause();audioModal.style.display='none';audioModal.setAttribute('aria-hidden','true');audioContent.src='';try{if(typeof go==='function')go('privati')}catch(e){}};
+      function openAudioModal(){try{closeIframeModal()}catch{};audioContent.src=AUDIO_URL;audioModal.style.display='flex';audioModal.setAttribute('aria-hidden','false');audioContent.play().catch(()=>{})}
+      function closeAudioModal(){audioContent.pause();audioModal.style.display='none';audioModal.setAttribute('aria-hidden','true');audioContent.src='';try{go('privati')}catch{}}
+      window.openAudioModal=openAudioModal; window.closeAudioModal=closeAudioModal;
       audioModal.addEventListener('click',e=>{if(e.target.id==='audioModal')closeAudioModal()});
-
-      /* WhatsApp */
-      const WHATSAPP_NUMBER="393924156215";
-      const WHATSAPP_TEXT="Buongiorno, desidero avere maggiori informazioni sulla vendita dell'immobile di Via Fanelli, 8 a Castellana Grotte.";
-      window.openWhatsApp=()=>{const url=`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_TEXT)}`;location.href=url};
 
       /* ===== Copia info (emoji a colori) ===== */
       const LINK_URL="https://tinyurl.com/Via-Fanelli";
@@ -401,7 +435,6 @@
         `🔍 Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: ${LINK_URL}`
       ].join("\n");
 
-      /* in HTML avvolgo le emoji in <span class="emoji"> per forzare il font “color emoji” sui device */
       const COPY_HTML =
         `<div>`+
           `<p><span class="emoji">📢</span> È disponibile per la vendita a Castellana Grotte un immobile di 150-168 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p>`+
@@ -420,7 +453,7 @@
       function closeCopyModal(){const m=document.getElementById('copyModal');m.style.display='none';m.setAttribute('aria-hidden','true')}
       window.openCopyModal=openCopyModal; window.closeCopyModal=closeCopyModal;
 
-      // Fallback robusto per copia anche da file://
+      /* Fallback copia */
       function legacyCopyUsingSelection(html,text){
         try{
           const div=document.createElement('div');
@@ -470,7 +503,7 @@
       }
       window.copyInfo=copyInfo;
 
-      /* chiusura clic fuori */
+      /* chiusura clic fuori modali */
       document.getElementById('imageModal').addEventListener('click',e=>{if(e.target.id==='imageModal')closeModal()});
       document.getElementById('videoModal').addEventListener('click',e=>{if(e.target.id==='videoModal')closeVideoModal()});
       document.getElementById('audioModal').addEventListener('click',e=>{if(e.target.id==='audioModal')closeAudioModal()});
