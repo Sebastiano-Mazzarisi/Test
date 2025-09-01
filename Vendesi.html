@@ -115,6 +115,12 @@
     .rich-copy a{color:#1d4ed8;text-decoration:underline}
     .copy-actions{margin-top:1rem;display:flex;gap:.6rem;justify-content:flex-end}
     .copy-hint{color:#475569;font-size:.95rem;margin-top:.8rem}
+
+    /* Emoji sempre a colori (Android/iOS/Win) */
+    .emoji{
+      font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Segoe UI Symbol","Android Emoji","EmojiOne Color","Twemoji Mozilla",sans-serif;
+      font-weight: normal; font-style: normal;
+    }
   </style>
 
   <link rel="preconnect" href="https://dl.dropboxusercontent.com">
@@ -177,12 +183,23 @@
 
     <section data-page="agenzie">
       <h2><span class="e">🏢</span>Per agenzie immobiliari</h2>
-      <p>Partnership <b>senza esclusiva</b>. Disponibili scheda immobile, foto HQ e documenti societari.</p>
+      <div class="info-box">
+        <p><b>Nessuna esclusiva.</b> L’incarico di vendita non è in esclusiva (vale per chiunque), ma <b>la tua provvigione è garantita</b> se l’acquirente ci viene presentato da te.</p>
+        <p>Mettiamo a disposizione scheda completa, documenti e materiale fotografico. Per i dettagli tecnici consulta la <a href="#" onclick="go('documenti')">Documentazione</a>.</p>
+        <p>Contattaci per concordare visite e modalità operative.</p>
+      </div>
     </section>
 
     <section data-page="imprese">
       <h2><span class="e">🛠️</span>Per imprese edili</h2>
-      <p>Possibilità di ristrutturazione/valorizzazione: cambio d'uso, suddivisione in abitazioni e realizzazione di garage sottostanti.</p>
+      <div class="info-box">
+        <p><b>Cambio d’uso possibile</b> (vedi <a href="#" onclick="go('documenti')">Documentazione</a>) e ampia flessibilità progettuale:</p>
+        <ul>
+          <li>realizzare una <b>grande abitazione</b> (≥ 150 mq),</li>
+          <li>oppure due unità distinte, ad es. <b>80 mq</b> + <b>70 mq</b>, facilmente vendibili.</li>
+        </ul>
+        <p>È inoltre possibile <b>completare il piano garage</b>, già <b>autorizzato dal condominio</b> (vedi <a href="#" onclick="go('documenti')">Documentazione</a>), ricavando box auto e cantinole.</p>
+      </div>
     </section>
 
     <section data-page="gallery">
@@ -374,7 +391,7 @@
       const WHATSAPP_TEXT="Buongiorno, desidero avere maggiori informazioni sulla vendita dell'immobile di Via Fanelli, 8 a Castellana Grotte.";
       window.openWhatsApp=()=>{const url=`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_TEXT)}`;location.href=url};
 
-      /* ===== Copia info (robusto anche da file://) ===== */
+      /* ===== Copia info (emoji a colori) ===== */
       const LINK_URL="https://tinyurl.com/Via-Fanelli";
       const COPY_TEXT=[
         "📢 È disponibile per la vendita a Castellana Grotte un immobile di 150-168 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.",
@@ -383,25 +400,27 @@
         "",
         `🔍 Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: ${LINK_URL}`
       ].join("\n");
+
+      /* in HTML avvolgo le emoji in <span class="emoji"> per forzare il font “color emoji” sui device */
       const COPY_HTML =
         `<div>`+
-          `<p>📢 È disponibile per la vendita a Castellana Grotte un immobile di 150-168 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p>`+
-          `<p>💲 Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.</p>`+
-          `<p>🔍 Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: <a href="${LINK_URL}">${LINK_URL}</a></p>`+
+          `<p><span class="emoji">📢</span> È disponibile per la vendita a Castellana Grotte un immobile di 150-168 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p>`+
+          `<p><span class="emoji">💲</span> Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.</p>`+
+          `<p><span class="emoji">🔍</span> Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: <a href="${LINK_URL}">${LINK_URL}</a></p>`+
         `</div>`;
 
       function renderCopyPreview(){
         const box=document.getElementById('copyText');
         box.innerHTML =
-          `<p>📢 È disponibile per la vendita a Castellana Grotte un immobile di 150-168 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p>`+
-          `<p>💲 Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.</p>`+
-          `<p>🔍 Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: <a href="${LINK_URL}" target="_blank" rel="noopener">${LINK_URL}</a></p>`;
+          `<p><span class="emoji">📢</span> È disponibile per la vendita a Castellana Grotte un immobile di 150-168 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p>`+
+          `<p><span class="emoji">💲</span> Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.</p>`+
+          `<p><span class="emoji">🔍</span> Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: <a href="${LINK_URL}" target="_blank" rel="noopener">${LINK_URL}</a></p>`;
       }
       function openCopyModal(){renderCopyPreview();const m=document.getElementById('copyModal');m.style.display='flex';m.setAttribute('aria-hidden','false')}
       function closeCopyModal(){const m=document.getElementById('copyModal');m.style.display='none';m.setAttribute('aria-hidden','true')}
       window.openCopyModal=openCopyModal; window.closeCopyModal=closeCopyModal;
 
-      // Fallback “duro”: prova selection+execCommand, poi textarea; ritorna true/false
+      // Fallback robusto per copia anche da file://
       function legacyCopyUsingSelection(html,text){
         try{
           const div=document.createElement('div');
@@ -438,13 +457,10 @@
             await navigator.clipboard.writeText(COPY_TEXT);
             success(); return;
           }
-          // se arriviamo qui proviamo il fallback
           if(legacyCopyUsingSelection(COPY_HTML,COPY_TEXT)){success(); return;}
           throw new Error("execCommand failed");
         }catch(e){
-          // un'ultima chance: fallback anche dopo l’errore
           if(legacyCopyUsingSelection(COPY_HTML,COPY_TEXT)){success(); return;}
-          // seleziona il testo nella modale così puoi fare Ctrl+C
           if(preview){
             const range=document.createRange();range.selectNodeContents(preview);
             const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
