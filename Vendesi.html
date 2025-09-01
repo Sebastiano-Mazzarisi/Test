@@ -25,23 +25,21 @@
       --content-font-size:1.2rem; --content-line:1.35;
     }
     *{box-sizing:border-box}
+    /* barra verticale stabile per evitare micro-spostamenti */
+    html{ scrollbar-gutter: stable both-edges; }
+    @supports not (scrollbar-gutter: stable){ body{ overflow-y:scroll; } }
+
     body{margin:0;line-height:1.5;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial,sans-serif;background:var(--bg);color:var(--ink)}
     header{padding:1.2rem;background:#fff;border-bottom:1px solid #eee;text-align:center}
 
-    /* HERO 450x300 (3:2) */
-    .hero{
-      position:relative; width:450px; height:300px;
-      margin:0 auto 12px; border-radius:12px; overflow:hidden;
-      background:#eceff3; box-shadow:0 4px 18px rgba(0,0,0,.15); cursor:pointer;
-    }
-    .hero img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none; opacity:0; transition:opacity .25s}
-    .hero img.loaded{ display:block; opacity:1 }
-    @media (max-width:500px){
-      .hero{ width:min(90vw,450px); height:calc(min(90vw,450px) * 2 / 3) }
-    }
+    /* HERO 450x300 (3:2) – spazio prenotato */
+    .hero{position:relative;width:450px;height:300px;margin:0 auto 12px;border-radius:12px;overflow:hidden;background:#eceff3;box-shadow:0 4px 18px rgba(0,0,0,.15);cursor:pointer}
+    .hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;opacity:0;transition:opacity .25s}
+    .hero img.loaded{display:block;opacity:1}
+    @media (max-width:500px){.hero{width:min(90vw,450px);height:calc(min(90vw,450px)*2/3)}}
 
-    .header-below{ opacity:0; transition:opacity .18s }
-    .header-ready .header-below{ opacity:1 }
+    .header-below{opacity:0;transition:opacity .18s}
+    .header-ready .header-below{opacity:1}
 
     h1{margin:.8rem 0;font-size:clamp(2.2rem,6vw,2.8rem);line-height:1.2}
     h2{margin:.8rem 0 .6rem;font-size:clamp(1.8rem,5vw,2.2rem);line-height:1.2}
@@ -55,12 +53,7 @@
     }
     nav button:hover{background-color:#fffac8}
     nav button:active{transform:translateY(1px)}
-    nav button.active{
-      background:var(--yellow-strong);
-      border-color:var(--yellow-border);
-      box-shadow:0 0 0 2px rgba(241,180,0,.35), 0 2px 6px rgba(0,0,0,.15);
-      color:#221a00;
-    }
+    nav button.active{background:var(--yellow-strong);border-color:var(--yellow-border);box-shadow:0 0 0 2px rgba(241,180,0,.35),0 2px 6px rgba(0,0,0,.15);color:#221a00}
 
     main{max-width:1000px;margin:0 auto;padding:1rem}
     section{display:none}
@@ -73,64 +66,53 @@
     footer{text-align:center;padding:.8rem;color:#666;font-size:1.1rem;margin-top:1.5rem;border-top:1px solid #eee}
     .e{font-size:1.25em;margin-right:6px}
 
-    /* Galleria foto 4:3 */
-    .image-gallery{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:8px}
-    .image-gallery .it{position:relative; border-radius:8px; overflow:hidden; aspect-ratio:4/3; background:#fff; border:1px solid #eee; cursor:pointer}
-    .image-gallery .it img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
+    /* Galleria 4:3 */
+    .image-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+    .image-gallery .it{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:4/3;background:#fff;border:1px solid #eee;cursor:pointer}
+    .image-gallery .it img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 
-    /* Modali base */
+    /* Modali generiche */
     .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:50;justify-content:center;align-items:center}
     .modal .wrap{position:relative;width:92%;max-width:960px}
     .modal img,.modal video{display:block;max-height:80vh;width:100%;object-fit:contain;border-radius:12px;background:#000}
 
-    /* default: X in basso a destra */
-    .modal .close{
-      position:absolute;right:16px;bottom:12px;top:auto;font-size:32px;color:#fff;font-weight:700;cursor:pointer;
-      z-index:3;background:rgba(0,0,0,.6);border-radius:10px;padding:4px 10px;line-height:1;-webkit-user-select:none;user-select:none
-    }
+    /* X default in basso dx */
+    .modal .close{position:absolute;right:16px;bottom:12px;top:auto;font-size:32px;color:#fff;font-weight:700;cursor:pointer;z-index:3;background:rgba(0,0,0,.6);border-radius:10px;padding:4px 10px;line-height:1;-webkit-user-select:none;user-select:none}
 
-    /* X in ALTO SOLO per Video e Copia info */
-    #videoModal .close, #copyModal .close{ top:10px; bottom:auto }
+    /* X in ALTO per Video e Copia info */
+    #videoModal .close, #copyModal .close{top:10px;bottom:auto}
 
     .modal .prev,.modal .next{position:absolute;top:50%;transform:translateY(-50%);font-size:28px;color:#fff;background:rgba(0,0,0,.5);padding:8px 12px;border-radius:8px;cursor:pointer;z-index:2}
     .modal .prev{left:0}.modal .next{right:0}
-
-    /* Contatore foto (in basso a sinistra) */
-    .modal .counter{
-      position:absolute; left:14px; bottom:12px; z-index:5;
-      background:rgba(0,0,0,.65); color:#fff; font-weight:700; font-size:1rem;
-      padding:6px 10px; border-radius:10px; line-height:1; user-select:none;
-    }
+    .modal .counter{position:absolute;left:14px;bottom:12px;z-index:5;background:rgba(0,0,0,.65);color:#fff;font-weight:700;font-size:1rem;padding:6px 10px;border-radius:10px;line-height:1;user-select:none}
 
     .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:2rem}
-    .btnA{
-      background:var(--yellow-light);border:1px solid #ddd;border-radius:8px;padding:.8rem 1.2rem;cursor:pointer;
-      font-size:1.3rem;transition:background-color .15s,border-color .15s,box-shadow .15s,transform .02s;
-      box-shadow:0 1px 3px rgba(0,0,0,.1);min-width:120px
-    }
+    .btnA{background:var(--yellow-light);border:1px solid #ddd;border-radius:8px;padding:.8rem 1.2rem;cursor:pointer;font-size:1.3rem;transition:background-color .15s,border-color .15s,box-shadow .15s,transform .02s;box-shadow:0 1px 3px rgba(0,0,0,.1);min-width:120px}
     .btnA:hover{background-color:#fffac8}
-    .btnA:active,.btnA:focus-visible{
-      background:var(--yellow-strong); border-color:var(--yellow-border);
-      box-shadow:0 0 0 2px rgba(241,180,0,.35), 0 1px 3px rgba(0,0,0,.15);
-      outline:none; transform:translateY(1px);
-    }
+    .btnA:active,.btnA:focus-visible{background:var(--yellow-strong);border-color:var(--yellow-border);box-shadow:0 0 0 2px rgba(241,180,0,.35),0 1px 3px rgba(0,0,0,.15);outline:none;transform:translateY(1px)}
 
-    /* Iframe (PDF/Mappe) -> X in basso va bene */
+    /* Iframe (PDF/Mappe) */
     .iframe-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,.7);justify-content:center;align-items:center;z-index:100}
     .iframe-modal-content{position:relative;width:90%;max-width:960px;height:90%;background-color:#fff;border-radius:8px;overflow:hidden;display:flex;flex-direction:column}
     .iframe-modal-content .close{position:absolute;right:16px;bottom:12px;top:auto;font-size:32px;color:#fff;font-weight:bold;cursor:pointer;z-index:101;background:rgba(0,0,0,.6);border-radius:10px;padding:4px 10px;line-height:1}
     .iframe-modal-content iframe{flex-grow:1;width:100%;border:none}
+    /* SOLO per Google Maps: X in alto dx */
+    .iframe-modal.top-close .iframe-modal-content .close{top:10px;bottom:auto}
 
-    /* Audio (X in basso a destra) */
+    /* Audio – X in basso, staccata dalla barra */
     .audio-player{width:100%;max-width:100%;background:#111;border-radius:12px}
     .audio-modal .wrap{background:transparent}
     #audioModal .wrap{width:92%;max-width:720px;display:flex;justify-content:center;align-items:center}
     #audioModal .audio-player{width:100%;max-width:640px}
+    #audioModal .close{bottom:96px;right:16px;top:auto}
+    @media (max-width:480px){#audioModal .close{bottom:84px}}
 
     /* Copia info */
     .copy-box{background:#fff;border:1px solid #eee;border-radius:12px;padding:1.4rem}
     .copy-rect{border:1.5px solid #c7cdd6;border-radius:10px;padding:1rem;background:#f8fafc}
-    .copy-rect p{margin:0; white-space:pre-wrap; font-size:1.05rem; line-height:1.45}
+    .rich-copy p{margin:0 0 1em 0;color:inherit}
+    .rich-copy p:last-child{margin-bottom:0}
+    .rich-copy a{color:#1d4ed8;text-decoration:underline}
     .copy-actions{margin-top:1rem;display:flex;gap:.6rem;justify-content:flex-end}
     .copy-hint{color:#475569;font-size:.95rem;margin-top:.8rem}
   </style>
@@ -142,10 +124,8 @@
 <body>
   <header id="hdr">
     <div class="hero" id="hero">
-      <img id="headerImage" alt="Copertina immobile - clic per videofoto" title="Clicca per aprire le videofoto"
-           width="450" height="300" referrerpolicy="no-referrer" loading="eager" decoding="async" fetchpriority="high">
+      <img id="headerImage" alt="Copertina immobile - clic per videofoto" title="Clicca per aprire le videofoto" width="450" height="300" referrerpolicy="no-referrer" loading="eager" decoding="async" fetchpriority="high">
     </div>
-
     <div class="header-below">
       <h1>Immobile per studi medici</h1>
       <p class="address">Via Fanelli, 8 - Castellana Grotte (BA)</p>
@@ -219,27 +199,17 @@
         <div class="doc"><span><span class="e">🌿</span>APE - Attestato di Prestazione Energetica</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/6olcvedcs47u0exu9w92r/2015-10-02-APE.pdf?rlkey=y4bkf6za0uhtgqrcvlvp0523y&dl=0')">Scarica</a></div>
       </div>
 
-      <h2 style="margin-top: 2rem;"><span class="e">📐</span>Disegni tecnici</h2>
+      <h2 style="margin-top:2rem;"><span class="e">📐</span>Disegni tecnici</h2>
       <div class="doc-box">
-        <div class="doc">
-          <span><span class="e">🗺️</span>Piantina piano terra</span>
-          <a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/nyruoo2n3faqeg9xqpdu4/Piantina-PT.pdf?rlkey=vmxbaia2q128nkk05au2l8ags&dl=0')">Scarica</a>
-        </div>
-        <div class="doc">
-          <span><span class="e">🗺️</span>Piantina garage</span>
-          <a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/gh0ckk55ouzs35hctvgw5/Piantina-garage-Arch.-Antonella-Ivone.pdf?rlkey=kp6392gf9ujvxkdlog23fh7jg&dl=0')">Scarica</a>
-        </div>
-        <div class="doc">
-          <span><span class="e">🗺️</span>Piantina garage completati</span>
-          <a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/zwb8q4lbubtcez36jdlvl/Piantina-garage-06-11-2015.pdf?rlkey=156ad8r3u1pijmhzrglx7xkir&dl=0')">Scarica</a>
-        </div>
+        <div class="doc"><span><span class="e">🗺️</span>Piantina piano terra</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/nyruoo2n3faqeg9xqpdu4/Piantina-PT.pdf?rlkey=vmxbaia2q128nkk05au2l8ags&dl=0')">Scarica</a></div>
+        <div class="doc"><span><span class="e">🗺️</span>Piantina garage</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/gh0ckk55ouzs35hctvgw5/Piantina-garage-Arch.-Antonella-Ivone.pdf?rlkey=kp6392gf9ujvxkdlog23fh7jg&dl=0')">Scarica</a></div>
+        <div class="doc"><span><span class="e">🗺️</span>Piantina garage completati</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/zwb8q4lbubtcez36jdlvl/Piantina-garage-06-11-2015.pdf?rlkey=156ad8r3u1pijmhzrglx7xkir&dl=0')">Scarica</a></div>
       </div>
     </section>
 
     <section data-page="contatti">
       <h2><span class="e">✉️</span>Contatti</h2>
-      <p><span class="e">☎️</span> <b>+39 392 41 56 215</b><br>
-         <span class="e">✉️</span> leonardo@infostudiopl.com</p>
+      <p><span class="e">☎️</span> <b>+39 392 41 56 215</b><br><span class="e">✉️</span> leonardo@infostudiopl.com</p>
       <div class="btns">
         <button type="button" class="btnA" onclick="location.href='tel:+393924156215'">📞 Chiama</button>
         <button type="button" class="btnA" onclick="openWhatsApp()">💬 WhatsApp</button>
@@ -290,18 +260,9 @@
       <span class="close" onclick="closeCopyModal()" aria-label="Chiudi">×</span>
       <div class="copy-box">
         <h3 style="margin:.2rem 0 1rem">Testo riepilogativo</h3>
-
-        <!-- Riquadro con il testo da copiare -->
-        <div class="copy-rect">
-          <p id="copyText"></p>
-        </div>
-
-        <!-- Frase tecnica (stile normale) -->
-        <div class="copy-hint">Suggerimento: usa il bottone qui sotto per copiare il testo e incollarlo in un messaggio o un’email.</div>
-
-        <div class="copy-actions">
-          <button type="button" class="btnA" id="copyBtn" onclick="copyInfo()">Copia</button>
-        </div>
+        <div class="copy-rect"><div id="copyText" class="rich-copy"></div></div>
+        <div class="copy-hint">Se la copia automatica non parte, il testo verrà selezionato: premi <b>Ctrl+C</b> (o tocca “Copia”) e poi incolla.</div>
+        <div class="copy-actions"><button type="button" class="btnA" id="copyBtn" onclick="copyInfo()">Copia</button></div>
       </div>
     </div>
   </div>
@@ -311,80 +272,30 @@
       /* NAV */
       const pages=[...document.querySelectorAll('[data-page]')];
       const navBtns=[...document.querySelectorAll('nav button')];
-      function go(to){
-        pages.forEach(p=>p.classList.toggle('active',p.dataset.page===to));
-        navBtns.forEach(b=>b.classList.toggle('active',b.dataset.route===to));
-      }
+      function go(to){pages.forEach(p=>p.classList.toggle('active',p.dataset.page===to));navBtns.forEach(b=>b.classList.toggle('active',b.dataset.route===to))}
       navBtns.forEach(b=>b.addEventListener('click',()=>go(b.dataset.route)));
       document.getElementById('year').textContent=new Date().getFullYear();
 
-      /* Copertina */
-      const hdr = document.getElementById('hdr');
-      const heroImg = document.getElementById('headerImage');
-      const revealHeader = ()=>hdr.classList.add('header-ready');
-
-      function normalizeDropbox(u){
-        try{
-          const url=new URL(u);
-          if(url.hostname==='www.dropbox.com'){ url.hostname='dl.dropboxusercontent.com'; }
-          url.searchParams.delete('dl'); url.searchParams.delete('raw');
-          return url.toString();
-        }catch{return u;}
-      }
-      const COVER_PRIMARY = "https://www.dropbox.com/scl/fi/slcptm1llthu6lj8v3mcy/Copertina.jpg?rlkey=l8jydba5ghoo2wg2jgouiou21&raw=1";
-      const COVER_SOURCES = [ normalizeDropbox(COVER_PRIMARY), COVER_PRIMARY, "https://sebastiano-mazzarisi.github.io/Test/Vendesi.jpg" ];
-      function tryLoadCover(i=0){
-        if(i>=COVER_SOURCES.length){ revealHeader(); return; }
-        const test=new Image();
-        test.referrerPolicy='no-referrer';
-        test.onload=()=>{ heroImg.src=test.src; heroImg.classList.add('loaded'); revealHeader(); };
-        test.onerror=()=>tryLoadCover(i+1);
-        test.src=COVER_SOURCES[i];
-      }
+      /* Copertina con fallback */
+      const hdr=document.getElementById('hdr'); const heroImg=document.getElementById('headerImage');
+      const revealHeader=()=>hdr.classList.add('header-ready');
+      function normalizeDropbox(u){try{const url=new URL(u);if(url.hostname==='www.dropbox.com'){url.hostname='dl.dropboxusercontent.com'}url.searchParams.delete('dl');url.searchParams.delete('raw');return url.toString()}catch{return u}}
+      const COVER_PRIMARY="https://www.dropbox.com/scl/fi/slcptm1llthu6lj8v3mcy/Copertina.jpg?rlkey=l8jydba5ghoo2wg2jgouiou21&raw=1";
+      const COVER_SOURCES=[normalizeDropbox(COVER_PRIMARY),COVER_PRIMARY,"https://sebastiano-mazzarisi.github.io/Test/Vendesi.jpg"];
+      function tryLoadCover(i=0){if(i>=COVER_SOURCES.length){revealHeader();return}const test=new Image();test.referrerPolicy='no-referrer';test.onload=()=>{heroImg.src=test.src;heroImg.classList.add('loaded');revealHeader()};test.onerror=()=>tryLoadCover(i+1);test.src=COVER_SOURCES[i]}
       tryLoadCover();
+      document.getElementById('hero').addEventListener('click',()=>openVideoModal());
 
-      document.getElementById('hero').addEventListener('click', ()=>openVideoModal());
-
-      /* Immagini util */
-      function normalizeDropboxImage(u){
-        try{
-          const url=new URL(u);
-          if(url.hostname==='www.dropbox.com'){ url.hostname='dl.dropboxusercontent.com'; }
-          url.searchParams.delete('dl'); url.searchParams.set('raw','1');
-          return url.toString();
-        }catch{return u;}
-      }
-      const IMAGE_FALLBACK = "https://sebastiano-mazzarisi.github.io/Test/Vendesi.jpg";
+      /* Utils immagini */
+      function normalizeDropboxImage(u){try{const url=new URL(u);if(url.hostname==='www.dropbox.com'){url.hostname='dl.dropboxusercontent.com'}url.searchParams.delete('dl');url.searchParams.set('raw','1');return url.toString()}catch{return u}}
+      const IMAGE_FALLBACK="https://sebastiano-mazzarisi.github.io/Test/Vendesi.jpg";
 
       /* Modale immagini */
-      const modal=document.getElementById('imageModal');
-      const modalImg=document.getElementById('modalImage');
-      const counterEl=document.getElementById('modalCounter');
-      let currentImageIndex=null;
-
-      window.openModal = (index) => {
-        currentImageIndex=index;
-        modal.style.display='flex'; modal.setAttribute('aria-hidden','false');
-        renderModal();
-      };
-      window.closeModal = () => {
-        modal.style.display='none'; modal.setAttribute('aria-hidden','true');
-      };
-      window.changeImage = (d) => {
-        if(currentImageIndex===null) return;
-        currentImageIndex=(currentImageIndex+d+images.length)%images.length;
-        renderModal();
-      };
-      function renderModal(){
-        const src = images[currentImageIndex];
-        modalImg.onerror = () => {
-          const alt = normalizeDropboxImage(src);
-          if (modalImg.src !== alt) { modalImg.src = alt; }
-          else { modalImg.onerror=null; modalImg.src = IMAGE_FALLBACK; }
-        };
-        modalImg.src = src;
-        counterEl.textContent = (currentImageIndex + 1).toString();
-      }
+      const modal=document.getElementById('imageModal'); const modalImg=document.getElementById('modalImage'); const counterEl=document.getElementById('modalCounter'); let currentImageIndex=null;
+      window.openModal=(index)=>{currentImageIndex=index;modal.style.display='flex';modal.setAttribute('aria-hidden','false');renderModal()};
+      window.closeModal=()=>{modal.style.display='none';modal.setAttribute('aria-hidden','true')};
+      window.changeImage=(d)=>{if(currentImageIndex===null)return;currentImageIndex=(currentImageIndex+d+images.length)%images.length;renderModal()};
+      function renderModal(){const src=images[currentImageIndex];modalImg.onerror=()=>{const alt=normalizeDropboxImage(src);if(modalImg.src!==alt){modalImg.src=alt}else{modalImg.onerror=null;modalImg.src=IMAGE_FALLBACK}};modalImg.src=src;counterEl.textContent=(currentImageIndex+1).toString()}
 
       /* Galleria */
       const images=[
@@ -419,210 +330,137 @@
         "https://www.dropbox.com/scl/fi/q1fe9nka0ppcr45sr048z/IMG_9840.jpg?rlkey=seu056w3og8bdum580816rzj0&raw=1",
         "https://www.dropbox.com/scl/fi/3m32wlbdchqp6f8dgzayw/IMG_9841.jpg?rlkey=xk311dmkx6be7izueyzgp6puw&raw=1"
       ];
-
-      function generateGallery(){
-        const wrap=document.getElementById('galleryContainer'); wrap.innerHTML='';
-        images.forEach((src,i)=>{
-          const d=document.createElement('div'); d.className='it';
-          const img=document.createElement('img');
-          img.src = src; img.alt = `Foto ${i+1}`; img.loading='lazy'; img.decoding='async';
-          img.onerror = () => {
-            const alt = normalizeDropboxImage(src);
-            if (img.src !== alt) { img.src = alt; }
-            else { img.onerror=null; img.src = IMAGE_FALLBACK; }
-          };
-          img.addEventListener('click',()=>window.openModal(i));
-          d.appendChild(img); wrap.appendChild(d);
-        });
-      }
+      function generateGallery(){const wrap=document.getElementById('galleryContainer');wrap.innerHTML='';images.forEach((src,i)=>{const d=document.createElement('div');d.className='it';const img=document.createElement('img');img.src=src;img.alt=`Foto ${i+1}`;img.loading='lazy';img.decoding='async';img.onerror=()=>{const alt=normalizeDropboxImage(src);if(img.src!==alt){img.src=alt}else{img.onerror=null;img.src=IMAGE_FALLBACK}};img.addEventListener('click',()=>window.openModal(i));d.appendChild(img);wrap.appendChild(d)})}
       generateGallery();
+      window.addEventListener('keydown',e=>{if(modal.style.display==='flex'){if(e.key==='ArrowLeft')window.changeImage(-1);if(e.key==='ArrowRight')window.changeImage(1);if(e.key==='Escape')window.closeModal()}});
 
-      window.addEventListener('keydown',e=>{
-        if(modal.style.display==='flex'){
-          if(e.key==='ArrowLeft')window.changeImage(-1);
-          if(e.key==='ArrowRight')window.changeImage(1);
-          if(e.key==='Escape')window.closeModal();
-        }
-      });
-
-      /* Iframe/PDF (PDF.js) */
-      const iframeModal=document.getElementById('iframeModal');
-      const iframeContent=document.getElementById('iframeContent');
-      let iframeReturnRoute=null;
-
-      window.openIframeModal = (url,returnRoute=null)=>{
-        iframeReturnRoute=returnRoute;
-        iframeContent.src=url;
-        iframeModal.style.display='flex';
-        iframeModal.setAttribute('aria-hidden','false');
-      };
-      window.closeIframeModal = ()=>{
-        iframeModal.style.display='none';
-        iframeModal.setAttribute('aria-hidden','true');
-        iframeContent.src='';
-        if(iframeReturnRoute){go(iframeReturnRoute);iframeReturnRoute=null;}
-      };
-      window.addEventListener('keydown',e=>{
-        if(iframeModal.style.display==='flex' && e.key==='Escape') window.closeIframeModal();
-      });
-      iframeModal.addEventListener('click',e=>{
-        if(e.target.id==='iframeModal') window.closeIframeModal();
-      });
-
-      function normalizeDropboxPdf(u){
-        try{
-          const url=new URL(u);
-          if(url.hostname==='www.dropbox.com'){ url.hostname='dl.dropboxusercontent.com'; }
-          url.searchParams.delete('dl'); url.searchParams.set('raw','1');
-          return url.toString();
-        }catch{return u;}
-      }
-      function openPdfModal(u, returnRoute=null){
-        const direct = normalizeDropboxPdf(u);
-        const viewer = "https://mozilla.github.io/pdf.js/web/viewer.html";
-        const viewerUrl = `${viewer}?file=${encodeURIComponent(direct)}#zoom=page-fit&pagemode=none`;
-        openIframeModal(viewerUrl, returnRoute);
-      }
-      window.openPdfModal = openPdfModal;
+      /* Iframe/PDF/Mappe */
+      const iframeModal=document.getElementById('iframeModal'); const iframeContent=document.getElementById('iframeContent'); let iframeReturnRoute=null;
+      window.openIframeModal=(url,returnRoute=null,topClose=false)=>{iframeReturnRoute=returnRoute;if(topClose)iframeModal.classList.add('top-close');else iframeModal.classList.remove('top-close');iframeContent.src=url;iframeModal.style.display='flex';iframeModal.setAttribute('aria-hidden','false')};
+      window.closeIframeModal=()=>{iframeModal.style.display='none';iframeModal.setAttribute('aria-hidden','true');iframeModal.classList.remove('top-close');iframeContent.src='';if(iframeReturnRoute){go(iframeReturnRoute);iframeReturnRoute=null}};
+      window.addEventListener('keydown',e=>{if(iframeModal.style.display==='flex'&&e.key==='Escape')window.closeIframeModal()});
+      iframeModal.addEventListener('click',e=>{if(e.target.id==='iframeModal')window.closeIframeModal()});
+      function normalizeDropboxPdf(u){try{const url=new URL(u);if(url.hostname==='www.dropbox.com'){url.hostname='dl.dropboxusercontent.com'}url.searchParams.delete('dl');url.searchParams.set('raw','1');return url.toString()}catch{return u}}
+      function openPdfModal(u,returnRoute=null){const direct=normalizeDropboxPdf(u);const viewer="https://mozilla.github.io/pdf.js/web/viewer.html";const viewerUrl=`${viewer}?file=${encodeURIComponent(direct)}#zoom=page-fit&pagemode=none`;openIframeModal(viewerUrl,returnRoute,false)}; window.openPdfModal=openPdfModal;
 
       /* Video (X in alto) */
-      const videoModal=document.getElementById('videoModal');
-      const videoContent=document.getElementById('videoContent');
+      const videoModal=document.getElementById('videoModal'); const videoContent=document.getElementById('videoContent');
       const VIDEO_SHARED='https://www.dropbox.com/scl/fi/cftj9km4x18tg2whm6dqx/Vendesi.mp4?rlkey=fbysbx30j8hdse089hx10tonk&dl=0';
-      function normalizeVideo(u){
-        try{
-          const url=new URL(u);
-          if(url.hostname==='www.dropbox.com'){ url.hostname='dl.dropboxusercontent.com'; }
-          url.searchParams.delete('dl'); url.searchParams.set('raw','1');
-          return url.toString();
-        }catch{return u;}
-      }
+      function normalizeVideo(u){try{const url=new URL(u);if(url.hostname==='www.dropbox.com'){url.hostname='dl.dropboxusercontent.com'}url.searchParams.delete('dl');url.searchParams.set('raw','1');return url.toString()}catch{return u}}
       const VIDEO_URL=normalizeVideo(VIDEO_SHARED);
-      window.openVideoModal = ()=>{
-        if(typeof window.closeIframeModal==='function') window.closeIframeModal();
-        videoContent.src=VIDEO_URL;
-        videoModal.style.display='flex';
-        videoModal.setAttribute('aria-hidden','false');
-      };
-      window.closeVideoModal = ()=>{
-        videoContent.pause();
-        videoModal.style.display='none';
-        videoModal.setAttribute('aria-hidden','true');
-        videoContent.src='';
-      };
-      window.addEventListener('keydown',e=>{
-        if(videoModal.style.display==='flex' && e.key==='Escape') window.closeVideoModal();
-      });
+      window.openVideoModal=()=>{if(typeof window.closeIframeModal==='function')window.closeIframeModal();videoContent.src=VIDEO_URL;videoModal.style.display='flex';videoModal.setAttribute('aria-hidden','false')};
+      window.closeVideoModal=()=>{videoContent.pause();videoModal.style.display='none';videoModal.setAttribute('aria-hidden','true');videoContent.src=''};
+      window.addEventListener('keydown',e=>{if(videoModal.style.display==='flex'&&e.key==='Escape')window.closeVideoModal()});
 
-      /* Google Maps */
+      /* Google Maps (X in alto) */
       const MAPS_EMBED_URL="https://www.google.com/maps?q=Via%20Fanelli%208%2C%2070013%20Castellana%20Grotte%20BA&output=embed";
-      window.openGoogleMapsHere = ()=> window.openIframeModal(MAPS_EMBED_URL,'privati');
+      window.openGoogleMapsHere=()=>window.openIframeModal(MAPS_EMBED_URL,'privati',true);
 
-      /* Volantino (PDF via PDF.js) */
+      /* Volantino */
       const FLYER_URL="https://www.dropbox.com/scl/fi/si9wdjxybxhwantxxhq0p/Volantino-Privati.pdf?rlkey=pao0gw7irs3gzdo5rqaxtao2y&dl=0";
-      window.openFlyer = ()=> window.openPdfModal(FLYER_URL,'privati');
+      window.openFlyer=()=>window.openPdfModal(FLYER_URL,'privati');
 
       /* Audio (X in basso) */
-      const audioModal = document.getElementById('audioModal');
-      const audioContent = document.getElementById('audioContent');
-      const AUDIO_SHARED = "https://www.dropbox.com/scl/fi/r2qipre9swkgd0v94azva/Podcast.mp3?rlkey=9m7ko0awpm04fktlvb72c1o8q&dl=0";
-      function normalizeAudio(u){
-        try{
-          const url=new URL(u);
-          if(url.hostname==='www.dropbox.com'){ url.hostname='dl.dropboxusercontent.com'; }
-          url.searchParams.delete('dl'); url.searchParams.set('raw','1');
-          return url.toString();
-        }catch{return u;}
-      }
-      const AUDIO_URL = normalizeAudio(AUDIO_SHARED);
-
-      window.openAudioModal = ()=>{
-        if(typeof window.closeIframeModal==='function') window.closeIframeModal();
-        audioContent.src = AUDIO_URL;
-        audioModal.style.display='flex';
-        audioModal.setAttribute('aria-hidden','false');
-        audioContent.play().catch(()=>{});
-      };
-      window.closeAudioModal = ()=>{
-        audioContent.pause();
-        audioModal.style.display='none';
-        audioModal.setAttribute('aria-hidden','true');
-        audioContent.src='';
-        try{ if(typeof go==='function') go('privati'); }catch(e){}
-      };
-      audioModal.addEventListener('click',e=>{ if(e.target.id==='audioModal') closeAudioModal(); });
+      const audioModal=document.getElementById('audioModal'); const audioContent=document.getElementById('audioContent');
+      const AUDIO_SHARED="https://www.dropbox.com/scl/fi/r2qipre9swkgd0v94azva/Podcast.mp3?rlkey=9m7ko0awpm04fktlvb72c1o8q&dl=0";
+      function normalizeAudio(u){try{const url=new URL(u);if(url.hostname==='www.dropbox.com'){url.hostname='dl.dropboxusercontent.com'}url.searchParams.delete('dl');url.searchParams.set('raw','1');return url.toString()}catch{return u}}
+      const AUDIO_URL=normalizeAudio(AUDIO_SHARED);
+      window.openAudioModal=()=>{if(typeof window.closeIframeModal==='function')window.closeIframeModal();audioContent.src=AUDIO_URL;audioModal.style.display='flex';audioModal.setAttribute('aria-hidden','false');audioContent.play().catch(()=>{})};
+      window.closeAudioModal=()=>{audioContent.pause();audioModal.style.display='none';audioModal.setAttribute('aria-hidden','true');audioContent.src='';try{if(typeof go==='function')go('privati')}catch(e){}};
+      audioModal.addEventListener('click',e=>{if(e.target.id==='audioModal')closeAudioModal()});
 
       /* WhatsApp */
-      const WHATSAPP_NUMBER = "393924156215";
-      const WHATSAPP_TEXT = "Buongiorno, desidero avere maggiori informazioni sulla vendita dell'immobile di Via Fanelli, 8 a Castellana Grotte.";
-      window.openWhatsApp = () => {
-        const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_TEXT)}`;
-        location.href = url;
-      };
+      const WHATSAPP_NUMBER="393924156215";
+      const WHATSAPP_TEXT="Buongiorno, desidero avere maggiori informazioni sulla vendita dell'immobile di Via Fanelli, 8 a Castellana Grotte.";
+      window.openWhatsApp=()=>{const url=`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_TEXT)}`;location.href=url};
 
-      /* Copia info (testo + HTML per link cliccabile quando possibile) */
-      const LINK_URL = "https://tinyurl.com/Via-Fanelli";
-      const COPY_TEXT = `📢 È disponibile per la vendita a Castellana Grotte un immobile di 150-168 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.
-
-💲 Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.
-
-🔍 Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: ${LINK_URL}`;
-
+      /* ===== Copia info (robusto anche da file://) ===== */
+      const LINK_URL="https://tinyurl.com/Via-Fanelli";
+      const COPY_TEXT=[
+        "📢 È disponibile per la vendita a Castellana Grotte un immobile di 150-168 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.",
+        "",
+        "💲 Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.",
+        "",
+        `🔍 Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: ${LINK_URL}`
+      ].join("\n");
       const COPY_HTML =
-        `<div>` +
-        `<p>📢 È disponibile per la vendita a Castellana Grotte un immobile di 150-168 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p>` +
-        `<p>💲 Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.</p>` +
-        `<p>🔍 Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: <a href="${LINK_URL}">${LINK_URL}</a></p>` +
+        `<div>`+
+          `<p>📢 È disponibile per la vendita a Castellana Grotte un immobile di 150-168 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p>`+
+          `<p>💲 Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.</p>`+
+          `<p>🔍 Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: <a href="${LINK_URL}">${LINK_URL}</a></p>`+
         `</div>`;
 
-      function openCopyModal(){
-        document.getElementById('copyText').textContent = COPY_TEXT;
-        const m = document.getElementById('copyModal');
-        m.style.display='flex'; m.setAttribute('aria-hidden','false');
+      function renderCopyPreview(){
+        const box=document.getElementById('copyText');
+        box.innerHTML =
+          `<p>📢 È disponibile per la vendita a Castellana Grotte un immobile di 150-168 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p>`+
+          `<p>💲 Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.</p>`+
+          `<p>🔍 Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: <a href="${LINK_URL}" target="_blank" rel="noopener">${LINK_URL}</a></p>`;
       }
-      function closeCopyModal(){
-        const m = document.getElementById('copyModal');
-        m.style.display='none'; m.setAttribute('aria-hidden','true');
-      }
-      async function copyInfo(){
-        const btn = document.getElementById('copyBtn');
+      function openCopyModal(){renderCopyPreview();const m=document.getElementById('copyModal');m.style.display='flex';m.setAttribute('aria-hidden','false')}
+      function closeCopyModal(){const m=document.getElementById('copyModal');m.style.display='none';m.setAttribute('aria-hidden','true')}
+      window.openCopyModal=openCopyModal; window.closeCopyModal=closeCopyModal;
+
+      // Fallback “duro”: prova selection+execCommand, poi textarea; ritorna true/false
+      function legacyCopyUsingSelection(html,text){
         try{
-          /* Se supportato, copia anche HTML per rendere cliccabile il link nelle app che lo accettano */
-          if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write && window.isSecureContext) {
-            const data = {
-              "text/plain": new Blob([COPY_TEXT], { type: "text/plain" }),
-              "text/html":  new Blob([COPY_HTML], { type: "text/html" })
-            };
+          const div=document.createElement('div');
+          div.style.position='fixed';div.style.left='-9999px';div.style.whiteSpace='pre-wrap';
+          div.setAttribute('contenteditable','true');div.innerHTML=html;document.body.appendChild(div);
+          const range=document.createRange();range.selectNodeContents(div);
+          const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
+          const ok=document.execCommand('copy');
+          sel.removeAllRanges();document.body.removeChild(div);
+          if(ok) return true;
+        }catch(e){}
+        try{
+          const ta=document.createElement('textarea');
+          ta.value=text;ta.style.position='fixed';ta.style.left='-9999px';
+          document.body.appendChild(ta);ta.focus();ta.select();
+          const ok=document.execCommand('copy');
+          document.body.removeChild(ta);
+          return !!ok;
+        }catch(e){return false}
+      }
+
+      async function copyInfo(){
+        const btn=document.getElementById('copyBtn');
+        const preview=document.getElementById('copyText');
+        const success=()=>{const old=btn.textContent;btn.textContent="Copiato!";setTimeout(()=>btn.textContent=old,1400)};
+
+        try{
+          if(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
+            const data={"text/plain":new Blob([COPY_TEXT],{type:"text/plain"}),"text/html":new Blob([COPY_HTML],{type:"text/html"})};
             await navigator.clipboard.write([new ClipboardItem(data)]);
-          } else {
-            /* Fallback: solo testo */
-            if(navigator.clipboard && window.isSecureContext){
-              await navigator.clipboard.writeText(COPY_TEXT);
-            }else{
-              const ta = document.createElement('textarea');
-              ta.value = COPY_TEXT;
-              ta.style.position='fixed'; ta.style.opacity='0'; ta.style.pointerEvents='none';
-              document.body.appendChild(ta); ta.select();
-              document.execCommand('copy'); document.body.removeChild(ta);
-            }
+            success(); return;
           }
-          const old = btn.textContent; btn.textContent = "Copiato!";
-          setTimeout(()=>btn.textContent=old,1400);
+          if(navigator.clipboard && navigator.clipboard.writeText){
+            await navigator.clipboard.writeText(COPY_TEXT);
+            success(); return;
+          }
+          // se arriviamo qui proviamo il fallback
+          if(legacyCopyUsingSelection(COPY_HTML,COPY_TEXT)){success(); return;}
+          throw new Error("execCommand failed");
         }catch(e){
-          alert("Non sono riuscito a copiare il testo. Puoi selezionarlo e copiare manualmente.");
+          // un'ultima chance: fallback anche dopo l’errore
+          if(legacyCopyUsingSelection(COPY_HTML,COPY_TEXT)){success(); return;}
+          // seleziona il testo nella modale così puoi fare Ctrl+C
+          if(preview){
+            const range=document.createRange();range.selectNodeContents(preview);
+            const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
+          }
+          alert("Non sono riuscito a copiare automaticamente. Il testo è stato selezionato: premi Ctrl+C (o usa il menu Copia) e poi Incolla.");
         }
       }
-      window.openCopyModal = openCopyModal;
-      window.closeCopyModal = closeCopyModal;
-      window.copyInfo = copyInfo;
+      window.copyInfo=copyInfo;
 
-      /* Chiudi clic fuori */
-      document.getElementById('imageModal').addEventListener('click',e=>{ if(e.target.id==='imageModal') closeModal(); });
-      document.getElementById('videoModal').addEventListener('click',e=>{ if(e.target.id==='videoModal') closeVideoModal(); });
-      document.getElementById('audioModal').addEventListener('click',e=>{ if(e.target.id==='audioModal') closeAudioModal(); });
-      document.getElementById('copyModal').addEventListener('click',e=>{ if(e.target.id==='copyModal') closeCopyModal(); });
+      /* chiusura clic fuori */
+      document.getElementById('imageModal').addEventListener('click',e=>{if(e.target.id==='imageModal')closeModal()});
+      document.getElementById('videoModal').addEventListener('click',e=>{if(e.target.id==='videoModal')closeVideoModal()});
+      document.getElementById('audioModal').addEventListener('click',e=>{if(e.target.id==='audioModal')closeAudioModal()});
+      document.getElementById('copyModal').addEventListener('click',e=>{if(e.target.id==='copyModal')closeCopyModal()});
 
-      /* Chiudi modali all'avvio */
+      /* stato iniziale modali */
       document.getElementById('imageModal').style.display='none';
       document.getElementById('videoModal').style.display='none';
       document.getElementById('iframeModal').style.display='none';
