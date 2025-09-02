@@ -184,7 +184,7 @@
 
 <main id="app">
   <section class="active" data-page="info" tabindex="-1">
-    <h2><span class="e">ℹ️</span>Info <button id="audioSpeakerBtn" class="speaker-btn" title="Ascolta audio guida" aria-label="Ascolta l’audio guida">🔊</button></h2>
+    <h2><span class="e">ℹ️</span>Info <button id="audioSpeakerBtn" class="speaker-btn" title="Ascolta audio guida" aria-label="Ascolta l'audio guida">🔊</button></h2>
     <div class="info-box">
       <p><b><span class="e">📏</span>Superficie:</b> 148 mq (lordi)</p>
       <p><b><span class="e">🏠</span>Interni:</b> reception, 8 ambienti studio, 2 bagni, sala d'attesa</p>
@@ -197,12 +197,12 @@
 
     <div class="garage-box">
       <p><b><span class="e">🚗</span>Area garage:</b> 240 mq sottostante, frazionabile in almeno 5 box.</p>
-      <p>Nota: quest’area <u>non è compresa</u> nel prezzo indicato in questa pagina.</p>
+      <p>Nota: quest'area <u>non è compresa</u> nel prezzo indicato in questa pagina.</p>
     </div>
 
     <div class="note">
       <p><b><span class="e">🤝</span>Agevolazioni:</b> Per i professionisti sanitari come medici e fisioterapisti, sono disponibili agevolazioni per l'acquisto di immobili destinati alla propria attività.</p>
-      <p>A livello nazionale, si può accedere a crediti di imposta e fondi PNRR; a livello regionale (Puglia) programmi come “Nidi”.</p>
+      <p>A livello nazionale, si può accedere a crediti di imposta e fondi PNRR; a livello regionale (Puglia) programmi come "Nidi".</p>
       <p>Clicca <a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/yzjj9cpl5bh69hau2gl3f/Agevolazioni.pdf?rlkey=itgxcpln1pcfnijctc038yakz&dl=0','info')">qui</a> per un breve approfondimento.</p>
     </div>
   </section>
@@ -273,7 +273,7 @@
     <div class="copy-box">
       <h3 style="margin:.2rem 0 1rem">Testo riepilogativo</h3>
       <div class="copy-rect"><div class="rich-copy" id="copyText"></div></div>
-      <div class="copy-hint">Se la copia automatica non parte, il testo verrà selezionato: premi <b>Ctrl+C</b> (o tocca “Copia”) e poi incolla.</div>
+      <div class="copy-hint">Se la copia automatica non parte, il testo verrà selezionato: premi <b>Ctrl+C</b> (o tocca "Copia") e poi incolla.</div>
       <div class="copy-actions"><button class="btnA" id="copyBtn" onclick="copyInfo()" type="button">Copia</button></div>
     </div>
   </div>
@@ -386,7 +386,15 @@
     window.addEventListener('keydown',e=>{if(iframeModal.style.display==='flex'&&e.key==='Escape')closeIframeModal()});
     iframeModal.addEventListener('click',e=>{if(e.target.id==='iframeModal')closeIframeModal()});
     function normalizeDropboxPdf(u){try{const url=new URL(u);if(url.hostname==='www.dropbox.com'){url.hostname='dl.dropboxusercontent.com'}url.searchParams.delete('dl');url.searchParams.set('raw','1');return url.toString()}catch{return u}}
-    function openPdfModal(u,returnRoute=null){const direct=normalizeDropboxPdf(u);const viewer="https://mozilla.github.io/pdf.js/web/viewer.html";const viewerUrl=`${viewer}?file=${encodeURIComponent(direct)}#zoom=page-fit&pagemode=none`;openIframeModal(viewerUrl,returnRoute,true)}; window.openPdfModal=openPdfModal;
+    
+    // FIX PDF: Usa Google Docs Viewer invece di PDF.js di Mozilla
+    function openPdfModal(u,returnRoute=null){
+      const direct=normalizeDropboxPdf(u);
+      const viewer="https://docs.google.com/viewer?url=";
+      const viewerUrl=`${viewer}${encodeURIComponent(direct)}&embedded=true`;
+      openIframeModal(viewerUrl,returnRoute,true);
+    }; 
+    window.openPdfModal=openPdfModal;
 
     /* Video */
     const videoModal=document.getElementById('videoModal'); const videoContent=document.getElementById('videoContent');
@@ -527,7 +535,7 @@
 </script>
 
 <script>
-// ====== CONTATORE VISITE — discreto nel footer, 1 HIT per sessione ======
+// ====== CONTATORE VISITE – discreto nel footer, 1 HIT per sessione ======
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('footer[data-global-counter]').forEach(footer => {
     const key = footer.dataset.globalCounter;
