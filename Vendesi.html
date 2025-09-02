@@ -170,23 +170,23 @@
   <section class="active" data-page="privati" tabindex="-1">
     <h2><span class="e">👤</span>Per privati</h2>
     <div class="info-box">
-      <p><b>Superficie:</b> 150-168 mq (da verifica catastale)</p>
-      <p><b>Interni:</b> reception, 8 ambienti studio, 2 bagni, sala d'attesa</p>
-      <p><b>Pertinenze:</b> area scoperta, posto auto recintato</p>
-      <p><b>Accessibilità:</b> abbattimento barriere, bagno disabili</p>
-      <p><b>Climatizzazione:</b> i locali sono climatizzati</p>
-      <p><b>Classe energetica:</b> B - IPE 213.9</p>
-      <p><b>Prezzo richiesto:</b> € 150.000</p>
+      <p><b><span class="e">📏</span>Superficie:</b> 150-168 mq (da verifica catastale)</p>
+      <p><b><span class="e">🏠</span>Interni:</b> reception, 8 ambienti studio, 2 bagni, sala d'attesa</p>
+      <p><b><span class="e">🌳</span>Pertinenze:</b> area scoperta, posto auto recintato</p>
+      <p><b><span class="e">♿</span>Accessibilità:</b> abbattimento barriere, bagno disabili</p>
+      <p><b><span class="e">🌬️</span>Climatizzazione:</b> i locali sono climatizzati</p>
+      <p><b><span class="e">⚡</span>Classe energetica:</b> B - IPE 213.9</p>
+      <p><b><span class="e">💲</span>Prezzo richiesto:</b> € 150.000</p>
     </div>
 
     <div class="garage-box">
-      <p><b>Area garage:</b> 240 mq sottostante, frazionabile in almeno 5 box.</p>
-      <p><b>Nota:</b> quest’area <u>non è compresa</u> nel prezzo indicato in questa pagina.</p>
+      <p><b><span class="e">🚗</span>Area garage:</b> 240 mq sottostante, frazionabile in almeno 5 box.</p>
+      <p>Nota: quest’area <u>non è compresa</u> nel prezzo indicato in questa pagina.</p>
     </div>
 
     <div class="note">
-      <p><b>Agevolazioni:</b> Per i professionisti sanitari come medici e fisioterapisti, sono disponibili agevolazioni per l'acquisto di immobili destinati alla propria attività.</p>
-      <p>A livello nazionale, si può accedere a credi di imposta e fondi PNRR; a livello regionale (Puglia) programmi come “Nidi”.</p>
+      <p><b><span class="e">🤝</span>Agevolazioni:</b> Per i professionisti sanitari come medici e fisioterapisti, sono disponibili agevolazioni per l'acquisto di immobili destinati alla propria attività.</p>
+      <p>A livello nazionale, si può accedere a crediti di imposta e fondi PNRR; a livello regionale (Puglia) programmi come “Nidi”.</p>
       <p>Clicca <a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/yzjj9cpl5bh69hau2gl3f/Agevolazioni.pdf?rlkey=itgxcpln1pcfnijctc038yakz&dl=0','privati')">qui</a> per un breve approfondimento.</p>
     </div>
 
@@ -282,7 +282,6 @@
     <div class="btns">
       <button class="btnA" onclick="location.href='tel:+393356276262'" type="button">📞 Chiama</button>
       <a class="btnA" href="https://wa.me/393356276262">💬 WhatsApp</a>
-      <button class="btnA" onclick="location.href='mailto:s.mazzarisi@mazzarisi.it'" type="button">✉️ Email</button>
       <button class="btnA" onclick="openCopyModal()" type="button">📋 Copia info</button>
     </div>
   </section>
@@ -654,98 +653,123 @@
 </script>
 
 <script>
-// ====== CONTATORE VISITE — invisibile/anonimo nel footer ======
-// Lo script cerca un footer con data-global-counter e aggiorna un elemento con id "visite-footer"
-// Funziona con CountAPI, ma ha un fallback robusto per i contatori locali in caso di errore.
+// ====== CONTATORE VISITE — discreto nel footer, 1 HIT per sessione ======
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('footer[data-global-counter]').forEach(footer => {
-        const key = footer.dataset.globalCounter;
-        if (!key) return;
-        
-        let span = footer.querySelector(`#visite-footer`);
-        if (!span) {
-            span = document.createElement('span');
-            span.id = 'visite-footer';
-            span.className = 'counter-box';
-            span.setAttribute('aria-label', 'contatore visite');
-            span.setAttribute('title', 'visite totali');
-            footer.appendChild(span);
+  document.querySelectorAll('footer[data-global-counter]').forEach(footer => {
+    const key = footer.dataset.globalCounter;
+    if (!key) return;
+
+    let span = footer.querySelector('#visite-footer');
+    if (!span) {
+      span = document.createElement('span');
+      span.id = 'visite-footer';
+      span.className = 'counter-box';
+      span.setAttribute('aria-label', 'contatore visite');
+      span.setAttribute('title', 'visite totali');
+      footer.appendChild(span);
+    }
+
+    // Stato
+    const NS = 'socim';
+    const sess = window.sessionStorage;   // <- per "una volta per sessione"
+    const perm = window.localStorage;     // <- per contatore locale e sync
+    const sessionFlag   = `sess-hit-${NS}-${key}`;
+    const localCountKey = `local-count-${NS}-${key}`;
+    const needsSyncKey  = `needs-sync-${NS}-${key}`;
+
+    const show = (n) => { span.textContent = `(${Number.isFinite(n) ? n : 0})`; };
+
+    // Backend multipli
+    const backends = [
+      { urlHit: `https://api.countapi.xyz/hit/${encodeURIComponent(NS)}/${encodeURIComponent(key)}`,
+        urlGet: `https://api.countapi.xyz/get/${encodeURIComponent(NS)}/${encodeURIComponent(key)}`,
+        map: (j) => Number(j.value) },
+      { urlHit: `https://countapi.store/hit/${encodeURIComponent(key)}/visite`,
+        urlGet: `https://countapi.store/get/${encodeURIComponent(key)}/visite`,
+        map: (j) => Number(j.value) },
+      { urlHit: `https://countapi.mileshilliard.com/api/v1/hit/${NS}_${key}`,
+        urlGet: `https://countapi.mileshilliard.com/api/v1/get/${NS}_${key}`,
+        map: (j) => Number(j.value ?? j.count) }
+    ];
+
+    const fetchJSON = (url) => fetch(url, { cache:'no-store' }).then(r => r.json());
+
+    const getRemote = async () => {
+      for (const b of backends) {
+        try {
+          const data = await fetchJSON(b.urlGet);
+          const v = b.map(data);
+          if (Number.isFinite(v)) return v;
+        } catch {}
+      }
+      throw new Error('GET failed on all backends');
+    };
+
+    const hitRemote = async () => {
+      for (const b of backends) {
+        try {
+          const data = await fetchJSON(b.urlHit);
+          const v = b.map(data);
+          if (Number.isFinite(v)) return v;
+        } catch {}
+      }
+      throw new Error('HIT failed on all backends');
+    };
+
+    const incLocal = () => {
+      let c = parseInt(perm.getItem(localCountKey) || '0', 10);
+      c += 1;
+      perm.setItem(localCountKey, String(c));
+      return c;
+    };
+
+    const syncLocalTo = (v) => {
+      const cur = parseInt(perm.getItem(localCountKey) || '0', 10);
+      if (Number.isFinite(v) && v > cur) perm.setItem(localCountKey, String(v));
+    };
+
+    (async () => {
+      show(parseInt(perm.getItem(localCountKey) || '0', 10));
+
+      const alreadyHitThisSession = !!sess.getItem(sessionFlag);
+
+      if (!alreadyHitThisSession) {
+        try {
+          const v = await hitRemote();
+          sess.setItem(sessionFlag, '1');
+          perm.removeItem(needsSyncKey);
+          syncLocalTo(v);
+          show(v);
+        } catch {
+          const vLocal = incLocal();
+          perm.setItem(needsSyncKey, '1');
+          sess.setItem(sessionFlag, '1');
+          show(vLocal);
         }
+        return;
+      }
+      
+      try {
+        const v = await getRemote();
+        syncLocalTo(v);
+        show(v);
+      } catch {
+        const vLocal = parseInt(perm.getItem(localCountKey) || '0', 10);
+        show(vLocal);
+      }
 
-        const NS = "socim";
-        const sessionFlag = `hit-${NS}-${key}`;
-        const alreadyHit = sessionStorage.getItem(sessionFlag);
-
-        // Funzione per mostrare il contatore locale
-        const updateLocalCounter = () => {
-            const localKey = `local-count-${NS}-${key}`;
-            let count = parseInt(localStorage.getItem(localKey) || '0', 10);
-            if (!alreadyHit) {
-                count += 1;
-                localStorage.setItem(localKey, count.toString());
-                sessionStorage.setItem(sessionFlag, '1');
-            }
-            span.textContent = `(${count})`;
-        };
-
-        const tryAPICounters = (i = 0) => {
-            const backends = [
-                { url: `https://api.countapi.xyz/hit/${encodeURIComponent(NS)}/${encodeURIComponent(key)}`, map: j => Number(j.value) },
-                { url: `https://countapi.store/hit/${key}/visite`, map: j => Number(j.value) },
-                { url: `https://countapi.mileshilliard.com/api/v1/hit/${NS}_${key}`, map: j => Number(j.value) }
-            ];
-
-            const endpoint = alreadyHit
-                ? `https://api.countapi.xyz/get/${encodeURIComponent(NS)}/${encodeURIComponent(key)}`
-                : backends[i].url;
-            
-            const mapFunction = alreadyHit ? j => Number(j.value) : backends[i].map;
-
-            fetch(endpoint, { cache: 'no-store' })
-                .then(r => r.json())
-                .then(data => {
-                    const value = mapFunction(data);
-                    if (Number.isFinite(value)) {
-                        if (!alreadyHit) {
-                            sessionStorage.setItem(sessionFlag, '1');
-                        }
-                        span.textContent = `(${value})`;
-                    } else {
-                        throw new Error("Invalid payload");
-                    }
-                })
-                .catch(() => {
-                    if (i + 1 < backends.length && !alreadyHit) {
-                        tryAPICounters(i + 1);
-                    } else {
-                        updateLocalCounter();
-                    }
-                });
-        };
-
-        const params = new URLSearchParams(location.search);
-        if (params.get('admin') === '1') {
-            const resetLink = document.createElement('a');
-            resetLink.href = '#';
-            resetLink.textContent = '[reset]';
-            resetLink.style.marginLeft = '1rem';
-            resetLink.onclick = (e) => {
-                e.preventDefault();
-                fetch(`https://api.countapi.xyz/set/${encodeURIComponent(NS)}/${encodeURIComponent(key)}?value=0`)
-                    .then(() => {
-                        sessionStorage.removeItem(sessionFlag);
-                        localStorage.removeItem(`local-count-${NS}-${key}`);
-                        location.reload();
-                    });
-            };
-            footer.appendChild(resetLink);
+      try {
+        if (perm.getItem(needsSyncKey) === '1') {
+          const v = await hitRemote();
+          perm.removeItem(needsSyncKey);
+          syncLocalTo(v);
+          show(v);
         }
-
-        tryAPICounters();
-    });
+      } catch {}
+    })();
+  });
 });
 </script>
-
 
 <script>
 // Mantieni il vecchio script per la retrocompatibilità con la sezione 'contatti'
