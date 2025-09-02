@@ -97,13 +97,41 @@
   .iframe-modal-content .close{position:absolute;right:16px;bottom:12px;top:auto;font-size:32px;color:#fff;font-weight:bold;cursor:pointer;z-index:101;background:rgba(0,0,0,.6);border-radius:10px;padding:4px 10px;line-height:1}
   .iframe-modal-content iframe{flex-grow:1;width:100%;border:none}
 
-  /* Audio – X in basso, staccata dalla barra */
-  .audio-player{width:100%;max-width:100%;background:#111;border-radius:12px}
-  .audio-modal .wrap{background:transparent}
-  #audioModal .wrap{width:92%;max-width:720px;display:flex;justify-content:center;align-items:center}
-  #audioModal .audio-player{width:100%;max-width:640px}
-  #audioModal .close{bottom:96px;right:16px;top:auto}
-  @media (max-width:480px){#audioModal .close{bottom:84px}}
+  /* Audio Bar */
+  .audio-bar{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #2563eb; /* Colore blu della "i" di Info */
+    backdrop-filter: blur(8px);
+    z-index: 90;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(100%);
+    transition: transform 0.3s ease-out;
+  }
+  .audio-bar.active{
+    transform: translateY(0);
+  }
+  .audio-bar__player{
+    flex-grow: 1;
+    max-width: 600px;
+  }
+  .audio-bar__close{
+    color: #fff;
+    font-size: 2rem;
+    cursor: pointer;
+    line-height: 1;
+    opacity: 0.8;
+  }
+  .audio-bar__close:hover{
+    opacity: 1;
+  }
 
   /* Copia info */
   .copy-box{background:#fff;border:1px solid #eee;border-radius:12px;padding:1.4rem}
@@ -120,25 +148,13 @@
     font-weight: normal; font-style: normal;
   }
 
-  /* ====== NUOVO: bottone altoparlante e modale Documenti ====== */
-  .docs-speaker{
+  /* Speaker button */
+  .speaker-btn{
     font-size:1.05em; line-height:1; margin-left:.5rem;
     background:#fff; border:1px solid #e5e5e5; border-radius:999px;
     padding:.2rem .5rem; cursor:pointer;
   }
-  .docs-speaker:hover{ background:#f6f6f6; }
-
-  .docs-panel{
-    background:#fff; border-radius:14px; box-shadow:0 8px 28px rgba(0,0,0,.25);
-    width:min(92vw,780px); max-height:86vh; display:flex; flex-direction:column; overflow:hidden;
-  }
-  .docs-panel__header{ padding:1rem 1.2rem .4rem; }
-  .docs-panel__title{ margin:0; font-size:1.15rem; }
-  .docs-panel__body{ padding:.25rem 1.2rem 1rem; overflow:auto; }
-  .docs-panel__body ol{ margin:.25rem 0 0 1.15rem; }
-  .docs-panel__body li{ margin:.35rem 0; }
-  .docs-panel__audio{ margin-top:auto; border-top:1px solid #eee; background:#fafafa; padding:.55rem .8rem; }
-  #docsModal .wrap{display:flex; justify-content:center; align-items:center}
+  .speaker-btn:hover{ background:#f6f6f6; }
 
 #footer-sep{margin:0 .35rem;color:#999}
 #visitCount{opacity:.6}
@@ -156,10 +172,10 @@
     <h1>Immobile per studi medici</h1>
     <p class="address">Via Fanelli, 8 - Castellana Grotte (BA)</p>
     <nav>
-      <button class="active" data-route="privati" type="button"><span class="e">👤</span>Privati</button>
-      <button data-route="agenzie" type="button"><span class="e">🏢</span>Agenzie</button>
-      <button data-route="imprese" type="button"><span class="e">🛠️</span>Imprese</button>
-      <button data-route="gallery" type="button"><span class="e">📸</span>Galleria</button>
+      <button class="active" data-route="info" type="button"><span class="e">ℹ️</span>Info</button>
+      <button onclick="openPdfModal('https://www.dropbox.com/scl/fi/nyruoo2n3faqeg9xqpdu4/Piantina-PT.pdf?rlkey=vmxbaia2q128nkk05au2l8ags&dl=0', 'info')" type="button"><span class="e">🗺️</span>Piantina</button>
+      <button data-route="foto" type="button"><span class="e">📸</span>Foto</button>
+      <button onclick="openVideoModal()" type="button"><span class="e">▶️</span>Video</button>
       <button data-route="documenti" type="button"><span class="e">📄</span>Documenti</button>
       <button data-route="contatti" type="button"><span class="e">✉️</span>Contatti</button>
     </nav>
@@ -167,10 +183,10 @@
 </header>
 
 <main id="app">
-  <section class="active" data-page="privati" tabindex="-1">
-    <h2><span class="e">👤</span>Per privati</h2>
+  <section class="active" data-page="info" tabindex="-1">
+    <h2><span class="e">ℹ️</span>Info <button id="audioSpeakerBtn" class="speaker-btn" title="Ascolta audio guida" aria-label="Ascolta l'audio guida">🔊</button></h2>
     <div class="info-box">
-      <p><b><span class="e">📏</span>Superficie:</b> 150-168 mq (da verifica catastale)</p>
+      <p><b><span class="e">📏</span>Superficie:</b> 148 mq (lordi)</p>
       <p><b><span class="e">🏠</span>Interni:</b> reception, 8 ambienti studio, 2 bagni, sala d'attesa</p>
       <p><b><span class="e">🌳</span>Pertinenze:</b> area scoperta, posto auto recintato</p>
       <p><b><span class="e">♿</span>Accessibilità:</b> abbattimento barriere, bagno disabili</p>
@@ -181,98 +197,27 @@
 
     <div class="garage-box">
       <p><b><span class="e">🚗</span>Area garage:</b> 240 mq sottostante, frazionabile in almeno 5 box.</p>
-      <p>Nota: quest’area <u>non è compresa</u> nel prezzo indicato in questa pagina.</p>
+      <p>Nota: quest'area <u>non è compresa</u> nel prezzo indicato in questa pagina.</p>
     </div>
 
     <div class="note">
       <p><b><span class="e">🤝</span>Agevolazioni:</b> Per i professionisti sanitari come medici e fisioterapisti, sono disponibili agevolazioni per l'acquisto di immobili destinati alla propria attività.</p>
-      <p>A livello nazionale, si può accedere a crediti di imposta e fondi PNRR; a livello regionale (Puglia) programmi come “Nidi”.</p>
-      <p>Clicca <a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/yzjj9cpl5bh69hau2gl3f/Agevolazioni.pdf?rlkey=itgxcpln1pcfnijctc038yakz&dl=0','privati')">qui</a> per un breve approfondimento.</p>
-    </div>
-
-    <div class="btns">
-      <button class="btnA" onclick="openGoogleMapsHere()" type="button"><span class="e">🗺️</span> Google Maps</button>
-      <button class="btnA" onclick="openVideoModal()" type="button"><span class="e">▶️</span> Videofoto</button>
-      <button class="btnA" onclick="openFlyer()" type="button"><span class="e">📄</span> Volantino</button>
-      <button class="btnA" onclick="openAudioModal()" type="button"><span class="e">🎧</span> Audio guida</button>
+      <p>A livello nazionale, si può accedere a crediti di imposta e fondi PNRR; a livello regionale (Puglia) programmi come "Nidi".</p>
+      <p>Clicca <a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/yzjj9cpl5bh69hau2gl3f/Agevolazioni.pdf?rlkey=itgxcpln1pcfnijctc038yakz&dl=0','info')">qui</a> per un breve approfondimento.</p>
     </div>
   </section>
 
-  <section data-page="agenzie" tabindex="-1">
-<h2><span class="e">🏢</span>Per agenzie immobiliari</h2>
-<div class="info-box">
-<p><b>Collaborazione aperta, senza esclusiva.</b> L’incarico non è in esclusiva per nessuno, ma <b>la tua provvigione è sempre garantita</b> se l’acquirente è presentato da te.</p>
-<p><b>Cosa mettiamo subito a disposizione:</b></p>
-<ul>
-<li>Scheda immobile, foto, videofoto e audio guida.</li>
-<li>Planimetrie (piano terra, garage e “garage completati”).</li>
-<li>Documentazione essenziale: APE, atti societari, visura. Tutto in <a href="#" onclick="go('documenti')">Documenti</a>.</li>
-</ul>
-<p><b>Come tuteliamo la tua segnalazione:</b></p>
-<ul>
-<li>Riconosciamo la paternità del contatto (WhatsApp/e-mail o codice di segnalazione).</li>
-<li>Registro visite e recap trattative per massima trasparenza.</li>
-</ul>
-<p><b>Operatività snella:</b> disponibilità per sopralluoghi, materiali pronti da inviare ai tuoi clienti e risposte rapide ai quesiti tecnici.</p>
-<div class="btns" style="margin-top:1rem">
-<a class="btnA" href="https://wa.me/393356276262">💬 Scrivi su WhatsApp</a>
-<button class="btnA" onclick="go('documenti')" type="button">📄 Documenti</button>
-</div>
-</div>
-</section>
-
-  <section data-page="imprese" tabindex="-1">
-<h2><span class="e">🛠️</span>Per imprese edili</h2>
-<div class="info-box">
-<p><b>Immobile flessibile con potenziale di riconversione.</b> È possibile il <b>cambio di destinazione d’uso</b> (vedi <a href="#" onclick="go('documenti')">Documenti</a>) e sono già pronte <b>ipotesi distributive</b> che valorizzano la metratura:</p>
-<ul>
-<li>una <b>grande abitazione</b> di almeno 150 mq;</li>
-<li>oppure <b>due unità</b> (esempio: ~80 mq + ~70 mq), soluzioni facili da collocare sul mercato.</li>
-</ul>
-<p><b>Piano garage già autorizzato dal condominio</b> (vedi Documenti) con possibilità di completamento per ricavare <b>box e cantinole</b>.</p>
-<p><b>Cosa forniamo:</b></p>
-<ul>
-<li>Planimetrie aggiornate e disegni (“piano terra”, “garage”, “garage completati”).</li>
-<li>Materiali fotografici e videofoto per la presentazione dei progetti.</li>
-<li>Documentazione amministrativa essenziale (APE, atti/visure) già disponibile.</li>
-</ul>
-<div class="btns" style="margin-top:1rem)">
-<a class="btnA" href="https://wa.me/393356276262">💬 Scrivi su WhatsApp</a>
-<button class="btnA" onclick="go('documenti')" type="button">📄 Documenti</button>
-</div>
-</div>
-</section>
-
-  <section data-page="gallery" tabindex="-1">
+  <section data-page="foto" tabindex="-1">
     <h2><span class="e">📸</span>Galleria fotografica</h2>
     <div class="image-gallery" id="galleryContainer"></div>
   </section>
 
   <section data-page="documenti" tabindex="-1">
-    <h2><span class="e">📄</span>Documenti
-      <button id="docsSpeakerBtn" class="docs-speaker" title="Ascolta elenco documenti" aria-label="Ascolta e apri l’elenco">🔊</button>
-    </h2>
-
+    <h2><span class="e">📄</span>Documenti</h2>
     <div class="doc-box">
-      <div class="doc"><span><span class="e">🌿</span>APE Via Fanelli (02-10-2015)</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/s2j9bmduomb1h4gyeoo9r/APE-Via-Fanelli-02-10-2015.pdf?rlkey=ewsevwya22rfxywehzln62s0i&dl=0')">Scarica</a></div>
-      <div class="doc"><span><span class="e">📜</span>Atto Costitutivo Socim SAS (07-03-2008)</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/pnw7gsbsrx1ntfh5mwmza/Atto-Costitutivo-Socim-SAS-07-03-2008.pdf?rlkey=7f66nc7gxn6bvtu46a7yk7ph0&dl=0')">Scarica</a></div>
-      <div class="doc"><span><span class="e">📜</span>Atto Spinosa-Socim SAS (04-06-2008)</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/xjo5opdmolxjwy1h6lbg2/Atto-Spinosa-Socim-SAS-04-06-2008.pdf?rlkey=e9vdgniaghho170gcfhznh7c7&dl=0')">Scarica</a></div>
-      <div class="doc"><span><span class="e">🏛️</span>Certificato Agibilità Via Fanelli (17-09-2007)</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/rv2rxepbn3qc8ised3m27/Certificato-Agibilit-Via-Fanelli-17-09-2007.pdf?rlkey=twyjp8ur10v4b6sva4ncd7177&dl=0')">Scarica</a></div>
-      <div class="doc"><span><span class="e">✅</span>Dichiarazioni varie di conformità (2006)</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/e402kyrqsb6bioh4kx4rn/Dichiarazioni-varie-di-conformit-2006.pdf?rlkey=tzi4rsbhb93htwbcpj9brzzfp&dl=0')">Scarica</a></div>
-      <div class="doc"><span><span class="e">💶</span>Piano Mutuo BCC Castellana (01-09-2025)</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/k3ejgtc1qn7lyzesct4w3/Piano-Mutuo-BCC-Castellana-01-09-2025.pdf?rlkey=a3ob66rixiihgiyn8yul9at1s&dl=0')">Scarica</a></div>
-      <div class="doc"><span><span class="e">🛡️</span>Polizza incendi Socim SAS (05-09-2024)</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/tuh1as302st5rxe4q309n/Polizza-incendi-Socim-SAS-05-09-2024.pdf?rlkey=6hy7t2gndd2lw1jq3jx5da9iv&dl=0')">Scarica</a></div>
-      <div class="doc"><span><span class="e">📜</span>Statuto Socim SAS (13-03-2008)</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/v1axkche6likmqzto1r6t/Statuto-Socim-SAS-13-03-2008.pdf?rlkey=7s4sofa048vj0twltyz6qrpgf&dl=0')">Scarica</a></div>
-      <div class="doc"><span><span class="e">🏢</span>Visura catastale Socim SAS (01-09-2025)</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/54awq2sdvfr26175a95s6/Visura-catastale-Socim-SAS-01-09-2025.pdf?rlkey=979lgiihsa4uz1gv9i25vk1o8&dl=0')">Scarica</a></div>
-      <div class="doc"><span><span class="e">🏢</span>Visura immobiliare Via Fanelli (23-10-2008)</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/clgvkolic26szysjglylh/Visura-immobiliare-Via-Fanelli-23-10-2008.pdf?rlkey=rfwgvg9e7937rz4yxjp3zfpeg&dl=0')">Scarica</a></div>
-      <div class="doc"><span><span class="e">🏢</span>Visura Ordinaria Socim SAS (30-08-2025)</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/v7q1oct9h67ywjg4u8qhd/Visura-Ordinaria-Socim-SAS-30-08-2025.pdf?rlkey=is36f0czxod4rkxfvq9fbai3b&dl=0')">Scarica</a></div>
-    </div>
-
-    <h2 style="margin-top:2rem;"><span class="e">📐</span>Disegni tecnici</h2>
-    <div class="doc-box">
-      <div class="doc"><span><span class="e">🗺️</span>Piantina piano terra</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/nyruoo2n3faqeg9xqpdu4/Piantina-PT.pdf?rlkey=vmxbaia2q128nkk05au2l8ags&dl=0')">Scarica</a></div>
-      <div class="doc"><span><span class="e">🗺️</span>Piantina garage</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/gh0ckk55ouzs35hctvgw5/Piantina-garage-Arch.-Antonella-Ivone.pdf?rlkey=kp6392gf9ujvxkdlog23fh7jg&dl=0')">Scarica</a></div>
-      <div class="doc"><span><span class="e">🗺️</span>Piantina garage completati</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/zwb8q4lbubtcez36jdlvl/Piantina-garage-06-11-2015.pdf?rlkey=156ad8r3u1pijmhzrglx7xkir&dl=0')">Scarica</a></div>
-      <div class="doc"><span><span class="e">🗺️️</span>Piantina esempio suddivisione</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/kw9ban3ga0i117lrj5d37/Pianta-piano-terra-Arch.-Antonella-Ivone.pdf?rlkey=n44h59v65sur42euc80van0d5&dl=0')">Scarica</a></div>
+      <div class="doc"><span><span class="e">🌿</span>APE Via Fanelli 8</span><a href="javascript:void(0)" onclick="openPdfModal('https://www.dropbox.com/scl/fi/s2j9bmduomb1h4gyeoo9r/APE-Via-Fanelli-02-10-2015.pdf?rlkey=ewsevwya22rfxywehzln62s0i&dl=0')">Scarica</a></div>
+      <div class="doc"><span><span class="e">🗺️</span>Google Maps</span><a href="javascript:void(0)" onclick="openGoogleMapsHere()">Apri</a></div>
+      <div class="doc"><span><span class="e">📄</span>Volantino</span><a href="javascript:void(0)" onclick="openFlyer()">Scarica</a></div>
     </div>
   </section>
 
@@ -291,6 +236,11 @@
   © <span id="year"></span> Socim S.a.s. - Tutti i diritti riservati
   <span id="visite-footer" aria-label="contatore visite" title="visite totali" class="counter-box"></span>
 </footer>
+
+<div class="audio-bar" id="audioBar" aria-hidden="true" role="dialog">
+    <audio id="audioContent" controls preload="metadata" class="audio-bar__player"></audio>
+    <span class="audio-bar__close" onclick="closeAudioBar()">×</span>
+</div>
 
 <div aria-hidden="true" aria-label="Galleria immagini" class="modal" id="imageModal" role="dialog">
   <div class="wrap" role="document">
@@ -317,53 +267,14 @@
   </div>
 </div>
 
-<div aria-hidden="true" aria-label="Riproduzione audio" class="modal audio-modal" id="audioModal" role="dialog">
-  <div class="wrap" role="document">
-    <span aria-label="Chiudi" class="close" onclick="closeAudioModal()">×</span>
-    <audio class="audio-player" controls id="audioContent" preload="metadata"></audio>
-  </div>
-</div>
-
 <div aria-hidden="true" aria-label="Copia informazioni" class="modal" id="copyModal" role="dialog">
   <div class="wrap" role="document">
     <span aria-label="Chiudi" class="close" onclick="closeCopyModal()">×</span>
     <div class="copy-box">
       <h3 style="margin:.2rem 0 1rem">Testo riepilogativo</h3>
       <div class="copy-rect"><div class="rich-copy" id="copyText"></div></div>
-      <div class="copy-hint">Se la copia automatica non parte, il testo verrà selezionato: premi <b>Ctrl+C</b> (o tocca “Copia”) e poi incolla.</div>
+      <div class="copy-hint">Se la copia automatica non parte, il testo verrà selezionato: premi <b>Ctrl+C</b> (o tocca "Copia") e poi incolla.</div>
       <div class="copy-actions"><button class="btnA" id="copyBtn" onclick="copyInfo()" type="button">Copia</button></div>
-    </div>
-  </div>
-</div>
-
-<div aria-hidden="true" aria-label="Elenco documenti" class="modal" id="docsModal" role="dialog">
-  <div class="wrap top-close" role="document" style="display:flex;justify-content:center;align-items:center">
-    <span aria-label="Chiudi" class="close" onclick="closeDocsModal()">×</span>
-    <div class="docs-panel">
-      <div class="docs-panel__header">
-        <h3 class="docs-panel__title">Elenco documenti</h3>
-      </div>
-      <div class="docs-panel__body">
-        <ol>
-          <li>APE Via Fanelli (02-10-2015)</li>
-          <li>Atto Costitutivo Socim SAS (07-03-2008)</li>
-          <li>Atto Spinosa-Socim SAS (04-06-2008)</li>
-          <li>Certificato Agibilità Via Fanelli (17-09-2007)</li>
-          <li>Dichiarazioni varie di conformità (2006)</li>
-          <li>Piano Mutuo BCC Castellana (01-09-2025)</li>
-          <li>Polizza incendi Socim SAS (05-09-2024)</li>
-          <li>Statuto Socim SAS (13-03-2008)</li>
-          <li>Visura catastale Socim SAS (01-09-2025)</li>
-          <li>Visura immobiliare Via Fanelli (23-10-2008)</li>
-          <li>Visura Ordinaria Socim SAS (30-08-2025)</li>
-        </ol>
-      </div>
-      <div class="docs-panel__audio">
-        <audio id="docsAudio" controls preload="auto" style="width:100%">
-          <source src="https://www.dropbox.com/scl/fi/zqyg8uptjy37a78jq5fhh/Documenti.mp3?rlkey=f1sufqpdu60mifo8o0zb0rsyz&dl=0" type="audio/mpeg"/>
-          Il tuo browser non supporta l’audio HTML5.
-        </audio>
-      </div>
     </div>
   </div>
 </div>
@@ -475,7 +386,23 @@
     window.addEventListener('keydown',e=>{if(iframeModal.style.display==='flex'&&e.key==='Escape')closeIframeModal()});
     iframeModal.addEventListener('click',e=>{if(e.target.id==='iframeModal')closeIframeModal()});
     function normalizeDropboxPdf(u){try{const url=new URL(u);if(url.hostname==='www.dropbox.com'){url.hostname='dl.dropboxusercontent.com'}url.searchParams.delete('dl');url.searchParams.set('raw','1');return url.toString()}catch{return u}}
-    function openPdfModal(u,returnRoute=null){const direct=normalizeDropboxPdf(u);const viewer="https://mozilla.github.io/pdf.js/web/viewer.html";const viewerUrl=`${viewer}?file=${encodeURIComponent(direct)}#zoom=page-fit&pagemode=none`;openIframeModal(viewerUrl,returnRoute,true)}; window.openPdfModal=openPdfModal;
+    
+    // FIX PDF: Usa Google Docs Viewer invece di PDF.js di Mozilla
+    function openPdfModal(u,returnRoute=null){
+      const direct=normalizeDropboxPdf(u);
+      const viewer="https://docs.google.com/viewer?url=";
+      const viewerUrl=`${viewer}${encodeURIComponent(direct)}&embedded=true`;
+      
+      const preloadImage = new Image();
+      preloadImage.src = direct;
+      preloadImage.onload = () => {
+        openIframeModal(viewerUrl, returnRoute, true);
+      };
+      preloadImage.onerror = () => {
+        setTimeout(() => openIframeModal(viewerUrl, returnRoute, true), 500);
+      };
+    }; 
+    window.openPdfModal=openPdfModal;
 
     /* Video */
     const videoModal=document.getElementById('videoModal'); const videoContent=document.getElementById('videoContent');
@@ -489,13 +416,19 @@
 
     /* Google Maps */
     const MAPS_EMBED_URL="https://www.google.com/maps?q=Via%20Fanelli%208%2C%2070013%20Castellana%20Grotte%20BA&output=embed";
-    window.openGoogleMapsHere=()=>openIframeModal(MAPS_EMBED_URL,'privati',true);
+    window.openGoogleMapsHere=()=>openIframeModal(MAPS_EMBED_URL,'documenti',true);
 
     /* Volantino */
     const FLYER_URL="https://www.dropbox.com/scl/fi/si9wdjxybxhwantxxhq0p/Volantino-Privati.pdf?rlkey=pao0gw7irs3gzdo5rqaxtao2y&dl=0";
-    window.openFlyer=()=>openPdfModal(FLYER_URL,'privati');
+    window.openFlyer=()=>openPdfModal(FLYER_URL,'documenti');
 
-    /* ====== UTIL AUDIO (per TUTTI gli MP3) ====== */
+    /* Audio Bar */
+    const audioBar = document.getElementById('audioBar');
+    const audioContent = document.getElementById('audioContent');
+    const audioSpeakerBtn = document.getElementById('audioSpeakerBtn');
+    const AUDIO_SHARED = "https://www.dropbox.com/scl/fi/xxbvzarsi0dswq8028qc8/Podcast.mp3?rlkey=yt2bocqu4haf4kj847r1oiwpb&dl=0";
+    const AUDIO_URL = normalizeAudio(AUDIO_SHARED);
+    
     function normalizeAudio(u){
       try{
         const url=new URL(u);
@@ -505,41 +438,26 @@
         return url.toString();
       }catch{ return u }
     }
-    function forceRate11(audioEl){
-      if(!audioEl) return;
-      try{ audioEl.playbackRate = 1.1; }catch(e){}
-      const setRate = () => { try{ audioEl.playbackRate = 1.1; }catch(e){} };
-      audioEl.addEventListener('loadedmetadata', setRate, { once:true });
-      setTimeout(setRate, 80);
+    
+    function openAudioBar() {
+      audioContent.src = AUDIO_URL;
+      audioBar.classList.add('active');
+      audioContent.play().catch(() => {});
     }
-
-    /* Audio guida (Podcast.mp3) – sempre 1.1x */
-    const audioModal=document.getElementById('audioModal'); const audioContent=document.getElementById('audioContent');
-    const AUDIO_SHARED="https://www.dropbox.com/scl/fi/r2qipre9swkgd0v94azva/Podcast.mp3?rlkey=9m7ko0awpm04fktlvb72c1o8q&dl=0";
-    const AUDIO_URL=normalizeAudio(AUDIO_SHARED);
-    function openAudioModal(){
-      try{ closeIframeModal() }catch{}
-      audioContent.src=AUDIO_URL;
-      forceRate11(audioContent);
-      audioModal.style.display='flex';
-      audioModal.setAttribute('aria-hidden','false');
-      audioContent.currentTime=0;
-      audioContent.play().catch(()=>{});
+    
+    function closeAudioBar() {
+      audioContent.pause();
+      audioBar.classList.remove('active');
+      audioContent.src = '';
     }
-    function closeAudioModal(){
-      try{ audioContent.pause() }catch(e){}
-      audioModal.style.display='none';
-      audioModal.setAttribute('aria-hidden','true');
-      audioContent.src='';
-      try{ go('privati') }catch{}
-    }
-    window.openAudioModal=openAudioModal; window.closeAudioModal=closeAudioModal;
-    audioModal.addEventListener('click',e=>{if(e.target.id==='audioModal')closeAudioModal()});
+    
+    if (audioSpeakerBtn) { audioSpeakerBtn.addEventListener('click', openAudioBar); }
+    window.closeAudioBar = closeAudioBar;
 
     /* Copia info */
     const LINK_URL="https://tinyurl.com/Via-Fanelli";
     const COPY_TEXT=[
-      "📢 È disponibile per la vendita a Castellana Grotte un immobile di 150-168 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.",
+      "📢 È disponibile per la vendita a Castellana Grotte un immobile di 148 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.",
       "",
       "💲 Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.",
       "",
@@ -547,14 +465,13 @@
     ].join("\n");
     const COPY_HTML =
       `<div>`+
-        `<p><span class="emoji">📢</span> È disponibile per la vendita a Castellana Grotte un immobile di 150-168 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p>`+
+        `<p><span class="emoji">📢</span> È disponibile per la vendita a Castellana Grotte un immobile di 148 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p>`+
         `<p><span class="emoji">💲</span> Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.</p>`+
-        `<p><span class="emoji">🔍</span> Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: <a href="${LINK_URL}">${LINK_URL}</a></p>`+
-      `</div>`;
+        `<p><span class="emoji">🔍</span> Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: <a href="${LINK_URL}">${LINK_URL}</a></p>`;
     function renderCopyPreview(){
       const box=document.getElementById('copyText');
       box.innerHTML =
-        `<p><span class="emoji">📢</span> È disponibile per la vendita a Castellana Grotte un immobile di 150-168 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p>`+
+        `<p><span class="emoji">📢</span> È disponibile per la vendita a Castellana Grotte un immobile di 148 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p>`+
         `<p><span class="emoji">💲</span> Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.</p>`+
         `<p><span class="emoji">🔍</span> Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: <a href="${LINK_URL}" target="_blank" rel="noopener">${LINK_URL}</a></p>`;
     }
@@ -612,51 +529,24 @@
     /* Chiudi clic fuori modali */
     document.getElementById('imageModal').addEventListener('click',e=>{if(e.target.id==='imageModal')closeModal()});
     document.getElementById('videoModal').addEventListener('click',e=>{if(e.target.id==='videoModal')closeVideoModal()});
-    document.getElementById('audioModal').addEventListener('click',e=>{if(e.target.id==='audioModal')closeAudioModal()});
     document.getElementById('copyModal').addEventListener('click',e=>{if(e.target.id==='copyModal')closeCopyModal()});
-
-    /* ===== NUOVO: Docs modal + audio (sempre 1.1x) ===== */
-    const docsModal = document.getElementById('docsModal');
-    const docsAudio = document.getElementById('docsAudio');
-    const docsBtn   = document.getElementById('docsSpeakerBtn');
-    const DOCS_AUDIO_SHARED = "https://www.dropbox.com/scl/fi/zqyg8uptjy37a78jq5fhh/Documenti.mp3?rlkey=f1sufqpdu60mifo8o0zb0rsyz&dl=0";
-    const DOCS_AUDIO_URL    = normalizeAudio(DOCS_AUDIO_SHARED);
-
-    function openDocsModal(){
-      try{ closeIframeModal(); }catch(e){}
-      docsAudio.src = DOCS_AUDIO_URL;
-      forceRate11(docsAudio);
-      docsModal.style.display='flex';
-      docsModal.setAttribute('aria-hidden','false');
-      docsAudio.currentTime = 0;
-      docsAudio.play().catch(()=>{});
-    }
-    function closeDocsModal(){
-      try{ docsAudio.pause(); }catch(e){}
-      docsModal.style.display='none';
-      docsModal.setAttribute('aria-hidden','true');
-      docsAudio.src = '';
-    }
-    window.closeDocsModal = closeDocsModal;
-    if(docsBtn){ docsBtn.addEventListener('click', openDocsModal); }
-    docsModal.addEventListener('click', e => { if(e.target.id === 'docsModal') closeDocsModal(); });
-    window.addEventListener('keydown', e=>{ if(docsModal.style.display==='flex' && e.key==='Escape') closeDocsModal(); });
+    
+    window.addEventListener('keydown', e => { if (audioBar.classList.contains('active') && e.key === 'Escape') closeAudioBar(); });
+    
 
     /* stato iniziale modali */
     document.getElementById('imageModal').style.display='none';
     document.getElementById('videoModal').style.display='none';
     document.getElementById('iframeModal').style.display='none';
-    document.getElementById('audioModal').style.display='none';
     document.getElementById('copyModal').style.display='none';
-    document.getElementById('docsModal').style.display='none';
   });
 </script>
 
 <script>
-// ====== CONTATORE VISITE — discreto nel footer, 1 HIT per sessione ======
+// ====== CONTATORE VISITE – discreto nel footer, 1 HIT per sessione ======
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('footer[data-global-counter]').forEach(footer => {
-    const key = footer.dataset.globalCounter;
+    const key = footer.dataset.global-counter;
     if (!key) return;
 
     let span = footer.querySelector('#visite-footer');
