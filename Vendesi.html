@@ -166,7 +166,7 @@
 <body>
 <header id="hdr">
   <div class="hero" id="hero">
-    <img alt="Copertina immobile - clic per aggiornamento" decoding="async" fetchpriority="high" height="300" id="headerImage" loading="eager" referrerpolicy="no-referrer" title="Clicca per aggiornare il programma" width="450"/>
+    <img alt="Copertina immobile - clic per videofoto" decoding="async" fetchpriority="high" height="300" id="headerImage" loading="eager" referrerpolicy="no-referrer" title="Clicca per aprire le videofoto" width="450"/>
   </div>
   <div class="header-below">
     <h1>Immobile per studi medici</h1>
@@ -304,9 +304,7 @@
     const COVER_SOURCES=[normalizeDropbox(COVER_PRIMARY),COVER_PRIMARY,"https://sebastiano-mazzarisi.github.io/Test/Vendesi.jpg"];
     function tryLoadCover(i=0){if(i>=COVER_SOURCES.length){revealHeader();return}const test=new Image();test.referrerPolicy='no-referrer';test.onload=()=>{heroImg.src=test.src;heroImg.classList.add('loaded');revealHeader()};test.onerror=()=>tryLoadCover(i+1);test.src=COVER_SOURCES[i]}
     tryLoadCover();
-    
-    // ** MODIFICA QUI: Ricarica la pagina per garantire l'aggiornamento **
-    document.getElementById('hero').addEventListener('click',() => window.location.href = './Vendesi.html');
+    document.getElementById('hero').addEventListener('click',()=>openVideoModal());
 
     /* Utils immagini */
     function normalizeDropboxImage(u){try{const url=new URL(u);if(url.hostname==='www.dropbox.com'){url.hostname='dl.dropboxusercontent.com'}url.searchParams.delete('dl');url.searchParams.set('raw','1');return url.toString()}catch{return u}}
@@ -388,11 +386,7 @@
     window.addEventListener('keydown',e=>{if(iframeModal.style.display==='flex'&&e.key==='Escape')closeIframeModal()});
     iframeModal.addEventListener('click',e=>{if(e.target.id==='iframeModal')closeIframeModal()});
     function normalizeDropboxPdf(u){try{const url=new URL(u);if(url.hostname==='www.dropbox.com'){url.hostname='dl.dropboxusercontent.com'}url.searchParams.delete('dl');url.searchParams.set('raw','1');return url.toString()}catch{return u}}
-    
-    // ** CODICE RIPRISTINATO: Visualizza i PDF nell'iframe **
-    function openPdfModal(u,returnRoute=null){const direct=normalizeDropboxPdf(u);const viewer="https://mozilla.github.io/pdf.js/web/viewer.html";const viewerUrl=`${viewer}?file=${encodeURIComponent(direct)}#zoom=page-fit&pagemode=none`;openIframeModal(viewerUrl,returnRoute,true)}; 
-    
-    window.openPdfModal=openPdfModal;
+    function openPdfModal(u,returnRoute=null){const direct=normalizeDropboxPdf(u);const viewer="https://mozilla.github.io/pdf.js/web/viewer.html";const viewerUrl=`${viewer}?file=${encodeURIComponent(direct)}#zoom=page-fit&pagemode=none`;openIframeModal(viewerUrl,returnRoute,true)}; window.openPdfModal=openPdfModal;
 
     /* Video */
     const videoModal=document.getElementById('videoModal'); const videoContent=document.getElementById('videoContent');
@@ -447,7 +441,7 @@
     /* Copia info */
     const LINK_URL="https://tinyurl.com/Via-Fanelli";
     const COPY_TEXT=[
-      "📢 È disponibile per la vendita a Castellana Grotte un immobile di 148 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.",
+      "📢 È disponibile per la vendita a Castellana Grotte un immobile di 150-168 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.",
       "",
       "💲 Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.",
       "",
@@ -455,13 +449,13 @@
     ].join("\n");
     const COPY_HTML =
       `<div>`+
-        `<p><span class="emoji">📢</span> È disponibile per la vendita a Castellana Grotte un immobile di 148 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p>`+
+        `<p><span class="emoji">📢</span> È disponibile per la vendita a Castellana Grotte un immobile di 150-168 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p>`+
         `<p><span class="emoji">💲</span> Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.</p>`+
         `<p><span class="emoji">🔍</span> Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: <a href="${LINK_URL}">${LINK_URL}</a></p>`;
     function renderCopyPreview(){
       const box=document.getElementById('copyText');
       box.innerHTML =
-        `<p><span class="emoji">📢</span> È disponibile per la vendita a Castellana Grotte un immobile di 148 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p>`+
+        `<p><span class="emoji">📢</span> È disponibile per la vendita a Castellana Grotte un immobile di 150-168 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p>`+
         `<p><span class="emoji">💲</span> Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.</p>`+
         `<p><span class="emoji">🔍</span> Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: <a href="${LINK_URL}" target="_blank" rel="noopener">${LINK_URL}</a></p>`;
     }
@@ -511,7 +505,7 @@
           const range=document.createRange();range.selectNodeContents(preview);
           const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
         }
-        alert("Non sono riuscito a copiare automaticamente. Il testo è stato selezionato: premi <b>Ctrl+C</b> (o usa il menu Copia) e poi Incolla.");
+        alert("Non sono riuscito a copiare automaticamente. Il testo è stato selezionato: premi Ctrl+C (o usa il menu Copia) e poi Incolla.");
       }
     }
     window.copyInfo=copyInfo;
@@ -559,17 +553,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const show = (n) => { span.textContent = `(${Number.isFinite(n) ? n : 0})`; };
 
-    const getRemote = () => fetch(`https://api.countapi.xyz/get/${NS}-${key}`).then(r => r.json()).then(j => Number(j.value));
-    const hitRemote = () => fetch(`https://api.countapi.xyz/hit/${NS}-${key}`).then(r => r.json()).then(j => Number(j.value));
-    const incLocal = () => {
-      const v = (parseInt(perm.getItem(localCountKey) || '0', 10) || 0) + 1;
-      perm.setItem(localCountKey, String(v));
-      return v;
-    };
-    const syncLocalTo = (v) => {
-      if (Number.isFinite(v)) {
-        perm.setItem(localCountKey, String(v));
+    // Backend multipli
+    const backends = [
+      { urlHit: `https://api.countapi.xyz/hit/${encodeURIComponent(NS)}/${encodeURIComponent(key)}`,
+        urlGet: `https://api.countapi.xyz/get/${encodeURIComponent(NS)}/${encodeURIComponent(key)}`,
+        map: (j) => Number(j.value) },
+      { urlHit: `https://countapi.store/hit/${encodeURIComponent(key)}/visite`,
+        urlGet: `https://countapi.store/get/${encodeURIComponent(key)}/visite`,
+        map: (j) => Number(j.value) },
+      { urlHit: `https://countapi.mileshilliard.com/api/v1/hit/${NS}_${key}`,
+        urlGet: `https://countapi.mileshilliard.com/api/v1/get/${NS}_${key}`,
+        map: (j) => Number(j.value ?? j.count) }
+    ];
+
+    const fetchJSON = (url) => fetch(url, { cache:'no-store' }).then(r => r.json());
+
+    const getRemote = async () => {
+      for (const b of backends) {
+        try {
+          const data = await fetchJSON(b.urlGet);
+          const v = b.map(data);
+          if (Number.isFinite(v)) return v;
+        } catch {}
       }
+      throw new Error('GET failed on all backends');
+    };
+
+    const hitRemote = async () => {
+      for (const b of backends) {
+        try {
+          const data = await fetchJSON(b.urlHit);
+          const v = b.map(data);
+          if (Number.isFinite(v)) return v;
+        } catch {}
+      }
+      throw new Error('HIT failed on all backends');
+    };
+
+    const incLocal = () => {
+      let c = parseInt(perm.getItem(localCountKey) || '0', 10);
+      c += 1;
+      perm.setItem(localCountKey, String(c));
+      return c;
+    };
+
+    const syncLocalTo = (v) => {
+      const cur = parseInt(perm.getItem(localCountKey) || '0', 10);
+      if (Number.isFinite(v) && v > cur) perm.setItem(localCountKey, String(v));
     };
 
     (async () => {
