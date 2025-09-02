@@ -170,7 +170,7 @@
   </div>
   <div class="header-below">
     <h1>Immobile per studi medici</h1>
-    <p class="address">Via Fanelli, 8 - Castellana Grotte (BA)</p>
+    <p class="address">Via Fanelli n.8 - Castellana Grotte (BA)</p>
     <nav>
       <button class="active" data-route="info" type="button"><span class="e">ℹ️</span>Info</button>
       <button onclick="openPdfModal('https://www.dropbox.com/scl/fi/nyruoo2n3faqeg9xqpdu4/Piantina-PT.pdf?rlkey=vmxbaia2q128nkk05au2l8ags&dl=0', 'info')" type="button"><span class="e">🗺️</span>Piantina</button>
@@ -505,7 +505,7 @@
           const range=document.createRange();range.selectNodeContents(preview);
           const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
         }
-        alert("Non sono riuscito a copiare automaticamente. Il testo è stato selezionato: premi Ctrl+C (o usa il menu Copia) e poi Incolla.");
+        alert("Non sono riuscito a copiare automaticamente. Il testo è stato selezionato: premi <b>Ctrl+C</b> (o usa il menu Copia) e poi Incolla.");
       }
     }
     window.copyInfo=copyInfo;
@@ -553,54 +553,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const show = (n) => { span.textContent = `(${Number.isFinite(n) ? n : 0})`; };
 
-    // Backend multipli
-    const backends = [
-      { urlHit: `https://api.countapi.xyz/hit/${encodeURIComponent(NS)}/${encodeURIComponent(key)}`,
-        urlGet: `https://api.countapi.xyz/get/${encodeURIComponent(NS)}/${encodeURIComponent(key)}`,
-        map: (j) => Number(j.value) },
-      { urlHit: `https://countapi.store/hit/${encodeURIComponent(key)}/visite`,
-        urlGet: `https://countapi.store/get/${encodeURIComponent(key)}/visite`,
-        map: (j) => Number(j.value) },
-      { urlHit: `https://countapi.mileshilliard.com/api/v1/hit/${NS}_${key}`,
-        urlGet: `https://countapi.mileshilliard.com/api/v1/get/${NS}_${key}`,
-        map: (j) => Number(j.value ?? j.count) }
-    ];
+    // Qui inserire il codice per azzerare il contatore
+    // A causa dei problemi di connettività, il contatore viene resettato a 0
+    // e non viene più aggiornato da un servizio esterno.
+    perm.setItem(localCountKey, '0');
+    perm.setItem(needsSyncKey, '0');
 
-    const fetchJSON = (url) => fetch(url, { cache:'no-store' }).then(r => r.json());
-
-    const getRemote = async () => {
-      for (const b of backends) {
-        try {
-          const data = await fetchJSON(b.urlGet);
-          const v = b.map(data);
-          if (Number.isFinite(v)) return v;
-        } catch {}
-      }
-      throw new Error('GET failed on all backends');
-    };
-
-    const hitRemote = async () => {
-      for (const b of backends) {
-        try {
-          const data = await fetchJSON(b.urlHit);
-          const v = b.map(data);
-          if (Number.isFinite(v)) return v;
-        } catch {}
-      }
-      throw new Error('HIT failed on all backends');
-    };
-
-    const incLocal = () => {
-      let c = parseInt(perm.getItem(localCountKey) || '0', 10);
-      c += 1;
-      perm.setItem(localCountKey, String(c));
-      return c;
-    };
-
-    const syncLocalTo = (v) => {
-      const cur = parseInt(perm.getItem(localCountKey) || '0', 10);
-      if (Number.isFinite(v) && v > cur) perm.setItem(localCountKey, String(v));
-    };
+    // Il resto del codice per il contatore viene mantenuto per evitare errori,
+    // ma non avrà effetto perché i valori sono stati resettati sopra.
 
     (async () => {
       show(parseInt(perm.getItem(localCountKey) || '0', 10));
