@@ -166,7 +166,7 @@
 <body>
 <header id="hdr">
   <div class="hero" id="hero">
-    <img alt="Copertina immobile - clic per videofoto" decoding="async" fetchpriority="high" height="300" id="headerImage" loading="eager" referrerpolicy="no-referrer" title="Clicca per aprire le videofoto" width="450"/>
+    <img alt="Copertina immobile - clic per aggiornamento" decoding="async" fetchpriority="high" height="300" id="headerImage" loading="eager" referrerpolicy="no-referrer" title="Clicca per aggiornare il programma" width="450"/>
   </div>
   <div class="header-below">
     <h1>Immobile per studi medici</h1>
@@ -304,7 +304,9 @@
     const COVER_SOURCES=[normalizeDropbox(COVER_PRIMARY),COVER_PRIMARY,"https://sebastiano-mazzarisi.github.io/Test/Vendesi.jpg"];
     function tryLoadCover(i=0){if(i>=COVER_SOURCES.length){revealHeader();return}const test=new Image();test.referrerPolicy='no-referrer';test.onload=()=>{heroImg.src=test.src;heroImg.classList.add('loaded');revealHeader()};test.onerror=()=>tryLoadCover(i+1);test.src=COVER_SOURCES[i]}
     tryLoadCover();
-    document.getElementById('hero').addEventListener('click',()=>openVideoModal());
+    
+    // ** MODIFICA QUI **
+    document.getElementById('hero').addEventListener('click',() => window.location.href = './Vendesi.html');
 
     /* Utils immagini */
     function normalizeDropboxImage(u){try{const url=new URL(u);if(url.hostname==='www.dropbox.com'){url.hostname='dl.dropboxusercontent.com'}url.searchParams.delete('dl');url.searchParams.set('raw','1');return url.toString()}catch{return u}}
@@ -449,7 +451,7 @@
     ].join("\n");
     const COPY_HTML =
       `<div>`+
-        `<p><span class="emoji">📢</span> È disponibile per la vendita a Castellana Grotte un immobile di 1548 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p>`+
+        `<p><span class="emoji">📢</span> È disponibile per la vendita a Castellana Grotte un immobile di 148 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p>`+
         `<p><span class="emoji">💲</span> Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.</p>`+
         `<p><span class="emoji">🔍</span> Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: <a href="${LINK_URL}">${LINK_URL}</a></p>`;
     function renderCopyPreview(){
@@ -530,7 +532,7 @@
 // ====== CONTATORE VISITE — discreto nel footer, 1 HIT per sessione ======
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('footer[data-global-counter]').forEach(footer => {
-    const key = footer.dataset.globalCounter;
+    const key = footer.dataset.global-counter;
     if (!key) return;
 
     let span = footer.querySelector('#visite-footer');
