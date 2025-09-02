@@ -57,9 +57,9 @@
   .info-box,.garage-box,.note,.doc-box{background:#fff;border:1px solid #eee;border-radius:8px;padding:1.5rem;margin-top:1rem}
   .doc{display:flex;justify-content:space-between;align-items:center;padding:.3rem 0;margin:0}
   .doc a{white-space:nowrap}
-  footer{text-align:center;padding:.8rem;color:#666;font-size:1.1rem;margin-top:1.5rem;border-top:1px solid #eee; display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:0.5rem;}
+  footer{text-align:center;padding:.8rem;color:#666;font-size:var(--content-font-size);margin-top:1.5rem;border-top:1px solid #eee; display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:0.5rem;}
   .e{font-size:1.25em;margin-right:6px}
-  .counter-box{margin-left: 0.5rem; font-size: 1rem; opacity: 0.7; }
+  .counter-box{margin-left: 0.5rem; font-size: var(--content-font-size); opacity: 1; }
   
   /* Nuova regola per nascondere il video nella modale immagine */
   #imageModal .modal-video {
@@ -156,6 +156,17 @@
   }
   .speaker-btn:hover{ background:#f6f6f6; }
 
+  /* --- Grazie inline --- */
+  .thank-wrap{padding-left:20px;padding-right:20px; width:100%; display:flex; justify-content:center; }
+  .thank-box{
+    background:#fff; border:2px solid #d1d5db; border-radius:12px;
+    padding:1rem 1.2rem; text-align:center; box-shadow:0 4px 14px rgba(0,0,0,.12);
+    margin: 0 auto; max-width: 760px;
+  }
+  .thank-box h1{ font-size:2.2rem; color:#065f46; margin:.2rem 0 .6rem; line-height:1.1; }
+  .thank-box p{ font-size:1.2rem; color:#064e3b; margin:.2rem 0 .8rem; }
+  .thank-bg{ background:#f0fdf4; border-radius:12px; padding:0.6rem; }
+
 #footer-sep{margin:0 .35rem;color:#999}
 #visitCount{opacity:.6}
 </style>
@@ -186,7 +197,7 @@
   <section class="active" data-page="info" tabindex="-1">
     <h2><span class="e">ℹ️</span>Info <button id="audioSpeakerBtn" class="speaker-btn" title="Ascolta audio guida" aria-label="Ascolta l'audio guida">🔊</button></h2>
     <div class="info-box">
-      <p><b><span class="e">📏</span>Superficie:</b> 148 mq (lordi)</p>
+      <p><b><span class="e">📐</span>Superficie:</b> 148 mq (lordi)</p>
       <p><b><span class="e">🏠</span>Interni:</b> reception, 8 ambienti studio, 2 bagni, sala d'attesa</p>
       <p><b><span class="e">🌳</span>Pertinenze:</b> area scoperta, posto auto recintato</p>
       <p><b><span class="e">♿</span>Accessibilità:</b> abbattimento barriere, bagno disabili</p>
@@ -223,29 +234,106 @@
 
   
 <section data-page="contatti" tabindex="-1">
-  <h2><span class="e">✉️</span>Contatti</h2>
-  <p>Compila il modulo qui sotto per richiedere informazioni o fissare una visita.</p>
+  <!-- CONTENITORE DEL FORM - sempre visibile -->
+  <div id="contactContent">
+    <h2><span class="e">✉️</span>Contatti</h2>
+    <p>Compila il modulo qui sotto per richiedere informazioni o fissare una visita.<br>
+       Puoi inserire <b>email o telefono (almeno uno dei due)</b>.</p>
 
-  <form action="https://formspree.io/f/xpwjyaje" method="POST" style="background:#fff;border:1px solid #eee;border-radius:12px;padding:1.4rem;max-width:500px;margin:1rem auto;">
-    <label for="name"><b>Nome e Cognome</b></label><br>
-    <input type="text" id="name" name="name" required style="width:100%;padding:.6rem;margin:.4rem 0;"><br>
+    <form id="contactForm" action="https://formspree.io/f/xpwjyaje" method="POST"
+          style="background:#fff;border:1px solid #eee;border-radius:12px;padding:1.4rem;max-width:500px;margin:1rem auto;">
+      
+      <label for="name"><b>Nome e Cognome</b></label><br>
+      <input type="text" id="name" name="name" required
+             style="width:100%;padding:.6rem;margin:.4rem 0;"><br>
 
-    <label for="email"><b>Email o Telefono</b></label><br>
-    <input type="text" id="email" name="email" required style="width:100%;padding:.6rem;margin:.4rem 0;"><br>
+      <label for="email"><b>Email</b> (opzionale)</label><br>
+      <input type="email" id="email" name="email"
+             style="width:100%;padding:.6rem;margin:.4rem 0;"><br>
 
-    <label for="message"><b>Messaggio</b></label><br>
-    <textarea id="message" name="message" rows="4" required style="width:100%;padding:.6rem;margin:.4rem 0;"></textarea><br>
+      <label for="phone"><b>Telefono</b> (opzionale)</label><br>
+      <input type="text" id="phone" name="phone"
+             style="width:100%;padding:.6rem;margin:.4rem 0;"><br>
 
-    <button type="submit" style="background:#ffd84d;border:1px solid #f1b400;border-radius:8px;padding:.8rem 1.2rem;font-size:1.2rem;cursor:pointer;width:100%;">📨 Invia richiesta</button>
-  </form>
+      <label for="message"><b>Messaggio</b></label><br>
+      <textarea id="message" name="message" rows="4" required
+                style="width:100%;padding:.6rem;margin:.4rem 0;"></textarea><br>
 
-  <p style="font-size:.9rem;color:#555;text-align:center;">I dati inseriti verranno inviati in modo sicuro e riceverai risposta via email o telefono.</p>
+      <button type="submit"
+              style="background:#ffd84d;border:1px solid #f1b400;border-radius:8px;padding:.8rem 1.2rem;font-size:1.2rem;cursor:pointer;width:100%;">
+        📨 Invia richiesta
+      </button>
+    </form>
+
+    <p style="font-size:.9rem;color:#555;text-align:center;">
+      I dati inseriti verranno inviati in modo sicuro e riceverai risposta via email o telefono.
+    </p>
+  </div>
+
+  <!-- MESSAGGIO DI RINGRAZIAMENTO - nascosto di default -->
+  <div id="thankYouMessage" style="display:none;">
+    <div class="thank-wrap">
+      <div class="thank-bg" style="width:100%;">
+        <div class="thank-box">
+          <h1>Grazie!</h1>
+          <p>Il modulo è stato inviato con successo.</p>
+          <p style="margin-top:.4rem; color:#475569">Il modulo qui sopra è pronto per nuovi invii.</p>
+          <div class="actions" style="display:flex;justify-content:center;margin-top:.6rem;">
+            <button class="btnA" type="button" onclick="hideThankYou()">OK, ricevuto</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script per il modulo contatti -->
+  <script>
+    // Script corretto che NON elimina il form
+    (function(){
+      const form = document.getElementById("contactForm");
+      const thankYouMessage = document.getElementById("thankYouMessage");
+      
+      if(!form || !thankYouMessage) return;
+      
+      form.addEventListener("submit", async function(e){
+        e.preventDefault();
+        const email = document.getElementById("email").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        if(!email && !phone){
+          alert("Inserisci almeno un recapito (email o telefono).");
+          return;
+        }
+        const fd = new FormData(form);
+        try{
+          const r = await fetch(form.action, { method:"POST", body: fd, headers: { "Accept":"application/json" } });
+          if(!r.ok) throw new Error("HTTP " + r.status);
+          
+          // ✅ SOLUZIONE: Mostra il messaggio senza rimuovere il form
+          thankYouMessage.style.display = 'block';
+          thankYouMessage.scrollIntoView({behavior:'smooth', block:'center'});
+          form.reset(); // Pulisce i campi per un nuovo invio
+          
+        }catch(err){
+          alert("Si è verificato un problema con l'invio. Riprova tra poco.");
+        }
+      });
+    })();
+
+    // Funzione per nascondere il messaggio di ringraziamento
+    function hideThankYou() {
+      const thankYouMessage = document.getElementById("thankYouMessage");
+      if (thankYouMessage) {
+        thankYouMessage.style.display = 'none';
+      }
+    }
+    window.hideThankYou = hideThankYou;
+  </script>
 </section>
 
 </main>
 
 <footer data-global-counter="vendesi">
-  © <span id="year"></span> Socim S.a.s. - Tutti i diritti riservati
+  Via Fanelli, 8 - Castellana Grotte (BA)
   <span id="visite-footer" aria-label="contatore visite" title="visite totali" class="counter-box"></span>
 </footer>
 
@@ -297,16 +385,49 @@
     const pages=[...document.querySelectorAll('[data-page]')];
     const navBtns=[...document.querySelectorAll('nav button')];
     function go(to){
+      // Reset del form contatti quando si naviga verso quella sezione
+      if (to === 'contatti') {
+        const form = document.getElementById("contactForm");
+        const thankYouMessage = document.getElementById("thankYouMessage");
+        
+        if (form && thankYouMessage) {
+          form.style.display = 'block';
+          thankYouMessage.style.display = 'none';
+          form.reset(); // Pulisce i campi
+        }
+      }
+      
+      // Gestione speciale per piantina e video
+      if (to === 'piantina') {
+        // Disattiva tutti i bottoni prima di aprire la piantina
+        navBtns.forEach(b => b.classList.remove('active'));
+        openPdfModal('https://www.dropbox.com/scl/fi/nyruoo2n3faqeg9xqpdu4/Piantina-PT.pdf?rlkey=vmxbaia2q128nkk05au2l8ags&dl=0', 'info');
+        return;
+      }
+      
+      if (to === 'video') {
+        // Disattiva tutti i bottoni prima di aprire il video
+        navBtns.forEach(b => b.classList.remove('active'));
+        openVideoModal();
+        return;
+      }
+      
+      // Normale gestione delle sezioni
       pages.forEach(p=>p.classList.toggle('active',p.dataset.page===to));
       navBtns.forEach(b=>b.classList.toggle('active',b.dataset.route===to));
       const sect = pages.find(p=>p.dataset.page===to);
       if(sect){ sect.scrollIntoView({behavior:'smooth', block:'start'}); sect.focus({preventScroll:true}); }
     
-  if (to === 'contatti') updateVisitorCounterVendesi();
-}
+      if (to === 'contatti') updateVisitorCounterVendesi();
+    }
     window.go=go;
     navBtns.forEach(b=>b.addEventListener('click',()=>go(b.dataset.route)));
-    document.getElementById('year').textContent=new Date().getFullYear();
+
+    // Funzione per resettare i bottoni di navigazione
+    function resetNavButtons() {
+      navBtns.forEach(b => b.classList.remove('active'));
+    }
+    window.resetNavButtons = resetNavButtons;
 
     /* Copertina */
     const hdr=document.getElementById('hdr'); const heroImg=document.getElementById('headerImage');
@@ -473,19 +594,19 @@
       "",
       "💲 Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.",
       "",
-      `🔍 Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: ${LINK_URL}`
+      `📍 Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: ${LINK_URL}`
     ].join("\n");
     const COPY_HTML =
       `<div>`+
         `<p><span class="emoji">📢</span> È disponibile per la vendita a Castellana Grotte un immobile di 148 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p>`+
         `<p><span class="emoji">💲</span> Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.</p>`+
-        `<p><span class="emoji">🔍</span> Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: <a href="${LINK_URL}">${LINK_URL}</a></p>`;
+        `<p><span class="emoji">📍</span> Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: <a href="${LINK_URL}">${LINK_URL}</a></p>`;
     function renderCopyPreview(){
       const box=document.getElementById('copyText');
       box.innerHTML =
         `<p><span class="emoji">📢</span> È disponibile per la vendita a Castellana Grotte un immobile di 148 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p>`+
         `<p><span class="emoji">💲</span> Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.</p>`+
-        `<p><span class="emoji">🔍</span> Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: <a href="${LINK_URL}" target="_blank" rel="noopener">${LINK_URL}</a></p>`;
+        `<p><span class="emoji">📍</span> Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: <a href="${LINK_URL}" target="_blank" rel="noopener">${LINK_URL}</a></p>`;
     }
     function openCopyModal(){renderCopyPreview();const m=document.getElementById('copyModal');m.style.display='flex';m.setAttribute('aria-hidden','false')}
     function closeCopyModal(){const m=document.getElementById('copyModal');m.style.display='none';m.setAttribute('aria-hidden','true')}
@@ -558,7 +679,7 @@
 // ====== CONTATORE VISITE – discreto nel footer, 1 HIT per sessione ======
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('footer[data-global-counter]').forEach(footer => {
-    const key = footer.dataset.global-counter;
+    const key = footer.dataset.globalCounter;
     if (!key) return;
 
     let span = footer.querySelector('#visite-footer');
