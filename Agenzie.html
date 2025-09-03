@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Agenzia – Dettaglio</title>
+  <meta name="color-scheme" content="light dark">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #1a1a1a;
+      --muted: #666;
+      --brand: #4b6bfb;
+      --card: #f6f7fb;
+      --ok: #18a558;
+      --err: #d7263d;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg:#0e0f13; --fg:#e9e9ef; --muted:#9aa0ac; --card:#171923; }
+    }
+    html,body { margin:0; padding:0; background:var(--bg); color:var(--fg); font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; }
+    .wrap { max-width: 780px; margin: min(8vh,60px) auto; padding: 24px; }
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px 22px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.08);
+      border: 1px solid rgba(0,0,0,.06);
+    }
+    h1 { font-size: 28px; margin: 0 0 8px; line-height: 1.2; }
+    .sub { color: var(--muted); margin: 0 0 18px; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    .row { display:flex; gap:10px; align-items:baseline; padding: 10px 12px; border-radius: 12px; background: rgba(0,0,0,.03); }
+    .k { min-width: 180px; color: var(--muted); }
+    .v { font-weight: 600; word-break: break-word; }
+    .badge { display:inline-block; font-size:12px; padding:.25rem .5rem; border-radius:999px; background:rgba(75,107,251,.12); color:var(--brand); border:1px solid rgba(75,107,251,.25); vertical-align:middle; }
+    .foot { margin-top: 18px; font-size: 13px; color: var(--muted); }
+    .center { text-align:center; }
+    .err { color: var(--err); font-weight: 700; }
+    .ok { color: var(--ok); font-weight: 700; }
+    .toolbar { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:14px; }
+    .input { flex:1; display:flex; gap:8px; }
+    input[type=text]{
+      flex:1; padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,.15); background: transparent; color:var(--fg);
+    }
+    button {
+      padding:10px 14px; border-radius:10px; border:1px solid rgba(0,0,0,.15); background: var(--brand); color:#fff; cursor:pointer; font-weight:600;
+    }
+    a { color: var(--brand); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .logo { max-height: 56px; max-width: 220px; object-fit: contain; display:none; }
+    .logo.show { display:block; }
+    .hint { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="toolbar">
+        <div>
+          <div class="badge" id="statusBadge">In attesa codice…</div>
+          <div class="hint">Apri con <code>?ACME01</code> oppure <code>?ag=ACME01</code></div>
+        </div>
+        <div class="input">
+          <input id="codeInput" type="text" placeholder="Inserisci codice agenzia (es. ACME01)">
+          <button id="goBtn" type="button">Apri</button>
+        </div>
+      </div>
+
+      <img id="logo" class="logo" alt="Logo agenzia">
+      <h1 id="nome">—</h1>
+      <p class="sub"><span id="codice">—</span></p>
+
+      <div class="grid" id="details" hidden>
+        <div class="row"><div class="k">Indirizzo</div>   <div class="v"><span id="via"></span></div></div>
+        <div class="row"><div class="k">Città</div>       <div class="v"><span id="citta"></span></div></div>
+        <div class="row"><div class="k">Telefono</div>    <div class="v"><a id="telLink" href="#"><span id="telefono"></span></a></div></div>
+        <div class="row"><div class="k">Email</div>       <div class="v"><a id="mailLink" href="#"><span id="email"></span></a></div></div>
+      </div>
+
+      <div id="notFound" class="center err" hidden>Agenzia non riconosciuta</div>
+      <div id="loading" class="center" hidden>Caricamento…</div>
+
+      <div class="foot">
+        Sorgente dati: <code id="csvUrlShown"></code>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    // === CONFIG: URL del CSV su Dropbox ===
+    const CSV_URL = "https://www.dropbox.com/scl/fi/vr26ndk8558wm5ryrwsqx/Agenzie.csv?rlkey=0s0jzx0gnfz6lbuswn1va73gt&dl=0";
+    // Forza download diretto (dl=1) per evitare pagine HTML intermedie
+    const DIRECT_CSV_URL = CSV_URL.replace(/([?&])dl=\d/, "$1dl=1").replace(/\?$/, "") + (CSV_URL.includes("?") ? "&" : "?") + "raw=1";
+
+    // === Utilità varie ===
+    const $ = (sel) => document.querySelector(sel);
+    const els = {
+      status: $("#statusBadge"),
+      codeInput: $("#codeInput"),
+      goBtn: $("#goBtn"),
+      logo: $("#logo"),
+      nome: $("#nome"),
+      codice: $("#codice"),
+      via: $("#via"),
+      citta: $("#citta"),
+      tel: $("#telefono"),
+      mail: $("#email"),
+      telLink: $("#telLink"),
+      mailLink: $("#mailLink"),
+      details: $("#details"),
+      notFound: $("#notFound"),
+      loading: $("#loading"),
+      csvUrlShown: $("#csvUrlShown")
+    };
+    els.csvUrlShown.textContent = CSV_URL;
+
+    // Estrae il codice dall'URL: supporta ?ACME01, ?ag=ACME01, ?codice=..., ?code=...
+    function getCodeFromURL(){
+      const raw = window.location.search.replace(/^\?/, "");
+      if (!raw) return "";
+      const params = new URLSearchParams(window.location.search);
+      // Caso 1: chiave 'ag' / 'codice' / 'code'
+      const known = params.get("ag") || params.get("codice") || params.get("code");
+      if (known) return known.trim();
+      // Caso 2: forma breve ?ACME01 (nessun '=')
+      if (!raw.includes("=")) return decodeURIComponent(raw).trim();
+      // Caso 3: prendi il primo valore utile
+      for (const [k,v] of params.entries()){ if (v) return v.trim(); }
+      return "";
+    }
+
+    // Normalizza header -> chiave canonica
+    function normKey(s){
+      return (s||"").toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g,"") // rimuovi accenti
+        .replace(/[^a-z0-9]+/g,"")                       // solo alfanumerico
+        .trim();
+    }
+
+    // Rileva delimitatore header: preferisci ';' se presente e prevalente
+    function detectDelimiter(headerLine){
+      const sc = (headerLine.match(/;/g)||[]).length;
+      const cc = (headerLine.match(/,/g)||[]).length;
+      if (sc === 0 && cc === 0) return ";"; // default italiano
+      return sc >= cc ? ";" : ",";
+    }
+
+    // Parser CSV minimale con supporto a virgolette
+    function parseCSV(text){
+      // Gestione BOM
+      if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+      const firstNL = text.indexOf("\n");
+      const headerLine = firstNL >= 0 ? text.slice(0, firstNL) : text;
+      const delim = detectDelimiter(headerLine);
+      // Split robusto per righe
+      const rows = [];
+      let cur = [];
+      let val = "";
+      let inQuotes = false;
+
+      const pushVal = () => { cur.push(val); val=""; };
+      const pushRow = () => { rows.push(cur); cur=[]; };
+
+      for (let i=0;i<text.length;i++){
+        const ch = text[i];
+        if (inQuotes){
+          if (ch === '"'){
+            // doppia virgoletta -> escape
+            if (text[i+1] === '"'){ val += '"'; i++; }
+            else { inQuotes = false; }
+          } else {
+            val += ch;
+          }
+        } else {
+          if (ch === '"'){ inQuotes = true; }
+          else if (ch === delim){ pushVal(); }
+          else if (ch === '\r'){ /* skip */ }
+          else if (ch === '\n'){
+            pushVal(); pushRow();
+          } else {
+            val += ch;
+          }
+        }
+      }
+      // ultima cella/fila
+      pushVal();
+      if (cur.length>1 || val !== "") pushRow();
+
+      if (rows.length === 0) return { headers:[], data:[] };
+      const headers = rows[0].map(h => h.trim());
+      const dataRows = rows.slice(1).filter(r => r.some(c => (c||"").trim() !== ""));
+      return { headers, data: dataRows };
+    }
+
+    // Crea indice per codice
+    function buildIndex(headers, data){
+      // Mappa header -> posizione
+      const idx = {};
+      headers.forEach((h,i)=> idx[normKey(h)] = i);
+
+      // Trova colonne con nomi attesi (tolleranti a varianti)
+      const col = {
+        codice: idx["codice"] ?? idx["codiceagenzia"] ?? idx["code"] ?? idx["id"] ?? -1,
+        nome: idx["nomeagenzia"] ?? idx["nome"] ?? idx["agenzia"] ?? -1,
+        via: idx["viaenumero"] ?? idx["indirizzo"] ?? idx["via"] ?? -1,
+        citta: idx["citta"] ?? idx["cittaprovincia"] ?? -1,
+        telefono: idx["telefonofissocellulare"] ?? idx["telefono"] ?? idx["cellulare"] ?? -1,
+        email: idx["indirizzoemail"] ?? idx["email"] ?? -1,
+        logo: idx["logo"] ?? -1
+      };
+
+      const book = {};
+      for (const r of data){
+        const rec = {
+          codice: col.codice>=0 ? (r[col.codice]||"").trim() : "",
+          nome: col.nome>=0 ? (r[col.nome]||"").trim() : "",
+          via: col.via>=0 ? (r[col.via]||"").trim() : "",
+          citta: col.citta>=0 ? (r[col.citta]||"").trim() : "",
+          telefono: col.telefono>=0 ? (r[col.telefono]||"").trim() : "",
+          email: col.email>=0 ? (r[col.email]||"").trim() : "",
+          logo: col.logo>=0 ? (r[col.logo]||"").trim() : ""
+        };
+        if (rec.codice) book[rec.codice] = rec;
+      }
+      return book;
+    }
+
+    async function loadCSV(){
+      els.loading.hidden = false;
+      els.status.textContent = "Caricamento CSV…";
+      try{
+        const res = await fetch(DIRECT_CSV_URL, { cache: "no-store" });
+        if (!res.ok) throw new Error("HTTP "+res.status);
+        const txt = await res.text();
+        const parsed = parseCSV(txt);
+        const book = buildIndex(parsed.headers, parsed.data);
+        els.status.textContent = "CSV caricato";
+        return book;
+      }catch(err){
+        els.status.textContent = "Errore CSV";
+        console.error("Errore caricando CSV:", err);
+        throw err;
+      } finally {
+        els.loading.hidden = true;
+      }
+    }
+
+    function renderAgency(ag){
+      // Reset viste
+      els.details.hidden = true;
+      els.notFound.hidden = true;
+      els.logo.classList.remove("show");
+
+      if (!ag){
+        els.notFound.hidden = false;
+        return;
+      }
+      els.nome.textContent = ag.nome || "—";
+      els.codice.textContent = ag.codice ? ("Codice: " + ag.codice) : "—";
+      els.via.textContent = ag.via || "—";
+      els.citta.textContent = ag.citta || "—";
+      els.tel.textContent = ag.telefono || "—";
+      els.mail.textContent = ag.email || "—";
+
+      if (ag.telefono){
+        const telHref = "tel:" + ag.telefono.replace(/\s+/g,"");
+        els.telLink.href = telHref;
+      } else {
+        els.telLink.removeAttribute("href");
+      }
+      if (ag.email){
+        els.mailLink.href = "mailto:" + ag.email;
+      } else {
+        els.mailLink.removeAttribute("href");
+      }
+
+      if (ag.logo){
+        els.logo.src = ag.logo;
+        els.logo.alt = ag.nome || "Logo agenzia";
+        els.logo.onerror = () => els.logo.classList.remove("show");
+        els.logo.onload = () => els.logo.classList.add("show");
+      }
+
+      els.details.hidden = false;
+    }
+
+    function goToCode(code){
+      code = (code||"").trim();
+      if (!code) return;
+      // Aggiorna query in modo pulito senza ricaricare (così puoi incollare il link)
+      const qp = new URLSearchParams();
+      qp.set("ag", code);
+      const newUrl = location.pathname + "?" + qp.toString() + location.hash;
+      history.replaceState(null, "", newUrl);
+      // Trigger reload dati (ma senza refetch se abbiamo già il book)
+      boot(bookCache, code);
+    }
+
+    // Cache in-memory del book
+    let bookCache = null;
+
+    async function boot(existingBook, codeFromUrl){
+      const code = (codeFromUrl || getCodeFromURL()).toUpperCase();
+      els.codeInput.value = code || "";
+      els.status.textContent = code ? ("Codice: " + code) : "Nessun codice";
+
+      try{
+        const book = existingBook || await loadCSV();
+        bookCache = book;
+        const rec = code ? book[code] : null;
+        renderAgency(rec);
+        els.status.textContent = rec ? "OK" : "Non trovato";
+      }catch(e){
+        renderAgency(null);
+        els.status.textContent = "Errore";
+      }
+    }
+
+    // Eventi UI
+    els.goBtn.addEventListener("click", ()=> goToCode(els.codeInput.value));
+    els.codeInput.addEventListener("keydown", (e)=>{ if (e.key==="Enter") goToCode(els.codeInput.value); });
+
+    // Avvio
+    boot(null, null);
+  })();
+  </script>
+</body>
+</html>
