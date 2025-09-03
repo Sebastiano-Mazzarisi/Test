@@ -234,7 +234,6 @@
 
   
 <section data-page="contatti" tabindex="-1">
-  <!-- CONTENITORE DEL FORM - sempre visibile -->
   <div id="contactContent">
     <h2><span class="e">✉️</span>Contatti</h2>
     <p>Compila il modulo qui sotto per richiedere informazioni o fissare una visita.<br>
@@ -260,17 +259,20 @@
                 style="width:100%;padding:.6rem;margin:.4rem 0;"></textarea><br>
 
       <button type="submit"
-              style="background:#ffd84d;border:1px solid #f1b400;border-radius:8px;padding:.8rem 1.2rem;font-size:1.2rem;cursor:pointer;width:100%;">
-        📨 Invia richiesta
+              style="background:#ffd84d;border:1px solid #f1b400;border-radius:8px;padding:.8rem 1.2rem;font-size:1.2rem;cursor:pointer;width:100%; display: inline-flex; justify-content: center; align-items: center;">
+        <span class="emoji" style="font-size:2em; line-height:0.8;">📨</span>
+        <span style="margin-left:.5rem;">Invia richiesta</span>
       </button>
     </form>
 
     <p style="font-size:.9rem;color:#555;text-align:center;">
       I dati inseriti verranno inviati in modo sicuro e riceverai risposta via email o telefono.
     </p>
+    <div class="btns" style="justify-content:center;">
+      <button class="btnA" type="button" onclick="openCopyModal()">📋 Copia info</button>
+    </div>
   </div>
 
-  <!-- MESSAGGIO DI RINGRAZIAMENTO - nascosto di default -->
   <div id="thankYouMessage" style="display:none;">
     <div class="thank-wrap">
       <div class="thank-bg" style="width:100%;">
@@ -286,7 +288,6 @@
     </div>
   </div>
 
-  <!-- Script per il modulo contatti -->
   <script>
     // Script corretto che NON elimina il form
     (function(){
@@ -360,6 +361,12 @@
   </div>
 </div>
 
+<div id="loading-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:101; justify-content:center; align-items:center;">
+    <div style="background:#fff; padding:2rem; border-radius:12px; font-size:1.5rem; text-align:center;">
+        Caricamento in corso<span id="loading-dots">...</span>
+    </div>
+</div>
+
 <div aria-hidden="true" aria-label="Anteprima contenuto" class="iframe-modal" id="iframeModal" role="dialog">
   <div class="iframe-modal-content top-close" role="document">
     <span aria-label="Chiudi" class="close" onclick="closeIframeModal()">×</span>
@@ -377,6 +384,12 @@
       <div class="copy-actions"><button class="btnA" id="copyBtn" onclick="copyInfo()" type="button">Copia</button></div>
     </div>
   </div>
+</div>
+
+<div id="loading-modal-2" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 102; justify-content: center; align-items: center;">
+    <div style="background:#fff; padding:2rem; border-radius:12px; font-size:1.5rem; text-align:center;">
+        Caricamento in corso<span id="loading-dots-2"></span>
+    </div>
 </div>
 
 <script>
@@ -521,21 +534,55 @@
     function normalizeDropboxPdf(u){try{const url=new URL(u);if(url.hostname==='www.dropbox.com'){url.hostname='dl.dropboxusercontent.com'}url.searchParams.delete('dl');url.searchParams.set('raw','1');return url.toString()}catch{return u}}
     
     // FIX PDF: Usa Google Docs Viewer invece di PDF.js di Mozilla
-    function openPdfModal(u,returnRoute=null){
-      const direct=normalizeDropboxPdf(u);
-      const viewer="https://docs.google.com/viewer?url=";
-      const viewerUrl=`${viewer}${encodeURIComponent(direct)}&embedded=true`;
-      
-      const preloadImage = new Image();
-      preloadImage.src = direct;
-      preloadImage.onload = () => {
+    let pdfReloadCount = 0;
+    function openPdfModal(u, returnRoute = null) {
+        const direct = normalizeDropboxPdf(u);
+        const viewer = "https://docs.google.com/viewer?url=";
+        const viewerUrl = `${viewer}${encodeURIComponent(direct)}&embedded=true`;
+
+        const loadingModal = document.getElementById('loading-modal');
+        const loadingDots = document.getElementById('loading-dots');
+
+        // Aggiorna la finestrella di caricamento con un puntino in più
+        if (pdfReloadCount === 0) {
+            loadingDots.textContent = '...';
+        } else {
+            loadingDots.textContent += '.';
+        }
+
+        loadingModal.style.display = 'flex';
+
+        const iframe = document.getElementById('iframeContent');
+        
+        let timeout = setTimeout(() => {
+            console.warn(`PDF loading timed out after 1 second. Reload count: ${pdfReloadCount + 1}. Reloading.`);
+            // Chiudi la modale bianca prima di riprovare
+            loadingModal.style.display = 'none';
+            // Simula la pressione del tasto X per chiudere la modale iframe, se aperta
+            closeIframeModal();
+            pdfReloadCount++;
+            openPdfModal(u, returnRoute);
+        }, 1000);
+
+        iframe.onload = () => {
+            clearTimeout(timeout);
+            loadingModal.style.display = 'none';
+            pdfReloadCount = 0; // Reset del contatore
+        };
+        
+        iframe.onerror = () => {
+             clearTimeout(timeout);
+             console.error('PDF loading failed. Reloading.');
+             // Chiudi la modale bianca prima di riprovare
+             loadingModal.style.display = 'none';
+             closeIframeModal();
+             pdfReloadCount++;
+             openPdfModal(u, returnRoute);
+        };
+        
         openIframeModal(viewerUrl, returnRoute, true);
-      };
-      preloadImage.onerror = () => {
-        setTimeout(() => openIframeModal(viewerUrl, returnRoute, true), 500);
-      };
-    }; 
-    window.openPdfModal=openPdfModal;
+    }
+    window.openPdfModal = openPdfModal;
 
     /* Video */
     const videoModal=document.getElementById('videoModal'); const videoContent=document.getElementById('videoContent');
@@ -588,76 +635,94 @@
     window.closeAudioBar = closeAudioBar;
 
     /* Copia info */
-    const LINK_URL="https://tinyurl.com/Via-Fanelli";
-    const COPY_TEXT=[
-      "📢 È disponibile per la vendita a Castellana Grotte un immobile di 148 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.",
-      "",
-      "💲 Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.",
-      "",
-      `📍 Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: ${LINK_URL}`
-    ].join("\n");
-    const COPY_HTML =
-      `<div>`+
-        `<p><span class="emoji">📢</span> È disponibile per la vendita a Castellana Grotte un immobile di 148 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p>`+
-        `<p><span class="emoji">💲</span> Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.</p>`+
-        `<p><span class="emoji">📍</span> Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: <a href="${LINK_URL}">${LINK_URL}</a></p>`;
+    const LINK_URL = 'https://tinyurl.com/Via-Fanelli';
+    const COPY_TEXT = ["📢 È disponibile per la vendita a Castellana Grotte un immobile di 148 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.", "", "💲 Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.", "", "🔍 Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: " + LINK_URL].join("\n");
+    const COPY_HTML = `<div><p><span class="emoji">📢</span> È disponibile per la vendita a Castellana Grotte un immobile di 148 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p><p><span class="emoji">💲</span> Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.</p><p><span class="emoji">🔍</span> Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: <a href="${LINK_URL}" target="_blank" rel="noopener">${LINK_URL}</a></p></div>`;
+    
     function renderCopyPreview(){
       const box=document.getElementById('copyText');
       box.innerHTML =
         `<p><span class="emoji">📢</span> È disponibile per la vendita a Castellana Grotte un immobile di 148 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p>`+
         `<p><span class="emoji">💲</span> Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.</p>`+
-        `<p><span class="emoji">📍</span> Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: <a href="${LINK_URL}" target="_blank" rel="noopener">${LINK_URL}</a></p>`;
+        `<p><span class="emoji">🔍</span> Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: <a href="https://tinyurl.com/Via-Fanelli" target="_blank" rel="noopener">https://tinyurl.com/Via-Fanelli</a></p>`;
     }
-    function openCopyModal(){renderCopyPreview();const m=document.getElementById('copyModal');m.style.display='flex';m.setAttribute('aria-hidden','false')}
-    function closeCopyModal(){const m=document.getElementById('copyModal');m.style.display='none';m.setAttribute('aria-hidden','true')}
-    window.openCopyModal=openCopyModal; window.closeCopyModal=closeCopyModal;
+    function openCopyModal(){
+      renderCopyPreview();
+      const m=document.getElementById('copyModal');
+      m.style.display='flex';
+      m.setAttribute('aria-hidden','false');
+    }
+    function closeCopyModal(){
+      const m=document.getElementById('copyModal');
+      m.style.display='none';
+      m.setAttribute('aria-hidden','true');
+    }
+    window.openCopyModal=openCopyModal;
+    window.closeCopyModal=closeCopyModal;
 
-    function legacyCopyUsingSelection(html,text){
-      try{
-        const div=document.createElement('div');
-        div.style.position='fixed';div.style.left='-9999px';div.style.whiteSpace='pre-wrap';
-        div.setAttribute('contenteditable','true');div.innerHTML=html;document.body.appendChild(div);
-        const range=document.createRange();range.selectNodeContents(div);
-        const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
-        const ok=document.execCommand('copy');
-        sel.removeAllRanges();document.body.removeChild(div);
-        if(ok) return true;
-      }catch(e){}
-      try{
-        const ta=document.createElement('textarea');
-        ta.value=text;ta.style.position='fixed';ta.style.left='-9999px';
-        document.body.appendChild(ta);ta.focus();ta.select();
-        const ok=document.execCommand('copy');
-        document.body.removeChild(ta);
-        return !!ok;
-      }catch(e){return false}
-    }
-    async function copyInfo(){
-      const btn=document.getElementById('copyBtn');
-      const preview=document.getElementById('copyText');
-      const success=()=>{const old=btn.textContent;btn.textContent="Copiato!";setTimeout(()=>btn.textContent=old,1400)};
-      try{
-        if(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
-          const data={"text/plain":new Blob([COPY_TEXT],{type:"text/plain"}),"text/html":new Blob([COPY_HTML],{type:"text/html"})};
+    async function copyInfo() {
+      const btn = document.getElementById('copyBtn');
+      const success = () => { const old = btn.textContent; btn.textContent = "Copiato!"; setTimeout(() => btn.textContent = old, 1400); };
+
+      // Funzione di fallback robusta che mantiene gli a capo (usa un elemento pre)
+      function preformattedCopy(textToCopy) {
+        let success = false;
+        const pre = document.createElement('pre');
+        pre.style.position = 'fixed';
+        pre.style.opacity = '0';
+        pre.textContent = textToCopy;
+        document.body.appendChild(pre);
+        const range = document.createRange();
+        range.selectNodeContents(pre);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        try {
+          document.execCommand('copy');
+          success = true;
+        } catch(err) {
+          console.error('Preformatted copy failed', err);
+        } finally {
+          sel.removeAllRanges();
+          document.body.removeChild(pre);
+        }
+        return success;
+      }
+
+      try {
+        // Tentativo 1: Clipboard API (versione estesa con HTML)
+        if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) {
+          const data = {
+            "text/plain": new Blob([COPY_TEXT], { type: "text/plain" }),
+            "text/html": new Blob([COPY_HTML], { type: "text/html" })
+          };
           await navigator.clipboard.write([new ClipboardItem(data)]);
-          success(); return;
+          success();
+          return;
         }
-        if(navigator.clipboard && navigator.clipboard.writeText){
-          await navigator.clipboard.writeText(COPY_TEXT);
-          success(); return;
+        
+        // Tentativo 2: Fallback con un elemento <pre> (più affidabile per gli a capo)
+        if (preformattedCopy(COPY_TEXT)) {
+          success();
+          return;
         }
-        if(legacyCopyUsingSelection(COPY_HTML,COPY_TEXT)){success(); return;}
-        throw new Error("execCommand failed");
-      }catch(e){
-        if(legacyCopyUsingSelection(COPY_HTML,COPY_TEXT)){success(); return;}
+        
+        throw new Error("Copy failed on all methods.");
+
+      } catch(e) {
+        alert("Si è verificato un errore durante la copia. Il testo verrà selezionato per la copia manuale.");
+        const preview = document.getElementById('copyText');
         if(preview){
-          const range=document.createRange();range.selectNodeContents(preview);
-          const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
+          const range = document.createRange();
+          range.selectNodeContents(preview);
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
         }
-        alert("Non sono riuscito a copiare automaticamente. Il testo è stato selezionato: premi Ctrl+C (o usa il menu Copia) e poi Incolla.");
       }
     }
     window.copyInfo=copyInfo;
+
 
     /* Chiudi clic fuori modali */
     document.getElementById('imageModal').addEventListener('click',e=>{if(e.target.id==='imageModal')closeModal()});
@@ -679,7 +744,7 @@
 // ====== CONTATORE VISITE – discreto nel footer, 1 HIT per sessione ======
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('footer[data-global-counter]').forEach(footer => {
-    const key = footer.dataset.globalCounter;
+    const key = footer.dataset.global-counter;
     if (!key) return;
 
     let span = footer.querySelector('#visite-footer');
