@@ -168,7 +168,6 @@
   .thank-bg{ background:#f0fdf4; border-radius:12px; padding:0.6rem; }
 
 #footer-sep{margin:0 .35rem;color:#999}
-#visitCount{opacity:.6}
 </style>
 <link href="https://dl.dropboxusercontent.com" rel="preconnect"/>
 <link href="https://www.dropbox.com" rel="preconnect"/>
@@ -237,7 +236,7 @@
 <section data-page="contatti" tabindex="-1">
   <div id="contactContent">
     <h2><span class="e">✉️</span>Contatti</h2>
-    <p>Compila il modulo qui sotto per richiedere informazioni o fissare una visita.<br>
+    <p class="default-contact-text">Compila il modulo qui sotto per richiedere informazioni o fissare una visita.<br>
        Puoi inserire <b>email o telefono (almeno uno dei due)</b>.</p>
 
     <form id="contactForm" action="https://formspree.io/f/xpwjyaje" method="POST"
@@ -432,7 +431,7 @@
       const sect = pages.find(p=>p.dataset.page===to);
       if(sect){ sect.scrollIntoView({behavior:'smooth', block:'start'}); sect.focus({preventScroll:true}); }
     
-      if (to === 'contatti') updateVisitorCounterVendesi();
+      
     }
     window.go=go;
     navBtns.forEach(b=>b.addEventListener('click',()=>go(b.dataset.route)));
@@ -724,7 +723,6 @@
     }
     window.copyInfo=copyInfo;
 
-
     /* Chiudi clic fuori modali */
     document.getElementById('imageModal').addEventListener('click',e=>{if(e.target.id==='imageModal')closeModal()});
     document.getElementById('videoModal').addEventListener('click',e=>{if(e.target.id==='videoModal')closeVideoModal()});
@@ -861,41 +859,93 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <script>
-// Mantieni il vecchio script per la retrocompatibilità con la sezione 'contatti'
-// ma usa il nuovo script per il footer.
-function updateVisitorCounterVendesi(){
-  const el = document.getElementById('visitCount');
-  if(!el) return;
-  const backends=[
-    {url:'https://countapi.mileshilliard.com/api/v1/hit/sebastiano_mazzarisi_vendesi_contatti',map:j=>Number(j.value)},
-    {url:'https://countapi.store/hit/vendesi-contatti/visite',map:j=>Number(j.value)},
-    {url:'https://api.countapi.xyz/hit/sebastiano-mazzarisi/vendesi-contatti',map:j=>Number(j.value)},
-  ];
-  const ATTEMPT_TIMEOUT_MS=3500;
-  const tryBackend=(i)=>{
-    if(i>=backends.length){
-      const k='vendesi_contatti_local_visits';
-      const v=(parseInt(localStorage.getItem(k)||'0',10)||0)+1;
-      localStorage.setItem(k,String(v));
-      el.textContent=String(v); // mostra solo il numero, senza etichetta
-      return;
-    }
-    const {url,map}=backends[i];
-    const controller=new AbortController();
-    const t=setTimeout(()=>controller.abort(),ATTEMPT_TIMEOUT_MS);
-    fetch(url,{signal:controller.signal}).then(r=>{
-      clearTimeout(t);
-      if(!r.ok) throw new Error('HTTP '+r.status);
-      return r.json();
-    }).then(d=>{
-      const val=map(d);
-      if(Number.isFinite(val)){ el.textContent=String(val); }
-      else{ throw new Error('payload'); }
-    }).catch(()=>tryBackend(i+1));
-  };
-  tryBackend(0);
-}
-</script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Variabile per memorizzare i dati dell'agenzia
+    let agenziaDati = null;
 
+    // Funzione per analizzare il CSV
+    async function caricaAgenzie() {
+      try {
+        const url = 'https://sebastiano-mazzarisi.github.io/Test/Agenzie.csv';
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Network response was not ok.');
+        const csvText = await response.text();
+        const righe = csvText.trim().split('\n').slice(1); // Salta l'intestazione
+        const agenzie = righe.map(riga => {
+          const colonne = riga.split(';');
+          return {
+            codice: colonne[0],
+            nome: colonne[1],
+            via: colonne[2],
+            citta: colonne[3],
+            telefono: colonne[4],
+            email: colonne[5]
+          };
+        });
+        return agenzie;
+      } catch (error) {
+        console.error("Errore nel caricamento del file Agenzie.csv:", error);
+        return [];
+      }
+    }
+
+    // Funzione per ottenere i parametri dall'URL
+    function getUrlParameter(name) {
+      name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+      const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+      const results = regex.exec(location.search);
+      return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    }
+
+    // Funzione per personalizzare la pagina
+    async function personalizzaPagina() {
+      const codiceAgenzia = getUrlParameter('ag');
+      const contactSection = document.querySelector('section[data-page="contatti"]');
+      
+      if (!codiceAgenzia) {
+        console.log("Nessun codice agenzia trovato nell'URL. Utilizzo la configurazione predefinita.");
+        return;
+      }
+      
+      const agenzie = await caricaAgenzie();
+      agenziaDati = agenzie.find(a => a.codice.toLowerCase() === codiceAgenzia.toLowerCase());
+
+      if (agenziaDati && contactSection) {
+        console.log("Agenzia trovata:", agenziaDati.nome);
+        
+        // Cambio del colore del titolo
+        const h1 = document.querySelector('h1');
+        if (h1) {
+          h1.style.color = '#1d4ed8'; // Blu
+        }
+
+        // Rimuovi l'intera sezione `contactContent` per sostituirla con la versione personalizzata
+        contactSection.innerHTML = '';
+        
+        // Aggiungi il nuovo contenuto personalizzato
+        const agenziaBoxHtml = `
+          <div id="contactContent">
+            <h2>Contattaci tramite:</h2>
+            <div style="background:#fff;border:1px solid #eee;border-radius:12px;padding:1.4rem;max-width:500px;margin:1rem auto;text-align:center;">
+              <h2 style="margin: .8rem 0 .6rem; font-size: clamp(1.8rem, 5vw, 2.2rem); line-height: 1.2; font-weight: normal; color: inherit;">
+                <span class="e">🏢</span>${agenziaDati.nome}
+              </h2>
+              <p style="margin-top: 1rem; margin-bottom: 0;"><span class="emoji">📍</span>${agenziaDati.via}</p>
+              <p style="margin-top: 0;">${agenziaDati.citta}</p>
+              <p><span class="emoji">📞</span><a href="tel:${agenziaDati.telefono}">${agenziaDati.telefono}</a></p>
+              <p><span class="emoji">📧</span><a href="mailto:${agenziaDati.email}">${agenziaDati.email}</a></p>
+            </div>
+          </div>
+        `;
+        contactSection.innerHTML = agenziaBoxHtml;
+        
+      } else {
+        console.log("Codice agenzia non riconosciuto. Utilizzo la configurazione predefinita.");
+      }
+    }
+
+    personalizzaPagina();
+  });
+</script>
 </body>
 </html>
