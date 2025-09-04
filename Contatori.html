@@ -23,12 +23,7 @@
   :root{ --ink:#0f172a; --muted:#475569; --bg:#e9edf5; --blue:#2563eb; --fs:20px; --rad:10px; }
   html, body { height:100%; }
   * { min-width:0; box-sizing:border-box; }
-  body{
-    margin:0; padding:0 4px;
-    font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial,sans-serif;
-    font-size:var(--fs); line-height:1.25; color:var(--ink); background:var(--bg);
-    overflow:hidden;
-  }
+  body{ margin:0; padding:0 4px; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial,sans-serif; font-size:var(--fs); line-height:1.25; color:var(--ink); background:var(--bg); overflow:hidden; }
   header{ padding:8px; background:var(--blue); color:#fff; text-align:center; border-radius:var(--rad); margin:4px auto 6px; }
   h1{ margin:2px 0; font-size:clamp(1.4rem,6vw,1.8rem); font-weight:700; }
   .hdr-sub{ margin:0; opacity:.95; font-size:1.1rem; }
@@ -36,8 +31,7 @@
 
   /* bottone centrato */
   .refresh-section{ display:flex; justify-content:center; align-items:center; }
-  button{ font:inherit; padding:10px 20px; border:1px solid #1e4fd1; border-radius:var(--rad);
-          background:var(--blue); color:#fff; cursor:pointer; font-size:1.2rem; font-weight:600; }
+  button{ font:inherit; padding:10px 20px; border:1px solid #1e4fd1; border-radius:var(--rad); background:var(--blue); color:#fff; cursor:pointer; font-size:1.2rem; font-weight:600; }
 
   .box{ background:#fff; border:1px solid #e5e7eb; border-radius:var(--rad); padding:8px; box-shadow:0 1px 0 rgba(0,0,0,.03); }
 
@@ -63,11 +57,6 @@
   .foot-mini{ color:var(--muted); font-size:1.05rem; text-align:center; margin:6px 0 2px; }
   .foot-link{ text-align:center; margin:2px 0 8px; }
   .foot-link a{ color:#2563eb; text-decoration:underline; font-size:1.05rem; }
-
-  @media(max-width:320px){
-    td .ag-descr{ font-size:.95rem; }
-    thead th:first-child, tbody td:first-child { width:calc(100% - 100px); }
-  }
 </style>
 </head>
 <body>
@@ -100,20 +89,24 @@
 <script>
 const AGENZIE_CSV = "https://sebastiano-mazzarisi.github.io/Test/Agenzie.csv";
 
-/* backends in fallback */
+/* backends in fallback (solo GET lettura) */
 const backends = [
-  { get: (ns,key)=>`https://countapi.mileshilliard.com/api/v1/get/${ns}_${key}`, map:j=>Number(j.value??j.count) },
-  { get: (ns,key)=>`https://countapi.store/get/${encodeURIComponent(key)}/visite`, map:j=>Number(j.value) },
-  { get: (ns,key)=>`https://api.countapi.xyz/get/${encodeURIComponent(ns)}/${encodeURIComponent(key)}`, map:j=>Number(j.value) }
+  { name:'mileshilliard', get:(ns,key)=>`https://countapi.mileshilliard.com/api/v1/get/${ns}_${key}`, map:j=>Number(j.value??j.count) },
+  { name:'countapi.store', get:(ns,key)=>`https://countapi.store/get/${encodeURIComponent(key)}/visite`, map:j=>Number(j.value) },
+  { name:'countapi.xyz', get:(ns,key)=>`https://api.countapi.xyz/get/${encodeURIComponent(ns)}/${encodeURIComponent(key)}`, map:j=>Number(j.value) }
 ];
-const fetchJSON = (u,ms=3000)=>{const c=new AbortController();const t=setTimeout(()=>c.abort(),ms);
- return fetch(u,{signal:c.signal,cache:'no-store'}).then(r=>{clearTimeout(t);if(!r.ok)throw new Error();return r.json();});};
 
+const fetchJSON = (u,ms=3500) => {
+  const c=new AbortController(); const t=setTimeout(()=>c.abort(),ms);
+  return fetch(u,{signal:c.signal,cache:'no-store'})
+    .then(r=>{ clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+};
+
+/* Parser CSV tollerante */
 function parseCSV(text){
   const clean=text.replace(/^\uFEFF/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim();
   const lines=clean.split('\n').filter(Boolean); if(!lines.length) return [];
-  const first=lines[0];
-  const delim=((first.match(/,/g)||[]).length>(first.match(/;/g)||[]).length)?',':';';
+  const first=lines[0]; const delim=((first.match(/,/g)||[]).length>(first.match(/;/g)||[]).length)?',':';';
   const rows=[];
   for(const line of lines){
     const out=[]; let cur='',q=false;
@@ -153,10 +146,34 @@ async function loadAgenzie(){
   return out;
 }
 
-async function getCount(ns,key){
-  for(const b of backends){
-    try{ const data=await fetchJSON(b.get(ns,key)); const v=b.map(data); if(Number.isFinite(v)) return v; }catch{}
+/* Prova più varianti di chiave finché trova un valore */
+async function getCountSmart(ns, rawCode, prefix){
+  const code = (rawCode||'').toString().trim();
+  const variants = [
+    `${prefix}${code}`,
+    `${prefix}${code.toUpperCase()}`,
+    `${prefix}${code.toLowerCase()}`,
+    code,
+    code.toUpperCase(),
+    code.toLowerCase()
+  ];
+
+  for (const key of variants){
+    for (const b of backends){
+      try{
+        const url = b.get(ns, key);
+        const data = await fetchJSON(url, 3000);
+        const v = b.map(data);
+        if (Number.isFinite(v)) {
+          console.debug('[contatore OK]', {backend:b.name, key, value:v});
+          return v;
+        }
+      }catch(e){
+        // silenzio, passo alla prossima variante/backend
+      }
+    }
   }
+  console.debug('[contatore KO] nessuna variante trovata per', code);
   return null;
 }
 
@@ -174,7 +191,6 @@ async function refresh(){
   let total=0, ok=0;
 
   for(const ag of ags){
-    const key=`${prefix}${ag.codice.trim().toUpperCase()}`;
     const parts=[ag.nome, ag.indirizzo, ag.cittaProv, ag.telefono ? `Tel ${ag.telefono}` : ""]
       .filter(Boolean).join(' - ');
 
@@ -188,7 +204,7 @@ async function refresh(){
     const row=h('tr',null, cell, h('td',null, '—'));
     tb.append(row);
 
-    const v=await getCount(ns,key);
+    const v=await getCountSmart(ns, ag.codice, prefix);
     if(v!=null){ row.children[1].textContent=v; total+=v; ok++; }
   }
   document.getElementById('totalValue').textContent = ok ? total : '—';
