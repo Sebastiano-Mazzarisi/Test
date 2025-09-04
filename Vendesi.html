@@ -938,11 +938,16 @@ document.addEventListener('DOMContentLoaded', () => {
       if (agenziaDati && contactSection) {
         console.log("Agenzia trovata:", agenziaDati.nome);
         
-        // Cambio del colore del titolo
-        const h1 = document.querySelector('h1');
-        if (h1) {
-          h1.style.color = '#1d4ed8'; // Blu
+        // --- INIZIO MODIFICA: Aggiungi "Proposto da [Nome Agenzia]" ---
+        const addressEl = document.querySelector('.address');
+        if (addressEl) {
+          const proposedByEl = document.createElement('p');
+          proposedByEl.className = 'address'; // Stesso stile dell'indirizzo
+          proposedByEl.style.marginTop = '.2rem';
+          proposedByEl.textContent = 'Proposto da ' + agenziaDati.nome;
+          addressEl.insertAdjacentElement('afterend', proposedByEl);
         }
+        // --- FINE MODIFICA ---
 
         // Rimuovi l'intera sezione `contactContent` per sostituirla con la versione personalizzata
         contactSection.innerHTML = '';
