@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 <title>Contatori visite per agenzia</title>
 
-<!-- Meta / icone come in Vendesi.html per "Aggiungi a Home" -->
+<!-- Meta / icone per "Aggiungi a Home" come in Vendesi.html -->
 <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
 <link rel="shortcut icon" href="./favicon.ico">
@@ -20,43 +20,70 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
 <style>
-  :root{ --ink:#0f172a; --muted:#475569; --bg:#e9edf5; --blue:#2563eb; --fs:20px; --rad:10px; }
+  :root{
+    --ink:#0f172a; --muted:#475569; --bg:#e9edf5; --blue:#2563eb; --link:#2563eb;
+    --fs:20px; --rad:10px; --border:#d1d5db;
+  }
   html, body { height:100%; }
   * { min-width:0; box-sizing:border-box; }
-  body{ margin:0; padding:0 4px; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial,sans-serif; font-size:var(--fs); line-height:1.25; color:var(--ink); background:var(--bg); overflow:hidden; }
+  body{
+    margin:0; padding:0 4px;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial,sans-serif;
+    font-size:var(--fs); line-height:1.25; color:var(--ink); background:var(--bg);
+    overflow:auto; /* <-- ora compaiono le barre di scorrimento quando serve */
+  }
   header{ padding:8px; background:var(--blue); color:#fff; text-align:center; border-radius:var(--rad); margin:4px auto 6px; }
   h1{ margin:2px 0; font-size:clamp(1.4rem,6vw,1.8rem); font-weight:700; }
   .hdr-sub{ margin:0; opacity:.95; font-size:1.1rem; }
-  main{ height:calc(100% - 96px); display:flex; flex-direction:column; gap:6px; }
-
-  /* bottone centrato */
-  .refresh-section{ display:flex; justify-content:center; align-items:center; }
-  button{ font:inherit; padding:10px 20px; border:1px solid #1e4fd1; border-radius:var(--rad); background:var(--blue); color:#fff; cursor:pointer; font-size:1.2rem; font-weight:600; }
+  main{ min-height:calc(100% - 130px); display:flex; flex-direction:column; gap:6px; }
 
   .box{ background:#fff; border:1px solid #e5e7eb; border-radius:var(--rad); padding:8px; box-shadow:0 1px 0 rgba(0,0,0,.03); }
 
   /* tabella + riquadri per riga */
   table{ width:100%; table-layout:fixed; border-collapse:separate; border-spacing:0 8px; font-size:1.2rem; }
-  thead th{ padding:8px 10px; background:#f3f4f6; font-weight:600; font-size:1.1rem; position:sticky; top:0; z-index:1; }
+  thead th{ padding:8px 10px; background:#f3f4f6; font-weight:600; font-size:1.1rem; position:sticky; top:0; z-index:1; white-space:nowrap; }
   tbody td{ padding:10px; background:#fff; }
   /* bordo grigio per ogni riga (riquadro) */
-  tbody td{ border-top:1px solid #d1d5db; border-bottom:1px solid #d1d5db; }
-  tbody td:first-child{ border-left:1px solid #d1d5db; border-right:none; border-radius:10px 0 0 10px; }
-  tbody td:last-child { border-right:1px solid #d1d5db; border-left:none; border-radius:0 10px 10px 0; }
+  tbody td{ border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  tbody td:first-child{ border-left:1px solid var(--border); border-right:none; border-radius:10px 0 0 10px; }
+  tbody td:last-child { border-right:1px solid var(--border); border-left:none; border-radius:0 10px 10px 0; }
 
-  /* larghezze colonne */
-  thead th:first-child, tbody td:first-child { width:calc(100% - 100px); }
-  thead th:nth-child(2), tbody td:nth-child(2) { width:100px; text-align:right; white-space:nowrap; }
+  /* 2 colonne: Agenzia + Visite (con reset dentro) */
+  thead th:first-child, tbody td:first-child { width:calc(100% - 120px); }
+  thead th:nth-child(2), tbody td:nth-child(2) { width:120px; text-align:right; white-space:nowrap; }
 
-  /* descrizione: un po' più piccola del th; solo codice in bold e link */
+  /* descrizione: codice nero in bold (non cliccabile) + link finale cliccabile */
   td .ag-descr{ font-size:1.0rem; font-weight:400; }
-  td .ag-descr .ag-code{ font-weight:700; text-decoration:none; color:inherit; }
-  td .ag-descr .ag-rest{ font-weight:400; }
+  td .ag-descr .ag-code{
+    font-weight:700; color:var(--ink); text-decoration:none; cursor:default;
+  }
+  td .ag-descr .ag-rest{ font-weight:400; color:var(--ink); }
+  td .ag-descr .ag-url{
+    color:var(--link); text-decoration:underline; text-underline-offset:2px;
+    word-break:break-all;
+  }
+  td .ag-descr .ag-url:hover{ opacity:.9; }
 
-  tfoot td{ padding:10px 12px; border-top:2px solid #d1d5db; text-align:center; font-weight:700; background:#fff; border-radius:10px; }
-  .foot-mini{ color:var(--muted); font-size:1.05rem; text-align:center; margin:6px 0 2px; }
-  .foot-link{ text-align:center; margin:2px 0 8px; }
-  .foot-link a{ color:#2563eb; text-decoration:underline; font-size:1.05rem; }
+  /* numero visite in grassetto + quadratino reset a fianco (centraggio perfetto) */
+  .visite-wrap{ display:inline-grid; grid-auto-flow:column; align-items:center; gap:6px; }
+  .visite-wrap .num{ font-weight:700; font-variant-numeric: tabular-nums; }
+  .reset-mini{
+    display:grid; place-items:center;              /* <-- centraggio orizz+vert */
+    width:20px; height:20px; border:1px solid #9ca3af; border-radius:4px;
+    background:#fff; cursor:pointer; user-select:none;
+  }
+  .reset-mini .x{ display:block; font-size:13px; line-height:1; font-weight:800; color:#dc2626; }
+  .reset-mini:focus-visible{ outline:2px solid #2563eb; outline-offset:2px; }
+  .reset-mini:hover{ background:#f8fafc; }
+
+  tfoot td{ padding:10px 12px; border-top:2px solid var(--border); text-align:center; font-weight:700; background:#fff; border-radius:10px; }
+
+  /* piè di pagina: solo bottone Aggiorna */
+  .refresh-section{ display:flex; justify-content:center; align-items:center; margin:6px 0 10px; }
+  .refresh-btn{
+    font:inherit; padding:10px 20px; border:1px solid #1e4fd1; border-radius:var(--rad);
+    background:#2563eb; color:#fff; cursor:pointer; font-size:1.2rem; font-weight:600;
+  }
 </style>
 </head>
 <body>
@@ -66,10 +93,6 @@
 </header>
 
 <main>
-  <div class="refresh-section">
-    <button id="refresh">Aggiorna</button>
-  </div>
-
   <div class="box">
     <table id="tbl">
       <thead>
@@ -82,18 +105,25 @@
     </table>
   </div>
 
-  <p class="foot-mini">(?ag=Agenzia) Sito agenzia · (?nohit=1) Non incrementa</p>
-  <p class="foot-link"><a href="https://tinyurl.com/Via-Fanelli" target="_blank" rel="noopener">https://tinyurl.com/Via-Fanelli</a></p>
+  <div class="refresh-section">
+    <button id="refresh" class="refresh-btn">Aggiorna</button>
+  </div>
 </main>
 
 <script>
 const AGENZIE_CSV = "https://sebastiano-mazzarisi.github.io/Test/Agenzie.csv";
 
-/* backends in fallback (solo GET lettura) */
-const backends = [
+/* backends per GET (lettura) */
+const backendsGet = [
   { name:'mileshilliard', get:(ns,key)=>`https://countapi.mileshilliard.com/api/v1/get/${ns}_${key}`, map:j=>Number(j.value??j.count) },
   { name:'countapi.store', get:(ns,key)=>`https://countapi.store/get/${encodeURIComponent(key)}/visite`, map:j=>Number(j.value) },
-  { name:'countapi.xyz', get:(ns,key)=>`https://api.countapi.xyz/get/${encodeURIComponent(ns)}/${encodeURIComponent(key)}`, map:j=>Number(j.value) }
+  { name:'countapi.xyz',  get:(ns,key)=>`https://api.countapi.xyz/get/${encodeURIComponent(ns)}/${encodeURIComponent(key)}`, map:j=>Number(j.value) }
+];
+
+/* backends per SET (azzeramento / inizializzazione) */
+const backendsSet = [
+  { name:'mileshilliard', set:(ns,key,val)=>`https://countapi.mileshilliard.com/api/v1/set/${ns}_${key}?value=${val}` },
+  { name:'countapi.xyz',  set:(ns,key,val)=>`https://api.countapi.xyz/set/${encodeURIComponent(ns)}/${encodeURIComponent(key)}?value=${val}` }
 ];
 
 const fetchJSON = (u,ms=3500) => {
@@ -102,7 +132,6 @@ const fetchJSON = (u,ms=3500) => {
     .then(r=>{ clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
 };
 
-/* Parser CSV tollerante */
 function parseCSV(text){
   const clean=text.replace(/^\uFEFF/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim();
   const lines=clean.split('\n').filter(Boolean); if(!lines.length) return [];
@@ -141,40 +170,73 @@ async function loadAgenzie(){
     link:(c[iLink]??'').trim()
   })).filter(a=>a.codice);
 
-  // ordine alfabetico per codice
+  /* Riga speciale "Base" (aggiunta alla lista) */
+  out.push({
+    codice:"Base",
+    nome:"Mini sito base non personalizzato",
+    indirizzo:"",
+    cittaProv:"",
+    telefono:"",
+    link:"https://tinyurl.com/Via-Fanelli"
+  });
+
+  // Ordine alfabetico per codice
   out.sort((a,b)=>a.codice.localeCompare(b.codice,'it',{sensitivity:'base'}));
   return out;
 }
 
-/* Prova più varianti di chiave finché trova un valore */
-async function getCountSmart(ns, rawCode, prefix){
-  const code = (rawCode||'').toString().trim();
-  const variants = [
-    `${prefix}${code}`,
-    `${prefix}${code.toUpperCase()}`,
-    `${prefix}${code.toLowerCase()}`,
-    code,
-    code.toUpperCase(),
-    code.toLowerCase()
+/* Varianti di chiave */
+function keyVariants(prefix, code){
+  const c=(code||'').toString().trim();
+  return [
+    `${prefix}${c}`,
+    `${prefix}${c.toUpperCase()}`,
+    `${prefix}${c.toLowerCase()}`,
+    c,
+    c.toUpperCase(),
+    c.toLowerCase()
   ];
+}
 
-  for (const key of variants){
-    for (const b of backends){
+/* Lettura robusta (prova più varianti) */
+async function getCountSmart(ns, code, prefix){
+  for (const key of keyVariants(prefix, code)){
+    for (const b of backendsGet){
       try{
-        const url = b.get(ns, key);
-        const data = await fetchJSON(url, 3000);
+        const data = await fetchJSON(b.get(ns, key), 3000);
         const v = b.map(data);
-        if (Number.isFinite(v)) {
-          console.debug('[contatore OK]', {backend:b.name, key, value:v});
-          return v;
-        }
-      }catch(e){
-        // silenzio, passo alla prossima variante/backend
-      }
+        if (Number.isFinite(v)) return v;
+      }catch{}
     }
   }
-  console.debug('[contatore KO] nessuna variante trovata per', code);
   return null;
+}
+
+/* Inizializza (set=0) su varianti prefissate, poi rileggi */
+async function ensureAndRead(ns, code, prefix){
+  let v = await getCountSmart(ns, code, prefix);
+  if (v != null) return v;
+
+  const pref = keyVariants(prefix, code).slice(0,3); // solo quelle con prefisso
+  for (const key of pref){
+    for (const b of backendsSet){
+      try{ await fetchJSON(b.set(ns, key, 0), 3000); }catch{}
+    }
+  }
+  return await getCountSmart(ns, code, prefix);
+}
+
+/* Reset contatore */
+async function resetCountSmart(ns, code, prefix, value=0){
+  for (const key of keyVariants(prefix, code)){
+    for (const b of backendsSet){
+      try{
+        const data = await fetchJSON(b.set(ns, key, value), 3500);
+        if (typeof data.value !== 'undefined') return true;
+      }catch{}
+    }
+  }
+  return false;
 }
 
 function h(tag,attrs,...kids){
@@ -182,6 +244,12 @@ function h(tag,attrs,...kids){
   if(attrs) for(const[k,v] of Object.entries(attrs)){ if(k==='class') el.className=v; else el.setAttribute(k,v); }
   for(const k of kids) el.append(k);
   return el;
+}
+function makeResetMini(onClick, title){
+  const btn = h('button', { class:'reset-mini', type:'button', title, 'aria-label':title });
+  btn.append(h('span',{class:'x'}, 'X'));
+  btn.addEventListener('click', onClick);
+  return btn;
 }
 
 async function refresh(){
@@ -194,18 +262,57 @@ async function refresh(){
     const parts=[ag.nome, ag.indirizzo, ag.cittaProv, ag.telefono ? `Tel ${ag.telefono}` : ""]
       .filter(Boolean).join(' - ');
 
-    const cell=h('td',null);
-    const span=h('span',{class:'ag-descr'});
-    const href=(ag.link&&/^https?:\/\//i.test(ag.link)) ? ag.link : '#';
-    const anchor=h('a',{class:'ag-code', href, target:'_blank', rel:'noopener'}, ag.codice);
-    span.append(anchor, ': ', h('span',{class:'ag-rest'}, parts));
-    cell.append(span);
+    // colonna 1: descrizione (codice bold nero, poi testo, poi URL cliccabile)
+    const c1=h('td',null);
+    const desc=h('span',{class:'ag-descr'});
+    desc.append(
+      h('span',{class:'ag-code'}, ag.codice), ': ',
+      h('span',{class:'ag-rest'}, parts)
+    );
 
-    const row=h('tr',null, cell, h('td',null, '—'));
+    const href=(ag.link&&/^https?:\/\//i.test(ag.link)) ? ag.link : '';
+    if(href){
+      desc.append(' — ', h('a',{class:'ag-url', href, target:'_blank', rel:'noopener'}, href));
+    }
+    c1.append(desc);
+
+    // colonna 2: visite bold + reset
+    const c2=h('td',null);
+    const vw=h('span',{class:'visite-wrap'});
+    const num=h('span',{class:'num'},'—');
+    const resetTitle=`Azzera contatore di "${ag.codice}"`;
+    const btn=makeResetMini(async (ev)=>{
+      ev.preventDefault();
+      const okConf = confirm(`Sei sicuro di voler azzerare il contatore per "${ag.codice}"?`);
+      if(!okConf) return;
+      num.textContent='…';
+      const done = await resetCountSmart(ns, ag.codice, prefix, 0);
+      if(!done) alert('Errore: impossibile azzerare il contatore. Riprova.');
+      const v2 = await ensureAndRead(ns, ag.codice, prefix);
+      num.textContent = (v2!=null) ? v2 : '—';
+      await refreshTotals();
+    }, resetTitle);
+    vw.append(num, btn);
+    c2.append(vw);
+
+    const row=h('tr',null, c1, c2);
     tb.append(row);
 
+    // lettura con auto-inizializzazione se mancante
+    const v=await ensureAndRead(ns, ag.codice, prefix);
+    if(v!=null){ num.textContent=v; total+=v; ok++; }
+  }
+  document.getElementById('totalValue').textContent = ok ? total : '—';
+}
+
+/* Ricalcola solo il totale */
+async function refreshTotals(){
+  const ns='socim', prefix='vendesi-';
+  const ags=await loadAgenzie();
+  let total=0, ok=0;
+  for(const ag of ags){
     const v=await getCountSmart(ns, ag.codice, prefix);
-    if(v!=null){ row.children[1].textContent=v; total+=v; ok++; }
+    if(v!=null){ total+=v; ok++; }
   }
   document.getElementById('totalValue').textContent = ok ? total : '—';
 }
