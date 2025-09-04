@@ -182,6 +182,16 @@
     from { transform: translateX(0); opacity:1; }
     to   { transform: translateX(-6px); opacity:0.4; }
   }
+  
+  /* Stile per la nuova scritta */
+  .proposed-by {
+      color: #1d4ed8;
+      font-weight: bold;
+      font-size: clamp(1.2rem, 3.5vw, 1.4rem);
+      margin: .2rem 0;
+      line-height: 1.5;
+      text-align: center;
+  }
 
 </style>
 <link href="https://dl.dropboxusercontent.com" rel="preconnect"/>
@@ -938,21 +948,19 @@ document.addEventListener('DOMContentLoaded', () => {
       if (agenziaDati && contactSection) {
         console.log("Agenzia trovata:", agenziaDati.nome);
         
-        // --- INIZIO MODIFICA: Aggiungi "Proposto da [Nome Agenzia]" ---
+        // Aggiunge la scritta "Proposto da..."
         const addressEl = document.querySelector('.address');
         if (addressEl) {
           const proposedByEl = document.createElement('p');
-          proposedByEl.className = 'address'; // Stesso stile dell'indirizzo
-          proposedByEl.style.marginTop = '.2rem';
+          proposedByEl.className = 'proposed-by';
           proposedByEl.textContent = 'Proposto da ' + agenziaDati.nome;
           addressEl.insertAdjacentElement('afterend', proposedByEl);
         }
-        // --- FINE MODIFICA ---
 
-        // Rimuovi l'intera sezione `contactContent` per sostituirla con la versione personalizzata
+        // Rimuove l'intera sezione `contactContent` per sostituirla con la versione personalizzata
         contactSection.innerHTML = '';
         
-        // Aggiungi il nuovo contenuto personalizzato
+        // Aggiunge il nuovo contenuto personalizzato
         const agenziaBoxHtml = `
           <div id="contactContent">
             
