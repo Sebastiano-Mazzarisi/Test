@@ -60,6 +60,8 @@
   footer{text-align:center;padding:.8rem;color:#666;font-size:var(--content-font-size);margin-top:1.5rem;border-top:1px solid #eee; display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:0.5rem;}
   .e{font-size:1.25em;margin-right:6px}
   .counter-box{margin-left: 0.5rem; font-size: var(--content-font-size); opacity: 1; }
+  /* Nascosto per non far sentire osservati gli utenti */
+  .counter-box{ display:none !important; }
   
   /* Nuova regola per nascondere il video nella modale immagine */
   #imageModal .modal-video {
@@ -740,121 +742,131 @@
 </script>
 
 <script>
-// ====== CONTATORE VISITE – discreto nel footer, 1 HIT per sessione ======
+// ====== CONTATORE VISITE ROBUSTO (per-agency + nohit) ======
 document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('footer[data-global-counter]').forEach(footer => {
-    const key = footer.dataset.global-counter;
-    if (!key) return;
+  const footer = document.querySelector('footer[data-global-counter]');
+  if (!footer) return;
 
-    let span = footer.querySelector('#visite-footer');
-    if (!span) {
-      span = document.createElement('span');
-      span.id = 'visite-footer';
-      span.className = 'counter-box';
-      span.setAttribute('aria-label', 'contatore visite');
-      span.setAttribute('title', 'visite totali');
-      footer.appendChild(span);
+  // --- URL params ---
+  const params = new URLSearchParams(location.search);
+  const ag = (params.get('ag') || '').trim();
+  const nohit = params.get('nohit') === '1' || params.get('demo') === '1' || params.get('preview') === '1';
+
+  // Chiave base + suffisso per agenzia
+  const baseKey = footer.dataset.globalCounter || 'vendesi';
+  const key = ag ? `${baseKey}-${ag}` : baseKey;
+
+  // Crea/recupera lo span del numero
+  const ensureSpan = () => {
+    let s = document.getElementById('visite-footer');
+    if (!s) {
+      s = document.createElement('span');
+      s.id = 'visite-footer';
+      s.className = 'counter-box';
+      s.setAttribute('aria-label', 'contatore visite');
+      s.setAttribute('title', 'visite totali');
+      footer.appendChild(s);
     }
+    return s;
+  };
+  const span = ensureSpan();
 
-    // Stato
-    const NS = 'socim';
-    const sess = window.sessionStorage;   // <- per "una volta per sessione"
-    const perm = window.localStorage;     // <- per contatore locale e sync
-    const sessionFlag   = `sess-hit-${NS}-${key}`;
-    const localCountKey = `local-count-${NS}-${key}`;
-    const needsSyncKey  = `needs-sync-${NS}-${key}`;
+  const setText = (n) => { span.textContent = `(${Number.isFinite(n) ? n : 0})`; };
+  setText(0); // placeholder
 
-    const show = (n) => { span.textContent = `(${Number.isFinite(n) ? n : 0})`; };
+  // --- storage sicuro ---
+  const safe = (() => {
+    const wrap = (obj) => ({
+      get: (k) => { try { return obj.getItem(k); } catch { return null; } },
+      set: (k, v) => { try { obj.setItem(k, v); } catch {} },
+      del: (k) => { try { obj.removeItem(k); } catch {} },
+      ok:  () => { try { const t='__t__'+Math.random(); obj.setItem(t,'1'); obj.removeItem(t); return true; } catch { return false; } }
+    });
+    return { local: wrap(window.localStorage), session: wrap(window.sessionStorage) };
+  })();
 
-    // Backend multipli
-    const backends = [
-      { urlHit: `https://api.countapi.xyz/hit/${encodeURIComponent(NS)}/${encodeURIComponent(key)}`,
-        urlGet: `https://api.countapi.xyz/get/${encodeURIComponent(NS)}/${encodeURIComponent(key)}`,
-        map: (j) => Number(j.value) },
-      { urlHit: `https://countapi.store/hit/${encodeURIComponent(key)}/visite`,
-        urlGet: `https://countapi.store/get/${encodeURIComponent(key)}/visite`,
-        map: (j) => Number(j.value) },
-      { urlHit: `https://countapi.mileshilliard.com/api/v1/hit/${NS}_${key}`,
-        urlGet: `https://countapi.mileshilliard.com/api/v1/get/${NS}_${key}`,
-        map: (j) => Number(j.value ?? j.count) }
-    ];
+  // cookie sessione – fallback per sessionFlag
+  const sessCookie = {
+    get: (name) => document.cookie.split('; ').find(r=>r.startsWith(name+'='))?.split('=')[1] || null,
+    set: (name, val) => { document.cookie = `${name}=${val}; path=/`; }
+  };
 
-    const fetchJSON = (url) => fetch(url, { cache:'no-store' }).then(r => r.json());
+  const NS = 'socim';
+  const sessionFlag = `sess-hit-${NS}-${key}`;
+  const localCountKey = `local-count-${NS}-${key}`;
 
-    const getRemote = async () => {
-      for (const b of backends) {
-        try {
-          const data = await fetchJSON(b.urlGet);
-          const v = b.map(data);
-          if (Number.isFinite(v)) return v;
-        } catch {}
-      }
-      throw new Error('GET failed on all backends');
-    };
+  const alreadyHit =
+    (safe.session.get(sessionFlag) === '1') ||
+    (sessCookie.get(sessionFlag) === '1');
 
-    const hitRemote = async () => {
-      for (const b of backends) {
-        try {
-          const data = await fetchJSON(b.urlHit);
-          const v = b.map(data);
-          if (Number.isFinite(v)) return v;
-        } catch {}
-      }
-      throw new Error('HIT failed on all backends');
-    };
+  // Backend in cascata + timeout
+  const backends = [
+    { urlHit: `https://countapi.mileshilliard.com/api/v1/hit/${NS}_${key}`, urlGet: `https://countapi.mileshilliard.com/api/v1/get/${NS}_${key}`, map: j => Number(j.value ?? j.count) },
+    { urlHit: `https://countapi.store/hit/${encodeURIComponent(key)}/visite`, urlGet: `https://countapi.store/get/${encodeURIComponent(key)}/visite`, map: j => Number(j.value) },
+    { urlHit: `https://api.countapi.xyz/hit/${encodeURIComponent(NS)}/${encodeURIComponent(key)}`, urlGet: `https://api.countapi.xyz/get/${encodeURIComponent(NS)}/${encodeURIComponent(key)}`, map: j => Number(j.value) }
+  ];
 
-    const incLocal = () => {
-      let c = parseInt(perm.getItem(localCountKey) || '0', 10);
-      c += 1;
-      perm.setItem(localCountKey, String(c));
-      return c;
-    };
+  const fetchJSON = (url, ms=3500) => {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), ms);
+    return fetch(url, { signal: ctrl.signal, cache:'no-store' })
+      .then(r => { clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+  };
 
-    const syncLocalTo = (v) => {
-      const cur = parseInt(perm.getItem(localCountKey) || '0', 10);
-      if (Number.isFinite(v) && v > cur) perm.setItem(localCountKey, String(v));
-    };
+  const cascade = async (mode) => {
+    for (const b of backends) {
+      const url = mode === 'hit' ? b.urlHit : b.urlGet;
+      try {
+        const data = await fetchJSON(url, 3500);
+        const v = b.map(data);
+        if (Number.isFinite(v)) return v;
+      } catch {}
+    }
+    throw new Error('all backends failed');
+  };
 
-    (async () => {
-      show(parseInt(perm.getItem(localCountKey) || '0', 10));
+  (async () => {
+    let value = null;
 
-      const alreadyHitThisSession = !!sess.getItem(sessionFlag);
-
-      if (!alreadyHitThisSession) {
-        try {
-          const v = await hitRemote();
-          sess.setItem(sessionFlag, '1');
-          perm.removeItem(needsSyncKey);
-          syncLocalTo(v);
-          show(v);
-        } catch {
-          const vLocal = incLocal();
-          perm.setItem(needsSyncKey, '1');
-          sess.setItem(sessionFlag, '1');
-          show(vLocal);
-        }
+    try {
+      if (nohit) {
+        // Solo lettura, non incrementa
+        value = await cascade('get');
+        setText(value);
         return;
       }
-      
-      try {
-        const v = await getRemote();
-        syncLocalTo(v);
-        show(v);
-      } catch {
-        const vLocal = parseInt(perm.getItem(localCountKey) || '0', 10);
-        show(vLocal);
-      }
 
-      try {
-        if (perm.getItem(needsSyncKey) === '1') {
-          const v = await hitRemote();
-          perm.removeItem(needsSyncKey);
-          syncLocalTo(v);
-          show(v);
+      if (!alreadyHit) {
+        value = await cascade('hit'); // incrementa una sola volta per sessione
+        if (safe.session.ok()) safe.session.set(sessionFlag,'1');
+        else sessCookie.set(sessionFlag,'1');
+      } else {
+        value = await cascade('get'); // lettura nelle visite successive
+      }
+      setText(value);
+
+      // sync locale non bloccante
+      if (safe.local.ok() && Number.isFinite(value)) {
+        const cur = parseInt(safe.local.get(localCountKey) || '0', 10);
+        if (value > cur) safe.local.set(localCountKey, String(value));
+      }
+    } catch {
+      // tutti i backend KO → fallback locale silenzioso
+      let v = 0;
+      if (safe.local.ok()) {
+        v = parseInt(safe.local.get(localCountKey) || '0', 10);
+        if (!alreadyHit && !nohit) {
+          v += 1;
+          safe.local.set(localCountKey, String(v));
+          if (safe.session.ok()) safe.session.set(sessionFlag,'1');
+          else sessCookie.set(sessionFlag,'1');
         }
-      } catch {}
-    })();
-  });
+      } else {
+        v = (!alreadyHit && !nohit) ? 1 : 0;
+      }
+      setText(v);
+    }
+  })();
 });
 </script>
 
