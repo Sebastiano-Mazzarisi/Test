@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<title>Contatori visite per agenzia</title>
+<style>
+  :root{
+    --ink:#0f172a; --muted:#475569; --bg:#e9edf5; --blue:#2563eb;
+    --fs:20px; --rad:8px;
+  }
+  html, body { height:100%; }
+  * { min-width:0; box-sizing:border-box; }
+  body{
+    margin:0; padding:0 4px;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial,sans-serif;
+    font-size:var(--fs); line-height:1.25;
+    color:var(--ink); background:var(--bg);
+    overflow:hidden; /* niente scrollbar globale */
+  }
+  header{
+    padding:8px; background:var(--blue); color:#fff; text-align:center;
+    border-radius:var(--rad); margin:4px auto 6px; width:100%;
+  }
+  h1{ margin:2px 0; font-size:clamp(1.4rem,6vw,1.8rem); font-weight:700; }
+  .hdr-sub{ margin:0; opacity:.95; font-size:1.1rem; }
+  
+  main{
+    width:100%; margin:0 auto;
+    height:calc(100% - 80px);
+    display:flex; flex-direction:column; gap:6px;
+  }
+  
+  .refresh-section{
+    text-align:center; flex:0 0 auto;
+  }
+  
+  button{
+    font:inherit; padding:10px 20px; border:1px solid #1e4fd1; border-radius:var(--rad);
+    background:var(--blue); color:#fff; cursor:pointer; font-size:1.2rem; font-weight:600;
+  }
+  
+  .box{
+    background:#fff; border:1px solid #e5e7eb; border-radius:var(--rad);
+    padding:8px; margin:0; box-shadow:0 1px 0 rgba(0,0,0,.03);
+    display:flex; flex-direction:column; min-height:0; /* niente flex-grow: il box non si allunga */
+    overflow:hidden; /* clip di sicurezza */
+  }
+  
+  /* Il wrapper della tabella NON riempie lo spazio:
+     il box si chiude subito dopo il totale */
+  .table-wrap{ 
+    flex:0 0 auto;         /* ⟵ niente "1 1 auto" */
+    min-height:0; 
+    overflow:visible;      /* ⟵ nessuno scroll interno */
+    border-radius:var(--rad);
+  }
+
+  table{
+    width:100%; 
+    table-layout:fixed;
+    border-collapse:separate;   /* più stabile con i bordi arrotondati */
+    border-spacing:0;
+    font-size:1.2rem;
+  }
+  th, td{ padding:8px 10px; border-bottom:1px solid #e5e7eb; text-align:left; word-break:break-word; }
+  th{
+    background:#f3f4f6; font-weight:600; position:sticky; top:0; z-index:3; font-size:1.1rem;
+  }
+  tr:last-child td{ border-bottom:none; }
+  .right{ text-align:right; }
+  
+  /* Colonne tabella responsive */
+  th:first-child, td:first-child { width:40%; }
+  th:nth-child(2), td:nth-child(2) { width:25%; }
+  th:nth-child(3), td:nth-child(3) { width:35%; }
+
+  /* Totale come riga normale attaccata al tbody (no sticky) */
+  tfoot{ position:static; }
+  tfoot td{
+    background:#fff;
+    border-top:2px solid #d1d5db;
+    padding:10px 12px;
+    text-align:center;
+    font-weight:700;
+  }
+  tfoot strong{ font-size:1.3rem; }
+  tfoot span{ font-size:1.4rem; font-weight:800; margin-left:6px; }
+
+  .foot-mini{
+    color:var(--muted); font-size:1.1rem; text-align:center; flex:0 0 auto;
+    margin:6px 0 4px; line-height:1.2;
+  }
+  
+  @media(max-width:300px){
+    body{ padding:0 2px; }
+    table{ font-size:1.1rem; }
+    th, td{ padding:6px 8px; }
+    tfoot strong{ font-size:1.2rem; }
+    button{ padding:8px 16px; font-size:1.1rem; }
+  }
+  
+  @media(max-height:500px){
+    h1{ font-size:clamp(1.2rem,5vw,1.6rem); }
+    .hdr-sub{ font-size:1rem; }
+    main{ height:calc(100% - 70px); }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Contatori visite per agenzia</h1>
+  <p class="hdr-sub">Mostra i valori globali letti, non incrementa nulla</p>
+</header>
+
+<main>
+  <div class="refresh-section">
+    <button id="refresh">Aggiorna</button>
+  </div>
+
+  <div class="box">
+    <div class="table-wrap">
+      <table id="tbl">
+        <thead>
+          <tr><th>Agenzia</th><th class="right">Valore</th><th>Backend</th></tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3" class="totale-row">
+              <strong>Totale complessivo: <span id="totalValue">—</span></strong>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <p class="foot-mini">(?ag=Agenzia) Sito agenzia - (?nohit=1) Non incrementa</p>
+</main>
+
+<script>
+const AGENZIE_CSV = "https://sebastiano-mazzarisi.github.io/Test/Agenzie.csv";
+const backends = [
+  { name: "mileshilliard",
+    get: (ns, key) => `https://countapi.mileshilliard.com/api/v1/get/${ns}_${key}`,
+    map: j => Number(j.value ?? j.count)
+  },
+  { name: "countapi.store",
+    get: (ns, key) => `https://countapi.store/get/${encodeURIComponent(key)}/visite`,
+    map: j => Number(j.value)
+  },
+  { name: "countapi.xyz",
+    get: (ns, key) => `https://api.countapi.xyz/get/${encodeURIComponent(ns)}/${encodeURIComponent(key)}`,
+    map: j => Number(j.value)
+  }
+];
+
+const fetchJSON = (url, ms=3000) => {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), ms);
+  return fetch(url, { signal: ctrl.signal, cache:'no-store' })
+    .then(r => { clearTimeout(t); if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+};
+
+async function getCount(ns, key) {
+  for (const b of backends) {
+    try {
+      const data = await fetchJSON(b.get(ns, key), 3000);
+      const v = b.map(data);
+      if (Number.isFinite(v)) return { value:v, backend:b.name };
+    } catch(e) {}
+  }
+  throw new Error("all backends failed");
+}
+
+async function loadAgenzieCodes() {
+  try{
+    const r = await fetch(AGENZIE_CSV, { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP '+r.status);
+    const text = await r.text();
+    const rows = text.trim().split(/\r?\n/);
+    const codes = [];
+    for (let i=1; i<rows.length; i++) {
+      const cols = rows[i].split(';');
+      if (cols[0]) codes.push(cols[0].trim());
+    }
+    return codes;
+  } catch(e){
+    console.warn('Errore nel caricamento Agenzie.csv', e);
+    return ['GIESSE', 'PRIMA', 'RUBINO']; // fallback
+  }
+}
+
+function h(tag, attrs, ...kids){
+  const el = document.createElement(tag);
+  if (attrs) for (const [k,v] of Object.entries(attrs)) {
+    if (k === "class") el.className = v;
+    else el.setAttribute(k, v);
+  }
+  for (const k of kids) el.append(k);
+  return el;
+}
+
+async function refresh(){
+  const ns = 'socim'; // fisso
+  const prefix = 'vendesi-'; // fisso
+  const ags = await loadAgenzieCodes();
+  const tb = document.querySelector('#tbl tbody');
+  const totalEl = document.getElementById('totalValue');
+  tb.innerHTML = "";
+  let total = 0;
+  let okRows = 0;
+
+  for (const ag of ags) {
+    const key = `${prefix}${ag}`;
+    const row = h('tr', null,
+      h('td', null, ag),
+      h('td', {class:'right'}, h('span', {class:'spinner', title:'carico…'})),
+      h('td', null, '—')
+    );
+    tb.append(row);
+    try{
+      const {value, backend} = await getCount(ns, key);
+      row.children[1].textContent = value;
+      row.children[2].textContent = backend;
+      total += (Number.isFinite(value) ? value : 0);
+      okRows++;
+    }catch{
+      row.children[1].textContent = '—';
+      row.children[2].textContent = 'errore';
+      row.children[2].className = 'err';
+    }
+  }
+  totalEl.textContent = okRows ? total : '—';
+}
+
+document.getElementById('refresh').addEventListener('click', refresh);
+document.addEventListener('DOMContentLoaded', refresh);
+</script>
+</body>
+</html>
