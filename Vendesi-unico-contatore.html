@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Immobile per studi medici - Via Fanelli, Castellana Grotte</title>
+<link href="https://sebastiano-mazzarisi.github.io/Test/Vendesi.jpg" rel="apple-touch-icon" sizes="180x180"/>
+<link href="https://sebastiano-mazzarisi.github.io/Test/Vendesi.jpg" rel="icon" sizes="192x192" type="image/jpeg"/>
+<link href="https://sebastiano-mazzarisi.github.io/Test/Vendesi.jpg" rel="icon"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="Via Fanelli" name="apple-mobile-web-app-title"/>
+<meta content="yes" name="mobile-web-app-capable"/>
+<meta content="Via Fanelli" name="application-name"/>
+<meta content="#2563eb" name="theme-color"/>
+<link as="image" href="https://dl.dropboxusercontent.com/s/slcptm1llthu6lj8v3mcy/Copertina.jpg?rlkey=l8jydba5ghoo2wg2jgouiou21" rel="preload"/>
+<style>
+  :root{
+    --ink:#0f172a; --muted:#475569; --bg:#e9e9e9;
+    --yellow-light:#fffbe0; --yellow-strong:#ffd84d; --yellow-border:#f1b400;
+    --content-font-size:1.2rem; --content-line:1.35;
+  }
+  *{box-sizing:border-box}
+  html{ scrollbar-gutter: stable both-edges; }
+  @supports not (scrollbar-gutter: stable){ body{ overflow-y:scroll; } }
+
+  body{margin:0;line-height:1.5;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  header{padding:1.2rem;background:#fff;border-bottom:1px solid #eee;text-align:center}
+
+  /* HERO 450x300 (3:2) */
+  .hero{position:relative;width:450px;height:300px;margin:0 auto 12px;border-radius:12px;overflow:hidden;background:#eceff3;box-shadow:0 4px 18px rgba(0,0,0,.15);cursor:pointer}
+  .hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;opacity:0;transition:opacity .25s}
+  .hero img.loaded{display:block;opacity:1}
+  @media (max-width:500px){.hero{width:min(90vw,450px);height:calc(min(90vw,450px)*2/3)}}
+
+  .header-below{opacity:0;transition:opacity .18s}
+  .header-ready .header-below{opacity:1}
+
+  h1{margin:.8rem 0;font-size:clamp(2.2rem,6vw,2.8rem);line-height:1.2}
+  h2{margin:.8rem 0 .6rem;font-size:clamp(1.8rem,5vw,2.2rem);line-height:1.2}
+  .address{margin:0;color:var(--muted);font-size:clamp(1.4rem,4vw,1.6rem);line-height:1.5;text-align:center}
+
+  nav{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin:.8rem 0}
+  nav button{
+    padding:.8rem 1.2rem;border:1px solid #ddd;border-radius:8px;background:var(--yellow-light);cursor:pointer;
+    font-weight:600;font-size:clamp(1.3rem,4vw,1.4rem);transition:background-color .15s,border-color .15s,box-shadow .15s,transform .02s;
+    box-shadow:0 1px 3px rgba(0,0,0,.1);width:140px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;
+  }
+  nav button:hover{background-color:#fffac8}
+  nav button:active{transform:translateY(1px)}
+  nav button.active{background:var(--yellow-strong);border-color:var(--yellow-border);box-shadow:0 0 0 2px rgba(241,180,0,.35),0 2px 6px rgba(0,0,0,.15);color:#221a00}
+
+  main{max-width:1000px;margin:0 auto;padding:1rem}
+  section{display:none}
+  section.active{display:block}
+
+  section, section p, .doc, .info-box, .garage-box, .note, .doc-box { font-size:var(--content-font-size); line-height:var(--content-line) }
+  .info-box,.garage-box,.note,.doc-box{background:#fff;border:1px solid #eee;border-radius:8px;padding:1.5rem;margin-top:1rem}
+  .doc{display:flex;justify-content:space-between;align-items:center;padding:.3rem 0;margin:0}
+  .doc a{white-space:nowrap}
+  footer{text-align:center;padding:.8rem;color:#666;font-size:var(--content-font-size);margin-top:1.5rem;border-top:1px solid #eee; display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:0.5rem;}
+  .e{font-size:1.25em;margin-right:6px}
+  .counter-box{margin-left:.5rem;font-size:var(--content-font-size);opacity:1;display:inline;}
+  
+  /* Nuova regola per nascondere il video nella modale immagine */
+  #imageModal .modal-video {
+    display: none;
+  }
+
+  /* Galleria 4:3 */
+  .image-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+  .image-gallery .it{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:4/3;background:#fff;border:1px solid #eee;cursor:pointer}
+  .image-gallery .it img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+
+  /* Modali generiche */
+  .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:50;justify-content:center;align-items:center}
+  .modal .wrap{position:relative;width:92%;max-width:960px}
+  .modal img,.modal video{display:block;max-height:80vh;width:100%;object-fit:contain;border-radius:12px;background:#000}
+
+  /* X default in basso dx */
+  .modal .close{position:absolute;right:16px;bottom:12px;top:auto;font-size:32px;color:#fff;font-weight:700;cursor:pointer;z-index:3;background:rgba(0,0,0,.6);border-radius:10px;padding:4px 10px;line-height:1;-webkit-user-select:none;user-select:none}
+
+  /* X in alto per alcune modali */
+  #videoModal .close, #copyModal .close, .top-close .close{top:10px;bottom:auto}
+
+  .modal .prev,.modal .next{position:absolute;top:50%;transform:translateY(-50%);font-size:28px;color:#fff;background:rgba(0,0,0,.5);padding:8px 12px;border-radius:8px;cursor:pointer;z-index:2}
+  .modal .prev{left:0}.modal .next{right:0}
+  .modal .counter{position:absolute;left:14px;bottom:12px;z-index:5;background:rgba(0,0,0,.65);color:#fff;font-weight:700;font-size:1rem;padding:6px 10px;border-radius:10px;line-height:1;user-select:none}
+
+  .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:2rem}
+  .btnA{background:var(--yellow-light);border:1px solid #ddd;border-radius:8px;padding:.8rem 1.2rem;cursor:pointer;font-size:1.3rem;transition:background-color .15s,border-color .15s,box-shadow .15s,transform .02s;box-shadow:0 1px 3px rgba(0,0,0,.1);min-width:120px;text-decoration:none;color:inherit;display:inline-block;text-align:center}
+  .btnA:hover{background-color:#fffac8}
+  .btnA:active,.btnA:focus-visible{background:var(--yellow-strong);border-color:var(--yellow-border);box-shadow:0 0 0 2px rgba(241,180,0,.35),0 1px 3px rgba(0,0,0,.15);outline:none;transform:translateY(1px)}
+
+  /* Iframe (PDF/Mappe) */
+  .iframe-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,.7);justify-content:center;align-items:center;z-index:100}
+  .iframe-modal-content{position:relative;width:90%;max-width:960px;height:90%;background-color:#fff;border-radius:8px;overflow:hidden;display:flex;flex-direction:column}
+  .iframe-modal-content .close{position:absolute;right:16px;bottom:12px;top:auto;font-size:32px;color:#fff;font-weight:bold;cursor:pointer;z-index:101;background:rgba(0,0,0,.6);border-radius:10px;padding:4px 10px;line-height:1}
+  .iframe-modal-content iframe{flex-grow:1;width:100%;border:none}
+
+  /* Audio Bar */
+  .audio-bar{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #2563eb; /* Colore blu della "i" di Info */
+    backdrop-filter: blur(8px);
+    z-index: 90;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(100%);
+    transition: transform 0.3s ease-out;
+  }
+  .audio-bar.active{
+    transform: translateY(0);
+  }
+  .audio-bar__player{
+    flex-grow: 1;
+    max-width: 600px;
+  }
+  .audio-bar__close{
+    color: #fff;
+    font-size: 2rem;
+    cursor: pointer;
+    line-height: 1;
+    opacity: 0.8;
+  }
+  .audio-bar__close:hover{
+    opacity: 1;
+  }
+
+  /* Copia info */
+  .copy-box{background:#fff;border:1px solid #eee;border-radius:12px;padding:1.4rem}
+  .copy-rect{border:1.5px solid #c7cdd6;border-radius:10px;padding:1rem;background:#f8fafc}
+  .rich-copy p{margin:0 0 1em 0;color:inherit}
+  .rich-copy p:last-child{margin-bottom:0}
+  .rich-copy a{color:#1d4ed8;text-decoration:underline}
+  .copy-actions{margin-top:1rem;display:flex;gap:.6rem;justify-content:flex-end}
+  .copy-hint{color:#475569;font-size:.95rem;margin-top:.8rem}
+
+  /* Emoji a colori */
+  .emoji{
+    font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Segoe UI Symbol","Android Emoji","EmojiOne Color","Twemoji Mozilla",sans-serif;
+    font-weight: normal; font-style: normal;
+  }
+
+  /* Speaker button */
+  .speaker-btn{
+    font-size:1.05em; line-height:1; margin-left:.5rem;
+    background:#fff; border:1px solid #e5e5e5; border-radius:999px;
+    padding:.2rem .5rem; cursor:pointer;
+  }
+  .speaker-btn:hover{ background:#f6f6f6; }
+
+  /* --- Grazie inline --- */
+  .thank-wrap{padding-left:20px;padding-right:20px; width:100%; display:flex; justify-content:center; }
+  .thank-box{
+    background:#fff; border:2px solid #d1d5db; border-radius:12px;
+    padding:1rem 1.2rem; text-align:center; box-shadow:0 4px 14px rgba(0,0,0,.12);
+    margin: 0 auto; max-width: 760px;
+  }
+  .thank-box h1{ font-size:2.2rem; color:#065f46; margin:.2rem 0 .6rem; line-height:1.1; }
+  .thank-box p{ font-size:1.2rem; color:#064e3b; margin:.2rem 0 .8rem; }
+  .thank-bg{ background:#f0fdf4; border-radius:12px; padding:0.6rem; }
+
+#footer-sep{margin:0 .35rem;color:#999}
+</style>
+<link href="https://dl.dropboxusercontent.com" rel="preconnect"/>
+<link href="https://www.dropbox.com" rel="preconnect"/>
+<link href="https://sebastiano-mazzarisi.github.io" rel="preconnect"/>
+</head>
+<body>
+<header id="hdr">
+  <div class="hero" id="hero">
+    <img alt="Copertina immobile - clic per videofoto" decoding="async" fetchpriority="high" height="300" id="headerImage" loading="eager" referrerpolicy="no-referrer" title="Clicca per aprire le videofoto" width="450"/>
+  </div>
+  <div class="header-below">
+    <h1>Immobile per studi medici</h1>
+    <p class="address">Via Fanelli, 8 - Castellana Grotte (BA)</p>
+    <nav>
+      <button class="active" data-route="info" type="button"><span class="e">ℹ️</span>Info</button>
+      <button onclick="openPdfModal('https://sebastiano-mazzarisi.github.io/Test/Piantina%20PT.pdf', 'info')" type="button"><span class="e">🗺️</span>Piantina</button>
+      <button data-route="foto" type="button"><span class="e">📸</span>Foto</button>
+      <button onclick="openVideoModal()" type="button"><span class="e">▶️</span>Video</button>
+      <button data-route="documenti" type="button"><span class="e">📄</span>Documenti</button>
+      <button data-route="contatti" type="button"><span class="e">✉️</span>Contatti</button>
+    </nav>
+  </div>
+</header>
+
+<main id="app">
+  <section class="active" data-page="info" tabindex="-1">
+    <h2><span class="e">ℹ️</span>Info <button id="audioSpeakerBtn" class="speaker-btn" title="Ascolta audio guida" aria-label="Ascolta l'audio guida">🔊</button></h2>
+    <div class="info-box">
+      <p><b><span class="e">📐</span>Superficie:</b> 148 mq (lordi)</p>
+      <p><b><span class="e">🏠</span>Interni:</b> reception, 8 ambienti studio, 2 bagni, sala d'attesa</p>
+      <p><b><span class="e">🌳</span>Pertinenze:</b> area scoperta, posto auto recintato</p>
+      <p><b><span class="e">♿</span>Accessibilità:</b> abbattimento barriere, bagno disabili</p>
+      <p><b><span class="e">🌬️</span>Climatizzazione:</b> i locali sono climatizzati</p>
+      <p><b><span class="e">⚡</span>Classe energetica:</b> B - IPE 213.9</p>
+      <p><b><span class="e">💲</span>Prezzo richiesto:</b> € 150.000</p>
+    </div>
+
+    <div class="garage-box">
+      <p><b><span class="e">🚗</span>Area garage:</b> 240 mq sottostante, frazionabile in almeno 5 box.</p>
+      <p>Nota: quest'area <u>non è compresa</u> nel prezzo indicato in questa pagina.</p>
+    </div>
+
+    <div class="note">
+      <p><b><span class="e">🤝</span>Agevolazioni:</b> Per i professionisti sanitari come medici e fisioterapisti, sono disponibili agevolazioni per l'acquisto di immobili destinati alla propria attività.</p>
+      <p>A livello nazionale, si può accedere a crediti di imposta e fondi PNRR; a livello regionale (Puglia) programmi come "Nidi".</p>
+      <p>Clicca <a href="javascript:void(0)" onclick="openPdfModal('https://sebastiano-mazzarisi.github.io/Test/Agevolazioni.pdf','info')">qui</a> per un breve approfondimento.</p>
+    </div>
+  </section>
+
+  <section data-page="foto" tabindex="-1">
+    <h2><span class="e">📸</span>Galleria fotografica</h2>
+    <div class="image-gallery" id="galleryContainer"></div>
+  </section>
+
+  <section data-page="documenti" tabindex="-1">
+    <h2><span class="e">📄</span>Documenti</h2>
+    <div class="doc-box">
+      <div class="doc"><span><span class="e">🌿</span>APE Via Fanelli 8</span><a href="javascript:void(0)" onclick="openPdfModal('https://sebastiano-mazzarisi.github.io/Test/APE%20Via%20Fanelli%20(02-10-2015).pdf')">Scarica</a></div>
+      <div class="doc"><span><span class="e">🗺️</span>Google Maps</span><a href="javascript:void(0)" onclick="openGoogleMapsHere()">Apri</a></div>
+      <div class="doc"><span><span class="e">📄</span>Volantino</span><a href="javascript:void(0)" onclick="openFlyer()">Scarica</a></div>
+      <div class="doc"><span><span class="e">📄</span>Agevolazioni</span><a href="javascript:void(0)" onclick="openPdfModal('https://sebastiano-mazzarisi.github.io/Test/Agevolazioni.pdf')">Scarica</a></div>
+    </div>
+  </section>
+
+  
+<section data-page="contatti" tabindex="-1">
+  <div id="contactContent">
+    <h2><span class="e">✉️</span>Contatti</h2>
+    <p class="default-contact-text">Compila il modulo qui sotto per richiedere informazioni o fissare una visita.<br>
+       Puoi inserire <b>email o telefono (almeno uno dei due)</b>.</p>
+
+    <form id="contactForm" action="https://formspree.io/f/xpwjyaje" method="POST"
+          style="background:#fff;border:1px solid #eee;border-radius:12px;padding:1.4rem;max-width:500px;margin:1rem auto;">
+      
+      <label for="name"><b>Nome e Cognome</b></label><br>
+      <input type="text" id="name" name="name" required
+             style="width:100%;padding:.6rem;margin:.4rem 0;"><br>
+
+      <label for="email"><b>Email</b> (opzionale)</label><br>
+      <input type="email" id="email" name="email"
+             style="width:100%;padding:.6rem;margin:.4rem 0;"><br>
+
+      <label for="phone"><b>Telefono</b> (opzionale)</label><br>
+      <input type="text" id="phone" name="phone"
+             style="width:100%;padding:.6rem;margin:.4rem 0;"><br>
+
+      <label for="message"><b>Messaggio</b></label><br>
+      <textarea id="message" name="message" rows="4" required
+                style="width:100%;padding:.6rem;margin:.4rem 0;"></textarea><br>
+
+      <button type="submit"
+              style="background:#ffd84d;border:1px solid #f1b400;border-radius:8px;padding:.8rem 1.2rem;font-size:1.2rem;cursor:pointer;width:100%; display: inline-flex; justify-content: center; align-items: center;">
+        <span class="emoji" style="font-size:2em; line-height:0.8;">📨</span>
+        <span style="margin-left:.5rem;">Invia richiesta</span>
+      </button>
+    </form>
+
+    <p style="font-size:.9rem;color:#555;text-align:center;">
+      I dati inseriti verranno inviati in modo sicuro e riceverai risposta via email o telefono.
+    </p>
+    <div class="btns" style="justify-content:center;">
+      <button class="btnA" type="button" onclick="openCopyModal()">📋 Copia info</button>
+    </div>
+  </div>
+
+  <div id="thankYouMessage" style="display:none;">
+    <div class="thank-wrap">
+      <div class="thank-bg" style="width:100%;">
+        <div class="thank-box">
+          <h1>Grazie!</h1>
+          <p>Il modulo è stato inviato con successo.</p>
+          <p style="margin-top:.4rem; color:#475569">Il modulo qui sopra è pronto per nuovi invii.</p>
+          <div class="actions" style="display:flex;justify-content:center;margin-top:.6rem;">
+            <button class="btnA" type="button" onclick="hideThankYou()">OK, ricevuto</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Script corretto che NON elimina il form
+    (function(){
+      const form = document.getElementById("contactForm");
+      const thankYouMessage = document.getElementById("thankYouMessage");
+      
+      if(!form || !thankYouMessage) return;
+      
+      form.addEventListener("submit", async function(e){
+        e.preventDefault();
+        const email = document.getElementById("email").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        if(!email && !phone){
+          alert("Inserisci almeno un recapito (email o telefono).");
+          return;
+        }
+        const fd = new FormData(form);
+        try{
+          const r = await fetch(form.action, { method:"POST", body: fd, headers: { "Accept":"application/json" } });
+          if(!r.ok) throw new Error("HTTP " + r.status);
+          
+          // ✅ SOLUZIONE: Mostra il messaggio senza rimuovere il form
+          thankYouMessage.style.display = 'block';
+          thankYouMessage.scrollIntoView({behavior:'smooth', block:'center'});
+          form.reset(); // Pulisce i campi per un nuovo invio
+          
+        }catch(err){
+          alert("Si è verificato un problema con l'invio. Riprova tra poco.");
+        }
+      });
+    })();
+
+    // Funzione per nascondere il messaggio di ringraziamento
+    function hideThankYou() {
+      const thankYouMessage = document.getElementById("thankYouMessage");
+      if (thankYouMessage) {
+        thankYouMessage.style.display = 'none';
+      }
+    }
+    window.hideThankYou = hideThankYou;
+  </script>
+</section>
+
+</main>
+
+<footer data-global-counter="vendesi">
+  Via Fanelli, 8 - Castellana Grotte (BA)
+  <span id="visite-footer" aria-label="contatore visite" title="visite totali" class="counter-box" aria-live="polite">(0)</span>
+</footer>
+
+<div class="audio-bar" id="audioBar" aria-hidden="true" role="dialog">
+    <audio id="audioContent" controls preload="metadata" class="audio-bar__player"></audio>
+    <span class="audio-bar__close" onclick="closeAudioBar()">×</span>
+</div>
+
+<div aria-hidden="true" aria-label="Galleria immagini" class="modal" id="imageModal" role="dialog">
+  <div class="wrap" role="document">
+    <span aria-label="Chiudi" class="close" onclick="closeModal()">×</span>
+    <img alt="Anteprima immagine" id="modalImage"/>
+    <video class="modal-video" controls id="modalVideo" playsinline preload="metadata" type="video/mp4"></video>
+    <span aria-label="Precedente" class="prev" onclick="changeImage(-1)">‹</span>
+    <span aria-label="Successiva" class="next" onclick="changeImage(1)">›</span>
+    <span class="counter" id="modalCounter">1</span>
+  </div>
+</div>
+
+<div aria-hidden="true" aria-label="Riproduzione video" class="modal" id="videoModal" role="dialog">
+  <div class="wrap" role="document">
+    <span aria-label="Chiudi" class="close" onclick="closeVideoModal()">×</span>
+    <video class="modal-video" controls id="videoContent" playsinline preload="metadata"></video>
+  </div>
+</div>
+
+<div id="loading-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:101; justify-content:center; align-items:center;">
+    <div style="background:#fff; padding:2rem; border-radius:12px; font-size:1.5rem; text-align:center;">
+        Caricamento in corso<span id="loading-dots">...</span>
+    </div>
+</div>
+
+<div aria-hidden="true" aria-label="Anteprima contenuto" class="iframe-modal" id="iframeModal" role="dialog">
+  <div class="iframe-modal-content top-close" role="document">
+    <span aria-label="Chiudi" class="close" onclick="closeIframeModal()">×</span>
+    <iframe frameborder="0" id="iframeContent" src=""></iframe>
+  </div>
+</div>
+
+<div aria-hidden="true" aria-label="Copia informazioni" class="modal" id="copyModal" role="dialog">
+  <div class="wrap" role="document">
+    <span aria-label="Chiudi" class="close" onclick="closeCopyModal()">×</span>
+    <div class="copy-box">
+      <h3 style="margin:.2rem 0 1rem">Testo riepilogativo</h3>
+      <div class="copy-rect"><div class="rich-copy" id="copyText"></div></div>
+      <div class="copy-hint">Se la copia automatica non parte, il testo verrà selezionato: premi <b>Ctrl+C</b> (o tocca "Copia") e poi incolla.</div>
+      <div class="copy-actions"><button class="btnA" id="copyBtn" onclick="copyInfo()" type="button">Copia</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="loading-modal-2" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 102; justify-content: center; align-items: center;">
+    <div style="background:#fff; padding:2rem; border-radius:12px; font-size:1.5rem; text-align:center;">
+        Caricamento in corso<span id="loading-dots-2"></span>
+    </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    /* NAV */
+    const pages=[...document.querySelectorAll('[data-page]')];
+    const navBtns=[...document.querySelectorAll('nav button')];
+    function go(to){
+      // Reset del form contatti quando si naviga verso quella sezione
+      if (to === 'contatti') {
+        const form = document.getElementById("contactForm");
+        const thankYouMessage = document.getElementById("thankYouMessage");
+        
+        if (form && thankYouMessage) {
+          form.style.display = 'block';
+          thankYouMessage.style.display = 'none';
+          form.reset(); // Pulisce i campi
+        }
+      }
+      
+      // Gestione speciale per piantina e video
+      if (to === 'piantina') {
+        // Disattiva tutti i bottoni prima di aprire la piantina
+        navBtns.forEach(b => b.classList.remove('active'));
+        openPdfModal('https://sebastiano-mazzarisi.github.io/Test/Piantina%20PT.pdf', 'info');
+        return;
+      }
+      
+      if (to === 'video') {
+        // Disattiva tutti i bottoni prima di aprire il video
+        navBtns.forEach(b => b.classList.remove('active'));
+        openVideoModal();
+        return;
+      }
+      
+      // Normale gestione delle sezioni
+      pages.forEach(p=>p.classList.toggle('active',p.dataset.page===to));
+      navBtns.forEach(b=>b.classList.toggle('active',b.dataset.route===to));
+      const sect = pages.find(p=>p.dataset.page===to);
+      if(sect){ sect.scrollIntoView({behavior:'smooth', block:'start'}); sect.focus({preventScroll:true}); }
+    
+      
+    }
+    window.go=go;
+    navBtns.forEach(b=>b.addEventListener('click',()=>go(b.dataset.route)));
+
+    // Funzione per resettare i bottoni di navigazione
+    function resetNavButtons() {
+      navBtns.forEach(b => b.classList.remove('active'));
+    }
+    window.resetNavButtons = resetNavButtons;
+
+    /* Copertina */
+    const hdr=document.getElementById('hdr'); const heroImg=document.getElementById('headerImage');
+    const revealHeader=()=>hdr.classList.add('header-ready');
+    function normalizeDropbox(u){try{const url=new URL(u);if(url.hostname==='www.dropbox.com'){url.hostname='dl.dropboxusercontent.com'}url.searchParams.delete('dl');url.searchParams.delete('raw');return url.toString()}catch{return u}}
+    const COVER_PRIMARY="https://www.dropbox.com/scl/fi/slcptm1llthu6lj8v3mcy/Copertina.jpg?rlkey=l8jydba5ghoo2wg2jgouiou21&raw=1";
+    const COVER_SOURCES=[normalizeDropbox(COVER_PRIMARY),COVER_PRIMARY,"https://sebastiano-mazzarisi.github.io/Test/Vendesi.jpg"];
+    function tryLoadCover(i=0){if(i>=COVER_SOURCES.length){revealHeader();return}const test=new Image();test.referrerPolicy='no-referrer';test.onload=()=>{heroImg.src=test.src;heroImg.classList.add('loaded');revealHeader()};test.onerror=()=>tryLoadCover(i+1);test.src=COVER_SOURCES[i]}
+    tryLoadCover();
+    document.getElementById('hero').addEventListener('click',()=>openVideoModal());
+
+    /* Utils immagini */
+    function normalizeDropboxImage(u){try{const url=new URL(u);if(url.hostname==='www.dropbox.com'){url.hostname='dl.dropboxusercontent.com'}url.searchParams.delete('dl');url.searchParams.set('raw','1');return url.toString()}catch{return u}}
+    const IMAGE_FALLBACK="https://sebastiano-mazzarisi.github.io/Test/Vendesi.jpg";
+
+    /* Modale immagini */
+    const modal=document.getElementById('imageModal'); const modalImg=document.getElementById('modalImage'); const counterEl=document.getElementById('modalCounter'); const modalVid = document.getElementById('modalVideo'); let currentImageIndex=null;
+    window.openModal=(index)=>{currentImageIndex=index;modal.style.display='flex';modal.setAttribute('aria-hidden','false');renderModal()};
+    window.closeModal=()=>{modal.style.display='none';modal.setAttribute('aria-hidden','true')};
+    window.changeImage=(d)=>{if(currentImageIndex===null)return;currentImageIndex=(currentImageIndex+d+images.length)%images.length;renderModal()};
+    function renderModal(){
+      const src=images[currentImageIndex];
+      modalImg.onerror=()=>{
+        const alt=normalizeDropboxImage(src);
+        if(modalImg.src!==alt){
+          modalImg.src=alt
+        } else {
+          modalImg.onerror=null;
+          modalImg.src=IMAGE_FALLBACK
+        }
+      };
+      modalImg.src=src;
+      counterEl.textContent=(currentImageIndex+1).toString();
+      // Nasconde esplicitamente il video, assicurando che l'immagine sia visibile.
+      modalVid.style.display = 'none';
+      modalImg.style.display = 'block';
+    }
+
+    /* Galleria */
+    const images=[
+      "https://www.dropbox.com/scl/fi/axup1qz37h4mkfbr27s1r/IMG_9792.jpg?rlkey=lzy6l9vp5kkiurym9bgl8bk8i&raw=1",
+      "https://www.dropbox.com/scl/fi/6dg7ctgm4isc5lfe5vovv/IMG_9793.jpg?rlkey=p7uvuqhgjmk97whrv6nws6n8t&raw=1",
+      "https://www.dropbox.com/scl/fi/5c9d6n67gc2rcek4csyy5/IMG_9794.jpg?rlkey=762qmzkxjg5yp9v43oo10gy2a&raw=1",
+      "https://www.dropbox.com/scl/fi/na64z4p9wjwd0q6o41icp/IMG_9795.jpg?rlkey=tg6sfsuv6doa0r3rxx2brfudc&raw=1",
+      "https://www.dropbox.com/scl/fi/6uswkjqt8laqzkirnk65o/IMG_9796.jpg?rlkey=55z2p3nkubr3q5shl3adgre93&raw=1",
+      "https://www.dropbox.com/scl/fi/0tpewlrwkgau922aowmgl/IMG_9797.jpg?rlkey=95hxu8u6rbftndr2qxyl6iwt0&raw=1",
+      "https://www.dropbox.com/scl/fi/m6xmo3o5esboh8429n0rt/IMG_9798.jpg?rlkey=msr09lfqf37nv4nlp2tu0xm1o&raw=1",
+      "https://www.dropbox.com/scl/fi/iw5fq9xx8fvwwp714n5qg/IMG_9799.jpg?rlkey=qbzc37aylxlo9cwhe2wmha6tq&raw=1",
+      "https://www.dropbox.com/scl/fi/m7w1i6ktxspkhsin5v8fk/IMG_9802.jpg?rlkey=lfezkhhskirvewr6dyuzpx5vy&raw=1",
+      "https://www.dropbox.com/scl/fi/v4wp0orsgu2buoyzdrr7e/IMG_9803.jpg?rlkey=yddga9y9xffqevfdvuekj18k3&raw=1",
+      "https://www.dropbox.com/scl/fi/8hqtjoszpizhc3snf76r7/IMG_9804.jpg?rlkey=u23c9huhq4lcw523gb99bals5&raw=1",
+      "https://www.dropbox.com/scl/fi/whxu9ah2sj5nawsgsd6pa/IMG_9805.jpg?rlkey=v7mfmhmdj549oe3rvgzb1whqv&raw=1",
+      "https://www.dropbox.com/scl/fi/fmatftvshvwfbfmevcs9v/IMG_9806.jpg?rlkey=r6zj225238pmhrloedipqj0ji&raw=1",
+      "https://www.dropbox.com/scl/fi/2137yqwsfvuut50ozyd3t/IMG_9807.jpg?rlkey=qsy1mok0uq90ax36yohdawfci&raw=1",
+      "https://www.dropbox.com/scl/fi/r6lic5md0ua4q9ongjxac/IMG_9808.jpg?rlkey=lufthw51jww2dzy7kn6avp4ov&raw=1",
+      "https://www.dropbox.com/scl/fi/o9vop6obc89395k14hfms/IMG_9809.jpg?rlkey=iwyoybr442jlwq4sagiv1fcp0&raw=1",
+      "https://www.dropbox.com/scl/fi/rrt7q9gjsxgj8sffsfg7i/IMG_9810.jpg?rlkey=44m167nvzsiiqee48kwm88wwo&raw=1",
+      "https://www.dropbox.com/scl/fi/1zbrpatyica6bjhfjfq00/IMG_9811.jpg?rlkey=xb72v36bfi9l11kqiokektenm&raw=1",
+      "https://www.dropbox.com/scl/fi/doch971am77wyddl96ly9/IMG_9818.jpg?rlkey=mbt9grph1nnfcz08ybpepoys7&raw=1",
+      "https://www.dropbox.com/scl/fi/3ycm1i3t1a70d1w3cc1pc/IMG_9821.jpg?rlkey=kt87osf16z8xwm9fnbrn5ngxm&raw=1",
+      "https://www.dropbox.com/scl/fi/5phte5cc8egljemomcr39/IMG_9822.jpg?rlkey=28gk08gjvbm5qnpouuxybq1s3&raw=1",
+      "https://www.dropbox.com/scl/fi/kpu16838tbmwx444can35/IMG_9823.jpg?rlkey=jryccy2rnnq4w51qt3skp2oy2&raw=1",
+      "https://www.dropbox.com/scl/fi/y4x4uprnjzsh5dtalo6ts/IMG_9825.jpg?rlkey=j1v44zbfngx5bwiwm1x9khgyw&raw=1",
+      "https://www.dropbox.com/scl/fi/w4e98zaj1jt0q4yyapm9i/IMG_9826.jpg?rlkey=6xwpjrt69ewdw716q6kd4kasv&raw=1",
+      "https://www.dropbox.com/scl/fi/0qmu6e9ot0cso67m801wn/IMG_9829.jpg?rlkey=qihtedbfc56oghv1vlxya42kt&raw=1",
+      "https://www.dropbox.com/scl/fi/vxctp4cluv15b9j4fk3pu/IMG_9830.jpg?rlkey=p3xcujq3iz9wreh43bv6e4o15&raw=1",
+      "https://www.dropbox.com/scl/fi/x7ofi2txhdsbmfiaii9dl/IMG_9831.jpg?rlkey=22yz958pyaie3bta0wbp6qlrt&raw=1",
+      "https://www.dropbox.com/scl/fi/pva6mxgsktour4gn7qpvm/IMG_9833.jpg?rlkey=12ivqoo0ruko1ouony2frrtgh&raw=1",
+      "https://www.dropbox.com/scl/fi/q1fe9nka0ppcr45sr048z/IMG_9840.jpg?rlkey=seu056w3og8bdum580816rzj0&raw=1",
+      "https://www.dropbox.com/scl/fi/3m32wlbdchqp6f8dgzayw/IMG_9841.jpg?rlkey=xk311dmkx6be7izueyzgp6puw&raw=1"
+    ];
+    function generateGallery(){const wrap=document.getElementById('galleryContainer');wrap.innerHTML='';images.forEach((src,i)=>{const d=document.createElement('div');d.className='it';const img=document.createElement('img');img.src=src;img.alt=`Foto ${i+1}`;img.loading='lazy';img.decoding='async';img.onerror=()=>{const alt=normalizeDropboxImage(src);if(img.src!==alt){img.src=alt}else{img.onerror=null;img.src=IMAGE_FALLBACK}};img.addEventListener('click',()=>window.openModal(i));d.appendChild(img);wrap.appendChild(d)})}
+    generateGallery();
+    window.addEventListener('keydown',e=>{if(modal.style.display==='flex'){if(e.key==='ArrowLeft')window.changeImage(-1);if(e.key==='ArrowRight')window.changeImage(1);if(e.key==='Escape')window.closeModal()}});
+
+    /* Iframe/PDF/Mappe */
+    const iframeModal=document.getElementById('iframeModal'); const iframeContent=document.getElementById('iframeContent'); let iframeReturnRoute=null;
+    function openIframeModal(url,returnRoute=null,topClose=false){
+      iframeReturnRoute=returnRoute;
+      const cont=document.querySelector('.iframe-modal-content');
+      cont.classList.toggle('top-close', !!topClose);
+      iframeContent.src=url; iframeModal.style.display='flex'; iframeModal.setAttribute('aria-hidden','false');
+    }
+    function closeIframeModal(){
+      iframeModal.style.display='none'; iframeModal.setAttribute('aria-hidden','true');
+      iframeContent.src=''; if(iframeReturnRoute){go(iframeReturnRoute); iframeReturnRoute=null}
+    }
+    window.openIframeModal=openIframeModal; window.closeIframeModal=closeIframeModal;
+    window.addEventListener('keydown',e=>{if(iframeModal.style.display==='flex'&&e.key==='Escape')closeIframeModal()});
+    iframeModal.addEventListener('click',e=>{if(e.target.id==='iframeModal')closeIframeModal()});
+    function normalizeDropboxPdf(u){try{const url=new URL(u);if(url.hostname==='www.dropbox.com'){url.hostname='dl.dropboxusercontent.com'}url.searchParams.delete('dl');url.searchParams.set('raw','1');return url.toString()}catch{return u}}
+    
+    // FIX PDF: Usa Google Docs Viewer invece di PDF.js di Mozilla
+    let pdfReloadCount = 0;
+    function openPdfModal(u, returnRoute = null) {
+        const direct = u.includes('dropbox.com') ? normalizeDropboxPdf(u) : u;
+        const viewer = "https://docs.google.com/viewer?url=";
+        const viewerUrl = `${viewer}${encodeURIComponent(direct)}&embedded=true`;
+
+        const loadingModal = document.getElementById('loading-modal');
+        const loadingDots = document.getElementById('loading-dots');
+
+        // Aggiorna la finestrella di caricamento con un puntino in più
+        if (pdfReloadCount === 0) {
+            loadingDots.textContent = '...';
+        } else {
+            loadingDots.textContent += '.';
+        }
+
+        loadingModal.style.display = 'flex';
+
+        const iframe = document.getElementById('iframeContent');
+        
+        let timeout = setTimeout(() => {
+            console.warn(`PDF loading timed out after 1 second. Reload count: ${pdfReloadCount + 1}. Reloading.`);
+            // Chiudi la modale bianca prima di riprovare
+            loadingModal.style.display = 'none';
+            // Simula la pressione del tasto X per chiudere la modale iframe, se aperta
+            closeIframeModal();
+            pdfReloadCount++;
+            openPdfModal(u, returnRoute);
+        }, 1000);
+
+        iframe.onload = () => {
+            clearTimeout(timeout);
+            loadingModal.style.display = 'none';
+            pdfReloadCount = 0; // Reset del contatore
+        };
+        
+        iframe.onerror = () => {
+             clearTimeout(timeout);
+             console.error('PDF loading failed. Reloading.');
+             // Chiudi la modale bianca prima di riprovare
+             loadingModal.style.display = 'none';
+             closeIframeModal();
+             pdfReloadCount++;
+             openPdfModal(u, returnRoute);
+        };
+        
+        openIframeModal(viewerUrl, returnRoute, true);
+    }
+    window.openPdfModal = openPdfModal;
+
+    /* Video */
+    const videoModal=document.getElementById('videoModal'); const videoContent=document.getElementById('videoContent');
+    const VIDEO_SHARED='https://www.dropbox.com/scl/fi/cftj9km4x18tg2whm6dqx/Vendesi.mp4?rlkey=fbysbx30j8hdse089hx10tonk&dl=0';
+    function normalizeVideo(u){try{const url=new URL(u);if(url.hostname==='www.dropbox.com'){url.hostname='dl.dropboxusercontent.com'}url.searchParams.delete('dl');url.searchParams.set('raw','1');return url.toString()}catch{return u}}
+    const VIDEO_URL=normalizeVideo(VIDEO_SHARED);
+    function openVideoModal(){try{closeIframeModal()}catch{};videoContent.src=VIDEO_URL;videoModal.style.display='flex';videoModal.setAttribute('aria-hidden','false')}
+    function closeVideoModal(){videoContent.pause();videoModal.style.display='none';videoModal.setAttribute('aria-hidden','true');videoContent.src=''}
+    window.openVideoModal=openVideoModal; window.closeVideoModal=closeVideoModal;
+    window.addEventListener('keydown',e=>{if(videoModal.style.display==='flex'&&e.key==='Escape')closeVideoModal()});
+
+    /* Google Maps */
+    const MAPS_EMBED_URL="https://www.google.com/maps?q=Via%20Fanelli%208%2C%2070013%20Castellana%20Grotte%20BA&output=embed";
+    window.openGoogleMapsHere=()=>openIframeModal(MAPS_EMBED_URL,'documenti',true);
+
+    /* Volantino */
+    const FLYER_URL="https://sebastiano-mazzarisi.github.io/Test/Volantino-Privati.pdf";
+    window.openFlyer=()=>openPdfModal(FLYER_URL,'documenti');
+
+    /* Audio Bar */
+    const audioBar = document.getElementById('audioBar');
+    const audioContent = document.getElementById('audioContent');
+    const audioSpeakerBtn = document.getElementById('audioSpeakerBtn');
+    const AUDIO_SHARED = "https://www.dropbox.com/scl/fi/w06o1d617drhqovomo1mk/Podcast.mp3?rlkey=wrm09lp5gq4inbdy0rmhipxmt&dl=0";
+    const AUDIO_URL = normalizeAudio(AUDIO_SHARED);
+    
+    function normalizeAudio(u){
+      try{
+        const url=new URL(u);
+        if(url.hostname==='www.dropbox.com'){ url.hostname='dl.dropboxusercontent.com' }
+        url.searchParams.delete('dl');
+        url.searchParams.set('raw','1');
+        return url.toString();
+      }catch{ return u }
+    }
+    
+    function openAudioBar() {
+      audioContent.src = AUDIO_URL;
+      audioBar.classList.add('active');
+      audioContent.play().catch(() => {});
+    }
+    
+    function closeAudioBar() {
+      audioContent.pause();
+      audioBar.classList.remove('active');
+      audioContent.src = '';
+    }
+    
+    if (audioSpeakerBtn) { audioSpeakerBtn.addEventListener('click', openAudioBar); }
+    window.closeAudioBar = closeAudioBar;
+
+    /* Copia info */
+    const LINK_URL = 'https://tinyurl.com/Via-Fanelli';
+    const COPY_TEXT = ["📢 È disponibile per la vendita a Castellana Grotte un immobile di 148 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.", "", "💲 Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.", "", "🔍 Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: " + LINK_URL].join("\n");
+    const COPY_HTML = `<div><p><span class="emoji">📢</span> È disponibile per la vendita a Castellana Grotte un immobile di 148 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p><p><span class="emoji">💲</span> Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.</p><p><span class="emoji">🔍</span> Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: <a href="${LINK_URL}" target="_blank" rel="noopener">${LINK_URL}</a></p></div>`;
+    
+    function renderCopyPreview(){
+      const box=document.getElementById('copyText');
+      box.innerHTML =
+        `<p><span class="emoji">📢</span> È disponibile per la vendita a Castellana Grotte un immobile di 148 mq in Via Fanelli 8, ideale per studi medici o per professionisti sanitari.</p>`+
+        `<p><span class="emoji">💲</span> Al prezzo di € 150.000, l'immobile offre reception, 8 ambienti, 2 bagni, sala d'attesa, posto auto e climatizzazione.</p>`+
+        `<p><span class="emoji">🔍</span> Puoi trovare tutti i dettagli, le foto e le agevolazioni disponibili sul mini-sito dedicato: <a href="https://tinyurl.com/Via-Fanelli" target="_blank" rel="noopener">https://tinyurl.com/Via-Fanelli</a></p>`;
+    }
+    function openCopyModal(){
+      renderCopyPreview();
+      const m=document.getElementById('copyModal');
+      m.style.display='flex';
+      m.setAttribute('aria-hidden','false');
+    }
+    function closeCopyModal(){
+      const m=document.getElementById('copyModal');
+      m.style.display='none';
+      m.setAttribute('aria-hidden','true');
+    }
+    window.openCopyModal=openCopyModal;
+    window.closeCopyModal=closeCopyModal;
+
+    async function copyInfo() {
+      const btn = document.getElementById('copyBtn');
+      const success = () => { const old = btn.textContent; btn.textContent = "Copiato!"; setTimeout(() => btn.textContent = old, 1400); };
+
+      // Funzione di fallback robusta che mantiene gli a capo (usa un elemento pre)
+      function preformattedCopy(textToCopy) {
+        let success = false;
+        const pre = document.createElement('pre');
+        pre.style.position = 'fixed';
+        pre.style.opacity = '0';
+        pre.textContent = textToCopy;
+        document.body.appendChild(pre);
+        const range = document.createRange();
+        range.selectNodeContents(pre);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        try {
+          document.execCommand('copy');
+          success = true;
+        } catch(err) {
+          console.error('Preformatted copy failed', err);
+        } finally {
+          sel.removeAllRanges();
+          document.body.removeChild(pre);
+        }
+        return success;
+      }
+
+      try {
+        // Tentativo 1: Clipboard API (versione estesa con HTML)
+        if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) {
+          const data = {
+            "text/plain": new Blob([COPY_TEXT], { type: "text/plain" }),
+            "text/html": new Blob([COPY_HTML], { type: "text/html" })
+          };
+          await navigator.clipboard.write([new ClipboardItem(data)]);
+          success();
+          return;
+        }
+        
+        // Tentativo 2: Fallback con un elemento <pre> (più affidabile per gli a capo)
+        if (preformattedCopy(COPY_TEXT)) {
+          success();
+          return;
+        }
+        
+        throw new Error("Copy failed on all methods.");
+
+      } catch(e) {
+        alert("Si è verificato un errore durante la copia. Il testo verrà selezionato per la copia manuale.");
+        const preview = document.getElementById('copyText');
+        if(preview){
+          const range = document.createRange();
+          range.selectNodeContents(preview);
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+      }
+    }
+    window.copyInfo=copyInfo;
+
+    /* Chiudi clic fuori modali */
+    document.getElementById('imageModal').addEventListener('click',e=>{if(e.target.id==='imageModal')closeModal()});
+    document.getElementById('videoModal').addEventListener('click',e=>{if(e.target.id==='videoModal')closeVideoModal()});
+    document.getElementById('copyModal').addEventListener('click',e=>{if(e.target.id==='copyModal')closeCopyModal()});
+    
+    window.addEventListener('keydown', e => { if (audioBar.classList.contains('active') && e.key === 'Escape') closeAudioBar(); });
+    
+
+    /* stato iniziale modali */
+    document.getElementById('imageModal').style.display='none';
+    document.getElementById('videoModal').style.display='none';
+    document.getElementById('iframeModal').style.display='none';
+    document.getElementById('copyModal').style.display='none';
+  });
+</script>
+
+<script>
+// ====== CONTATORE VISITE – discreto nel footer, 1 HIT per sessione ======
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('footer[data-global-counter]').forEach(footer => {
+    const key = footer.dataset.global-counter;
+    if (!key) return;
+
+    let span = footer.querySelector('#visite-footer');
+    if (!span) {
+      span = document.createElement('span');
+      span.id = 'visite-footer';
+      span.className = 'counter-box';
+      span.setAttribute('aria-label', 'contatore visite');
+      span.setAttribute('title', 'visite totali');
+      footer.appendChild(span);
+    }
+
+    // Stato
+    const NS = 'socim';
+    const sess = window.sessionStorage;   // <- per "una volta per sessione"
+    const perm = window.localStorage;     // <- per contatore locale e sync
+    const sessionFlag   = `sess-hit-${NS}-${key}`;
+    const localCountKey = `local-count-${NS}-${key}`;
+    const needsSyncKey  = `needs-sync-${NS}-${key}`;
+
+    const show = (n) => { span.textContent = `(${Number.isFinite(n) ? n : 0})`; };
+
+    // Backend multipli
+    const backends = [
+      { urlHit: `https://api.countapi.xyz/hit/${encodeURIComponent(NS)}/${encodeURIComponent(key)}`,
+        urlGet: `https://api.countapi.xyz/get/${encodeURIComponent(NS)}/${encodeURIComponent(key)}`,
+        map: (j) => Number(j.value) },
+      { urlHit: `https://countapi.store/hit/${encodeURIComponent(key)}/visite`,
+        urlGet: `https://countapi.store/get/${encodeURIComponent(key)}/visite`,
+        map: (j) => Number(j.value) },
+      { urlHit: `https://countapi.mileshilliard.com/api/v1/hit/${NS}_${key}`,
+        urlGet: `https://countapi.mileshilliard.com/api/v1/get/${NS}_${key}`,
+        map: (j) => Number(j.value ?? j.count) }
+    ];
+
+    const fetchJSON = (url) => fetch(url, { cache:'no-store' }).then(r => r.json());
+
+    const getRemote = async () => {
+      for (const b of backends) {
+        try {
+          const data = await fetchJSON(b.urlGet);
+          const v = b.map(data);
+          if (Number.isFinite(v)) return v;
+        } catch {}
+      }
+      throw new Error('GET failed on all backends');
+    };
+
+    const hitRemote = async () => {
+      for (const b of backends) {
+        try {
+          const data = await fetchJSON(b.urlHit);
+          const v = b.map(data);
+          if (Number.isFinite(v)) return v;
+        } catch {}
+      }
+      throw new Error('HIT failed on all backends');
+    };
+
+    const incLocal = () => {
+      let c = parseInt(perm.getItem(localCountKey) || '0', 10);
+      c += 1;
+      perm.setItem(localCountKey, String(c));
+      return c;
+    };
+
+    const syncLocalTo = (v) => {
+      const cur = parseInt(perm.getItem(localCountKey) || '0', 10);
+      if (Number.isFinite(v) && v > cur) perm.setItem(localCountKey, String(v));
+    };
+
+    (async () => {
+      show(parseInt(perm.getItem(localCountKey) || '0', 10));
+
+      const alreadyHitThisSession = !!sess.getItem(sessionFlag);
+
+      if (!alreadyHitThisSession) {
+        try {
+          const v = await hitRemote();
+          sess.setItem(sessionFlag, '1');
+          perm.removeItem(needsSyncKey);
+          syncLocalTo(v);
+          show(v);
+        } catch {
+          const vLocal = incLocal();
+          perm.setItem(needsSyncKey, '1');
+          sess.setItem(sessionFlag, '1');
+          show(vLocal);
+        }
+        return;
+      }
+      
+      try {
+        const v = await getRemote();
+        syncLocalTo(v);
+        show(v);
+      } catch {
+        const vLocal = parseInt(perm.getItem(localCountKey) || '0', 10);
+        show(vLocal);
+      }
+
+      try {
+        if (perm.getItem(needsSyncKey) === '1') {
+          const v = await hitRemote();
+          perm.removeItem(needsSyncKey);
+          syncLocalTo(v);
+          show(v);
+        }
+      } catch {}
+    })();
+  });
+});
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Variabile per memorizzare i dati dell'agenzia
+    let agenziaDati = null;
+
+    // Funzione per analizzare il CSV
+    async function caricaAgenzie() {
+      try {
+        const url = 'https://sebastiano-mazzarisi.github.io/Test/Agenzie.csv';
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Network response was not ok.');
+        const csvText = await response.text();
+        const righe = csvText.trim().split('\n').slice(1); // Salta l'intestazione
+        const agenzie = righe.map(riga => {
+          const colonne = riga.split(';');
+          return {
+            codice: colonne[0],
+            nome: colonne[1],
+            via: colonne[2],
+            citta: colonne[3],
+            telefono: colonne[4],
+            email: colonne[5]
+          };
+        });
+        return agenzie;
+      } catch (error) {
+        console.error("Errore nel caricamento del file Agenzie.csv:", error);
+        return [];
+      }
+    }
+
+    // Funzione per ottenere i parametri dall'URL
+    function getUrlParameter(name) {
+      name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+      const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+      const results = regex.exec(location.search);
+      return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    }
+
+    // Funzione per personalizzare la pagina
+    async function personalizzaPagina() {
+      const codiceAgenzia = getUrlParameter('ag');
+      const contactSection = document.querySelector('section[data-page="contatti"]');
+      
+      if (!codiceAgenzia) {
+        console.log("Nessun codice agenzia trovato nell'URL. Utilizzo la configurazione predefinita.");
+        return;
+      }
+      
+      const agenzie = await caricaAgenzie();
+      agenziaDati = agenzie.find(a => a.codice.toLowerCase() === codiceAgenzia.toLowerCase());
+
+      if (agenziaDati && contactSection) {
+        console.log("Agenzia trovata:", agenziaDati.nome);
+        
+        // Cambio del colore del titolo
+        const h1 = document.querySelector('h1');
+        if (h1) {
+          h1.style.color = '#1d4ed8'; // Blu
+        }
+
+        // Rimuovi l'intera sezione `contactContent` per sostituirla con la versione personalizzata
+        contactSection.innerHTML = '';
+        
+        // Aggiungi il nuovo contenuto personalizzato
+        const agenziaBoxHtml = `
+          <div id="contactContent">
+            <h2>Contattaci tramite:</h2>
+            <div style="background:#fff;border:1px solid #eee;border-radius:12px;padding:1.4rem;max-width:500px;margin:1rem auto;text-align:center;">
+              <h2 style="margin: .8rem 0 .6rem; font-size: clamp(1.8rem, 5vw, 2.2rem); line-height: 1.2; font-weight: normal; color: inherit;">
+                <span class="e">🏢</span>${agenziaDati.nome}
+              </h2>
+              <p style="margin-top: 1rem; margin-bottom: 0;"><span class="emoji">📍</span>${agenziaDati.via}</p>
+              <p style="margin-top: 0;">${agenziaDati.citta}</p>
+              <p><span class="emoji">📞</span><a href="tel:${agenziaDati.telefono}">${agenziaDati.telefono}</a></p>
+              <p><span class="emoji">📧</span><a href="mailto:${agenziaDati.email}">${agenziaDati.email}</a></p>
+            </div>
+          </div>
+        `;
+        contactSection.innerHTML = agenziaBoxHtml;
+        
+      } else {
+        console.log("Codice agenzia non riconosciuto. Utilizzo la configurazione predefinita.");
+      }
+    }
+
+    personalizzaPagina();
+  });
+</script>
+</body>
+</html>
