@@ -1,0 +1,3918 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ricorrenze</title>
+    <link rel="apple-touch-icon" href="https://sebastiano-mazzarisi.github.io/Test/Eventi.png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .navigation a, .navigation button {
+            color: #007BFF;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: 16px;
+        }
+        .event-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .event-list li {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .pink-bg { background-color: #ffe4e1; }
+        .yellow-bg { background-color: #fffacd; }
+        .green-bg { background-color: #f0fff0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2 id="currentDate"></h2>
+        </div>
+        <div class="navigation">
+            <a onclick="changeDay(-1)">Precedente</a>
+            <button onclick="showToday()">Oggi</button>
+            <a onclick="changeDay(1)">Successivo</a>
+        </div>
+        <ul class="event-list" id="eventList"></ul>
+    </div>
+
+    <script>
+        const eventsData = {
+    "01-01": [
+        "Alberto Sacco: 01-01-65",
+        "Alessandra Vinella: 01-01-95",
+        "Antonella Vitti: 01-01-71",
+        "Deceduto Nino Pinto: 01-01-2024",
+        "Donato Carucci: 01-01-54",
+        "Donato Lovece: 01-01-53",
+        "Enzo Castiglia: 01-01-58",
+        "Floriana Medici: 01-01-71",
+        "Francesco Lentini: 01-01-75",
+        "Gino Tieuli: 01-01-50",
+        "Giuseppe Stama (geriatra): 01-01-50",
+        "Ilario Totaro (coop): 01-01-87",
+        "Lucia Ivone: 01-01-??",
+        "Maria Carbonelli: 01-01-50",
+        "Marica Mirizzi: 01-01-89",
+        "Raffaella Maraglino: 01-01-72",
+        "Vanni Procino: 01-01-57",
+        "Vanni Tinella: 01-01-92",
+        "Vito Eramo (Hotel Svevo): 01-01-61"
+    ],
+    "01-02": [
+        "Alfonso Manfra: 02-01-59",
+        "Anna Sabatelli: 02-01-69",
+        "Cesare Pricci: 02-01-65",
+        "Claudio Loliva: 02-01-55",
+        "Franco Grilletti: 02-01-52",
+        "Luca Basile: 02-01-00",
+        "Marg\u00f2 Caruso: 02-01-88",
+        "Massimo Depalma: 02-01-62",
+        "Mirella Pricci: 02-01-65",
+        "Nello Sisto: 02-01-52",
+        "Paolo Comes: 02-01-58",
+        "Vito Griseta: 02-01-89"
+    ],
+    "01-03": [
+        "Antonella Mongelli: 03-01-82",
+        "Francesca Tomaselli: 03-01-89",
+        "Francesco Dibattista: 03-01-82",
+        "Ilario Parrotta: 03-01-92",
+        "Pasquale Pirulli (geologo): 03-01-64"
+    ],
+    "01-04": [
+        "Federico Mirizzi: 04-01-86",
+        "Lucia Lucatorto: 04-01-25",
+        "Marco Frabetti (di Marina Regina): 04-01-21",
+        "Maristella Saponari: 04-01-74",
+        "Martina Bubba: 04-01-93",
+        "Mauro Lupi: 04-01-61"
+    ],
+    "01-05": [
+        "Antonella Spinelli: 05-01-76",
+        "Gianpaolo Gavioli: 05-01-60",
+        "Giuseppe Pipoli: 05-01-84",
+        "Maria Rosa Longo (11:00): 05-01-33",
+        "Massimo Leone: 05-01-81",
+        "Vito Colaprico: 05-01-61"
+    ],
+    "01-06": [
+        "Anna Esposito: 06-01-70",
+        "Giulio Cancelliere: 06-01-62",
+        "Massimiliano Ciccarese: 06-01-78",
+        "Stefano Lippolis: 06-01-62"
+    ],
+    "01-07": [
+        "Antonio Nardone: 07-01-75",
+        "Bianca Lanzilotta: 07-01-65",
+        "Carmen Spagnuolo: 07-01-88",
+        "Emma Delfine: 07-01-73",
+        "Erminio d'Ares: 07-01-72",
+        "Giuseppe Detomaso: 07-01-92",
+        "Giusy Valentini (di Lele): 07-01-09",
+        "Lello Pastore: 07-01-60",
+        "Luana Cervellera: 07-01-94",
+        "Mario Liuzzi (costruttore): 07-01-86",
+        "Nicol\u00f2 Rana (di Mauro): 07-01-14"
+    ],
+    "01-08": [
+        "Annie Williams: 08-01-02",
+        "Antonio Giampetruzzi: 08-01-84",
+        "Gaia Peragine (di Irene Palumbo): 08-01-21",
+        "Liliana Miccolis: 08-01-??",
+        "Luca Dani (di Alessia Volgarino): 08-01-16",
+        "Luigi Centenaro: 08-01-??",
+        "Mariachiara Silvestri: 08-01-95",
+        "Mario Quaranta: 08-01-56",
+        "Massimo: 08-01"
+    ],
+    "01-09": [
+        "Alessandro Lovisi: 09-01-90",
+        "Emiliano Carlucci: 09-01-75",
+        "Giovanna Sette: 09-01-82",
+        "Giuseppe Cazzetta: 09-01-88"
+    ],
+    "01-10": [
+        "Aldo: 10-01",
+        "Andrea Bosco: 10-01-67",
+        "Bollo Audi A2: 10-01",
+        "Bollo Mercedes: 10-01",
+        "Bollo ML 280: 10-01",
+        "Bollo Smart: 10-01",
+        "Bollo T-Roc: 10-01",
+        "Clemi Cisternino: 10-01-67",
+        "Eleonora Satalino: 10-01-87",
+        "Massimo Moretti: 10-01-67",
+        "Massimo Sbiroli: 10-01-64",
+        "Mikaela Bandini: 10-01-72",
+        "Nino Carpinelli: 10-01-63",
+        "Pasqua Maria Romano (medico): 10-01-70",
+        "Sara Ceccarini: 10-01-78",
+        "Simona Sisto: 10-01-90",
+        "Tommaso Carbone: 10-01-70"
+    ],
+    "01-11": [
+        "Antonella Terrafina: 11-01-87",
+        "Fabio Loliva: 11-01-08",
+        "Gianluca De Pinto: 11-01-75",
+        "Giovanni Piepoli: 11-01-40",
+        "Giulia Mele (di Nino): 11-01-19",
+        "Paolo Fanigliuolo: 11-01-54",
+        "Ubaldo Amati: 11-01-68"
+    ],
+    "01-12": [
+        "Betta Sallustio: 12-01-69",
+        "Decesso padre Tommaso: 12-01-23",
+        "Enzo Goffredo: 12-01-56",
+        "Francesco Valluzzi: 12-01-52",
+        "Gabriele Sorbino: 12-01-56",
+        "Gianni Ignazzi: 12-01-52",
+        "Ivana Colizzi: 12-01-89",
+        "Katia Console: 12-01-81",
+        "Luciana Fortunato: 12-01-82",
+        "Maddalena D'Ambruoso: 12-01-89",
+        "Simone Giove: 12-01-05"
+    ],
+    "01-13": [
+        "Angela Pricci (01:15): 13-01-57",
+        "Angelo L'Abbate: 13-01-53",
+        "Cosimo Montagna: 13-01-58",
+        "Giovanni Sbiroli: 13-01-00",
+        "Giuliana La Gala: 13-01-65",
+        "Ilario: 13-01",
+        "Niccol\u00f2 Pascale: 13-01-88"
+    ],
+    "01-14": [
+        "Annamaria Cisternino: 14-01-62",
+        "Annuccia Tateo: 14-01-75",
+        "Bartolomeo Di Monaco: 14-01-42",
+        "Francesca Galluzzi: 14-01-94",
+        "Gemma Elefante: 14-01-65",
+        "Gianni Intini (medico): 14-01-54",
+        "Laura Sportelli (Francia): 14-01-??",
+        "Rossana Ungolo: 14-01-??",
+        "Salvatore Affronti: 14-01-44"
+    ],
+    "01-15": [
+        "Francesco Maellaro: 15-01-86",
+        "Nino Mastrangelo: 15-01-50",
+        "Piero Bagnulo: 15-01-58",
+        "Rosario Adone: 15-01-68"
+    ],
+    "01-16": [
+        "Giacomo Mastrangelo: 16-01-58",
+        "Gianni Ginestra: 16-01-61",
+        "Marcello Bianchi: 16-01-59",
+        "Marcello: 16-01",
+        "Maria Sportelli: 16-01-62",
+        "Rossana Delfine: 16-01-76",
+        "Silvino Quaranta: 16-01-75",
+        "Teresa Calisi: 16-01-30"
+    ],
+    "01-17": [
+        "Danila Delle Foglie: 17-01-92",
+        "Fabio Nanoia: 17-01-86",
+        "Guglielmo Bellelli: 17-01-46",
+        "Immatricolazione ML 280: 17-01-07",
+        "Nico Tauro: 17-01-58",
+        "Roberta Recchia (Morea): 17-01-68"
+    ],
+    "01-18": [
+        "Antonella Mele: 18-01-76",
+        "Mariano D\u2019Onghia: 18-01-68",
+        "Miki Campanella: 18-01-92",
+        "Nico Campanella: 18-01-68",
+        "Piero Intonti: 18-01-68",
+        "Pino Vinella: 18-01-59",
+        "Sara Calarco: 18-01-75",
+        "Serena Contegiacomo: 18-01-90"
+    ],
+    "01-19": [
+        "AM Anna Pellegrini-Vito Mazzarisi: 19-01-85",
+        "Anna Chiara Labella: 19-01-67",
+        "Decesso Don Nicola Pellegrino (80 anni): 19-01-16",
+        "Mario: 19-01",
+        "Nino Susca: 19-01-55",
+        "Sebastiano Notarangelo: 19-01-75",
+        "Silvia De Bellis: 19-01-90"
+    ],
+    "01-20": [
+        "Alessia Carbonaro: 20-01-89",
+        "Anna De Benedictis: 20-01-??",
+        "Assunzione Joy Fit Marica: 20-01-17",
+        "Corinna Spina: 20-01-71",
+        "Decesso Gessie: 20-01-20",
+        "Emilia (Elia) Longo: 20-01-42",
+        "Francesco Pinto: 20-01-72",
+        "Gianni Carrieri: 20-01-83",
+        "Giorgio Lippolis: 20-01-68",
+        "Giuseppe Giampetuzzi: 20-01-75",
+        "Isabella Carucci: 20-01-90",
+        "Lory Passeri: 20-01-??",
+        "Sebastiano-Nino: 20-01",
+        "Silvia Gatto: 20-01-94",
+        "William Morea: 20-01-74"
+    ],
+    "01-21": [
+        "Agnese: 21-01",
+        "Beatrice (nipotina): 21-01-12",
+        "Loretta Del Monte: 21-01-52",
+        "Maria Grazia Mazzarisi (19:30): 21-01-89"
+    ],
+    "01-22": [
+        "Assunzione OA Sistemi Marica: 22-01-92",
+        "Dottorato in Fisica Ony (eccellente): 22-01-21",
+        "Enzo Marcantonio: 22-01-71",
+        "Giovanna Derobertis: 22-01-63",
+        "Marta Miniaci: 22-01-09",
+        "OA Sistemi Srl: 22-01-85"
+    ],
+    "01-23": [
+        "Claudia Contegiacomo: 23-01-93",
+        "Ethan Giuseppe Bianco: 23-01-21",
+        "Filippo Bongallino: 23-01-78",
+        "Filomena Macina: 23-01-70",
+        "Ilia Indiveri: 23-01-91",
+        "Lina Cervellera: 23-01-43",
+        "Marisa Caponio: 23-01-68",
+        "Mauro: 23-01",
+        "Stefano Barletta: 23-01-58"
+    ],
+    "01-24": [
+        "Cinzia Putignano: 24-01-61",
+        "Michele Digiorgio (di Giulio): 24-01-04"
+    ],
+    "01-25": [
+        "Ermanno Regoli: 25-01-52",
+        "Graziana Pricci: 25-01-60",
+        "Immatricolazione T-Roc: 25-01-24",
+        "Margherita Lefemine: 25-01-09",
+        "Onomastico Paolo Detomaso: 25-01",
+        "Paolo (Detomaso): 25-01"
+    ],
+    "01-26": [
+        "Andrea Tria: 26-01-48",
+        "Anna Maria Longo: 26-01-71",
+        "Assicurazione T-Roc: 26-01",
+        "Claudia Campanella: 26-01-78",
+        "Paola: 26-01",
+        "Stefano Palazzo: 26-01-85",
+        "Vito Fanelli: 26-01-46"
+    ],
+    "01-27": [
+        "Cecilia Armenio: 27-01-88",
+        "Dalila Bianco (di Gaetana Procino) (09:19): 27-01-22",
+        "Dante Ariano: 27-01-70",
+        "Decesso Laera Graziano: 27-01-19",
+        "Elvira: 27-01",
+        "Giovanni Battista Lacalendola: 27-01-52",
+        "Giuseppe Mansueto: 27-01-72",
+        "Monica Castellan: 27-01-??",
+        "Rocco Giampetruzzi: 27-01-02",
+        "Salvatore Vena (fisiatra): 27-01-74",
+        "Vincenzo Pompilio: 27-01-56"
+    ],
+    "01-28": [
+        "Claudio Lorusso: 28-01-88",
+        "Giandomenico Genco: 28-01-81",
+        "Giovanni Vitti: 28-01-75",
+        "Laser miopia Terry: 28-01-22",
+        "Luca Labalestra: 28-01-78",
+        "Onomastico Tommaso Mussella: 28-01",
+        "Valerio: 28-01"
+    ],
+    "01-29": [
+        "Marcella Camicia: 29-01-54",
+        "Sabrina: 29-01",
+        "Tonia Guglielmi: 29-01-53"
+    ],
+    "01-30": [
+        "Angela Amodio: 30-01-82",
+        "Antonio Cantatore: 30-01-58",
+        "Domenico Lanera: 30-01-??",
+        "Edoardo Floriani: 30-01-15",
+        "Manuela Crema: 30-01-84",
+        "Martina: 30-01",
+        "Raffaele Giampetruzzi: 30-01-78"
+    ],
+    "01-31": [
+        "Clo\u00e9 Bianco: 31-01-23",
+        "Germana Surico: 31-01-67",
+        "Gianvito Lefemine: 31-01-66",
+        "Paolo Bianco: 31-01-66"
+    ],
+    "02-01": [
+        "Antonella Messa: 01-02-69",
+        "Chiara Console: 01-02-87",
+        "Cristina Cocozza: 01-02-79",
+        "Emanuela Dibattista: 01-02-70",
+        "Maria Pia Longo: 01-02-68",
+        "Marilisa Discipio: 01-02-88",
+        "Mila Difronzo: 01-02-76",
+        "Milena Luisi: 01-02-69",
+        "Mimy Manieri Elia: 01-02-59"
+    ],
+    "02-02": [
+        "Caterina Porfido: 02-02-65",
+        "Giangiuseppe Lippolis: 02-02-79",
+        "Giuseppe Salatino: 02-02-68",
+        "Monica Lestingi: 02-02-71"
+    ],
+    "02-03": [
+        "Alberto Polignano: 03-02-95",
+        "Biagio: 03-02",
+        "Domenico Bulzacchelli: 03-02-56",
+        "Francesco Fasano: 03-02-80",
+        "Francesco Totaro: 03-02-92",
+        "Francesco Vitti: 03-02-71",
+        "Franco Loliva: 03-02-59",
+        "Gianni Leogrande: 03-02-50",
+        "Lapo Fabrini: 03-02-76",
+        "Loredana Ballo: 03-02-82",
+        "Nicola Addante: 03-02-61",
+        "Onofrio Murro: 03-02-46",
+        "Vanda Picca: 03-02-67"
+    ],
+    "02-04": [
+        "Annalisa Togati: 04-02-??",
+        "Camilla Degiorgio: 04-02-04",
+        "Cecilia Russo: 04-02-47",
+        "Cinzia Ficco: 04-02-69",
+        "Denise Basileo: 04-02-96",
+        "Giuseppe Castellana: 04-02-52",
+        "Maria Nitti: 04-02-44",
+        "Valeria Degiorgio: 04-02-82"
+    ],
+    "02-05": [
+        "Agata: 05-02",
+        "AM genitori di Rossana Pinto: 05-02-63",
+        "Bartolomeo Stifano: 05-02-47",
+        "Eloisia Labate: 05-02-80"
+    ],
+    "02-06": [
+        "Amanda: 06-02",
+        "Angela Leo (Vincenzo Giove): 06-02-70",
+        "Angelica Mastrangelo: 06-02-??",
+        "Armando: 06-02",
+        "Domenico Lefemine: 06-02-57",
+        "Dorotea: 06-02",
+        "Enzo Pascale: 06-02-59",
+        "Mariano Marzionna: 06-02-59",
+        "Marinella Lorusso: 06-02-94",
+        "Mimmo Bellini: 06-02-??",
+        "Vito Rotolo: 06-02-57"
+    ],
+    "02-07": [
+        "Antonio Conte: 07-02-65",
+        "Domenico Mezzapesa: 07-02-68",
+        "Edy Consoli: 07-02-57",
+        "Enrica Gravagnuolo: 07-02-65",
+        "Enza Scarpetta: 07-02-60",
+        "Fabio Campanella: 07-02-74",
+        "Francesco Apicella: 07-02-??",
+        "Giancarlo Zecchino: 07-02-??",
+        "Gianni Labate: 07-02-58",
+        "Giuseppe Rotolo: 07-02-58",
+        "Maria Grazia Eboli: 07-02-65",
+        "Mimmo Solare: 07-02-70",
+        "Nello Derobertis: 07-02-61",
+        "Nicola Mastronardi: 07-02-62",
+        "Paola Mangini: 07-02-04",
+        "Rosa Di C'\u00e8: 07-02-47",
+        "Vincenzo Fortino: 07-02-58"
+    ],
+    "02-08": [
+        "Anna Todisco: 08-02-??",
+        "Antonio Di Fonzo: 08-02-??",
+        "Daniela Marinelli: 08-02-76",
+        "First Certificate in English Ony: 08-02-11",
+        "Ludovica Colaprico: 08-02-94",
+        "Max Formisano: 08-02-70",
+        "Miriam Pricci: 08-02-73",
+        "Stefano Smargiassi: 08-02-88",
+        "Vito Giagulli (Coop): 08-02-74"
+    ],
+    "02-09": [
+        "Adriana Cusmai: 09-02-89",
+        "Fabio Tosetto: 09-02-66",
+        "Francesco Sbiroli: 09-02-73",
+        "Giusy Campanella: 09-02-96",
+        "Nicol Basile: 09-02-06"
+    ],
+    "02-10": [
+        "Domenico Galizia: 10-02-61",
+        "InfoDivani Srl: 10-02-99",
+        "Mariarita Bianco: 10-02-86"
+    ],
+    "02-11": [
+        "Donato Lovece (di Roberta): 11-02-57",
+        "Gabriella Totaro: 11-02-92",
+        "Giovanna Ferro: 11-02-88",
+        "Marcello Pace: 11-02-57",
+        "Mario Piccione: 11-02-57",
+        "Massimo Vitti: 11-02-76",
+        "Pietro Manghisi: 11-02-79"
+    ],
+    "02-12": [
+        "Enzo Massaro: 12-02-64",
+        "Franca Sonnante: 12-02-60",
+        "Franco Andresini: 12-02-69",
+        "Gori Tonti: 12-02-??",
+        "Guido Di Stasio: 12-02-73",
+        "Nicoletta Rotondi (22:10): 12-02-19",
+        "Tonio Todisco: 12-02-62"
+    ],
+    "02-13": [
+        "Eliana Liotta: 13-02-68",
+        "Giacomo Lucarelli: 13-02-42",
+        "Giammauro Basile: 13-02-71",
+        "Gilda: 13-02",
+        "Giulia Marcantonio: 13-02-13",
+        "Martino Sgobba: 13-02-57",
+        "Onomastico Gilda Pricci: 13-02",
+        "Sandro Francesconi: 13-02-64"
+    ],
+    "02-14": [
+        "Francesca Cerullo: 14-02-96",
+        "Nino Mangini: 14-02-64",
+        "Roberto Spera: 14-02-72",
+        "Rocky Labrador: 14-02-04",
+        "Sandro Mele: 14-02-60",
+        "Valentina-Valentino: 14-02",
+        "Vincenza Innamorato: 14-02-30",
+        "Vito Gozzi: 14-02-59"
+    ],
+    "02-15": [
+        "2\u00b0 Laurea Maria Teresa De Michele: 15-02-11",
+        "Agostino Meduso: 15-02-57",
+        "Andrea Bianco: 15-02-86",
+        "Antonio Rossi: 15-02-63",
+        "Crescenzio Marzano: 15-02-57",
+        "Decesso Afra Boffola Rana: 15-02-22",
+        "Fine rapporto SSS Nino: 15-02-85",
+        "Leonardo Santamaria: 15-02-57",
+        "Luca Castellana: 15-02-00",
+        "Mariella Iaia: 15-02-51",
+        "Nicoletta Gentile: 15-02-68",
+        "Patrizia Gallo: 15-02-73",
+        "Rodolfo Di Mauro: 15-02-56",
+        "Vito Pasquale Longo (zio): 15-02-22"
+    ],
+    "02-16": [
+        "Aurora Genco: 16-02-16",
+        "Don Nicola Pellegrino: 16-02-36",
+        "Federica Vinella: 16-02-90",
+        "Francesco Saverio Digiorgio (di Giulio): 16-02-05",
+        "Giangrazio Proietto: 16-02-48",
+        "Gianluca Intini: 16-02-79",
+        "Giovanna Piras: 16-02-50",
+        "Giuliana: 16-02",
+        "Nino Mele: 16-02-79",
+        "Onomastico Leo Petrera: 16-02",
+        "Patente moto Ony: 16-02-24",
+        "Saverio Rana: 16-02-91",
+        "Vincenzo De Leo: 16-02-52"
+    ],
+    "02-17": [
+        "AM Angela Leo-Vincenzo Giove: 17-02-96",
+        "Gerardo Certini: 17-02-61",
+        "Luigi Sportelli: 17-02-67",
+        "Monica Dell'Aera: 17-02-??",
+        "Nicola Nitti (bar): 17-02-63",
+        "Vito Campanella: 17-02-63"
+    ],
+    "02-18": [
+        "Cinzia: 18-02",
+        "Deni Bianco: 18-02-??",
+        "Diletta Longo (di Piero): 18-02-20",
+        "Marcello Laera: 18-02-74",
+        "Michele Stasi: 18-02-46",
+        "Vito Papanice: 18-02-46"
+    ],
+    "02-19": [
+        "Alessandro Piconi: 19-02-80",
+        "Asia: 19-02",
+        "Carmela Losapio: 19-02-88",
+        "Filippo Campanella: 19-02-??",
+        "Marica fonda Lions Gioia-Putignano: 19-02-22",
+        "Piero Genco: 19-02-65",
+        "Stefano Frachey: 19-02-69",
+        "Tiziana Morea: 19-02-74",
+        "Vittorio Cappellano: 19-02-84"
+    ],
+    "02-20": [
+        "Anastasia Cristella: 20-02-76",
+        "Anna Maria Iurilli: 20-02-71",
+        "Antonella Iurilli: 20-02-71",
+        "Gaetano Galeone: 20-02-84",
+        "Giammario Spinelli: 20-02-65",
+        "Gloria Lanciano: 20-02-58",
+        "Monica Dibello: 20-02-??",
+        "Nina Tsezsxladze: 20-02-75",
+        "Patrizia Mancini: 20-02-62"
+    ],
+    "02-21": [
+        "Antonella D'Alessandro: 21-02-??",
+        "Donato Sozio: 21-02-57",
+        "Eleonora: 21-02",
+        "Giulia De Pinto: 21-02-11",
+        "Livia Orr\u00f9: 21-02-??",
+        "Nicola Di Santo: 21-02-54",
+        "Piero Venerito: 21-02-57",
+        "Vito Santamato: 21-02-89"
+    ],
+    "02-22": [
+        "Domenico Giannandrea: 22-02-75",
+        "Don Antonio L\u2019Oliva: 22-02-45",
+        "Giusy Serio: 22-02-70",
+        "Marco Perrelli: 22-02-87",
+        "Margherita-Rita: 22-02",
+        "Milena Rutigliano: 22-02-86",
+        "Vanni Sansonetti: 22-02-75"
+    ],
+    "02-23": [
+        "Decesso Zia Teresa (92 anni): 23-02-21",
+        "Giuseppe Lorusso (medico): 23-02-54",
+        "Heber D\u2019Alberto (OA Point Abruzzo): 23-02-79",
+        "Laura Mascolo: 23-02-82",
+        "Maria Tagliavanti: 23-02-64",
+        "Michele Veneziani: 23-02-56",
+        "Milena: 23-02",
+        "Riccardo Bertini: 23-02-97",
+        "Valentina Petruzzelli: 23-02-88",
+        "Vito Pepe (nefrologo): 23-02-74"
+    ],
+    "02-24": [
+        "Domenico Mazzarisi (01:00): 24-02-64",
+        "Francesco Manghisi (palestra): 24-02-75",
+        "Gianfranco Mola (di Nunzio): 24-02-05",
+        "Luigi Di Leo (addestratore): 24-02-62",
+        "Raffaele Colombo (hip hop): 24-02-??",
+        "Sandra Cavalli (di Giacomo): 24-02-59",
+        "Stefano Maria Sisto: 24-02-88",
+        "Ubaldo Agosti: 24-02-53"
+    ],
+    "02-25": [
+        "A Chicago per lavoro: 25-02-24",
+        "Antonella Genco: 25-02-64",
+        "Claudio Derobertis: 25-02-67",
+        "Francesco Agrusti: 25-02-73",
+        "Franco Giannandrea: 25-02-58",
+        "Marika Mazzara: 25-02-57",
+        "Patente B Marica: 25-02-81"
+    ],
+    "02-26": [
+        "Antonella Impedovo: 26-02-62",
+        "Carlo Ricci (psicologo): 26-02-57",
+        "Ivan Vellucci (Mercedes): 26-02-69",
+        "Ketty Lepore: 26-02-68",
+        "Laurea Milena Mele (110 e lode): 26-02-15",
+        "Laurea specialistica Claudia Campanella: 26-02-10",
+        "Lelio Pinto: 26-02-70",
+        "Patrizia Tamma: 26-02-74",
+        "Vanni Wassermann: 26-02-76",
+        "Vito Menga: 26-02-48"
+    ],
+    "02-27": [
+        "Antonella Tamburrano: 27-02-92",
+        "Immatricolazione Twingo: 27-02-01",
+        "Luca Laera (Spops): 27-02-74",
+        "Maria Antonietta Iaia: 27-02-54",
+        "Mimmo Lopriore: 27-02-??",
+        "Nunzio Mola: 27-02-71",
+        "Sante Tamburrano: 27-02-92",
+        "Valentina Bianco: 27-02-88",
+        "Valentina Tamburrano: 27-02-92",
+        "Vito Pavone (fratello di Grazia): 27-02-50"
+    ],
+    "02-28": [
+        "Francesca Parrotta: 28-02-88",
+        "Mauro Bisceglia: 28-02-61",
+        "Rita Marcantonio: 28-02-08"
+    ],
+    "03-01": [
+        "Inizio pensione Vito Mazzarisi: 01-03-20",
+        "Laura Zacc\u00e0: 01-03-95",
+        "Laurea Sc. Educazione Marica (105): 01-03-12",
+        "Lucia Molinari (di Francesco): 01-03-88",
+        "Lucy Genco: 01-03-77",
+        "Nadia Sansone: 01-03-77",
+        "Rita Marinelli: 01-03-78",
+        "Valeria Genco: 01-03-71"
+    ],
+    "03-02": [
+        "Donato Macchia: 02-03-59",
+        "Giampiero Pavone (di Ornella): 02-03-05",
+        "Gianmarco Ventrella: 02-03-87",
+        "Marco Mazzarisi (autoscuola): 02-03-75",
+        "Michele Vavalle: 02-03-32",
+        "Valentina Laera: 02-03-90"
+    ],
+    "03-03": [
+        "Antonella Longo: 03-03-61",
+        "Claudio Certini: 03-03-55",
+        "Giulia Mangini: 03-03-02",
+        "Marco Losavio: 03-03-65",
+        "Mery Florenzio: 03-03-81",
+        "Tiziana: 03-03",
+        "Vito Carella: 03-03-57"
+    ],
+    "03-04": [
+        "Gianni Dalena: 04-03-65",
+        "Valentina Mastrangelo: 04-03-09",
+        "Valerio Lattarulo: 04-03-81"
+    ],
+    "03-05": [
+        "Adriana Clori: 05-03-63",
+        "Adriano Dalena: 05-03-55",
+        "Adriano: 05-03",
+        "Alessandra Curci: 05-03-88",
+        "Anna Schirone: 05-03-52",
+        "Battesimo Mary (San Filippo): 05-03-89",
+        "Francesca Piacentini: 05-03-71",
+        "Franco Tricase: 05-03-62",
+        "Pasquina Pollicelli: 05-03-50",
+        "Teresa Grilletti: 05-03-37",
+        "Tony Coletta: 05-03-54"
+    ],
+    "03-06": [
+        "Domenico Labarile: 06-03-07",
+        "Francesco Di Pede: 06-03-??",
+        "Gianni Santoro: 06-03-70",
+        "Lella Longo: 06-03-55",
+        "Linda Minunni: 06-03-69",
+        "Mario Stefanelli: 06-03-56",
+        "Mimmo Deluca: 06-03-69",
+        "Nicola Boccardi: 06-03-61",
+        "Roberta Rana: 06-03-90",
+        "Sabrina Sportelli: 06-03-75",
+        "Sebastiano Frisone: 06-03-50",
+        "Vittoria Natile: 06-03-65"
+    ],
+    "03-07": [
+        "Decesso Angelo Buttaro: 07-03-20",
+        "Giuseppe Benedetto: 07-03-54",
+        "Ilaria Navarra: 07-03-??",
+        "Leonardo Pedone: 07-03-68",
+        "Piero Miccolis: 07-03-80"
+    ],
+    "03-08": [
+        "Annarella Ragaglini: 08-03-54",
+        "Gianfranco Mezzapesa: 08-03-74",
+        "Gianni Rotondi (17:00): 08-03-74",
+        "Giuseppe Iaselli: 08-03-56",
+        "Marcella Pirrone: 08-03-59",
+        "Maria Staglian\u00f2: 08-03-74",
+        "Mariella Tateo: 08-03-68",
+        "Samanta Policiti: 08-03-??",
+        "Tiziano Angelini: 08-03-72",
+        "Viviana Sportelli: 08-03-64"
+    ],
+    "03-09": [
+        "Anna Maria Maiullari: 09-03-70",
+        "Antonio Pace: 09-03-53",
+        "Bit Sistemi Srl: 09-03-87",
+        "Carmine Console: 09-03-78",
+        "Cosimo Trevisano: 09-03-41",
+        "Enza Digregorio: 09-03-64",
+        "Francesca Romana: 09-03",
+        "Gianni Intini (palestra): 09-03-69",
+        "Ivan Nardelli: 09-03-88",
+        "Maria Marchione: 09-03-66",
+        "Mario Digregorio: 09-03-64",
+        "Onomastico Francesca Colacicco: 09-03",
+        "Onomastico Francesca Galluzzi: 09-03"
+    ],
+    "03-10": [
+        "Camillo Polignano (commercialista): 10-03-??",
+        "Carla Console: 10-03-79",
+        "Dino Lovecchio: 10-03-63",
+        "Maril\u00f9 Laterza: 10-03-71"
+    ],
+    "03-11": [
+        "Margherita Curlo: 11-03-80",
+        "Mariella Mangini: 11-03-75",
+        "Paolo Lorusso (di Maria Teresa): 11-03-80",
+        "Valentino Netti: 11-03-87",
+        "Vincenzo Amatulli: 11-03-61",
+        "Vito Giannuzzi: 11-03-58"
+    ],
+    "03-12": [
+        "Claudio Massafra: 12-03-83",
+        "Daniela Giannandrea: 12-03-88",
+        "Gianni Lovece: 12-03-59",
+        "Gianni Pricci: 12-03-61",
+        "Maria Fierro: 12-03-71",
+        "Massimiliano: 12-03",
+        "Nico Totaro (grande): 12-03-52"
+    ],
+    "03-13": [
+        "Alessandro Digregorio: 13-03-00",
+        "Annalisa Tavarilli: 13-03-88",
+        "Enrico Delfine: 13-03-89",
+        "Giovanna Piccolo: 13-03-88",
+        "James Cottrell: 13-03-79",
+        "Lucio: 13-03",
+        "Marco Genco: 13-03-89",
+        "Tommaso Sorchiotti: 13-03-80"
+    ],
+    "03-14": [
+        "Carmela Luisi: 14-03-74",
+        "Decesso Raffaello Guerra: 14-03-10",
+        "Filippo Digregorio: 14-03-93",
+        "Gianvito Mastrorosa: 14-03-76",
+        "Giovanni Battista Tateo: 14-03-70",
+        "Lorenzo Cincotta: 14-03-52",
+        "Marica Urbano: 14-03-??",
+        "Roberta Lovece: 14-03-91",
+        "Valentina Lippolis: 14-03-88"
+    ],
+    "03-15": [
+        "Albino Capuano: 15-03-48",
+        "Caudia Rizzitano: 15-03-88",
+        "Cesare: 15-03",
+        "Elena Turitto: 15-03-59",
+        "Gianstefano Impedovo: 15-03-58",
+        "Luisa-Luigia-Gina: 15-03",
+        "Mina Leo: 15-03-87",
+        "Monica Binassi: 15-03-62",
+        "Roberta De Carne: 15-03-74",
+        "Vincenzo Ventrella: 15-03-76"
+    ],
+    "03-16": [
+        "Adriana Anaclerio: 16-03-88",
+        "Antonella Alba Scalera: 16-03-87",
+        "Carmine Lattarulo: 16-03-50",
+        "Claudia Dalena: 16-03-69",
+        "Decesso Serafina Mazzarisi: 16-03-71",
+        "Giannettino Labalestra: 16-03-79",
+        "Ivano Mastrangelo: 16-03-69",
+        "Luigia De Gennaro: 16-03-88",
+        "Mauro Bianco: 16-03-51",
+        "Peter Iurilli: 16-03-31",
+        "Pierfrancesco Manghisi: 16-03-94",
+        "Piero Liuzzi: 16-03-54",
+        "Stefano Marchetti: 16-03-65",
+        "Vincenzo Farace: 16-03-39"
+    ],
+    "03-17": [
+        "Annamaria Castrignano: 17-03-82",
+        "Chiara Digiorgio (di Giulio): 17-03-10",
+        "Decesso Giacomo Mezzapesa: 17-03-15",
+        "Patrizia: 17-03",
+        "Rosa Siggillino: 17-03-51",
+        "Rossella Giampetruzzi: 17-03-63",
+        "Serena Bavaro: 17-03-88",
+        "Vito Stanisci: 17-03-83"
+    ],
+    "03-18": [
+        "Agostino Serio: 18-03-79",
+        "Marilena D\u2019Alena: 18-03-61",
+        "Nicol\u00f2 Della Vecchia: 18-03-08",
+        "Orazio Lella (nipote): 18-03-72"
+    ],
+    "03-19": [
+        "Eliana Frallonardo: 19-03-72",
+        "Enza Ladisa: 19-03-59",
+        "Fidanzamento Vanna-Domenico: 19-03-80",
+        "Giuseppe: 19-03",
+        "Inizio lavoro BCC Cinzia Lorusso: 19-03-08",
+        "Massimo Mondini: 19-03-69",
+        "Michele Di Mauro: 19-03-86",
+        "Mirco Tenerelli: 19-03-80",
+        "Teresa Galise: 19-03-89"
+    ],
+    "03-20": [
+        "Alessandra: 20-03",
+        "Bruno Bongarzone: 20-03-73",
+        "Claudia: 20-03",
+        "Francesco Lefemine (13:45): 20-03-00",
+        "Francesco Triggiani: 20-03-65",
+        "Francesco Valente (MBE): 20-03-67",
+        "Gerardo Magro: 20-03-66",
+        "Giada Marchitelli: 20-03-92",
+        "Giuseppe Digiesi: 20-03-76",
+        "Margherita Roncone: 20-03-73",
+        "Maria Rotolo: 20-03-63",
+        "Mario Vismara: 20-03-68",
+        "Mimmo Maggipinto: 20-03-63",
+        "Mimmo Solazzo: 20-03-60",
+        "Onomastico Alessandra Faniuolo: 20-03",
+        "Onomastico Claudia Cavalli: 20-03",
+        "Stefano Loliva (Sbiroli): 20-03-71"
+    ],
+    "03-21": [
+        "Benedetto: 21-03",
+        "Carolina Gozzi: 21-03-53",
+        "Francesca Molinari (di Francesco): 21-03-91",
+        "Grazia Impedovo: 21-03-65",
+        "Nicola Netti: 21-03-47",
+        "Nunzio Camerada: 21-03-57",
+        "OA Point Firenze Srl: 21-03-01",
+        "Roberto Gagliardi: 21-03-72",
+        "Rosaria Pedone: 21-03-75",
+        "Silvia Santamato: 21-03-92",
+        "Teresa Troccoli: 21-03-63"
+    ],
+    "03-22": [
+        "Rosita Martone: 22-03-85",
+        "Tonio Comes: 22-03-60"
+    ],
+    "03-23": [
+        "Anna Pellegrini: 23-03-60",
+        "Claudio Ferrante: 23-03-63",
+        "Dalena Caterina: 23-03-63",
+        "Davide Risola: 23-03-74",
+        "Enzo Filomeno: 23-03-57",
+        "Gianfranco Secondo: 23-03-70",
+        "Laurea Management Bocconi Terry (106): 23-03-19"
+    ],
+    "03-24": [
+        "Davide Filioli Uranio: 24-03-81",
+        "Emanuele Andresini: 24-03-81",
+        "Erasmo Labarile: 24-03-67",
+        "Francesco Labate: 24-03-93",
+        "Gabriella Labarile: 24-03-74",
+        "Milena Mele: 24-03-87",
+        "Richard Udall: 24-03-56",
+        "Rosaria Fiore: 24-03-52"
+    ],
+    "03-25": [
+        "Brando Pettico: 25-03-24",
+        "Chiaretta Leone: 25-03-65",
+        "Daniela Demarinis: 25-03-93",
+        "Fabrizia Miani: 25-03-95",
+        "Gianni Lorusso: 25-03-56",
+        "Giovanni De Biasi: 25-03-83",
+        "Giulia Spera: 25-03-10",
+        "Samuela D'Onghia: 25-03-95"
+    ],
+    "03-26": [
+        "Emanuela: 26-03",
+        "Fabio Missoli: 26-03-67",
+        "Felice Scaringella: 26-03-80",
+        "Gianni Eboli: 26-03-40",
+        "Lella Variglia: 26-03-69",
+        "Manuela: 26-03",
+        "Max Favoti: 26-03-66",
+        "Onomastico Emanuela Dibattista: 26-03"
+    ],
+    "03-27": [
+        "Celeste Boscia: 27-03-64",
+        "Chiara Biscione: 27-03-04",
+        "Giuseppe Santoro (ing.): 27-03-85",
+        "Rossella Lospalluto: 27-03-04"
+    ],
+    "03-28": [
+        "Alessandra Pinto: 28-03-03",
+        "Andrea Serravezza: 28-03-80",
+        "Giuseppe Giardina: 28-03-63",
+        "Ludovico Bellizzi: 28-03-56",
+        "Pino Nobile: 28-03-61",
+        "Stefano Carucci: 28-03-19",
+        "Stefano Lupparelli: 28-03-66"
+    ],
+    "03-29": [
+        "Alessandro Dipierro: 29-03-??",
+        "Antonio Murzio: 29-03-60",
+        "Bice Barile: 29-03-61",
+        "Debora Certini: 29-03-??",
+        "Giulio Digiorgio: 29-03-71",
+        "Laura Albino: 29-03-49",
+        "Marcella Delfine: 29-03-67",
+        "Osvaldo Giannuzzi: 29-03-60",
+        "Roberto Rattazzi: 29-03-62",
+        "Rossana Pinto: 29-03-65",
+        "Tonia Girolamo: 29-03-56"
+    ],
+    "03-30": [
+        "Anna Maria Sonnante: 30-03-57",
+        "Cresima Benny Lorusso: 30-03-08",
+        "Filippo Nitti: 30-03-41",
+        "Immatricolazione Smart: 30-03-11"
+    ],
+    "03-31": [
+        "Costanza Mele: 31-03-??",
+        "Francesco Nitti: 31-03-70",
+        "Maurizio Dalena: 31-03-84",
+        "Tiziana Pugliese: 31-03-75"
+    ],
+    "04-01": [
+        "Giannetto Luisi: 01-04-37",
+        "Giorgio Pricci: 01-04-36",
+        "Marco Massara: 01-04-??",
+        "Mario Totaro: 01-04-51",
+        "Rosa Tucci: 01-04-59",
+        "Sandro Lippolis: 01-04-59",
+        "Teresa Mazzarisi (10:10): 01-04-94"
+    ],
+    "04-02": [
+        "Adrian Fartade: 02-04-87",
+        "Davide Carnevale: 02-04-??",
+        "Donato Labate: 02-04-48",
+        "Francesco da Paola - Franco: 02-04",
+        "Franco Barile: 02-04-68",
+        "Giampiero Delfine: 02-04-70",
+        "Mina Di Turi: 02-04-59",
+        "Pierino Pace: 02-04-58",
+        "Rossella Guglielmi: 02-04-77",
+        "Vito Amendolagine: 02-04-83"
+    ],
+    "04-03": [
+        "Alessandro Derobertis: 03-04-92",
+        "Clementina Colucci: 03-04-62",
+        "Gianni Pesce: 03-04-68",
+        "Giuseppe Laterza: 03-04-89",
+        "Leonardo (Leo) Faniuolo: 03-04-75",
+        "Riccardo: 03-04",
+        "Sabrina Sinisi: 03-04-88",
+        "Stefano Campanella (Cibaria): 03-04-84"
+    ],
+    "04-04": [
+        "Domenico Mazzarelli: 04-04-59",
+        "Franco Basileo: 04-04-??",
+        "Gianna Cambrai: 04-04-75",
+        "Loredana Nitti: 04-04-66",
+        "Saverio Giliberti: 04-04-58",
+        "Virginia Putignano (di Michele): 04-04-06",
+        "Vito Vippolis: 04-04-69"
+    ],
+    "04-05": [
+        "Alberto Parma: 05-04-63",
+        "Angelo Di Masi: 05-04-61",
+        "Anna Maria Losito: 05-04-??",
+        "Fabio Natile: 05-04-74",
+        "Gaia Micca Longo: 05-04-86",
+        "Maria Castellano: 05-04-76",
+        "Mario Citelli: 05-04-50",
+        "Mario Mele: 05-04-58",
+        "Onofrio Mariella: 05-04-69",
+        "Rosita Napoleone: 05-04-??",
+        "Stefano Netti: 05-04-52",
+        "Tania Pinto: 05-04-67",
+        "Vincenzo Lorusso: 05-04-88",
+        "Vincenzo: 05-04"
+    ],
+    "04-06": [
+        "Cinzia Lorusso (06:40): 06-04-80",
+        "Giovanni Fulvio: 06-04-92",
+        "Michele Didonna: 06-04-62",
+        "Nikj Mancini: 06-04-82",
+        "Saverio Cisternino: 06-04-54"
+    ],
+    "04-07": [
+        "Annamaria Tonazzi: 07-04-65",
+        "Cristiano: 07-04",
+        "Decesso Lina Cervellera: 07-04-16",
+        "Donatella Zibardi: 07-04-63",
+        "Elio Santamato: 07-04-59",
+        "Giovanni Pollicelli: 07-04-54",
+        "Loredana Manghisi: 07-04-67",
+        "Luigi Minerva: 07-04-61",
+        "Valeria Lorusso: 07-04-88"
+    ],
+    "04-08": [
+        "Alessia Celestino: 08-04-98",
+        "Alessia Chiarolla: 08-04-97",
+        "Decesso Peter Iurilli: 08-04-21",
+        "Giani Vairo: 08-04-77",
+        "Renata Daprile: 08-04-77"
+    ],
+    "04-09": [
+        "AM Rina Mangini-Paolo Fanigliuolo: 09-04-83",
+        "Antonella Polignano: 09-04-78",
+        "Lina Lippolis: 09-04-71",
+        "Massimo Bianco: 09-04-92",
+        "Michele Zuccaro: 09-04-70",
+        "Rossano Avolio: 09-04-57"
+    ],
+    "04-10": [
+        "Dimitri Galullo: 10-04-60",
+        "Fabio Barone: 10-04-64",
+        "Isabella Sallustio: 10-04-88",
+        "Mariapia D\u2019Attolico: 10-04-88",
+        "Marzia Daddabbo: 10-04-68",
+        "Paolo Rizzi: 10-04-68",
+        "Pio Rinaldi: 10-04-58"
+    ],
+    "04-11": [
+        "InfoAssistenza Srl: 11-04-01",
+        "InfoTelecom Bari Srl: 11-04-01",
+        "Laurea Giurisprudenza Nico Ottone: 11-04-08",
+        "Nicola Silletti: 11-04-57",
+        "Onomastico Genny: 11-04",
+        "Paola De Venezia: 11-04-61",
+        "Riccardo Dalena (01:30): 11-04-73"
+    ],
+    "04-12": [
+        "Angela Giagulli: 12-04-83",
+        "Costanza Indiveri: 12-04-00",
+        "Donato Speroni: 12-04-42",
+        "Elisabetta Guerra: 12-04-53",
+        "Laurea Ariana Lanzilotta: 12-04-11",
+        "Luigi Palmirotta: 12-04-65",
+        "Marica Pricci (17:00): 12-04-61",
+        "Natia Ketelauri: 12-04-81",
+        "Simonetta Detomaso: 12-04-95",
+        "Vito Castellana: 12-04-??"
+    ],
+    "04-13": [
+        "Ciccio Vinella: 13-04-78",
+        "Domenico Catera: 13-04-64",
+        "Etta Polignano: 13-04-??",
+        "Gino Bellafronte: 13-04-48",
+        "Ida: 13-04",
+        "Marica Labbate: 13-04-78",
+        "Mino Di Mola: 13-04-74",
+        "Nicol\u00f2 Lo Presti: 13-04-06",
+        "Pasquale Gentile: 13-04-66",
+        "Tonino Silletti: 13-04-51"
+    ],
+    "04-14": [
+        "Alessandra Rizzi: 14-04-76",
+        "Antonella Tapogna: 14-04-64",
+        "Dario Latrofa: 14-04-69",
+        "Gatto Grigina: 14-04-19",
+        "Gatto Spider: 14-04-19",
+        "Gatto Spot: 14-04-19",
+        "Gianvito D\u2019Aprile: 14-04-83",
+        "Giuseppe Vitti: 14-04-00",
+        "Mara Giannandrea: 14-04-71",
+        "Patrizia Bianco: 14-04-78",
+        "Patrizia Totaro: 14-04-63",
+        "Salvatore Carraturo: 14-04-89"
+    ],
+    "04-15": [
+        "Anastasia: 15-04",
+        "Angela Palmirotta: 15-04-??",
+        "Anna Rossiello: 15-04-88",
+        "Antonio Zonno: 15-04-99",
+        "Battista Chiarella: 15-04-64",
+        "Francesco Bongallino: 15-04-75",
+        "Loredana Barletta: 15-04-63",
+        "Luca Natile: 15-04-62",
+        "Onomastico Anastasia Boscia: 15-04",
+        "Rosilde Colombini: 15-04-79",
+        "Sergio Campanella: 15-04-76"
+    ],
+    "04-16": [
+        "AM Mamma e pap\u00e0: 16-04-56",
+        "AM Sabrina Oppedisano-Antonio Brigio: 16-04-14",
+        "Angelica Morea: 16-04-??",
+        "Benedetto Laera: 16-04-79",
+        "Carlo Molinari: 16-04-65",
+        "Emma Interesse: 16-04-84",
+        "Lucio Pinto: 16-04-64",
+        "Mariagrazia Petruzzella: 16-04-87",
+        "Nicola Violante: 16-04-59",
+        "Olimpia Pascale: 16-04-??",
+        "Paola Revello: 16-04-56",
+        "Raffaella Priore (nipote): 16-04-70",
+        "Raffaello Guerra: 16-04-20",
+        "Valter Crivello: 16-04-63"
+    ],
+    "04-17": [
+        "Doriana Celestino: 17-04-88",
+        "Gianni Laera: 17-04-72",
+        "Lidia Losavio: 17-04-00",
+        "Pasqua Ceglie: 17-04-70",
+        "Pierluigi Petruzzi: 17-04-80"
+    ],
+    "04-18": [
+        "Angela Maria Volpicella: 18-04-48",
+        "Giorgio Giovanni Ventrella: 18-04-23",
+        "Giuseppe Lillo: 18-04-64",
+        "Maria Teresa De Michele: 18-04-82",
+        "Massimiliano Giagulli: 18-04-91",
+        "Michele Triggiani: 18-04-89",
+        "Patrizia D\u2019Ambruoso: 18-04-62",
+        "Sante Dellisanti: 18-04-??"
+    ],
+    "04-19": [
+        "Dino Lacatena: 19-04-60",
+        "Luca De Tommaso: 19-04-77",
+        "Maddalena Dolce: 19-04-58",
+        "Sara Pagliarulo: 19-04-53"
+    ],
+    "04-20": [
+        "Adalgisa: 20-04",
+        "AM Eliana Frallonardo-Giuseppe Mansueto: 20-04-13",
+        "Fabio Fanigliuolo: 20-04-92",
+        "Federico Guerrini: 20-04-72",
+        "Flora Farina: 20-04-68",
+        "Marco Ranieri: 20-04-77",
+        "Mario Conte: 20-04-51",
+        "Natalia Pinto: 20-04-68",
+        "Rosa Ferreyra: 20-04-44",
+        "Rossella Loiacono: 20-04-53"
+    ],
+    "04-21": [
+        "AM Maria Longo-Domenico De Michele: 21-04-79",
+        "Davide Ferrante: 21-04-04",
+        "Flavio Rinaldi: 21-04-78",
+        "Mariella Savino: 21-04-??",
+        "Mirella Mastronardi: 21-04-??"
+    ],
+    "04-22": [
+        "Alessandro Taurino: 22-04-73",
+        "AM Manuela Crema-Filippo Floriani: 22-04-14",
+        "Francesca Colacicco: 22-04-76",
+        "Luigi Parziale: 22-04-53",
+        "Mariachiara Parisi: 22-04-88",
+        "Mary Casulli: 22-04-62",
+        "Rosy Palazzo: 22-04-80",
+        "Vito Antonio Scisci: 22-04-57"
+    ],
+    "04-23": [
+        "Giorgio: 23-04",
+        "Graziangela Ancona: 23-04-90",
+        "Manuela Montagna: 23-04-93",
+        "Marilina Aiuciello: 23-04-75",
+        "Mattia Volgarino: 23-04-87",
+        "Padre Pio D\u2019Andola: 23-04-31",
+        "Valerio Sbiroli: 23-04-62"
+    ],
+    "04-24": [
+        "Anna Maria Mazzarisi: 24-04-??",
+        "Aura Martiradonna: 24-04-89",
+        "Cristian Marcianelli (OA Point Abruzzo): 24-04-72",
+        "Elisabetta Colaprico: 24-04-52",
+        "Fedele: 24-04",
+        "Massimo Spada: 24-04-69",
+        "Paolo Lombardi: 24-04-54",
+        "Peppino Barile: 24-04-58"
+    ],
+    "04-25": [
+        "Alessio Sportelli: 25-04-78",
+        "AM Mina-Nico Tauro: 25-04-78",
+        "Betta Vittorione: 25-04-57",
+        "Domenico Leo: 25-04-67",
+        "Francesco Lardo: 25-04-56",
+        "Luca Leuci: 25-04-70",
+        "Marco: 25-04",
+        "Martino Fischietti: 25-04-59",
+        "Michele Sallustio: 25-04-??",
+        "Nico Gattullo: 25-04-87",
+        "Onomastico Marco Mazzarisi: 25-04",
+        "Stefania Totaro: 25-04-67"
+    ],
+    "04-26": [
+        "AM Monia De Martin-Leo Campanella: 26-04-03",
+        "Carlo Ignazzi: 26-04-62",
+        "Gianni Petruzzi: 26-04-56",
+        "Laurea Ingegneria Marco Mazzarisi (105): 26-04-12",
+        "Laurea Laura Romanazzi (106): 26-04-10",
+        "Michela Calderoni: 26-04-88",
+        "Paolo Iabichino: 26-04-69",
+        "Rita Recchia: 26-04-66",
+        "Rosa Lippolis: 26-04-72"
+    ],
+    "04-27": [
+        "Alessandro Fiorencis: 27-04-67",
+        "Amedeo Stella: 27-04-56",
+        "Ciro Esposito: 27-04-76",
+        "Giovanna Carelli: 27-04-66",
+        "Giusy Frallonardo: 27-04-??",
+        "Laurea Magistr. Marco Mazzarisi (110+L): 27-04-15",
+        "Laurea specialistica Netti Gianfranco: 27-04-11",
+        "Luisa Albanese: 27-04-48",
+        "Manuel Vespucci: 27-04-88",
+        "Michele Guglielmi: 27-04-59",
+        "Prabha Mele: 27-04-91"
+    ],
+    "04-28": [
+        "Decesso Graziana Pricci (21): 28-04-81",
+        "Domenico Costantino: 28-04-73",
+        "Leonardo Dongiovanni: 28-04-72",
+        "Marcella Trivisani: 28-04-77",
+        "Marco Mazzarisi: 28-04-87",
+        "Mattia Leone: 28-04-??",
+        "Nico Perniola: 28-04-87",
+        "Onofrio Ostuni: 28-04-70",
+        "Paolo Detomaso: 28-04-61",
+        "Sabina Campanella: 28-04-76",
+        "Stefano Notarangelo: 28-04-90",
+        "Valeria: 28-04",
+        "Vito Detomaso (fratello di Angela): 28-04-56"
+    ],
+    "04-29": [
+        "Alessia Tolone: 29-04-69",
+        "AM Rosa Siggillino-Renato Miniaci: 29-04-72",
+        "Arianna Togati: 29-04-71",
+        "Beppe Bella: 29-04-??",
+        "Caterina (aprile): 29-04",
+        "Giacomo Mallardi: 29-04-64",
+        "Giandomenico Losacco: 29-04-73",
+        "Laurea Triennale Daniele Mazzarisi (96): 29-04-13",
+        "Marco De Grandis: 29-04-62",
+        "Mary Bianco: 29-04-??",
+        "Nicola Della Vecchia: 29-04-68",
+        "Rosa De Filippis: 29-04-61",
+        "Savio Vurchio: 29-04-62",
+        "Vito Nobile: 29-04-??"
+    ],
+    "04-30": [
+        "Abramo Plantamura: 30-04-71",
+        "Angelo Gentile: 30-04-88",
+        "Angelo Spinelli: 30-04-56",
+        "Barbara Certini: 30-04-83",
+        "Bollo Porsche 996: 30-04",
+        "Domenico Derossi: 30-04-77",
+        "Donato Rossi: 30-04-60",
+        "Elena Bellazzini: 30-04-66",
+        "Francesco Minunni: 30-04-39",
+        "Luigi Esposito: 30-04-47",
+        "Marinella Balzano: 30-04-89",
+        "Michele Scarabaggio: 30-04-54",
+        "Nicoletta Luchena: 30-04-56",
+        "Serena Giannandrea: 30-04-94",
+        "Tania Lippolis: 30-04-87",
+        "Vito Detomaso: 30-04-60"
+    ],
+    "05-01": [
+        "Angelo Sebastiani: 01-05-91",
+        "Brunella Di Masi: 01-05-59",
+        "Daniela Freda: 01-05-??",
+        "Domenico Chibelli: 01-05-00",
+        "Elisabetta Maggipinto: 01-05-68",
+        "Gianfranco De Pinto: 01-05-56",
+        "Giovanni Impedovo: 01-05-75",
+        "Mario Contegiacomo: 01-05-51"
+    ],
+    "05-02": [
+        "Anna Mancini: 02-05-88",
+        "Federico Fortino: 02-05-93",
+        "Franco Sportelli: 02-05-50",
+        "Giuseppe Luisi: 02-05-80",
+        "Mara Mangini: 02-05-75",
+        "Mari Rosa Cisternino: 02-05-??",
+        "Prima Comunione Terry (San Pietro): 02-05-04"
+    ],
+    "05-03": [
+        "Attilio Di Stasio (nonno): 03-05-42",
+        "InfoAziende Srl: 03-05-99",
+        "Stefano Serio: 03-05-81",
+        "Vito Detomaso (politico): 03-05-56"
+    ],
+    "05-04": [
+        "Agata Laviola: 04-05-64",
+        "Domi Di Lorenzo: 04-05-90",
+        "Laurea Giurisprudenza Armando Detomaso: 04-05-20",
+        "Maria Teresa Fortino: 04-05-91",
+        "Paola Palazzo: 04-05-61",
+        "Simona Chiarella: 04-05-94"
+    ],
+    "05-05": [
+        "Angelina Colombari: 05-05-39",
+        "Anna Maria Discepolo: 05-05-64",
+        "Carmela Martinovicz: 05-05-54",
+        "Ciccio Pace: 05-05-67",
+        "Gianstefano Laterza: 05-05-71",
+        "Ivano Mezzapesa: 05-05-89",
+        "Marianna Console: 05-05-79",
+        "Mimmo Leo: 05-05-54",
+        "Paolo Pedico: 05-05-60",
+        "Samira Bellanova: 05-05-??"
+    ],
+    "05-06": [
+        "Alessia Mallardi: 06-05-04",
+        "Angela Totaro (Angy): 06-05-85",
+        "Antonella De Nobili: 06-05-59",
+        "Claudio Maffei: 06-05-52",
+        "Domenico Sabato: 06-05-56"
+    ],
+    "05-07": [
+        "Alberto Schettini: 07-05-79",
+        "Appendicite Benny Lorusso: 07-05-19",
+        "Claudia Laterza: 07-05-80",
+        "Filomena Sportelli: 07-05-77",
+        "Flavia: 07-05",
+        "Francesco Belligerante: 07-05-35",
+        "Francesco Cali\u00f2: 07-05-71",
+        "Olivia Elisabetta Floriani: 07-05-16",
+        "Sebastiano Mazzarisi (22:00): 07-05-57",
+        "Vincenzo Giove: 07-05-67"
+    ],
+    "05-08": [
+        "Antonello Pascale (Giuni Gioielli): 08-05-61",
+        "Decesso Franco Castiglia: 08-05-21",
+        "Filippo Temperato: 08-05-63",
+        "Mara Palmirotta: 08-05-73",
+        "Massimo Mangini: 08-05-68",
+        "Michele Nuzzi (Torre): 08-05-60"
+    ],
+    "05-09": [
+        "Gennaro Dongiovanni: 09-05-66",
+        "Grazia Tenerelli: 09-05-55",
+        "Lodovico Mabini: 09-05-67",
+        "Maria Carmela Iurato: 09-05-56",
+        "Valentina Doria: 09-05-88"
+    ],
+    "05-10": [
+        "Anna Maria Gentile: 10-05-67",
+        "Bollo Aygo: 10-05",
+        "Bollo Megane: 10-05",
+        "Bollo Twingo: 10-05",
+        "Lorenzo Susca: 10-05-57",
+        "Lucia Marzullo (zia): 10-05-39",
+        "Vito Cassano: 10-05-86"
+    ],
+    "05-11": [
+        "Alessandro Feroldi: 11-05-48",
+        "Decesso Nicola Pace: 11-05-08",
+        "Decesso Nonno Benedetto Lorusso: 11-05-08",
+        "Fabio: 11-05",
+        "Francesca Intelletto: 11-05-64",
+        "Gianluca Cosomati: 11-05-74",
+        "Giusi Minoia: 11-05-67",
+        "Inger Camps: 11-05-??",
+        "Irma Pagliarulo: 11-05-74",
+        "Joel De Pinto: 11-05-05",
+        "Paolo Di Giuseppe: 11-05-61"
+    ],
+    "05-12": [
+        "Anna Wezle: 12-05-??",
+        "Gianluca Casulli: 12-05-88",
+        "Luigi Tagarelli: 12-05-35",
+        "Mimmo Giannandrea: 12-05-63",
+        "Mimmo Tinelli: 12-05-79",
+        "Prima Comunione Ony (Carmine): 12-05-02",
+        "Raffaella Rizzi: 12-05-71",
+        "Rosalinda Romanazzi: 12-05-70",
+        "Victor Cant\u00f9: 12-05-61"
+    ],
+    "05-13": [
+        "Daniele Scollo: 13-05-79",
+        "Elena Brambilla: 13-05-69",
+        "Ester Molinari: 13-05-00",
+        "Rossella Ivone: 13-05-64"
+    ],
+    "05-14": [
+        "Albo Basileo: 14-05-46",
+        "Alessandro Manti: 14-05-93",
+        "Caterina Spinelli: 14-05-74",
+        "Francesco Mazzotta: 14-05-61",
+        "Francesco Perniola: 14-05-89",
+        "Nico Manghisi: 14-05-56",
+        "Ninni Polignano: 14-05-61",
+        "Nino Dalena: 14-05-59"
+    ],
+    "05-15": [
+        "Eloisa Zippo: 15-05-??",
+        "Giulio Spilotro: 15-05-61",
+        "Piero Gonnella: 15-05-65",
+        "Serena Campanella: 15-05-89"
+    ],
+    "05-16": [
+        "Angela Palazzo: 16-05-60",
+        "Cristina Massaro: 16-05-59",
+        "Luigi Melillo: 16-05-85",
+        "Manuela Buonsanti: 16-05-88",
+        "Maria Rosa Farinola: 16-05-88",
+        "Nico Ottone: 16-05-76",
+        "Paolo Gatto: 16-05-66"
+    ],
+    "05-17": [
+        "Angela Martone: 17-05-83",
+        "Betta Mirizzi: 17-05-69",
+        "Doni Manghisi: 17-05-55",
+        "Flavia Pinto: 17-05-94",
+        "Giacomo Bianco: 17-05-69",
+        "Nicla De Pinto: 17-05-51",
+        "Nicola Recchia: 17-05-60",
+        "Pasquale: 17-05",
+        "Rudi Mesotten: 17-05-53",
+        "Vanni Bordignon: 17-05-65"
+    ],
+    "05-18": [
+        "AM Menica Colucci-Domenico Leo: 18-05-02",
+        "Angela Totaro: 18-05-61",
+        "Arturo Laterza: 18-05-69",
+        "Carmela Giannini: 18-05-74",
+        "Fabio Laera: 18-05-73",
+        "Felice: 18-05",
+        "Giancarlo Schiavone: 18-05-53",
+        "Gianvito Mevoli: 18-05-94",
+        "Gregorio Barletta: 18-05-70",
+        "Matrimonio Roberta-Gianvito: 18-05-23",
+        "Paolo Maiullari: 18-05-77",
+        "Rossella Pugliese: 18-05-64",
+        "Ugo Lucci: 18-05-81"
+    ],
+    "05-19": [
+        "Arianna Gasparro: 19-05-86",
+        "Francesco Mastrangelo (cooperativa): 19-05-78",
+        "Gaetano Gagliardi: 19-05-71",
+        "Gisella: 19-05",
+        "Saverio Fierro: 19-05-75",
+        "Valentina Sposato: 19-05-88",
+        "Valeria Tamma: 19-05-66",
+        "Vito Gonnella: 19-05-64",
+        "Zaira Fanigliuolo: 19-05-89"
+    ],
+    "05-20": [
+        "Alice Pucci: 20-05-80",
+        "AM Marica Labbate-Gianni Pinto: 20-05-06",
+        "Anna Manghisi: 20-05-59",
+        "Bernarda Clori: 20-05-61",
+        "Francesco De Michele: 20-05-80",
+        "Marco Galluzzi: 20-05-58",
+        "Monica Montese: 20-05-64",
+        "Orazio Lella (di Rino): 20-05-92",
+        "Seconda spec. Flavia: 20-05-23",
+        "Silvana Caldarola: 20-05-88",
+        "Vittorio Ingrassia: 20-05-03"
+    ],
+    "05-21": [
+        "Anna Galiano: 21-05-71",
+        "Ariana Lanzilotta: 21-05-88",
+        "Aurora Andresini: 21-05-10",
+        "Dominga Di Mise: 21-05-77",
+        "Francesco Perillo: 21-05-80",
+        "Maria Antonietta Pricci (04:15): 21-05-58",
+        "Maria Natile (Tio Pepe): 21-05-54",
+        "Rino Grillo: 21-05-64",
+        "Vittorio: 21-05"
+    ],
+    "05-22": [
+        "Alessandro Muolo (di Claudia Console): 22-05-19",
+        "AM Daniela Mastrangelo-Enzo Marcantonio: 22-05-04",
+        "Fabio Brambilla: 22-05-65",
+        "Gianni Russo: 22-05-50",
+        "Giulia: 22-05",
+        "Maria Vittoria Primavera: 22-05-58",
+        "Mariantonietta Malerba: 22-05-64",
+        "Mariella Sardone: 22-05-69",
+        "Pino Gentile: 22-05-68",
+        "Rita: 22-05",
+        "Stefano Bertini: 22-05-60",
+        "Tonio Pricci: 22-05-44"
+    ],
+    "05-23": [
+        "Betta Gonnella: 23-05-??",
+        "Nino Miani: 23-05-57",
+        "Rosanna Bianco: 23-05-73"
+    ],
+    "05-24": [
+        "Afra: 24-05",
+        "Antonio Pellegrino: 24-05-61",
+        "Emanuela Genco: 24-05-71",
+        "Giovanna Gallo: 24-05-67",
+        "Ilia: 24-05",
+        "Marco Morea: 24-05-92",
+        "Maria Pontrandolfo: 24-05-60",
+        "Martino Chiarappa (06:55): 24-05-97",
+        "Natale Marco Morea: 24-05-92",
+        "Patrizia Tinelli: 24-05-73",
+        "Prima Comunione Mary (Salvatore): 24-05-98",
+        "Romeo Caputo: 24-05-55",
+        "Trasf. lavoro a Martina di Anna Trivisani: 24-05-05",
+        "Valentina Marchitelli: 24-05-88",
+        "Vito Cali\u00f2: 24-05-76"
+    ],
+    "05-25": [
+        "Arianna Mezzapesa: 25-05-83",
+        "Dunja Belada: 25-05-79",
+        "Ester Cavallo: 25-05-68",
+        "Filippo Rocca: 25-05-80",
+        "Leo Gianfrate: 25-05-59",
+        "Lucio Marcantonio: 25-05-68",
+        "Marcella Genco: 25-05-73",
+        "Pierino Mastrangelo: 25-05-41",
+        "Sergio Vatta: 25-05-58",
+        "Valerio Longo (di Vito): 25-05-91"
+    ],
+    "05-26": [
+        "Anna Lisa Recchia: 26-05-78",
+        "Carmela Vergadoro: 26-05-93",
+        "Filippo: 26-05",
+        "Flavia Nitti: 26-05-87",
+        "Giuseppe Pesce (elettrauto): 26-05-82",
+        "Tommaso Pugliese: 26-05-64"
+    ],
+    "05-27": [
+        "Marcello De Marzo: 27-05-78",
+        "Maria Grazia Ferrara: 27-05-66",
+        "Melania Netti: 27-05-76",
+        "Pamela Resta: 27-05-78",
+        "Pasquale Fatalino: 27-05-60",
+        "Rory Rubino: 27-05-60",
+        "Walter Vinella: 27-05-70"
+    ],
+    "05-28": [
+        "Carmen Novello: 28-05-67",
+        "Don Emilio Caputo: 28-05-58",
+        "Eleonora Bergamasco: 28-05-97",
+        "Emilio: 28-05",
+        "Francesco Liuzzi: 28-05-81",
+        "Giuseppe Claudio Laera: 28-05-66",
+        "Mariella Losavio: 28-05-64",
+        "Valerio Napoleone: 28-05-70"
+    ],
+    "05-29": [
+        "Franco Mazzariol: 29-05-54",
+        "Giandomenico Aloisio: 29-05-88",
+        "Gianluca Del Moro (OA Point Abruzzo): 29-05-72",
+        "Gianvito Patroni: 29-05-57",
+        "Leo Campanella: 29-05-75",
+        "Nicola Lavermicocca: 29-05-58",
+        "Tetta Fanelli: 29-05-59",
+        "Valentina Polignano (Gianni Notarnicola): 29-05-80",
+        "Vito Sportelli: 29-05-77"
+    ],
+    "05-30": [
+        "AM Gaia Boselli-Angelo Amati: 30-05-18",
+        "Angelo Sabatelli: 30-05-66",
+        "Anna Linda Loiacono: 30-05-69",
+        "Cesaria Delfine: 30-05-68",
+        "Chiaranna Mauroantonio: 30-05-70",
+        "Francesca Abrescia: 30-05-88",
+        "Imar Laporta: 30-05-77",
+        "Maria Teresa Loiacono: 30-05-69",
+        "Marino Guarnieri: 30-05-78",
+        "Mario Odone: 30-05-76",
+        "Massimo Curci: 30-05-61",
+        "Nicla Ditaranto: 30-05-64",
+        "Nicola Quaranta: 30-05-72",
+        "Piera Trivisani: 30-05-68",
+        "Vito Vittorione: 30-05-77"
+    ],
+    "05-31": [
+        "Antonella Mastronardi: 31-05-85",
+        "Domenica Pantaleo: 31-05-88",
+        "Fabrizio Caringella: 31-05-10",
+        "Piter Giove: 31-05-73",
+        "Valentina Cardinali: 31-05-78"
+    ],
+    "06-01": [
+        "Angelo Casulli: 01-06-60",
+        "Gatto Tina: 01-06-17",
+        "Giulio Di Santo: 01-06-64",
+        "Maria Rosa Di Fazio: 01-06-65",
+        "Patrizia Giliberti: 01-06-69",
+        "Vito Dal\u00f2: 01-06-??"
+    ],
+    "06-02": [
+        "Adriana Mazzarisi: 02-06-58",
+        "AM Marina Regina-Luca Frabetti: 02-06-12",
+        "Barbara De Nobili: 02-06-??",
+        "Claudio Bianco: 02-06-82",
+        "Diploma Conservatorio Mariapia D'Attolico: 02-06-12",
+        "Erasmo: 02-06",
+        "Francesco Intini: 02-06-58",
+        "Giacomo Mezzapesa: 02-06-63",
+        "Marina Regina: 02-06-83",
+        "Pierluigi Pisani: 02-06-69"
+    ],
+    "06-03": [
+        "Giuseppe Mezzapesa (di Gianfranco): 03-06-08",
+        "Janet Mirizzi: 03-06-80",
+        "Luca Medici: 03-06-77",
+        "Marco Bruno: 03-06-53",
+        "Mario Cerullo: 03-06-92",
+        "Michele Guida: 03-06-49",
+        "Stefy Fiume: 03-06-51"
+    ],
+    "06-04": [
+        "Lia Gigante: 04-06-69",
+        "Manuela Maggipinto: 04-06-80",
+        "Rosa Bitondo: 04-06-88"
+    ],
+    "06-05": [
+        "Alessandro Cecchini: 05-06-77",
+        "Alessandro Pavone (di Ornella): 05-06-08",
+        "AM Tiziana Genco-Gianfranco Intini: 05-06-04",
+        "Battesimo Terry (Salvatore): 05-06-94",
+        "Donato Piepoli: 05-06-54",
+        "Emanuele Lessa: 05-06-62",
+        "Giorgia e Adriana Cocozza: 05-06-92",
+        "Nicola Giampaolo: 05-06-71",
+        "Nonna Angelina Gasparro: 05-06-09",
+        "Onofrio Mazzarisi (19:00): 05-06-92"
+    ],
+    "06-06": [
+        "Ferruccio Guerra: 06-06-60",
+        "Francesca Misto: 06-06-90",
+        "Giuseppe Savino: 06-06-71",
+        "Massimo Broggi: 06-06-68",
+        "Pasquale Giotta: 06-06-84",
+        "Stefania De Bellis: 06-06-91"
+    ],
+    "06-07": [
+        "Alessio Nitti: 07-06-50",
+        "Asia Pricci (13:30): 07-06-06",
+        "Francesco Forzino: 07-06-72",
+        "Gabriele Laera: 07-06-91",
+        "Gabriella Caprio: 07-06-58",
+        "Lilli Totaro: 07-06-77",
+        "Linda Caputo: 07-06-57",
+        "Lorenzo Castellana: 07-06-58",
+        "Marica conosciuto Nino: 07-06-81",
+        "Mario Mastrangelo: 07-06-55",
+        "Pino Mirizzi (Lions): 07-06-53",
+        "Rosa Maria Scarafile: 07-06-54",
+        "Saverio Termite: 07-06-72",
+        "Tommaso Mastroscristino: 07-06-74",
+        "Vanna Pricci (Castellana): 07-06-66"
+    ],
+    "06-08": [
+        "Assunzione SSS Nino: 08-06-81",
+        "Danilo Barone: 08-06-69",
+        "Domi Ottomano: 08-06-87",
+        "Enzo Giannini: 08-06-49",
+        "Flavio Insalata: 08-06-85",
+        "Franco Tricase (ex sindaco): 08-06-53",
+        "Giulia Recchia: 08-06-68",
+        "Maria Perrelli: 08-06-63",
+        "Nicola Mele: 08-06-52",
+        "Pino Daprile: 08-06-64"
+    ],
+    "06-09": [
+        "Caterina Coppi: 09-06-65",
+        "Daniele Casulli: 09-06-92",
+        "Giovanni Russo: 09-06-72",
+        "Immatricolazione Aygo: 09-06-09",
+        "Sonia Spinelli: 09-06-97"
+    ],
+    "06-10": [
+        "Gino Benincasa: 10-06-55",
+        "Lia Cozzolongo: 10-06-??",
+        "Marco Cenzato: 10-06-64",
+        "Onomastico Cinzia Lorusso (Diana): 10-06",
+        "Raffaele Devillanova (di Giuseppe): 10-06-06"
+    ],
+    "06-11": [
+        "AM Margaret Longo-Francesco Quarato: 11-06-18",
+        "Inizio lavoro Accenture Terry: 11-06-19"
+    ],
+    "06-12": [
+        "Alberto Spinelli: 12-06-71",
+        "Diego Boscia: 12-06-59",
+        "Grazia Loglisci: 12-06-76",
+        "Luigi Greco: 12-06-??",
+        "Maria Gigante: 12-06-54",
+        "Massimo Zizzi: 12-06-89",
+        "Noemi Nardelli: 12-06-97",
+        "Onofrio: 12-06",
+        "Rossana Pavone: 12-06-73"
+    ],
+    "06-13": [
+        "Alice: 13-06",
+        "Antonio-Antonia: 13-06",
+        "Cosimo Diroma: 13-06-70",
+        "Gianni Tateo (cugino di Anna): 13-06-79",
+        "Luciana Laera: 13-06-73",
+        "Luigia De Marinis: 13-06-??",
+        "Mariella Lorusso: 13-06-69",
+        "Nicola Calabrese: 13-06-42",
+        "Paola Lillo: 13-06-60",
+        "Rosita Williams: 13-06-??"
+    ],
+    "06-14": [
+        "Erasmo Baldassarre: 14-06-68",
+        "Maria Nuzzi (moglie di Piter Giove): 14-06-75",
+        "Nunzio Teofilo: 14-06-61"
+    ],
+    "06-15": [
+        "Federica Fedele: 15-06-89",
+        "Gaetano Bitetto: 15-06-72",
+        "Giampiero Gigante: 15-06-77",
+        "Lia Mastromatteo: 15-06-81",
+        "Patente Terry: 15-06-12",
+        "Sagaya Mele: 15-06-93",
+        "Vincitore concorso Trieste: 15-06-23",
+        "Vito: 15-06"
+    ],
+    "06-16": [
+        "AM Luigi Stivaletta: 16-06-02",
+        "AM Rosa De Filippis-Michele Didonna: 16-06-90",
+        "Assicurazione Porsche 996: 16-06",
+        "Dominga Tenerelli: 16-06-16",
+        "Fabio Sblano: 16-06-87",
+        "Martino Chiafele: 16-06-59",
+        "Saverio Lacitignola: 16-06-46"
+    ],
+    "06-17": [
+        "Armando Detomaso: 17-06-92",
+        "Gianni Lomanto: 17-06-63",
+        "Mara Pellegrino: 17-06-85",
+        "Marcella Valentini: 17-06-73",
+        "Maria Antonietta Polignano: 17-06-65",
+        "Michele Micca Longo: 17-06-55",
+        "Michele Stricchiola: 17-06-68",
+        "Mimmo Valentini: 17-06-67",
+        "Piero Console: 17-06-49",
+        "Sebastiano Cal\u00f2: 17-06-50",
+        "Tonio Lippolis: 17-06-58"
+    ],
+    "06-18": [
+        "Claudia Mazzarisi: 18-06-86",
+        "Lucrezia Tassiello: 18-06-88",
+        "Maria Cicorella: 18-06-58",
+        "Marina: 18-06",
+        "Seconda laurea Marica (98): 18-06-24"
+    ],
+    "06-19": [
+        "Alessandra Manzionna: 19-06-00",
+        "AM Anna Maria Bongiorno-Filippo Caringella: 19-06-04",
+        "Claudia De Mattia: 19-06-10",
+        "Giovanni Mario Pascolla: 19-06-20",
+        "Grazia Rongo: 19-06-72",
+        "Mario Gaio: 19-06-54",
+        "Nazzareno Gorni: 19-06-78",
+        "Rocco Iacovelli: 19-06-66",
+        "Tommaso Mussella: 19-06-65",
+        "Tonina Giglio: 19-06-56"
+    ],
+    "06-20": [
+        "AM Laura Iaffaldano-Paolo Avella: 20-06-01",
+        "Anna Beatrice: 20-06-66",
+        "Anna Rita Riontino: 20-06-87",
+        "Cesare Laterza: 20-06-62",
+        "Cristiano Chiarappa (09:50): 20-06-01",
+        "Dario Agrimi: 20-06-80",
+        "Domenico Cerruti: 20-06-65",
+        "Domenico Indiveri: 20-06-93",
+        "Federico Barbi: 20-06-91",
+        "Maria Didonna: 20-06-90",
+        "Michelina Savino: 20-06-62",
+        "Tonia Fanelli: 20-06-61"
+    ],
+    "06-21": [
+        "Daniela Florio: 21-06-58",
+        "Giuseppe Aquilino: 21-06-74",
+        "Luigi-Gino: 21-06",
+        "Mauro Mastronardi: 21-06-62",
+        "Nada Lovece: 21-06-79",
+        "Vito Rubino: 21-06-55"
+    ],
+    "06-22": [
+        "AM Monica Montese-Marco Losavio: 22-06-91",
+        "Andrea Miani: 22-06-92",
+        "Anna Pontrandolfo: 22-06-51",
+        "Fabio Troilo: 22-06-74",
+        "Gaia Capa (di Valentina Ventura): 22-06-18",
+        "Gianfranco D'Autilia: 22-06-59",
+        "Marco Lorusso: 22-06-96",
+        "Marica entra nei Lions Putignano: 22-06-14",
+        "Marta Traetta: 22-06-81",
+        "Nicola Talenti: 22-06-65",
+        "Paolo Tateo (zio di Anna): 22-06-56",
+        "Sebi Vinella: 22-06-96",
+        "Sergio Capotorto: 22-06-76"
+    ],
+    "06-23": [
+        "Alessandro Maiolino: 23-06-89",
+        "Ciccio Mirizzi: 23-06-64",
+        "Elisabetta Mastropasqua: 23-06-94",
+        "Enzo Fasano: 23-06-55",
+        "Manila Benedetto: 23-06-81",
+        "Michelangelo Mastropasqua: 23-06-94",
+        "Nico Valenza: 23-06-60",
+        "Piero Bianco: 23-06-60",
+        "Roberta Cozzolongo: 23-06-67",
+        "Vito Longo (di Pietro): 23-06-58"
+    ],
+    "06-24": [
+        "Claudia Cavalli: 24-06-85",
+        "Ernesto Toma: 24-06-66",
+        "Gianpaolo Chiarella: 24-06-66",
+        "Giovanna-Vanna-Giovanni: 24-06",
+        "Luca Boselli: 24-06-70",
+        "Maria Longo (di Vittorio): 24-06-59",
+        "Massimo Melpignano: 24-06-64",
+        "Onomastico Giampiero Console: 24-06",
+        "Rosanna Dilillo Cavallera: 24-06-61",
+        "Stefania Rotolo: 24-06-66",
+        "Vanni Vittorione: 24-06-92",
+        "Vito Spinosa: 24-06-63",
+        "Vito Vinella (palestra): 24-06-72"
+    ],
+    "06-25": [
+        "Gianfranco Marazia: 25-06-63",
+        "Gianni Dalena (Atmosfere d'interni): 25-06-86",
+        "Micol Petruzzi: 25-06-92"
+    ],
+    "06-26": [
+        "Alessandro Bertolino: 26-06-67",
+        "Donatello Cal\u00f2: 26-06-60",
+        "Francesco Lacatena: 26-06-65",
+        "Francesco Valente: 26-06-73",
+        "Gianfranco Netti: 26-06-83",
+        "Maria Longo (di Pietro): 26-06-64",
+        "Sara Atlante: 26-06-87"
+    ],
+    "06-27": [
+        "Donato Notarangelo: 27-06-87",
+        "Felice Fasano: 27-06-52",
+        "Marco Loliva: 27-06-04",
+        "Mario Ianora: 27-06-66",
+        "Rita Tateo: 27-06-52",
+        "Tiziana De Michele: 27-06-66",
+        "Tiziana Pricci (05:00): 27-06-72"
+    ],
+    "06-28": [
+        "Alessandra Misto: 28-06-88",
+        "AM Melania Netti-Erasmo Labarile: 28-06-01",
+        "Antonella Laruccia: 28-06-69",
+        "Antonia Tinelli: 28-06-61",
+        "Dino Parrotta: 28-06-72",
+        "Giorgio Pietro Bruno: 28-06-14",
+        "Giovanni Laselva: 28-06-76",
+        "Lenella Breveglieri: 28-06-56",
+        "Licia Stasi: 28-06-88",
+        "Mirella Pacello: 28-06-73",
+        "Rosario Di Martino: 28-06-54"
+    ],
+    "06-29": [
+        "AM Giusi Minoia-Dimitri Galullo: 29-06-16",
+        "Annalaura Adone: 29-06-90",
+        "Annamaria Manghisi: 29-06-60",
+        "Antonio Grazietti: 29-06-68",
+        "Decesso Vito Sardelli: 29-06-14",
+        "Enzo Bartolomeo: 29-06-53",
+        "Enzo Cataldo: 29-06-55",
+        "Gianni Netti: 29-06-??",
+        "Gilda Pricci (11:30): 29-06-04",
+        "Mara Nitti: 29-06-73",
+        "Paolo: 29-06",
+        "Piermarino Notarnicola: 29-06-??",
+        "Pietro-Piero: 29-06",
+        "Rosa Degiorgio: 29-06-47"
+    ],
+    "06-30": [
+        "Anna Calisi: 30-06-??",
+        "Assicurazione Mercedes: 30-06",
+        "Flora Losavio: 30-06-65",
+        "Gaia Boselli: 30-06-88",
+        "Giovanna Ciccolella: 30-06-86",
+        "Sabrina Imbriaco: 30-06-82",
+        "Vincenzo Campanella: 30-06-60"
+    ],
+    "07-01": [
+        "Claudia Crema: 01-07-77",
+        "Lorusso Mimmo: 01-07-55",
+        "Nicky Persico: 01-07-64",
+        "Piero Russo: 01-07-82",
+        "Stefano Brigio: 01-07-17"
+    ],
+    "07-02": [
+        "Antonio Palazzo: 02-07-58",
+        "Eleonora Cognetti: 02-07-89",
+        "Francesco Balena: 02-07-60",
+        "Francesco Lanzilotta: 02-07-61",
+        "Gianni Mangini: 02-07-62",
+        "Gianni Notarangelo: 02-07-66",
+        "Grazia-Graziana (no Rutigliano): 02-07",
+        "Immatricolazione Megane: 02-07-11",
+        "Kat\u00eca Valente: 02-07-63",
+        "Valentina Gonnella: 02-07-07"
+    ],
+    "07-03": [
+        "Afra Rana: 03-07-89",
+        "Beppe Cavone: 03-07-72",
+        "Filippo Caringella: 03-07-61",
+        "Giorgia Mangini: 03-07-93",
+        "Giovanni Pugliese: 03-07-78",
+        "Maria Pia Vasti: 03-07-53",
+        "Mazzarisi Marco Grazio: 03-07-71",
+        "Richard Savino: 03-07-64"
+    ],
+    "07-04": [
+        "AM Marica Pricci -Sebastiano Mazzarisi: 04-07-87",
+        "AM Marica Pricci-Sebastiano Mazzarisi: 04-07-87",
+        "Federica Mevoli: 04-07-90",
+        "Genny Lepore: 04-07-75",
+        "Jimmy Di Martino: 04-07-84",
+        "Laurea Daniela Mastrangelo: 04-07-02",
+        "Laurea Flavia Lefemine (110): 04-07-18",
+        "Luca Schiavone: 04-07-66",
+        "Maria Teresa Digirolamo: 04-07-94",
+        "Simona Miccoli: 04-07-75",
+        "Sonia Monica Detomaso: 04-07-77",
+        "Stefano Degiorgio: 04-07-70",
+        "Stefano Giove: 04-07-96",
+        "Tanja Hundhammer: 04-07-78"
+    ],
+    "07-05": [
+        "Donato Ottomano: 05-07-43",
+        "Filomena: 05-07",
+        "Franco Mazzarisi (05:20): 05-07-61",
+        "Giada della Corte: 05-07-88",
+        "Lino Linardi: 05-07-58",
+        "Mariella Mazzarisi (05:10): 05-07-61",
+        "Mina Ferrarese: 05-07-86",
+        "Nicola Lassandro: 05-07-53",
+        "Paola Lampugnani: 05-07-65",
+        "Serena Bartolomeo: 05-07-81"
+    ],
+    "07-06": [
+        "AM Valentina Lippolis-Angelo: 06-07-11",
+        "Decesso Maria Detomaso (102 anni): 06-07-17",
+        "Massimo Colacicco: 06-07-??",
+        "Mimino Schiavarelli: 06-07-54"
+    ],
+    "07-07": [
+        "Alessia Volgarino: 07-07-82",
+        "AM Ilze Nuzzi-Tony Nuzzi: 07-07-14",
+        "AM Marilena D'Alena-Vito Longo: 07-07-84",
+        "Francesco Campanella: 07-07-63",
+        "Giuseppe Dimauro: 07-07-69",
+        "Monica Bellizio: 07-07-92",
+        "Stefania Mastrangelo: 07-07-84"
+    ],
+    "07-08": [
+        "Agata (Tina) Leone: 08-07-60",
+        "Biagio Labate: 08-07-63",
+        "Emma Giuliani: 08-07-62",
+        "Francesco Comes: 08-07-91",
+        "Terry Di Leo: 08-07-88"
+    ],
+    "07-09": [
+        "AM Anna Trivisani-Giuseppe Pricci: 09-07-97",
+        "AM Roberta Tateo-Gianvito Angiulli: 09-07-16",
+        "Decesso Pasquale Tria: 09-07-16",
+        "Fabrizio Intini: 09-07-92",
+        "Francesco Marasciulo: 09-07-86",
+        "Giovanni Giorgio: 09-07-53",
+        "Grazia Lobefaro: 09-07-69",
+        "Michela Didonna: 09-07-93",
+        "Stefano Loliva (Putignano): 09-07-91",
+        "Veronica: 09-07",
+        "Vito Laera: 09-07-68"
+    ],
+    "07-10": [
+        "Alessia Miniaci: 10-07-80",
+        "AM Floriana Medici-Enzo Goffredo: 10-07-12",
+        "Antonio Lacatena: 10-07-??",
+        "Daniela Izzo: 10-07-76",
+        "Diploma Liceo Majorana Mary (92): 10-07-07",
+        "Leo Di Lorenzo: 10-07-57",
+        "Margherita Genco: 10-07-??",
+        "Nino Laera: 10-07-58",
+        "Pasquale Di Ciommo: 10-07-50"
+    ],
+    "07-11": [
+        "AM Viviana Ventrella-Tiziano Mangini: 11-07-15",
+        "Angela Laera (bionda): 11-07-82",
+        "Antonio Dongiovanni: 11-07-43",
+        "Decesso Onofrio Mazzarisi nonno (86): 11-07-07",
+        "Pino Pote: 11-07-62",
+        "Rosita Detomaso: 11-07-81",
+        "Sara Petaroscia: 11-07-78"
+    ],
+    "07-12": [
+        "Andrea Pace: 12-07-56",
+        "Anna Trivisani (11:30): 12-07-69",
+        "Gisella Barbieri: 12-07-??",
+        "Giuseppe Modugno: 12-07-75",
+        "Margherita Binetti: 12-07-??",
+        "Marvisa Natile: 12-07-??",
+        "Mary Pinto: 12-07-79",
+        "Onofrio Giancola: 12-07-54"
+    ],
+    "07-13": [
+        "Andrea D\u2019Amico: 13-07-91",
+        "Enrico: 13-07",
+        "Giorgia Ardia: 13-07-80",
+        "Massimo Papanice: 13-07-75",
+        "Raffaella Gigantesco: 13-07-??"
+    ],
+    "07-14": [
+        "AM Anna Pellegrini-Vito Mazzarisi (civile): 14-07-84",
+        "Antonella Andresini (L'Acquario): 14-07-66",
+        "Antonella Bellizzi: 14-07-74",
+        "Betty Vinella: 14-07-62",
+        "Laurea Psicologia Nino (110): 14-07-10",
+        "Lisa Dibello: 14-07-88",
+        "Marisa Masi: 14-07-65",
+        "Vincenzo Sportelli: 14-07-73"
+    ],
+    "07-15": [
+        "Adriano Fasce: 15-07-19",
+        "AM Teresa Giove-Orazio Lella: 15-07-02",
+        "Camillo Polignano (avvocato): 15-07-58",
+        "Daniele Motolese: 15-07-86",
+        "Diploma liceo Majorana Ony (83): 15-07-11",
+        "Filippo Floriani: 15-07-84",
+        "Luca De Felice: 15-07-??",
+        "Peppino Plantamura: 15-07-50",
+        "Pietro Longo: 15-07-29"
+    ],
+    "07-16": [
+        "Angela Fontana: 16-07-49",
+        "Carmela-Carmen: 16-07",
+        "Decesso Angelina Gasparro (92 anni): 16-07-01",
+        "Decesso Zio Francesco Mazzarisi (38 anni): 16-07-46",
+        "Peppino Pricci: 16-07-38",
+        "Peter Ivone: 16-07-73",
+        "Severino Boscia: 16-07-31",
+        "Tonia Labbate: 16-07-52",
+        "Tonio Coladonato: 16-07-??"
+    ],
+    "07-17": [
+        "Alessandro Lorusso (19:30): 17-07-10",
+        "Alessio: 17-07",
+        "Cecilia Milano: 17-07-83",
+        "Claudio Chiarella: 17-07-84",
+        "Domenico Digregorio: 17-07-71",
+        "Gessie di Tiziana e Ricardo: 17-07-08",
+        "Gianluca Silvestri: 17-07-02",
+        "Giuseppe Chiarella: 17-07-11",
+        "Marco Carrino: 17-07-75",
+        "Mary Cofano: 17-07-89",
+        "Nunzia Lippolis: 17-07-89"
+    ],
+    "07-18": [
+        "AM Flavia Nitti-Alejo Fasce: 18-07-14",
+        "AM Patrizia Totaro-Pasquale Primavera: 18-07-87",
+        "Federica-Federico: 18-07",
+        "Guy Van Peel: 18-07-61",
+        "Mimmo Lucarelli: 18-07-73"
+    ],
+    "07-19": [
+        "AM Milena Mele-Domenico Donvito: 19-07-21",
+        "AM Milena Mele: 19-07-21",
+        "Decesso Danilo Barone (50 anni): 19-07-19",
+        "Fabio Schettini: 19-07-78",
+        "Giuseppe Ritella: 19-07-82",
+        "Mariana Demarinis: 19-07-73",
+        "Osvaldo Colombo: 19-07-61",
+        "Sandra Pastore: 19-07-88",
+        "Turibbia Stasi: 19-07-77",
+        "Vanna Plantone: 19-07-80"
+    ],
+    "07-20": [
+        "Alessandra Console: 20-07-84",
+        "Alice Lorusso (18:30): 20-07-13",
+        "AM Mery Florenzio-Enzo Giannandrea: 20-07-12",
+        "Elia-Lelio: 20-07",
+        "Francesco Saccente: 20-07-64",
+        "Mariantonietta Pugliese: 20-07-84",
+        "Stefano Odone (padre di Nicola e Mario): 20-07-47"
+    ],
+    "07-21": [
+        "AM Anna Sabatelli-Domenico Mazzarisi: 21-07-97",
+        "Angelo Carucci: 21-07-78",
+        "Benedetto Morea (di Roberta Recchia): 21-07-03",
+        "Donatello Casulli: 21-07-24",
+        "Edoardo Putignano (di Michele): 21-07-03",
+        "Enzo Sabato: 21-07-51",
+        "Flavia Lanzilotta: 21-07-59",
+        "Gabriele Guaragno: 21-07-78",
+        "Giuseppe Stano: 21-07-60",
+        "Laurea Fisica Teorica Ony (110+Lode): 21-07-17",
+        "Luca Frabetti (Marina Regina): 21-07-82",
+        "Lucetta Gentile: 21-07-71",
+        "Marco Morea (di Roberta Recchia): 21-07-10",
+        "Tania Romanazzi: 21-07-89"
+    ],
+    "07-22": [
+        "AM Tiziana Gigantesco-Nino Miani: 22-07-89",
+        "Catia Nitti: 22-07-94",
+        "Decesso Rocky (13 anni): 22-07-17",
+        "Donato Paradiso: 22-07-52",
+        "Giuseppe Dalena: 22-07-76",
+        "Maria Giovanna Rizzi: 22-07-88",
+        "Maria Sinatra: 22-07-45",
+        "Vito La Ghezza: 22-07-67"
+    ],
+    "07-23": [
+        "Anna Lo Presti: 23-07-03",
+        "Arianna Teofilo: 23-07-87",
+        "Francesco Losito: 23-07-55",
+        "Mercedes Lanzilotta: 23-07-56",
+        "Michele Emiliano: 23-07-59",
+        "OA Point Srl - Milano: 23-07-96",
+        "OA Point Srl - Verona: 23-07-96",
+        "Paolo Silva: 23-07-79",
+        "Raffaele De Leonardis: 23-07-79",
+        "Teresa Taccone: 23-07-63"
+    ],
+    "07-24": [
+        "Anna Vita Dalena: 24-07-61",
+        "Cristina: 24-07",
+        "Domenico Sportelli: 24-07-71",
+        "Domenico Tappero: 24-07-56",
+        "Mariangela Branchi: 24-07-77",
+        "Marzia Intini: 24-07-87",
+        "Nadia Mastronardo: 24-07-89",
+        "Paola Cazzolla: 24-07-92",
+        "Silvia Recchia: 24-07-88",
+        "Valter Longo (di Vito): 24-07-02",
+        "Vito Angelo Giagulli: 24-07-58"
+    ],
+    "07-25": [
+        "Anita Gentile: 25-07-73",
+        "Antonella Lippolis: 25-07-77",
+        "Fabio Ferretti: 25-07-67",
+        "Giacomo: 25-07",
+        "InfoTelecom Taranto Srl: 25-07-00",
+        "Leo Ivone: 25-07-58",
+        "Luca Maggipinto: 25-07-92",
+        "Manuela Dinaccio: 25-07-75",
+        "Manuela Longo: 25-07-79",
+        "Nicola Rana: 25-07-61",
+        "Pierluigi Castellana: 25-07-??",
+        "Rosa Busco: 25-07-61",
+        "Silvestro Palmisano: 25-07-51"
+    ],
+    "07-26": [
+        "Alessandro Vitti: 26-07-02",
+        "AM Genny Lepore-Benny Lorusso: 26-07-08",
+        "Anna: 26-07",
+        "Antonella Palmisano: 26-07-88",
+        "Carlo Mancino: 26-07-79",
+        "Edi Bianco: 26-07-72",
+        "Leo Petrera: 26-07-60",
+        "Mariangela Abbadessa: 26-07-88",
+        "Paolo Sardelli: 26-07-54",
+        "Patente B Ony: 26-07-10",
+        "Rino Petrara: 26-07-73",
+        "Rosita Mirizzi: 26-07-92"
+    ],
+    "07-27": [
+        "Assicurazione Audi A2: 27-07",
+        "Assicurazione Aygo: 27-07",
+        "Assicurazione Megane: 27-07",
+        "Assicurazione ML 280: 27-07",
+        "Assicurazione Smart: 27-07",
+        "Assicurazione UP: 27-07",
+        "Claudio D\u2019Amico: 27-07-92",
+        "Decesso Zio Minguccio: 27-07-70",
+        "Donato Gagliardi: 27-07-88",
+        "Giampaolo Marcolini: 27-07-64",
+        "Gianvincenzo Angelini De Miccolis: 27-07-61",
+        "Miriam Maurantonio: 27-07-81",
+        "Pino Buzzerio: 27-07-56"
+    ],
+    "07-28": [
+        "AM Alessandra Faniuolo-Stefano Loliva: 28-07-00",
+        "AM Anna Pontrandolfo-Nicola Mele: 28-07-75",
+        "Andrea Lorusso: 28-07-92",
+        "Angelo Pellegrino: 28-07-72",
+        "Filippo Redavid (di Peppino): 28-07-95",
+        "Michele Rotolo: 28-07-??",
+        "Mimmo Bianco: 28-07-60",
+        "Paola Totaro: 28-07-88",
+        "Valerio Perrone: 28-07-92"
+    ],
+    "07-29": [
+        "Angela Mastrangelo: 29-07-60",
+        "Marco De Miccolis Angelini: 29-07-11",
+        "Marta: 29-07",
+        "Michelangelo Lamanna: 29-07-64"
+    ],
+    "07-30": [
+        "Abdon: 30-07",
+        "Agata Marchitelli: 30-07-73",
+        "AM Paola Troilo-Massimo Papanice: 30-07-05",
+        "Claudia Maggipinto: 30-07-86",
+        "Cristina Bonvicini: 30-07-69",
+        "Lucia Garofalo: 30-07-66",
+        "Mara Vinella: 30-07-66",
+        "Roberto Bianco: 30-07-66",
+        "Tonietta Lopriore: 30-07-47"
+    ],
+    "07-31": [
+        "AM Angela Totaro-Gianluca Pascolla: 31-07-17",
+        "AM Anna Vinella-Gianluca Casulli: 31-07-19",
+        "AM Giuliana La Gala-Maurizio Dell'Aera: 31-07-09",
+        "AM Grazia Losito-Peppino Redavid: 31-07-90",
+        "Antonella Loliva: 31-07-89",
+        "Davide Nitti: 31-07-83",
+        "Diploma Geometra Nino (60/60): 31-07-76",
+        "Diploma Liceo Majorana Terry (93): 31-07-13",
+        "Diploma ragioneria Marica (56/60): 31-07-80",
+        "Giovanna Gioja: 31-07-62",
+        "Graziano De Palma: 31-07-76",
+        "Leonardo Becchetti: 31-07-65",
+        "Maril\u00f9 Tateo: 31-07-67"
+    ],
+    "08-01": [
+        "AM Agata Marchitelli-Giammauro Basile: 01-08-00",
+        "AM Sabina Campanella-Checco Di Stasio: 01-08-09",
+        "AM Sergio Pepe: 01-08-01",
+        "Emanuela Banfi: 01-08-??",
+        "Gianluca Andresini: 01-08-74",
+        "Marianna Piccininni: 01-08-88",
+        "Menica Colucci: 01-08-71",
+        "Pietro Sbiroli: 01-08-92",
+        "Roberta Recchia: 01-08-91"
+    ],
+    "08-02": [
+        "AM Rosita Polignano-John Williams: 02-08-99",
+        "Anastasio Delia: 02-08-71",
+        "Angela: 02-08",
+        "Domenico Palazzo: 02-08-57",
+        "Federico Dellarosa: 02-08-72",
+        "Sergio Povia: 02-08-54",
+        "Stefania Campanella: 02-08-82",
+        "Stefano Ruscigno: 02-08-91"
+    ],
+    "08-03": [
+        "AM Mario Conte: 03-08-80",
+        "AM Rita Longo-Pietro Longo: 03-08-57",
+        "Carlo Mindicini: 03-08-77",
+        "Caterina Didonna: 03-08-92",
+        "Enzo Salatino: 03-08-??",
+        "Paola Barbara: 03-08-67",
+        "Stefania Polignano: 03-08-72",
+        "Tiziana Genco: 03-08-81",
+        "Tonio Sansonetti: 03-08-52",
+        "Valerio Mongelli: 03-08-77"
+    ],
+    "08-04": [
+        "AM Lucia Ivone-Franco Castiglia: 04-08-87",
+        "AM Patrizia Pricci-Nuccio De Miccolis: 04-08-10",
+        "Antonella Lotito: 04-08-77",
+        "Antonella Notarnicola: 04-08-75",
+        "Domenico-Domi-Mimmo: 04-08",
+        "Fedele Dalena: 04-08-48",
+        "Giovanna Mazzarelli: 04-08-??",
+        "Salvatore Pantaleo: 04-08-61",
+        "Simone Squaiella: 04-08-70",
+        "Vanna Loconte: 04-08-67"
+    ],
+    "08-05": [
+        "Anna Farina: 05-08-??",
+        "Antonella Ivone: 05-08-69",
+        "Ezio Antonacci: 05-08-91",
+        "Gianluca Pascolla: 05-08-72",
+        "Nives Schettini: 05-08-72",
+        "Onofrio Lorusso (09:00): 05-08-51",
+        "Vittorio Indiveri: 05-08-63"
+    ],
+    "08-06": [
+        "AM Maria Marchione-Angelo Casulli: 06-08-87",
+        "Angelo Michele Coppola: 06-08-52",
+        "Michele Di Masi: 06-08-55",
+        "Salvatore-Turibbia: 06-08"
+    ],
+    "08-07": [
+        "Corinna Campanelli: 07-08-86",
+        "Enzo Calabritta: 07-08-64",
+        "Gaetano-Nino: 07-08",
+        "Giuseppe Laera: 07-08-63",
+        "Mario Capurso: 07-08-53",
+        "Nicola Guida: 07-08-35",
+        "Nicola Sgobba: 07-08-92"
+    ],
+    "08-08": [
+        "Benedetta Fodale: 08-08-17",
+        "Decesso Manuela Crema (33 anni): 08-08-17",
+        "Onomastico Lella Longo: 08-08",
+        "Patentino Terry: 08-08-08",
+        "Raffaella Genco: 08-08-80",
+        "Rosalba Molinari (di Francesco): 08-08-95",
+        "Vito Primavera: 08-08-67"
+    ],
+    "08-09": [
+        "AM Angela Pricci-Onofrio Lorusso: 09-08-75",
+        "AM Fabrizia Miani-Manuel Vespucci: 09-08-21",
+        "AM Francesca Piacentini-Michele Putignano: 09-08-01",
+        "AM Grazia Putignano-Giulio Digiorgio: 09-08-97",
+        "Maurizio Matrisciano: 09-08-48",
+        "Nicola Mazzarelli: 09-08-94",
+        "Sabrina Oppedisano: 09-08-85"
+    ],
+    "08-10": [
+        "AM Giovanna Gallo-Mario Digregorio: 10-08-91",
+        "AM Teresa Schettini-Pino Monopoli: 10-08-91",
+        "Augusto Dell\u2019Erba: 10-08-54",
+        "Lorenzo: 10-08",
+        "Luca Conti: 10-08-75",
+        "Mariangela Orlando: 10-08-68",
+        "Michele Capozzi: 10-08-58",
+        "Onomastico Enza Nitti: 10-08",
+        "Vito Matarrese: 10-08-60",
+        "Wladimir Vinella: 10-08-03"
+    ],
+    "08-11": [
+        "Chiara: 11-08",
+        "Ilenia La Rocca: 11-08-88",
+        "Rocco Turi: 11-08-67",
+        "Rossella Loglisci: 11-08-81",
+        "Teresa Schettini (di Pino): 11-08-62"
+    ],
+    "08-12": [
+        "AM Livia Orr\u00f9-Francesco Valente: 12-08-06",
+        "Anna Giacovazzo: 12-08-88",
+        "Enrica Manganiello: 12-08-88",
+        "Francesco Bonelli: 12-08-??",
+        "Giuseppe Pricci (09:00): 12-08-68",
+        "Zoe Lucci: 12-08-15"
+    ],
+    "08-13": [
+        "Fiorella Giulietti: 13-08-71",
+        "Francesco Buono: 13-08-80",
+        "Gabriella Giannoccaro: 13-08-60",
+        "Gabriella Gubitosa: 13-08-80",
+        "Giuseppe Totaro: 13-08-88",
+        "Matteo Robustella: 13-08-69",
+        "Silvano Palazzo: 13-08-71",
+        "Titti Meazza: 13-08-48",
+        "Vito Lombardi: 13-08-73"
+    ],
+    "08-14": [
+        "Amadia Campanella: 14-08-58",
+        "Dionigi Nitti: 14-08-56",
+        "Etta Tutino: 14-08-64",
+        "Patrizia Pricci: 14-08-72",
+        "Stefano Papanice: 14-08-72",
+        "Vito Mastrovito: 14-08-43",
+        "Vito Mazzone: 14-08-84"
+    ],
+    "08-15": [
+        "Anna Ivone (Lele Valentini): 15-08-76",
+        "Decesso Maria Teresa Laera: 15-08-10",
+        "Doriana Pugliese: 15-08-94",
+        "Franco Laera: 15-08-51",
+        "Grazia (a Rutigliano): 15-08",
+        "Sonia Scaranello: 15-08-88"
+    ],
+    "08-16": [
+        "AM Roberta Lovece-Daniele Casulli: 16-08-21",
+        "Claudia Giaquinto: 16-08-83",
+        "Massimo Vinella: 16-08-66",
+        "Rocco: 16-08",
+        "Sandrino Pace: 16-08-59",
+        "Viviana Ventrella: 16-08-88"
+    ],
+    "08-17": [
+        "Carla: 17-08",
+        "Cristina De Pinto: 17-08-94",
+        "Figli di Donatello Cal\u00f2: 17-08-??",
+        "Francesco Caramia: 17-08-73",
+        "Franco Lippolis: 17-08-61",
+        "Katy Sharadze: 17-08-78",
+        "Nino Pinto: 17-08-33",
+        "Onomastico Elia Longo: 17-08",
+        "Rinaldo Dibello: 17-08-58",
+        "Tiziano Perrone: 17-08-89"
+    ],
+    "08-18": [
+        "Angela Primavera: 18-08-65",
+        "Angela Safira Natile: 18-08-14",
+        "Anna Fulvio: 18-08-89",
+        "Elena: 18-08",
+        "Isa Daprile: 18-08-62",
+        "Mary Sabato: 18-08-75",
+        "Nicola Odone: 18-08-74",
+        "Paola Gallo: 18-08-74",
+        "Pierfrancesco Iorio: 18-08-88",
+        "Pino Ventrella: 18-08-53"
+    ],
+    "08-19": [
+        "Andrea Dolce: 19-08-43",
+        "Decesso Zio Vittorio: 19-08-94",
+        "Elisabetta Ripa: 19-08-59",
+        "Laura Guazzaroni: 19-08-59"
+    ],
+    "08-20": [
+        "Cristina Cultrera: 20-08-68",
+        "Domenico Elefante: 20-08-53",
+        "Rita Lippolis: 20-08-90",
+        "Tina Franco: 20-08-71",
+        "Vincenzo Caramia: 20-08-??"
+    ],
+    "08-21": [
+        "Brigida La Candia: 21-08-78",
+        "Cosimo Andresini: 21-08-74",
+        "Daniela Ippolito: 21-08-59",
+        "Enzo Colapietro: 21-08-61",
+        "Fausta D'Onghia: 21-08-92",
+        "Lucrezia Garofalo: 21-08-51",
+        "Mariella Mastrangelo: 21-08-63",
+        "Pierfrancesco Di Masi: 21-08-62"
+    ],
+    "08-22": [
+        "Anna Rinaldi: 22-08-??",
+        "Giuseppe Vinella: 22-08-63",
+        "Lucrezia Nitti: 22-08-58",
+        "Martina Montagna: 22-08-89",
+        "Rosaura Casulli: 22-08-85",
+        "Rossella Del Re: 22-08-88",
+        "Vito Mazzarisi (05:00): 22-08-58"
+    ],
+    "08-23": [
+        "AM Grazia Ladisa-Dante Ariano: 23-08-04",
+        "AM Serena Contegiacomo-Vincenzo: 23-08-19",
+        "Donato Maellaro: 23-08-55",
+        "Enrico Mozzati: 23-08-62",
+        "Franco Antonacci: 23-08-61",
+        "Giorgia Brunetti: 23-08-88",
+        "Giovanni Mazzarelli: 23-08-??",
+        "Irene Palumbo: 23-08-88",
+        "Luigi Romano: 23-08-62",
+        "Maria Longo (in Guerra): 23-08-29",
+        "Rosa Lorusso: 23-08-60",
+        "Rosa-Rossella-Rosy-Rosita-Rossana-Rosilde: 23-08"
+    ],
+    "08-24": [
+        "Giada Mobilio: 24-08-71",
+        "Giuseppe Giannandrea: 24-08-62",
+        "Marcello Ciancio: 24-08-53",
+        "Nicola Mele (di Nino): 24-08-15",
+        "Simona Casulli: 24-08-91",
+        "Valentina Certini: 24-08-89"
+    ],
+    "08-25": [
+        "Adriano Novembre: 25-08-57",
+        "AM Antonella Mele-Piero Girardi: 25-08-01",
+        "Domenico Mazzarisi (zio Minguccio): 25-08-15",
+        "Rita Longo: 25-08-38"
+    ],
+    "08-26": [
+        "Alessandra Campanella: 26-08-88",
+        "Alessandro-Sandro: 26-08",
+        "Alessia Manghisi: 26-08-88",
+        "AM Mariella Sardone-Carlo Lospalluto: 26-08-93",
+        "AM Sandra Sacchetti-Vincenzo Pacelli: 26-08-09",
+        "Francesco Lucarella: 26-08-57",
+        "Onomastico Sandra Sacchetti: 26-08",
+        "Roberto Gramegna: 26-08-57",
+        "Vallarelli Michele: 26-08-72"
+    ],
+    "08-27": [
+        "Francesco Furio: 27-08-79",
+        "Monica: 27-08",
+        "Onofrio Todisco: 27-08-92",
+        "Rosita Bratta: 27-08-75"
+    ],
+    "08-28": [
+        "AM Anna Libraro-Nino Mele: 28-08-21",
+        "AM Vanna Pricci-Domenico Lefemine: 28-08-91",
+        "Decesso padre Notaio Celeste: 28-08-07",
+        "Mariella Barile: 28-08-59",
+        "Michele Miccolis: 28-08-55",
+        "Onomastico Sabina Campanella: 28-08",
+        "Roberto Castellana: 28-08-63",
+        "Vito Zonno: 28-08-64"
+    ],
+    "08-29": [
+        "Antonio Polo: 29-08-58",
+        "Corrado Castellana (tendaggi): 29-08-18",
+        "Lucia Pote: 29-08-64",
+        "Michele Giampetruzzi: 29-08-67",
+        "Sabina: 29-08",
+        "Simone Frabetti (di Marina Regina): 29-08-18",
+        "Stefano Ventrella: 29-08-50"
+    ],
+    "08-30": [
+        "Angela Odone: 30-08-72",
+        "Battesimo Ony (Salvatore): 30-08-92",
+        "Ciccio Nardelli: 30-08-59",
+        "Francesca Deluca: 30-08-88",
+        "Francesco Marzullo: 30-08-71",
+        "Letizia D'Alessandro: 30-08-82",
+        "Marco Demichele: 30-08-59"
+    ],
+    "08-31": [
+        "Maurizio Dell'Aera: 31-08-64",
+        "Pino Furio: 31-08-56",
+        "Sara Conversano: 31-08-86"
+    ],
+    "09-01": [
+        "AM Celeste Boscia-Paolo Detomaso: 01-09-88",
+        "AM Marianna Difino-Tommaso Mastrocristino: 01-09-04",
+        "Anna Giannandrea: 01-09-90",
+        "Anna Maria Losito insegnante di ruolo: 01-09-14",
+        "Fabio Campanella (coop): 01-09-84",
+        "Ferruccio Ferrara: 01-09-66",
+        "Luca De Biase: 01-09-56",
+        "Pietro Gonnella: 01-09-47"
+    ],
+    "09-02": [
+        "AM Angela Martone-Nicola De Santis: 02-09-11",
+        "Chiara Demichele (di Marco): 02-09-92",
+        "Chiara Demichele: 02-09-92",
+        "Daphne Crovace: 02-09-89",
+        "Elia Antonacci: 02-09-60",
+        "Federica Goffredo: 02-09-90",
+        "Ilaria Colasuonno: 02-09-88",
+        "Onomastico Walter Vinella: 02-09",
+        "Rosa Bianco (18:20): 02-09-71"
+    ],
+    "09-03": [
+        "Arcangelo Loglisci: 03-09-58",
+        "Francesca Difonzo: 03-09-74",
+        "Giuseppe Del Vecchio: 03-09-74",
+        "Giuseppe Mangini: 03-09-67",
+        "Gregorio: 03-09",
+        "Margherita Marzario: 03-09-70",
+        "Maria Mangini: 03-09-07",
+        "Pino Fumarola: 03-09-67",
+        "Serena Vurchio: 03-09-95",
+        "Sonia Quaranta: 03-09-72"
+    ],
+    "09-04": [
+        "AM Gaetana Procino-Sante Bianco: 04-09-20",
+        "Carmela Sirio: 04-09-62",
+        "Franco Sonnante: 04-09-64",
+        "Ilizia Ciquera: 04-09-78",
+        "Maria Lucrezia Girardi: 04-09-38",
+        "Onomastico Rossella Loiacono: 04-09",
+        "Rosalia-Lia: 04-09",
+        "Teresa Cirone: 04-09-74"
+    ],
+    "09-05": [
+        "Eugenio Maiorano: 05-09-58",
+        "Maria Dambrosio: 05-09-87"
+    ],
+    "09-06": [
+        "Anna De Bellis: 06-09-57",
+        "Corrado Castellana (Vaporterma): 06-09-78",
+        "Federica Serami: 06-09-85",
+        "Luca Pesce: 06-09-23",
+        "Lucio Romano: 06-09-63",
+        "Mario Fraccalvieri: 06-09-62",
+        "Mina Ronco: 06-09-??",
+        "Pierangelo Indolfi: 06-09-59",
+        "Pierpaolo Tateo: 06-09-69",
+        "Umberto: 06-09"
+    ],
+    "09-07": [
+        "AM Pia Lobifaro-Pino Santomasi: 07-09-91",
+        "Angela Maria Contegiacomo: 07-09-61",
+        "Angelo Amati: 07-09-89",
+        "Carlo D\u2019Auria: 07-09-61",
+        "Elisabet Fasano: 07-09-81",
+        "Federica Cassone: 07-09-92"
+    ],
+    "09-08": [
+        "Angelica Serio: 08-09-93",
+        "Beatrice Ligorio: 08-09-63",
+        "Carmencita Serino: 08-09-51",
+        "Davide Gioved\u00ec Santo: 08-09-95",
+        "Franco Chiaravalloti: 08-09-63",
+        "Gernone Giuseppe: 08-09-59",
+        "Mimmo Ciliberti: 08-09-64",
+        "Sergio Carlucci: 08-09-62"
+    ],
+    "09-09": [
+        "AM Antonietta Pricci-Saverio Chiarappa: 09-09-00",
+        "AM Roberta Recchia Morea: 09-09-95",
+        "Dario Donvito: 09-09-22",
+        "Davide Fodale: 09-09-22",
+        "Diego Fodale: 09-09-22",
+        "Dorotea De Laurentis: 09-09-65",
+        "Giovanni Guario: 09-09-49",
+        "Ivan Vittorione: 09-09-92",
+        "Mariana Mastrangelo: 09-09-81",
+        "Mark Kelevra: 09-09-86",
+        "Mattia Donvito: 09-09-22",
+        "Nicola Minerva: 09-09-87"
+    ],
+    "09-10": [
+        "Alessandro Serrelli: 10-09-67",
+        "Angelo Buttaro: 10-09-53",
+        "Antonio Galluzzi: 10-09-67",
+        "Antonio Savino: 10-09-05",
+        "Bollo UP: 10-09",
+        "Elena Nitti: 10-09-91",
+        "Elisabetta Pascolla: 10-09-18",
+        "Gaia Giotta: 10-09-08",
+        "Giuseppe Grandinetti: 10-09-59",
+        "Letizia Carrera: 10-09-69",
+        "Lisa Di Niso: 10-09-88",
+        "Marina De Santis (09:26): 10-09-13",
+        "Nadia Riso: 10-09-75",
+        "Nicola Pavone: 10-09-70",
+        "Stefano Pacello: 10-09-57"
+    ],
+    "09-11": [
+        "Decesso madre di Paolo Fanigliuolo: 11-09-11",
+        "Giovanni Lupoli: 11-09-44",
+        "Mauro Mastrovito: 11-09-64",
+        "Michele D'Ercole: 11-09-49",
+        "Nuccio De Miccolis Angelini: 11-09-71",
+        "Renato Miniaci: 11-09-49",
+        "Vanna Pricci (05:30): 11-09-63"
+    ],
+    "09-12": [
+        "Angelo Basili: 12-09-54",
+        "Franco Mignozzi: 12-09-61",
+        "Giulio Cecchini: 12-09-85",
+        "Giuseppe Spinosa: 12-09-68",
+        "Guido: 12-09",
+        "Marco Canzio: 12-09-67",
+        "Maria-Mary-Mariana: 12-09",
+        "Mirko Lalli: 12-09-??",
+        "Onomastico Rory Rubino: 12-09",
+        "Serafina Mazzarisi: 12-09-05",
+        "Teresa Giove (moglie di Orazio Lella): 12-09-73",
+        "Titti Convertino (di Mauro Console): 12-09-69"
+    ],
+    "09-13": [
+        "AM Alessandro Serreli: 13-09-08",
+        "AM Cinzia Lorusso-Gianni Rotondi: 13-09-14",
+        "AM Rita Lippolis-Michele Daprile: 13-09-18",
+        "Angelo Pizzutilo: 13-09-70",
+        "Cherif Ibrahima: 13-09-72",
+        "Decesso Crescenzio Marzano: 13-09-24",
+        "Domenica Signorile: 13-09-88",
+        "Gabriele Miranda: 13-09-63",
+        "Giulia Perez Almodovar: 13-09-95",
+        "Isabella Mastrangelo: 13-09-89",
+        "Katia Scagliuso: 13-09-65",
+        "Nanni Bassetti: 13-09-70",
+        "Riccardo Vurchio: 13-09-97",
+        "Rosanna Cisternino: 13-09-77",
+        "Saverio Capozza: 13-09-76",
+        "Silvia De Luca: 13-09-70",
+        "Tony Nuzzi: 13-09-66",
+        "Vincenzo Argese: 13-09-54",
+        "Vito Costante: 13-09-59"
+    ],
+    "09-14": [
+        "AM Francesca Difonzo-Gianvito Lefemine: 14-09-07",
+        "AM Miriam Guerci-Luca Boselli: 14-09-03",
+        "Anna Vinella: 14-09-91",
+        "Gino Dionisio: 14-09-65",
+        "Irma Lomidze: 14-09-69",
+        "Mauro Mottola: 14-09-82",
+        "Vito Sabatelli (Trullando): 14-09-71"
+    ],
+    "09-15": [
+        "Angela Loconsolo: 15-09-03",
+        "Angela Pignatelli: 15-09-78",
+        "Anna Rita Laera: 15-09-80",
+        "Antonino Labate: 15-09-92",
+        "Dario Silletti (di Rossella): 15-09-92",
+        "Francesco Caringella: 15-09-05",
+        "Graziana Pinto: 15-09-94",
+        "Martino Sportelli: 15-09-53",
+        "Valentino Paccione: 15-09-85"
+    ],
+    "09-16": [
+        "Aurora Console: 16-09-05",
+        "Domenico Silvestri: 16-09-97",
+        "Felicetta Ferrante: 16-09-67",
+        "Francesca Lippolis: 16-09-94",
+        "Giuseppe Sampietro: 16-09-57",
+        "Marco Silletti (di Rossella): 16-09-88",
+        "Natia Aivazashvili: 16-09-74",
+        "Riccardo Sabatelli: 16-09-18",
+        "Sandra Napolitano: 16-09-87",
+        "Sergio Pepe: 16-09-66"
+    ],
+    "09-17": [
+        "AM Rossella Guglielmi-Bruno Bongarzone: 17-09-16",
+        "Aurelio Criacci: 17-09-56",
+        "Clelia Tripaldi: 17-09-72",
+        "Domenico Centrone: 17-09-56",
+        "Giulietta Lemmi: 17-09-62",
+        "Ivano Lippolis: 17-09-84",
+        "Luigi Montanaro: 17-09-78",
+        "Nicola Fraccalvieri: 17-09-68",
+        "Onomastico Roberta Recchia: 17-09",
+        "Roberto-Roberta: 17-09",
+        "Rosalba Palazzo: 17-09-77",
+        "Rossana Talenti: 17-09-63"
+    ],
+    "09-18": [
+        "Anna Rita Labate: 18-09-84",
+        "Carlo Maselli: 18-09-62",
+        "Francesco Bruno: 18-09-65",
+        "Giusy Spano: 18-09-88",
+        "Marianna Virginia Laguardia: 18-09-99",
+        "Nicola Labate: 18-09-59",
+        "Riccardo Giotta: 18-09-67",
+        "Rocco Baccelliere: 18-09-60",
+        "Rosalinda Cassibba: 18-09-65",
+        "Severino Santoro: 18-09-49",
+        "Sofia: 18-09",
+        "Vito Debrando: 18-09-54"
+    ],
+    "09-19": [
+        "Gennaro: 19-09",
+        "Leo Montinaro: 19-09-57",
+        "Luigi Stivaletta: 19-09-68",
+        "Mariella Girolamo: 19-09-69",
+        "Marinella Dibenedetto: 19-09-59",
+        "Pasquina Pollicelli (amica Mariella): 19-09-57",
+        "Patrizia Loliva: 19-09-72",
+        "Sara Fodale: 19-09-20",
+        "Saverio Coletti: 19-09-94",
+        "Vita Caroli Casavola: 19-09-85"
+    ],
+    "09-20": [
+        "Cosimo Laera: 20-09-57",
+        "Dante Ramondo: 20-09-73",
+        "Don Angelo Sabatelli: 20-09-50",
+        "Eustachio: 20-09",
+        "Franco Marzano: 20-09-56",
+        "Giovanni D'Onghia: 20-09-66",
+        "Lillo Barile: 20-09-76",
+        "Marinella Schiavone: 20-09-07",
+        "Melinda Di Ceglie: 20-09-94",
+        "Mimmo Musella: 20-09-74",
+        "Vito Dell'Erba: 20-09-70"
+    ],
+    "09-21": [
+        "Cresima Terry (San Filippo): 21-09-08",
+        "Daniele Zullo: 21-09-79",
+        "Francesca Polignano: 21-09-96",
+        "Giuseppe Maurantonio: 21-09-87",
+        "Marica Grilletti: 21-09-64",
+        "Massimo Castiglia: 21-09-66",
+        "Matteo: 21-09",
+        "Maurizio Mangini: 21-09-83",
+        "Nicla Console: 21-09-??"
+    ],
+    "09-22": [
+        "Decesso Nonno Francesco Lefemine: 22-09-15",
+        "Donato Calella: 22-09-67",
+        "Edoardo Morelli: 22-09-63",
+        "Fabio Mazzarisi: 22-09-80",
+        "Lea Losavio: 22-09-90",
+        "Lucia Tateo: 22-09-68",
+        "Mariangela Sportelli: 22-09-77",
+        "Maurizio: 22-09",
+        "Michele Soriano: 22-09-56",
+        "Nunzio Certini: 22-09-51",
+        "Pietro Pedone: 22-09-05",
+        "Stefano Mazzarisi: 22-09-80",
+        "Tonia Pellegrini: 22-09-64"
+    ],
+    "09-23": [
+        "Angela Gentile: 23-09-75",
+        "Arianna Gigante: 23-09-82",
+        "Decesso Massimo Sbiroli: 23-09-07",
+        "Lucia Giacoletti: 23-09-74",
+        "Pio: 23-09"
+    ],
+    "09-24": [
+        "Angelo Rinaldi: 24-09-58",
+        "Davide Totaro: 24-09-90",
+        "Domenico Donvito: 24-09-88",
+        "Francesco Casulli (avvocato coop): 24-09-74",
+        "Gianni Daprile: 24-09-58",
+        "Grazia Putignano: 24-09-71",
+        "OA Point Srl - Roma: 24-09-96",
+        "Veronica Laterza: 24-09-96"
+    ],
+    "09-25": [
+        "Cresima Mary (San Filippo): 25-09-05",
+        "Cresima Ony (San Filippo): 25-09-05",
+        "Hennie Van Buren: 25-09-46",
+        "Maria Cristina De Carlo: 25-09-86",
+        "Maria Giuseppa Detomaso: 25-09-14",
+        "Piero Lavarra: 25-09-56"
+    ],
+    "09-26": [
+        "Cosimo-Mino-Mina: 26-09",
+        "Damiano Bitetto: 26-09-65",
+        "Francesco Bratta: 26-09-61",
+        "Gianluca Gigante: 26-09-71",
+        "Giovanni Laera: 26-09-53",
+        "John Williams: 26-09-68",
+        "Nicola Ivone: 26-09-61",
+        "Simone Pinto: 26-09-53",
+        "Susanna Fontana: 26-09-71"
+    ],
+    "09-27": [
+        "Antonio Covella: 27-09-86",
+        "Giovanna Fontana: 27-09-57",
+        "Giovanni Caramia: 27-09-58",
+        "Leonie Kaufmann: 27-09-90",
+        "Mimina Palma: 27-09-67",
+        "Nicola Cappellano: 27-09-83",
+        "Tiziana Maggipinto: 27-09-83"
+    ],
+    "09-28": [
+        "Arianna Giampetruzzi: 28-09-05",
+        "Gianvito Tauro: 28-09-76",
+        "Grazia Pavone: 28-09-47",
+        "Guillermina Carnicina Di Vittorio: 28-09-66",
+        "Laser miopia Ony: 28-09-17",
+        "Rosalinda Maggipinto: 28-09-93",
+        "Tiziana Giagulli: 28-09-85",
+        "Veronica Satalino: 28-09-83"
+    ],
+    "09-29": [
+        "Anita Lacalendola: 29-09-78",
+        "Gabriele: 29-09",
+        "Mariana Buttiglione: 29-09-61",
+        "Michele: 29-09",
+        "Natascia Luffarelli: 29-09-74",
+        "Nicola Pellegrino: 29-09-88",
+        "Raffaele-Raffaella: 29-09"
+    ],
+    "09-30": [
+        "Erminia De Luca: 30-09-77",
+        "Giancarlo Brambilla: 30-09-97",
+        "Maria Laterza: 30-09-63",
+        "Mina Barratta: 30-09-??",
+        "Mina Tauro (zia di Anna): 30-09-56",
+        "Nino Passaquindici: 30-09-54",
+        "Paolo Dalena: 30-09-97",
+        "Paolo Vitantonio Detomaso: 30-09-55",
+        "Rossana Casalino: 30-09-88",
+        "Rossana Lattarulo: 30-09-69",
+        "Stefano Romanazzi: 30-09-94",
+        "Stella Laruccia: 30-09-64",
+        "Valentina Tata Basile: 30-09-83"
+    ],
+    "10-01": [
+        "Antonj Laera: 01-10-84",
+        "Gianni Consaga: 01-10-55",
+        "Giusy Curci: 01-10-84",
+        "Laurea Spec. Flavia Lefemine (110 + L): 01-10-20",
+        "Mino Ritella: 01-10-59",
+        "Nicola Cacciapaglia: 01-10-47",
+        "Nicola Perrone: 01-10-54",
+        "Nuova sede (L'Acquario): 01-10-14",
+        "Pino Scaglione: 01-10-??",
+        "Roberto Burano: 01-10-48"
+    ],
+    "10-02": [
+        "Angelo: 02-10",
+        "Deceduta: 02-10-22",
+        "Donatella Treu: 02-10-57",
+        "Francesca Fanelli: 02-10-64",
+        "Gianluca Nocco: 02-10-67",
+        "Gianluigi Masi: 02-10-48",
+        "Giuseppe Loconsolo: 02-10-07",
+        "Giuseppe Ricco: 02-10-60",
+        "Leonardo Cosimo Nitti: 02-10-54",
+        "Luigi Elia: 02-10-79",
+        "Tiziana Lovero: 02-10-75",
+        "Valeria Zullo: 02-10-88",
+        "Vanni Tatone: 02-10-84",
+        "Vitantonio Bianco: 02-10-87"
+    ],
+    "10-03": [
+        "Alessia Lippolis: 03-10-92",
+        "Alfonso Carpinelli: 03-10-43",
+        "AM Caterina Porfido-Rino Lella: 03-10-87",
+        "Antonello Derobertis: 03-10-90",
+        "Arianna Cino: 03-10-90",
+        "Betta Detomaso: 03-10-62",
+        "Edoardo Di Stasio (01:15): 03-10-14",
+        "Gerardo: 03-10",
+        "Massimiliano Polignano: 03-10-81",
+        "Roberta Giotta: 03-10-93"
+    ],
+    "10-04": [
+        "Aldo Carella: 04-10-61",
+        "AM Anna Maria Iurilli-Leonardo Pedone: 04-10-01",
+        "AM Teresa Cisternino-Vittorio Longo: 04-10-58",
+        "AM Tiziana Pricci-Riccardo Dalena: 04-10-02",
+        "Francesco-Franco-Ciccio-Checco: 04-10",
+        "Grazio Muolo: 04-10-55",
+        "Katia Gulotta: 04-10-75",
+        "Rino Volpe: 04-10-51",
+        "Sabrina Romanazzi: 04-10-87"
+    ],
+    "10-05": [
+        "Antonella Bianco: 05-10-??",
+        "Chiara Polieri: 05-10-89",
+        "Claudia Contegiacomo (dietista): 05-10-66",
+        "Francesco Grosso: 05-10-74",
+        "Imma Redavid (di Peppino): 05-10-92",
+        "Luca Giagulli: 05-10-47",
+        "Raffaele Cozzolongo: 05-10-56",
+        "Simona Russo: 05-10-68",
+        "Valeria Lanzilotta: 05-10-66",
+        "Vito Miccolis (fabbro): 05-10-70"
+    ],
+    "10-06": [
+        "Daniela Mastrangelo: 06-10-74",
+        "Francesco Forte: 06-10-83",
+        "Gianni Leone: 06-10-57",
+        "Michele Lamanna: 06-10-85",
+        "Rosalinda Lippolis: 06-10-58",
+        "Rosaria Lacitignola: 06-10-75",
+        "Tonia Lippolis: 06-10-58"
+    ],
+    "10-07": [
+        "Alessandro Giagulli: 07-10-89",
+        "Carlo Villa: 07-10-43",
+        "Daniele Giove (figlio di Piter): 07-10-03",
+        "Francesco Coppola: 07-10-77",
+        "Isa Sabato: 07-10-62",
+        "Laurea Dietistica Mary (109): 07-10-10",
+        "Piero Polignano: 07-10-70",
+        "Rosaria: 07-10"
+    ],
+    "10-08": [
+        "AM Martina Montagna-Mario Fodale: 08-10-16",
+        "AM Martina Montagna: 08-10-16",
+        "Dode Radaelli: 08-10-??",
+        "Domenico De Michele: 08-10-55",
+        "Gabriella Vinella: 08-10-61",
+        "Mariolina Totaro: 08-10-60",
+        "Marta Vilardi: 08-10-88",
+        "Orazio Intini: 08-10-62"
+    ],
+    "10-09": [
+        "AM Mariangela Branchi-Roberto Scannicchio: 09-10-10",
+        "Daniele Mazzarisi: 09-10-88",
+        "Desir\u00e8 Parente: 09-10-82",
+        "Martina Morelli: 09-10-95",
+        "Stella Sgobba: 09-10-63",
+        "Vincenzo Morelli: 09-10-97",
+        "Vito Catucci: 09-10-??"
+    ],
+    "10-10": [
+        "AM Cristina Cultrera-Nicola Della Vecchia: 10-10-04",
+        "Clorinda Panaro: 10-10-73",
+        "Daniela-Daniele: 10-10",
+        "Domenico Lorusso: 10-10-23",
+        "Ferruccio Ferrigno: 10-10-51",
+        "Laurea Maril\u00f9 Mazzarisi: 10-10-23",
+        "Maria Teresa Scalini: 10-10-62",
+        "Paolo Impedovo: 10-10-63",
+        "Roberta Cagnetti: 10-10-88",
+        "Teresa Schettini (Sbiroli): 10-10-65"
+    ],
+    "10-11": [
+        "Alessandra Mazzarisi: 11-10-88",
+        "Alessia Rizzi (istruttrice): 11-10-99",
+        "Domenico Giuseppe Nardelli: 11-10-85"
+    ],
+    "10-12": [
+        "AM Antonio Murzio-Terry Cirone: 12-10-96",
+        "Gesy Campanella: 12-10-86",
+        "Lino Chiarella: 12-10-??",
+        "Michele Lorusso: 12-10-17",
+        "Pietro Console: 12-10-80",
+        "Sandra Sacchetti: 12-10-79",
+        "Stella Rinaldi: 12-10-82",
+        "Teresa Sportelli: 12-10-56"
+    ],
+    "10-13": [
+        "Alessandra Fersini: 13-10-87",
+        "Alessandra Mola (di Nunzio): 13-10-07",
+        "Arianna Celestino: 13-10-91",
+        "Daniela Intini: 13-10-81",
+        "Francesca Pietroforte: 13-10-81",
+        "Manuela Maiano: 13-10-84",
+        "Thomas Williams: 13-10-08",
+        "Vito Genco: 13-10-95"
+    ],
+    "10-14": [
+        "Bruno Scordamaglia: 14-10-61",
+        "Celeste: 14-10",
+        "Martina Girardi (figlia di Piero): 14-10-03",
+        "Martina Girardi: 14-10-03",
+        "Mimmo Labate: 14-10-57",
+        "Onomastico Celeste Boscia: 14-10",
+        "Pino Celeste (notaio): 14-10-59",
+        "Raffaele Difonzo: 14-10-62"
+    ],
+    "10-15": [
+        "Angela Laera (bruna): 15-10-82",
+        "Claudia Dell'Aquila: 15-10-76",
+        "Decesso madre di Flora Farina: 15-10-21",
+        "Decesso madre Germana Surico: 15-10-21",
+        "Ezio Cantore: 15-10-64",
+        "Irene Troilo (canile): 15-10-69",
+        "Nicola Cisternino: 15-10-56",
+        "Peppino Redavid: 15-10-61",
+        "Rosilde Galluzzi: 15-10-61",
+        "Stefano Bianco (Mercedes): 15-10-56",
+        "Teresa-Terry: 15-10",
+        "Tiziano Togati: 15-10-75"
+    ],
+    "10-16": [
+        "Dominga Pinto: 16-10-92",
+        "Gianni Romanazzi: 16-10-69",
+        "Livio Crema: 16-10-43",
+        "Marcello Cantore: 16-10-55",
+        "Vito Degiorgio: 16-10-72"
+    ],
+    "10-17": [
+        "Alessandro Nitti: 17-10-87",
+        "AM Janet Mirizzi-Stefano Bianco: 17-10-16",
+        "Francesca Minunni (di Domi): 17-10-08",
+        "Laurea Magistr. Claudia Console (110 + L): 17-10-11",
+        "Massimiliano Miniaci: 17-10-73",
+        "Mauro Rana: 17-10-58",
+        "Sergio Cappelli: 17-10-57",
+        "Stefano Bianco: 17-10-76"
+    ],
+    "10-18": [
+        "Alessandra De Mattia: 18-10-13",
+        "Alessio Vinci: 18-10-??",
+        "Battesimo di Flavia: 18-10-87",
+        "Daniela Polzot: 18-10-65",
+        "Luca Schiavarelli: 18-10-65",
+        "Luca-Gianluca: 18-10",
+        "Luigi Gatto: 18-10-97",
+        "Renato Rotolo: 18-10-58",
+        "Salvatore Volgarino: 18-10-51",
+        "Saverio Campanella: 18-10-60"
+    ],
+    "10-19": [
+        "Alfiere del Lavoro Valerio Perrone: 19-10-11",
+        "AM Filomena Macina-Carmine Biscione: 19-10-02",
+        "AM Maria Crippa-Pierfranco Carbonara: 19-10-13",
+        "Antonia Bellafronte: 19-10-76",
+        "Beppe Tansella: 19-10-57",
+        "Carmen Favia: 19-10-76",
+        "Giovanni Cannone: 19-10-56",
+        "Laura: 19-10",
+        "Lucilla Pavone: 19-10-68",
+        "Maria Barbara: 19-10-70",
+        "Martina Angelini: 19-10-10",
+        "Maurizio Verdolino: 19-10-61",
+        "Nicola Mezzapesa: 19-10-85",
+        "Sergio Consaga: 19-10-57"
+    ],
+    "10-20": [
+        "Irene: 20-10",
+        "Massimo Dalfino: 20-10-71",
+        "Mimmo De Leonardis: 20-10-73",
+        "Mimmo Laera: 20-10-60",
+        "Paolo Ottolina: 20-10-74"
+    ],
+    "10-21": [
+        "Betta De Venere: 21-10-77",
+        "Clementina-Clemy: 21-10",
+        "Giampiero Console: 21-10-52",
+        "Giuseppe Crupi: 21-10-53",
+        "Marigia Loglisci: 21-10-80",
+        "Michele Come: 21-10-57",
+        "Miriana Furio: 21-10-93",
+        "Rosanna Palazzo: 21-10-59",
+        "Silvia Brambilla: 21-10-02"
+    ],
+    "10-22": [
+        "AM Mariella Mazzarisi-Stefano Pacello: 22-10-05",
+        "AM Mariella Mazzarisi: 22-10-05",
+        "Andrea Dalla Porta: 22-10-72",
+        "Carlo Lospalluto: 22-10-64",
+        "Claudia Sportelli: 22-10-67",
+        "Donato: 22-10",
+        "Federico Mangini: 22-10-01",
+        "Filippo Liuzzi: 22-10-62",
+        "Filippo Mastropasqua: 22-10-55",
+        "Liliana Corleto: 22-10-82"
+    ],
+    "10-23": [
+        "AM Patrizia D'Ambruoso-Nicola Perrone: 23-10-82",
+        "Dino Massa: 23-10-56",
+        "Giacomo Bruno: 23-10-70",
+        "Leo Dibello: 23-10-85",
+        "Matteo Leuci: 23-10-01",
+        "Mirella Visconti: 23-10-57",
+        "Severino: 23-10",
+        "Vito Daprile: 23-10-57"
+    ],
+    "10-24": [
+        "Andrea Mastromarino: 24-10-61",
+        "Emanuela Lops: 24-10-88",
+        "Gianni Notarnicola: 24-10-70",
+        "Gianni Tommasi: 24-10-67",
+        "Giovanni Pricci (03:00): 24-10-64",
+        "Marisa Di Lorenzo: 24-10-48",
+        "Samuele Degiorgio: 24-10-09"
+    ],
+    "10-25": [
+        "AM Enzo Calabritta: 25-10-09",
+        "Kim Phillips: 25-10-65",
+        "Lina Pioggia: 25-10-??",
+        "Mariagrazia Gemmati: 25-10-92",
+        "Mirella Pugliese: 25-10-65",
+        "Rino Lella: 25-10-60"
+    ],
+    "10-26": [
+        "Allegra Vespucci: 26-10-22",
+        "AM con Miriam: 26-10-19",
+        "Antonella Chibelli: 26-10-88",
+        "Domenico Ladogana: 26-10-59",
+        "Feldia Loperfido: 26-10-84",
+        "Francesco Mastronardo: 26-10-56",
+        "Inizio Medicina Mary: 26-10-10",
+        "Laurea Benny Lorusso (107): 26-10-01",
+        "Maria Romano: 26-10-66",
+        "Quinto Fattori: 26-10-35",
+        "Raffaele Labarile: 26-10-02"
+    ],
+    "10-27": [
+        "Fabio Pinto: 27-10-86",
+        "Giulio Pizzarelli: 27-10-86",
+        "Laurea Tiziana Pricci (108): 27-10-01",
+        "Matteo Tagliavanti: 27-10-73",
+        "Ordinazione a sacerdote: 27-10-84"
+    ],
+    "10-28": [
+        "Alex Gentile: 28-10-22",
+        "Alice Valenza: 28-10-94",
+        "Enzo Giannandrea: 28-10-70",
+        "Paolo Avella: 28-10-69",
+        "Simona-Simonetta-Simone: 28-10"
+    ],
+    "10-29": [
+        "Antonella Scagliuso: 29-10-81",
+        "Carlo Pinasco: 29-10-55",
+        "Ermelinda-Linda: 29-10",
+        "Francesco Lippolis: 29-10-75",
+        "Mario Lopriore: 29-10-79",
+        "Milvia Dalena: 29-10-64",
+        "Nicola Carucci: 29-10-86",
+        "Onomastico Linda Caputo: 29-10"
+    ],
+    "10-30": [
+        "Francesca Nenca: 30-10-64",
+        "Giuseppe Campanella: 30-10-58",
+        "Giuseppe Lospalluto: 30-10-98",
+        "Maria Schettini: 30-10-12",
+        "Pino Monopoli: 30-10-61",
+        "Rosa Mazzeo: 30-10-66",
+        "Vito Etna: 30-10-77"
+    ],
+    "10-31": [
+        "Erasmo Sciacovelli: 31-10-70",
+        "Francesco Ledda: 31-10-46",
+        "Giovanni Pagliarulo: 31-10-58",
+        "InfoTelecom Srl: 31-10-96",
+        "Laurea in Fisica Ony (110): 31-10-14",
+        "Lavoro Pellegrini 1: 01-06-22 / 31-10-22",
+        "Maria Lacatena: 31-10-54",
+        "Matteo Dondi: 31-10-88",
+        "Michele Putignano: 31-10-65",
+        "Rossella Mastrangelo: 31-10-68",
+        "Tonia Schettini: 31-10-68",
+        "Vito Cappellano: 31-10-64",
+        "Walter Casulli: 31-10-88"
+    ],
+    "11-01": [
+        "Clorinda: 01-11",
+        "Davide Labate: 01-11-92",
+        "Decesso Don Antonio Loliva: 01-11-10",
+        "Ilenia: 01-11",
+        "Nino Valente: 01-11-29",
+        "Samanta: 01-11",
+        "Stefano Laera: 01-11-73"
+    ],
+    "11-02": [
+        "Alessio Buzzerio: 02-11-90",
+        "Inizio dottorato a Fisciano Ony: 02-11-17",
+        "Lele Valentini: 02-11-70",
+        "Paolo Polignano: 02-11-65",
+        "Seby Vittorione: 02-11-83",
+        "Vito Nitti: 02-11-54"
+    ],
+    "11-03": [
+        "Andrea Monopoli: 03-11-92",
+        "Antonello Bianco: 03-11-63",
+        "Domi Minunni: 03-11-71",
+        "Francesco Mellace: 03-11-66",
+        "Maria Pricci: 03-11-46",
+        "Mariarosaria Grazioso: 03-11-64",
+        "Silvana De Leonardis: 03-11-65",
+        "Vito Latrofa: 03-11-??",
+        "Vito Longo (di Vittorio): 03-11-62"
+    ],
+    "11-04": [
+        "Alessia Pacilio: 04-11-97",
+        "Carlo: 04-11",
+        "Gianni Silvestri: 04-11-60",
+        "Giovanna Viscanti: 04-11-80",
+        "Giusi Morea: 04-11-73",
+        "Maria Pia Minenna: 04-11-60",
+        "Nicola Gigante: 04-11-??",
+        "Pippo Guarnieri: 04-11-77",
+        "Saverio Buttiglione: 04-11-47",
+        "Stefano Mangini: 04-11-95",
+        "Uccio Mancini: 04-11-59"
+    ],
+    "11-05": [
+        "Aldo Cal\u00f2: 05-11-51",
+        "Art Paladini: 05-11-69",
+        "Claudia De Leonardis: 05-11-17",
+        "Ettore Sportiello: 05-11-47"
+    ],
+    "11-06": [
+        "Amanda Bertini: 06-11-93",
+        "Anna Bratta: 06-11-97",
+        "Carmela Difonzo: 06-11-64",
+        "Dalena Pino: 06-11-60",
+        "Donato Boscia (ing): 06-11-57",
+        "Leonardo-Leo: 06-11",
+        "Lorenzo Valentini: 06-11-69",
+        "Mario Rosini: 06-11-63",
+        "Piero Netti: 06-11-65"
+    ],
+    "11-07": [
+        "Andrea Laporta: 07-11-93",
+        "Annamaria Candela: 07-11-70",
+        "Cristina Cianciotti: 07-11-71",
+        "Endrit Shahini: 07-11-85",
+        "Francesco Spinelli: 07-11-93",
+        "Iva Tria: 07-11-72",
+        "Laura Romanazzi: 07-11-81",
+        "Nico Totaro: 07-11-61",
+        "Patente B Mary: 07-11-07",
+        "Sebastiano Deluca: 07-11-58",
+        "Teresa Scoppio: 07-11-38"
+    ],
+    "11-08": [
+        "Andrea Mazzarisi: 08-11-93",
+        "Daniele Tabacco: 08-11-81",
+        "Yara Daw: 08-11-88"
+    ],
+    "11-09": [
+        "Caterina Laterza: 09-11-67",
+        "Donato Fumarola: 09-11-??",
+        "Elena Fanelli: 09-11-73",
+        "Luca Laera (Castellana): 09-11-64",
+        "Massimo Mastrovito: 09-11-??",
+        "Michele Mastrangelo: 09-11-90",
+        "Ornella: 09-11",
+        "Paola Togati: 09-11-68"
+    ],
+    "11-10": [
+        "Alessandra Faniuolo: 10-11-73",
+        "Alessio Galluzzi: 10-11-89",
+        "Ernesto Losavio: 10-11-61",
+        "Franco Sciacovelli: 10-11-54",
+        "Marika Taurino: 10-11-88",
+        "Massimo Mancini: 10-11-59",
+        "Simone Boldrini: 10-11-80"
+    ],
+    "11-11": [
+        "Dino Iurino: 11-11-55",
+        "Eugenia Bianco: 11-11-58",
+        "Francisco Gatti: 11-11-60",
+        "Franco Lillo: 11-11-54",
+        "Giovanna Loporcaro: 11-11-77",
+        "Maria Geosukhiashvili: 11-11-69",
+        "Martino: 11-11",
+        "Pino Mastrangelo: 11-11-65"
+    ],
+    "11-12": [
+        "Anita Terlizzi (Lorenzo Susca): 12-11-60",
+        "Annarita Antonacci: 12-11-88",
+        "Antonio Bianco: 12-11-83",
+        "Claudia Console: 12-11-82",
+        "Dino Lorizio: 12-11-46",
+        "Enzo Marzullo: 12-11-86",
+        "Leonardo Nitti: 12-11-51",
+        "Maddalena Monti: 12-11-88",
+        "Renato: 12-11",
+        "Valentina Ventura: 12-11-81"
+    ],
+    "11-13": [
+        "Assunzione Joy Club Marica: 13-11-06",
+        "Biagio Spano: 13-11-43",
+        "Cecilia Campanella: 13-11-52",
+        "Lorenza Netti: 13-11-65",
+        "Rosa Pappagallo: 13-11-59",
+        "Rosa Uliassi: 13-11-92",
+        "Rosaria Laterza: 13-11-??"
+    ],
+    "11-14": [
+        "Cesare Indiveri: 14-11-58",
+        "Cinzia Fusillo: 14-11-73",
+        "Katia Ditaranto: 14-11-68",
+        "Nicola Madio: 14-11-38",
+        "OA Sistemi entra in WK: 14-11-00",
+        "Pasquale Tria: 14-11-34"
+    ],
+    "11-15": [
+        "Alberto: 15-11",
+        "Egidio Dalena: 15-11-61",
+        "Enrico Buzzerio: 15-11-94",
+        "Manuela Mirizzi: 15-11-76",
+        "Margaret Longo: 15-11-91",
+        "Pierino Sbiroli: 15-11-34",
+        "Rossana Console: 15-11-76",
+        "Sergio Magazzino: 15-11-??"
+    ],
+    "11-16": [
+        "Angelo Bratta: 16-11-95",
+        "Annalisa De Angelis: 16-11-??",
+        "Annasara Lacatena: 16-11-93",
+        "Flavia Lefemine (11:15): 16-11-96",
+        "Immatricolazione UP: 16-11-17",
+        "Luigi Pricci (14:00): 16-11-33",
+        "Raffaele Pinto: 16-11-73",
+        "Roberta Tateo (cugina di Anna): 16-11-83",
+        "Silvia Cascella: 16-11-88",
+        "Stefano Pesce: 16-11-70",
+        "Umberto Cocozza: 16-11-58",
+        "Vita Locorotondo: 16-11-72"
+    ],
+    "11-17": [
+        "Angela Barbuti: 17-11-59",
+        "Benny Lorusso (11:00): 17-11-75",
+        "Bianca Favale: 17-11-57",
+        "Elisabetta Lella: 17-11-88",
+        "Elisabetta-Betta: 17-11",
+        "Isabella - Isa: 17-11",
+        "Marco Di Cecca: 17-11-76",
+        "Michele Pote: 17-11-39",
+        "Umberto Boveri: 17-11-54"
+    ],
+    "11-18": [
+        "Carlo Schiraldi: 18-11-61",
+        "Claudia Chiaia: 18-11-68",
+        "Francesco Amendolare: 18-11-53",
+        "Gianni Manghisi: 18-11-58",
+        "Giovanni Natile: 18-11-44",
+        "Marika Locorotondo: 18-11-79",
+        "Paolo Vario: 18-11-62",
+        "Rossana Demarinis: 18-11-88"
+    ],
+    "11-19": [
+        "Ornella Mastrangelo: 19-11-71",
+        "Vito Valentini: 19-11-58"
+    ],
+    "11-20": [
+        "Annalisa Mancino: 20-11-68",
+        "Antonietta Curci: 20-11-69",
+        "Chiara Castellana: 20-11-95",
+        "Claudio Aquilino: 20-11-92",
+        "Fabio Silletti (di Rossella): 20-11-95",
+        "Federico Corberi (fisico): 20-11-62",
+        "Gianfranco Intini: 20-11-61",
+        "Gianni Recchia: 20-11-50",
+        "Lisa Laricchiuta: 20-11-85",
+        "Tiziana Gigantesco: 20-11-60"
+    ],
+    "11-21": [
+        "Francesco Ciccarone: 21-11-71",
+        "Francesco Di Marco: 21-11-80",
+        "Laurea Psicologia Lucia Garofalo (110 e lode): 21-11-11",
+        "Laurea Psicologia Marica Mirizzi (109): 21-11-11",
+        "Michele Lorusso (Tecnocasa): 21-11-74",
+        "Tonino Buono: 21-11-58"
+    ],
+    "11-22": [
+        "Cecilia: 22-11",
+        "Claudia Goffredo: 22-11-96",
+        "Marco Innamorati: 22-11-62",
+        "Massimiliano Marchitelli: 22-11-83"
+    ],
+    "11-23": [
+        "Angelica Totaro: 23-11-91",
+        "Anna Lisa Di Toma: 23-11-80",
+        "Anna Lisa Ditoma: 23-11-80",
+        "Domenico Paparella: 23-11-67",
+        "Franco Fanelli: 23-11-62",
+        "Giovanna Piccoli: 23-11-??",
+        "Giuseppe Zileni: 23-11-73",
+        "Lucrezia: 23-11",
+        "Pino Mazzarelli: 23-11-57",
+        "Rossana Sportelli: 23-11-83",
+        "Terremoto Irpinia: 23-11-80"
+    ],
+    "11-24": [
+        "Eleonora Minunni: 24-11-79",
+        "Mariano Manzionna: 24-11-04",
+        "Mario Manzionna: 24-11-04",
+        "Niki Maggipinto: 24-11-92"
+    ],
+    "11-25": [
+        "Caterina (novembre): 25-11",
+        "Dora Plenzich: 25-11-62",
+        "Elio Losavio: 25-11-95",
+        "Enza Nitti: 25-11-53",
+        "Francesco Belviso: 25-11-67",
+        "Irene Parchitelli: 25-11-89",
+        "Laurea Economia Bocconi Terry (97): 25-11-16",
+        "Michele Perniola: 25-11-61",
+        "Pierino Centrone: 25-11-57",
+        "Valeria Maurogiovanni: 25-11-85"
+    ],
+    "11-26": [
+        "Gianclaudio Laterza: 26-11-86",
+        "Gianni Totaro: 26-11-45",
+        "Marco Stassolla: 26-11-62",
+        "Mariaelena Palmisano: 26-11-88",
+        "Nicola Lippolis: 26-11-61",
+        "Samanta Egizio: 26-11-78",
+        "Saverio Chiarappa (06:00): 26-11-51"
+    ],
+    "11-27": [
+        "Gabriel Sportelli: 27-11-10",
+        "Giulio Derobertis: 27-11-69",
+        "Miriana Grazietti: 27-11-95",
+        "Nino Rossi: 27-11-62"
+    ],
+    "11-28": [
+        "Amit Kumar: 28-11-87",
+        "Decesso Kim Phillips: 28-11-17",
+        "Enzo Scarafile: 28-11-55",
+        "Laurea Giurisprudenza Vanna (108): 28-11-88",
+        "Lucia Laera: 28-11-98",
+        "Micky Castellana: 28-11-65",
+        "Mirko Fratus: 28-11-71",
+        "Piero Laterza: 28-11-49"
+    ],
+    "11-29": [
+        "Anna Console: 29-11-74",
+        "Christian Impedovo: 29-11-98",
+        "Gabriele Savino: 29-11-03",
+        "Giuditta Avella: 29-11-04",
+        "Imma Gentile: 29-11-51",
+        "Loredana Ruscigno: 29-11-82",
+        "Nina Lorusso (12:23): 29-11-15",
+        "Vincenzo Di Trani: 29-11-??"
+    ],
+    "11-30": [
+        "Andrea Cassotta: 30-11-63",
+        "Andrea Ventrella: 30-11-13",
+        "Andrea: 30-11",
+        "Fine Post doc a Lipsia Ony: 30-11-22",
+        "Luca Mascioni: 30-11-63",
+        "Rita Barbaro: 30-11-40"
+    ],
+    "12-01": [
+        "Ambrogio Giacovelli: 01-12-87",
+        "Andrea Elefante: 01-12-63",
+        "Antonio Valletta: 01-12-63",
+        "Arturo Casulli: 01-12-75",
+        "Evasio Vitale: 01-12-67",
+        "Giovanni Gentile: 01-12-64",
+        "Inizio Post doc a Lipsia Ony: 01-12-20",
+        "Mina Petiti: 01-12-76",
+        "OA Point Calabria Srl: 01-12-00",
+        "Rina Mangini: 01-12-60",
+        "Rosa Dimuccio: 01-12-70"
+    ],
+    "12-02": [
+        "Alessandra Lombardo: 02-12-88",
+        "AM Hennie Van Buren: 02-12-66",
+        "Cesare Petruzzi: 02-12-60",
+        "Clemente Montuori: 02-12-71",
+        "Decesso Severino Boscia (82 anni): 02-12-13",
+        "Enrico Silletti (di Rossella): 02-12-97",
+        "Nicola Nitti: 02-12-56",
+        "Piero Girardi: 02-12-72"
+    ],
+    "12-03": [
+        "AM Antonella De Nobili-Cosimo Montagna: 03-12-86",
+        "AM Antonella De Nobili-Cosimo: 03-12-86",
+        "AM Teresa Grilletti-Luigi Pricci: 03-12-56",
+        "Angela Detomaso: 03-12-61",
+        "Gabriella Liuzzi: 03-12-84",
+        "Laurea Andrea Mazzarisi (Fisioterapia): 03-12-15",
+        "Laurea Fisioterapia Giuseppe Pricci (108): 03-12-13",
+        "Mamma di Anna Trivisani: 03-12-??",
+        "Marco Diomedi: 03-12-59",
+        "Maria Bruno: 03-12-59",
+        "Saverio: 03-12",
+        "Tamara Andresini: 03-12-00"
+    ],
+    "12-04": [
+        "Alessandra Boccuzzi: 04-12-82",
+        "Antonella Casulli: 04-12-62",
+        "Barbara: 04-12",
+        "Donato Loconsolo: 04-12-69",
+        "Klarida Bejko: 04-12-89"
+    ],
+    "12-05": [
+        "Assicurazione Twingo: 05-12",
+        "Giovanna Sgobba: 05-12-59",
+        "Giovanni Didonna: 05-12-54",
+        "Giulia De Feudis: 05-12-88",
+        "Giulio: 05-12",
+        "Maria Muolo: 05-12-62",
+        "Pino Santomasi: 05-12-67"
+    ],
+    "12-06": [
+        "AM Francesca Bellacicco-Giuseppe Zileni: 06-12-03",
+        "Danilo Dogali: 06-12-85",
+        "Gianfranco Recchia: 06-12-69",
+        "Giuseppe Devillanova: 06-12-73",
+        "Ida Totaro: 06-12-96",
+        "Margherita Sportelli: 06-12-53",
+        "Maria Pia Sacco: 06-12-45",
+        "Nicola-Nico: 06-12",
+        "Nicoletta: 06-12",
+        "Vincenzo Laera: 06-12-63"
+    ],
+    "12-07": [
+        "Ambrogio: 07-12",
+        "Eraldo Lattari: 07-12-76",
+        "Gigi Pace: 07-12-??",
+        "Mario Ferrario: 07-12-62",
+        "Vito Avello: 07-12-67"
+    ],
+    "12-08": [
+        "AM Anna Rita Laera-Luca De Tommaso: 08-12-12",
+        "Anna Rita Roma: 08-12-88",
+        "Fabio Iraldi: 08-12-68",
+        "Giulia Matarrese (autodromo): 08-12-??",
+        "Giuseppe De Nicolo\u2019: 08-12-75",
+        "Imma Fasano: 08-12-64",
+        "Imma Totaro: 08-12-64",
+        "Tina Tinelli: 08-12-68"
+    ],
+    "12-09": [
+        "Erasmo Giove: 09-12-01",
+        "Vittorio Longo (di Vito): 09-12-88"
+    ],
+    "12-10": [
+        "Agata Petrone: 10-12-64",
+        "Attilio Di Stasio: 10-12-10",
+        "Giulia Guazzaroni: 10-12-57",
+        "Giuseppe Basile: 10-12-03",
+        "Loredana: 10-12",
+        "Mariaclara Zagaria: 10-12-62",
+        "Stefania Bruni: 10-12-84"
+    ],
+    "12-11": [
+        "Adriana Grosu: 11-12-77",
+        "Alessio Semoli: 11-12-79",
+        "AM Rosalinda Maggipinto-Davide Labate: 11-12-20",
+        "Beppe Sanseverino: 11-12-58",
+        "Claudia Fiume: 11-12-80",
+        "Giuseppe Spinelli: 11-12-88",
+        "Graziella Gigante: 11-12-??"
+    ],
+    "12-12": [
+        "Aida Quarato: 12-12-20",
+        "Alessandro Scoppio: 12-12-95",
+        "AM Giulia Guazzaroni-Franco Mazzarisi: 12-12-87",
+        "Armando Scoppio: 12-12-59",
+        "Assunzione Bit Sistemi Marica: 12-12-00",
+        "Checco Di Stasio: 12-12-75",
+        "Isa Delfine: 12-12-64",
+        "Manuela Schettini: 12-12-81",
+        "Pippo Fischietti: 12-12-91"
+    ],
+    "12-13": [
+        "Alessandro Basile: 13-12-78",
+        "Federico Antonicelli: 13-12-63",
+        "Flavio Pesce: 13-12-87",
+        "Laurea Informatica Nino (101): 13-12-06",
+        "Lucia: 13-12",
+        "Luciana Matteu: 13-12-80",
+        "Luciano Lamuraglia: 13-12-78",
+        "Piero Grilletti: 13-12-??",
+        "Piero Longo: 13-12-87"
+    ],
+    "12-14": [
+        "Arianna Ventrella: 14-12-88",
+        "Figlie Michele Didonna a casa: 14-12-86",
+        "Gianmarco Pinto: 14-12-99",
+        "Gianni Sportelli: 14-12-63",
+        "Giuseppe Loliva: 14-12-44",
+        "Marco Marino: 14-12-87",
+        "Patrizio Lippolis: 14-12-56"
+    ],
+    "12-15": [
+        "Alessandra Dalena: 15-12-77",
+        "Alessandro Campanella Vinella: 15-12-80",
+        "Arca di No\u00e8: 15-12-06",
+        "Barbara Guglielmi: 15-12-75",
+        "Carlotta Vinella: 15-12-99",
+        "Ernesto Agostinacchio: 15-12-64",
+        "Onomastico Nina: 15-12",
+        "Sabrina Lanzilotta: 15-12-95"
+    ],
+    "12-16": [
+        "Angela Mastropasqua: 16-12-88",
+        "Anna Albano: 16-12-67",
+        "Decesso Nicola Perrone (56 anni): 16-12-10",
+        "Edoardo Casulli: 16-12-22",
+        "Laurea Triennale Francesco (105): 16-12-22",
+        "Mirella Dalessandro: 16-12-??",
+        "Terry Daprile: 16-12-??"
+    ],
+    "12-17": [
+        "Antonio Capurso: 17-12-82",
+        "Deborah Basileo: 17-12-91",
+        "Gabriella Gregorio: 17-12-76",
+        "Mariaclaudia Polo: 17-12-12",
+        "Onofrio Mazzarisi (nonno): 17-12-20",
+        "Pierluigi Volpe: 17-12-74",
+        "Roberta Pedone: 17-12-10"
+    ],
+    "12-18": [
+        "Cerys Williams: 18-12-03",
+        "Davide De Pinto: 18-12-90",
+        "Decesso Don Angelo Sabatelli: 18-12-05",
+        "Francesca Albano: 18-12-88",
+        "Graziano: 18-12",
+        "Gregorio Impedovo: 18-12-69",
+        "Mariana Malagnino: 18-12-64",
+        "Massimo Morelli: 18-12-64",
+        "Michela Lucarella: 18-12-71",
+        "Nicola Misto: 18-12-57",
+        "OA Point Abruzzo Srl: 18-12-00",
+        "Piero Satalino: 18-12-55",
+        "Renato Miniaci (di Massimiliano): 18-12-05",
+        "Rossella Giannuzzi: 18-12-87",
+        "Tony Antonicelli: 18-12-71"
+    ],
+    "12-19": [
+        "Anna Spinosa: 19-12-89",
+        "Chiara Sonnante: 19-12-54",
+        "Egidio Scalini: 19-12-64",
+        "Francesco Mazzarisi (zio): 19-12-08",
+        "Vito Polignano: 19-12-82",
+        "Ylenia Risola: 19-12-88"
+    ],
+    "12-20": [
+        "AM Maria Teresa De Michele-Paolo: 20-12-14",
+        "Cinzia Campanella: 20-12-67",
+        "Lia Plantone: 20-12-70",
+        "Maia Lafachi: 20-12-67"
+    ],
+    "12-21": [
+        "Fabrizio De Bellis: 21-12-92",
+        "Francesco Mazza: 21-12-57",
+        "Gianni Ventrella: 21-12-58",
+        "Giosu\u00e8 Dell'Aera: 21-12-66",
+        "Guido De Bellis: 21-12-57",
+        "Nicola Morelli: 21-12-60",
+        "Vito Vinella (di Michele): 21-12-68"
+    ],
+    "12-22": [
+        "AM Pina Demarco-Domi Minunni: 22-12-07",
+        "Daniela Martellotta: 22-12-93",
+        "Daniele Castellana: 22-12-92",
+        "Martin Chilla: 22-12-57",
+        "Milena Tinelli: 22-12-78",
+        "Mina (moglie di Nico Tauro): 22-12-??",
+        "Mina Putignano: 22-12-63",
+        "Mino Selicato: 22-12-66",
+        "Vito Andresini: 22-12-95"
+    ],
+    "12-23": [
+        "Fabrizio Perrone: 23-12-85",
+        "Maddalena Polignano: 23-12-63",
+        "Maria Marcotriggiani: 23-12-63",
+        "Onomastico Vittoria Natile: 23-12",
+        "Vittoria: 23-12"
+    ],
+    "12-24": [
+        "Anna Maria Detomaso: 24-12-59",
+        "Daniela Belligerante: 24-12-70",
+        "Donato Boscia: 24-12-61",
+        "Lelio D'Aprile: 24-12-56",
+        "Michele Carulli: 24-12-51",
+        "Nicola Vitti: 24-12-61",
+        "Piernicola Primavera: 24-12-91",
+        "Piero Matarrese: 24-12-??"
+    ],
+    "12-25": [
+        "Decesso Lella Longo: 25-12-22"
+    ],
+    "12-26": [
+        "Amarkant Singh: 26-12-87",
+        "Elisabetta Mirizzi: 26-12-66",
+        "Stefania: 26-12",
+        "Stefano: 26-12"
+    ],
+    "12-27": [
+        "Daniele Sportelli: 27-12-73",
+        "Francesco Molinari: 27-12-55",
+        "Grazia Losito (di Peppino Redavid): 27-12-60",
+        "Nicola Pacilio: 27-12-59",
+        "Vincenzo Derobertis: 27-12-85",
+        "Vito Mastronardi: 27-12-64"
+    ],
+    "12-28": [
+        "AM Niki Tauro: 28-12-22",
+        "Antonella Iacobellis: 28-12-72",
+        "Daniela Genco: 28-12-61",
+        "Decesso mamma: 28-12-24",
+        "Maril\u00f9 Mazzarisi: 28-12-99",
+        "Minghua Luo: 28-12-87",
+        "Teresa Cisternino: 28-12-28",
+        "Yuri Bonari: 28-12-68"
+    ],
+    "12-29": [
+        "AM Rosa Bianco-Giovanni Pricci: 29-12-04",
+        "Anastasia Schena: 29-12-86",
+        "Davide: 29-12",
+        "Francesca Ariano: 29-12-07",
+        "Giambattista Mangini: 29-12-76",
+        "Mariangela Mazzarella: 29-12-87",
+        "Pasquale Popolizio: 29-12-61",
+        "Pino Mevoli: 29-12-61",
+        "Rossella Pacilio: 29-12-94",
+        "Sonya Perrelli: 29-12-95",
+        "Vincenzo d\u2019Angelo: 29-12-46"
+    ],
+    "12-30": [
+        "AM Livia Tangorra-Marcello Bianchi: 30-12-85",
+        "AM Maria Girardi-Severino Boscia: 30-12-59",
+        "Emanuele Costanzo: 30-12-65",
+        "Francesca Masciale: 30-12-87",
+        "Francesco Mastrangelo: 30-12-95",
+        "Gianfranco Pezzolato: 30-12-64",
+        "Paola Troilo: 30-12-76",
+        "Stefania Cisternino: 30-12-80"
+    ],
+    "12-31": [
+        "Anna Notarangelo (giornalaia): 31-12-59",
+        "Melania: 31-12",
+        "Milly Galluzzi: 31-12-90",
+        "Rosarianna Romano: 31-12-97",
+        "Tiziano Mangini: 31-12-78"
+    ]
+};
+        const currentYear = 2025;
+        let currentDate = new Date();
+        
+        function formatDate(date) {
+            const d = String(date.getDate()).padStart(2, '0');
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            return `${m}-${d}`;
+        }
+
+        function showEvents(date) {
+            const dateKey = formatDate(date);
+            const events = eventsData[dateKey] || [];
+            
+            const eventList = document.getElementById('eventList');
+            eventList.innerHTML = ''; // Svuota la lista precedente
+            
+            const fullDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+            document.getElementById('currentDate').textContent = `Ricorrenze del ${fullDate}`;
+            
+            if (events.length > 0) {
+                events.forEach(event => {
+                    const li = document.createElement('li');
+                    
+                    let className = '';
+                    let eventText = event;
+                    
+                    // Controlla l'anno per il calcolo e la colorazione
+                    const yearMatch = event.match(/\d{2}-\d{2}-(\d{2,4}|\?\?)/);
+                    if (yearMatch) {
+                        const eventYearStr = yearMatch[1];
+                        if (eventYearStr === '??') {
+                            className = 'yellow-bg';
+                        } else {
+                            const eventYear = parseInt(eventYearStr);
+                            let fullEventYear;
+                            if (eventYearStr.length === 2) {
+                                if (eventYear < 25) {
+                                    fullEventYear = 2000 + eventYear;
+                                } else {
+                                    fullEventYear = 1900 + eventYear;
+                                }
+                            } else {
+                                fullEventYear = eventYear;
+                            }
+                            const yearsPassed = date.getFullYear() - fullEventYear;
+                            eventText = event.replace(yearMatch[0], `${fullEventYear} (${yearsPassed} anni)`);
+                            
+                            if (event.startsWith("AM ")) {
+                                className = 'pink-bg';
+                            } else {
+                                className = 'yellow-bg';
+                            }
+                        }
+                    } else {
+                        // Nessun anno, solo GG-MM
+                        className = 'green-bg';
+                        if (!event.toLowerCase().includes('onomastico')) {
+                            eventText = `(Onomastico) ${event}`;
+                        }
+                    }
+
+                    li.textContent = eventText;
+                    li.className = className;
+                    eventList.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.textContent = 'Nessuna ricorrenza per questo giorno.';
+                li.style.border = '1px solid #ddd'; // Aggiunge il bordo anche per l'elemento "nessuna ricorrenza"
+                li.style.backgroundColor = '#e9ecef';
+                eventList.appendChild(li);
+            }
+        }
+        
+        function changeDay(delta) {
+            currentDate.setDate(currentDate.getDate() + delta);
+            showEvents(currentDate);
+        }
+        
+        function showToday() {
+            currentDate = new Date();
+            showEvents(currentDate);
+        }
+
+        // Nuova logica per i tasti da tastiera
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && e.ctrlKey) {
+                // CTRL + Freccia sinistra: inizio mese o mese precedente
+                if (currentDate.getDate() === 1) {
+                    currentDate.setMonth(currentDate.getMonth() - 1);
+                }
+                currentDate.setDate(1);
+                showEvents(currentDate);
+            } else if (e.key === 'ArrowRight' && e.ctrlKey) {
+                // CTRL + Freccia destra: fine mese o mese successivo
+                const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+                if (currentDate.getDate() === lastDayOfMonth) {
+                    currentDate.setMonth(currentDate.getMonth() + 2); // Passa al mese successivo e poi al suo ultimo giorno
+                } else {
+                    currentDate.setMonth(currentDate.getMonth() + 1);
+                }
+                currentDate.setDate(0); // Imposta la data all'ultimo giorno del mese precedente (che è ora il mese di destinazione)
+                showEvents(currentDate);
+            } else if (e.key === 'ArrowLeft') {
+                // Freccia sinistra: giorno precedente
+                changeDay(-1);
+            } else if (e.key === 'ArrowRight') {
+                // Freccia destra: giorno successivo
+                changeDay(1);
+            } else if (e.key === 'Home') {
+                // Tasto "Inizio": inizio anno
+                currentDate.setFullYear(currentDate.getFullYear() - 1);
+                currentDate.setMonth(0);
+                currentDate.setDate(1);
+                showEvents(currentDate);
+            } else if (e.key === 'End') {
+                // Tasto "Fine": fine anno
+                currentDate.setFullYear(currentDate.getFullYear() + 1);
+                currentDate.setMonth(11);
+                currentDate.setDate(31);
+                showEvents(currentDate);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            showEvents(currentDate);
+        });
+    </script>
+</body>
+</html>
