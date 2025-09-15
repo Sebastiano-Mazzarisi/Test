@@ -51,6 +51,14 @@
             padding: 10px;
             border-radius: 5px;
             border: 1px solid #ddd;
+            cursor: pointer;
+            transition: all 0.1s ease-in-out;
+            user-select: none; /* Previene la selezione del testo al tocco */
+        }
+        .event-list li:active {
+            transform: scale(0.98);
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+            background-color: #b0e0e6 !important; /* Celeste pastello */
         }
         .pink-bg { background-color: #ffe4e1; }
         .yellow-bg { background-color: #fffacd; }
@@ -58,6 +66,7 @@
     </style>
 </head>
 <body>
+    <audio id="popSound" src="https://www.soundjay.com/buttons/sounds/button-20.mp3"></audio>
     <div class="container">
         <div class="header">
             <h2 id="currentDate"></h2>
@@ -3788,6 +3797,7 @@
 };
         const currentYear = 2025;
         let currentDate = new Date();
+        const popSound = document.getElementById('popSound');
         
         function formatDate(date) {
             const d = String(date.getDate()).padStart(2, '0');
@@ -3849,6 +3859,34 @@
 
                     li.textContent = eventText;
                     li.className = className;
+
+                    li.onclick = function() {
+                        // Riproduce il suono
+                        if (popSound) {
+                            popSound.play();
+                        }
+
+                        let textToCopy = this.textContent;
+                        let separatorIndex = textToCopy.indexOf(':');
+                        if (separatorIndex !== -1) {
+                            textToCopy = textToCopy.substring(0, separatorIndex);
+                        }
+                        
+                        // Rimuove "(Onomastico)" se presente
+                        textToCopy = textToCopy.replace('(Onomastico)', '').trim();
+                        
+                        // Copia il testo negli appunti
+                        navigator.clipboard.writeText(textToCopy).then(() => {
+                            console.log('Testo copiato: ' + textToCopy);
+                            // Cerca di aprire l'app nativa dei contatti
+                            // Questo URL non ha una funzione di ricerca integrata
+                            // ma può aprire l'app in un click
+                            window.location.href = 'contacts://';
+                        }).catch(err => {
+                            console.error('Errore nella copia del testo: ', err);
+                        });
+                    };
+                    
                     eventList.appendChild(li);
                 });
             } else {
