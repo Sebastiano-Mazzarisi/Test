@@ -26,6 +26,43 @@
             text-align: center;
             margin-bottom: 20px;
         }
+        .header h2 {
+            cursor: pointer;
+            user-select: none;
+            margin: 0;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+        .header h2:hover {
+            background-color: #f0f8ff;
+        }
+        .search-container {
+            display: none;
+            margin-bottom: 20px;
+        }
+        .search-input {
+            width: calc(100% - 90px);
+            padding: 12px;
+            border: 2px solid #007BFF;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+            display: inline-block;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #0056b3;
+        }
+        .search-counter {
+            display: inline-block;
+            margin-left: 10px;
+            font-size: 16px;
+            color: #666;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: right;
+        }
         .navigation {
             display: flex;
             justify-content: space-between;
@@ -59,6 +96,17 @@
             transform: scale(0.98);
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
             background-color: #b0e0e6 !important;
+        }
+        .search-result {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .search-date {
+            font-size: 0.9em;
+            color: #666;
+            margin-left: 10px;
+            font-weight: bold;
         }
         .pink-bg { background-color: #ffe4e1; }
         .yellow-bg { background-color: #fffacd; }
@@ -129,15 +177,23 @@
             font-size: 1.1em;
             margin: 0;
         }
+        .highlight {
+            background-color: #ffff99;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <audio id="popSound" src="https://www.soundjay.com/buttons/sounds/button-20.mp3"></audio>
     <div class="container">
         <div class="header">
-            <h2 id="currentDate"></h2>
+            <h2 id="currentDate" onclick="toggleSearch()"></h2>
+            <div id="searchContainer" class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Cerca negli eventi e nelle note..." oninput="performSearch()">
+                <span id="searchCounter" class="search-counter">0</span>
+            </div>
         </div>
-        <div class="navigation">
+        <div class="navigation" id="navigation">
             <a onclick="changeDay(-1)">Precedente</a>
             <button onclick="showToday()">Oggi</button>
             <a onclick="changeDay(1)">Successivo</a>
@@ -156,7 +212,7 @@
     </div>
 
     <script>
-        const eventsData = {
+        var eventsData = {
     "01-01": [
         "[Alberto Sacco: 01-01-65]",
         "[Alessandra Vinella: 01-01-95]",
@@ -3866,7 +3922,7 @@
         "[Tiziano Mangini: 31-12-78]"
     ]
 };
-        const linkMap = {
+        var linkMap = {
     "LINK RIGHE DATE": "NOMI CONTATTI",
     "[Mariangela Abbadessa: 26-07-88]": "Abbadessa Mariangela",
     "[Pio Rinaldi: 10-04-58]": "Rinaldi Pio",
@@ -6869,7 +6925,7 @@
     "[Michele Zuccaro: 09-04-70]": "Zuccaro Michele",
     "[Valeria Zullo: 02-10-88]": "Zullo Valeria"
 };
-        const archiveData = {
+        var archiveData = {
     "Abbadessa Mariangela": "Palombaio (Bitonto - BA)\n.....\nCollega a Psicologia\nAmica di Mariapia D'Attolico\nDiploma: 100/100 (maturità scientifica)\nPosto in graduatoria accesso a psicologia: 42\nNata a Terlizzi\n14-07-10: Laurea (110 e lode)\n.....\nPadre: Filomeno Abbadessa\nVia Aspromonte, 27\nPalombaio (BA)\n.....\nCompletato gli esami del primo anno\nIn tempo e con una media superiore al 29\n.....\n*[Mariangela Abbadessa: 26-07-88]",
     "Abbigliamento L'uomottanta": "Castellana\nVia Risorgimento, 24\n.....\nNegozio di abbigliamento\nInaugurato nel 1979\n.....\n*[Pio Rinaldi: 10-04-58]",
     "Abrescia Francesca": "Psicologia\n.....\nCollega\n.....\n*[Francesca Abrescia: 30-05-88]",
@@ -9173,104 +9229,381 @@
     "Zullo Valeria": "Cassano\n.....\nCollega a Psicologia\nNata ad Acquaviva\n.....\n*[Valeria Zullo: 02-10-88]",
     "d'Aries Erminio": "Comune di Putignano\nIng. Dirigente 3a Area\nSegue Opere di Urbanizzazione\ndella Cooperativa\nCollaboratore: Vito Miccolis\n.....\nAbitazione:\nVia Sant'Antonio Abate, 9/A\n70014 Conversano (BA)\n.....\nResponsabile Sportello\nUnico Edilizia Online\n.....\nResponsabile per la\nTransizione Digitale\n.....\nRiceve il giovedì\ndalle 16:00 alle 18:30\nAppuntamento tramite\nemail di riconferma\n.....\nNato a San Severo (FG)\n.....\n[Erminio d'Ares: 07-01-72]"
 };
-        const currentYear = 2025;
-        let currentDate = new Date();
-        const popSound = document.getElementById('popSound');
+        var currentYear = 2025;
+        var currentDate = new Date();
+        var isSearchMode = false;
+        var popSound = document.getElementById('popSound');
 
         function formatDate(date) {
-            const d = String(date.getDate()).padStart(2, '0');
-            const m = String(date.getMonth() + 1).padStart(2, '0');
-            return `${m}-${d}`;
+            var d = String(date.getDate()).padStart(2, '0');
+            var m = String(date.getMonth() + 1).padStart(2, '0');
+            return m + '-' + d;
+        }
+
+        function getMonthName(monthNum) {
+            var months = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+            return months[monthNum - 1];
+        }
+
+        function formatDateForOnomastico(dateStr) {
+            var parts = dateStr.split('-');
+            var month = parseInt(parts[0], 10);
+            var day = parseInt(parts[1], 10);
+            return day + ' ' + getMonthName(month);
+        }
+
+        function calculateYearsFromDate(event) {
+            var yearRegex = /\d{2}-\d{2}-(\d{2,4}|\?\?)/;
+            var yearMatch = event.match(yearRegex);
+            if (yearMatch) {
+                var eventYearStr = yearMatch[1];
+                if (eventYearStr === '??') {
+                    return null;
+                }
+                
+                var eventYear = parseInt(eventYearStr, 10);
+                var fullEventYear;
+                if (eventYearStr.length === 2) {
+                    fullEventYear = eventYear < 25 ? 2000 + eventYear : 1900 + eventYear;
+                } else {
+                    fullEventYear = eventYear;
+                }
+                
+                var currentYear = new Date().getFullYear();
+                return currentYear - fullEventYear;
+            }
+            
+            return null;
+        }
+
+        function highlightText(text, searchTerms) {
+            var highlightedText = text;
+            for (var i = 0; i < searchTerms.length; i++) {
+                var term = searchTerms[i];
+                if (term.length >= 1) {
+                    var regex = new RegExp('(' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+                    highlightedText = highlightedText.replace(regex, '<span class="highlight">$1</span>');
+                }
+            }
+            return highlightedText;
+        }
+
+        function removeDuplicates(results) {
+            var uniqueResults = [];
+            var seenEvents = {};
+            for (var i = 0; i < results.length; i++) {
+                var result = results[i];
+                var eventKey = result.event + '|' + result.date;
+                if (!seenEvents[eventKey]) {
+                    seenEvents[eventKey] = true;
+                    uniqueResults.push(result);
+                }
+            }
+            return uniqueResults;
+        }
+
+        function toggleSearch() {
+            var searchContainer = document.getElementById('searchContainer');
+            var navigation = document.getElementById('navigation');
+            var searchInput = document.getElementById('searchInput');
+            
+            if (!isSearchMode) {
+                isSearchMode = true;
+                searchContainer.style.display = 'block';
+                navigation.style.display = 'none';
+                document.getElementById('currentDate').textContent = 'Ricerca';
+                searchInput.focus();
+                showAllEvents();
+            } else {
+                exitSearchMode();
+            }
+        }
+
+        function exitSearchMode() {
+            isSearchMode = false;
+            document.getElementById('searchContainer').style.display = 'none';
+            document.getElementById('navigation').style.display = 'flex';
+            document.getElementById('searchInput').value = '';
+            showEvents(currentDate);
+        }
+
+        function showAllEvents() {
+            var allResults = [];
+            
+            for (var dateKey in eventsData) {
+                for (var i = 0; i < eventsData[dateKey].length; i++) {
+                    var event = eventsData[dateKey][i];
+                    var idxOpen = event.indexOf('[');
+                    var rawLine = idxOpen >= 0 ? event.substring(idxOpen).trim() : event.trim();
+                    var contactName = linkMap[rawLine];
+                    
+                    allResults.push({
+                        date: dateKey,
+                        event: event,
+                        contactName: contactName
+                    });
+                }
+            }
+
+            allResults.sort(function(a, b) {
+                var textA = a.event.replace(/[\[\]]/g, '').toLowerCase();
+                var textB = b.event.replace(/[\[\]]/g, '').toLowerCase();
+                return textA.localeCompare(textB);
+            });
+
+            var uniqueResults = removeDuplicates(allResults);
+            document.getElementById('searchCounter').textContent = uniqueResults.length.toLocaleString('it-IT');
+            displaySearchResults(uniqueResults, [], []);
+        }
+
+        function performSearch() {
+            var searchTerm = document.getElementById('searchInput').value.trim();
+            
+            if (searchTerm.length < 1) {
+                showAllEvents();
+                return;
+            }
+
+            var allTerms = searchTerm.toLowerCase().split(' ').filter(function(term) { return term.length > 0; });
+            var searchTerms = allTerms.filter(function(term) { return !term.startsWith('-'); });
+            var excludeTerms = allTerms.filter(function(term) { return term.startsWith('-'); }).map(function(term) { return term.substring(1); });
+            
+            var results = [];
+
+            for (var dateKey in eventsData) {
+                for (var i = 0; i < eventsData[dateKey].length; i++) {
+                    var event = eventsData[dateKey][i];
+                    var eventText = event.toLowerCase();
+                    
+                    var matchesEvent = searchTerms.every(function(term) { return eventText.includes(term); }) &&
+                                     excludeTerms.every(function(term) { return !eventText.includes(term); });
+                    
+                    var matchesNote = false;
+                    var idxOpen = event.indexOf('[');
+                    var rawLine = idxOpen >= 0 ? event.substring(idxOpen).trim() : event.trim();
+                    var contactName = linkMap[rawLine];
+                    
+                    if (contactName && archiveData[contactName]) {
+                        var noteText = archiveData[contactName].toLowerCase();
+                        matchesNote = searchTerms.every(function(term) { return noteText.includes(term); }) &&
+                                     excludeTerms.every(function(term) { return !noteText.includes(term); });
+                    }
+                    
+                    if (matchesEvent || matchesNote) {
+                        results.push({
+                            date: dateKey,
+                            event: event,
+                            contactName: contactName,
+                            matchType: matchesEvent ? 'event' : 'note'
+                        });
+                    }
+                }
+            }
+
+            results.sort(function(a, b) {
+                var textA = a.event.replace(/[\[\]]/g, '').toLowerCase();
+                var textB = b.event.replace(/[\[\]]/g, '').toLowerCase();
+                return textA.localeCompare(textB);
+            });
+
+            var uniqueResults = removeDuplicates(results);
+            document.getElementById('searchCounter').textContent = uniqueResults.length.toLocaleString('it-IT');
+            displaySearchResults(uniqueResults, searchTerms, excludeTerms);
+        }
+
+        function displaySearchResults(results, searchTerms, excludeTerms) {
+            var eventList = document.getElementById('eventList');
+            eventList.innerHTML = '';
+            
+            if (results.length === 0) {
+                var li = document.createElement('li');
+                li.textContent = 'Nessun risultato trovato.';
+                li.style.border = '1px solid #ddd';
+                li.style.backgroundColor = '#e9ecef';
+                eventList.appendChild(li);
+                return;
+            }
+
+            for (var j = 0; j < results.length; j++) {
+                var result = results[j];
+                var li = document.createElement('li');
+                
+                var displayText = searchTerms.length > 0 ? 
+                    highlightText(result.event.replace(/[\[\]]/g, ''), searchTerms) :
+                    result.event.replace(/[\[\]]/g, '');
+                
+                var years = calculateYearsFromDate(result.event);
+                var rightText = '';
+                
+                if (years !== null) {
+                    rightText = years + ' anni';
+                } else {
+                    var amRegex = /^\s*\[AM\b/i;
+                    var yearRegex = /\d{2}-\d{2}-(\d{2,4}|\?\?)/;
+                    var isOnomastico = !amRegex.test(result.event) && !yearRegex.test(result.event);
+                    if (isOnomastico) {
+                        rightText = formatDateForOnomastico(result.date);
+                    }
+                }
+                    
+                li.innerHTML = '<div class="search-result"><div>' + displayText + '</div><div class="search-date">' + rightText + '</div></div>';
+                
+                var className = '';
+                var event = result.event;
+                
+                var amRegex = /^\s*\[AM\b/i;
+                if (amRegex.test(event)) {
+                    className = 'pink-bg';
+                } else {
+                    var yearRegex = /\d{2}-\d{2}-(\d{2,4}|\?\?)/;
+                    if (yearRegex.test(event)) {
+                        className = 'yellow-bg';
+                    } else {
+                        className = 'green-bg';
+                    }
+                }
+                
+                li.className = className;
+                
+                (function(event, searchTerms) {
+                    li.onclick = function() {
+                        try { 
+                            if (popSound && popSound.play) popSound.play(); 
+                        } catch (e) { 
+                            console.warn(e); 
+                        }
+                        
+                        var idxOpen = event.indexOf('[');
+                        var idxColon = event.indexOf(':');
+                        var rawLine = idxOpen >= 0 ? event.substring(idxOpen).trim() : event.trim();
+                        var contactName = linkMap[rawLine];
+
+                        var textToCopy = (idxOpen >= 0 && idxColon > idxOpen)
+                            ? event.substring(idxOpen + 1, idxColon).trim()
+                            : event.replace(/[\[\]]/g, '').trim();
+                        if (/^AM\b/.test(textToCopy)) textToCopy = textToCopy.substring(3).trim();
+
+                        if (navigator.clipboard && navigator.clipboard.writeText) {
+                            navigator.clipboard.writeText(textToCopy).catch(function(err) { console.warn('Copia fallita:', err); });
+                        }
+
+                        if (contactName && archiveData[contactName]) {
+                            var noteContent = archiveData[contactName];
+                            if (searchTerms.length > 0) {
+                                noteContent = highlightText(noteContent, searchTerms);
+                            }
+                            
+                            document.getElementById('modal-title').textContent = contactName;
+                            document.getElementById('modal-body').innerHTML = '<pre>' + noteContent + '</pre>';
+                            document.getElementById('myModal').style.display = 'block';
+                        } else {
+                            document.getElementById('modal-title').textContent = 'Nota';
+                            document.getElementById('modal-body').innerHTML = '<p>Nessuna nota completa trovata per questo contatto.</p>';
+                            document.getElementById('myModal').style.display = 'block';
+                        }
+                    };
+                })(event, searchTerms);
+                
+                eventList.appendChild(li);
+            }
         }
 
         function showEvents(date) {
-            const dateKey = formatDate(date);
-            const events = eventsData[dateKey] || [];
+            if (isSearchMode) return;
+            
+            var dateKey = formatDate(date);
+            var events = eventsData[dateKey] || [];
 
-            const eventList = document.getElementById('eventList');
+            var eventList = document.getElementById('eventList');
             eventList.innerHTML = '';
 
-            const fullDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
-            document.getElementById('currentDate').textContent = `Ricorrenze del ${fullDate}`;
+            var fullDate = String(date.getDate()).padStart(2, '0') + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + date.getFullYear();
+            document.getElementById('currentDate').textContent = 'Ricorrenze del ' + fullDate;
 
             if (events.length > 0) {
-                events.forEach(event => {
+                for (var i = 0; i < events.length; i++) {
+                    var event = events[i];
                     try {
-                        const li = document.createElement('li');
+                        var li = document.createElement('li');
 
-                        let className = '';
-                        let eventText = event;
+                        var className = '';
+                        var eventText = event;
 
-                        // Se Ã¨ anniversario di matrimonio => rosa
-                        if (/^\s*\[AM/i.test(event)) {
+                        var amRegex = /^\s*\[AM\b/i;
+                        if (amRegex.test(event)) {
                             className = 'pink-bg';
                         } else {
-                            const yearMatch = event.match(/\d{2}-\d{2}-(\d{2,4}|\?\?)/);
+                            var yearMatch = event.match(/\d{2}-\d{2}-(\d{2,4}|\?\?)/);
                             if (yearMatch) {
-                                const eventYearStr = yearMatch[1];
+                                var eventYearStr = yearMatch[1];
                                 if (eventYearStr === '??') {
                                     className = 'yellow-bg';
                                 } else {
-                                    const eventYear = parseInt(eventYearStr, 10);
-                                    let fullEventYear;
+                                    var eventYear = parseInt(eventYearStr, 10);
+                                    var fullEventYear;
                                     if (eventYearStr.length === 2) {
                                         fullEventYear = eventYear < 25 ? 2000 + eventYear : 1900 + eventYear;
                                     } else {
                                         fullEventYear = eventYear;
                                     }
-                                    const yearsPassed = date.getFullYear() - fullEventYear;
-                                    eventText = event.replace(yearMatch[0], `${fullEventYear} (${yearsPassed} anni)`);
+                                    var yearsPassed = date.getFullYear() - fullEventYear;
+                                    eventText = event.replace(yearMatch[0], fullEventYear + ' (' + yearsPassed + ' anni)');
                                     className = 'yellow-bg';
                                 }
                             } else {
                                 className = 'green-bg';
                                 if (!event.toLowerCase().includes('onomastico')) {
-                                    eventText = `(Onomastico) ${event}`;
+                                    eventText = '(Onomastico) ' + event;
                                 }
                             }
                         }
 
-                        // Rimuovi solo le parentesi quadre dalla visualizzazione
-                        let displayText = eventText.replace(/[\[\]]/g, '');
+                        var displayText = eventText.replace(/[\[\]]/g, '');
                         li.textContent = displayText;
                         li.className = className;
 
-                        li.onclick = function() {
-                            const idxOpen = event.indexOf('[');
-                            const idxColon = event.indexOf(':');
-                            const rawLine = idxOpen >= 0 ? event.substring(idxOpen).trim() : event.trim();
-                            const contactName = linkMap[rawLine];
+                        (function(event) {
+                            li.onclick = function() {
+                                var idxOpen = event.indexOf('[');
+                                var idxColon = event.indexOf(':');
+                                var rawLine = idxOpen >= 0 ? event.substring(idxOpen).trim() : event.trim();
+                                var contactName = linkMap[rawLine];
 
-                            try { popSound && popSound.play && popSound.play(); } catch (e) { console.warn(e); }
+                                try { 
+                                    if (popSound && popSound.play) popSound.play(); 
+                                } catch (e) { 
+                                    console.warn(e); 
+                                }
 
-                            let textToCopy = (idxOpen >= 0 && idxColon > idxOpen)
-                                ? event.substring(idxOpen + 1, idxColon).trim()
-                                : event.replace(/[\[\]]/g, '').trim();
-                            if (/^AM/.test(textToCopy)) textToCopy = textToCopy.substring(3).trim();
+                                var textToCopy = (idxOpen >= 0 && idxColon > idxOpen)
+                                    ? event.substring(idxOpen + 1, idxColon).trim()
+                                    : event.replace(/[\[\]]/g, '').trim();
+                                if (/^AM\b/.test(textToCopy)) textToCopy = textToCopy.substring(3).trim();
 
-                            if (navigator.clipboard && navigator.clipboard.writeText) {
-                                navigator.clipboard.writeText(textToCopy).catch(err => console.warn('Copia fallita:', err));
-                            }
+                                if (navigator.clipboard && navigator.clipboard.writeText) {
+                                    navigator.clipboard.writeText(textToCopy).catch(function(err) { console.warn('Copia fallita:', err); });
+                                }
 
-                            if (contactName && archiveData[contactName]) {
-                                const noteContent = archiveData[contactName];
-                                document.getElementById('modal-title').textContent = contactName;
-                                document.getElementById('modal-body').innerHTML = `<pre>${noteContent}</pre>`;
-                                document.getElementById('myModal').style.display = 'block';
-                            } else {
-                                document.getElementById('modal-title').textContent = 'Nota';
-                                document.getElementById('modal-body').innerHTML = '<p>Nessuna nota completa trovata per questo contatto.</p>';
-                                document.getElementById('myModal').style.display = 'block';
-                            }
-                        };
+                                if (contactName && archiveData[contactName]) {
+                                    var noteContent = archiveData[contactName];
+                                    document.getElementById('modal-title').textContent = contactName;
+                                    document.getElementById('modal-body').innerHTML = '<pre>' + noteContent + '</pre>';
+                                    document.getElementById('myModal').style.display = 'block';
+                                } else {
+                                    document.getElementById('modal-title').textContent = 'Nota';
+                                    document.getElementById('modal-body').innerHTML = '<p>Nessuna nota completa trovata per questo contatto.</p>';
+                                    document.getElementById('myModal').style.display = 'block';
+                                }
+                            };
+                        })(event);
 
                         eventList.appendChild(li);
                     } catch (err) {
                         console.error('Errore nel rendering evento:', err, event);
                     }
-                });
+                }
             } else {
-                const li = document.createElement('li');
+                var li = document.createElement('li');
                 li.textContent = 'Nessuna ricorrenza per questo giorno.';
                 li.style.border = '1px solid #ddd';
                 li.style.backgroundColor = '#e9ecef';
@@ -9283,23 +9616,35 @@
         }
 
         window.onclick = function(event) {
-            const modal = document.getElementById('myModal');
+            var modal = document.getElementById('myModal');
             if (event.target == modal) {
                 modal.style.display = 'none';
             }
         }
 
         function changeDay(delta) {
+            if (isSearchMode) return;
             currentDate.setDate(currentDate.getDate() + delta);
             showEvents(currentDate);
         }
 
         function showToday() {
-            currentDate = new Date();
-            showEvents(currentDate);
+            if (isSearchMode) {
+                exitSearchMode();
+            } else {
+                currentDate = new Date();
+                showEvents(currentDate);
+            }
         }
 
-        document.addEventListener('keydown', (e) => {
+        document.addEventListener('keydown', function(e) {
+            if (isSearchMode) {
+                if (e.key === 'Escape') {
+                    exitSearchMode();
+                }
+                return;
+            }
+
             if (e.key === 'ArrowLeft' && e.ctrlKey) {
                 if (currentDate.getDate() === 1) {
                     currentDate.setMonth(currentDate.getMonth() - 1);
@@ -9307,7 +9652,7 @@
                 currentDate.setDate(1);
                 showEvents(currentDate);
             } else if (e.key === 'ArrowRight' && e.ctrlKey) {
-                const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+                var lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
                 if (currentDate.getDate() === lastDayOfMonth) {
                     currentDate.setMonth(currentDate.getMonth() + 2);
                 } else {
@@ -9332,7 +9677,7 @@
             }
         });
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', function() {
             showEvents(currentDate);
         });
     </script>
