@@ -9526,40 +9526,45 @@
                     try {
                         var li = document.createElement('li');
 
-                        var className = '';
-                        var eventText = event;
+                        // Testo pulito senza modifiche per età
+                        var displayText = event.replace(/[\[\]]/g, '');
+                        
+                        // Calcola le informazioni per la destra
+                        var years = calculateYearsFromDate(event);
+                        var rightText = '';
+                        
+                        if (years !== null) {
+                            rightText = years + ' anni';
+                        } else {
+                            var amRegex = /^\s*\[AM\b/i;
+                            var yearRegex = /\d{2}-\d{2}-(\d{2,4}|\?\?)/;
+                            var isOnomastico = !amRegex.test(event) && !yearRegex.test(event);
+                            if (isOnomastico) {
+                                rightText = formatDateForOnomastico(dateKey);
+                            }
+                        }
 
+                        // Usa il layout con flex per allineare sinistra/destra
+                        li.innerHTML = '<div class="search-result"><div>' + displayText + '</div><div class="search-date">' + rightText + '</div></div>';
+
+                        // Determina la classe colore
+                        var className = '';
                         var amRegex = /^\s*\[AM\b/i;
                         if (amRegex.test(event)) {
                             className = 'pink-bg';
                         } else {
                             var yearMatch = event.match(/\d{2}-\d{2}-(\d{2,4}|\?\?)/);
                             if (yearMatch) {
-                                var eventYearStr = yearMatch[1];
-                                if (eventYearStr === '??') {
-                                    className = 'yellow-bg';
-                                } else {
-                                    var eventYear = parseInt(eventYearStr, 10);
-                                    var fullEventYear;
-                                    if (eventYearStr.length === 2) {
-                                        fullEventYear = eventYear < 25 ? 2000 + eventYear : 1900 + eventYear;
-                                    } else {
-                                        fullEventYear = eventYear;
-                                    }
-                                    var yearsPassed = date.getFullYear() - fullEventYear;
-                                    eventText = event.replace(yearMatch[0], fullEventYear + ' (' + yearsPassed + ' anni)');
-                                    className = 'yellow-bg';
-                                }
+                                className = 'yellow-bg';
                             } else {
                                 className = 'green-bg';
+                                // Aggiungi prefisso onomastico se non presente
                                 if (!event.toLowerCase().includes('onomastico')) {
-                                    eventText = '(Onomastico) ' + event;
+                                    li.innerHTML = '<div class="search-result"><div>(Onomastico) ' + displayText + '</div><div class="search-date">' + rightText + '</div></div>';
                                 }
                             }
                         }
 
-                        var displayText = eventText.replace(/[\[\]]/g, '');
-                        li.textContent = displayText;
                         li.className = className;
 
                         (function(event) {
