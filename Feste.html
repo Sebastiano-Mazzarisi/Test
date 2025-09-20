@@ -63,6 +63,7 @@
     .event-list li:active { transform: scale(0.98); background-color: #b0e0e6 !important; }
     .search-result { display: flex; justify-content: space-between; align-items: center; }
     .search-date { font-size: 0.9em; color: #666; margin-left: 10px; font-weight: bold; }
+    .phone-indicator { color: #dc3545; font-weight: bold; margin-right: 8px; }
     .pink-bg { background-color: #ffe4e1; }
     .yellow-bg { background-color: #fffacd; }
     .green-bg { background-color: #f0fff0; }
@@ -145,6 +146,17 @@
         return (new Date()).getFullYear() - full;
       }
       return null;
+    }
+
+    function hasPhoneNumber(contactName) {
+      if (!contactName) return false;
+      function norm(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim(); }
+      var entry = archiveData[contactName] || archiveByNorm[norm(contactName)];
+      if (entry && entry.cell) {
+        var digits = String(entry.cell).replace(/\D/g,'');
+        return digits.length >= 9; // almeno 9 cifre per essere considerato valido
+      }
+      return false;
     }
 
     function highlightText(text, terms) {
@@ -284,17 +296,40 @@
           // solo cifre
           var digits = String(cell).replace(/\D/g,'');
 
-          // numero nazionale per display: togli sempre prefissi 0039/39/+39
+          // Formattazione migliorata per tutti i formati di numero italiano
+          var display;
+          
+          // Rimuovi sempre prefissi internazionali
           var nat = digits.replace(/^(?:\+?39|0039)/,'');
           
-          // formattazione: nnn nnn nnnn (10 cifre) o nnn nnn nnn (9 cifre)
-          var display;
+          // Formattazione basata sulla lunghezza del numero nazionale
           if (nat.length === 10) {
+            // Cellulare: 3XX XXX XXXX
             display = nat.replace(/(\d{3})(\d{3})(\d{4})/,'$1 $2 $3');
           } else if (nat.length === 9) {
+            // Cellulare vecchio formato: 3XX XXX XXX
             display = nat.replace(/(\d{3})(\d{3})(\d{3})/,'$1 $2 $3');
+          } else if (nat.length === 11 && nat.startsWith('0')) {
+            // Fisso con prefisso: 0XX XXXX XXXX
+            display = nat.replace(/(\d{3})(\d{4})(\d{4})/,'$1 $2 $3');
+          } else if (nat.length === 10 && nat.startsWith('0')) {
+            // Fisso con prefisso: 0XX XXX XXXX
+            display = nat.replace(/(\d{3})(\d{3})(\d{4})/,'$1 $2 $3');
+          } else if (nat.length === 9 && nat.startsWith('0')) {
+            // Fisso con prefisso: 0X XXXX XXXX
+            display = nat.replace(/(\d{2})(\d{4})(\d{3})/,'$1 $2 $3');
+          } else if (nat.length === 8 && nat.startsWith('0')) {
+            // Fisso con prefisso: 0X XXX XXXX
+            display = nat.replace(/(\d{2})(\d{3})(\d{3})/,'$1 $2 $3');
           } else {
-            display = nat; // fallback per numeri non standard
+            // Fallback: formato generico XXX XXX XXXX per numeri di 10+ cifre
+            if (nat.length >= 10) {
+              display = nat.replace(/(\d{3})(\d{3})(\d{4})/,'$1 $2 $3');
+            } else if (nat.length >= 9) {
+              display = nat.replace(/(\d{3})(\d{3})(\d{3})/,'$1 $2 $3');
+            } else {
+              display = nat; // troppo corto, lascia così com'è
+            }
           }
 
           // numero per WhatsApp (E.164 senza '+')
@@ -347,7 +382,12 @@
             var isOnomastico = !amRegex.test(result.event) && !yearRegex.test(result.event);
             if (isOnomastico) rightText = formatDateForOnomastico(result.date);
           }
-          li.innerHTML = '<div class="search-result"><div>' + txt + '</div><div class="search-date">' + rightText + '</div></div>';
+
+          // Controllo se ha telefono per aggiungere il puntino rosso
+          var contactName = linkMap[result.event.indexOf('[') >= 0 ? result.event.substring(result.event.indexOf('[')).trim() : result.event.trim()];
+          var phoneIndicator = hasPhoneNumber(contactName) ? '<span class="phone-indicator">●</span>' : '';
+          
+          li.innerHTML = '<div class="search-result"><div>' + phoneIndicator + txt + '</div><div class="search-date">' + rightText + '</div></div>';
           var cls = '';
           if (/^\s*\[AM\b/i.test(result.event)) cls = 'pink-bg';
           else if (/\d{2}-\d{2}-(\d{2,4}|\?\?)/.test(result.event)) cls = 'yellow-bg';
@@ -409,12 +449,30 @@
             var isOnomastico = !amRegex.test(event) && !yearRegex.test(event);
             if (isOnomastico) rightText = formatDateForOnomastico(dateKey);
           }
-          li.innerHTML = '<div class="search-result"><div>' + displayText + '</div><div class="search-date">' + rightText + '</div></div>';
+
+          // Controllo se ha telefono per aggiungere il puntino rosso
+          var idxOpen = event.indexOf('[');
+          var rawLine = idxOpen >= 0 ? event.substring(idxOpen).trim() : event.trim();
+          var contactName = linkMap[rawLine];
+          var phoneIndicator = hasPhoneNumber(contactName) ? '<span class="phone-indicator">●</span>' : '';
+
+          var isOnomasticoAutoLabel = false;
+          var finalDisplayText = displayText;
+          
           var cls = '';
           if (/^\s*\[AM\b/i.test(event)) cls = 'pink-bg';
           else if (/\d{2}-\d{2}-(\d{2,4}|\?\?)/.test(event)) cls = 'yellow-bg';
-          else { cls = 'green-bg'; if (!/onomastico/i.test(event)) li.innerHTML = '<div class="search-result"><div>(Onomastico) ' + displayText + '</div><div class="search-date">' + rightText + '</div></div>'; }
+          else { 
+            cls = 'green-bg'; 
+            if (!/onomastico/i.test(event)) {
+              finalDisplayText = '(Onomastico) ' + displayText;
+              isOnomasticoAutoLabel = true;
+            }
+          }
+          
+          li.innerHTML = '<div class="search-result"><div>' + phoneIndicator + finalDisplayText + '</div><div class="search-date">' + rightText + '</div></div>';
           li.className = cls;
+          
           li.onclick = function(){
             var idxOpen = event.indexOf('[');
             var idxColon = event.indexOf(':');
