@@ -304,47 +304,57 @@
           
           // Formattazione basata sulla lunghezza del numero nazionale
           if (nat.length === 10) {
-            // Cellulare: 3XX XXX XXXX
-            display = nat.replace(/(\d{3})(\d{3})(\d{4})/,'$1 $2 $3');
+            // Cellulare: &#43;39 3XX XXX XXXX
+            display = '&#43;39 ' + nat.replace(/(\d{3})(\d{3})(\d{4})/,'$1 $2 $3');
           } else if (nat.length === 9) {
-            // Cellulare vecchio formato: 3XX XXX XXX
-            display = nat.replace(/(\d{3})(\d{3})(\d{3})/,'$1 $2 $3');
+            // Cellulare vecchio formato: &#43;39 3XX XXX XXX
+            display = '&#43;39 ' + nat.replace(/(\d{3})(\d{3})(\d{3})/,'$1 $2 $3');
           } else if (nat.length === 11 && nat.startsWith('0')) {
-            // Fisso con prefisso: 0XX XXXX XXXX
-            display = nat.replace(/(\d{3})(\d{4})(\d{4})/,'$1 $2 $3');
+            // Fisso con prefisso: &#43;39 0XX XXXX XXXX
+            display = '&#43;39 ' + nat.replace(/(\d{3})(\d{4})(\d{4})/,'$1 $2 $3');
           } else if (nat.length === 10 && nat.startsWith('0')) {
-            // Fisso con prefisso: 0XX XXX XXXX
-            display = nat.replace(/(\d{3})(\d{3})(\d{4})/,'$1 $2 $3');
+            // Fisso con prefisso: &#43;39 0XX XXX XXXX
+            display = '&#43;39 ' + nat.replace(/(\d{3})(\d{3})(\d{4})/,'$1 $2 $3');
           } else if (nat.length === 9 && nat.startsWith('0')) {
-            // Fisso con prefisso: 0X XXXX XXXX
-            display = nat.replace(/(\d{2})(\d{4})(\d{3})/,'$1 $2 $3');
+            // Fisso con prefisso: &#43;39 0X XXXX XXXX
+            display = '&#43;39 ' + nat.replace(/(\d{2})(\d{4})(\d{3})/,'$1 $2 $3');
           } else if (nat.length === 8 && nat.startsWith('0')) {
-            // Fisso con prefisso: 0X XXX XXXX
-            display = nat.replace(/(\d{2})(\d{3})(\d{3})/,'$1 $2 $3');
+            // Fisso con prefisso: &#43;39 0X XXX XXXX
+            display = '&#43;39 ' + nat.replace(/(\d{2})(\d{3})(\d{3})/,'$1 $2 $3');
           } else {
-            // Fallback: formato generico XXX XXX XXXX per numeri di 10+ cifre
+            // Fallback: formato generico &#43;39 XXX XXX XXXX per numeri di 10+ cifre
             if (nat.length >= 10) {
-              display = nat.replace(/(\d{3})(\d{3})(\d{4})/,'$1 $2 $3');
+              display = '&#43;39 ' + nat.replace(/(\d{3})(\d{3})(\d{4})/,'$1 $2 $3');
             } else if (nat.length >= 9) {
-              display = nat.replace(/(\d{3})(\d{3})(\d{3})/,'$1 $2 $3');
+              display = '&#43;39 ' + nat.replace(/(\d{3})(\d{3})(\d{3})/,'$1 $2 $3');
             } else {
-              display = nat; // troppo corto, lascia così com'è
+              display = '&#43;39 ' + nat; // troppo corto, lascia così com'è
             }
           }
 
-          // numero per WhatsApp (E.164 senza '+')
+          // numero per WhatsApp - formato API corretto
           var waNum = digits;
-          if (waNum.startsWith('00')) waNum = waNum.slice(2);
-          if (!waNum.startsWith('39') && /^3\d{9,10}$/.test(waNum)) waNum = '39' + waNum;
+          
+          // Rimuovi prefissi internazionali
+          waNum = waNum.replace(/^(\+39|0039|39)/, '');
+          
+          // Se inizia con 0 (fisso), rimuovilo
+          if (waNum.startsWith('0')) {
+            waNum = waNum.slice(1);
+          }
+          
+          // Formato finale: +39 seguito dal numero pulito
+          var phoneFormatted = '+39' + waNum;
+          
+          console.log("Numero WhatsApp:", phoneFormatted);
 
-          // *** MODIFICA v2: messaggio con stelline decorative ***
+          // Messaggio con stelle Unicode
           var msg = "★★★ AUGURI ★★★";
           
-          // Forza sempre l'apertura dell'app WhatsApp (non web)
-          // Usa wa.me che è più affidabile per il redirect all'app
-          var wa = "https://wa.me/" + waNum + "?text=" + encodeURIComponent(msg);
+          // URL WhatsApp API corretto - NON encodare il telefono
+          var wa = "https://api.whatsapp.com/send/?phone=" + phoneFormatted + "&text=" + encodeURIComponent(msg);
 
-          // solo il numero cliccabile (senza riga vuota dopo)
+          // Link WhatsApp semplice
           extra = '<div class="cellline"><a href="' + wa + '" target="_blank" rel="noopener noreferrer">' + display + '</a></div>';
         }
 
