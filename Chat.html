@@ -156,22 +156,48 @@ const abbreviazioniCorsi = {
   "defen": "Defence System"
 };
 
+let femaleVoice = null;
+window.speechSynthesis.onvoiceschanged = () => {
+  const voices = window.speechSynthesis.getVoices();
+  femaleVoice = voices.find(voice => voice.lang === 'it-IT' && (voice.gender === 'female' || voice.name.includes('Feminine'))) || voices.find(voice => voice.lang === 'it-IT');
+};
+
 function normalize(t){return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");}
 function timestamp(){return new Date().toLocaleTimeString().slice(0,5);}
-function addMessage(s,t){
-  const c=document.getElementById("chat");
-  const m=document.createElement("div");m.className="message "+s;
-  if(s==="bot"){const a=document.createElement("img");a.src="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/JoyFit.jpg";a.className="avatar";m.appendChild(a);}
-  const b=document.createElement("div");b.className="bubble";b.innerHTML=t;m.appendChild(b);
-  const tm=document.createElement("div");tm.className="timestamp";tm.textContent=timestamp();m.appendChild(tm);
-  c.appendChild(m);c.scrollTop=c.scrollHeight;
-  if (s === 'bot') {
-    speak(t);
+function addMessage(s, t, textToSpeak = "") {
+  const c = document.getElementById("chat");
+  const m = document.createElement("div");
+  m.className = "message " + s;
+  if (s === "bot") {
+    const a = document.createElement("img");
+    a.src = "https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/JoyFit.jpg";
+    a.className = "avatar";
+    m.appendChild(a);
+  }
+  const b = document.createElement("div");
+  b.className = "bubble";
+  b.innerHTML = t;
+  m.appendChild(b);
+  const tm = document.createElement("div");
+  tm.className = "timestamp";
+  tm.textContent = timestamp();
+  m.appendChild(tm);
+  c.appendChild(m);
+  c.scrollTop = c.scrollHeight;
+  if (s === 'bot' && textToSpeak) {
+    speak(textToSpeak);
   }
 }
 
 function speak(text) {
-    const utterance = new SpeechSynthesisUtterance(text.replace(/<[^>]*>/g, ''));
+    if (!femaleVoice) {
+      const voices = window.speechSynthesis.getVoices();
+      femaleVoice = voices.find(voice => voice.lang === 'it-IT' && (voice.gender === 'female' || voice.name.includes('Feminine'))) || voices.find(voice => voice.lang === 'it-IT');
+    }
+    const utterance = new SpeechSynthesisUtterance(text);
+    if(femaleVoice) {
+        utterance.voice = femaleVoice;
+    }
     utterance.lang = 'it-IT';
     speechSynthesis.speak(utterance);
 }
@@ -250,26 +276,45 @@ function levenshteinDistance(a, b) {
 function risposta(q){
   const low = normalize(q);
   const soglia = 2; // Soglia di tolleranza per gli errori di battitura
+  let textToSpeak = "";
 
   // Controllo per i comandi speciali con Levenshtein e `includes`
-  if (levenshteinDistance(low, "contatti") <= soglia || low.includes("contatti") || low.includes("telefono") || low.includes("indirizzo")) return addMessage("bot", contatti);
-  if (low.includes("pdf")) {
-    window.open('https://tinyurl.com/Orari-JoyFit2','_blank');
-    addMessage("bot", "Sto aprendo il file PDF degli orari in una nuova scheda.");
+  if (levenshteinDistance(low, "contatti") <= soglia || low.includes("contatti") || low.includes("telefono") || low.includes("indirizzo")) {
+    textToSpeak = "Ecco i contatti della palestra! Indirizzo, numero di telefono, e mail!";
+    addMessage("bot", contatti, textToSpeak);
     return;
   }
-  if (levenshteinDistance(low, "segreteria") <= soglia || low.includes("segreteria") || low.includes("sabina") || low.includes("marica")) return addMessage("bot", segreteria);
-  if (levenshteinDistance(low, "costo") <= soglia || low.includes("costo") || low.includes("prezzo") || low.includes("abbonamento")) return addMessage("bot", "Per informazioni su abbonamenti e costi contatta la segreteria al ☎️ 080-491.22.23.");
+  if (low.includes("pdf")) {
+    window.open('https://tinyurl.com/Orari-JoyFit2','_blank');
+    textToSpeak = "Sto aprendo il file PDF degli orari in una nuova scheda!";
+    addMessage("bot", textToSpeak, textToSpeak);
+    return;
+  }
+  if (levenshteinDistance(low, "segreteria") <= soglia || low.includes("segreteria") || low.includes("sabina") || low.includes("marica")) {
+    textToSpeak = "Ecco gli orari e i contatti della segreteria!";
+    addMessage("bot", segreteria, textToSpeak);
+    return;
+  }
+  if (levenshteinDistance(low, "costo") <= soglia || low.includes("costo") || low.includes("prezzo") || low.includes("abbonamento")) {
+    textToSpeak = "Per informazioni su abbonamenti e costi, contatta la segreteria!";
+    addMessage("bot", "Per informazioni su abbonamenti e costi contatta la segreteria al ☎️ 080-491.22.23.", textToSpeak);
+    return;
+  }
   if (low.includes("orari")) {
-      addMessage("bot", orariPalestra);
-      addMessage("bot", segreteria);
+      textToSpeak = "Ecco gli orari della sala fitness e della segreteria!";
+      addMessage("bot", orariPalestra + segreteria, textToSpeak);
       return;
   }
   if (levenshteinDistance(low, "fitness") <= soglia || low.includes("fitness")) {
-      addMessage("bot", orariPalestra);
+      textToSpeak = "Ecco gli orari della sala fitness!";
+      addMessage("bot", orariPalestra, textToSpeak);
       return;
   }
-  if (levenshteinDistance(low, "corsi") <= soglia || low.includes("lezioni") || low.includes("programma")) return addMessage("bot", elencoCorsi());
+  if (levenshteinDistance(low, "corsi") <= soglia || low.includes("lezioni") || low.includes("programma")) {
+    textToSpeak = `La palestra offre un totale di ${corsi.length} corsi! Ecco l'elenco completo, diviso per giorno!`;
+    addMessage("bot", elencoCorsi(), textToSpeak);
+    return;
+  }
 
   const tokens = low.split(/,| | e | ed /).map(x => x.trim()).filter(x => x);
   const giorni = [];
@@ -318,33 +363,67 @@ function risposta(q){
     });
   }
 
-  let risultati = [];
+  let risultati = [...new Set(corsiSel)];
   let isMultiDaySearch = giorni.length > 1 && corsiSel.length === 0;
-  let isMultiIstruttoreSearch = false;
-  if(corsiSel.length > 0) {
-    const istruttoriTrovati = [...new Set(corsiSel.map(c => c[3]))];
-    if(istruttoriTrovati.length > 1) {
-      isMultiIstruttoreSearch = true;
-    }
-  }
+  
+  if (corsiSel.length > 0) {
+      const istruttoriTrovati = [...new Set(corsiSel.map(c => c[3]))];
+      let isSingleIstruttoreSearch = istruttoriTrovati.length === 1 && giorni.length === 0;
+      if (isSingleIstruttoreSearch) {
+          const istruttore = istruttoriTrovati[0];
+          const corsiUnici = [...new Set(corsiSel.map(c => c[2]))];
+          const corsiNomi = corsiUnici.length > 1 ? corsiUnici.slice(0, -1).join(", ") + " e " + corsiUnici.slice(-1) : corsiUnici[0];
 
-  if (giorni.length > 0 && corsiSel.length === 0) {
-    const uniqueDays = [...new Set(giorni)];
-    risultati = corsi.filter(c => uniqueDays.includes(c[0]));
-  } else if (giorni.length > 0 && corsiSel.length > 0) {
-    const combinedResults = [...new Set(corsiSel)];
-    risultati = combinedResults.filter(c => giorni.includes(c[0]));
-  } else if (corsiSel.length > 0) {
-    risultati = [...new Set(corsiSel)];
-  }
+          const corsiPerGiorno = {};
+          corsiSel.forEach(c => {
+            const giorno = c[0];
+            const orario = c[1];
+            if (!corsiPerGiorno[giorno]) {
+              corsiPerGiorno[giorno] = [];
+            }
+            corsiPerGiorno[giorno].push(orario);
+          });
 
-  if(risultati.length===0)return addMessage("bot","Nessuna lezione trovata 🤔 Prova con 'Pilates', 'Mimmo e Antonella', 'gio e ven'.");
+          let giorniFrasi = [];
+          for (const giorno of giorniSettimana) {
+            if (corsiPerGiorno[giorno]) {
+              const orari = [...new Set(corsiPerGiorno[giorno])].sort();
+              giorniFrasi.push(`il ${giorno} alle ore ${orari.join(" e ")}`);
+            }
+          }
+          
+          textToSpeak = `${istruttore} tiene ogni settimana ${corsiSel.length} corsi di ${corsiNomi}! ${giorniFrasi.join("! ")}.`;
+      } else {
+        textToSpeak = `Trovati ${risultati.length} risultati! Ecco l'elenco completo!`;
+      }
+      
+      if (giorni.length > 0) {
+          risultati = corsiSel.filter(c => giorni.includes(c[0]));
+      }
+  } else if (giorni.length > 0) {
+      const uniqueDays = [...new Set(giorni)];
+      risultati = corsi.filter(c => uniqueDays.includes(c[0]));
+      textToSpeak = `Trovati ${risultati.length} risultati per i giorni selezionati! Ecco l'elenco completo!`;
+  } else {
+    textToSpeak = "Nessuna lezione trovata! Prova a cercare con il nome di un corso, di un istruttore o un giorno della settimana!";
+    addMessage("bot", "Nessuna lezione trovata 🤔 Prova con 'Pilates', 'Mimmo e Antonella', 'gio e ven'.", textToSpeak);
+    return;
+  }
+  
+  if (risultati.length === 0) {
+      textToSpeak = "Nessuna lezione trovata! Prova a cercare con il nome di un corso, di un istruttore o un giorno della settimana!";
+      addMessage("bot", "Nessuna lezione trovata 🤔 Prova con 'Pilates', 'Mimmo e Antonella', 'gio e ven'.", textToSpeak);
+      return;
+  }
+  
+  const istruttoriNeiRisultati = [...new Set(risultati.map(r => r[3]))];
+  let isMultiIstruttoreSearch = istruttoriNeiRisultati.length > 1;
 
   let html=`<div class='card'><b>Risultati Joy Fit: ${risultati.length}</b><ul>`;
 
   // Logica per visualizzare i risultati raggruppati per istruttore
   if(isMultiIstruttoreSearch) {
-    const istruttoriOrdinati = [...new Set(risultati.map(r => r[3]))].sort();
+    const istruttoriOrdinati = istruttoriNeiRisultati.sort();
     istruttoriOrdinati.forEach((istruttore, index) => {
       const corsiDellIstruttore = risultati.filter(r => r[3] === istruttore).sort((a,b)=>giorniSettimana.indexOf(a[0])-giorniSettimana.indexOf(b[0])||a[1].localeCompare(b[1]));
       if (index > 0) html += `</ul><br><ul>`;
@@ -371,7 +450,7 @@ function risposta(q){
   }
   
   html+="</ul></div>";
-  addMessage("bot",html);
+  addMessage("bot", html, textToSpeak);
 }
 
 function elencoCorsi(){
