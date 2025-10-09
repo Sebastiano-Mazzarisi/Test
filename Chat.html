@@ -165,6 +165,15 @@ function addMessage(s,t){
   const b=document.createElement("div");b.className="bubble";b.innerHTML=t;m.appendChild(b);
   const tm=document.createElement("div");tm.className="timestamp";tm.textContent=timestamp();m.appendChild(tm);
   c.appendChild(m);c.scrollTop=c.scrollHeight;
+  if (s === 'bot') {
+    speak(t);
+  }
+}
+
+function speak(text) {
+    const utterance = new SpeechSynthesisUtterance(text.replace(/<[^>]*>/g, ''));
+    utterance.lang = 'it-IT';
+    speechSynthesis.speak(utterance);
 }
 
 let history = [];
@@ -244,6 +253,11 @@ function risposta(q){
 
   // Controllo per i comandi speciali con Levenshtein e `includes`
   if (levenshteinDistance(low, "contatti") <= soglia || low.includes("contatti") || low.includes("telefono") || low.includes("indirizzo")) return addMessage("bot", contatti);
+  if (low.includes("pdf")) {
+    window.open('https://tinyurl.com/Orari-JoyFit2','_blank');
+    addMessage("bot", "Sto aprendo il file PDF degli orari in una nuova scheda.");
+    return;
+  }
   if (levenshteinDistance(low, "segreteria") <= soglia || low.includes("segreteria") || low.includes("sabina") || low.includes("marica")) return addMessage("bot", segreteria);
   if (levenshteinDistance(low, "costo") <= soglia || low.includes("costo") || low.includes("prezzo") || low.includes("abbonamento")) return addMessage("bot", "Per informazioni su abbonamenti e costi contatta la segreteria al ☎️ 080-491.22.23.");
   if (low.includes("orari")) {
