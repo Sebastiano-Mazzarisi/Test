@@ -71,7 +71,7 @@ Via Giacomo Leopardi 56 – Putignano (BA)<br><br>
 </div>`;
 
 const segreteria=`<div class="card">
-🕓 <b>Segreteria Joy Fit</b><br>
+🕐 <b>Segreteria Joy Fit</b><br>
 👩‍💼 Sabina (mattina)<br>
 👩‍💼 Marica (pomeriggio e sera)<br><br>
 Lun-Ven 08:00-12:00 / 16:00-20:00<br>
@@ -80,7 +80,7 @@ Mer 16:00-20:00 – Sab 09:00-12:00<br>
 </div>`;
 
 const orariPalestra = `<div class="card">
-🕓 <b>Orari Sala Fitness</b><br>
+🕐 <b>Orari Sala Fitness</b><br>
 Lun-Ven 07:00-21:00<br>
 Sab mattina 09:00-12:00<br>
 Sab pomeriggio 15:00-18:00
@@ -156,17 +156,41 @@ const abbreviazioniCorsi = {
   "defen": "Defence System"
 };
 
+// ===== MODIFICHE PER iOS 26 =====
 let selectedVoice = null;
 let voicesLoaded = false;
-window.speechSynthesis.onvoiceschanged = () => {
+
+function loadVoices() {
     const voices = window.speechSynthesis.getVoices();
-    selectedVoice = voices.find(voice => voice.name === 'Google italiano') || voices.find(voice => voice.name.includes('Irene')) || voices.find(voice => voice.name.includes('Alice')) || voices.find(voice => voice.lang === 'it-IT');
+    
+    // Su iOS cerca queste voci in ordine di priorità
+    const priorityNames = ['Alice', 'Luca', 'Paolo', 'italiano', 'Italian'];
+    
+    for (const name of priorityNames) {
+        const voice = voices.find(v => 
+            v.lang.startsWith('it') && 
+            v.name.toLowerCase().includes(name.toLowerCase())
+        );
+        if (voice) {
+            selectedVoice = voice;
+            console.log('✅ Voce selezionata:', voice.name);
+            voicesLoaded = true;
+            return;
+        }
+    }
+    
+    // Fallback: prima voce italiana disponibile
+    selectedVoice = voices.find(v => v.lang.startsWith('it'));
+    console.log('⚠️ Voce fallback:', selectedVoice?.name || 'Nessuna');
     voicesLoaded = true;
-};
-window.speechSynthesis.onvoiceschanged();
+}
+
+window.speechSynthesis.onvoiceschanged = loadVoices;
+setTimeout(loadVoices, 100); // iOS fix
 
 function normalize(t){return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");}
 function timestamp(){return new Date().toLocaleTimeString().slice(0,5);}
+
 function addMessage(s, t, textToSpeak = null) {
   const c = document.getElementById("chat");
   const m = document.createElement("div");
@@ -196,34 +220,44 @@ function addMessage(s, t, textToSpeak = null) {
   }
 }
 
+// ===== FUNZIONE SPEAK OTTIMIZZATA PER iOS 26 =====
 function speak(sentences) {
-  if (window.speechSynthesis.speaking) {
-    window.speechSynthesis.cancel();
-  }
-  if (!voicesLoaded) {
-      setTimeout(() => speak(sentences), 100);
-      return;
-  }
+  window.speechSynthesis.cancel();
   
-  const speakNextSentence = (index) => {
-    if (index >= sentences.length) {
+  setTimeout(() => {
+    if (!voicesLoaded) {
+      setTimeout(() => speak(sentences), 150);
       return;
     }
-    const utterance = new SpeechSynthesisUtterance(sentences[index]);
-    if (selectedVoice) {
-      utterance.voice = selectedVoice;
-    }
-    utterance.lang = 'it-IT';
-    utterance.onend = () => {
-      speakNextSentence(index + 1);
+    
+    const speakNextSentence = (index) => {
+      if (index >= sentences.length) return;
+      
+      const utterance = new SpeechSynthesisUtterance(sentences[index]);
+      
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
+      utterance.lang = 'it-IT';
+      utterance.rate = 0.9;    // Rallenta leggermente per iOS
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+      
+      utterance.onend = () => speakNextSentence(index + 1);
+      utterance.onerror = (e) => {
+        console.error('❌ Errore TTS:', e);
+        speakNextSentence(index + 1);
+      };
+      
+      window.speechSynthesis.speak(utterance);
     };
-    window.speechSynthesis.speak(utterance);
-  };
-  speakNextSentence(0);
+    
+    speakNextSentence(0);
+  }, 100); // Delay critico per iOS
 }
 
 function testVoices() {
-    const voices = window.speechSynthesis.getVoices().filter(voice => voice.lang === 'it-IT');
+    const voices = window.speechSynthesis.getVoices().filter(voice => voice.lang === 'it-IT' || voice.lang.startsWith('it'));
     if (voices.length === 0) {
         addMessage("bot", "Nessuna voce italiana trovata per il test.", ["Nessuna voce italiana trovata per il test!"]);
         return;
@@ -247,7 +281,6 @@ function testVoices() {
     };
     speakNextVoice(0);
 }
-
 
 let history = [];
 let historyIndex = -1;
@@ -322,7 +355,7 @@ function levenshteinDistance(a, b) {
 
 function risposta(q){
   const low = normalize(q);
-  const soglia = 2; // Soglia di tolleranza per gli errori di battitura
+  const soglia = 2;
   let textToSpeak = [];
   
   const voices = window.speechSynthesis.getVoices();
@@ -339,7 +372,6 @@ function risposta(q){
       return;
   }
 
-  // Controllo per i comandi speciali con Levenshtein e `includes`
   if (levenshteinDistance(low, "contatti") <= soglia || low.includes("contatti") || low.includes("telefono") || low.includes("indirizzo")) {
     textToSpeak.push("Ecco i contatti della palestra!", "Indirizzo, numero di telefono, e mail!");
     addMessage("bot", contatti, textToSpeak);
@@ -384,7 +416,6 @@ function risposta(q){
   for (const t of tokens) {
     let giornoTrovato = false;
     
-    // Tentativo di riconoscimento con abbreviazione e Levenshtein per i giorni
     const p = t.slice(0, 3);
     const abbrev = {"lun":"Lunedì","mar":"Martedì","mer":"Mercoledì","gio":"Giovedì","ven":"Venerdì","sab":"Sabato"};
     if (abbrev[p] && t.length <= 4 && levenshteinDistance(normalize(abbrev[p]), t) <= soglia) {
@@ -409,14 +440,12 @@ function risposta(q){
       const istruttoreNormalizzato = normalize(c[3]);
       
       let matchTrovato = false;
-      // Riconoscimento con abbreviazioni dei corsi
       const abbreviazioneTrovata = abbreviazioniCorsi[t];
       if (abbreviazioneTrovata && normalize(abbreviazioneTrovata) === corsoNormalizzato) {
         corsiSel.push(c);
         matchTrovato = true;
       }
       
-      // Se non è un'abbreviazione, usa la distanza di Levenshtein
       if(!matchTrovato) {
         if (levenshteinDistance(corsoNormalizzato, t) <= soglia || levenshteinDistance(istruttoreNormalizzato, t) <= soglia) {
           corsiSel.push(c);
@@ -483,7 +512,6 @@ function risposta(q){
 
   let html=`<div class='card'><b>Risultati Joy Fit: ${risultati.length}</b><ul>`;
 
-  // Logica per visualizzare i risultati raggruppati per istruttore
   if(isMultiIstruttoreSearch) {
     const istruttoriOrdinati = istruttoriNeiRisultati.sort();
     istruttoriOrdinati.forEach((istruttore, index) => {
@@ -494,7 +522,6 @@ function risposta(q){
       }
     });
   } 
-  // Logica per visualizzare i risultati raggruppati per giorno
   else if (isMultiDaySearchVisual) {
     const giorniOrdinati = [...new Set(risultati.map(r => r[0]))].sort((a, b) => giorniSettimana.indexOf(a) - giorniSettimana.indexOf(b));
     giorniOrdinati.forEach((giorno, index) => {
@@ -505,7 +532,6 @@ function risposta(q){
       }
     });
   }
-  // Logica per gli altri casi (singolo giorno/istruttore o ricerca mista)
   else {
     risultati.sort((a,b)=>giorniSettimana.indexOf(a[0])-giorniSettimana.indexOf(b[0])||a[1].localeCompare(b[1]));
     for(const r of risultati)html+=`<li><b class='giorno'>${r[0]}</b> – ${r[1]} – ${r[2]} (${r[3]})</li>`;
