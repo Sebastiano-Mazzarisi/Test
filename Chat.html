@@ -160,10 +160,10 @@ let selectedVoice = null;
 let voicesLoaded = false;
 window.speechSynthesis.onvoiceschanged = () => {
     const voices = window.speechSynthesis.getVoices();
-    selectedVoice = voices.find(voice => voice.name === 'Google italiano') || voices.find(voice => voice.name === 'Alice') || voices.find(voice => voice.lang === 'it-IT' && (voice.name.includes('Irene') || voice.name.includes('Samantha') || voice.name.includes('femmina'))) || voices.find(voice => voice.lang === 'it-IT');
+    selectedVoice = voices.find(voice => voice.name === 'Google italiano') || voices.find(voice => voice.name.includes('Irene')) || voices.find(voice => voice.name.includes('Alice')) || voices.find(voice => voice.lang === 'it-IT');
     voicesLoaded = true;
 };
-window.speechSynthesis.onvoiceschanged(); // Triggera il caricamento all'avvio
+window.speechSynthesis.onvoiceschanged();
 
 function normalize(t){return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");}
 function timestamp(){return new Date().toLocaleTimeString().slice(0,5);}
@@ -188,7 +188,11 @@ function addMessage(s, t, textToSpeak = null) {
   c.appendChild(m);
   c.scrollTop = c.scrollHeight;
   if (s === 'bot' && textToSpeak) {
-    speak(textToSpeak);
+    if (Array.isArray(textToSpeak)) {
+        speak(textToSpeak);
+    } else {
+        speak([textToSpeak]);
+    }
   }
 }
 
@@ -320,6 +324,15 @@ function risposta(q){
   const low = normalize(q);
   const soglia = 2; // Soglia di tolleranza per gli errori di battitura
   let textToSpeak = [];
+  
+  const voices = window.speechSynthesis.getVoices();
+  const setVoiceCommand = voices.find(voice => low.includes(normalize(voice.name)));
+  if (setVoiceCommand) {
+    selectedVoice = setVoiceCommand;
+    textToSpeak.push(`Ho impostato la voce su ${selectedVoice.name}!`);
+    addMessage("bot", textToSpeak[0], textToSpeak);
+    return;
+  }
 
   if (low.includes("test voce")) {
       testVoices();
