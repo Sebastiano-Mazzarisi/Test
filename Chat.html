@@ -156,41 +156,20 @@ const abbreviazioniCorsi = {
   "defen": "Defence System"
 };
 
-// ===== MODIFICHE PER iOS 26 =====
+// ===== UNICA MODIFICA: Disabilita voce su iOS =====
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
 let selectedVoice = null;
 let voicesLoaded = false;
-
-function loadVoices() {
+window.speechSynthesis.onvoiceschanged = () => {
     const voices = window.speechSynthesis.getVoices();
-    
-    // Su iOS cerca queste voci in ordine di priorità
-    const priorityNames = ['Alice', 'Luca', 'Paolo', 'italiano', 'Italian'];
-    
-    for (const name of priorityNames) {
-        const voice = voices.find(v => 
-            v.lang.startsWith('it') && 
-            v.name.toLowerCase().includes(name.toLowerCase())
-        );
-        if (voice) {
-            selectedVoice = voice;
-            console.log('✅ Voce selezionata:', voice.name);
-            voicesLoaded = true;
-            return;
-        }
-    }
-    
-    // Fallback: prima voce italiana disponibile
-    selectedVoice = voices.find(v => v.lang.startsWith('it'));
-    console.log('⚠️ Voce fallback:', selectedVoice?.name || 'Nessuna');
+    selectedVoice = voices.find(voice => voice.name === 'Google italiano') || voices.find(voice => voice.name.includes('Irene')) || voices.find(voice => voice.name.includes('Alice')) || voices.find(voice => voice.lang === 'it-IT');
     voicesLoaded = true;
-}
-
-window.speechSynthesis.onvoiceschanged = loadVoices;
-setTimeout(loadVoices, 100); // iOS fix
+};
+window.speechSynthesis.onvoiceschanged();
 
 function normalize(t){return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");}
 function timestamp(){return new Date().toLocaleTimeString().slice(0,5);}
-
 function addMessage(s, t, textToSpeak = null) {
   const c = document.getElementById("chat");
   const m = document.createElement("div");
@@ -211,7 +190,9 @@ function addMessage(s, t, textToSpeak = null) {
   m.appendChild(tm);
   c.appendChild(m);
   c.scrollTop = c.scrollHeight;
-  if (s === 'bot' && textToSpeak) {
+  
+  // ===== UNICA MODIFICA: Non parlare su iOS =====
+  if (s === 'bot' && textToSpeak && !isIOS) {
     if (Array.isArray(textToSpeak)) {
         speak(textToSpeak);
     } else {
@@ -220,44 +201,34 @@ function addMessage(s, t, textToSpeak = null) {
   }
 }
 
-// ===== FUNZIONE SPEAK OTTIMIZZATA PER iOS 26 =====
 function speak(sentences) {
-  window.speechSynthesis.cancel();
+  if (window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
+  }
+  if (!voicesLoaded) {
+      setTimeout(() => speak(sentences), 100);
+      return;
+  }
   
-  setTimeout(() => {
-    if (!voicesLoaded) {
-      setTimeout(() => speak(sentences), 150);
+  const speakNextSentence = (index) => {
+    if (index >= sentences.length) {
       return;
     }
-    
-    const speakNextSentence = (index) => {
-      if (index >= sentences.length) return;
-      
-      const utterance = new SpeechSynthesisUtterance(sentences[index]);
-      
-      if (selectedVoice) {
-        utterance.voice = selectedVoice;
-      }
-      utterance.lang = 'it-IT';
-      utterance.rate = 0.9;    // Rallenta leggermente per iOS
-      utterance.pitch = 1.0;
-      utterance.volume = 1.0;
-      
-      utterance.onend = () => speakNextSentence(index + 1);
-      utterance.onerror = (e) => {
-        console.error('❌ Errore TTS:', e);
-        speakNextSentence(index + 1);
-      };
-      
-      window.speechSynthesis.speak(utterance);
+    const utterance = new SpeechSynthesisUtterance(sentences[index]);
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+    }
+    utterance.lang = 'it-IT';
+    utterance.onend = () => {
+      speakNextSentence(index + 1);
     };
-    
-    speakNextSentence(0);
-  }, 100); // Delay critico per iOS
+    window.speechSynthesis.speak(utterance);
+  };
+  speakNextSentence(0);
 }
 
 function testVoices() {
-    const voices = window.speechSynthesis.getVoices().filter(voice => voice.lang === 'it-IT' || voice.lang.startsWith('it'));
+    const voices = window.speechSynthesis.getVoices().filter(voice => voice.lang === 'it-IT');
     if (voices.length === 0) {
         addMessage("bot", "Nessuna voce italiana trovata per il test.", ["Nessuna voce italiana trovata per il test!"]);
         return;
@@ -281,6 +252,7 @@ function testVoices() {
     };
     speakNextVoice(0);
 }
+
 
 let history = [];
 let historyIndex = -1;
