@@ -159,7 +159,7 @@ const abbreviazioniCorsi = {
 let selectedVoice = null;
 window.speechSynthesis.onvoiceschanged = () => {
     const voices = window.speechSynthesis.getVoices();
-    selectedVoice = voices.find(voice => voice.name === 'Google italiano') || voices.find(voice => voice.lang === 'it-IT' && (voice.name.includes('Feminine') || voice.name.includes('femmina'))) || voices.find(voice => voice.lang === 'it-IT');
+    selectedVoice = voices.find(voice => voice.name === 'Google italiano') || voices.find(voice => voice.lang === 'it-IT' && (voice.name.includes('Irene') || voice.name.includes('Samantha') || voice.name.includes('femmina'))) || voices.find(voice => voice.lang === 'it-IT');
 };
 
 function normalize(t){return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");}
@@ -194,20 +194,10 @@ function addMessage(s, t, textToSpeak = null) {
 }
 
 function speak(sentences) {
-  if (!selectedVoice) {
-    window.speechSynthesis.onvoiceschanged = () => {
-        const voices = window.speechSynthesis.getVoices();
-        selectedVoice = voices.find(voice => voice.name === 'Google italiano') || voices.find(voice => voice.lang === 'it-IT' && (voice.name.includes('Feminine') || voice.name.includes('femmina'))) || voices.find(voice => voice.lang === 'it-IT');
-        if(selectedVoice) {
-            speak(sentences); // Prova a riprodurre una volta che la voce è stata trovata
-        }
-    };
-    if (window.speechSynthesis.getVoices().length > 0) { // Se le voci sono già caricate ma la nostra preferita no, riprova
-      window.speechSynthesis.onvoiceschanged();
-    }
-    return;
+  if (window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
   }
-  
+
   const speakNextSentence = (index) => {
     if (index >= sentences.length) {
       return;
@@ -303,14 +293,14 @@ function risposta(q){
 
   // Controllo per i comandi speciali con Levenshtein e `includes`
   if (levenshteinDistance(low, "contatti") <= soglia || low.includes("contatti") || low.includes("telefono") || low.includes("indirizzo")) {
-    textToSpeak.push("Ecco i contatti della palestra! Indirizzo, numero di telefono, e mail!");
+    textToSpeak.push("Ecco i contatti della palestra!", "Indirizzo, numero di telefono, e mail!");
     addMessage("bot", contatti, textToSpeak);
     return;
   }
   if (low.includes("pdf")) {
     window.open('https://tinyurl.com/Orari-JoyFit2','_blank');
     textToSpeak.push("Sto aprendo il file PDF degli orari in una nuova scheda!");
-    addMessage("bot", textToSpeak.join(" "), textToSpeak);
+    addMessage("bot", "Sto aprendo il file PDF degli orari in una nuova scheda!", textToSpeak);
     return;
   }
   if (levenshteinDistance(low, "segreteria") <= soglia || low.includes("segreteria") || low.includes("sabina") || low.includes("marica")) {
@@ -324,8 +314,7 @@ function risposta(q){
     return;
   }
   if (low.includes("orari")) {
-      textToSpeak.push("Ecco gli orari della sala fitness!");
-      textToSpeak.push("E gli orari della segreteria!");
+      textToSpeak.push("Ecco gli orari della sala fitness!", "E gli orari della segreteria!");
       addMessage("bot", orariPalestra + segreteria, textToSpeak);
       return;
   }
@@ -335,7 +324,7 @@ function risposta(q){
       return;
   }
   if (levenshteinDistance(low, "corsi") <= soglia || low.includes("lezioni") || low.includes("programma")) {
-    textToSpeak.push(`La palestra offre un totale di ${corsi.length} corsi! Ecco l'elenco completo, diviso per giorno!`);
+    textToSpeak.push(`La palestra offre un totale di ${corsi.length} corsi!`, "Ecco l'elenco completo, diviso per giorno!");
     addMessage("bot", elencoCorsi(), textToSpeak);
     return;
   }
@@ -429,13 +418,13 @@ function risposta(q){
       risultati = corsi.filter(c => uniqueDays.includes(c[0]));
       textToSpeak.push(`Trovati ${risultati.length} risultati per i giorni selezionati! Ecco l'elenco completo!`);
   } else {
-    textToSpeak.push("Nessuna lezione trovata! Prova a cercare con il nome di un corso, di un istruttore o un giorno della settimana!");
+    textToSpeak.push("Nessuna lezione trovata!", "Prova a cercare con il nome di un corso, di un istruttore o un giorno della settimana!");
     addMessage("bot", "Nessuna lezione trovata 🤔 Prova con 'Pilates', 'Mimmo e Antonella', 'gio e ven'.", textToSpeak);
     return;
   }
   
   if (risultati.length === 0) {
-      textToSpeak.push("Nessuna lezione trovata! Prova a cercare con il nome di un corso, di un istruttore o un giorno della settimana!");
+      textToSpeak.push("Nessuna lezione trovata!", "Prova a cercare con il nome di un corso, di un istruttore o un giorno della settimana!");
       addMessage("bot", "Nessuna lezione trovata 🤔 Prova con 'Pilates', 'Mimmo e Antonella', 'gio e ven'.", textToSpeak);
       return;
   }
