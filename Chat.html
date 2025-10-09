@@ -156,15 +156,15 @@ const abbreviazioniCorsi = {
   "defen": "Defence System"
 };
 
-let femaleVoice = null;
+let selectedVoice = null;
 window.speechSynthesis.onvoiceschanged = () => {
-  const voices = window.speechSynthesis.getVoices();
-  femaleVoice = voices.find(voice => voice.lang === 'it-IT' && (voice.gender === 'female' || voice.name.includes('Feminine'))) || voices.find(voice => voice.lang === 'it-IT');
+    const voices = window.speechSynthesis.getVoices();
+    selectedVoice = voices.find(voice => voice.name === 'Google italiano') || voices.find(voice => voice.lang === 'it-IT' && (voice.name.includes('Feminine') || voice.name.includes('femmina'))) || voices.find(voice => voice.lang === 'it-IT');
 };
 
 function normalize(t){return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");}
 function timestamp(){return new Date().toLocaleTimeString().slice(0,5);}
-function addMessage(s, t, textToSpeak = "") {
+function addMessage(s, t, textToSpeak = null) {
   const c = document.getElementById("chat");
   const m = document.createElement("div");
   m.className = "message " + s;
@@ -185,21 +185,44 @@ function addMessage(s, t, textToSpeak = "") {
   c.appendChild(m);
   c.scrollTop = c.scrollHeight;
   if (s === 'bot' && textToSpeak) {
-    speak(textToSpeak);
+    if (Array.isArray(textToSpeak)) {
+        speak(textToSpeak);
+    } else {
+        speak([textToSpeak]);
+    }
   }
 }
 
-function speak(text) {
-    if (!femaleVoice) {
-      const voices = window.speechSynthesis.getVoices();
-      femaleVoice = voices.find(voice => voice.lang === 'it-IT' && (voice.gender === 'female' || voice.name.includes('Feminine'))) || voices.find(voice => voice.lang === 'it-IT');
+function speak(sentences) {
+  if (!selectedVoice) {
+    window.speechSynthesis.onvoiceschanged = () => {
+        const voices = window.speechSynthesis.getVoices();
+        selectedVoice = voices.find(voice => voice.name === 'Google italiano') || voices.find(voice => voice.lang === 'it-IT' && (voice.name.includes('Feminine') || voice.name.includes('femmina'))) || voices.find(voice => voice.lang === 'it-IT');
+        if(selectedVoice) {
+            speak(sentences); // Prova a riprodurre una volta che la voce è stata trovata
+        }
+    };
+    if (window.speechSynthesis.getVoices().length > 0) { // Se le voci sono già caricate ma la nostra preferita no, riprova
+      window.speechSynthesis.onvoiceschanged();
     }
-    const utterance = new SpeechSynthesisUtterance(text);
-    if(femaleVoice) {
-        utterance.voice = femaleVoice;
+    return;
+  }
+  
+  const speakNextSentence = (index) => {
+    if (index >= sentences.length) {
+      return;
+    }
+    const utterance = new SpeechSynthesisUtterance(sentences[index]);
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
     }
     utterance.lang = 'it-IT';
-    speechSynthesis.speak(utterance);
+    utterance.onend = () => {
+      speakNextSentence(index + 1);
+    };
+    window.speechSynthesis.speak(utterance);
+  };
+  speakNextSentence(0);
 }
 
 let history = [];
@@ -276,42 +299,43 @@ function levenshteinDistance(a, b) {
 function risposta(q){
   const low = normalize(q);
   const soglia = 2; // Soglia di tolleranza per gli errori di battitura
-  let textToSpeak = "";
+  let textToSpeak = [];
 
   // Controllo per i comandi speciali con Levenshtein e `includes`
   if (levenshteinDistance(low, "contatti") <= soglia || low.includes("contatti") || low.includes("telefono") || low.includes("indirizzo")) {
-    textToSpeak = "Ecco i contatti della palestra! Indirizzo, numero di telefono, e mail!";
+    textToSpeak.push("Ecco i contatti della palestra! Indirizzo, numero di telefono, e mail!");
     addMessage("bot", contatti, textToSpeak);
     return;
   }
   if (low.includes("pdf")) {
     window.open('https://tinyurl.com/Orari-JoyFit2','_blank');
-    textToSpeak = "Sto aprendo il file PDF degli orari in una nuova scheda!";
-    addMessage("bot", textToSpeak, textToSpeak);
+    textToSpeak.push("Sto aprendo il file PDF degli orari in una nuova scheda!");
+    addMessage("bot", textToSpeak.join(" "), textToSpeak);
     return;
   }
   if (levenshteinDistance(low, "segreteria") <= soglia || low.includes("segreteria") || low.includes("sabina") || low.includes("marica")) {
-    textToSpeak = "Ecco gli orari e i contatti della segreteria!";
+    textToSpeak.push("Ecco gli orari e i contatti della segreteria!");
     addMessage("bot", segreteria, textToSpeak);
     return;
   }
   if (levenshteinDistance(low, "costo") <= soglia || low.includes("costo") || low.includes("prezzo") || low.includes("abbonamento")) {
-    textToSpeak = "Per informazioni su abbonamenti e costi, contatta la segreteria!";
+    textToSpeak.push("Per informazioni su abbonamenti e costi, contatta la segreteria!");
     addMessage("bot", "Per informazioni su abbonamenti e costi contatta la segreteria al ☎️ 080-491.22.23.", textToSpeak);
     return;
   }
   if (low.includes("orari")) {
-      textToSpeak = "Ecco gli orari della sala fitness e della segreteria!";
+      textToSpeak.push("Ecco gli orari della sala fitness!");
+      textToSpeak.push("E gli orari della segreteria!");
       addMessage("bot", orariPalestra + segreteria, textToSpeak);
       return;
   }
   if (levenshteinDistance(low, "fitness") <= soglia || low.includes("fitness")) {
-      textToSpeak = "Ecco gli orari della sala fitness!";
+      textToSpeak.push("Ecco gli orari della sala fitness!");
       addMessage("bot", orariPalestra, textToSpeak);
       return;
   }
   if (levenshteinDistance(low, "corsi") <= soglia || low.includes("lezioni") || low.includes("programma")) {
-    textToSpeak = `La palestra offre un totale di ${corsi.length} corsi! Ecco l'elenco completo, diviso per giorno!`;
+    textToSpeak.push(`La palestra offre un totale di ${corsi.length} corsi! Ecco l'elenco completo, diviso per giorno!`);
     addMessage("bot", elencoCorsi(), textToSpeak);
     return;
   }
@@ -349,7 +373,8 @@ function risposta(q){
       
       let matchTrovato = false;
       // Riconoscimento con abbreviazioni dei corsi
-      if(abbreviazioniCorsi[t] && normalize(abbreviazioniCorsi[t]) === corsoNormalizzato) {
+      const abbreviazioneTrovata = abbreviazioniCorsi[t];
+      if (abbreviazioneTrovata && normalize(abbreviazioneTrovata) === corsoNormalizzato) {
         corsiSel.push(c);
         matchTrovato = true;
       }
@@ -364,7 +389,6 @@ function risposta(q){
   }
 
   let risultati = [...new Set(corsiSel)];
-  let isMultiDaySearch = giorni.length > 1 && corsiSel.length === 0;
   
   if (corsiSel.length > 0) {
       const istruttoriTrovati = [...new Set(corsiSel.map(c => c[3]))];
@@ -372,8 +396,10 @@ function risposta(q){
       if (isSingleIstruttoreSearch) {
           const istruttore = istruttoriTrovati[0];
           const corsiUnici = [...new Set(corsiSel.map(c => c[2]))];
-          const corsiNomi = corsiUnici.length > 1 ? corsiUnici.slice(0, -1).join(", ") + " e " + corsiUnici.slice(-1) : corsiUnici[0];
+          const corsiNomi = corsiUnici.length > 1 ? corsiUnici.slice(0, -1).join(" e ") + " e " + corsiUnici.slice(-1) : corsiUnici[0];
 
+          textToSpeak.push(`${istruttore} tiene ogni settimana ${corsiSel.length} corsi di ${corsiNomi}!`);
+          
           const corsiPerGiorno = {};
           corsiSel.forEach(c => {
             const giorno = c[0];
@@ -383,18 +409,16 @@ function risposta(q){
             }
             corsiPerGiorno[giorno].push(orario);
           });
-
-          let giorniFrasi = [];
-          for (const giorno of giorniSettimana) {
-            if (corsiPerGiorno[giorno]) {
-              const orari = [...new Set(corsiPerGiorno[giorno])].sort();
-              giorniFrasi.push(`il ${giorno} alle ore ${orari.join(" e ")}`);
-            }
-          }
           
-          textToSpeak = `${istruttore} tiene ogni settimana ${corsiSel.length} corsi di ${corsiNomi}! ${giorniFrasi.join("! ")}.`;
+          const giorniOrdinati = Object.keys(corsiPerGiorno).sort((a,b) => giorniSettimana.indexOf(a) - giorniSettimana.indexOf(b));
+          
+          giorniOrdinati.forEach(giorno => {
+            const orari = [...new Set(corsiPerGiorno[giorno])].sort();
+            textToSpeak.push(`Il ${giorno} alle ore ${orari.join(" e alle ore ")}!`);
+          });
+
       } else {
-        textToSpeak = `Trovati ${risultati.length} risultati! Ecco l'elenco completo!`;
+        textToSpeak.push(`Trovati ${risultati.length} risultati! Ecco l'elenco completo!`);
       }
       
       if (giorni.length > 0) {
@@ -403,21 +427,22 @@ function risposta(q){
   } else if (giorni.length > 0) {
       const uniqueDays = [...new Set(giorni)];
       risultati = corsi.filter(c => uniqueDays.includes(c[0]));
-      textToSpeak = `Trovati ${risultati.length} risultati per i giorni selezionati! Ecco l'elenco completo!`;
+      textToSpeak.push(`Trovati ${risultati.length} risultati per i giorni selezionati! Ecco l'elenco completo!`);
   } else {
-    textToSpeak = "Nessuna lezione trovata! Prova a cercare con il nome di un corso, di un istruttore o un giorno della settimana!";
+    textToSpeak.push("Nessuna lezione trovata! Prova a cercare con il nome di un corso, di un istruttore o un giorno della settimana!");
     addMessage("bot", "Nessuna lezione trovata 🤔 Prova con 'Pilates', 'Mimmo e Antonella', 'gio e ven'.", textToSpeak);
     return;
   }
   
   if (risultati.length === 0) {
-      textToSpeak = "Nessuna lezione trovata! Prova a cercare con il nome di un corso, di un istruttore o un giorno della settimana!";
+      textToSpeak.push("Nessuna lezione trovata! Prova a cercare con il nome di un corso, di un istruttore o un giorno della settimana!");
       addMessage("bot", "Nessuna lezione trovata 🤔 Prova con 'Pilates', 'Mimmo e Antonella', 'gio e ven'.", textToSpeak);
       return;
   }
   
   const istruttoriNeiRisultati = [...new Set(risultati.map(r => r[3]))];
   let isMultiIstruttoreSearch = istruttoriNeiRisultati.length > 1;
+  const isMultiDaySearchVisual = giorni.length > 1 && corsiSel.length === 0;
 
   let html=`<div class='card'><b>Risultati Joy Fit: ${risultati.length}</b><ul>`;
 
@@ -433,7 +458,7 @@ function risposta(q){
     });
   } 
   // Logica per visualizzare i risultati raggruppati per giorno
-  else if (isMultiDaySearch) {
+  else if (isMultiDaySearchVisual) {
     const giorniOrdinati = [...new Set(risultati.map(r => r[0]))].sort((a, b) => giorniSettimana.indexOf(a) - giorniSettimana.indexOf(b));
     giorniOrdinati.forEach((giorno, index) => {
       const corsiDelGiorno = risultati.filter(r => r[0] === giorno).sort((a,b)=>a[1].localeCompare(b[1]));
