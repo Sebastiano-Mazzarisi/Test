@@ -157,10 +157,13 @@ const abbreviazioniCorsi = {
 };
 
 let selectedVoice = null;
+let voicesLoaded = false;
 window.speechSynthesis.onvoiceschanged = () => {
     const voices = window.speechSynthesis.getVoices();
-    selectedVoice = voices.find(voice => voice.name === 'Google italiano') || voices.find(voice => voice.lang === 'it-IT' && (voice.name.includes('Irene') || voice.name.includes('Samantha') || voice.name.includes('femmina'))) || voices.find(voice => voice.lang === 'it-IT');
+    selectedVoice = voices.find(voice => voice.name === 'Google italiano') || voices.find(voice => voice.name === 'Alice') || voices.find(voice => voice.lang === 'it-IT' && (voice.name.includes('Irene') || voice.name.includes('Samantha') || voice.name.includes('femmina'))) || voices.find(voice => voice.lang === 'it-IT');
+    voicesLoaded = true;
 };
+window.speechSynthesis.onvoiceschanged(); // Triggera il caricamento all'avvio
 
 function normalize(t){return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");}
 function timestamp(){return new Date().toLocaleTimeString().slice(0,5);}
@@ -185,11 +188,7 @@ function addMessage(s, t, textToSpeak = null) {
   c.appendChild(m);
   c.scrollTop = c.scrollHeight;
   if (s === 'bot' && textToSpeak) {
-    if (Array.isArray(textToSpeak)) {
-        speak(textToSpeak);
-    } else {
-        speak([textToSpeak]);
-    }
+    speak(textToSpeak);
   }
 }
 
@@ -197,7 +196,11 @@ function speak(sentences) {
   if (window.speechSynthesis.speaking) {
     window.speechSynthesis.cancel();
   }
-
+  if (!voicesLoaded) {
+      setTimeout(() => speak(sentences), 100);
+      return;
+  }
+  
   const speakNextSentence = (index) => {
     if (index >= sentences.length) {
       return;
@@ -214,6 +217,33 @@ function speak(sentences) {
   };
   speakNextSentence(0);
 }
+
+function testVoices() {
+    const voices = window.speechSynthesis.getVoices().filter(voice => voice.lang === 'it-IT');
+    if (voices.length === 0) {
+        addMessage("bot", "Nessuna voce italiana trovata per il test.", ["Nessuna voce italiana trovata per il test!"]);
+        return;
+    }
+    let html = "Ecco le voci disponibili:<ul>";
+    voices.forEach(voice => {
+        html += `<li><b>${voice.name}</b> (${voice.lang})</li>`;
+    });
+    html += "</ul><p>Dimmi il nome della voce che preferisci per impostarla!</p>";
+    addMessage("bot", html, ["Ecco le voci disponibili! Dimmi il nome della voce che preferisci per impostarla!"]);
+
+    const speakNextVoice = (index) => {
+        if (index >= voices.length) return;
+        const voice = voices[index];
+        const utterance = new SpeechSynthesisUtterance(`Voce di test! Questa è la voce ${voice.name}`);
+        utterance.voice = voice;
+        utterance.onend = () => {
+            speakNextVoice(index + 1);
+        };
+        window.speechSynthesis.speak(utterance);
+    };
+    speakNextVoice(0);
+}
+
 
 let history = [];
 let historyIndex = -1;
@@ -290,6 +320,11 @@ function risposta(q){
   const low = normalize(q);
   const soglia = 2; // Soglia di tolleranza per gli errori di battitura
   let textToSpeak = [];
+
+  if (low.includes("test voce")) {
+      testVoices();
+      return;
+  }
 
   // Controllo per i comandi speciali con Levenshtein e `includes`
   if (levenshteinDistance(low, "contatti") <= soglia || low.includes("contatti") || low.includes("telefono") || low.includes("indirizzo")) {
