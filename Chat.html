@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Palestra Joy Fit 🏋️‍♀️</title>
+
+<link rel="icon" href="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/JoyFit.jpg" type="image/jpeg">
+<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/JoyFit.jpg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Joy Fit">
+
+<style>
+body{font-family:"Segoe UI",Arial,sans-serif;
+background:linear-gradient(180deg,#b3e5fc,#e1f5fe);
+margin:0;display:flex;flex-direction:column;height:100vh;}
+header{display:flex;align-items:center;
+background:linear-gradient(90deg,#0277bd,#29b6f6);
+color:#fff;padding:10px 16px;font-size:1.3em;font-weight:bold;
+box-shadow:0 2px 6px rgba(0,0,0,0.25);}
+header img{height:42px;width:42px;border-radius:50%;margin-right:10px;}
+#chat{flex:1;padding:12px;overflow-y:auto;display:flex;flex-direction:column;scroll-behavior:smooth;}
+.message{display:flex;align-items:flex-end;margin:8px 0;}
+.message.bot{justify-content:flex-start;}
+.message.user{justify-content:flex-end;}
+.bubble{max-width:75%;padding:10px 14px;border-radius:18px;
+line-height:1.4em;word-wrap:break-word;position:relative;}
+.bot .bubble{background:#fff;color:#004d40;border-bottom-left-radius:4px;
+box-shadow:0 2px 4px rgba(0,0,0,0.1);}
+.user .bubble{background:#0288d1;color:#fff;border-bottom-right-radius:4px;
+box-shadow:0 2px 4px rgba(0,0,0,0.15);}
+.avatar{width:36px;height:36px;border-radius:50%;margin:0 8px;}
+.timestamp{font-size:.7em;color:#777;margin-top:3px;text-align:right;}
+footer{display:flex;justify-content:space-between;align-items:center;
+background:#b3e5fc;padding:8px;flex-wrap:wrap;box-shadow:0 -2px 6px rgba(0,0,0,0.1);}
+input{flex:1;border:none;border-radius:20px;padding:10px 14px;font-size:1em;margin:4px;}
+button{border:none;background:#0288d1;color:#fff;border-radius:20px;
+padding:8px 14px;font-size:1em;cursor:pointer;margin:4px;
+box-shadow:0 2px 4px rgba(0,0,0,0.2);transition:transform .1s;}
+button:hover{background:#0277bd;transform:scale(1.05);}
+.card{background:#f9f9f9;border-left:4px solid #0288d1;
+padding:10px;border-radius:10px;margin-top:4px;line-height:1.4em;}
+h4{margin:6px 0 2px;color:#0277bd;}
+ul{margin:6px 0 0 15px;padding:0;}
+b.giorno{color:#0277bd;}
+</style>
+</head>
+<body>
+
+<header>
+  <img src="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/JoyFit.jpg" alt="Logo Joy Fit">
+  Chat Joy Fit
+</header>
+
+<div id="chat"></div>
+
+<footer>
+  <input id="msg" placeholder="Scrivi la tua domanda..." onkeypress="handleKeyPress(event)">
+  <button onclick="quick('corsi')">📋 Corsi</button>
+  <button onclick="quick('contatti')">📞 Contatti</button>
+  <button onclick="window.open('https://tinyurl.com/Orari-JoyFit2','_blank')">📄 PDF Orari</button>
+</footer>
+
+<script>
+const contatti=`<div class="card">
+📍 <b>Palestra Joy Fit</b><br>
+Via Giacomo Leopardi 56 – Putignano (BA)<br><br>
+☎️ 080-491.22.23  📱 366-40-06-050<br>
+✉️ <a href="mailto:joyfit.putignano@libero.it">joyfit.putignano@libero.it</a><br>
+🌐 <a href="https://www.fb.com/Joy.Fit.Putignano" target="_blank">facebook.com/Joy.Fit.Putignano</a>
+</div>`;
+
+const segreteria=`<div class="card">
+🕓 <b>Segreteria Joy Fit</b><br>
+👩‍💼 Sabina (mattina)<br>
+👩‍💼 Marica (pomeriggio e sera)<br><br>
+Lun-Ven 08:00-12:00 / 16:00-20:00<br>
+Mer 16:00-20:00 – Sab 09:00-12:00<br>
+☎️ 080-491.22.23
+</div>`;
+
+const orariPalestra = `<div class="card">
+🕓 <b>Orari Sala Fitness</b><br>
+Lun-Ven 07:00-21:00<br>
+Sab mattina 09:00-12:00<br>
+Sab pomeriggio 15:00-18:00
+</div>`;
+
+const corsi = [
+  // Lunedì
+  ["Lunedì", "07:30", "Pilates", "Mirella"],
+  ["Lunedì", "09:00", "Postural/Pilates", "Roberta"],
+  ["Lunedì", "10:00", "Power Pilates", "Roberta"],
+  ["Lunedì", "13:30", "Funzionale", "Checco"],
+  ["Lunedì", "14:30", "Funzionale", "Checco"],
+  ["Lunedì", "17:15", "Pilates", "Antonella"],
+  ["Lunedì", "18:15", "Pilates", "Antonella"],
+  ["Lunedì", "18:20", "Body Sculpt", "Titti"],
+  ["Lunedì", "19:15", "Pilates", "Antonella"],
+  ["Lunedì", "19:30", "Body Sculpt", "Titti"],
+  ["Lunedì", "20:15", "Krav Maga", "Saverio"],
+
+  // Martedì
+  ["Martedì", "09:15", "Body Sculpt", "Titti"],
+  ["Martedì", "16:30", "Giocomotricità", "Rosita"],
+  ["Martedì", "18:00", "Total Body", "Sabrina"],
+  ["Martedì", "18:30", "Slow Fit", "Mimmo"],
+  ["Martedì", "19:15", "Funzionale", "Checco"],
+  ["Martedì", "19:30", "Slow Fit", "Mimmo"],
+  ["Martedì", "20:15", "Calisthenics", "Matteo"],
+
+  // Mercoledì
+  ["Mercoledì", "07:00", "Pilates", "Mirella"],
+  ["Mercoledì", "18:00", "Defence System", "Saverio"],
+  ["Mercoledì", "18:00", "Body Sculpt", "Titti"],
+  ["Mercoledì", "19:00", "Body Sculpt", "Titti"],
+  ["Mercoledì", "20:00", "Krav Maga", "Saverio"],
+
+  // Giovedì
+  ["Giovedì", "09:00", "Postural/Pilates", "Roberta"],
+  ["Giovedì", "10:00", "Power Pilates", "Roberta"],
+  ["Giovedì", "13:30", "Funzionale", "Checco"],
+  ["Giovedì", "14:30", "Funzionale", "Checco"],
+  ["Giovedì", "17:15", "Pilates", "Antonella"],
+  ["Giovedì", "18:00", "Total Body", "Sabrina"],
+  ["Giovedì", "18:15", "Pilates", "Antonella"],
+  ["Giovedì", "19:15", "Funzionale", "Checco"],
+  ["Giovedì", "19:15", "Pilates", "Antonella"],
+  ["Giovedì", "20:15", "Calisthenics", "Matteo"],
+
+  // Venerdì
+  ["Venerdì", "07:00", "Pilates", "Mirella"],
+  ["Venerdì", "09:15", "Body Sculpt", "Titti"],
+  ["Venerdì", "16:30", "Giocomotricità", "Rosita"],
+  ["Venerdì", "18:00", "Defence System", "Saverio"],
+  ["Venerdì", "18:30", "Slow Fit", "Mimmo"],
+  ["Venerdì", "19:30", "Body Sculpt", "Titti"],
+  ["Venerdì", "19:30", "Slow Fit", "Mimmo"],
+  ["Venerdì", "20:30", "Calisthenics", "Matteo"],
+
+  // Sabato
+  ["Sabato", "09:00", "Body Sculpt", "Titti"],
+  ["Sabato", "11:00", "Funzionale", "Checco"],
+];
+
+const giorniSettimana=["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
+const abbreviazioniCorsi = {
+  "cali": "Calisthenics",
+  "body": "Body Sculpt",
+  "krav": "Krav Maga",
+  "mag": "Krav Maga",
+  "gioco": "Giocomotricità",
+  "total": "Total Body",
+  "funz": "Funzionale",
+  "defence": "Defence System",
+  "defen": "Defence System"
+};
+
+function normalize(t){return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");}
+function timestamp(){return new Date().toLocaleTimeString().slice(0,5);}
+function addMessage(s,t){
+  const c=document.getElementById("chat");
+  const m=document.createElement("div");m.className="message "+s;
+  if(s==="bot"){const a=document.createElement("img");a.src="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/JoyFit.jpg";a.className="avatar";m.appendChild(a);}
+  const b=document.createElement("div");b.className="bubble";b.innerHTML=t;m.appendChild(b);
+  const tm=document.createElement("div");tm.className="timestamp";tm.textContent=timestamp();m.appendChild(tm);
+  c.appendChild(m);c.scrollTop=c.scrollHeight;
+}
+
+let history = [];
+let historyIndex = -1;
+const maxHistory = 20;
+
+function handleKeyPress(event) {
+  const i = document.getElementById("msg");
+  if (event.key === "Enter") {
+    send();
+  } else if (event.key === "ArrowUp") {
+    event.preventDefault();
+    if (history.length > 0 && historyIndex > 0) {
+      historyIndex--;
+      i.value = history[historyIndex];
+    }
+  } else if (event.key === "ArrowDown") {
+    event.preventDefault();
+    if (historyIndex < history.length - 1) {
+      historyIndex++;
+      i.value = history[historyIndex];
+    } else if (historyIndex === history.length - 1) {
+      historyIndex = history.length;
+      i.value = "";
+    }
+  }
+}
+
+function send(){
+  const i = document.getElementById("msg");
+  const t = i.value.trim();
+  if(!t) return;
+  addMessage("user", t);
+  
+  history.push(t);
+  if (history.length > maxHistory) {
+    history.shift();
+  }
+  historyIndex = history.length;
+  
+  i.value = "";
+  risposta(t);
+}
+
+function quick(a){risposta(a);}
+
+function levenshteinDistance(a, b) {
+  const an = a.length;
+  const bn = b.length;
+  if (an === 0) return bn;
+  if (bn === 0) return an;
+  const matrix = [];
+
+  for (let i = 0; i <= an; i++) {
+    matrix[i] = [i];
+  }
+  for (let j = 0; j <= bn; j++) {
+    matrix[0][j] = j;
+  }
+
+  for (let i = 1; i <= an; i++) {
+    for (let j = 1; j <= bn; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      matrix[i][j] = Math.min(
+        matrix[i - 1][j] + 1,
+        matrix[i][j - 1] + 1,
+        matrix[i - 1][j - 1] + cost
+      );
+    }
+  }
+  return matrix[an][bn];
+}
+
+function risposta(q){
+  const low = normalize(q);
+  const soglia = 2; // Soglia di tolleranza per gli errori di battitura
+
+  // Controllo per i comandi speciali con Levenshtein e `includes`
+  if (levenshteinDistance(low, "contatti") <= soglia || low.includes("contatti") || low.includes("telefono") || low.includes("indirizzo")) return addMessage("bot", contatti);
+  if (levenshteinDistance(low, "segreteria") <= soglia || low.includes("segreteria") || low.includes("sabina") || low.includes("marica")) return addMessage("bot", segreteria);
+  if (levenshteinDistance(low, "costo") <= soglia || low.includes("costo") || low.includes("prezzo") || low.includes("abbonamento")) return addMessage("bot", "Per informazioni su abbonamenti e costi contatta la segreteria al ☎️ 080-491.22.23.");
+  if (low.includes("orari")) {
+      addMessage("bot", orariPalestra);
+      addMessage("bot", segreteria);
+      return;
+  }
+  if (levenshteinDistance(low, "fitness") <= soglia || low.includes("fitness")) {
+      addMessage("bot", orariPalestra);
+      return;
+  }
+  if (levenshteinDistance(low, "corsi") <= soglia || low.includes("lezioni") || low.includes("programma")) return addMessage("bot", elencoCorsi());
+
+  const tokens = low.split(/,| | e | ed /).map(x => x.trim()).filter(x => x);
+  const giorni = [];
+  const corsiSel = [];
+
+  for (const t of tokens) {
+    let giornoTrovato = false;
+    
+    // Tentativo di riconoscimento con abbreviazione e Levenshtein per i giorni
+    const p = t.slice(0, 3);
+    const abbrev = {"lun":"Lunedì","mar":"Martedì","mer":"Mercoledì","gio":"Giovedì","ven":"Venerdì","sab":"Sabato"};
+    if (abbrev[p] && t.length <= 4 && levenshteinDistance(normalize(abbrev[p]), t) <= soglia) {
+      giorni.push(abbrev[p]);
+      giornoTrovato = true;
+    }
+
+    if (!giornoTrovato) {
+      for (const g of giorniSettimana) {
+        if (levenshteinDistance(normalize(g), t) <= soglia) {
+          giorni.push(g);
+          giornoTrovato = true;
+          break;
+        }
+      }
+    }
+    
+    if (giornoTrovato) continue;
+
+    corsi.forEach(c => {
+      const corsoNormalizzato = normalize(c[2]);
+      const istruttoreNormalizzato = normalize(c[3]);
+      
+      let matchTrovato = false;
+      // Riconoscimento con abbreviazioni dei corsi
+      if(abbreviazioniCorsi[t] && normalize(abbreviazioniCorsi[t]) === corsoNormalizzato) {
+        corsiSel.push(c);
+        matchTrovato = true;
+      }
+      
+      // Se non è un'abbreviazione, usa la distanza di Levenshtein
+      if(!matchTrovato) {
+        if (levenshteinDistance(corsoNormalizzato, t) <= soglia || levenshteinDistance(istruttoreNormalizzato, t) <= soglia) {
+          corsiSel.push(c);
+        }
+      }
+    });
+  }
+
+  let risultati = [];
+  let isMultiDaySearch = giorni.length > 1 && corsiSel.length === 0;
+  let isMultiIstruttoreSearch = false;
+  if(corsiSel.length > 0) {
+    const istruttoriTrovati = [...new Set(corsiSel.map(c => c[3]))];
+    if(istruttoriTrovati.length > 1) {
+      isMultiIstruttoreSearch = true;
+    }
+  }
+
+  if (giorni.length > 0 && corsiSel.length === 0) {
+    const uniqueDays = [...new Set(giorni)];
+    risultati = corsi.filter(c => uniqueDays.includes(c[0]));
+  } else if (giorni.length > 0 && corsiSel.length > 0) {
+    const combinedResults = [...new Set(corsiSel)];
+    risultati = combinedResults.filter(c => giorni.includes(c[0]));
+  } else if (corsiSel.length > 0) {
+    risultati = [...new Set(corsiSel)];
+  }
+
+  if(risultati.length===0)return addMessage("bot","Nessuna lezione trovata 🤔 Prova con 'Pilates', 'Mimmo e Antonella', 'gio e ven'.");
+
+  let html=`<div class='card'><b>Risultati Joy Fit: ${risultati.length}</b><ul>`;
+
+  // Logica per visualizzare i risultati raggruppati per istruttore
+  if(isMultiIstruttoreSearch) {
+    const istruttoriOrdinati = [...new Set(risultati.map(r => r[3]))].sort();
+    istruttoriOrdinati.forEach((istruttore, index) => {
+      const corsiDellIstruttore = risultati.filter(r => r[3] === istruttore).sort((a,b)=>giorniSettimana.indexOf(a[0])-giorniSettimana.indexOf(b[0])||a[1].localeCompare(b[1]));
+      if (index > 0) html += `</ul><br><ul>`;
+      for (const r of corsiDellIstruttore) {
+        html += `<li><b class='giorno'>${r[0]}</b> – ${r[1]} – ${r[2]} (${r[3]})</li>`;
+      }
+    });
+  } 
+  // Logica per visualizzare i risultati raggruppati per giorno
+  else if (isMultiDaySearch) {
+    const giorniOrdinati = [...new Set(risultati.map(r => r[0]))].sort((a, b) => giorniSettimana.indexOf(a) - giorniSettimana.indexOf(b));
+    giorniOrdinati.forEach((giorno, index) => {
+      const corsiDelGiorno = risultati.filter(r => r[0] === giorno).sort((a,b)=>a[1].localeCompare(b[1]));
+      if (index > 0) html += `</ul><br><ul>`;
+      for (const r of corsiDelGiorno) {
+        html += `<li><b class='giorno'>${r[0]}</b> – ${r[1]} – ${r[2]} (${r[3]})</li>`;
+      }
+    });
+  }
+  // Logica per gli altri casi (singolo giorno/istruttore o ricerca mista)
+  else {
+    risultati.sort((a,b)=>giorniSettimana.indexOf(a[0])-giorniSettimana.indexOf(b[0])||a[1].localeCompare(b[1]));
+    for(const r of risultati)html+=`<li><b class='giorno'>${r[0]}</b> – ${r[1]} – ${r[2]} (${r[3]})</li>`;
+  }
+  
+  html+="</ul></div>";
+  addMessage("bot",html);
+}
+
+function elencoCorsi(){
+  const totaleCorsi = corsi.length;
+  let html=`<div class='card'><b>🏋️‍♀️ Corsi Joy Fit: ${totaleCorsi}</b><br>`;
+  for(const g of giorniSettimana){
+    const corsiGiorno = corsi.filter(c=>c[0]===g);
+    html+=`<h4>${g}: ${corsiGiorno.length}</h4>`;
+    html+=corsiGiorno.map(c=>`${c[1]} – ${c[2]} (${c[3]})`).join("<br>")+"<br>";
+  }
+  return html+"</div>";
+}
+
+window.onload=()=>{
+  addMessage("bot","Ciao 👋 sono <b>Chat Joy Fit 4.5 Premium</b>! Posso dirti orari e corsi per istruttori o giorni. Prova con 'Mimmo e Antonella', 'Pilates e Krav', o 'lun, mer e ven'.");
+  document.getElementById("msg").focus();
+};
+</script>
+</body>
+</html>
