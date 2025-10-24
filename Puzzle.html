@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Puzzle by Mazzarisi</title>
+<style>
+:root{
+  --bg:#f9fafb;--panel:#fff;--accent:#2563eb;--bordo:#b3d4fc;
+  --tile:#e6f0ff;--tile-at:#e5e7eb;--tile-empty:#ffedd5;
+  --tile-border:#d1d5db;--shadow:0 6px 20px rgba(0,0,0,.08);
+  --radius:18px;--tile-radius:12px;--gap:4px;
+  --tile-font:calc(1.8vw + 12px);
+}
+body{margin:0;background:var(--bg);font-family:"Poppins",system-ui,sans-serif;
+display:flex;flex-direction:column;align-items:center;justify-content:center;
+height:100dvh;color:#1f2937;-webkit-user-select:none;user-select:none;
+touch-action:manipulation;}
+.app{width:95vw;max-width:500px;background:var(--panel);
+border-radius:var(--radius);box-shadow:var(--shadow);
+padding:18px;text-align:center;}
+.title{font-size:17px;margin-bottom:12px;font-style:italic;font-weight:400;color:#374151;}
+.board-wrap{border:4px solid var(--bordo);border-radius:var(--radius);
+padding:10px;margin:auto;display:inline-block;transition:border-color .2s ease;}
+.board{display:grid;gap:var(--gap);justify-content:center;align-content:center;
+margin:auto;transition:grid-template-columns .2s ease;}
+.tile{aspect-ratio:1/1;width:calc(19vw);max-width:65px;display:grid;
+place-items:center;border-radius:var(--tile-radius);
+font-weight:700;font-size:var(--tile-font);
+user-select:none;border:1px solid var(--tile-border);
+transition:transform .1s;}
+.tile.letter{background:var(--tile);color:#0f172a;}
+.tile.at{background:var(--tile-at);color:transparent;}
+.tile.empty{background:var(--tile-empty);border-style:dashed;color:#fb923c;}
+.tile.clickable:active{transform:scale(.96);}
+.controls{display:flex;justify-content:center;gap:10px;margin-top:16px;flex-wrap:wrap;}
+button{border:1px solid #e5e7eb;background:#fff;padding:10px 14px;border-radius:12px;
+cursor:pointer;transition:.15s;box-shadow:0 3px 8px rgba(0,0,0,0.05);
+font-weight:600;font-size:16px;}
+button:active{transform:scale(.96);}
+button.primary{background:var(--accent);color:#fff;border:none;}
+@keyframes frameflash{
+  0%{border-color:#3b82f6;}
+  20%{border-color:#ef4444;}
+  40%{border-color:#facc15;}
+  60%{border-color:#22c55e;}
+  80%{border-color:#06b6d4;}
+  100%{border-color:#3b82f6;}
+}
+.flash-border{animation:frameflash 0.6s linear 5;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="title">Puzzle by Mazzarisi</div>
+  <div class="board-wrap">
+    <div class="board"></div>
+  </div>
+  <div class="controls">
+    <button id="shuffle">Mescola</button>
+    <button id="solve">Soluzione</button>
+    <button id="next" class="primary">Prossimo</button>
+  </div>
+</div>
+<script id="puzzle-data" type="application/json">{"parole": ["DALENA RICCARDO", "LORUSSO ALICE", "LEFEMINE FLAVIA", "PRICCI ANGELA", "LEFEMINE FRANCESCO", "LEPORE GENNY", "CHIARAPPA SAVERIO", "CHIARAPPA MARTINO", "PRICCI MARIA ANTONIETTA", "PRICCI GIUSEPPE", "MAZZARISI MARIA GRAZIA", "MAZZARISI NINO", "LORUSSO CINZIA", "GRILLETTI TERESA", "LORUSSO BENNY", "PRICCI MARICA", "PRICCI TIZIANA", "PRICCI VANNA", "LORUSSO ALESSANDRO", "PRICCI LUIGI", "PRICCI ASIA", "PRICCI GILDA", "LORUSSO ONOFRIO", "PRICCI GIOVANNI", "ROTONDI NICOLETTA", "LEFEMINE DOMENICO", "MAZZARISI ONOFRIO", "BIANCO ROSA", "MAZZARISI TERESA", "LORUSSO NINA", "CHIARAPPA CRISTIANO", "ROTONDI GIANNI", "TRIVISANI ANNA"], "mappa": {"1": {"totale_pezzi": 2, "righe": 2, "colonne": 2, "riempimento_at": 2, "vuoti_hash": 1}, "2": {"totale_pezzi": 3, "righe": 2, "colonne": 2, "riempimento_at": 1, "vuoti_hash": 1}, "3": {"totale_pezzi": 4, "righe": 2, "colonne": 2, "riempimento_at": 0, "vuoti_hash": 1}, "4": {"totale_pezzi": 5, "righe": 2, "colonne": 3, "riempimento_at": 1, "vuoti_hash": 1}, "5": {"totale_pezzi": 6, "righe": 2, "colonne": 3, "riempimento_at": 0, "vuoti_hash": 1}, "6": {"totale_pezzi": 7, "righe": 3, "colonne": 3, "riempimento_at": 2, "vuoti_hash": 1}, "7": {"totale_pezzi": 8, "righe": 3, "colonne": 3, "riempimento_at": 1, "vuoti_hash": 1}, "8": {"totale_pezzi": 9, "righe": 3, "colonne": 3, "riempimento_at": 0, "vuoti_hash": 1}, "9": {"totale_pezzi": 10, "righe": 3, "colonne": 4, "riempimento_at": 2, "vuoti_hash": 1}, "10": {"totale_pezzi": 11, "righe": 3, "colonne": 4, "riempimento_at": 1, "vuoti_hash": 1}, "11": {"totale_pezzi": 12, "righe": 3, "colonne": 4, "riempimento_at": 0, "vuoti_hash": 1}, "12": {"totale_pezzi": 13, "righe": 4, "colonne": 4, "riempimento_at": 3, "vuoti_hash": 1}, "13": {"totale_pezzi": 14, "righe": 4, "colonne": 4, "riempimento_at": 2, "vuoti_hash": 1}, "14": {"totale_pezzi": 15, "righe": 4, "colonne": 4, "riempimento_at": 1, "vuoti_hash": 1}, "15": {"totale_pezzi": 16, "righe": 4, "colonne": 4, "riempimento_at": 0, "vuoti_hash": 1}, "16": {"totale_pezzi": 17, "righe": 4, "colonne": 5, "riempimento_at": 3, "vuoti_hash": 1}, "17": {"totale_pezzi": 18, "righe": 4, "colonne": 5, "riempimento_at": 2, "vuoti_hash": 1}, "18": {"totale_pezzi": 19, "righe": 4, "colonne": 5, "riempimento_at": 1, "vuoti_hash": 1}, "19": {"totale_pezzi": 20, "righe": 4, "colonne": 5, "riempimento_at": 0, "vuoti_hash": 1}, "20": {"totale_pezzi": 21, "righe": 5, "colonne": 5, "riempimento_at": 4, "vuoti_hash": 1}, "21": {"totale_pezzi": 22, "righe": 5, "colonne": 5, "riempimento_at": 3, "vuoti_hash": 1}, "22": {"totale_pezzi": 23, "righe": 5, "colonne": 5, "riempimento_at": 2, "vuoti_hash": 1}, "23": {"totale_pezzi": 24, "righe": 5, "colonne": 5, "riempimento_at": 1, "vuoti_hash": 1}, "24": {"totale_pezzi": 25, "righe": 5, "colonne": 5, "riempimento_at": 0, "vuoti_hash": 1}, "25": {"totale_pezzi": 26, "righe": 5, "colonne": 6, "riempimento_at": 4, "vuoti_hash": 1}, "26": {"totale_pezzi": 27, "righe": 5, "colonne": 6, "riempimento_at": 3, "vuoti_hash": 1}, "27": {"totale_pezzi": 28, "righe": 5, "colonne": 6, "riempimento_at": 2, "vuoti_hash": 1}, "28": {"totale_pezzi": 29, "righe": 5, "colonne": 6, "riempimento_at": 1, "vuoti_hash": 1}, "29": {"totale_pezzi": 30, "righe": 5, "colonne": 6, "riempimento_at": 0, "vuoti_hash": 1}, "30": {"totale_pezzi": 31, "righe": 6, "colonne": 6, "riempimento_at": 5, "vuoti_hash": 1}, "31": {"totale_pezzi": 32, "righe": 6, "colonne": 6, "riempimento_at": 4, "vuoti_hash": 1}, "32": {"totale_pezzi": 33, "righe": 6, "colonne": 6, "riempimento_at": 3, "vuoti_hash": 1}, "33": {"totale_pezzi": 34, "righe": 6, "colonne": 6, "riempimento_at": 2, "vuoti_hash": 1}, "34": {"totale_pezzi": 35, "righe": 6, "colonne": 6, "riempimento_at": 1, "vuoti_hash": 1}, "35": {"totale_pezzi": 36, "righe": 6, "colonne": 6, "riempimento_at": 0, "vuoti_hash": 1}, "36": {"totale_pezzi": 37, "righe": 6, "colonne": 7, "riempimento_at": 5, "vuoti_hash": 1}, "37": {"totale_pezzi": 38, "righe": 6, "colonne": 7, "riempimento_at": 4, "vuoti_hash": 1}, "38": {"totale_pezzi": 39, "righe": 6, "colonne": 7, "riempimento_at": 3, "vuoti_hash": 1}, "39": {"totale_pezzi": 40, "righe": 6, "colonne": 7, "riempimento_at": 2, "vuoti_hash": 1}, "40": {"totale_pezzi": 41, "righe": 6, "colonne": 7, "riempimento_at": 1, "vuoti_hash": 1}, "41": {"totale_pezzi": 42, "righe": 6, "colonne": 7, "riempimento_at": 0, "vuoti_hash": 1}, "42": {"totale_pezzi": 43, "righe": 7, "colonne": 7, "riempimento_at": 6, "vuoti_hash": 1}, "43": {"totale_pezzi": 44, "righe": 7, "colonne": 7, "riempimento_at": 5, "vuoti_hash": 1}, "44": {"totale_pezzi": 45, "righe": 7, "colonne": 7, "riempimento_at": 4, "vuoti_hash": 1}, "45": {"totale_pezzi": 46, "righe": 7, "colonne": 7, "riempimento_at": 3, "vuoti_hash": 1}, "46": {"totale_pezzi": 47, "righe": 7, "colonne": 7, "riempimento_at": 2, "vuoti_hash": 1}, "47": {"totale_pezzi": 48, "righe": 7, "colonne": 7, "riempimento_at": 1, "vuoti_hash": 1}, "48": {"totale_pezzi": 49, "righe": 7, "colonne": 7, "riempimento_at": 0, "vuoti_hash": 1}, "49": {"totale_pezzi": 50, "righe": 7, "colonne": 8, "riempimento_at": 6, "vuoti_hash": 1}, "50": {"totale_pezzi": 51, "righe": 7, "colonne": 8, "riempimento_at": 5, "vuoti_hash": 1}, "51": {"totale_pezzi": 52, "righe": 7, "colonne": 8, "riempimento_at": 4, "vuoti_hash": 1}, "52": {"totale_pezzi": 53, "righe": 7, "colonne": 8, "riempimento_at": 3, "vuoti_hash": 1}, "53": {"totale_pezzi": 54, "righe": 7, "colonne": 8, "riempimento_at": 2, "vuoti_hash": 1}, "54": {"totale_pezzi": 55, "righe": 7, "colonne": 8, "riempimento_at": 1, "vuoti_hash": 1}, "55": {"totale_pezzi": 56, "righe": 7, "colonne": 8, "riempimento_at": 0, "vuoti_hash": 1}, "56": {"totale_pezzi": 57, "righe": 8, "colonne": 8, "riempimento_at": 7, "vuoti_hash": 1}, "57": {"totale_pezzi": 58, "righe": 8, "colonne": 8, "riempimento_at": 6, "vuoti_hash": 1}, "58": {"totale_pezzi": 59, "righe": 8, "colonne": 8, "riempimento_at": 5, "vuoti_hash": 1}, "59": {"totale_pezzi": 60, "righe": 8, "colonne": 8, "riempimento_at": 4, "vuoti_hash": 1}, "60": {"totale_pezzi": 61, "righe": 8, "colonne": 8, "riempimento_at": 3, "vuoti_hash": 1}, "61": {"totale_pezzi": 62, "righe": 8, "colonne": 8, "riempimento_at": 2, "vuoti_hash": 1}, "62": {"totale_pezzi": 63, "righe": 8, "colonne": 8, "riempimento_at": 1, "vuoti_hash": 1}, "63": {"totale_pezzi": 64, "righe": 8, "colonne": 8, "riempimento_at": 0, "vuoti_hash": 1}, "64": {"totale_pezzi": 65, "righe": 8, "colonne": 9, "riempimento_at": 7, "vuoti_hash": 1}, "65": {"totale_pezzi": 66, "righe": 8, "colonne": 9, "riempimento_at": 6, "vuoti_hash": 1}, "66": {"totale_pezzi": 67, "righe": 8, "colonne": 9, "riempimento_at": 5, "vuoti_hash": 1}, "67": {"totale_pezzi": 68, "righe": 8, "colonne": 9, "riempimento_at": 4, "vuoti_hash": 1}, "68": {"totale_pezzi": 69, "righe": 8, "colonne": 9, "riempimento_at": 3, "vuoti_hash": 1}, "69": {"totale_pezzi": 70, "righe": 8, "colonne": 9, "riempimento_at": 2, "vuoti_hash": 1}, "70": {"totale_pezzi": 71, "righe": 8, "colonne": 9, "riempimento_at": 1, "vuoti_hash": 1}, "71": {"totale_pezzi": 72, "righe": 8, "colonne": 9, "riempimento_at": 0, "vuoti_hash": 1}, "72": {"totale_pezzi": 73, "righe": 9, "colonne": 9, "riempimento_at": 8, "vuoti_hash": 1}, "73": {"totale_pezzi": 74, "righe": 9, "colonne": 9, "riempimento_at": 7, "vuoti_hash": 1}, "74": {"totale_pezzi": 75, "righe": 9, "colonne": 9, "riempimento_at": 6, "vuoti_hash": 1}, "75": {"totale_pezzi": 76, "righe": 9, "colonne": 9, "riempimento_at": 5, "vuoti_hash": 1}, "76": {"totale_pezzi": 77, "righe": 9, "colonne": 9, "riempimento_at": 4, "vuoti_hash": 1}, "77": {"totale_pezzi": 78, "righe": 9, "colonne": 9, "riempimento_at": 3, "vuoti_hash": 1}, "78": {"totale_pezzi": 79, "righe": 9, "colonne": 9, "riempimento_at": 2, "vuoti_hash": 1}, "79": {"totale_pezzi": 80, "righe": 9, "colonne": 9, "riempimento_at": 1, "vuoti_hash": 1}, "80": {"totale_pezzi": 81, "righe": 9, "colonne": 9, "riempimento_at": 0, "vuoti_hash": 1}, "81": {"totale_pezzi": 82, "righe": 9, "colonne": 10, "riempimento_at": 8, "vuoti_hash": 1}, "82": {"totale_pezzi": 83, "righe": 9, "colonne": 10, "riempimento_at": 7, "vuoti_hash": 1}, "83": {"totale_pezzi": 84, "righe": 9, "colonne": 10, "riempimento_at": 6, "vuoti_hash": 1}, "84": {"totale_pezzi": 85, "righe": 9, "colonne": 10, "riempimento_at": 5, "vuoti_hash": 1}, "85": {"totale_pezzi": 86, "righe": 9, "colonne": 10, "riempimento_at": 4, "vuoti_hash": 1}, "86": {"totale_pezzi": 87, "righe": 9, "colonne": 10, "riempimento_at": 3, "vuoti_hash": 1}, "87": {"totale_pezzi": 88, "righe": 9, "colonne": 10, "riempimento_at": 2, "vuoti_hash": 1}, "88": {"totale_pezzi": 89, "righe": 9, "colonne": 10, "riempimento_at": 1, "vuoti_hash": 1}, "89": {"totale_pezzi": 90, "righe": 9, "colonne": 10, "riempimento_at": 0, "vuoti_hash": 1}, "90": {"totale_pezzi": 91, "righe": 10, "colonne": 10, "riempimento_at": 9, "vuoti_hash": 1}, "91": {"totale_pezzi": 92, "righe": 10, "colonne": 10, "riempimento_at": 8, "vuoti_hash": 1}, "92": {"totale_pezzi": 93, "righe": 10, "colonne": 10, "riempimento_at": 7, "vuoti_hash": 1}, "93": {"totale_pezzi": 94, "righe": 10, "colonne": 10, "riempimento_at": 6, "vuoti_hash": 1}, "94": {"totale_pezzi": 95, "righe": 10, "colonne": 10, "riempimento_at": 5, "vuoti_hash": 1}, "95": {"totale_pezzi": 96, "righe": 10, "colonne": 10, "riempimento_at": 4, "vuoti_hash": 1}, "96": {"totale_pezzi": 97, "righe": 10, "colonne": 10, "riempimento_at": 3, "vuoti_hash": 1}, "97": {"totale_pezzi": 98, "righe": 10, "colonne": 10, "riempimento_at": 2, "vuoti_hash": 1}, "98": {"totale_pezzi": 99, "righe": 10, "colonne": 10, "riempimento_at": 1, "vuoti_hash": 1}, "99": {"totale_pezzi": 100, "righe": 10, "colonne": 10, "riempimento_at": 0, "vuoti_hash": 1}, "100": {"totale_pezzi": 101, "righe": 10, "colonne": 11, "riempimento_at": 9, "vuoti_hash": 1}}}</script>
+<script>
+(() => {
+  const data = JSON.parse(document.getElementById("puzzle-data").textContent);
+  const paroleBase = data.parole.slice();
+  const mappa = data.mappa;
+  const board = document.querySelector(".board");
+  const frame = document.querySelector(".board-wrap");
+  const btnShuffle = document.querySelector("#shuffle");
+  const btnSolve = document.querySelector("#solve");
+  const btnNext = document.querySelector("#next");
+
+  // Audio iPhone-safe
+  let ctx = null;
+  function ensureAudio() {
+    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  function tick() {
+    ensureAudio();
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.type="square"; osc.frequency.value=240;
+    gain.gain.value=0.06;
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.08);
+    osc.stop(ctx.currentTime + 0.08);
+  }
+  function cheer() {
+    ensureAudio();
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.type="sine";
+    osc.frequency.setValueAtTime(500, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1500, ctx.currentTime + 0.7);
+    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.9);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.9);
+  }
+
+  // Gestione ordine casuale senza ripetizioni
+  let pool = paroleBase.slice();
+  let currentWord = pool.shift();
+  let current=[], solution=[], conf=null, cols=0;
+
+  const disp=c=>c===" "?"·":(c==="#"||c==="@"?"":c);
+  const coord=(i,c)=>[Math.floor(i/c),i%c];
+  const isSolved=(a,b)=>a.length===b.length&&a.every((x,i)=>x===b[i]);
+  const shuffle=a=>{let arr=a.slice();do{
+    for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
+  }while(isSolved(arr,a));return arr;}
+
+  function build(txt){
+    const n=[...txt].length;
+    conf=mappa[n]; if(!conf){board.innerHTML=`<p>Nessuna configurazione per ${n} caratteri</p>`;return;}
+    cols=conf.colonne;
+    solution=[...txt,...Array(conf.riempimento_at).fill("@"),...Array(conf.vuoti_hash).fill("#")];
+    current=shuffle(solution);
+    render(txt);
+  }
+
+  function render(txt){
+    board.style.gridTemplateColumns=`repeat(${conf.colonne},1fr)`;
+    board.innerHTML="";
+    current.forEach((v,i)=>{
+      const d=document.createElement("div");
+      d.className="tile "+(v==="#"?"empty":v==="@"?"at":"letter")+" clickable";
+      d.textContent=disp(v);
+      d.onclick=()=>move(i);
+      board.appendChild(d);
+    });
+  }
+
+  function move(i){
+    const e=current.indexOf("#");
+    if(e<0||i===e)return;
+    const [rE,cE]=coord(e,cols),[rI,cI]=coord(i,cols);
+    if(rE===rI){const dir=cI<cE?1:-1;for(let c=cE-dir;c!==cI-dir;c-=dir){const a=rE*cols+c,b=rE*cols+c+dir;[current[a],current[b]]=[current[b],current[a]];}}
+    else if(cE===cI){const dir=rI<rE?1:-1;for(let r=rE-dir;r!==rI-dir;r-=dir){const a=r*cols+cE,b=(r+dir)*cols+cE;[current[a],current[b]]=[current[b],current[a]];}}
+    else return;
+    tick();
+    render();
+    if(isSolved(current,solution)){
+      cheer();
+      frame.classList.add("flash-border");
+      setTimeout(()=>frame.classList.remove("flash-border"),3000);
+      document.title="🎉 Puzzle Completato!";
+    }
+  }
+
+  function nextWord(){
+    if(pool.length===0){pool=paroleBase.slice();
+      for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+    }
+    currentWord=pool.shift();
+    build(currentWord);
+  }
+
+  btnShuffle.onclick=()=>{current=shuffle(solution);render();};
+  btnSolve.onclick=()=>{current=solution.slice();render();};
+  btnNext.onclick=()=>{nextWord();};
+
+  build(currentWord);
+})();
+</script>
+</body>
+</html>
