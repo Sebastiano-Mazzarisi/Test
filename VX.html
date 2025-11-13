@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisi Dati VX (02/09/2024 - 11/11/2025)</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15); 
+        }
+        h1 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #343a40;
+            margin-top: 30px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border: 1px solid #dee2e6;
+        }
+        th {
+            background-color: #e9ecef;
+            color: #495057;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .chart-container {
+            width: 90%; 
+            max-width: 800px; 
+            margin: 30px auto; 
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); 
+            height: 500px; 
+        }
+        .chart-container canvas {
+            height: 100% !important; 
+            width: 100% !important;
+        }
+        /* Stili per il pulsante */
+        .print-button {
+            display: block;
+            margin: 10px auto 30px auto;
+            padding: 12px 25px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .print-button:hover {
+            background-color: #1e7e34;
+        }
+
+        /* MEDIA QUERY PER LA STAMPA (KEY TO AVOIDING CUTS AND IMPROVING SPACING) */
+        @media print {
+            .print-button {
+                display: none;
+            }
+            .container, .chart-container {
+                box-shadow: none !important;
+                background-color: white !important;
+                padding: 0;
+            }
+            
+            /* REGOLA PER NON TAGLIARE GLI ELEMENTI LUNGHI */
+            h2, table, .chart-container {
+                page-break-inside: avoid;
+            }
+            
+            /* RIDUZIONE INTERLINEA TABELLE */
+            th, td {
+                padding: 5px 10px !important; 
+            }
+            
+            /* NUOVE REGOLE PER LA SPAZIATURA IN STAMPA (AUMENTATE A 100PX) */
+            
+            /* Aumenta lo spazio superiore prima di una nuova sezione */
+            h2 {
+                page-break-before: always;
+                margin-top: 30px !important; 
+                padding-top: 20px;
+            }
+            h1 + h2 {
+                 page-break-before: auto;
+            }
+            
+            /* Aumenta lo spazio sotto le tabelle (100px) */
+            table {
+                margin-bottom: 100px !important; 
+            }
+
+            /* Aumenta lo spazio sopra e sotto i grafici (100px) */
+            .chart-container {
+                margin-top: 100px !important;    
+                margin-bottom: 100px !important; 
+                height: 320px !important;       
+                width: 100% !important;
+                max-width: none !important;
+            }
+            
+            /* L'etichetta dell'ultimo grafico prima di un H2 ha bisogno di più spazio */
+            .chart-container:last-of-type {
+                margin-bottom: 100px !important; 
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="content-to-print">
+        
+        <button class="print-button" onclick="window.print()">
+            🖨️ Stampa / Genera PDF (Consigliato)
+        </button>
+
+        <h1>Analisi Dati Operativi e Finanziari (02/09/2024 - 11/11/2025)</h1>
+
+        <h2>👤 Operatori</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Operatore</th>
+                    <th>N. movimenti</th>
+                    <th>Totale acquisito</th>
+                    <th>Totale presenze</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Marica</td>
+                    <td>3.472 (64.1%)</td>
+                    <td>255.538 € (63.0%)</td>
+                    <td>276 giorni (79.5%)</td>
+                </tr>
+                <tr>
+                    <td>Sabina</td>
+                    <td>1.860 (34.4%)</td>
+                    <td>148.572 € (36.6%)</td>
+                    <td>278 giorni (80.1%)</td>
+                </tr>
+                <tr>
+                    <td>Generico</td>
+                    <td>81 (1.5%)</td>
+                    <td>1.338 € (0.3%)</td>
+                    <td>63 giorni (18.2%)</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td><strong>Totale</strong></td> 
+                    <td><strong>5.413</strong></td> 
+                    <td><strong>405.449 €</strong></td> 
+                    <td><strong>347 giorni</strong></td> 
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="chart-container">
+            <canvas id="movimentiChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="acquisitoChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="presenzeChart"></canvas>
+        </div>
+
+        <h2>🗓️ Giorni di Cassa (Distribuzione Movimenti)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Giorno</th>
+                    <th>N. Incassi</th>
+                    <th>Percentuale</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Lunedì</td><td>1.499</td><td>27.7%</td></tr>
+                <tr><td>Martedì</td><td>1.142</td><td>21.1%</td></tr>
+                <tr><td>Mercoledì</td><td>648</td><td>12.0%</td></tr>
+                <tr><td>Giovedì</td><td>924</td><td>17.1%</td></tr>
+                <tr><td>Venerdì</td><td>968</td><td>17.9%</td></tr>
+                <tr><td>Sabato</td><td>232</td><td>4.3%</td></tr>
+            </tbody>
+            <tfoot>
+                <tr><td><strong>Numero totale incassi</strong></td><td><strong>5.413</strong></td><td></td></tr> 
+            </tfoot>
+        </table>
+
+        <div class="chart-container">
+            <canvas id="cassaGiorniChart"></canvas>
+        </div>
+
+        <h2>💰 Entrate Totali (Mensili)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Mese</th>
+                    <th>Importo Mese 1</th>
+                    <th>Importo Mese 2</th>
+                    <th>Differenza</th>
+                    <th>Variazione %</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Set</td><td>30.997 €</td><td>41.315 €</td><td>10.318 €</td><td>33.3%</td></tr>
+                <tr><td>Ott</td><td>33.138 €</td><td>41.202 €</td><td>8.064 €</td><td>24.3%</td></tr>
+                <tr><td>Nov</td><td>31.575 €</td><td>21.817 €</td><td>-9.758 €</td><td>-30.9%</td></tr>
+                <tr><td>Dic</td><td>23.376 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Gen</td><td>32.400 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Feb</td><td>26.390 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Mar</td><td>28.694 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Apr</td><td>25.342 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Mag</td><td>23.493 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Giu</td><td>19.740 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Lug</td><td>12.570 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Ago</td><td>13.400 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td><strong>Totale</strong></td> 
+                    <td><strong>301.115 €</strong></td> 
+                    <td><strong>104.334 €</strong></td> 
+                    <td><strong>-196.782 €</strong></td> 
+                    <td><strong>-65.4%</strong></td> 
+                </tr>
+            </tfoot>
+        </table>
+        <div class="chart-container">
+            <canvas id="entrateTotaliChart"></canvas>
+        </div>
+
+        <h2>💵 Entrate Contanti (Mensili)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Mese</th>
+                    <th>Importo Mese 1</th>
+                    <th>Importo Mese 2</th>
+                    <th>Differenza</th>
+                    <th>Variazione %</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Set</td><td>10.772 €</td><td>14.498 €</td><td>3.726 €</td><td>34.6%</td></tr>
+                <tr><td>Ott</td><td>11.775 €</td><td>13.852 €</td><td>2.078 €</td><td>17.6%</td></tr>
+                <tr><td>Nov</td><td>11.211 €</td><td>7.015 €</td><td>-4.196 €</td><td>-37.4%</td></tr>
+                <tr><td>Dic</td><td>9.096 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Gen</td><td>13.328 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Feb</td><td>10.300 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Mar</td><td>12.705 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Apr</td><td>9.325 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Mag</td><td>12.245 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Giu</td><td>8.779 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Lug</td><td>6.345 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Ago</td><td>3.876 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td><strong>Totale</strong></td> 
+                    <td><strong>119.757 €</strong></td> 
+                    <td><strong>35.366 €</strong></td> 
+                    <td><strong>-84.392 €</strong></td> 
+                    <td><strong>-70.5%</strong></td> 
+                </tr>
+            </tfoot>
+        </table>
+        <div class="chart-container">
+            <canvas id="entrateContantiChart"></canvas>
+        </div>
+
+        <h2>💳 Entrate POS (Mensili)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Mese</th>
+                    <th>Importo Mese 1</th>
+                    <th>Importo Mese 2</th>
+                    <th>Differenza</th>
+                    <th>Variazione %</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Set</td><td>20.225 €</td><td>26.817 €</td><td>6.592 €</td><td>32.6%</td></tr>
+                <tr><td>Ott</td><td>21.363 €</td><td>27.349 €</td><td>5.986 €</td><td>28.0%</td></tr>
+                <tr><td>Nov</td><td>20.364 €</td><td>14.802 €</td><td>-5.562 €</td><td>-27.3%</td></tr>
+                <tr><td>Dic</td><td>14.280 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Gen</td><td>19.072 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Feb</td><td>16.090 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Mar</td><td>15.989 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Apr</td><td>16.017 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Mag</td><td>11.248 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Giu</td><td>10.961 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Lug</td><td>6.225 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Ago</td><td>9.524 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td><strong>Totale</strong></td> 
+                    <td><strong>181.358 €</strong></td> 
+                    <td><strong>68.968 €</strong></td> 
+                    <td><strong>-112.390 €</strong></td> 
+                    <td><strong>-62.0%</strong></td> 
+                </tr>
+            </tfoot>
+        </table>
+        <div class="chart-container">
+            <canvas id="entratePosChart"></canvas>
+        </div>
+
+        <h2>💸 Uscite (Mensili)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Mese</th>
+                    <th>Importo Mese 1</th>
+                    <th>Importo Mese 2</th>
+                    <th>Differenza</th>
+                    <th>Variazione %</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Set</td><td>760 €</td><td>886 €</td><td>126 €</td><td>16.6%</td></tr>
+                <tr><td>Ott</td><td>317 €</td><td>283 €</td><td>-34 €</td><td>-10.8%</td></tr>
+                <tr><td>Nov</td><td>81 €</td><td>10 €</td><td>-71 €</td><td>-87.6%</td></tr>
+                <tr><td>Dic</td><td>314 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Gen</td><td>126 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Feb</td><td>98 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Mar</td><td>102 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Apr</td><td>56 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Mag</td><td>18 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Giu</td><td>286 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Lug</td><td>32 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+                <tr><td>Ago</td><td>62 €</td><td>0 €</td><td>0 €</td><td>0.0%</td></tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td><strong>Totale</strong></td> 
+                    <td><strong>2.252 €</strong></td> 
+                    <td><strong>1.180 €</strong></td> 
+                    <td><strong>-1.073 €</strong></td> 
+                    <td><strong>-47.6%</strong></td> 
+                </tr>
+            </tfoot>
+        </table>
+        <div class="chart-container">
+            <canvas id="usciteChart"></canvas>
+        </div>
+
+    </div> 
+
+    <script>
+        // Registra il plugin per le etichette dei dati
+        Chart.register(ChartDataLabels);
+
+        // --- DATI GENERALI ---
+        const operators = ['Marica', 'Sabina', 'Generico'];
+        const movimentiData = [3472, 1860, 81];
+        const acquisitoData = [255538, 148572, 1338];
+        const presenzeData = [276, 278, 63];
+        const movimentiPercentages = [64.1, 34.4, 1.5];
+        const acquisitoPercentages = [63.0, 36.6, 0.3];
+        const presenzePercentages = [79.5, 80.1, 18.2];
+
+        const giorniLabels = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+        const incassiData = [1499, 1142, 648, 924, 968, 232];
+        const percentualiCassaData = [27.7, 21.1, 12.0, 17.1, 17.9, 4.3];
+
+        const mesiLabels = ['Set', 'Ott', 'Nov', 'Dic', 'Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago'];
+        const totali_Y1 = [30997, 33138, 31575, 23376, 32400, 26390, 28694, 25342, 23493, 19740, 12570, 13400];
+        const totali_Y2 = [41315, 41202, 21817, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        const contanti_Y1 = [10772, 11775, 11211, 9096, 13328, 10300, 12705, 9325, 12245, 8779, 6345, 3876];
+        const contanti_Y2 = [14498, 13852, 7015, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        const pos_Y1 = [20225, 21363, 20364, 14280, 19072, 16090, 15989, 16017, 11248, 10961, 6225, 9524];
+        const pos_Y2 = [26817, 27349, 14802, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        const uscite_Y1 = [760, 317, 81, 314, 126, 98, 102, 56, 18, 286, 32, 62];
+        const uscite_Y2 = [886, 283, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+
+        // --- FUNZIONE PER GRAFICI OPERATORI E CASSA (SINGOLO DATASET) ---
+
+        function createChart(ctxId, labels, data, percentageData, labelText, colors) {
+            new Chart(document.getElementById(ctxId), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: labelText,
+                        data: data,
+                        backgroundColor: colors,
+                        borderColor: colors.map(c => c.replace('A5F5', '76D2').replace('FF6384', 'D32F2F').replace('FFCE56', 'FFA000').replace('66BB6A', '388E3C')), 
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, 
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: labelText,
+                            font: { size: 16 }
+                        },
+                        datalabels: {
+                            labels: {
+                                // Etichetta 1: Valore assoluto (ORIZZONTALE, NERO)
+                                valueLabel: {
+                                    anchor: 'end', 
+                                    align: 'top', 
+                                    offset: 4, 
+                                    rotation: 0, 
+                                    formatter: function(value, context) {
+                                        if (ctxId === 'acquisitoChart') {
+                                            return value.toLocaleString('it-IT', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                                        }
+                                        return value.toLocaleString();
+                                    },
+                                    color: '#333', 
+                                    font: {
+                                        weight: 'bold'
+                                    }
+                                },
+                                // Etichetta 2: Percentuale (al centro della colonna)
+                                percentLabel: {
+                                    anchor: 'center',
+                                    align: 'center',
+                                    formatter: function(value, context) {
+                                        const percentage = percentageData[context.dataIndex];
+                                        return percentage.toFixed(1) + '%';
+                                    },
+                                    color: 'white', 
+                                    font: {
+                                        weight: 'bold',
+                                        size: 14 
+                                    },
+                                    display: function(context) {
+                                        return percentageData[context.dataIndex] > 5;
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 14 
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: (ctxId === 'acquisitoChart') ? 'Totale Acquisito (€)' : 'Movimenti/Incassi/Giorni'
+                            },
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    return (ctxId === 'acquisitoChart') ? 
+                                           value.toLocaleString('it-IT', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0 }) : 
+                                           value.toLocaleString();
+                                }
+                            },
+                            afterDataLimits: function(scale) {
+                                scale.max = scale.max * 1.10; 
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels] 
+            });
+        }
+
+        // --- FUNZIONE PER GRAFICI DI CONFRONTO (DOPPIO DATASET) ---
+
+        function createComparisonChart(ctxId, labels, dataY1, dataY2, labelText) {
+            new Chart(document.getElementById(ctxId), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '2025', 
+                            data: dataY1,
+                            backgroundColor: '#007bff', 
+                            borderColor: '#0056b3',
+                            borderWidth: 1
+                        },
+                        {
+                            label: '2026', 
+                            data: dataY2,
+                            backgroundColor: '#28a745', 
+                            borderColor: '#1e7e34',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, 
+                    plugins: {
+                        legend: { 
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: { size: 14 }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: labelText,
+                            font: { size: 16 }
+                        },
+                        datalabels: {
+                            // Etichetta (RUOTATA, BIANCA)
+                            anchor: 'end', 
+                            align: 'start', 
+                            offset: 4, 
+                            rotation: -90, 
+                            formatter: function(value, context) {
+                                if (value <= 0) return ''; 
+                                return value.toLocaleString('it-IT', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                            },
+                            color: 'white', 
+                            font: {
+                                weight: 'bold',
+                                size: 12
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 14 
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Importo (€)'
+                            },
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    return value.toLocaleString('it-IT', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                                }
+                            },
+                            afterDataLimits: function(scale) {
+                                scale.max = scale.max * 1.10; 
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels] 
+            });
+        }
+
+
+        // --- ISTANZIAMENTO GRAFICI ---
+
+        const operatorColors = ['#42A5F5', '#FF6384', '#66BB6A']; 
+        const cassaColors = ['#5cb85c', '#4cae4c', '#449d44', '#398439', '#2d692d', '#204d20']; 
+
+        // 1. Grafici Operatori
+        createChart('movimentiChart', operators, movimentiData, movimentiPercentages, 'Numero di Movimenti per Operatore', operatorColors);
+        createChart('acquisitoChart', operators, acquisitoData, acquisitoPercentages, 'Totale Acquisito (€) per Operatore', operatorColors);
+        createChart('presenzeChart', operators, presenzeData, presenzePercentages, 'Totale Presenze (Giorni) per Operatore', operatorColors);
+
+        // 2. Grafico Giorni di Cassa
+        createChart('cassaGiorniChart', giorniLabels, incassiData, percentualiCassaData, 'Distribuzione Incassi per Giorno della Settimana', cassaColors);
+
+        // 3. Nuovi Grafici di Confronto Mensile
+        createComparisonChart('entrateTotaliChart', mesiLabels, totali_Y1, totali_Y2, 'Confronto Entrate Totali Mensili');
+        createComparisonChart('entrateContantiChart', mesiLabels, contanti_Y1, contanti_Y2, 'Confronto Entrate Contanti Mensili');
+        createComparisonChart('entratePosChart', mesiLabels, pos_Y1, pos_Y2, 'Confronto Entrate POS Mensili');
+        createComparisonChart('usciteChart', mesiLabels, uscite_Y1, uscite_Y2, 'Confronto Uscite Mensili');
+
+    </script>
+</body>
+</html>
