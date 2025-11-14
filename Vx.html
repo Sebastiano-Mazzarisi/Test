@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisi Dati VX (02/09/2024 - 11/11/2025)</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+        h1 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            font-size: 1.8em;
+        }
+        h2 {
+            color: #343a40;
+            margin-top: 30px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+        
+        /* Contenitore per lo scroll delle tabelle su schermi piccoli */
+        .table-container {
+            overflow-x: auto;
+            margin: 20px auto; 
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            width: 95%; 
+            max-width: 800px;
+            border: 1px solid #333; /* Cornice nera esterna */
+        }
+
+        table {
+            width: 100%;
+            min-width: 600px; 
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px 10px;
+            text-align: left;
+            border: 1px solid #dee2e6;
+            font-size: 0.9em;
+            vertical-align: middle; 
+        }
+        
+        /* Allineamento celle dati */
+        td {
+            text-align: center;
+        }
+        
+        /* Stile per valori negativi */
+        .negative-value {
+            color: red;
+            font-weight: bold;
+        }
+
+        /* Stile per l'intestazione della tabella (TH) */
+        th {
+            background-color: #e0f7fa; 
+            color: #004d40; 
+            font-weight: bold;
+            text-align: center; 
+        }
+        /* Stile per il rigo dei risultati (TFOOT) */
+        tfoot tr {
+            background-color: #e8f5e9; 
+            font-weight: bold;
+        }
+        tfoot td {
+            text-align: center; 
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        /* Chart Container e Responsive */
+        .chart-container {
+            width: 95%; 
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            height: 400px; 
+            border: 1px solid #333; /* Cornice nera per i grafici */
+        }
+        .chart-container canvas {
+            height: 100% !important;
+            width: 100% !important;
+        }
+
+        .print-button {
+            display: block;
+            margin: 10px auto 30px auto;
+            padding: 12px 25px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .print-button:hover {
+            background-color: #1e7e34;
+        }
+        
+        /* MEDIA QUERY PER MOBILE */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            .table-container {
+                max-width: 100%; 
+            }
+            .chart-container {
+                height: 300px; 
+                margin-top: 15px;
+                margin-bottom: 15px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            th, td {
+                font-size: 0.85em;
+                padding: 6px 8px;
+            }
+        }
+
+
+        /* MEDIA QUERY PER LA STAMPA */
+        @media print {
+            .print-button {
+                display: none;
+            }
+            .container, .chart-container {
+                box-shadow: none !important;
+                background-color: white !important;
+                padding: 0;
+            }
+
+            /* Forziamo la stampa dei colori di sfondo e della cornice */
+            .table-container, .chart-container {
+                border: 1px solid #333 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            th {
+                background-color: #e0f7fa !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            tfoot tr {
+                background-color: #e8f5e9 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            h2, .table-container, .chart-container {
+                page-break-inside: avoid;
+            }
+            th, td {
+                padding: 5px 10px !important;
+            }
+            h2 {
+                page-break-before: always;
+                margin-top: 20px !important;
+                padding-top: 15px;
+            }
+            h1 + h2 {
+                 page-break-before: auto;
+            }
+            .table-container {
+                margin-bottom: 50px !important;
+                max-width: 100% !important;
+            }
+            .chart-container {
+                margin-top: 50px !important;
+                margin-bottom: 50px !important;
+                height: 320px !important; 
+                width: 100% !important;
+                max-width: none !important;
+            }
+            /* Mantenere il colore rosso per i valori negativi in stampa */
+            .negative-value {
+                color: red !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="content-to-print">
+
+        <button class="print-button" onclick="window.print()">
+            🖨️ Stampa / Genera PDF (Consigliato)
+        </button>
+
+        <h1>Analisi Dati (02/09/2024 - 11/11/2025)</h1>
+
+        <h2>💰 Entrate Totali (Mensili)</h2>
+        <div class="table-container"> 
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mese</th>
+                        <th>Importo Mese 1</th>
+                        <th>Importo Mese 2</th>
+                        <th>Differenza</th>
+                        <th>Variazione %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Set</td><td>30.997 €</td><td>41.315 €</td><td>10.318 €</td><td>33.3%</td></tr>
+                    <tr><td>Ott</td><td>33.138 €</td><td>41.202 €</td><td>8.064 €</td><td>24.3%</td></tr>
+                    <tr><td>Nov</td><td>31.575 €</td><td>21.817 €</td><td><span class="negative-value">-9.758 €</span></td><td><span class="negative-value">-30.9%</span></td></tr>
+                    <tr><td>Dic</td><td>23.376 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Gen</td><td>32.400 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Feb</td><td>26.390 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Mar</td><td>28.694 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Apr</td><td>25.342 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Mag</td><td>23.493 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Giu</td><td>19.740 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Lug</td><td>12.570 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Ago</td><td>13.400 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td><strong>Totale</strong></td>
+                        <td><strong>301.115 €</strong></td>
+                        <td><strong>104.334 €</strong></td>
+                        <td><span class="negative-value"><strong>-196.782 €</strong></span></td>
+                        <td><span class="negative-value"><strong>-65.4%</strong></span></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div> 
+        <div class="chart-container">
+            <canvas id="entrateTotaliChart"></canvas>
+        </div>
+
+        
+        <h2>💰 Entrate Totali2 (Mensili)</h2>
+        <div class="table-container"> 
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mese</th>
+                        <th>Importo Mese 1</th>
+                        <th>Importo Mese 2</th>
+                        <th>Differenza</th>
+                        <th>Variazione %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Set</td><td>2.022 €</td><td>2.681 €</td><td>659 €</td><td>32.6%</td></tr>
+                    <tr><td>Ott</td><td>2.136 €</td><td>2.734 €</td><td>598 €</td><td>28.0%</td></tr>
+                    <tr><td>Nov</td><td>2.036 €</td><td>1.480 €</td><td><span class="negative-value">-556 €</span></td><td><span class="negative-value">-27.3%</span></td></tr>
+                    <tr><td>Dic</td><td>1.428 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Gen</td><td>1.907 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Feb</td><td>1.609 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Mar</td><td>1.598 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Apr</td><td>1.601 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Mag</td><td>1.124 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Giu</td><td>1.096 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Lug</td><td>622 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Ago</td><td>952 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td><strong>Totale</strong></td>
+                        <td><strong>18.165 €</strong></td>
+                        <td><strong>6.895 €</strong></td>
+                        <td><span class="negative-value"><strong>-11.271 €</strong></span></td>
+                        <td><span class="negative-value"><strong>-62.0%</strong></span></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div> 
+        <div class="chart-container">
+            <canvas id="entrateTotaliNuovoChart"></canvas>
+        </div>
+        
+        
+        <h2>💵 Entrate Contanti (Mensili)</h2>
+        <div class="table-container"> 
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mese</th>
+                        <th>Importo Mese 1</th>
+                        <th>Importo Mese 2</th>
+                        <th>Differenza</th>
+                        <th>Variazione %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Set</td><td>10.772 €</td><td>14.498 €</td><td>3.726 €</td><td>34.6%</td></tr>
+                    <tr><td>Ott</td><td>11.775 €</td><td>13.852 €</td><td>2.078 €</td><td>17.6%</td></tr>
+                    <tr><td>Nov</td><td>11.211 €</td><td>7.015 €</td><td><span class="negative-value">-4.196 €</span></td><td><span class="negative-value">-37.4%</span></td></tr>
+                    <tr><td>Dic</td><td>9.096 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Gen</td><td>13.328 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Feb</td><td>10.300 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Mar</td><td>12.705 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Apr</td><td>9.325 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Mag</td><td>12.245 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Giu</td><td>8.779 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Lug</td><td>6.345 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Ago</td><td>3.876 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td><strong>Totale</strong></td>
+                        <td><strong>119.757 €</strong></td>
+                        <td><strong>35.366 €</strong></td>
+                        <td><span class="negative-value"><strong>-84.392 €</strong></span></td>
+                        <td><span class="negative-value"><strong>-70.5%</strong></span></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div> 
+        <div class="chart-container">
+            <canvas id="entrateContantiChart"></canvas>
+        </div>
+
+        
+        <h2>💳 Entrate POS (Mensili)</h2>
+        <div class="table-container"> 
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mese</th>
+                        <th>Importo Mese 1</th>
+                        <th>Importo Mese 2</th>
+                        <th>Differenza</th>
+                        <th>Variazione %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Set</td><td>20.225 €</td><td>26.817 €</td><td>6.592 €</td><td>32.6%</td></tr>
+                    <tr><td>Ott</td><td>21.363 €</td><td>27.349 €</td><td>5.986 €</td><td>28.0%</td></tr>
+                    <tr><td>Nov</td><td>20.364 €</td><td>14.802 €</td><td><span class="negative-value">-5.562 €</span></td><td><span class="negative-value">-27.3%</span></td></tr>
+                    <tr><td>Dic</td><td>14.280 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Gen</td><td>19.072 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Feb</td><td>16.090 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Mar</td><td>15.989 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Apr</td><td>16.017 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Mag</td><td>11.248 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Giu</td><td>10.961 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Lug</td><td>6.225 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Ago</td><td>9.524 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td><strong>Totale</strong></td>
+                        <td><strong>181.358 €</strong></td>
+                        <td><strong>68.968 €</strong></td>
+                        <td><span class="negative-value"><strong>-112.390 €</strong></span></td>
+                        <td><span class="negative-value"><strong>-62.0%</strong></span></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div> 
+        <div class="chart-container">
+            <canvas id="entratePosChart"></canvas>
+        </div>
+
+        
+        <h2>💸 Uscite (Mensili)</h2>
+        <div class="table-container"> 
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mese</th>
+                        <th>Importo Mese 1</th>
+                        <th>Importo Mese 2</th>
+                        <th>Differenza</th>
+                        <th>Variazione %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Set</td><td>760 €</td><td>886 €</td><td>126 €</td><td>16.6%</td></tr>
+                    <tr><td>Ott</td><td>317 €</td><td>283 €</td><td><span class="negative-value">-34 €</span></td><td><span class="negative-value">-10.8%</span></td></tr>
+                    <tr><td>Nov</td><td>81 €</td><td>10 €</td><td><span class="negative-value">-71 €</span></td><td><span class="negative-value">-87.6%</span></td></tr>
+                    <tr><td>Dic</td><td>314 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Gen</td><td>126 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Feb</td><td>98 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Mar</td><td>102 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Apr</td><td>56 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Mag</td><td>18 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Giu</td><td>286 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Lug</td><td>32 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>Ago</td><td>62 €</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td><strong>Totale</strong></td>
+                        <td><strong>2.252 €</strong></td>
+                        <td><strong>1.180 €</strong></td>
+                        <td><span class="negative-value"><strong>-1.073 €</strong></span></td>
+                        <td><span class="negative-value"><strong>-47.6%</strong></span></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div> 
+        <div class="chart-container">
+            <canvas id="usciteChart"></canvas>
+        </div>
+
+        
+        <h2>🗓️ Giorni di Cassa (Distribuzione Movimenti)</h2>
+        <div class="table-container"> 
+            <table>
+                <thead>
+                    <tr>
+                        <th>Giorno</th>
+                        <th>N. Incassi</th>
+                        <th>Percentuale</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Lunedì</td><td>1.499</td><td>27.7%</td></tr>
+                    <tr><td>Martedì</td><td>1.142</td><td>21.1%</td></tr>
+                    <tr><td>Mercoledì</td><td>648</td><td>12.0%</td></tr>
+                    <tr><td>Giovedì</td><td>924</td><td>17.1%</td></tr>
+                    <tr><td>Venerdì</td><td>968</td><td>17.9%</td></tr>
+                    <tr><td>Sabato</td><td>232</td><td>4.3%</td></tr>
+                </tbody>
+                <tfoot>
+                    <tr><td><strong>Numero totale incassi</strong></td><td><strong>5.413</strong></td><td>&nbsp;</td></tr>
+                </tfoot>
+            </table>
+        </div> 
+
+        <div class="chart-container">
+            <canvas id="cassaGiorniChart"></canvas>
+        </div>
+
+        
+        <h2>👤 Operatori</h2>
+        <div class="table-container"> 
+            <table>
+                <thead>
+                    <tr>
+                        <th>Operatore</th>
+                        <th>N. movimenti</th>
+                        <th>Totale acquisito</th>
+                        <th>Totale presenze</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Marica</td>
+                        <td>3.472 (64.1%)</td>
+                        <td>255.538 € (63.0%)</td>
+                        <td>276 giorni (79.5%)</td>
+                    </tr>
+                    <tr>
+                        <td>Sabina</td>
+                        <td>1.860 (34.4%)</td>
+                        <td>148.572 € (36.6%)</td>
+                        <td>278 giorni (80.1%)</td>
+                    </tr>
+                    <tr>
+                        <td>Generico</td>
+                        <td>81 (1.5%)</td>
+                        <td>1.338 € (0.3%)</td>
+                        <td>63 giorni (18.2%)</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td><strong>Totale</strong></td>
+                        <td><strong>5.413</strong></td>
+                        <td><strong>405.449 €</strong></td>
+                        <td><strong>347 giorni</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div> 
+
+        <div class="chart-container">
+            <canvas id="movimentiChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="acquisitoChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="presenzeChart"></canvas>
+        </div>
+
+    </div>
+
+    <script>
+        // Registra il plugin per le etichette dei dati
+        Chart.register(ChartDataLabels);
+
+        // --- DATI (Dati Y2 con 0 sostituiti da null per i grafici) ---
+        
+        // Funzione per sostituire gli zeri finali con null
+        function replaceTrailingZerosWithNull(data) {
+            let foundNonZero = false;
+            for (let i = data.length - 1; i >= 0; i--) {
+                if (data[i] === 0 && !foundNonZero) {
+                    data[i] = null;
+                } else if (data[i] !== 0 && data[i] !== null) {
+                    foundNonZero = true;
+                }
+            }
+            return data;
+        }
+
+        // Dati Anno 1 (2024-2025)
+        const operators = ['Marica', 'Sabina', 'Generico'];
+        const movimentiData = [3472, 1860, 81];
+        const acquisitoData = [255538, 148572, 1338];
+        const presenzeData = [276, 278, 63];
+        const movimentiPercentages = [64.1, 34.4, 1.5];
+        const acquisitoPercentages = [63.0, 36.6, 0.3];
+        const presenzePercentages = [79.5, 80.1, 18.2];
+
+        const giorniLabels = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+        const incassiData = [1499, 1142, 648, 924, 968, 232];
+        const percentualiCassaData = [27.7, 21.1, 12.0, 17.1, 17.9, 4.3];
+
+        const mesiLabels = ['Set', 'Ott', 'Nov', 'Dic', 'Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago'];
+        
+        // Dati Y1 (per i grafici)
+        const totali_Y1 = [30997, 33138, 31575, 23376, 32400, 26390, 28694, 25342, 23493, 19740, 12570, 13400];
+        const totaliNuovo_Y1 = [2022, 2136, 2036, 1428, 1907, 1609, 1598, 1601, 1124, 1096, 622, 952];
+        const contanti_Y1 = [10772, 11775, 11211, 9096, 13328, 10300, 12705, 9325, 12245, 8779, 6345, 3876];
+        const pos_Y1 = [20225, 21363, 20364, 14280, 19072, 16090, 15989, 16017, 11248, 10961, 6225, 9524];
+        const uscite_Y1 = [760, 317, 81, 314, 126, 98, 102, 56, 18, 286, 32, 62];
+
+        // Dati Y2 originali (per i grafici, gli zeri sono convertiti in null qui)
+        let totali_Y2 = replaceTrailingZerosWithNull([41315, 41202, 21817, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+        let totaliNuovo_Y2 = replaceTrailingZerosWithNull([2681, 2734, 1480, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+        let contanti_Y2 = replaceTrailingZerosWithNull([14498, 13852, 7015, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+        let pos_Y2 = replaceTrailingZerosWithNull([26817, 27349, 14802, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+        let uscite_Y2 = replaceTrailingZerosWithNull([886, 283, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+
+
+        // Funzione helper per ottenere la dimensione del font in base alla larghezza dello schermo
+        const getMobileFontSize = (desktopSize) => {
+            return window.innerWidth <= 768 ? desktopSize * 0.8 : desktopSize;
+        };
+
+
+        // --- FUNZIONE PER GRAFICI OPERATORI E CASSA (SINGOLO DATASET - BARRE) ---
+        function createChart(ctxId, labels, data, percentageData, labelText, colors) {
+            new Chart(document.getElementById(ctxId), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: labelText,
+                        data: data,
+                        backgroundColor: colors,
+                        borderColor: colors.map(c => c.replace('A5F5', '76D2').replace('FF6384', 'D32F2F').replace('FFCE56', 'FFA000').replace('66BB6A', '388E3C')),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: labelText,
+                            font: { size: getMobileFontSize(16) }
+                        },
+                        datalabels: {
+                            labels: {
+                                // Etichetta 1: Valore assoluto (ORIZZONTALE, NERO)
+                                valueLabel: {
+                                    anchor: 'end',
+                                    align: 'top',
+                                    offset: 4,
+                                    rotation: 0,
+                                    formatter: function(value, context) {
+                                        if (ctxId === 'acquisitoChart') {
+                                            return value.toLocaleString('it-IT', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                                        }
+                                        return value.toLocaleString();
+                                    },
+                                    color: '#333',
+                                    font: {
+                                        weight: 'bold',
+                                        size: getMobileFontSize(12) 
+                                    }
+                                },
+                                // Etichetta 2: Percentuale (al centro della colonna)
+                                percentLabel: {
+                                    anchor: 'center',
+                                    align: 'center',
+                                    formatter: function(value, context) {
+                                        const percentage = percentageData[context.dataIndex];
+                                        return percentage.toFixed(1) + '%';
+                                    },
+                                    color: 'white',
+                                    font: {
+                                        weight: 'bold',
+                                        size: getMobileFontSize(14) 
+                                    },
+                                    display: function(context) {
+                                        return percentageData[context.dataIndex] > 5;
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: getMobileFontSize(14) 
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: (ctxId === 'acquisitoChart') ? 'Totale Acquisito (€)' : 'Movimenti/Incassi/Giorni',
+                                font: { size: getMobileFontSize(12) } 
+                            },
+                            ticks: {
+                                font: { size: getMobileFontSize(10) }, 
+                                callback: function(value, index, values) {
+                                    return (ctxId === 'acquisitoChart') ?
+                                           value.toLocaleString('it-IT', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0 }) :
+                                           value.toLocaleString();
+                                }
+                            },
+                            afterDataLimits: function(scale) {
+                                scale.max = scale.max * 1.15; 
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
+        // --- FUNZIONE PER GRAFICI DI CONFRONTO (DOPPIO DATASET - LINEA) ---
+        function createComparisonChart(ctxId, labels, dataY1, dataY2, labelText) {
+            new Chart(document.getElementById(ctxId), {
+                type: 'line', 
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '2024-2025', 
+                            data: dataY1,
+                            borderColor: '#007bff',
+                            backgroundColor: '#007bff',
+                            fill: false,
+                            pointRadius: 5,
+                            pointHoverRadius: 8,
+                            tension: 0.1
+                        },
+                        {
+                            label: '2025-2026', 
+                            data: dataY2,
+                            borderColor: '#28a745',
+                            backgroundColor: '#28a745',
+                            fill: false,
+                            pointRadius: 5,
+                            pointHoverRadius: 8,
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: { size: getMobileFontSize(14) } 
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: labelText,
+                            font: { size: getMobileFontSize(16) }
+                        },
+                        datalabels: {
+                            // Etichetta (ORIZZONTALE, NERA) - Posizionamento intelligente
+                            anchor: 'end', 
+                            align: 'top',
+                            offset: 12, 
+                            rotation: 0, 
+                            formatter: function(value, context) {
+                                if (value === null || value === 0) return '';
+                                
+                                // Formattazione a K per risparmiare spazio
+                                if (value >= 10000) {
+                                    return (value / 1000).toFixed(0) + 'K';
+                                }
+                                return value.toLocaleString('it-IT', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                            },
+                            color: '#333', 
+                            font: {
+                                weight: 'bold',
+                                size: getMobileFontSize(10) 
+                            },
+                            display: function(context) {
+                                // Visualizza solo se il valore è presente (non null)
+                                return context.dataset.data[context.dataIndex] !== null;
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: getMobileFontSize(12) 
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Importo (€)',
+                                font: { size: getMobileFontSize(12) } 
+                            },
+                            ticks: {
+                                font: { size: getMobileFontSize(10) }, 
+                                callback: function(value, index, values) {
+                                    // Formattazione a K anche per l'asse Y
+                                    if (value >= 10000) {
+                                        return (value / 1000).toFixed(0) + 'K €';
+                                    }
+                                    return value.toLocaleString('it-IT', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                                }
+                            },
+                            afterDataLimits: function(scale) {
+                                scale.max = scale.max * 1.25; 
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
+
+        // --- ISTANZIAMENTO GRAFICI ---
+
+        const operatorColors = ['#42A5F5', '#FF6384', '#66BB6A'];
+        const cassaColors = ['#5cb85c', '#4cae4c', '#449d44', '#398439', '#2d692d', '#204d2d'];
+
+        // 1. Grafici di Confronto Mensile (LINEA)
+        createComparisonChart('entrateTotaliChart', mesiLabels, totali_Y1, totali_Y2, 'Confronto Entrate Totali Mensili');
+        createComparisonChart('entrateTotaliNuovoChart', mesiLabels, totaliNuovo_Y1, totaliNuovo_Y2, 'Confronto Entrate2 Totali Mensili');
+        createComparisonChart('entrateContantiChart', mesiLabels, contanti_Y1, contanti_Y2, 'Confronto Entrate Contanti Mensili');
+        createComparisonChart('entratePosChart', mesiLabels, pos_Y1, pos_Y2, 'Confronto Entrate POS Mensili');
+        createComparisonChart('usciteChart', mesiLabels, uscite_Y1, uscite_Y2, 'Confronto Uscite Mensili');
+
+        // 2. Grafico Giorni di Cassa (BARRE)
+        createChart('cassaGiorniChart', giorniLabels, incassiData, percentualiCassaData, 'Distribuzione Incassi per Giorno della Settimana', cassaColors);
+
+        // 3. Grafici Operatori (BARRE)
+        createChart('movimentiChart', operators, movimentiData, movimentiPercentages, 'Numero di Movimenti per Operatore', operatorColors);
+        createChart('acquisitoChart', operators, acquisitoData, acquisitoPercentages, 'Totale Acquisito (€) per Operatore', operatorColors);
+        createChart('presenzeChart', operators, presenzeData, presenzePercentages, 'Totale Presenze (Giorni) per Operatore', operatorColors);
+
+    </script>
+</body>
+</html>
