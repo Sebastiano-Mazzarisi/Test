@@ -1,0 +1,545 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.5, minimum-scale=0.1, maximum-scale=2.0, user-scalable=yes">
+    <title>JF Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { 
+            background-color: #e9ecef; 
+            font-family: 'Segoe UI', sans-serif; 
+            /* FONT GENERALE AUMENTATO */
+            font-size: 15px; 
+            margin: 0; padding: 0;
+        }
+        
+        .container-fluid {
+            padding: 20px !important;
+        }
+        
+        .row-gap {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px; 
+        }
+
+        .card { 
+            border: none; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: #fff;
+            width: 100%;
+            /* AUMENTATA LARGHEZZA MASSIMA PER ACCOGLIERE FONT PIÙ GRANDI */
+            max-width: 260px; 
+            min-width: 220px; 
+        }
+        
+        .header-top {
+            background-color: #212529; 
+            color: white;
+            display: flex;
+            align-items: center; /* Centra verticalmente il contenuto flex */
+            justify-content: center;
+            /* Aumentato padding verticale per dare aria al titolo */
+            padding: 10px 35px 10px 10px; 
+            position: relative;
+            min-height: 40px; /* Altezza minima garantita */
+            border-radius: 8px 8px 0 0;
+        }
+
+        .header-title-text {
+            font-weight: 700;
+            font-size: 1rem; /* Aumentato */
+            text-align: center;
+            line-height: 1.2;
+            word-wrap: break-word;
+            width: 100%;
+        }
+
+        /* ICONA INFO PERFETTAMENTE CENTRATA */
+        .info-icon {
+            position: absolute;
+            right: 10px;
+            /* Centratura verticale assoluta */
+            top: 50%;
+            transform: translateY(-50%);
+            
+            color: #ffc107; 
+            z-index: 100;
+            cursor: pointer;
+            background-color: #212529;
+            border-radius: 50%;
+            /* Dimensioni fisse per l'area cliccabile */
+            width: 20px; 
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .info-icon svg {
+            width: 18px; /* Icona più grande */
+            height: 18px;
+        }
+        .info-icon:hover { color: #ffca2c; }
+
+        .header-sub {
+            background-color: #fff;
+            padding: 8px 5px;
+            text-align: center;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .card-subtitle {
+            color: #6c757d;
+            font-size: 0.85rem; /* Aumentato */
+            margin-bottom: 5px;
+            word-wrap: break-word;
+        }
+
+        .main-stat-box {
+            font-weight: bold;
+            font-size: 1.15rem; /* Aumentato (Totale bello grosso) */
+            padding: 4px 10px;
+            background-color: #f1f3f5; 
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .card-body { 
+            padding: 10px 8px; 
+            width: 100%;
+        }
+
+        .data-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-end; 
+            padding: 2px 0; /* Leggermente più spaziato */
+            line-height: 1.3; 
+            border-bottom: 1px solid #f8f9fa;
+            font-size: 0.95rem; /* DATI PIÙ GRANDI */
+            width: 100%;       
+            max-width: 240px;  
+            margin: 0 auto;    
+        }
+        .data-row:last-child { border-bottom: none; }
+
+        .monday-separator {
+            border-top: 1px solid #dee2e6;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            width: 100%;
+        }
+
+        .row-label { 
+            text-align: left; 
+            font-weight: 500; 
+            color: #495057;
+            white-space: nowrap;
+            flex-shrink: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 65%;
+        }
+        
+        .row-dots {
+            flex-grow: 1; 
+            border-bottom: 2px dotted #ced4da; 
+            margin: 0 4px 5px 4px; /* Sistemato margine per allineamento visivo */
+            opacity: 0.6;
+            min-width: 5px;
+        }
+
+        .row-value { 
+            text-align: right; 
+            font-weight: 600; 
+            color: #000; 
+            white-space: nowrap;
+            flex-shrink: 0;
+            font-size: 0.95rem; /* Valore numerico ben visibile */
+        }
+
+        .color-blue { color: #0d6efd; }
+        .color-dark-red { color: #8B0000 !important; } 
+        
+        .row-negative .row-label, 
+        .row-negative .row-value { 
+            color: #8B0000 !important; 
+        }
+
+        @media (max-width: 350px) {
+            .container-fluid { padding: 10px !important; }
+            .row-gap { gap: 10px; }
+            .card { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row-gap">
+    
+            <div class="col-auto">
+                <div class="card">
+                    <div class="header-top">
+                        <span class="header-title-text">1) MESE IN CORSO</span>
+                        
+        <a tabindex="0" class="info-icon" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Info" data-bs-content="Indica le date di inizio e fine del mese attuale. Totale: Somma di tutti gli incassi (Contanti + Carta) di questo mese.">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
+              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
+            </svg>
+        </a>
+        
+                    </div>
+                    <div class="header-sub">
+                        <div class="card-subtitle">1 Nov 2025 - 21 Nov 2025</div>
+                        <div class="main-stat-box color-blue">Totale: 33.139 €</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="data-row "><span class="row-label">Lu  3 Nov:</span><span class="row-dots"></span><span class="row-value">8.930 €</span></div><div class="data-row "><span class="row-label">Ma  4 Nov:</span><span class="row-dots"></span><span class="row-value">3.215 €</span></div><div class="data-row "><span class="row-label">Me  5 Nov:</span><span class="row-dots"></span><span class="row-value">870 €</span></div><div class="data-row "><span class="row-label">Gi  6 Nov:</span><span class="row-dots"></span><span class="row-value">1.455 €</span></div><div class="data-row "><span class="row-label">Ve  7 Nov:</span><span class="row-dots"></span><span class="row-value">1.970 €</span></div><div class="data-row "><span class="row-label">Sa  8 Nov:</span><span class="row-dots"></span><span class="row-value">737 €</span></div><div class="monday-separator"></div><div class="data-row "><span class="row-label">Lu 10 Nov:</span><span class="row-dots"></span><span class="row-value">2.760 €</span></div><div class="data-row "><span class="row-label">Ma 11 Nov:</span><span class="row-dots"></span><span class="row-value">1.880 €</span></div><div class="data-row "><span class="row-label">Me 12 Nov:</span><span class="row-dots"></span><span class="row-value">1.256 €</span></div><div class="data-row "><span class="row-label">Gi 13 Nov:</span><span class="row-dots"></span><span class="row-value">1.675 €</span></div><div class="data-row "><span class="row-label">Ve 14 Nov:</span><span class="row-dots"></span><span class="row-value">1.625 €</span></div><div class="data-row "><span class="row-label">Sa 15 Nov:</span><span class="row-dots"></span><span class="row-value">265 €</span></div><div class="monday-separator"></div><div class="data-row "><span class="row-label">Lu 17 Nov:</span><span class="row-dots"></span><span class="row-value">1.540 €</span></div><div class="data-row "><span class="row-label">Ma 18 Nov:</span><span class="row-dots"></span><span class="row-value">1.435 €</span></div><div class="data-row "><span class="row-label">Me 19 Nov:</span><span class="row-dots"></span><span class="row-value">685 €</span></div><div class="data-row "><span class="row-label">Gi 20 Nov:</span><span class="row-dots"></span><span class="row-value">897 €</span></div><div class="data-row "><span class="row-label">Ve 21 Nov:</span><span class="row-dots"></span><span class="row-value">1.944 €</span></div>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="col-auto">
+                <div class="card">
+                    <div class="header-top">
+                        <span class="header-title-text">2) ANNO IN CORSO</span>
+                        
+        <a tabindex="0" class="info-icon" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Info" data-bs-content="Indica l'intera stagione sportiva attuale. Totale: Somma progressiva degli incassi mese per mese.">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
+              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
+            </svg>
+        </a>
+        
+                    </div>
+                    <div class="header-sub">
+                        <div class="card-subtitle">1 Set 2025 - 31 Ago 2026</div>
+                        <div class="main-stat-box color-blue">Totale: 115.657 €</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="data-row "><span class="row-label">Set 2025:</span><span class="row-dots"></span><span class="row-value">41.316 €</span></div><div class="data-row "><span class="row-label">Ott 2025:</span><span class="row-dots"></span><span class="row-value">41.202 €</span></div><div class="data-row "><span class="row-label">Nov 2025:</span><span class="row-dots"></span><span class="row-value">33.139 €</span></div>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="col-auto">
+                <div class="card">
+                    <div class="header-top">
+                        <span class="header-title-text">3) MENSILE</span>
+                        
+        <a tabindex="0" class="info-icon" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Info" data-bs-content="Confronta solo questo specifico mese con lo stesso mese degli anni passati.">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
+              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
+            </svg>
+        </a>
+        
+                    </div>
+                    <div class="header-sub">
+                        <div class="card-subtitle">1 Nov 2025 - 21 Nov 2025</div>
+                        <div class="main-stat-box color-blue">Diff.: +8.880 € (+37%)</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="data-row "><span class="row-label">2021-2022:</span><span class="row-dots"></span><span class="row-value">12.596 €</span></div><div class="data-row "><span class="row-label">2022-2023:</span><span class="row-dots"></span><span class="row-value">20.408 € (+62%)</span></div><div class="data-row "><span class="row-label">2023-2024:</span><span class="row-dots"></span><span class="row-value">20.936 € (+ 3%)</span></div><div class="data-row "><span class="row-label">2024-2025:</span><span class="row-dots"></span><span class="row-value">24.259 € (+16%)</span></div><div class="data-row "><span class="row-label">2025-2026:</span><span class="row-dots"></span><span class="row-value">33.139 € (+37%)</span></div>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="col-auto">
+                <div class="card">
+                    <div class="header-top">
+                        <span class="header-title-text">4) CUMULATIVA</span>
+                        
+        <a tabindex="0" class="info-icon" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Info" data-bs-content="Confronta l'incasso fatto dal 1° Settembre fino al giorno di oggi, per tutti gli anni (Cumulativa).">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
+              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
+            </svg>
+        </a>
+        
+                    </div>
+                    <div class="header-sub">
+                        <div class="card-subtitle">1 Set 2025 - 21 Nov 2025</div>
+                        <div class="main-stat-box color-blue">Diff.: +27.263 € (+31%)</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="data-row "><span class="row-label">2021-2022:</span><span class="row-dots"></span><span class="row-value">47.606 €</span></div><div class="data-row "><span class="row-label">2022-2023:</span><span class="row-dots"></span><span class="row-value">72.047 € (+51%)</span></div><div class="data-row "><span class="row-label">2023-2024:</span><span class="row-dots"></span><span class="row-value">78.285 € (+ 9%)</span></div><div class="data-row "><span class="row-label">2024-2025:</span><span class="row-dots"></span><span class="row-value">88.394 € (+13%)</span></div><div class="data-row "><span class="row-label">2025-2026:</span><span class="row-dots"></span><span class="row-value">115.657 € (+31%)</span></div>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="col-auto">
+                <div class="card">
+                    <div class="header-top">
+                        <span class="header-title-text">5) ANNO SPORTIVO</span>
+                        
+        <a tabindex="0" class="info-icon" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Info" data-bs-content="Mostra come si è chiusa l'annata completa negli anni scorsi, confrontandola con il totale raggiunto finora quest'anno.">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
+              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
+            </svg>
+        </a>
+        
+                    </div>
+                    <div class="header-sub">
+                        <div class="card-subtitle">1 Set 2025 - 21 Nov 2025</div>
+                        <div class="main-stat-box color-dark-red">Diff.: -185.458 € (-62%)</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="data-row "><span class="row-label">2021-2022:</span><span class="row-dots"></span><span class="row-value">167.358 €</span></div><div class="data-row "><span class="row-label">2022-2023:</span><span class="row-dots"></span><span class="row-value">231.095 € (+38%)</span></div><div class="data-row "><span class="row-label">2023-2024:</span><span class="row-dots"></span><span class="row-value">245.668 € (+ 6%)</span></div><div class="data-row "><span class="row-label">2024-2025:</span><span class="row-dots"></span><span class="row-value">301.115 € (+23%)</span></div><div class="data-row row-negative"><span class="row-label">2025-2026:</span><span class="row-dots"></span><span class="row-value">115.657 € (-62%)</span></div>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="col-auto">
+                <div class="card">
+                    <div class="header-top">
+                        <span class="header-title-text">6) ANNO PREVISIONALE</span>
+                        
+        <a tabindex="0" class="info-icon" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Info" data-bs-content="Per l'anno in corso mostra una stima di come finirà la stagione. Per gli anni passati è il totale reale.">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
+              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
+            </svg>
+        </a>
+        
+                    </div>
+                    <div class="header-sub">
+                        <div class="card-subtitle">1 Set 2025 - 31 Ago 2026</div>
+                        <div class="main-stat-box color-blue">Diff.: +73.138 € (+24%)</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="data-row "><span class="row-label">2021-2022:</span><span class="row-dots"></span><span class="row-value">167.358 €</span></div><div class="data-row "><span class="row-label">2022-2023:</span><span class="row-dots"></span><span class="row-value">231.095 € (+38%)</span></div><div class="data-row "><span class="row-label">2023-2024:</span><span class="row-dots"></span><span class="row-value">245.668 € (+ 6%)</span></div><div class="data-row "><span class="row-label">2024-2025:</span><span class="row-dots"></span><span class="row-value">301.115 € (+23%)</span></div><div class="data-row "><span class="row-label">2025-2026:</span><span class="row-dots"></span><span class="row-value">374.253 € (+24%)</span></div>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="col-auto">
+                <div class="card">
+                    <div class="header-top">
+                        <span class="header-title-text">7) ANNO CONTANTI</span>
+                        
+        <a tabindex="0" class="info-icon" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Info" data-bs-content="Identico all'anno sportivo, ma conta solo i pagamenti in Contanti.">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
+              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
+            </svg>
+        </a>
+        
+                    </div>
+                    <div class="header-sub">
+                        <div class="card-subtitle">1 Set 2025 - 31 Ago 2026</div>
+                        <div class="main-stat-box color-blue">Diff.: +26.280 € (+22%)</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="data-row "><span class="row-label">2021-2022:</span><span class="row-dots"></span><span class="row-value">81.490 €</span></div><div class="data-row "><span class="row-label">2022-2023:</span><span class="row-dots"></span><span class="row-value">97.116 € (+19%)</span></div><div class="data-row row-negative"><span class="row-label">2023-2024:</span><span class="row-dots"></span><span class="row-value">93.563 € (- 4%)</span></div><div class="data-row "><span class="row-label">2024-2025:</span><span class="row-dots"></span><span class="row-value">119.757 € (+28%)</span></div><div class="data-row "><span class="row-label">2025-2026:</span><span class="row-dots"></span><span class="row-value">146.037 € (+22%)</span></div>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="col-auto">
+                <div class="card">
+                    <div class="header-top">
+                        <span class="header-title-text">8) ANNO POS</span>
+                        
+        <a tabindex="0" class="info-icon" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Info" data-bs-content="Identico all'anno sportivo, ma conta solo i pagamenti con Carta/POS.">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
+              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
+            </svg>
+        </a>
+        
+                    </div>
+                    <div class="header-sub">
+                        <div class="card-subtitle">1 Set 2025 - 31 Ago 2026</div>
+                        <div class="main-stat-box color-blue">Diff.: +45.990 € (+25%)</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="data-row "><span class="row-label">2021-2022:</span><span class="row-dots"></span><span class="row-value">85.868 €</span></div><div class="data-row "><span class="row-label">2022-2023:</span><span class="row-dots"></span><span class="row-value">133.979 € (+56%)</span></div><div class="data-row "><span class="row-label">2023-2024:</span><span class="row-dots"></span><span class="row-value">152.105 € (+14%)</span></div><div class="data-row "><span class="row-label">2024-2025:</span><span class="row-dots"></span><span class="row-value">181.358 € (+19%)</span></div><div class="data-row "><span class="row-label">2025-2026:</span><span class="row-dots"></span><span class="row-value">227.348 € (+25%)</span></div>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="col-auto">
+                <div class="card">
+                    <div class="header-top">
+                        <span class="header-title-text">9) ANNO USCITE</span>
+                        
+        <a tabindex="0" class="info-icon" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Info" data-bs-content="Somma di tutte le spese/uscite registrate nell'anno sportivo.">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
+              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
+            </svg>
+        </a>
+        
+                    </div>
+                    <div class="header-sub">
+                        <div class="card-subtitle">1 Set 2025 - 31 Ago 2026</div>
+                        <div class="main-stat-box color-blue">Diff.: +1.370 € (+61%)</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="data-row "><span class="row-label">2021-2022:</span><span class="row-dots"></span><span class="row-value">3.487 €</span></div><div class="data-row "><span class="row-label">2022-2023:</span><span class="row-dots"></span><span class="row-value">3.521 € (+ 1%)</span></div><div class="data-row row-negative"><span class="row-label">2023-2024:</span><span class="row-dots"></span><span class="row-value">2.366 € (-33%)</span></div><div class="data-row row-negative"><span class="row-label">2024-2025:</span><span class="row-dots"></span><span class="row-value">2.250 € (- 5%)</span></div><div class="data-row "><span class="row-label">2025-2026:</span><span class="row-dots"></span><span class="row-value">3.620 € (+61%)</span></div>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="col-auto">
+                <div class="card">
+                    <div class="header-top">
+                        <span class="header-title-text">10) ANNO ENTRATE (x)</span>
+                        
+        <a tabindex="0" class="info-icon" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Info" data-bs-content="Somma degli incassi registrati a parte (Entrate x) nell'anno sportivo.">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
+              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
+            </svg>
+        </a>
+        
+                    </div>
+                    <div class="header-sub">
+                        <div class="card-subtitle">1 Set 2025 - 31 Ago 2026</div>
+                        <div class="main-stat-box color-blue">Diff.: +8.695 € (+73%)</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="data-row "><span class="row-label">2021-2022:</span><span class="row-dots"></span><span class="row-value">8.968 €</span></div><div class="data-row "><span class="row-label">2022-2023:</span><span class="row-dots"></span><span class="row-value">15.870 € (+77%)</span></div><div class="data-row row-negative"><span class="row-label">2023-2024:</span><span class="row-dots"></span><span class="row-value">12.301 € (-22%)</span></div><div class="data-row row-negative"><span class="row-label">2024-2025:</span><span class="row-dots"></span><span class="row-value">11.987 € (- 3%)</span></div><div class="data-row "><span class="row-label">2025-2026:</span><span class="row-dots"></span><span class="row-value">20.682 € (+73%)</span></div>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="col-auto">
+                <div class="card">
+                    <div class="header-top">
+                        <span class="header-title-text">11) NUMERO CLIENTI</span>
+                        
+        <a tabindex="0" class="info-icon" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Info" data-bs-content="Conta quante persone diverse hanno pagato durante l'anno (numero di teste, non di pagamenti).">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
+              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
+            </svg>
+        </a>
+        
+                    </div>
+                    <div class="header-sub">
+                        <div class="card-subtitle">1 Set 2025 - 31 Ago 2026</div>
+                        <div class="main-stat-box color-blue">Diff.: +146 (+14%)</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="data-row "><span class="row-label">2021-2022:</span><span class="row-dots"></span><span class="row-value">816</span></div><div class="data-row "><span class="row-label">2022-2023:</span><span class="row-dots"></span><span class="row-value">898 (+10%)</span></div><div class="data-row "><span class="row-label">2023-2024:</span><span class="row-dots"></span><span class="row-value">933 (+ 4%)</span></div><div class="data-row "><span class="row-label">2024-2025:</span><span class="row-dots"></span><span class="row-value">1.059 (+14%)</span></div><div class="data-row "><span class="row-label">2025-2026:</span><span class="row-dots"></span><span class="row-value">1.205 (+14%)</span></div>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="col-auto">
+                <div class="card">
+                    <div class="header-top">
+                        <span class="header-title-text">12) INTROITO MEDIO CLIENTE</span>
+                        
+        <a tabindex="0" class="info-icon" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Info" data-bs-content="Indica quanto spende in media ogni singola persona (Incasso totale / Numero clienti).">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
+              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
+            </svg>
+        </a>
+        
+                    </div>
+                    <div class="header-sub">
+                        <div class="card-subtitle">1 Set 2025 - 31 Ago 2026</div>
+                        <div class="main-stat-box color-blue">Diff.: +26 € (+ 9%)</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="data-row "><span class="row-label">2021-2022:</span><span class="row-dots"></span><span class="row-value">205 €</span></div><div class="data-row "><span class="row-label">2022-2023:</span><span class="row-dots"></span><span class="row-value">257 € (+25%)</span></div><div class="data-row "><span class="row-label">2023-2024:</span><span class="row-dots"></span><span class="row-value">263 € (+ 2%)</span></div><div class="data-row "><span class="row-label">2024-2025:</span><span class="row-dots"></span><span class="row-value">284 € (+ 8%)</span></div><div class="data-row "><span class="row-label">2025-2026:</span><span class="row-dots"></span><span class="row-value">311 € (+ 9%)</span></div>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="col-auto">
+                <div class="card">
+                    <div class="header-top">
+                        <span class="header-title-text">13) OPERATORI (ANNO)</span>
+                        
+        <a tabindex="0" class="info-icon" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Info" data-bs-content="Classifica di quanto ha incassato ogni membro dello staff durante questa stagione.">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
+              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
+            </svg>
+        </a>
+        
+                    </div>
+                    <div class="header-sub">
+                        <div class="card-subtitle">1 Set 2025 - 21 Nov 2025</div>
+                        <div class="main-stat-box color-blue">Totale: 115.657 €</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="data-row "><span class="row-label">Marica:</span><span class="row-dots"></span><span class="row-value">71.996 € (62%)</span></div><div class="data-row "><span class="row-label">Sabina:</span><span class="row-dots"></span><span class="row-value">43.552 € (38%)</span></div><div class="data-row "><span class="row-label">Altri:</span><span class="row-dots"></span><span class="row-value">109 € ( 0%)</span></div>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="col-auto">
+                <div class="card">
+                    <div class="header-top">
+                        <span class="header-title-text">14) OPERATORI (STORICO)</span>
+                        
+        <a tabindex="0" class="info-icon" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Info" data-bs-content="Classifica generale di quanto ha incassato ogni membro dello staff 'da sempre' (Storico).">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
+              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
+            </svg>
+        </a>
+        
+                    </div>
+                    <div class="header-sub">
+                        <div class="card-subtitle">1 Set 2021 - 21 Nov 2025</div>
+                        <div class="main-stat-box color-blue">Totale: 1.060.893 €</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="data-row "><span class="row-label">Marica:</span><span class="row-dots"></span><span class="row-value">712.695 € (67%)</span></div><div class="data-row "><span class="row-label">Sabina:</span><span class="row-dots"></span><span class="row-value">342.656 € (32%)</span></div><div class="data-row "><span class="row-label">Altri:</span><span class="row-dots"></span><span class="row-value">5.542 € ( 1%)</span></div>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="col-auto">
+                <div class="card">
+                    <div class="header-top">
+                        <span class="header-title-text">15) SETTIMANA (STORICO)</span>
+                        
+        <a tabindex="0" class="info-icon" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Info" data-bs-content="Info non disponibili.">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
+              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
+            </svg>
+        </a>
+        
+                    </div>
+                    <div class="header-sub">
+                        <div class="card-subtitle">1 Set 2021 - 21 Nov 2025</div>
+                        <div class="main-stat-box color-blue">Totale: 1.060.893 €</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="data-row "><span class="row-label">Lunedì:</span><span class="row-dots"></span><span class="row-value">275.793 € (26%)</span></div><div class="data-row "><span class="row-label">Martedì:</span><span class="row-dots"></span><span class="row-value">221.120 € (21%)</span></div><div class="data-row "><span class="row-label">Mercoledì:</span><span class="row-dots"></span><span class="row-value">142.124 € (13%)</span></div><div class="data-row "><span class="row-label">Giovedì:</span><span class="row-dots"></span><span class="row-value">180.841 € (17%)</span></div><div class="data-row "><span class="row-label">Venerdì:</span><span class="row-dots"></span><span class="row-value">201.352 € (19%)</span></div><div class="data-row "><span class="row-label">Sabato:</span><span class="row-dots"></span><span class="row-value">39.663 € ( 4%)</span></div>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="col-auto">
+                <div class="card">
+                    <div class="header-top">
+                        <span class="header-title-text">16) MESE (STORICO)</span>
+                        
+        <a tabindex="0" class="info-icon" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Info" data-bs-content="Info non disponibili.">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
+              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
+            </svg>
+        </a>
+        
+                    </div>
+                    <div class="header-sub">
+                        <div class="card-subtitle">1 Set 2021 - 21 Nov 2025</div>
+                        <div class="main-stat-box color-blue">Totale: 1.060.893 €</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="data-row "><span class="row-label">Gennaio:</span><span class="row-dots"></span><span class="row-value">107.955 € (10%)</span></div><div class="data-row "><span class="row-label">Febbraio:</span><span class="row-dots"></span><span class="row-value">83.122 € ( 8%)</span></div><div class="data-row "><span class="row-label">Marzo:</span><span class="row-dots"></span><span class="row-value">84.714 € ( 8%)</span></div><div class="data-row "><span class="row-label">Aprile:</span><span class="row-dots"></span><span class="row-value">76.566 € ( 7%)</span></div><div class="data-row "><span class="row-label">Maggio:</span><span class="row-dots"></span><span class="row-value">72.550 € ( 7%)</span></div><div class="data-row "><span class="row-label">Giugno:</span><span class="row-dots"></span><span class="row-value">56.516 € ( 5%)</span></div><div class="data-row "><span class="row-label">Luglio:</span><span class="row-dots"></span><span class="row-value">36.283 € ( 3%)</span></div><div class="data-row "><span class="row-label">Agosto:</span><span class="row-dots"></span><span class="row-value">28.756 € ( 3%)</span></div><div class="data-row "><span class="row-label">Settembre:</span><span class="row-dots"></span><span class="row-value">139.476 € (13%)</span></div><div class="data-row "><span class="row-label">Ottobre:</span><span class="row-dots"></span><span class="row-value">151.175 € (14%)</span></div><div class="data-row "><span class="row-label">Novembre:</span><span class="row-dots"></span><span class="row-value">137.388 € (13%)</span></div><div class="data-row "><span class="row-label">Dicembre:</span><span class="row-dots"></span><span class="row-value">86.392 € ( 8%)</span></div>
+                    </div>
+                </div>
+            </div>
+        
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+        const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
+    </script>
+</body>
+</html>
+    
