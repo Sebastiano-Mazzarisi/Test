@@ -135,46 +135,18 @@
         .chart-title {
             text-align: center; font-weight: 700; font-size: 16px; margin-bottom: 10px; color: #333; text-transform: uppercase;
         }
+        .chart-row { display: flex; align-items: center; margin-bottom: 6px; font-size: 13px; width: 100%; }
         
-        .chart-row { 
-            display: flex; 
-            align-items: center; 
-            margin-bottom: 6px; 
-            font-size: 13px; 
-            width: 100%;
-        }
-        
-        /* ETICHETTA SINISTRA (Anno) */
         .chart-lbl { 
-            flex: 0 0 75px; /* Fissa a 75px, non si restringe */
-            text-align: right; 
-            padding-right: 6px; 
-            color: #555; 
-            font-weight: 500; 
-            white-space: nowrap;
-            /* NO overflow hidden, voglio vederlo tutto */
+            width: 80px; text-align: right; padding-right: 6px; color: #555; font-weight: 500; 
+            flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; 
         }
         
-        /* AREA BARRA (Si adatta) */
-        .chart-bar-area { 
-            flex: 1 1 auto; /* Prende lo spazio rimanente */
-            background-color: #e9ecef; 
-            height: 12px; 
-            border-radius: 5px; 
-            overflow: hidden; 
-            margin: 0 5px;
-        }
-        
+        .chart-bar-area { flex-grow: 1; background-color: #e9ecef; height: 10px; border-radius: 5px; overflow: hidden; margin: 0 5px; }
         .chart-bar { height: 100%; border-radius: 5px; }
         
-        /* VALORE DESTRA (Euro) */
         .chart-val { 
-            flex: 0 0 80px; /* Fissa a 80px, non si restringe */
-            text-align: left; 
-            font-weight: 600; 
-            color: #333; 
-            font-size: 11px; 
-            white-space: nowrap;
+            width: 60px; text-align: left; padding-left: 6px; font-weight: 600; color: #333; font-size: 11px; white-space: nowrap; flex-shrink: 0; 
         }
 
         .color-red { color: #dc3545 !important; } 
@@ -197,10 +169,10 @@
 
             .total-value { font-size: 20px; }
             
-            /* Grafico: Font più piccolo per far entrare tutto */
+            /* Grafico: Font più piccolo */
             .chart-row { font-size: 11px; }
-            .chart-lbl { flex: 0 0 65px; font-size: 11px; }
-            .chart-val { flex: 0 0 70px; font-size: 10px; }
+            .chart-lbl { width: 65px; font-size: 11px; }
+            .chart-val { width: 50px; font-size: 10px; }
             
             .menu-item { font-size: 18px; padding: 8px 10px; }
             #header-title { font-size: 24px; }
@@ -209,7 +181,7 @@
     </style>
     
     <script>
-        const TABLE_DATA = [{"id": "tab_0", "title": "1) MESE IN CORSO", "date": "1 Nov 2025 - 21 Nov 2025", "desc": "<strong>Periodo:</strong> da inizio mese all'ultima data in archivio.<br><strong>Tabella:</strong> entrate giorno per giorno.<br><strong>Totale:</strong> somma tutte le entrate nel periodo."}, {"id": "tab_1", "title": "2) ANNO IN CORSO", "date": "1 Set 2025 - 31 Ago 2026", "desc": "<strong>Periodo:</strong> stagione sportiva attuale.<br><strong>Tabella:</strong> entrate consolidate mese per mese.<br><strong>Totale:</strong> somma tutte le entrate nel periodo."}, {"id": "tab_2", "title": "3) MENSILE", "date": "1 Nov 2025 - 21 Nov 2025", "desc": "<strong>Periodo:</strong> mese consolidato attuale e stesso periodo degli anni scorsi.<br><strong>Tabella:</strong> entrate consolidate del mese attuale confrontato con lo stesso periodo degli scorsi anni presenti in archivio.<br><strong>Differenza:</strong> tra le entrate del periodo attuale con quello dello scorso anno."}, {"id": "tab_3", "title": "4) CUMULATIVA", "date": "1 Set 2025 - 21 Nov 2025", "desc": "<strong>Periodo:</strong> da inizio anno sportivo attuale e stesso periodo degli anni scorsi.<br><strong>Tabella:</strong> entrate consolidate del periodo attuale confrontato con lo stesso periodo degli scorsi anni presenti in archivio.<br><strong>Differenza:</strong> tra le entrate del periodo attuale con quello dello scorso anno."}, {"id": "tab_4", "title": "5) ANNO SPORTIVO", "date": "1 Set 2025 - 21 Nov 2025", "desc": "Mostra come si \u00e8 chiusa l'annata completa negli anni scorsi, confrontandola con il totale raggiunto finora quest'anno."}, {"id": "tab_5", "title": "6) ANNO PREVISIONALE", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Per l'anno in corso mostra una stima di come finir\u00e0 la stagione. Per gli anni passati \u00e8 il totale reale."}, {"id": "tab_6", "title": "7) ANNO CONTANTI", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Identico all'anno sportivo, ma conta solo i pagamenti in Contanti."}, {"id": "tab_7", "title": "8) ANNO POS", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Identico all'anno sportivo, ma conta solo i pagamenti con Carta/POS."}, {"id": "tab_8", "title": "9) ANNO USCITE", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Somma di tutte le spese/uscite registrate nell'anno sportivo."}, {"id": "tab_9", "title": "10) ANNO ENTRATE (x)", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Somma degli incassi registrati a parte (Entrate x) nell'anno sportivo."}, {"id": "tab_10", "title": "11) NUMERO CLIENTI", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Conta quante persone diverse hanno pagato durante l'anno (numero di teste, non di pagamenti)."}, {"id": "tab_11", "title": "12) INTROITO MEDIO CLIENTE", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Indica quanto spende in media ogni singola persona (Incasso totale / Numero clienti)."}, {"id": "tab_12", "title": "13) OPERATORI (ANNO)", "date": "1 Set 2025 - 21 Nov 2025", "desc": "Classifica di quanto ha incassato ogni membro dello staff durante questa stagione."}, {"id": "tab_13", "title": "14) OPERATORI (STORICO)", "date": "1 Set 2021 - 21 Nov 2025", "desc": "Classifica generale di quanto ha incassato ogni membro dello staff 'da sempre' (Storico)."}, {"id": "tab_14", "title": "15) SETTIMANA (STORICO)", "date": "1 Set 2021 - 21 Nov 2025", "desc": "Somma gli incassi raggruppandoli per giorno della settimana per capire i giorni migliori."}, {"id": "tab_15", "title": "16) MESE (STORICO)", "date": "1 Set 2021 - 21 Nov 2025", "desc": "Somma gli incassi raggruppandoli per mese per capire i mesi pi\u00f9 ricchi storicamente."}];
+        const TABLE_DATA = [{"id": "tab_0", "title": "1) MESE IN CORSO", "date": "1 Nov 2025 - 21 Nov 2025", "desc": "Dettaglio giornaliero delle entrate del mese corrente. La tabella visualizza solo i giorni in cui sono stati registrati movimenti (escludendo quelli a zero), permettendo di individuare rapidamente i picchi di attivit\u00e0 quotidiana.<br><br>Il totale rappresenta il cumulato progressivo aggiornato all'ultimo inserimento."}, {"id": "tab_1", "title": "2) ANNO IN CORSO", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Andamento mensile della stagione sportiva attuale (dal 1\u00b0 settembre al 31 agosto).<br><br>Mostra l'accumulo delle entrate mese per mese, fondamentale per monitorare il trend di crescita della stagione e confrontare i mesi \"forti\" con quelli \"deboli\" all'interno dell'annata corrente."}, {"id": "tab_2", "title": "3) MENSILE", "date": "1 Nov 2025 - 21 Nov 2025", "desc": "Confronto diretto del mese attuale con lo stesso mese degli anni precedenti.<br><br>\u00c8 un indicatore di performance puntuale: serve a capire se, ad esempio, questo \"novembre\" sta performando meglio o peggio dei \"novembre\" passati.<br>Include la variazione percentuale rispetto all'anno scorso."}, {"id": "tab_3", "title": "4) CUMULATIVA", "date": "1 Set 2025 - 21 Nov 2025", "desc": "Confronto alla \"data odierna\". Paragona l'incasso generato dal 1\u00b0 settembre a oggi con quanto realizzato nello stesso esatto lasso di tempo nelle stagioni passate.<br><br>\u00c8 l'indicatore pi\u00f9 veritiero per capire se la stagione sta viaggiando a un ritmo di crescita superiore o inferiore allo storico."}, {"id": "tab_4", "title": "5) ANNO SPORTIVO", "date": "1 Set 2025 - 21 Nov 2025", "desc": "Quadro generale delle stagioni passate (totali definitivi al 31 agosto) confrontato con il totale parziale raggiunto finora quest'anno.<br><br>Offre una visione d'insieme per capire quanto manca per eguagliare o superare i record di fatturato degli anni precedenti."}, {"id": "tab_5", "title": "6) ANNO PREVISIONALE", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Proiezione di chiusura. Per l'anno in corso mostra una stima del risultato finale al 31 agosto, calcolata sull'andamento attuale.<br><br>Per gli anni passati mostra il fatturato reale consolidato. Utile per capire \"dove atterreremo\" se il trend attuale dovesse confermarsi."}, {"id": "tab_6", "title": "7) ANNO CONTANTI", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Analisi dei flussi di cassa fisici. Isola i soli movimenti in Contanti per ogni stagione sportiva, permettendo di valutare la liquidit\u00e0 immediata rispetto al totale e l'evoluzione dell'uso del contante nel tempo."}, {"id": "tab_7", "title": "8) ANNO POS", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Analisi dei pagamenti elettronici. Isola i soli movimenti tramite Carta/Bancomat/Bonifico per ogni stagione sportiva, evidenziando la crescita dell'adozione dei pagamenti digitali da parte della clientela."}, {"id": "tab_8", "title": "9) ANNO USCITE", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Riepilogo annuale di tutte le spese operative. Confronta il volume delle uscite registrate nella stagione corrente con i costi sostenuti negli anni precedenti, essenziale per il controllo del bilancio."}, {"id": "tab_9", "title": "10) ANNO ENTRATE (x)", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Monitoraggio delle entrate extra-gestione. Isola gli incassi accessori (registrati separatamente dalla gestione ordinaria) per valutarne l'impatto sul fatturato complessivo anno su anno."}, {"id": "tab_10", "title": "11) NUMERO CLIENTI", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Analisi della base utenza. Conta le persone fisiche uniche (teste) che hanno effettuato almeno un pagamento durante l'anno.<br><br>Non conta il numero di transazioni, ma l'ampiezza della clientela attiva."}, {"id": "tab_11", "title": "12) INTROITO MEDIO CLIENTE", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Valore medio generato da ogni singolo cliente (ARPU: Average Revenue Per User).<br>Si ottiene dividendo il Totale Incassi per il Numero di Clienti unici.<br><br>Indica la capacit\u00e0 di spesa media e la fedelt\u00e0 della clientela per ogni stagione."}, {"id": "tab_12", "title": "13) OPERATORI (ANNO)", "date": "1 Set 2025 - 21 Nov 2025", "desc": "Performance dello staff nella stagione corrente. Visualizza la quota di incasso e il volume d'affari gestito da ciascun operatore dal 1\u00b0 settembre ad oggi."}, {"id": "tab_13", "title": "14) OPERATORI (STORICO)", "date": "1 Set 2021 - 21 Nov 2025", "desc": "Classifica \"All-Time\" dello staff. Visualizza il volume totale di incassi gestito da ciascun operatore dall'inizio dell'attivit\u00e0 a oggi, offrendo una prospettiva storica sul contributo di ogni membro del team."}, {"id": "tab_14", "title": "15) SETTIMANA (STORICO)", "date": "1 Set 2021 - 21 Nov 2025", "desc": "Analisi statistica dei giorni della settimana. Aggrega tutti i dati storici per rivelare quali sono, in media, i giorni pi\u00f9 redditizi (es. \"Il luned\u00ec incassiamo pi\u00f9 del venerd\u00ec?\"), utile per la pianificazione dei turni o delle offerte."}, {"id": "tab_15", "title": "16) MESE (STORICO)", "date": "1 Set 2021 - 21 Nov 2025", "desc": "Analisi della stagionalit\u00e0. Aggrega tutti i dati storici per mostrare quali mesi dell'anno generano tradizionalmente pi\u00f9 volume d'affari, evidenziando i picchi e i cali fisiologici del business."}];
         const HOME_TITLE = "ANALISI DATI";
         const HOME_SUBTITLE = "Aggiornato al: 21 Nov 2025";
         
@@ -493,7 +465,7 @@
         </div>
         </div>
             <div class="info-footer">
-                <strong>Periodo:</strong> da inizio mese all'ultima data in archivio.<br><strong>Tabella:</strong> entrate giorno per giorno.<br><strong>Totale:</strong> somma tutte le entrate nel periodo.
+                Dettaglio giornaliero delle entrate del mese corrente. La tabella visualizza solo i giorni in cui sono stati registrati movimenti (escludendo quelli a zero), permettendo di individuare rapidamente i picchi di attività quotidiana.<br><br>Il totale rappresenta il cumulato progressivo aggiornato all'ultimo inserimento.
             </div>
         </div>
         
@@ -529,7 +501,7 @@
         </div>
         </div>
             <div class="info-footer">
-                <strong>Periodo:</strong> stagione sportiva attuale.<br><strong>Tabella:</strong> entrate consolidate mese per mese.<br><strong>Totale:</strong> somma tutte le entrate nel periodo.
+                Andamento mensile della stagione sportiva attuale (dal 1° settembre al 31 agosto).<br><br>Mostra l'accumulo delle entrate mese per mese, fondamentale per monitorare il trend di crescita della stagione e confrontare i mesi "forti" con quelli "deboli" all'interno dell'annata corrente.
             </div>
         </div>
         
@@ -581,7 +553,7 @@
         </div>
         </div>
             <div class="info-footer">
-                <strong>Periodo:</strong> mese consolidato attuale e stesso periodo degli anni scorsi.<br><strong>Tabella:</strong> entrate consolidate del mese attuale confrontato con lo stesso periodo degli scorsi anni presenti in archivio.<br><strong>Differenza:</strong> tra le entrate del periodo attuale con quello dello scorso anno.
+                Confronto diretto del mese attuale con lo stesso mese degli anni precedenti.<br><br>È un indicatore di performance puntuale: serve a capire se, ad esempio, questo "novembre" sta performando meglio o peggio dei "novembre" passati.<br>Include la variazione percentuale rispetto all'anno scorso.
             </div>
         </div>
         
@@ -633,7 +605,7 @@
         </div>
         </div>
             <div class="info-footer">
-                <strong>Periodo:</strong> da inizio anno sportivo attuale e stesso periodo degli anni scorsi.<br><strong>Tabella:</strong> entrate consolidate del periodo attuale confrontato con lo stesso periodo degli scorsi anni presenti in archivio.<br><strong>Differenza:</strong> tra le entrate del periodo attuale con quello dello scorso anno.
+                Confronto alla "data odierna". Paragona l'incasso generato dal 1° settembre a oggi con quanto realizzato nello stesso esatto lasso di tempo nelle stagioni passate.<br><br>È l'indicatore più veritiero per capire se la stagione sta viaggiando a un ritmo di crescita superiore o inferiore allo storico.
             </div>
         </div>
         
@@ -685,7 +657,7 @@
         </div>
         </div>
             <div class="info-footer">
-                Mostra come si è chiusa l'annata completa negli anni scorsi, confrontandola con il totale raggiunto finora quest'anno.
+                Quadro generale delle stagioni passate (totali definitivi al 31 agosto) confrontato con il totale parziale raggiunto finora quest'anno.<br><br>Offre una visione d'insieme per capire quanto manca per eguagliare o superare i record di fatturato degli anni precedenti.
             </div>
         </div>
         
@@ -737,7 +709,7 @@
         </div>
         </div>
             <div class="info-footer">
-                Per l'anno in corso mostra una stima di come finirà la stagione. Per gli anni passati è il totale reale.
+                Proiezione di chiusura. Per l'anno in corso mostra una stima del risultato finale al 31 agosto, calcolata sull'andamento attuale.<br><br>Per gli anni passati mostra il fatturato reale consolidato. Utile per capire "dove atterreremo" se il trend attuale dovesse confermarsi.
             </div>
         </div>
         
@@ -789,7 +761,7 @@
         </div>
         </div>
             <div class="info-footer">
-                Identico all'anno sportivo, ma conta solo i pagamenti in Contanti.
+                Analisi dei flussi di cassa fisici. Isola i soli movimenti in Contanti per ogni stagione sportiva, permettendo di valutare la liquidità immediata rispetto al totale e l'evoluzione dell'uso del contante nel tempo.
             </div>
         </div>
         
@@ -841,7 +813,7 @@
         </div>
         </div>
             <div class="info-footer">
-                Identico all'anno sportivo, ma conta solo i pagamenti con Carta/POS.
+                Analisi dei pagamenti elettronici. Isola i soli movimenti tramite Carta/Bancomat/Bonifico per ogni stagione sportiva, evidenziando la crescita dell'adozione dei pagamenti digitali da parte della clientela.
             </div>
         </div>
         
@@ -893,7 +865,7 @@
         </div>
         </div>
             <div class="info-footer">
-                Somma di tutte le spese/uscite registrate nell'anno sportivo.
+                Riepilogo annuale di tutte le spese operative. Confronta il volume delle uscite registrate nella stagione corrente con i costi sostenuti negli anni precedenti, essenziale per il controllo del bilancio.
             </div>
         </div>
         
@@ -945,7 +917,7 @@
         </div>
         </div>
             <div class="info-footer">
-                Somma degli incassi registrati a parte (Entrate x) nell'anno sportivo.
+                Monitoraggio delle entrate extra-gestione. Isola gli incassi accessori (registrati separatamente dalla gestione ordinaria) per valutarne l'impatto sul fatturato complessivo anno su anno.
             </div>
         </div>
         
@@ -997,7 +969,7 @@
         </div>
         </div>
             <div class="info-footer">
-                Conta quante persone diverse hanno pagato durante l'anno (numero di teste, non di pagamenti).
+                Analisi della base utenza. Conta le persone fisiche uniche (teste) che hanno effettuato almeno un pagamento durante l'anno.<br><br>Non conta il numero di transazioni, ma l'ampiezza della clientela attiva.
             </div>
         </div>
         
@@ -1049,7 +1021,7 @@
         </div>
         </div>
             <div class="info-footer">
-                Indica quanto spende in media ogni singola persona (Incasso totale / Numero clienti).
+                Valore medio generato da ogni singolo cliente (ARPU: Average Revenue Per User).<br>Si ottiene dividendo il Totale Incassi per il Numero di Clienti unici.<br><br>Indica la capacità di spesa media e la fedeltà della clientela per ogni stagione.
             </div>
         </div>
         
@@ -1085,7 +1057,7 @@
         </div>
         </div>
             <div class="info-footer">
-                Classifica di quanto ha incassato ogni membro dello staff durante questa stagione.
+                Performance dello staff nella stagione corrente. Visualizza la quota di incasso e il volume d'affari gestito da ciascun operatore dal 1° settembre ad oggi.
             </div>
         </div>
         
@@ -1121,7 +1093,7 @@
         </div>
         </div>
             <div class="info-footer">
-                Classifica generale di quanto ha incassato ogni membro dello staff 'da sempre' (Storico).
+                Classifica "All-Time" dello staff. Visualizza il volume totale di incassi gestito da ciascun operatore dall'inizio dell'attività a oggi, offrendo una prospettiva storica sul contributo di ogni membro del team.
             </div>
         </div>
         
@@ -1181,7 +1153,7 @@
         </div>
         </div>
             <div class="info-footer">
-                Somma gli incassi raggruppandoli per giorno della settimana per capire i giorni migliori.
+                Analisi statistica dei giorni della settimana. Aggrega tutti i dati storici per rivelare quali sono, in media, i giorni più redditizi (es. "Il lunedì incassiamo più del venerdì?"), utile per la pianificazione dei turni o delle offerte.
             </div>
         </div>
         
@@ -1289,7 +1261,7 @@
         </div>
         </div>
             <div class="info-footer">
-                Somma gli incassi raggruppandoli per mese per capire i mesi più ricchi storicamente.
+                Analisi della stagionalità. Aggrega tutti i dati storici per mostrare quali mesi dell'anno generano tradizionalmente più volume d'affari, evidenziando i picchi e i cali fisiologici del business.
             </div>
         </div>
         
