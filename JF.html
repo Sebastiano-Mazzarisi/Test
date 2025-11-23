@@ -59,7 +59,8 @@
         }
 
         .menu-item {
-            padding: 10px 20px; 
+            /* PADDING VOCI: 6px */
+            padding: 6px 20px; 
             border-bottom: none; 
             font-size: 20px;
             color: #333;
@@ -143,7 +144,7 @@
         }
 
         .total-value {
-            font-size: 24px; /* RIDOTTO DI UN ALTRO PX (da 25 a 24) */
+            font-size: 24px; 
             font-weight: 900;
             color: #0d6efd;
         }
@@ -152,12 +153,17 @@
             margin-top: 25px;
             padding-top: 15px;
             border-top: 1px solid #ddd;
-            text-align: center;
+            text-align: left; /* Allineato a sinistra per leggere bene i paragrafi */
             font-size: 16px;
             color: #666;
-            font-style: italic;
-            line-height: 1.4;
+            line-height: 1.5;
             padding-bottom: 30px;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+        
+        .info-footer strong {
+            color: #333;
         }
 
         .color-red { color: #dc3545 !important; } 
@@ -166,7 +172,7 @@
     </style>
     
     <script>
-        const TABLE_DATA = [{"id": "tab_0", "title": "1) MESE IN CORSO", "date": "1 Nov 2025 - 21 Nov 2025", "desc": "Indica le date di inizio e fine del mese attuale. Totale: Somma di tutti gli incassi (Contanti + Carta) di questo mese."}, {"id": "tab_1", "title": "2) ANNO IN CORSO", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Indica l'intera stagione sportiva attuale. Totale: Somma progressiva degli incassi mese per mese."}, {"id": "tab_2", "title": "3) MENSILE", "date": "1 Nov 2025 - 21 Nov 2025", "desc": "Confronta solo questo specifico mese con lo stesso mese degli anni passati."}, {"id": "tab_3", "title": "4) CUMULATIVA", "date": "1 Set 2025 - 21 Nov 2025", "desc": "Confronta l'incasso fatto dal 1\u00b0 Settembre fino al giorno di oggi, per tutti gli anni (Cumulativa)."}, {"id": "tab_4", "title": "5) ANNO SPORTIVO", "date": "1 Set 2025 - 21 Nov 2025", "desc": "Mostra come si \u00e8 chiusa l'annata completa negli anni scorsi, confrontandola con il totale raggiunto finora quest'anno."}, {"id": "tab_5", "title": "6) ANNO PREVISIONALE", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Per l'anno in corso mostra una stima di come finir\u00e0 la stagione. Per gli anni passati \u00e8 il totale reale."}, {"id": "tab_6", "title": "7) ANNO CONTANTI", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Identico all'anno sportivo, ma conta solo i pagamenti in Contanti."}, {"id": "tab_7", "title": "8) ANNO POS", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Identico all'anno sportivo, ma conta solo i pagamenti con Carta/POS."}, {"id": "tab_8", "title": "9) ANNO USCITE", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Somma di tutte le spese/uscite registrate nell'anno sportivo."}, {"id": "tab_9", "title": "10) ANNO ENTRATE (x)", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Somma degli incassi registrati a parte (Entrate x) nell'anno sportivo."}, {"id": "tab_10", "title": "11) NUMERO CLIENTI", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Conta quante persone diverse hanno pagato durante l'anno (numero di teste, non di pagamenti)."}, {"id": "tab_11", "title": "12) INTROITO MEDIO CLIENTE", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Indica quanto spende in media ogni singola persona (Incasso totale / Numero clienti)."}, {"id": "tab_12", "title": "13) OPERATORI (ANNO)", "date": "1 Set 2025 - 21 Nov 2025", "desc": "Classifica di quanto ha incassato ogni membro dello staff durante questa stagione."}, {"id": "tab_13", "title": "14) OPERATORI (STORICO)", "date": "1 Set 2021 - 21 Nov 2025", "desc": "Classifica generale di quanto ha incassato ogni membro dello staff 'da sempre' (Storico)."}, {"id": "tab_14", "title": "15) SETTIMANA (STORICO)", "date": "1 Set 2021 - 21 Nov 2025", "desc": "Nessuna info."}, {"id": "tab_15", "title": "16) MESE (STORICO)", "date": "1 Set 2021 - 21 Nov 2025", "desc": "Nessuna info."}];
+        const TABLE_DATA = [{"id": "tab_0", "title": "1) MESE IN CORSO", "date": "1 Nov 2025 - 21 Nov 2025", "desc": "<strong>Periodo:</strong> da inizio mese all'ultima data in archivio.<br><strong>Tabella:</strong> entrate giorno per giorno.<br><strong>Totale:</strong> somma tutte le entrate nel periodo."}, {"id": "tab_1", "title": "2) ANNO IN CORSO", "date": "1 Set 2025 - 31 Ago 2026", "desc": "<strong>Periodo:</strong> stagione sportiva attuale.<br><strong>Tabella:</strong> entrate consolidate mese per mese.<br><strong>Totale:</strong> somma tutte le entrate nel periodo."}, {"id": "tab_2", "title": "3) MENSILE", "date": "1 Nov 2025 - 21 Nov 2025", "desc": "<strong>Periodo:</strong> mese consolidato attuale e stesso periodo degli anni scorsi.<br><strong>Tabella:</strong> entrate consolidate del mese attuale confrontato con lo stesso periodo degli scorsi anni presenti in archivio.<br><strong>Differenza:</strong> tra le entrate del periodo attuale con quello dello scorso anno."}, {"id": "tab_3", "title": "4) CUMULATIVA", "date": "1 Set 2025 - 21 Nov 2025", "desc": "<strong>Periodo:</strong> da inizio anno sportivo attuale e stesso periodo degli anni scorsi.<br><strong>Tabella:</strong> entrate consolidate del periodo attuale confrontato con lo stesso periodo degli scorsi anni presenti in archivio.<br><strong>Differenza:</strong> tra le entrate del periodo attuale con quello dello scorso anno."}, {"id": "tab_4", "title": "5) ANNO SPORTIVO", "date": "1 Set 2025 - 21 Nov 2025", "desc": "Mostra come si \u00e8 chiusa l'annata completa negli anni scorsi, confrontandola con il totale raggiunto finora quest'anno."}, {"id": "tab_5", "title": "6) ANNO PREVISIONALE", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Per l'anno in corso mostra una stima di come finir\u00e0 la stagione. Per gli anni passati \u00e8 il totale reale."}, {"id": "tab_6", "title": "7) ANNO CONTANTI", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Identico all'anno sportivo, ma conta solo i pagamenti in Contanti."}, {"id": "tab_7", "title": "8) ANNO POS", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Identico all'anno sportivo, ma conta solo i pagamenti con Carta/POS."}, {"id": "tab_8", "title": "9) ANNO USCITE", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Somma di tutte le spese/uscite registrate nell'anno sportivo."}, {"id": "tab_9", "title": "10) ANNO ENTRATE (x)", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Somma degli incassi registrati a parte (Entrate x) nell'anno sportivo."}, {"id": "tab_10", "title": "11) NUMERO CLIENTI", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Conta quante persone diverse hanno pagato durante l'anno (numero di teste, non di pagamenti)."}, {"id": "tab_11", "title": "12) INTROITO MEDIO CLIENTE", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Indica quanto spende in media ogni singola persona (Incasso totale / Numero clienti)."}, {"id": "tab_12", "title": "13) OPERATORI (ANNO)", "date": "1 Set 2025 - 21 Nov 2025", "desc": "Classifica di quanto ha incassato ogni membro dello staff durante questa stagione."}, {"id": "tab_13", "title": "14) OPERATORI (STORICO)", "date": "1 Set 2021 - 21 Nov 2025", "desc": "Classifica generale di quanto ha incassato ogni membro dello staff 'da sempre' (Storico)."}, {"id": "tab_14", "title": "15) SETTIMANA (STORICO)", "date": "1 Set 2021 - 21 Nov 2025", "desc": "Somma gli incassi raggruppandoli per giorno della settimana per capire i giorni migliori."}, {"id": "tab_15", "title": "16) MESE (STORICO)", "date": "1 Set 2021 - 21 Nov 2025", "desc": "Somma gli incassi raggruppandoli per mese per capire i mesi pi\u00f9 ricchi storicamente."}];
         const HOME_TITLE = "ANALISI DATI";
         const HOME_SUBTITLE = "Aggiornato al: 21 Nov 2025";
         
@@ -332,7 +338,7 @@
             <div class="data-row "><span class="row-label">Lu  3 Nov</span><span class="row-dots"></span><span class="row-value">8.930 €</span></div><div class="data-row "><span class="row-label">Ma  4 Nov</span><span class="row-dots"></span><span class="row-value">3.215 €</span></div><div class="data-row "><span class="row-label">Me  5 Nov</span><span class="row-dots"></span><span class="row-value">870 €</span></div><div class="data-row "><span class="row-label">Gi  6 Nov</span><span class="row-dots"></span><span class="row-value">1.455 €</span></div><div class="data-row "><span class="row-label">Ve  7 Nov</span><span class="row-dots"></span><span class="row-value">1.970 €</span></div><div class="data-row "><span class="row-label">Sa  8 Nov</span><span class="row-dots"></span><span class="row-value">737 €</span></div><div class="monday-separator"></div><div class="data-row "><span class="row-label">Lu 10 Nov</span><span class="row-dots"></span><span class="row-value">2.760 €</span></div><div class="data-row "><span class="row-label">Ma 11 Nov</span><span class="row-dots"></span><span class="row-value">1.880 €</span></div><div class="data-row "><span class="row-label">Me 12 Nov</span><span class="row-dots"></span><span class="row-value">1.256 €</span></div><div class="data-row "><span class="row-label">Gi 13 Nov</span><span class="row-dots"></span><span class="row-value">1.675 €</span></div><div class="data-row "><span class="row-label">Ve 14 Nov</span><span class="row-dots"></span><span class="row-value">1.625 €</span></div><div class="data-row "><span class="row-label">Sa 15 Nov</span><span class="row-dots"></span><span class="row-value">265 €</span></div><div class="monday-separator"></div><div class="data-row "><span class="row-label">Lu 17 Nov</span><span class="row-dots"></span><span class="row-value">1.540 €</span></div><div class="data-row "><span class="row-label">Ma 18 Nov</span><span class="row-dots"></span><span class="row-value">1.435 €</span></div><div class="data-row "><span class="row-label">Me 19 Nov</span><span class="row-dots"></span><span class="row-value">685 €</span></div><div class="data-row "><span class="row-label">Gi 20 Nov</span><span class="row-dots"></span><span class="row-value">897 €</span></div><div class="data-row "><span class="row-label">Ve 21 Nov</span><span class="row-dots"></span><span class="row-value">1.944 €</span></div>
 
             <div class="info-footer">
-                Indica le date di inizio e fine del mese attuale. Totale: Somma di tutti gli incassi (Contanti + Carta) di questo mese.
+                <strong>Periodo:</strong> da inizio mese all'ultima data in archivio.<br><strong>Tabella:</strong> entrate giorno per giorno.<br><strong>Totale:</strong> somma tutte le entrate nel periodo.
             </div>
         </div>
         
@@ -346,7 +352,7 @@
             <div class="data-row "><span class="row-label">Set 2025</span><span class="row-dots"></span><span class="row-value">41.316 €</span></div><div class="data-row "><span class="row-label">Ott 2025</span><span class="row-dots"></span><span class="row-value">41.202 €</span></div><div class="data-row "><span class="row-label">Nov 2025</span><span class="row-dots"></span><span class="row-value">33.139 €</span></div>
 
             <div class="info-footer">
-                Indica l'intera stagione sportiva attuale. Totale: Somma progressiva degli incassi mese per mese.
+                <strong>Periodo:</strong> stagione sportiva attuale.<br><strong>Tabella:</strong> entrate consolidate mese per mese.<br><strong>Totale:</strong> somma tutte le entrate nel periodo.
             </div>
         </div>
         
@@ -360,7 +366,7 @@
             <div class="data-row "><span class="row-label">2021-2022</span><span class="row-dots"></span><span class="row-value">12.596 €</span></div><div class="data-row "><span class="row-label">2022-2023</span><span class="row-dots"></span><span class="row-value">20.408 € (+62%)</span></div><div class="data-row "><span class="row-label">2023-2024</span><span class="row-dots"></span><span class="row-value">20.936 € (+ 3%)</span></div><div class="data-row "><span class="row-label">2024-2025</span><span class="row-dots"></span><span class="row-value">24.259 € (+16%)</span></div><div class="data-row "><span class="row-label">2025-2026</span><span class="row-dots"></span><span class="row-value">33.139 € (+37%)</span></div>
 
             <div class="info-footer">
-                Confronta solo questo specifico mese con lo stesso mese degli anni passati.
+                <strong>Periodo:</strong> mese consolidato attuale e stesso periodo degli anni scorsi.<br><strong>Tabella:</strong> entrate consolidate del mese attuale confrontato con lo stesso periodo degli scorsi anni presenti in archivio.<br><strong>Differenza:</strong> tra le entrate del periodo attuale con quello dello scorso anno.
             </div>
         </div>
         
@@ -374,7 +380,7 @@
             <div class="data-row "><span class="row-label">2021-2022</span><span class="row-dots"></span><span class="row-value">47.606 €</span></div><div class="data-row "><span class="row-label">2022-2023</span><span class="row-dots"></span><span class="row-value">72.047 € (+51%)</span></div><div class="data-row "><span class="row-label">2023-2024</span><span class="row-dots"></span><span class="row-value">78.285 € (+ 9%)</span></div><div class="data-row "><span class="row-label">2024-2025</span><span class="row-dots"></span><span class="row-value">88.394 € (+13%)</span></div><div class="data-row "><span class="row-label">2025-2026</span><span class="row-dots"></span><span class="row-value">115.657 € (+31%)</span></div>
 
             <div class="info-footer">
-                Confronta l'incasso fatto dal 1° Settembre fino al giorno di oggi, per tutti gli anni (Cumulativa).
+                <strong>Periodo:</strong> da inizio anno sportivo attuale e stesso periodo degli anni scorsi.<br><strong>Tabella:</strong> entrate consolidate del periodo attuale confrontato con lo stesso periodo degli scorsi anni presenti in archivio.<br><strong>Differenza:</strong> tra le entrate del periodo attuale con quello dello scorso anno.
             </div>
         </div>
         
@@ -528,7 +534,7 @@
             <div class="data-row "><span class="row-label">Lunedì</span><span class="row-dots"></span><span class="row-value">275.793 € (26%)</span></div><div class="data-row "><span class="row-label">Martedì</span><span class="row-dots"></span><span class="row-value">221.120 € (21%)</span></div><div class="data-row "><span class="row-label">Mercoledì</span><span class="row-dots"></span><span class="row-value">142.124 € (13%)</span></div><div class="data-row "><span class="row-label">Giovedì</span><span class="row-dots"></span><span class="row-value">180.841 € (17%)</span></div><div class="data-row "><span class="row-label">Venerdì</span><span class="row-dots"></span><span class="row-value">201.352 € (19%)</span></div><div class="data-row "><span class="row-label">Sabato</span><span class="row-dots"></span><span class="row-value">39.663 € ( 4%)</span></div>
 
             <div class="info-footer">
-                
+                Somma gli incassi raggruppandoli per giorno della settimana per capire i giorni migliori.
             </div>
         </div>
         
@@ -542,7 +548,7 @@
             <div class="data-row "><span class="row-label">Gennaio</span><span class="row-dots"></span><span class="row-value">107.955 € (10%)</span></div><div class="data-row "><span class="row-label">Febbraio</span><span class="row-dots"></span><span class="row-value">83.122 € ( 8%)</span></div><div class="data-row "><span class="row-label">Marzo</span><span class="row-dots"></span><span class="row-value">84.714 € ( 8%)</span></div><div class="data-row "><span class="row-label">Aprile</span><span class="row-dots"></span><span class="row-value">76.566 € ( 7%)</span></div><div class="data-row "><span class="row-label">Maggio</span><span class="row-dots"></span><span class="row-value">72.550 € ( 7%)</span></div><div class="data-row "><span class="row-label">Giugno</span><span class="row-dots"></span><span class="row-value">56.516 € ( 5%)</span></div><div class="data-row "><span class="row-label">Luglio</span><span class="row-dots"></span><span class="row-value">36.283 € ( 3%)</span></div><div class="data-row "><span class="row-label">Agosto</span><span class="row-dots"></span><span class="row-value">28.756 € ( 3%)</span></div><div class="data-row "><span class="row-label">Settembre</span><span class="row-dots"></span><span class="row-value">139.476 € (13%)</span></div><div class="data-row "><span class="row-label">Ottobre</span><span class="row-dots"></span><span class="row-value">151.175 € (14%)</span></div><div class="data-row "><span class="row-label">Novembre</span><span class="row-dots"></span><span class="row-value">137.388 € (13%)</span></div><div class="data-row "><span class="row-label">Dicembre</span><span class="row-dots"></span><span class="row-value">86.392 € ( 8%)</span></div>
 
             <div class="info-footer">
-                
+                Somma gli incassi raggruppandoli per mese per capire i mesi più ricchi storicamente.
             </div>
         </div>
         
