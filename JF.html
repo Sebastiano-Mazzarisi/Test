@@ -128,38 +128,68 @@
         }
         .info-footer strong { color: #333; }
 
-        /* --- GRAFICO --- */
+        /* --- GRAFICO FIXATO PER MOBILE --- */
         .chart-container {
             margin-top: 20px; padding: 10px 5px; background-color: #fafafa; border-radius: 8px; border: 1px solid #eee;
         }
         .chart-title {
             text-align: center; font-weight: 700; font-size: 16px; margin-bottom: 10px; color: #333; text-transform: uppercase;
         }
-        .chart-row { display: flex; align-items: center; margin-bottom: 6px; font-size: 13px; }
         
-        .chart-lbl { 
-            width: 80px; text-align: right; padding-right: 6px; color: #555; font-weight: 500; 
-            flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; 
+        .chart-row { 
+            display: flex; 
+            align-items: center; 
+            margin-bottom: 6px; 
+            font-size: 13px; 
+            width: 100%;
         }
         
-        .chart-bar-area { flex-grow: 1; background-color: #e9ecef; height: 10px; border-radius: 5px; overflow: hidden; }
+        /* ETICHETTA SINISTRA (Anno) */
+        .chart-lbl { 
+            flex: 0 0 75px; /* Fissa a 75px, non si restringe */
+            text-align: right; 
+            padding-right: 6px; 
+            color: #555; 
+            font-weight: 500; 
+            white-space: nowrap;
+            /* NO overflow hidden, voglio vederlo tutto */
+        }
+        
+        /* AREA BARRA (Si adatta) */
+        .chart-bar-area { 
+            flex: 1 1 auto; /* Prende lo spazio rimanente */
+            background-color: #e9ecef; 
+            height: 12px; 
+            border-radius: 5px; 
+            overflow: hidden; 
+            margin: 0 5px;
+        }
+        
         .chart-bar { height: 100%; border-radius: 5px; }
-        .chart-val { width: 60px; text-align: left; padding-left: 6px; font-weight: 600; color: #333; font-size: 11px; flex-shrink: 0; }
+        
+        /* VALORE DESTRA (Euro) */
+        .chart-val { 
+            flex: 0 0 80px; /* Fissa a 80px, non si restringe */
+            text-align: left; 
+            font-weight: 600; 
+            color: #333; 
+            font-size: 11px; 
+            white-space: nowrap;
+        }
 
         .color-red { color: #dc3545 !important; } 
         .row-negative .row-value { color: #dc3545 !important; }
 
         /* ==========================================
-           MEDIA QUERY PER MOBILE (Corretta con doppie parentesi)
+           MEDIA QUERY PER MOBILE (IPHONE/ANDROID)
            ========================================== */
         @media (max-width: 500px) {
-            /* 1. Aggiungi margini laterali */
+            /* Margini di sicurezza laterali */
             .main-container {
                 padding-left: 15px;
                 padding-right: 15px;
             }
 
-            /* 2. Riduci font dei dati per evitare a capo */
             .data-row {
                 font-size: 18px !important; 
                 max-width: 100%; 
@@ -167,12 +197,11 @@
 
             .total-value { font-size: 20px; }
             
-            /* 3. Grafico: Riduci font e spazi */
-            .chart-row { font-size: 12px; }
-            .chart-lbl { width: 60px; font-size: 11px; }
-            .chart-val { width: 50px; font-size: 10px; }
+            /* Grafico: Font più piccolo per far entrare tutto */
+            .chart-row { font-size: 11px; }
+            .chart-lbl { flex: 0 0 65px; font-size: 11px; }
+            .chart-val { flex: 0 0 70px; font-size: 10px; }
             
-            /* 4. Menu un po' più piccolo */
             .menu-item { font-size: 18px; padding: 8px 10px; }
             #header-title { font-size: 24px; }
         }
