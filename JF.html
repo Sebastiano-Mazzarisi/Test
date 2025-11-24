@@ -26,10 +26,7 @@
     .row-value { text-align: right; font-weight: 700; color: #000; white-space: nowrap; flex-shrink: 0; }
     .total-row-container { position: relative; display: flex; justify-content: center; align-items: center; background-color: #f0f8ff; border-radius: 10px; padding: 6px 12px; margin-bottom: 15px; margin-top: 15px; border: 1px solid black; }
     .back-arrow { position: absolute; left: 15px; font-size: 28px; cursor: pointer; line-height: 1; user-select: none; color: #b8860b; }
-    
-    /* TOTALE: NO BOLD */
     .total-value { font-size: 23px; font-weight: 400; color: #0d6efd; }
-    
     .info-footer { margin-top: 25px; padding-top: 15px; border-top: 3px solid #000; text-align: left; font-size: 16px; color: #666; line-height: 1.5; padding-bottom: 30px; padding-left: 10px; padding-right: 10px; }
     .info-footer strong { color: #333; }
     .chart-container { margin-top: 20px; padding: 10px 5px; background-color: #fafafa; border-radius: 8px; border: 1px solid #eee; }
@@ -41,11 +38,9 @@
     .chart-val { width: 60px; text-align: left; padding-left: 6px; font-weight: 600; color: #333; font-size: 11px; flex-shrink: 0; white-space: nowrap; }
     .color-red { color: #dc3545 !important; } 
     .row-negative .row-value { color: #dc3545 !important; }
-    
-    /* RIGHE SPECIALI (Consolidato, Proiezione, Restante) - SFONDO GIALLO */
     .special-row { background-color: #fff9db; border-radius: 4px; }
-    .special-row .row-label { color: #000; font-weight: 600; padding-left: 5px; }
-    .special-row .row-value { color: #000; font-weight: 700; padding-right: 5px; }
+    .special-row .row-label { color: #000; font-weight: 600; }
+    .special-row .row-value { color: #000; font-weight: 700; }
     
     #pdf-hidden-container { display: none; }
 
@@ -162,10 +157,6 @@
             const right = document.createElement('div');
             right.style.flex = "1.2"; 
 
-            // FLAG PER RICALCOLO
-            const isTop20 = data.title.indexOf("TOP 20") !== -1;
-            let newTotal = 0.0;
-            let rowCount = 0;
             let lastAddedWasSeparator = false;
 
             Array.from(sourceElem.children).forEach(child => {
@@ -175,9 +166,12 @@
                     clone.style.marginTop = "0";
                     clone.style.width = "92%"; 
                     clone.style.margin = "0 auto";
-                    if(isTop20) {
+                    
+                    // Top 20 Filter per grafico
+                    if(data.title.indexOf("TOP 20") !== -1) {
                         clone.querySelectorAll('.chart-row').forEach((r, idx) => { if(idx >= 20) r.remove(); });
                     }
+
                     clone.querySelectorAll('.chart-row').forEach(cr => cr.style.fontSize = "9px");
                     clone.querySelectorAll('.chart-bar').forEach(cb => {
                          if(cb.style.backgroundColor.indexOf('220') === -1 && cb.style.backgroundColor.indexOf('dc3545') === -1) {
@@ -187,58 +181,37 @@
                     right.appendChild(clone);
                 } 
                 else if(child.classList.contains('info-footer')) {
-                    if (!lastAddedWasSeparator) {
-                         clone.style.borderTop = "1px solid #444";
-                    } else {
-                         clone.style.borderTop = "none";
-                    }
+                    clone.style.borderTop = "1px solid #444";
                     clone.style.marginTop = "20px";
                     clone.style.paddingTop = "10px";
                     clone.style.fontSize = "10px";
-                    left.appendChild(clone);
+                    // Descrizione spostata a DESTRA sotto il grafico
+                    right.appendChild(clone);
                 } 
                 else if(!child.classList.contains('total-row-container') && !child.classList.contains('back-arrow')) {
                     if(clone.classList.contains('data-row')) {
-                        if(isTop20 && rowCount >= 20) return;
-
-                        if(isTop20) {
-                             const valStr = clone.querySelector('.row-value').innerText;
-                             const cleanVal = parseFloat(valStr.replace('.','').replace('€',''));
-                             if(!isNaN(cleanVal)) newTotal += cleanVal;
-                        }
-
                         clone.style.fontSize = "18px"; 
                         clone.style.padding = "1px 0";
                         
                         if(clone.classList.contains('row-negative')) {
                             clone.querySelector('.row-value').style.color = "#dc3545";
                         }
-                        // Sfondo Giallo PDF
                         if(clone.classList.contains('special-row')) {
                             clone.style.backgroundColor = "#fff9db";
                         }
                         
                         lastAddedWasSeparator = false;
                         left.appendChild(clone);
-                        rowCount++;
                     }
                     if(clone.classList.contains('monday-separator') || clone.classList.contains('strong-separator')) {
-                        if(!isTop20 || rowCount < 20) {
-                            clone.style.marginTop = "4px";
-                            clone.style.marginBottom = "4px";
-                            clone.style.borderTop = "1px solid #444"; 
-                            lastAddedWasSeparator = true;
-                            left.appendChild(clone);
-                        }
+                        clone.style.marginTop = "4px";
+                        clone.style.marginBottom = "4px";
+                        clone.style.borderTop = "1px solid #444"; 
+                        lastAddedWasSeparator = true;
+                        left.appendChild(clone);
                     }
                 }
             });
-            
-            if(isTop20) {
-                tVal.innerText = new Intl.NumberFormat('it-IT').format(Math.round(newTotal)) + " €";
-                let avg = Math.round(newTotal / 20);
-                tVal.innerText += " - Media: " + new Intl.NumberFormat('it-IT').format(avg) + " €";
-            }
 
             grid.appendChild(left);
             grid.appendChild(right);
