@@ -13,36 +13,39 @@
     #header-title { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: 1px; line-height: 1.2; text-transform: uppercase; }
     #header-subtitle { margin-top: 5px; font-size: 16px; font-weight: 500; opacity: 0.9; }
     #menu-view { display: block; padding-bottom: 40px; padding-top: 20px; }
-    .menu-item { padding: 6px 20px; border-bottom: none; font-size: 20px; color: #333; font-weight: 400; cursor: pointer; display: flex; justify-content: center; align-items: center; position: relative; }
+    .menu-item { padding: 3px 20px; border-bottom: none; font-size: 20px; color: #333; font-weight: 400; cursor: pointer; display: flex; justify-content: center; align-items: center; position: relative; }
     .menu-item:hover { background-color: #f9f9f9; }
-    .menu-item.negative { color: #dc3545 !important; }
     .menu-item::after { content: '›'; font-size: 24px; color: #ccc; position: absolute; right: 20px; top: 50%; transform: translateY(-50%); }
     .detail-view { display: none; padding: 5px 10px; }
-    .data-row { display: flex; justify-content: space-between; align-items: flex-end; padding: 2px 0; font-size: 22px; width: 100%; max-width: 430px; margin: 0 auto; }
+    .data-row { display: flex; justify-content: space-between; align-items: flex-end; padding: 2px 0; font-size: 20px; width: 100%; max-width: 430px; margin: 0 auto; }
     .monday-separator { border-top: 2px solid #ccc; margin-top: 8px; margin-bottom: 8px; width: 100%; max-width: 430px; margin-left: auto; margin-right: auto; }
     .strong-separator { border-top: 3px solid #000; margin-top: 15px; margin-bottom: 15px; width: 100%; max-width: 430px; margin-left: auto; margin-right: auto; }
     .row-label { text-align: left; font-weight: 500; color: #495057; white-space: nowrap; flex-shrink: 1; overflow: hidden; text-overflow: ellipsis; max-width: 85%; }
     .row-dots { flex-grow: 1; border-bottom: 3px dotted #ccc; margin: 0 6px 7px 6px; min-width: 15px; }
     .row-value { text-align: right; font-weight: 700; color: #000; white-space: nowrap; flex-shrink: 0; }
-    .total-row-container { position: relative; display: flex; justify-content: center; align-items: center; background-color: #f0f8ff; border-radius: 10px; padding: 6px 12px; margin-bottom: 15px; margin-top: 15px; border: 1px solid black; }
+    .total-row-container { position: relative; display: flex; justify-content: center; align-items: center; background-color: #f0f8ff; border-radius: 10px; padding: 6px 12px; margin-bottom: 15px; margin-top: 15px; border: 2px solid #0d6efd; }
     .back-arrow { position: absolute; left: 15px; font-size: 28px; cursor: pointer; line-height: 1; user-select: none; color: #b8860b; }
-    .total-value { font-size: 23px; font-weight: 400; color: #0d6efd; }
-    .info-footer { margin-top: 25px; padding-top: 15px; border-top: 3px solid #000; text-align: left; font-size: 16px; color: #666; line-height: 1.5; padding-bottom: 30px; padding-left: 10px; padding-right: 10px; }
+    .total-value { font-size: 20px; font-weight: 400; color: #000 !important; }
+    
+    .info-footer { margin-top: 10px; padding-top: 8px; border-top: 1px solid #e0e0e0; text-align: left; font-size: 9px; color: #666; line-height: 1.3; padding-bottom: 20px; }
     .info-footer strong { color: #333; }
-    .chart-container { margin-top: 20px; padding: 10px 5px; background-color: #fafafa; border-radius: 8px; border: 1px solid #eee; }
+    
+    .chart-container { margin-top: 20px; padding: 10px 5px; background-color: #fafafa; border-radius: 8px; border: 1px solid #eee; margin-bottom: 5px; }
     .chart-title { text-align: center; font-weight: 700; font-size: 16px; margin-bottom: 10px; color: #333; text-transform: uppercase; }
     .chart-row { display: flex; align-items: center; margin-bottom: 6px; font-size: 13px; width: 100%; }
     .chart-lbl { width: 80px; text-align: right; padding-right: 6px; color: #555; font-weight: 500; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .chart-bar-area { flex-grow: 1; background-color: #e9ecef; height: 10px; border-radius: 5px; overflow: hidden; margin: 0 5px; }
     .chart-bar { height: 100%; border-radius: 5px; }
     .chart-val { width: 60px; text-align: left; padding-left: 6px; font-weight: 600; color: #333; font-size: 11px; flex-shrink: 0; white-space: nowrap; }
+    
     .color-red { color: #dc3545 !important; } 
     .row-negative .row-value { color: #dc3545 !important; }
     .special-row { background-color: #fff9db; border-radius: 4px; }
     .special-row .row-label { color: #000; font-weight: 600; }
     .special-row .row-value { color: #000; font-weight: 700; }
     
-    #pdf-hidden-container { display: none; }
+    #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 9999; display: none; justify-content: center; align-items: center; flex-direction: column; }
+    .loading-box { background-color: #333; color: white; padding: 20px 40px; border-radius: 8px; font-size: 18px; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: center; }
 
     @media (max-width: 500px) {
         .main-container { padding-left: 15px; padding-right: 15px; }
@@ -51,12 +54,12 @@
         .chart-row { font-size: 11px; }
         .chart-lbl { flex: 0 0 65px; font-size: 11px; }
         .chart-val { flex: 0 0 70px; font-size: 10px; }
-        .menu-item { font-size: 18px; padding: 8px 10px; }
+        .menu-item { font-size: 18px; padding: 4px 10px; }
         #header-title { font-size: 24px; }
     }
     </style>
     <script>
-        const TABLE_DATA = [{"id": "tab_0", "title": "1) MESE IN CORSO", "date": "1 Nov 2025 - 21 Nov 2025", "desc": "Dettaglio giornaliero delle entrate del mese corrente. La tabella visualizza solo i giorni in cui sono stati registrati movimenti (escludendo quelli a zero), permettendo di individuare rapidamente i picchi di attivit\u00e0 quotidiana. Il totale rappresenta il cumulato progressivo aggiornato all'ultimo inserimento."}, {"id": "tab_1", "title": "2) ANNO IN CORSO", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Andamento mensile della stagione sportiva attuale (dal 1\u00b0 settembre al 31 agosto). Mostra l'accumulo delle entrate mese per mese, fondamentale per monitorare il trend di crescita della stagione e confrontare i mesi \"forti\" con quelli \"deboli\" all'interno dell'annata corrente."}, {"id": "tab_2", "title": "3) MENSILE", "date": "1 Nov - 21 Nov", "desc": "Confronto diretto del mese attuale con lo stesso mese degli anni precedenti. \u00c8 un indicatore di performance puntuale: serve a capire se, ad esempio, questo \"novembre\" sta performando meglio o peggio dei \"novembre\" passati. Include la variazione percentuale rispetto all'anno scorso."}, {"id": "tab_3", "title": "4) CUMULATIVA", "date": "1 Set - 21 Nov", "desc": "Confronto alla \"data odierna\". Paragona l'incasso generato dal 1\u00b0 settembre a oggi con quanto realizzato nello stesso esatto lasso di tempo nelle stagioni passate. \u00c8 l'indicatore pi\u00f9 veritiero per capire se la stagione sta viaggiando a un ritmo di crescita superiore o inferiore allo storico."}, {"id": "tab_4", "title": "5) ANNO SPORTIVO", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Quadro generale delle stagioni passate (totali definitivi al 31 agosto) confrontato con il totale parziale raggiunto finora quest'anno. Offre una visione d'insieme per capire quanto manca per eguagliare o superare i record di fatturato degli anni precedenti."}, {"id": "tab_5", "title": "6) ANNO PREVISIONALE", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Proiezione di chiusura. Per l'anno in corso mostra una stima del risultato finale al 31 agosto, calcolata sull'andamento attuale. Per gli anni passati mostra il fatturato reale consolidato. Utile per capire \"dove atterreremo\" se il trend attuale dovesse confermarsi."}, {"id": "tab_6", "title": "7) ANNO CONTANTI", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Analisi dei flussi di cassa fisici. Isola i soli movimenti in Contanti per ogni stagione sportiva, permettendo di valutare la liquidit\u00e0 immediata rispetto al totale e l'evoluzione dell'uso del contante nel tempo."}, {"id": "tab_7", "title": "8) ANNO POS", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Analisi dei pagamenti elettronici. Isola i soli movimenti tramite Carta/Bancomat/Bonifico per ogni stagione sportiva, evidenziando la crescita dell'adozione dei pagamenti digitali da parte della clientela."}, {"id": "tab_8", "title": "9) ANNO USCITE", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Riepilogo annuale di tutte le spese operative. Confronta il volume delle uscite registrate nella stagione corrente con i costi sostenuti negli anni precedenti, essenziale per il controllo del bilancio."}, {"id": "tab_9", "title": "10) ANNO ENTRATE (x)", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Monitoraggio delle entrate extra-gestione. Isola gli incassi accessori (registrati separatamente dalla gestione ordinaria) per valutarne l'impatto sul fatturato complessivo anno su anno."}, {"id": "tab_10", "title": "11) NUMERO CLIENTI", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Analisi della base utenza. Conta le persone fisiche uniche (teste) che hanno effettuato almeno un pagamento durante l'anno. Non conta il numero di transazioni, ma l'ampiezza della clientela attiva."}, {"id": "tab_11", "title": "12) INTROITO MEDIO CLIENTE", "date": "1 Set 2025 - 31 Ago 2026", "desc": "Valore medio generato da ogni singolo cliente (ARPU: Average Revenue Per User). Si ottiene dividendo il Totale Incassi per il Numero di Clienti unici. Indica la capacit\u00e0 di spesa media e la fedelt\u00e0 della clientela per ogni stagione."}, {"id": "tab_12", "title": "13) OPERATORI (ANNO)", "date": "1 Set 2025 - ...", "desc": "Performance dello staff nella stagione corrente. Visualizza la quota di incasso e il volume d'affari gestito da ciascun operatore dal 1\u00b0 settembre ad oggi."}, {"id": "tab_13", "title": "14) OPERATORI (STORICO)", "date": "Storico Completo", "desc": "Classifica \"All-Time\" dello staff. Visualizza il volume totale di incassi gestito da ciascun operatore dall'inizio dell'attivit\u00e0 a oggi, offrendo una prospettiva storica sul contributo di ogni membro del team."}, {"id": "tab_14", "title": "15) SETTIMANA (STORICO)", "date": "Storico Completo", "desc": "Analisi statistica dei giorni della settimana. Aggrega tutti i dati storici per rivelare quali sono, in media, i giorni pi\u00f9 redditizi (es. \"Il luned\u00ec incassiamo pi\u00f9 del venerd\u00ec?\"), utile per la pianificazione dei turni o delle offerte."}, {"id": "tab_15", "title": "16) MESE (STORICO)", "date": "Storico Completo", "desc": "Analisi della stagionalit\u00e0. Aggrega tutti i dati storici per mostrare quali mesi dell'anno generano tradizionalmente pi\u00f9 volume d'affari, evidenziando i picchi e i cali fisiologici del business."}, {"id": "tab_16", "title": "17) TOP 20 CLIENTI (STAGIONE)", "date": "1 Set 2025 - 21 Nov 2025", "desc": "Classifica dei 20 clienti che hanno speso di pi\u00f9 nella stagione in corso. Utile per individuare i clienti 'VIP' su cui focalizzare l'attenzione o strategie di fidelizzazione."}, {"id": "tab_17", "title": "18) TOP 20 CLIENTI (STORICI)", "date": "1 Set 2021 - 21 Nov 2025", "desc": "Classifica dei 20 migliori clienti dall'apertura ad oggi (All-Time). Mostra i nominativi che hanno generato il maggior fatturato storico complessivo per la palestra."}];
+        const TABLE_DATA = [{"id": "tab_0", "title": "1) MESE IN CORSO", "date": "Novembre 2025", "desc": "Dettaglio giornaliero delle entrate del mese corrente. La tabella visualizza solo i giorni in cui sono stati registrati movimenti (escludendo quelli a zero), permettendo di individuare rapidamente i picchi di attivit\u00e0 quotidiana.", "yellow_row_idx": -1, "show_special_block": false, "val_consolidato": 0, "val_proiezione": 0, "val_restante": 0}, {"id": "tab_1", "title": "2) MESE SCORSO", "date": "Ottobre 2025", "desc": "Dettaglio giornaliero del mese precedente. Utile per analizzare l'andamento completo dell'ultimo mese chiuso e confrontarlo con quello attuale.", "yellow_row_idx": -1, "show_special_block": false, "val_consolidato": 0, "val_proiezione": 0, "val_restante": 0}, {"id": "tab_2", "title": "3) MENSILE", "date": "Novembre 2025", "desc": "Confronto diretto del mese attuale con lo stesso mese degli anni precedenti. \u00c8 un indicatore di performance puntuale.", "yellow_row_idx": -1, "show_special_block": false, "val_consolidato": 0, "val_proiezione": 0, "val_restante": 0}, {"id": "tab_3", "title": "4) ANNO IN CORSO", "date": "Stagione attuale (2025-2026)", "desc": "Andamento mensile della stagione sportiva attuale (dal 1\u00b0 settembre al 31 agosto). Mostra l'accumulo delle entrate mese per mese.", "yellow_row_idx": -1, "show_special_block": false, "val_consolidato": 0, "val_proiezione": 0, "val_restante": 0}, {"id": "tab_4", "title": "5) CUMULATIVA", "date": "Tutti gli anni fino al 21 novembre", "desc": "Confronto alla \"data odierna\". Paragona l'incasso generato dal 1\u00b0 settembre a oggi con le stagioni passate.", "yellow_row_idx": -1, "show_special_block": false, "val_consolidato": 0, "val_proiezione": 0, "val_restante": 0}, {"id": "tab_5", "title": "6) ANNO SPORTIVO", "date": "Stagione attuale (2025-2026)", "desc": "Quadro generale delle stagioni passate (totali definitivi al 31 agosto).", "yellow_row_idx": -1, "show_special_block": false, "val_consolidato": 0, "val_proiezione": 0, "val_restante": 0}, {"id": "tab_6", "title": "7) ANNO PREVISIONI", "date": "Stagione attuale (2025-2026)", "desc": "Proiezione di chiusura. Mostra una stima del risultato finale al 31 agosto basata sull'andamento attuale.", "yellow_row_idx": -1, "show_special_block": false, "val_consolidato": 0, "val_proiezione": 0, "val_restante": 0}, {"id": "tab_7", "title": "8) ANNO CONTANTI", "date": "Stagione attuale (2025-2026)", "desc": "Analisi dei flussi di cassa fisici (solo Contanti) anno su anno.", "yellow_row_idx": -1, "show_special_block": false, "val_consolidato": 0, "val_proiezione": 0, "val_restante": 0}, {"id": "tab_8", "title": "9) ANNO POS", "date": "Stagione attuale (2025-2026)", "desc": "Analisi dei pagamenti elettronici (Carta/Bancomat/Bonifico) anno su anno.", "yellow_row_idx": -1, "show_special_block": false, "val_consolidato": 0, "val_proiezione": 0, "val_restante": 0}, {"id": "tab_9", "title": "10) ANNO USCITE", "date": "Stagione attuale (2025-2026)", "desc": "Riepilogo annuale di tutte le spese operative.", "yellow_row_idx": -1, "show_special_block": false, "val_consolidato": 0, "val_proiezione": 0, "val_restante": 0}, {"id": "tab_10", "title": "11) ANNO ENTRATE (x)", "date": "Stagione attuale (2025-2026)", "desc": "Monitoraggio delle entrate extra-gestione (incassi accessori).", "yellow_row_idx": -1, "show_special_block": false, "val_consolidato": 0, "val_proiezione": 0, "val_restante": 0}, {"id": "tab_11", "title": "12) NUMERO CLIENTI", "date": "Tutti gli anni fino al 21 novembre", "desc": "Conta le persone fisiche uniche (teste) che hanno effettuato almeno un pagamento.", "yellow_row_idx": -1, "show_special_block": false, "val_consolidato": 0, "val_proiezione": 0, "val_restante": 0}, {"id": "tab_12", "title": "13) INTROITO MEDIO CLIENTE", "date": "Tutti gli anni fino al 21 novembre", "desc": "Valore medio generato da ogni singolo cliente (Incassi / Clienti).", "yellow_row_idx": -1, "show_special_block": false, "val_consolidato": 0, "val_proiezione": 0, "val_restante": 0}, {"id": "tab_13", "title": "14) OPERATORI (ANNO)", "date": "Stagione attuale (2025-2026)", "desc": "Performance dello staff nella stagione corrente.", "yellow_row_idx": -1, "show_special_block": false, "val_consolidato": 0, "val_proiezione": 0, "val_restante": 0}, {"id": "tab_14", "title": "15) OPERATORI (STORICO)", "date": "Storico completo (2021-2026)", "desc": "Classifica \"All-Time\" dello staff dall'apertura ad oggi.", "yellow_row_idx": -1, "show_special_block": false, "val_consolidato": 0, "val_proiezione": 0, "val_restante": 0}, {"id": "tab_15", "title": "16) SETTIMANA (STORICO)", "date": "Storico completo (2021-2026)", "desc": "Analisi statistica dei giorni della settimana pi\u00f9 redditizi.", "yellow_row_idx": -1, "show_special_block": false, "val_consolidato": 0, "val_proiezione": 0, "val_restante": 0}, {"id": "tab_16", "title": "17) MESE (STORICO)", "date": "Storico completo (2021-2026)", "desc": "Analisi della stagionalit\u00e0 aggregata per mese.", "yellow_row_idx": -1, "show_special_block": false, "val_consolidato": 0, "val_proiezione": 0, "val_restante": 0}, {"id": "tab_17", "title": "18) TOP 20 ANNO IN CORSO", "date": "Stagione attuale fino al 21 novembre", "desc": "Andamento mensile della stagione sportiva attuale (dal 1\u00b0 settembre al 31 agosto). Mostra l'accumulo delle entrate mese per mese.", "yellow_row_idx": -1, "show_special_block": false, "val_consolidato": 0, "val_proiezione": 0, "val_restante": 0}, {"id": "tab_18", "title": "19) ANNO IN CORSO", "date": "Dettaglio Mensile", "desc": "Andamento mensile della stagione sportiva attuale (dal 1\u00b0 settembre al 31 agosto). Mostra l'accumulo delle entrate mese per mese.", "yellow_row_idx": -1, "show_special_block": false, "val_consolidato": 0, "val_proiezione": 0, "val_restante": 0}, {"id": "tab_19", "title": "20) TOP 20 ANNO SCORSO", "date": "Stagione passata (2024-2025)", "desc": "Classifica dei 20 clienti migliori della stagione sportiva passata.", "yellow_row_idx": -1, "show_special_block": false, "val_consolidato": 0, "val_proiezione": 0, "val_restante": 0}, {"id": "tab_20", "title": "21) TOP 20 STORICI", "date": "Storico completo fino al 21 novembre", "desc": "Classifica dei 20 migliori clienti dall'apertura ad oggi.", "yellow_row_idx": -1, "show_special_block": false, "val_consolidato": 0, "val_proiezione": 0, "val_restante": 0}];
         const HOME_TITLE = "ANALISI DATI";
         const HOME_SUBTITLE = "Aggiornato al: 21 Nov 2025";
         let currIdx = -1; 
@@ -65,12 +68,42 @@
             currIdx = index;
             const data = TABLE_DATA[index];
             document.getElementById('header-title').innerText = data.title;
-            document.getElementById('header-subtitle').innerText = data.date; 
+            document.getElementById('header-subtitle').innerHTML = data.date; 
             document.getElementById('menu-view').style.display = 'none';
-            const details = document.getElementsByClassName('detail-view');
-            for(let d of details) d.style.display = 'none';
+            
             const target = document.getElementById(data.id);
-            if(target) { target.style.display = 'block'; window.scrollTo(0,0); }
+            if(target) { 
+                const tVal = target.querySelector('.total-value');
+                if (tVal) {
+                    let originalText = tVal.getAttribute('data-original');
+                    if(!originalText) {
+                        originalText = tVal.innerText;
+                        tVal.setAttribute('data-original', originalText);
+                    }
+                    
+                    let displayText = originalText;
+                    // V133: SPLIT 2 RIGHE PER TAB 1 (MESE IN CORSO) A VIDEO
+                    if(data.title.indexOf("MESE IN CORSO") !== -1) {
+                        const pieces = displayText.split("  •  ");
+                        if(pieces.length === 4) {
+                            // Riga 1: Σ val • µ val
+                            // Riga 2: ŷ val • Δ val
+                            displayText = pieces[0] + "  •  " + pieces[1] + "<br>" + pieces[2] + "  •  " + pieces[3];
+                        }
+                    }
+                    
+                    tVal.innerHTML = displayText
+                        .replace(/Σ/g, '<b style="color:#800000">Σ</b>')
+                        .replace(/µ/g, '<b style="color:#800000">µ</b>')
+                        .replace(/ŷ/g, '<b style="color:#800000">ŷ</b>')
+                        .replace(/Δ/g, '<b style="color:#800000">Δ</b>');
+                }
+                target.style.display = 'block'; 
+                window.scrollTo(0,0); 
+            }
+            
+            const details = document.getElementsByClassName('detail-view');
+            for(let d of details) if(d.id !== data.id) d.style.display = 'none';
         }
 
         function goHome() {
@@ -81,6 +114,16 @@
             document.getElementById('header-subtitle').innerText = HOME_SUBTITLE;
             document.getElementById('menu-view').style.display = 'block';
             window.scrollTo(0,0);
+        }
+
+        function startDownload() {
+            document.getElementById('loading-overlay').style.display = 'flex';
+            setTimeout(() => {
+                downloadPDF();
+                setTimeout(() => {
+                     document.getElementById('loading-overlay').style.display = 'none';
+                }, 2000);
+            }, 100);
         }
 
         function downloadPDF() {
@@ -95,8 +138,13 @@
             } else {
                 filename = 'Report_Completo.pdf';
                 for(let i=0; i<TABLE_DATA.length; i++) {
+                    if (i >= 3 && i <= 15 && (i % 2 !== 0)) continue;
                     const data = TABLE_DATA[i];
-                    const page = buildPdfPage(data, document.getElementById(data.id));
+                    let nextData = null;
+                    if (i >= 2 && i < 16 && (i % 2 === 0)) nextData = TABLE_DATA[i+1];
+                    const el1 = document.getElementById(data.id);
+                    const el2 = nextData ? document.getElementById(nextData.id) : null;
+                    const page = buildPdfPage(data, el1, nextData, el2);
                     pdfContainer.appendChild(page);
                 }
             }
@@ -112,17 +160,7 @@
             html2pdf().from(pdfContainer).set(opt).save();
         }
 
-        function buildPdfPage(data, sourceElem) {
-            const pdfDiv = document.createElement('div');
-            pdfDiv.style.width = "210mm";
-            pdfDiv.style.minHeight = "295mm"; 
-            pdfDiv.style.padding = "20mm"; 
-            pdfDiv.style.boxSizing = "border-box";
-            pdfDiv.style.fontFamily = "Arial, sans-serif";
-            pdfDiv.style.backgroundColor = "#fff";
-            pdfDiv.style.position = "relative"; 
-            pdfDiv.style.pageBreakAfter = "always"; 
-
+        function appendTableToPdf(pdfDiv, data, sourceElem) {
             const h = document.createElement('div');
             h.style.backgroundColor = "#ffffff";
             h.style.color = "black";
@@ -135,14 +173,27 @@
 
             const totRow = sourceElem.querySelector('.total-row-container').cloneNode(true);
             totRow.querySelector('.back-arrow').remove(); 
-            totRow.style.border = "1px solid #000";
+            totRow.style.border = "2px solid #0d6efd"; 
             totRow.style.backgroundColor = "#f0f8ff";
             totRow.style.textAlign = "center";
             totRow.style.padding = "6px";
             totRow.style.marginBottom = "20px";
+            
             const tVal = totRow.querySelector('.total-value');
-            tVal.style.fontSize = "18px"; 
-            tVal.style.fontWeight = "400"; // NO BOLD NEL PDF
+            if(tVal.getAttribute('data-original')) {
+                tVal.innerText = tVal.getAttribute('data-original');
+            }
+            tVal.style.fontSize = "15px"; 
+            tVal.style.fontWeight = "400"; 
+            tVal.style.color = "#000";
+            
+            // PDF: RIGA UNICA (Nessun split)
+            tVal.innerHTML = tVal.innerText
+                .replace(/Σ/g, '<b style="color:#800000">Σ</b>')
+                .replace(/µ/g, '<b style="color:#800000">µ</b>')
+                .replace(/ŷ/g, '<b style="color:#800000">ŷ</b>')
+                .replace(/Δ/g, '<b style="color:#800000">Δ</b>');
+            
             pdfDiv.appendChild(totRow);
 
             const grid = document.createElement('div');
@@ -157,8 +208,6 @@
             const right = document.createElement('div');
             right.style.flex = "1.2"; 
 
-            let lastAddedWasSeparator = false;
-
             Array.from(sourceElem.children).forEach(child => {
                 const clone = child.cloneNode(true);
                 
@@ -166,12 +215,9 @@
                     clone.style.marginTop = "0";
                     clone.style.width = "92%"; 
                     clone.style.margin = "0 auto";
-                    
-                    // Top 20 Filter per grafico
                     if(data.title.indexOf("TOP 20") !== -1) {
                         clone.querySelectorAll('.chart-row').forEach((r, idx) => { if(idx >= 20) r.remove(); });
                     }
-
                     clone.querySelectorAll('.chart-row').forEach(cr => cr.style.fontSize = "9px");
                     clone.querySelectorAll('.chart-bar').forEach(cb => {
                          if(cb.style.backgroundColor.indexOf('220') === -1 && cb.style.backgroundColor.indexOf('dc3545') === -1) {
@@ -181,41 +227,78 @@
                     right.appendChild(clone);
                 } 
                 else if(child.classList.contains('info-footer')) {
-                    clone.style.borderTop = "1px solid #444";
-                    clone.style.marginTop = "20px";
-                    clone.style.paddingTop = "10px";
-                    clone.style.fontSize = "10px";
-                    // Descrizione spostata a DESTRA sotto il grafico
+                    clone.style.borderTop = "1px solid #bfbfbf"; 
+                    clone.style.marginTop = "10px";
+                    clone.style.paddingTop = "5px";
+                    clone.style.fontSize = "9px";
+                    clone.style.lineHeight = "1.2";
                     right.appendChild(clone);
                 } 
                 else if(!child.classList.contains('total-row-container') && !child.classList.contains('back-arrow')) {
                     if(clone.classList.contains('data-row')) {
-                        clone.style.fontSize = "18px"; 
+                        clone.style.fontSize = "17px"; 
                         clone.style.padding = "1px 0";
-                        
                         if(clone.classList.contains('row-negative')) {
                             clone.querySelector('.row-value').style.color = "#dc3545";
                         }
                         if(clone.classList.contains('special-row')) {
                             clone.style.backgroundColor = "#fff9db";
                         }
-                        
-                        lastAddedWasSeparator = false;
                         left.appendChild(clone);
                     }
                     if(clone.classList.contains('monday-separator') || clone.classList.contains('strong-separator')) {
                         clone.style.marginTop = "4px";
                         clone.style.marginBottom = "4px";
                         clone.style.borderTop = "1px solid #444"; 
-                        lastAddedWasSeparator = true;
                         left.appendChild(clone);
                     }
                 }
             });
+            
+            if(data.title.indexOf("TOP 20") !== -1) {
+                 let newTotal = 0.0;
+                 let rowCount = 0;
+                 left.querySelectorAll('.data-row').forEach(row => {
+                     if(rowCount < 20) {
+                         try {
+                            const v = row.querySelector('.row-value').innerText;
+                            const clean = parseFloat(v.replace('.','').replace('€',''));
+                            if(!isNaN(clean)) newTotal += clean;
+                         } catch(e){}
+                         rowCount++;
+                     } else {
+                         row.remove(); 
+                     }
+                 });
+                 let avg = Math.round(newTotal / 20);
+                 tVal.innerHTML = '<b style="color:#800000">Σ</b> ' + new Intl.NumberFormat('it-IT').format(Math.round(newTotal)) + " €  •  <b style='color:#800000'>µ</b> " + new Intl.NumberFormat('it-IT').format(avg) + " €";
+            }
 
             grid.appendChild(left);
             grid.appendChild(right);
             pdfDiv.appendChild(grid);
+        }
+
+        function buildPdfPage(data1, el1, data2, el2) {
+            const pdfDiv = document.createElement('div');
+            pdfDiv.style.width = "210mm";
+            pdfDiv.style.minHeight = "295mm"; 
+            pdfDiv.style.padding = "20mm"; 
+            pdfDiv.style.boxSizing = "border-box";
+            pdfDiv.style.fontFamily = "Arial, sans-serif";
+            pdfDiv.style.backgroundColor = "#fff";
+            pdfDiv.style.position = "relative"; 
+            pdfDiv.style.pageBreakAfter = "always"; 
+
+            appendTableToPdf(pdfDiv, data1, el1);
+            
+            if(data2 && el2) {
+                const spacer = document.createElement('div');
+                spacer.style.height = "10mm";
+                spacer.style.width = "100%";
+                pdfDiv.appendChild(spacer);
+                appendTableToPdf(pdfDiv, data2, el2);
+            }
 
             const foot = document.createElement('div');
             foot.style.position = "absolute";
@@ -233,13 +316,23 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            document.querySelector('.header-box').addEventListener('click', () => { downloadPDF(); });
+            document.querySelector('.header-box').addEventListener('click', () => { startDownload(); });
             
             document.addEventListener('keydown', e => {
                 if(e.key==="Backspace" && currIdx!==-1) goHome();
-                if(currIdx===-1) return;
-                if(e.key==="ArrowLeft") loadTable(currIdx-1<0?TABLE_DATA.length-1:currIdx-1);
-                if(e.key==="ArrowRight") loadTable(currIdx+1>=TABLE_DATA.length?0:currIdx+1);
+                if(currIdx===-1) {
+                    if(e.key==="ArrowRight") loadTable(0); 
+                    if(e.key==="ArrowLeft") loadTable(TABLE_DATA.length - 1);
+                    return;
+                }
+                if(e.key==="ArrowLeft") {
+                    if(currIdx === 0) goHome();
+                    else loadTable(currIdx - 1);
+                }
+                if(e.key==="ArrowRight") {
+                    if(currIdx === TABLE_DATA.length - 1) goHome();
+                    else loadTable(currIdx + 1);
+                }
             });
             let touchStartX = 0;
             document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, false);
@@ -254,716 +347,56 @@
     </script>
 </head>
 <body>
+    <div id="loading-overlay">
+        <div class="loading-box">Elaborazione in corso...</div>
+    </div>
+
     <div class="main-container">
         <div class="header-box" title="Clicca per scaricare PDF">
             <div id="header-title">ANALISI DATI</div>
             <div id="header-subtitle">Aggiornato al: 21 Nov 2025</div>
         </div>
         <div id="menu-view">
-<div class="menu-item" onclick="loadTable(0)">1) MESE IN CORSO</div><div class="menu-item" onclick="loadTable(1)">2) ANNO IN CORSO</div><div class="menu-item" onclick="loadTable(2)">3) MENSILE</div><div class="menu-item" onclick="loadTable(3)">4) CUMULATIVA</div><div class="menu-item negative" onclick="loadTable(4)">5) ANNO SPORTIVO</div><div class="menu-item" onclick="loadTable(5)">6) ANNO PREVISIONALE</div><div class="menu-item negative" onclick="loadTable(6)">7) ANNO CONTANTI</div><div class="menu-item negative" onclick="loadTable(7)">8) ANNO POS</div><div class="menu-item negative" onclick="loadTable(8)">9) ANNO USCITE</div><div class="menu-item negative" onclick="loadTable(9)">10) ANNO ENTRATE (x)</div><div class="menu-item negative" onclick="loadTable(10)">11) NUMERO CLIENTI</div><div class="menu-item" onclick="loadTable(11)">12) INTROITO MEDIO CLIENTE</div><div class="menu-item" onclick="loadTable(12)">13) OPERATORI (ANNO)</div><div class="menu-item" onclick="loadTable(13)">14) OPERATORI (STORICO)</div><div class="menu-item" onclick="loadTable(14)">15) SETTIMANA (STORICO)</div><div class="menu-item" onclick="loadTable(15)">16) MESE (STORICO)</div><div class="menu-item" onclick="loadTable(16)">17) TOP 20 CLIENTI (STAGIONE)</div><div class="menu-item" onclick="loadTable(17)">18) TOP 20 CLIENTI (STORICI)</div></div><div id="tab_0" class="detail-view">
-        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value ">Totale: 28.619 € - Media: 1.683 €</div></div>
-        <div class="data-row "><span class="row-label">Lu  3 Nov</span><span class="row-dots"></span><span class="row-value">4.465 €</span></div><div class="data-row "><span class="row-label">Ma  4 Nov</span><span class="row-dots"></span><span class="row-value">3.215 €</span></div><div class="data-row "><span class="row-label">Me  5 Nov</span><span class="row-dots"></span><span class="row-value">870 €</span></div><div class="data-row "><span class="row-label">Gi  6 Nov</span><span class="row-dots"></span><span class="row-value">1.455 €</span></div><div class="data-row "><span class="row-label">Ve  7 Nov</span><span class="row-dots"></span><span class="row-value">1.970 €</span></div><div class="data-row "><span class="row-label">Sa  8 Nov</span><span class="row-dots"></span><span class="row-value">737 €</span></div><div class="monday-separator"></div><div class="data-row "><span class="row-label">Lu 10 Nov</span><span class="row-dots"></span><span class="row-value">2.760 €</span></div><div class="data-row "><span class="row-label">Ma 11 Nov</span><span class="row-dots"></span><span class="row-value">1.880 €</span></div><div class="data-row "><span class="row-label">Me 12 Nov</span><span class="row-dots"></span><span class="row-value">1.256 €</span></div><div class="data-row "><span class="row-label">Gi 13 Nov</span><span class="row-dots"></span><span class="row-value">1.620 €</span></div><div class="data-row "><span class="row-label">Ve 14 Nov</span><span class="row-dots"></span><span class="row-value">1.625 €</span></div><div class="data-row "><span class="row-label">Sa 15 Nov</span><span class="row-dots"></span><span class="row-value">265 €</span></div><div class="monday-separator"></div><div class="data-row "><span class="row-label">Lu 17 Nov</span><span class="row-dots"></span><span class="row-value">1.540 €</span></div><div class="data-row "><span class="row-label">Ma 18 Nov</span><span class="row-dots"></span><span class="row-value">1.435 €</span></div><div class="data-row "><span class="row-label">Me 19 Nov</span><span class="row-dots"></span><span class="row-value">685 €</span></div><div class="data-row "><span class="row-label">Gi 20 Nov</span><span class="row-dots"></span><span class="row-value">897 €</span></div><div class="data-row "><span class="row-label">Ve 21 Nov</span><span class="row-dots"></span><span class="row-value">1.944 €</span></div><div class="monday-separator" style="border-color:#000; margin:15px auto;"></div><div class="data-row special-row"><span class="row-label">Consolidato</span><span class="row-dots"></span><span class="row-value">28.619 €</span></div><div class="data-row special-row"><span class="row-label">Proiezione</span><span class="row-dots"></span><span class="row-value">38.151 €</span></div><div class="data-row special-row"><span class="row-label">Restante</span><span class="row-dots"></span><span class="row-value">9.532 €</span></div><div class="strong-separator"></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div>
-        <div class="chart-row">
-            <div class="chart-lbl">Lu  3 Nov</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
-            <div class="chart-val">4.465 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Ma  4 Nov</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:72.00447928331467%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">3.215 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Me  5 Nov</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:19.48488241881299%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">870 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Gi  6 Nov</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:32.586786114221724%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">1.455 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Ve  7 Nov</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:44.120940649496085%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">1.970 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Sa  8 Nov</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:16.50615901455767%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">737 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Lu 10 Nov</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:61.81410974244122%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">2.760 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Ma 11 Nov</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:42.10526315789473%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">1.880 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Me 12 Nov</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:28.12989921612542%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">1.256 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Gi 13 Nov</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:36.28219484882419%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">1.620 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Ve 14 Nov</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:36.39417693169093%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">1.625 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Sa 15 Nov</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:5.93505039193729%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">265 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Lu 17 Nov</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:34.49048152295633%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">1.540 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Ma 18 Nov</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:32.13885778275476%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">1.435 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Me 19 Nov</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:15.34154535274356%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">685 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Gi 20 Nov</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:20.089585666293395%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">897 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Ve 21 Nov</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:43.53863381858902%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">1.944 €</div>
-        </div></div><div class="info-footer">Dettaglio giornaliero delle entrate del mese corrente. La tabella visualizza solo i giorni in cui sono stati registrati movimenti (escludendo quelli a zero), permettendo di individuare rapidamente i picchi di attività quotidiana. Il totale rappresenta il cumulato progressivo aggiornato all'ultimo inserimento.</div></div><div id="tab_1" class="detail-view">
-        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value ">Totale: 111.137 €</div></div>
-        <div class="data-row "><span class="row-label">Set 2025</span><span class="row-dots"></span><span class="row-value">41.316 €</span></div><div class="data-row "><span class="row-label">Ott 2025</span><span class="row-dots"></span><span class="row-value">41.202 €</span></div><div class="data-row "><span class="row-label">Nov 2025</span><span class="row-dots"></span><span class="row-value">28.619 €</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div>
-        <div class="chart-row">
-            <div class="chart-lbl">Set 2025</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
-            <div class="chart-val">41.316 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Ott 2025</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:99.72407783909382%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">41.202 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Nov 2025</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:69.26856423661536%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">28.619 €</div>
-        </div></div><div class="info-footer">Andamento mensile della stagione sportiva attuale (dal 1° settembre al 31 agosto). Mostra l'accumulo delle entrate mese per mese, fondamentale per monitorare il trend di crescita della stagione e confrontare i mesi "forti" con quelli "deboli" all'interno dell'annata corrente.</div></div><div id="tab_2" class="detail-view">
-        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value ">Diff: +4.360 € (+18%)</div></div>
-        <div class="data-row "><span class="row-label">2021-22</span><span class="row-dots"></span><span class="row-value">12.596 €</span></div><div class="data-row "><span class="row-label">2022-23</span><span class="row-dots"></span><span class="row-value">20.408 € (+62%)</span></div><div class="data-row "><span class="row-label">2023-24</span><span class="row-dots"></span><span class="row-value">20.896 € (+ 2%)</span></div><div class="data-row "><span class="row-label">2024-25</span><span class="row-dots"></span><span class="row-value">24.259 € (+16%)</span></div><div class="data-row "><span class="row-label">2025-26</span><span class="row-dots"></span><span class="row-value">28.619 € (+18%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div>
-        <div class="chart-row">
-            <div class="chart-lbl">2021-22</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:44.01271882315944%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">12.596 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2022-23</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:71.3092700653412%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">20.408 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2023-24</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:73.0144309724309%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">20.896 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2024-25</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:84.76536566616583%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">24.259 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2025-26</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
-            <div class="chart-val">28.619 €</div>
-        </div></div><div class="info-footer">Confronto diretto del mese attuale con lo stesso mese degli anni precedenti. È un indicatore di performance puntuale: serve a capire se, ad esempio, questo "novembre" sta performando meglio o peggio dei "novembre" passati. Include la variazione percentuale rispetto all'anno scorso.</div></div><div id="tab_3" class="detail-view">
-        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value ">Diff: +22.743 € (+26%)</div></div>
-        <div class="data-row "><span class="row-label">2021-22</span><span class="row-dots"></span><span class="row-value">47.606 €</span></div><div class="data-row "><span class="row-label">2022-23</span><span class="row-dots"></span><span class="row-value">71.947 € (+51%)</span></div><div class="data-row "><span class="row-label">2023-24</span><span class="row-dots"></span><span class="row-value">78.245 € (+ 9%)</span></div><div class="data-row "><span class="row-label">2024-25</span><span class="row-dots"></span><span class="row-value">88.394 € (+13%)</span></div><div class="data-row "><span class="row-label">2025-26</span><span class="row-dots"></span><span class="row-value">111.137 € (+26%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div>
-        <div class="chart-row">
-            <div class="chart-lbl">2021-22</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:42.83541934729208%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">47.606 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2022-23</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:64.73721622861873%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">71.947 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2023-24</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:70.40409584566795%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">78.245 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2024-25</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:79.5360680961336%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">88.394 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2025-26</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
-            <div class="chart-val">111.137 €</div>
-        </div></div><div class="info-footer">Confronto alla "data odierna". Paragona l'incasso generato dal 1° settembre a oggi con quanto realizzato nello stesso esatto lasso di tempo nelle stagioni passate. È l'indicatore più veritiero per capire se la stagione sta viaggiando a un ritmo di crescita superiore o inferiore allo storico.</div></div><div id="tab_4" class="detail-view">
-        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value color-red">Diff: -189.978 € (-63%)</div></div>
-        <div class="data-row "><span class="row-label">2021-22</span><span class="row-dots"></span><span class="row-value">167.358 €</span></div><div class="data-row "><span class="row-label">2022-23</span><span class="row-dots"></span><span class="row-value">230.985 € (+38%)</span></div><div class="data-row "><span class="row-label">2023-24</span><span class="row-dots"></span><span class="row-value">245.568 € (+ 6%)</span></div><div class="data-row "><span class="row-label">2024-25</span><span class="row-dots"></span><span class="row-value">301.115 € (+23%)</span></div><div class="data-row "><span class="row-label">2025-26</span><span class="row-dots"></span><span class="row-value">111.137 € (-63%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div>
-        <div class="chart-row">
-            <div class="chart-lbl">2021-22</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:55.579429785962176%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">167.358 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2022-23</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:76.7098948906564%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">230.985 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2023-24</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:81.55289507331086%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">245.568 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2024-25</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
-            <div class="chart-val">301.115 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2025-26</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:36.90849011175133%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">111.137 €</div>
-        </div></div><div class="info-footer">Quadro generale delle stagioni passate (totali definitivi al 31 agosto) confrontato con il totale parziale raggiunto finora quest'anno. Offre una visione d'insieme per capire quanto manca per eguagliare o superare i record di fatturato degli anni precedenti.</div></div><div id="tab_5" class="detail-view">
-        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value ">Diff: +60.701 € (+20%)</div></div>
-        <div class="data-row "><span class="row-label">2021-22</span><span class="row-dots"></span><span class="row-value">167.358 €</span></div><div class="data-row "><span class="row-label">2022-23</span><span class="row-dots"></span><span class="row-value">230.985 € (+38%)</span></div><div class="data-row "><span class="row-label">2023-24</span><span class="row-dots"></span><span class="row-value">245.568 € (+ 6%)</span></div><div class="data-row "><span class="row-label">2024-25</span><span class="row-dots"></span><span class="row-value">301.115 € (+23%)</span></div><div class="data-row "><span class="row-label">2025-26</span><span class="row-dots"></span><span class="row-value">361.816 € (+20%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div>
-        <div class="chart-row">
-            <div class="chart-lbl">2021-22</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:46.2550025427289%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">167.358 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2022-23</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:63.840460344484484%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">230.985 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2023-24</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:67.87096203595198%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">245.568 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2024-25</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:83.22324054215402%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">301.115 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2025-26</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
-            <div class="chart-val">361.816 €</div>
-        </div></div><div class="info-footer">Proiezione di chiusura. Per l'anno in corso mostra una stima del risultato finale al 31 agosto, calcolata sull'andamento attuale. Per gli anni passati mostra il fatturato reale consolidato. Utile per capire "dove atterreremo" se il trend attuale dovesse confermarsi.</div></div><div id="tab_6" class="detail-view">
-        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value color-red">Diff: -81.216 € (-68%)</div></div>
-        <div class="data-row "><span class="row-label">2021-22</span><span class="row-dots"></span><span class="row-value">81.490 €</span></div><div class="data-row "><span class="row-label">2022-23</span><span class="row-dots"></span><span class="row-value">97.006 € (+19%)</span></div><div class="data-row "><span class="row-label">2023-24</span><span class="row-dots"></span><span class="row-value">93.553 € (- 4%)</span></div><div class="data-row "><span class="row-label">2024-25</span><span class="row-dots"></span><span class="row-value">119.757 € (+28%)</span></div><div class="data-row "><span class="row-label">2025-26</span><span class="row-dots"></span><span class="row-value">141.973 € (+19%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div>
-        <div class="chart-row">
-            <div class="chart-lbl">2021-22</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:57.398237693082486%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">81.490 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2022-23</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:68.32707627506639%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">97.006 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2023-24</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:65.89492368267206%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">93.553 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2024-25</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:84.3519542448212%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">119.757 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2025-26</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
-            <div class="chart-val">141.973 €</div>
-        </div></div><div class="info-footer">Analisi dei flussi di cassa fisici. Isola i soli movimenti in Contanti per ogni stagione sportiva, permettendo di valutare la liquidità immediata rispetto al totale e l'evoluzione dell'uso del contante nel tempo.</div></div><div id="tab_7" class="detail-view">
-        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value color-red">Diff: -108.762 € (-60%)</div></div>
-        <div class="data-row "><span class="row-label">2021-22</span><span class="row-dots"></span><span class="row-value">85.868 €</span></div><div class="data-row "><span class="row-label">2022-23</span><span class="row-dots"></span><span class="row-value">133.979 € (+56%)</span></div><div class="data-row "><span class="row-label">2023-24</span><span class="row-dots"></span><span class="row-value">152.015 € (+13%)</span></div><div class="data-row "><span class="row-label">2024-25</span><span class="row-dots"></span><span class="row-value">181.358 € (+19%)</span></div><div class="data-row "><span class="row-label">2025-26</span><span class="row-dots"></span><span class="row-value">218.964 € (+21%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div>
-        <div class="chart-row">
-            <div class="chart-lbl">2021-22</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:39.215578816609124%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">85.868 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2022-23</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:61.18768382017136%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">133.979 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2023-24</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:69.42465428106902%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">152.015 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2024-25</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:82.82548729471512%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">181.358 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2025-26</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
-            <div class="chart-val">218.964 €</div>
-        </div></div><div class="info-footer">Analisi dei pagamenti elettronici. Isola i soli movimenti tramite Carta/Bancomat/Bonifico per ogni stagione sportiva, evidenziando la crescita dell'adozione dei pagamenti digitali da parte della clientela.</div></div><div id="tab_8" class="detail-view">
-        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value color-red">Diff: -981 € (-44%)</div></div>
-        <div class="data-row "><span class="row-label">2021-22</span><span class="row-dots"></span><span class="row-value">3.487 €</span></div><div class="data-row "><span class="row-label">2022-23</span><span class="row-dots"></span><span class="row-value">3.521 € (+ 1%)</span></div><div class="data-row "><span class="row-label">2023-24</span><span class="row-dots"></span><span class="row-value">2.366 € (-33%)</span></div><div class="data-row "><span class="row-label">2024-25</span><span class="row-dots"></span><span class="row-value">2.250 € (- 5%)</span></div><div class="data-row "><span class="row-label">2025-26</span><span class="row-dots"></span><span class="row-value">3.401 € (+51%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div>
-        <div class="chart-row">
-            <div class="chart-lbl">2021-22</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:99.03436523714853%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">3.487 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2022-23</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
-            <div class="chart-val">3.521 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2023-24</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:67.19681908548708%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">2.366 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2024-25</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:63.90230048281739%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">2.250 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2025-26</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:96.59187730758308%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">3.401 €</div>
-        </div></div><div class="info-footer">Riepilogo annuale di tutte le spese operative. Confronta il volume delle uscite registrate nella stagione corrente con i costi sostenuti negli anni precedenti, essenziale per il controllo del bilancio.</div></div><div id="tab_9" class="detail-view">
-        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value color-red">Diff: -7.482 € (-62%)</div></div>
-        <div class="data-row "><span class="row-label">2021-22</span><span class="row-dots"></span><span class="row-value">8.968 €</span></div><div class="data-row "><span class="row-label">2022-23</span><span class="row-dots"></span><span class="row-value">15.760 € (+76%)</span></div><div class="data-row "><span class="row-label">2023-24</span><span class="row-dots"></span><span class="row-value">12.291 € (-22%)</span></div><div class="data-row "><span class="row-label">2024-25</span><span class="row-dots"></span><span class="row-value">11.987 € (- 2%)</span></div><div class="data-row "><span class="row-label">2025-26</span><span class="row-dots"></span><span class="row-value">19.411 € (+62%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div>
-        <div class="chart-row">
-            <div class="chart-lbl">2021-22</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:46.20060790273556%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">8.968 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2022-23</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:81.19107722425429%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">15.760 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2023-24</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:63.31976714234197%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">12.291 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2024-25</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:61.75364484055432%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">11.987 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2025-26</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
-            <div class="chart-val">19.411 €</div>
-        </div></div><div class="info-footer">Monitoraggio delle entrate extra-gestione. Isola gli incassi accessori (registrati separatamente dalla gestione ordinaria) per valutarne l'impatto sul fatturato complessivo anno su anno.</div></div><div id="tab_10" class="detail-view">
-        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value color-red">Diff: -406 (-38%)</div></div>
-        <div class="data-row "><span class="row-label">2021-22</span><span class="row-dots"></span><span class="row-value">817</span></div><div class="data-row "><span class="row-label">2022-23</span><span class="row-dots"></span><span class="row-value">899 (+10%)</span></div><div class="data-row "><span class="row-label">2023-24</span><span class="row-dots"></span><span class="row-value">933 (+ 4%)</span></div><div class="data-row "><span class="row-label">2024-25</span><span class="row-dots"></span><span class="row-value">1.060 (+14%)</span></div><div class="data-row "><span class="row-label">2025-26</span><span class="row-dots"></span><span class="row-value">654 (-38%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div>
-        <div class="chart-row">
-            <div class="chart-lbl">2021-22</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:77.0754716981132%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">817</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2022-23</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:84.81132075471697%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">899</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2023-24</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:88.0188679245283%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">933</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2024-25</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
-            <div class="chart-val">1.060</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2025-26</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:61.698113207547166%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">654</div>
-        </div></div><div class="info-footer">Analisi della base utenza. Conta le persone fisiche uniche (teste) che hanno effettuato almeno un pagamento durante l'anno. Non conta il numero di transazioni, ma l'ampiezza della clientela attiva.</div></div><div id="tab_11" class="detail-view">
-        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value ">Diff: +269 € (+95%)</div></div>
-        <div class="data-row "><span class="row-label">2021-22</span><span class="row-dots"></span><span class="row-value">205 €</span></div><div class="data-row "><span class="row-label">2022-23</span><span class="row-dots"></span><span class="row-value">257 € (+25%)</span></div><div class="data-row "><span class="row-label">2023-24</span><span class="row-dots"></span><span class="row-value">263 € (+ 2%)</span></div><div class="data-row "><span class="row-label">2024-25</span><span class="row-dots"></span><span class="row-value">284 € (+ 8%)</span></div><div class="data-row "><span class="row-label">2025-26</span><span class="row-dots"></span><span class="row-value">553 € (+95%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div>
-        <div class="chart-row">
-            <div class="chart-lbl">2021-22</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:37.070524412296564%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">205 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2022-23</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:46.473779385171795%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">257 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2023-24</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:47.55877034358047%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">263 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2024-25</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:51.35623869801085%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">284 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">2025-26</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
-            <div class="chart-val">553 €</div>
-        </div></div><div class="info-footer">Valore medio generato da ogni singolo cliente (ARPU: Average Revenue Per User). Si ottiene dividendo il Totale Incassi per il Numero di Clienti unici. Indica la capacità di spesa media e la fedeltà della clientela per ogni stagione.</div></div><div id="tab_12" class="detail-view">
-        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value ">Totale: 111.137 €</div></div>
-        <div class="data-row "><span class="row-label">Marica</span><span class="row-dots"></span><span class="row-value">70.246 € (63%)</span></div><div class="data-row "><span class="row-label">Sabina</span><span class="row-dots"></span><span class="row-value">40.782 € (37%)</span></div><div class="data-row "><span class="row-label">Altri</span><span class="row-dots"></span><span class="row-value">109 € ( 0%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div>
-        <div class="chart-row">
-            <div class="chart-lbl">Marica</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
-            <div class="chart-val">70.246 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Sabina</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:58.055974717421634%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">40.782 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Altri</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:0.1551689775930302%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">109 €</div>
-        </div></div><div class="info-footer">Performance dello staff nella stagione corrente. Visualizza la quota di incasso e il volume d'affari gestito da ciascun operatore dal 1° settembre ad oggi.</div></div><div id="tab_13" class="detail-view">
-        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value ">Totale: 1.056.163 €</div></div>
-        <div class="data-row "><span class="row-label">Marica</span><span class="row-dots"></span><span class="row-value">710.745 € (67%)</span></div><div class="data-row "><span class="row-label">Sabina</span><span class="row-dots"></span><span class="row-value">339.876 € (32%)</span></div><div class="data-row "><span class="row-label">Altri</span><span class="row-dots"></span><span class="row-value">5.542 € ( 1%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div>
-        <div class="chart-row">
-            <div class="chart-lbl">Marica</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
-            <div class="chart-val">710.745 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Sabina</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:47.81968216448937%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">339.876 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Altri</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:0.7797451969412377%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">5.542 €</div>
-        </div></div><div class="info-footer">Classifica "All-Time" dello staff. Visualizza il volume totale di incassi gestito da ciascun operatore dall'inizio dell'attività a oggi, offrendo una prospettiva storica sul contributo di ogni membro del team.</div></div><div id="tab_14" class="detail-view">
-        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value ">Totale: 1.056.163 €</div></div>
-        <div class="data-row "><span class="row-label">Lunedì</span><span class="row-dots"></span><span class="row-value">271.278 € (26%)</span></div><div class="data-row "><span class="row-label">Martedì</span><span class="row-dots"></span><span class="row-value">221.020 € (21%)</span></div><div class="data-row "><span class="row-label">Mercoledì</span><span class="row-dots"></span><span class="row-value">142.114 € (13%)</span></div><div class="data-row "><span class="row-label">Giovedì</span><span class="row-dots"></span><span class="row-value">180.736 € (17%)</span></div><div class="data-row "><span class="row-label">Venerdì</span><span class="row-dots"></span><span class="row-value">201.352 € (19%)</span></div><div class="data-row "><span class="row-label">Sabato</span><span class="row-dots"></span><span class="row-value">39.663 € ( 4%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div>
-        <div class="chart-row">
-            <div class="chart-lbl">Lunedì</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
-            <div class="chart-val">271.278 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Martedì</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:81.47361746990173%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">221.020 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Mercoledì</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:52.386850389637196%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">142.114 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Giovedì</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:66.62390610370174%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">180.736 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Venerdì</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:74.22349029408946%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">201.352 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Sabato</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:14.620794904120496%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">39.663 €</div>
-        </div></div><div class="info-footer">Analisi statistica dei giorni della settimana. Aggrega tutti i dati storici per rivelare quali sono, in media, i giorni più redditizi (es. "Il lunedì incassiamo più del venerdì?"), utile per la pianificazione dei turni o delle offerte.</div></div><div id="tab_15" class="detail-view">
-        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value ">Totale: 1.056.163 €</div></div>
-        <div class="data-row "><span class="row-label">Gennaio</span><span class="row-dots"></span><span class="row-value">107.955 € (10%)</span></div><div class="data-row "><span class="row-label">Febbraio</span><span class="row-dots"></span><span class="row-value">83.122 € ( 8%)</span></div><div class="data-row "><span class="row-label">Marzo</span><span class="row-dots"></span><span class="row-value">84.714 € ( 8%)</span></div><div class="data-row "><span class="row-label">Aprile</span><span class="row-dots"></span><span class="row-value">76.566 € ( 7%)</span></div><div class="data-row "><span class="row-label">Maggio</span><span class="row-dots"></span><span class="row-value">72.490 € ( 7%)</span></div><div class="data-row "><span class="row-label">Giugno</span><span class="row-dots"></span><span class="row-value">56.516 € ( 5%)</span></div><div class="data-row "><span class="row-label">Luglio</span><span class="row-dots"></span><span class="row-value">36.283 € ( 3%)</span></div><div class="data-row "><span class="row-label">Agosto</span><span class="row-dots"></span><span class="row-value">28.746 € ( 3%)</span></div><div class="data-row "><span class="row-label">Settembre</span><span class="row-dots"></span><span class="row-value">139.376 € (13%)</span></div><div class="data-row "><span class="row-label">Ottobre</span><span class="row-dots"></span><span class="row-value">151.175 € (14%)</span></div><div class="data-row "><span class="row-label">Novembre</span><span class="row-dots"></span><span class="row-value">132.828 € (13%)</span></div><div class="data-row "><span class="row-label">Dicembre</span><span class="row-dots"></span><span class="row-value">86.392 € ( 8%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div>
-        <div class="chart-row">
-            <div class="chart-lbl">Gennaio</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:71.41061683479411%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">107.955 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Febbraio</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:54.98395898792789%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">83.122 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Marzo</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:56.03704316189846%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">84.714 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Aprile</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:50.64726310567224%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">76.566 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Maggio</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:47.95105010749132%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">72.490 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Giugno</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:37.38448817595501%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">56.516 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Luglio</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:24.0006614850339%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">36.283 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Agosto</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:19.015048784521248%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">28.746 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Settembre</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:92.19513808500082%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">139.376 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Ottobre</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
-            <div class="chart-val">151.175 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Novembre</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:87.86373408301638%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">132.828 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Dicembre</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:57.147015048784525%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">86.392 €</div>
-        </div></div><div class="info-footer">Analisi della stagionalità. Aggrega tutti i dati storici per mostrare quali mesi dell'anno generano tradizionalmente più volume d'affari, evidenziando i picchi e i cali fisiologici del business.</div></div><div id="tab_16" class="detail-view">
-        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value ">Totale: 12.890 € - Media: 644 €</div></div>
-        <div class="data-row "><span class="row-label">Deleonardis Pietro</span><span class="row-dots"></span><span class="row-value">925 €</span></div><div class="data-row "><span class="row-label">Mignozzi Francesco</span><span class="row-dots"></span><span class="row-value">850 €</span></div><div class="data-row "><span class="row-label">Pinto Nadia</span><span class="row-dots"></span><span class="row-value">785 €</span></div><div class="data-row "><span class="row-label">Netti Giulia</span><span class="row-dots"></span><span class="row-value">780 €</span></div><div class="data-row "><span class="row-label">Intini Cinzia</span><span class="row-dots"></span><span class="row-value">755 €</span></div><div class="data-row "><span class="row-label">Dibattista Emanuela</span><span class="row-dots"></span><span class="row-value">750 €</span></div><div class="data-row "><span class="row-label">Natile Gianna</span><span class="row-dots"></span><span class="row-value">690 €</span></div><div class="data-row "><span class="row-label">Pugliese Annalisa</span><span class="row-dots"></span><span class="row-value">660 €</span></div><div class="data-row "><span class="row-label">Lerede Luca</span><span class="row-dots"></span><span class="row-value">650 €</span></div><div class="data-row "><span class="row-label">Conteh Mariam</span><span class="row-dots"></span><span class="row-value">635 €</span></div><div class="data-row "><span class="row-label">Loliva Ivan</span><span class="row-dots"></span><span class="row-value">580 €</span></div><div class="data-row "><span class="row-label">Campanella Angela</span><span class="row-dots"></span><span class="row-value">570 €</span></div><div class="data-row "><span class="row-label">Tria Angela</span><span class="row-dots"></span><span class="row-value">565 €</span></div><div class="data-row "><span class="row-label">Dalena Giovanni</span><span class="row-dots"></span><span class="row-value">540 €</span></div><div class="data-row "><span class="row-label">Labate Gabriele</span><span class="row-dots"></span><span class="row-value">540 €</span></div><div class="data-row "><span class="row-label">Delfine Valentina</span><span class="row-dots"></span><span class="row-value">540 €</span></div><div class="data-row "><span class="row-label">Sbiroli Vito</span><span class="row-dots"></span><span class="row-value">540 €</span></div><div class="data-row "><span class="row-label">Pace Pietro</span><span class="row-dots"></span><span class="row-value">535 €</span></div><div class="data-row "><span class="row-label">Daprile Claudio</span><span class="row-dots"></span><span class="row-value">500 €</span></div><div class="data-row "><span class="row-label">Manelli Alessia</span><span class="row-dots"></span><span class="row-value">500 €</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div>
-        <div class="chart-row">
-            <div class="chart-lbl">Deleonardis</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
-            <div class="chart-val">925 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Mignozzi</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:91.8918918918919%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">850 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Pinto</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:84.86486486486487%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">785 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Netti</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:84.32432432432432%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">780 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Intini</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:81.62162162162161%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">755 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Dibattista</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:81.08108108108108%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">750 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Natile</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:74.5945945945946%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">690 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Pugliese</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:71.35135135135135%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">660 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Lerede</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:70.27027027027027%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">650 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Conteh</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:68.64864864864865%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">635 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Loliva</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:62.70270270270271%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">580 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Campanella</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:61.62162162162163%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">570 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Tria</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:61.08108108108108%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">565 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Dalena</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:58.37837837837838%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">540 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Labate</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:58.37837837837838%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">540 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Delfine</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:58.37837837837838%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">540 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Sbiroli</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:58.37837837837838%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">540 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Pace</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:57.83783783783784%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">535 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Daprile</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:54.054054054054056%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">500 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Manelli</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:54.054054054054056%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">500 €</div>
-        </div></div><div class="info-footer">Classifica dei 20 clienti che hanno speso di più nella stagione in corso. Utile per individuare i clienti 'VIP' su cui focalizzare l'attenzione o strategie di fidelizzazione.</div></div><div id="tab_17" class="detail-view">
-        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value ">Totale: 64.295 € - Media: 3.215 €</div></div>
-        <div class="data-row "><span class="row-label">Colacicco Francesca</span><span class="row-dots"></span><span class="row-value">5.425 €</span></div><div class="data-row "><span class="row-label">Fiume Stefania</span><span class="row-dots"></span><span class="row-value">4.300 €</span></div><div class="data-row "><span class="row-label">Mignozzi Francesco</span><span class="row-dots"></span><span class="row-value">4.030 €</span></div><div class="data-row "><span class="row-label">Detomaso Teresa</span><span class="row-dots"></span><span class="row-value">3.950 €</span></div><div class="data-row "><span class="row-label">Polignano Antonio</span><span class="row-dots"></span><span class="row-value">3.864 €</span></div><div class="data-row "><span class="row-label">Gaetano Vincenzo</span><span class="row-dots"></span><span class="row-value">3.375 €</span></div><div class="data-row "><span class="row-label">Delfine Marcella</span><span class="row-dots"></span><span class="row-value">3.343 €</span></div><div class="data-row "><span class="row-label">Vinella Gianni</span><span class="row-dots"></span><span class="row-value">3.320 €</span></div><div class="data-row "><span class="row-label">Convertino Valentina</span><span class="row-dots"></span><span class="row-value">3.172 €</span></div><div class="data-row "><span class="row-label">Manelli Alessia</span><span class="row-dots"></span><span class="row-value">3.000 €</span></div><div class="data-row "><span class="row-label">Lacarbonara Mariano</span><span class="row-dots"></span><span class="row-value">2.950 €</span></div><div class="data-row "><span class="row-label">Tieuli Claudia</span><span class="row-dots"></span><span class="row-value">2.910 €</span></div><div class="data-row "><span class="row-label">Mangini Alessia</span><span class="row-dots"></span><span class="row-value">2.855 €</span></div><div class="data-row "><span class="row-label">Delfine Giuseppe</span><span class="row-dots"></span><span class="row-value">2.745 €</span></div><div class="data-row "><span class="row-label">Tateo Chiara</span><span class="row-dots"></span><span class="row-value">2.562 €</span></div><div class="data-row "><span class="row-label">Netti Ivan</span><span class="row-dots"></span><span class="row-value">2.537 €</span></div><div class="data-row "><span class="row-label">Laterza Giancarlo</span><span class="row-dots"></span><span class="row-value">2.535 €</span></div><div class="data-row "><span class="row-label">Pizzutilo Domenico</span><span class="row-dots"></span><span class="row-value">2.483 €</span></div><div class="data-row "><span class="row-label">Andresini Angela</span><span class="row-dots"></span><span class="row-value">2.479 €</span></div><div class="data-row "><span class="row-label">Campanella Marilena</span><span class="row-dots"></span><span class="row-value">2.460 €</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div>
-        <div class="chart-row">
-            <div class="chart-lbl">Colacicco</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
-            <div class="chart-val">5.425 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Fiume</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:79.26267281105991%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">4.300 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Mignozzi</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:74.28571428571429%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">4.030 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Detomaso</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:72.81105990783409%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">3.950 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Polignano</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:71.22580645161291%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">3.864 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Gaetano</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:62.21198156682027%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">3.375 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Delfine</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:61.622119815668206%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">3.343 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Vinella</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:61.19815668202765%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">3.320 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Convertino</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:58.47004608294931%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">3.172 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Manelli</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:55.29953917050692%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">3.000 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Lacarbonara</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:54.377880184331794%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">2.950 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Tieuli</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:53.64055299539171%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">2.910 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Mangini</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:52.626728110599075%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">2.855 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Delfine</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:50.59907834101382%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">2.745 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Tateo</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:47.225806451612904%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">2.562 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Netti</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:46.764976958525345%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">2.537 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Laterza</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:46.72811059907834%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">2.535 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Pizzutilo</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:45.76958525345622%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">2.483 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Andresini</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:45.69585253456221%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">2.479 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl">Campanella</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:45.34562211981567%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">2.460 €</div>
-        </div></div><div class="info-footer">Classifica dei 20 migliori clienti dall'apertura ad oggi (All-Time). Mostra i nominativi che hanno generato il maggior fatturato storico complessivo per la palestra.</div></div></div><script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js'></script></body></html>
+<div class="menu-item" onclick="loadTable(0)">1) MESE IN CORSO</div><div class="menu-item" onclick="loadTable(1)">2) MESE SCORSO</div><div class="menu-item" onclick="loadTable(2)">3) MENSILE</div><div class="menu-item" onclick="loadTable(3)">4) ANNO IN CORSO</div><div class="menu-item" onclick="loadTable(4)">5) CUMULATIVA</div><div class="menu-item" onclick="loadTable(5)">6) ANNO SPORTIVO</div><div class="menu-item" onclick="loadTable(6)">7) ANNO PREVISIONI</div><div class="menu-item" onclick="loadTable(7)">8) ANNO CONTANTI</div><div class="menu-item" onclick="loadTable(8)">9) ANNO POS</div><div class="menu-item" onclick="loadTable(9)">10) ANNO USCITE</div><div class="menu-item" onclick="loadTable(10)">11) ANNO ENTRATE (x)</div><div class="menu-item" onclick="loadTable(11)">12) NUMERO CLIENTI</div><div class="menu-item" onclick="loadTable(12)">13) INTROITO MEDIO CLIENTE</div><div class="menu-item" onclick="loadTable(13)">14) OPERATORI (ANNO)</div><div class="menu-item" onclick="loadTable(14)">15) OPERATORI (STORICO)</div><div class="menu-item" onclick="loadTable(15)">16) SETTIMANA (STORICO)</div><div class="menu-item" onclick="loadTable(16)">17) MESE (STORICO)</div><div class="menu-item" onclick="loadTable(17)">18) TOP 20 ANNO IN CORSO</div><div class="menu-item" onclick="loadTable(18)">19) ANNO IN CORSO</div><div class="menu-item" onclick="loadTable(19)">20) TOP 20 ANNO SCORSO</div><div class="menu-item" onclick="loadTable(20)">21) TOP 20 STORICI</div></div><div id="tab_0" class="detail-view">
+        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value " data-original="Σ 28.619 €  •  µ 1.683 €  •  ŷ 38.151 €  •  Δ 9.532 €" style="color:black !important"><b>Σ</b> 28.619 €  •  <b>µ</b> 1.683 €  •  <b>ŷ</b> 38.151 €  •  <b>Δ</b> 9.532 €</div></div>
+        <div class="data-row "><span class="row-label">Lu  3 Nov</span><span class="row-dots"></span><span class="row-value">4.465 €</span></div><div class="data-row "><span class="row-label">Ma  4 Nov</span><span class="row-dots"></span><span class="row-value">3.215 €</span></div><div class="data-row "><span class="row-label">Me  5 Nov</span><span class="row-dots"></span><span class="row-value">870 €</span></div><div class="data-row "><span class="row-label">Gi  6 Nov</span><span class="row-dots"></span><span class="row-value">1.455 €</span></div><div class="data-row "><span class="row-label">Ve  7 Nov</span><span class="row-dots"></span><span class="row-value">1.970 €</span></div><div class="data-row "><span class="row-label">Sa  8 Nov</span><span class="row-dots"></span><span class="row-value">737 €</span></div><div class="monday-separator"></div><div class="data-row "><span class="row-label">Lu 10 Nov</span><span class="row-dots"></span><span class="row-value">2.760 €</span></div><div class="data-row "><span class="row-label">Ma 11 Nov</span><span class="row-dots"></span><span class="row-value">1.880 €</span></div><div class="data-row "><span class="row-label">Me 12 Nov</span><span class="row-dots"></span><span class="row-value">1.256 €</span></div><div class="data-row "><span class="row-label">Gi 13 Nov</span><span class="row-dots"></span><span class="row-value">1.620 €</span></div><div class="data-row "><span class="row-label">Ve 14 Nov</span><span class="row-dots"></span><span class="row-value">1.625 €</span></div><div class="data-row "><span class="row-label">Sa 15 Nov</span><span class="row-dots"></span><span class="row-value">265 €</span></div><div class="monday-separator"></div><div class="data-row "><span class="row-label">Lu 17 Nov</span><span class="row-dots"></span><span class="row-value">1.540 €</span></div><div class="data-row "><span class="row-label">Ma 18 Nov</span><span class="row-dots"></span><span class="row-value">1.435 €</span></div><div class="data-row "><span class="row-label">Me 19 Nov</span><span class="row-dots"></span><span class="row-value">685 €</span></div><div class="data-row "><span class="row-label">Gi 20 Nov</span><span class="row-dots"></span><span class="row-value">897 €</span></div><div class="data-row "><span class="row-label">Ve 21 Nov</span><span class="row-dots"></span><span class="row-value">1.944 €</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div><div class="chart-row"><div class="chart-lbl">Lu  3 Nov</div><div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div><div class="chart-val">4.465 €</div></div><div class="chart-row"><div class="chart-lbl">Ma  4 Nov</div><div class="chart-bar-area"><div class="chart-bar" style="width:72.00447928331467%; background-color: #85c1e9;"></div></div><div class="chart-val">3.215 €</div></div><div class="chart-row"><div class="chart-lbl">Me  5 Nov</div><div class="chart-bar-area"><div class="chart-bar" style="width:19.48488241881299%; background-color: #85c1e9;"></div></div><div class="chart-val">870 €</div></div><div class="chart-row"><div class="chart-lbl">Gi  6 Nov</div><div class="chart-bar-area"><div class="chart-bar" style="width:32.586786114221724%; background-color: #85c1e9;"></div></div><div class="chart-val">1.455 €</div></div><div class="chart-row"><div class="chart-lbl">Ve  7 Nov</div><div class="chart-bar-area"><div class="chart-bar" style="width:44.120940649496085%; background-color: #85c1e9;"></div></div><div class="chart-val">1.970 €</div></div><div class="chart-row"><div class="chart-lbl">Sa  8 Nov</div><div class="chart-bar-area"><div class="chart-bar" style="width:16.50615901455767%; background-color: #85c1e9;"></div></div><div class="chart-val">737 €</div></div><div class="chart-row"><div class="chart-lbl">Lu 10 Nov</div><div class="chart-bar-area"><div class="chart-bar" style="width:61.81410974244122%; background-color: #85c1e9;"></div></div><div class="chart-val">2.760 €</div></div><div class="chart-row"><div class="chart-lbl">Ma 11 Nov</div><div class="chart-bar-area"><div class="chart-bar" style="width:42.10526315789473%; background-color: #85c1e9;"></div></div><div class="chart-val">1.880 €</div></div><div class="chart-row"><div class="chart-lbl">Me 12 Nov</div><div class="chart-bar-area"><div class="chart-bar" style="width:28.12989921612542%; background-color: #85c1e9;"></div></div><div class="chart-val">1.256 €</div></div><div class="chart-row"><div class="chart-lbl">Gi 13 Nov</div><div class="chart-bar-area"><div class="chart-bar" style="width:36.28219484882419%; background-color: #85c1e9;"></div></div><div class="chart-val">1.620 €</div></div><div class="chart-row"><div class="chart-lbl">Ve 14 Nov</div><div class="chart-bar-area"><div class="chart-bar" style="width:36.39417693169093%; background-color: #85c1e9;"></div></div><div class="chart-val">1.625 €</div></div><div class="chart-row"><div class="chart-lbl">Sa 15 Nov</div><div class="chart-bar-area"><div class="chart-bar" style="width:5.93505039193729%; background-color: #85c1e9;"></div></div><div class="chart-val">265 €</div></div><div class="chart-row"><div class="chart-lbl">Lu 17 Nov</div><div class="chart-bar-area"><div class="chart-bar" style="width:34.49048152295633%; background-color: #85c1e9;"></div></div><div class="chart-val">1.540 €</div></div><div class="chart-row"><div class="chart-lbl">Ma 18 Nov</div><div class="chart-bar-area"><div class="chart-bar" style="width:32.13885778275476%; background-color: #85c1e9;"></div></div><div class="chart-val">1.435 €</div></div><div class="chart-row"><div class="chart-lbl">Me 19 Nov</div><div class="chart-bar-area"><div class="chart-bar" style="width:15.34154535274356%; background-color: #85c1e9;"></div></div><div class="chart-val">685 €</div></div><div class="chart-row"><div class="chart-lbl">Gi 20 Nov</div><div class="chart-bar-area"><div class="chart-bar" style="width:20.089585666293395%; background-color: #85c1e9;"></div></div><div class="chart-val">897 €</div></div><div class="chart-row"><div class="chart-lbl">Ve 21 Nov</div><div class="chart-bar-area"><div class="chart-bar" style="width:43.53863381858902%; background-color: #85c1e9;"></div></div><div class="chart-val">1.944 €</div></div></div><div class="info-footer">Dettaglio giornaliero delle entrate del mese corrente. La tabella visualizza solo i giorni in cui sono stati registrati movimenti (escludendo quelli a zero), permettendo di individuare rapidamente i picchi di attività quotidiana.</div></div><div id="tab_1" class="detail-view">
+        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value " data-original="Σ 41.202 €  •  µ 1.648 €" style="color:black !important"><b>Σ</b> 41.202 €  •  <b>µ</b> 1.648 €</div></div>
+        <div class="data-row "><span class="row-label">Me  1 Ott</span><span class="row-dots"></span><span class="row-value">2.053 €</span></div><div class="data-row "><span class="row-label">Gi  2 Ott</span><span class="row-dots"></span><span class="row-value">4.310 €</span></div><div class="data-row "><span class="row-label">Ve  3 Ott</span><span class="row-dots"></span><span class="row-value">2.645 €</span></div><div class="monday-separator"></div><div class="data-row "><span class="row-label">Lu  6 Ott</span><span class="row-dots"></span><span class="row-value">3.023 €</span></div><div class="data-row "><span class="row-label">Ma  7 Ott</span><span class="row-dots"></span><span class="row-value">1.540 €</span></div><div class="data-row "><span class="row-label">Gi  9 Ott</span><span class="row-dots"></span><span class="row-value">1.480 €</span></div><div class="data-row "><span class="row-label">Ve 10 Ott</span><span class="row-dots"></span><span class="row-value">1.815 €</span></div><div class="data-row "><span class="row-label">Sa 11 Ott</span><span class="row-dots"></span><span class="row-value">1.225 €</span></div><div class="monday-separator"></div><div class="data-row "><span class="row-label">Lu 13 Ott</span><span class="row-dots"></span><span class="row-value">2.868 €</span></div><div class="data-row "><span class="row-label">Ma 14 Ott</span><span class="row-dots"></span><span class="row-value">1.425 €</span></div><div class="data-row "><span class="row-label">Me 15 Ott</span><span class="row-dots"></span><span class="row-value">1.290 €</span></div><div class="data-row "><span class="row-label">Gi 16 Ott</span><span class="row-dots"></span><span class="row-value">1.575 €</span></div><div class="data-row "><span class="row-label">Ve 17 Ott</span><span class="row-dots"></span><span class="row-value">2.218 €</span></div><div class="data-row "><span class="row-label">Sa 18 Ott</span><span class="row-dots"></span><span class="row-value">770 €</span></div><div class="monday-separator"></div><div class="data-row "><span class="row-label">Lu 20 Ott</span><span class="row-dots"></span><span class="row-value">890 €</span></div><div class="data-row "><span class="row-label">Ma 21 Ott</span><span class="row-dots"></span><span class="row-value">1.335 €</span></div><div class="data-row "><span class="row-label">Me 22 Ott</span><span class="row-dots"></span><span class="row-value">565 €</span></div><div class="data-row "><span class="row-label">Gi 23 Ott</span><span class="row-dots"></span><span class="row-value">1.400 €</span></div><div class="data-row "><span class="row-label">Ve 24 Ott</span><span class="row-dots"></span><span class="row-value">1.080 €</span></div><div class="data-row "><span class="row-label">Sa 25 Ott</span><span class="row-dots"></span><span class="row-value">115 €</span></div><div class="monday-separator"></div><div class="data-row "><span class="row-label">Lu 27 Ott</span><span class="row-dots"></span><span class="row-value">1.735 €</span></div><div class="data-row "><span class="row-label">Ma 28 Ott</span><span class="row-dots"></span><span class="row-value">2.375 €</span></div><div class="data-row "><span class="row-label">Me 29 Ott</span><span class="row-dots"></span><span class="row-value">615 €</span></div><div class="data-row "><span class="row-label">Gi 30 Ott</span><span class="row-dots"></span><span class="row-value">1.305 €</span></div><div class="data-row "><span class="row-label">Ve 31 Ott</span><span class="row-dots"></span><span class="row-value">1.550 €</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div><div class="chart-row"><div class="chart-lbl">Me  1 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:47.63341067285383%; background-color: #85c1e9;"></div></div><div class="chart-val">2.053 €</div></div><div class="chart-row"><div class="chart-lbl">Gi  2 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div><div class="chart-val">4.310 €</div></div><div class="chart-row"><div class="chart-lbl">Ve  3 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:61.368909512761014%; background-color: #85c1e9;"></div></div><div class="chart-val">2.645 €</div></div><div class="chart-row"><div class="chart-lbl">Lu  6 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:70.13921113689095%; background-color: #85c1e9;"></div></div><div class="chart-val">3.023 €</div></div><div class="chart-row"><div class="chart-lbl">Ma  7 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:35.730858468677496%; background-color: #85c1e9;"></div></div><div class="chart-val">1.540 €</div></div><div class="chart-row"><div class="chart-lbl">Gi  9 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:34.33874709976798%; background-color: #85c1e9;"></div></div><div class="chart-val">1.480 €</div></div><div class="chart-row"><div class="chart-lbl">Ve 10 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:42.111368909512755%; background-color: #85c1e9;"></div></div><div class="chart-val">1.815 €</div></div><div class="chart-row"><div class="chart-lbl">Sa 11 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:28.42227378190255%; background-color: #85c1e9;"></div></div><div class="chart-val">1.225 €</div></div><div class="chart-row"><div class="chart-lbl">Lu 13 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:66.5429234338747%; background-color: #85c1e9;"></div></div><div class="chart-val">2.868 €</div></div><div class="chart-row"><div class="chart-lbl">Ma 14 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:33.06264501160093%; background-color: #85c1e9;"></div></div><div class="chart-val">1.425 €</div></div><div class="chart-row"><div class="chart-lbl">Me 15 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:29.930394431554525%; background-color: #85c1e9;"></div></div><div class="chart-val">1.290 €</div></div><div class="chart-row"><div class="chart-lbl">Gi 16 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:36.542923433874705%; background-color: #85c1e9;"></div></div><div class="chart-val">1.575 €</div></div><div class="chart-row"><div class="chart-lbl">Ve 17 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:51.461716937354986%; background-color: #85c1e9;"></div></div><div class="chart-val">2.218 €</div></div><div class="chart-row"><div class="chart-lbl">Sa 18 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:17.865429234338748%; background-color: #85c1e9;"></div></div><div class="chart-val">770 €</div></div><div class="chart-row"><div class="chart-lbl">Lu 20 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:20.649651972157773%; background-color: #85c1e9;"></div></div><div class="chart-val">890 €</div></div><div class="chart-row"><div class="chart-lbl">Ma 21 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:30.97447795823666%; background-color: #85c1e9;"></div></div><div class="chart-val">1.335 €</div></div><div class="chart-row"><div class="chart-lbl">Me 22 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:13.109048723897912%; background-color: #85c1e9;"></div></div><div class="chart-val">565 €</div></div><div class="chart-row"><div class="chart-lbl">Gi 23 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:32.48259860788863%; background-color: #85c1e9;"></div></div><div class="chart-val">1.400 €</div></div><div class="chart-row"><div class="chart-lbl">Ve 24 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:25.05800464037123%; background-color: #85c1e9;"></div></div><div class="chart-val">1.080 €</div></div><div class="chart-row"><div class="chart-lbl">Sa 25 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:2.668213457076566%; background-color: #85c1e9;"></div></div><div class="chart-val">115 €</div></div><div class="chart-row"><div class="chart-lbl">Lu 27 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:40.25522041763341%; background-color: #85c1e9;"></div></div><div class="chart-val">1.735 €</div></div><div class="chart-row"><div class="chart-lbl">Ma 28 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:55.10440835266821%; background-color: #85c1e9;"></div></div><div class="chart-val">2.375 €</div></div><div class="chart-row"><div class="chart-lbl">Me 29 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:14.269141531322504%; background-color: #85c1e9;"></div></div><div class="chart-val">615 €</div></div><div class="chart-row"><div class="chart-lbl">Gi 30 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:30.278422273781903%; background-color: #85c1e9;"></div></div><div class="chart-val">1.305 €</div></div><div class="chart-row"><div class="chart-lbl">Ve 31 Ott</div><div class="chart-bar-area"><div class="chart-bar" style="width:35.96287703016242%; background-color: #85c1e9;"></div></div><div class="chart-val">1.550 €</div></div></div><div class="info-footer">Dettaglio giornaliero del mese precedente. Utile per analizzare l'andamento completo dell'ultimo mese chiuso e confrontarlo con quello attuale.</div></div><div id="tab_2" class="detail-view">
+        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value " data-original="Δ +4.360 € (+18%)" style="color:black !important"><b>Δ</b> +4.360 € (+18%)</div></div>
+        <div class="data-row "><span class="row-label">2021-22</span><span class="row-dots"></span><span class="row-value">12.596 € (-------)</span></div><div class="data-row "><span class="row-label">2022-23</span><span class="row-dots"></span><span class="row-value">20.408 € (+62%)</span></div><div class="data-row "><span class="row-label">2023-24</span><span class="row-dots"></span><span class="row-value">20.896 € (+ 2%)</span></div><div class="data-row "><span class="row-label">2024-25</span><span class="row-dots"></span><span class="row-value">24.259 € (+16%)</span></div><div class="data-row "><span class="row-label">2025-26</span><span class="row-dots"></span><span class="row-value">28.619 € (+18%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div><div class="chart-row"><div class="chart-lbl">2021-22</div><div class="chart-bar-area"><div class="chart-bar" style="width:44.01271882315944%; background-color: #85c1e9;"></div></div><div class="chart-val">12.596 €</div></div><div class="chart-row"><div class="chart-lbl">2022-23</div><div class="chart-bar-area"><div class="chart-bar" style="width:71.3092700653412%; background-color: #85c1e9;"></div></div><div class="chart-val">20.408 €</div></div><div class="chart-row"><div class="chart-lbl">2023-24</div><div class="chart-bar-area"><div class="chart-bar" style="width:73.0144309724309%; background-color: #85c1e9;"></div></div><div class="chart-val">20.896 €</div></div><div class="chart-row"><div class="chart-lbl">2024-25</div><div class="chart-bar-area"><div class="chart-bar" style="width:84.76536566616583%; background-color: #85c1e9;"></div></div><div class="chart-val">24.259 €</div></div><div class="chart-row"><div class="chart-lbl">2025-26</div><div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div><div class="chart-val">28.619 €</div></div></div><div class="info-footer">Confronto diretto del mese attuale con lo stesso mese degli anni precedenti. È un indicatore di performance puntuale.</div></div><div id="tab_3" class="detail-view">
+        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value " data-original="Σ 111.137 €" style="color:black !important"><b>Σ</b> 111.137 €</div></div>
+        <div class="data-row "><span class="row-label">Set 2025</span><span class="row-dots"></span><span class="row-value">41.316 €</span></div><div class="data-row "><span class="row-label">Ott 2025</span><span class="row-dots"></span><span class="row-value">41.202 €</span></div><div class="data-row "><span class="row-label">Nov 2025</span><span class="row-dots"></span><span class="row-value">28.619 €</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div><div class="chart-row"><div class="chart-lbl">Set 2025</div><div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div><div class="chart-val">41.316 €</div></div><div class="chart-row"><div class="chart-lbl">Ott 2025</div><div class="chart-bar-area"><div class="chart-bar" style="width:99.72407783909382%; background-color: #85c1e9;"></div></div><div class="chart-val">41.202 €</div></div><div class="chart-row"><div class="chart-lbl">Nov 2025</div><div class="chart-bar-area"><div class="chart-bar" style="width:69.26856423661536%; background-color: #85c1e9;"></div></div><div class="chart-val">28.619 €</div></div></div><div class="info-footer">Andamento mensile della stagione sportiva attuale (dal 1° settembre al 31 agosto). Mostra l'accumulo delle entrate mese per mese.</div></div><div id="tab_4" class="detail-view">
+        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value " data-original="Δ +22.743 € (+26%)" style="color:black !important"><b>Δ</b> +22.743 € (+26%)</div></div>
+        <div class="data-row "><span class="row-label">2021-22</span><span class="row-dots"></span><span class="row-value">47.606 € (-------)</span></div><div class="data-row "><span class="row-label">2022-23</span><span class="row-dots"></span><span class="row-value">71.947 € (+51%)</span></div><div class="data-row "><span class="row-label">2023-24</span><span class="row-dots"></span><span class="row-value">78.245 € (+ 9%)</span></div><div class="data-row "><span class="row-label">2024-25</span><span class="row-dots"></span><span class="row-value">88.394 € (+13%)</span></div><div class="data-row "><span class="row-label">2025-26</span><span class="row-dots"></span><span class="row-value">111.137 € (+26%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div><div class="chart-row"><div class="chart-lbl">2021-22</div><div class="chart-bar-area"><div class="chart-bar" style="width:42.83541934729208%; background-color: #85c1e9;"></div></div><div class="chart-val">47.606 €</div></div><div class="chart-row"><div class="chart-lbl">2022-23</div><div class="chart-bar-area"><div class="chart-bar" style="width:64.73721622861873%; background-color: #85c1e9;"></div></div><div class="chart-val">71.947 €</div></div><div class="chart-row"><div class="chart-lbl">2023-24</div><div class="chart-bar-area"><div class="chart-bar" style="width:70.40409584566795%; background-color: #85c1e9;"></div></div><div class="chart-val">78.245 €</div></div><div class="chart-row"><div class="chart-lbl">2024-25</div><div class="chart-bar-area"><div class="chart-bar" style="width:79.5360680961336%; background-color: #85c1e9;"></div></div><div class="chart-val">88.394 €</div></div><div class="chart-row"><div class="chart-lbl">2025-26</div><div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div><div class="chart-val">111.137 €</div></div></div><div class="info-footer">Confronto alla "data odierna". Paragona l'incasso generato dal 1° settembre a oggi con le stagioni passate.</div></div><div id="tab_5" class="detail-view">
+        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value " data-original="Δ -189.978 € (-63%)" style="color:black !important"><b>Δ</b> -189.978 € (-63%)</div></div>
+        <div class="data-row "><span class="row-label">2021-22</span><span class="row-dots"></span><span class="row-value">167.358 € (-------)</span></div><div class="data-row "><span class="row-label">2022-23</span><span class="row-dots"></span><span class="row-value">230.985 € (+38%)</span></div><div class="data-row "><span class="row-label">2023-24</span><span class="row-dots"></span><span class="row-value">245.568 € (+ 6%)</span></div><div class="data-row "><span class="row-label">2024-25</span><span class="row-dots"></span><span class="row-value">301.115 € (+23%)</span></div><div class="data-row "><span class="row-label">2025-26</span><span class="row-dots"></span><span class="row-value">111.137 € (-63%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div><div class="chart-row"><div class="chart-lbl">2021-22</div><div class="chart-bar-area"><div class="chart-bar" style="width:55.579429785962176%; background-color: #85c1e9;"></div></div><div class="chart-val">167.358 €</div></div><div class="chart-row"><div class="chart-lbl">2022-23</div><div class="chart-bar-area"><div class="chart-bar" style="width:76.7098948906564%; background-color: #85c1e9;"></div></div><div class="chart-val">230.985 €</div></div><div class="chart-row"><div class="chart-lbl">2023-24</div><div class="chart-bar-area"><div class="chart-bar" style="width:81.55289507331086%; background-color: #85c1e9;"></div></div><div class="chart-val">245.568 €</div></div><div class="chart-row"><div class="chart-lbl">2024-25</div><div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div><div class="chart-val">301.115 €</div></div><div class="chart-row"><div class="chart-lbl">2025-26</div><div class="chart-bar-area"><div class="chart-bar" style="width:36.90849011175133%; background-color: #85c1e9;"></div></div><div class="chart-val">111.137 €</div></div></div><div class="info-footer">Quadro generale delle stagioni passate (totali definitivi al 31 agosto).</div></div><div id="tab_6" class="detail-view">
+        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value " data-original="Δ +60.701 € (+20%)  •  ŷ 361.816 €" style="color:black !important"><b>Δ</b> +60.701 € (+20%)  •  <b>ŷ</b> 361.816 €</div></div>
+        <div class="data-row "><span class="row-label">2021-22</span><span class="row-dots"></span><span class="row-value">167.358 € (-------)</span></div><div class="data-row "><span class="row-label">2022-23</span><span class="row-dots"></span><span class="row-value">230.985 € (+38%)</span></div><div class="data-row "><span class="row-label">2023-24</span><span class="row-dots"></span><span class="row-value">245.568 € (+ 6%)</span></div><div class="data-row "><span class="row-label">2024-25</span><span class="row-dots"></span><span class="row-value">301.115 € (+23%)</span></div><div class="data-row "><span class="row-label">2025-26</span><span class="row-dots"></span><span class="row-value">361.816 € (+20%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div><div class="chart-row"><div class="chart-lbl">2021-22</div><div class="chart-bar-area"><div class="chart-bar" style="width:46.2550025427289%; background-color: #85c1e9;"></div></div><div class="chart-val">167.358 €</div></div><div class="chart-row"><div class="chart-lbl">2022-23</div><div class="chart-bar-area"><div class="chart-bar" style="width:63.840460344484484%; background-color: #85c1e9;"></div></div><div class="chart-val">230.985 €</div></div><div class="chart-row"><div class="chart-lbl">2023-24</div><div class="chart-bar-area"><div class="chart-bar" style="width:67.87096203595198%; background-color: #85c1e9;"></div></div><div class="chart-val">245.568 €</div></div><div class="chart-row"><div class="chart-lbl">2024-25</div><div class="chart-bar-area"><div class="chart-bar" style="width:83.22324054215402%; background-color: #85c1e9;"></div></div><div class="chart-val">301.115 €</div></div><div class="chart-row"><div class="chart-lbl">2025-26</div><div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div><div class="chart-val">361.816 €</div></div></div><div class="info-footer">Proiezione di chiusura. Mostra una stima del risultato finale al 31 agosto basata sull'andamento attuale.</div></div><div id="tab_7" class="detail-view">
+        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value " data-original="Δ -81.216 € (-68%)  •  ŷ 125.474 €" style="color:black !important"><b>Δ</b> -81.216 € (-68%)  •  <b>ŷ</b> 125.474 €</div></div>
+        <div class="data-row "><span class="row-label">2021-22</span><span class="row-dots"></span><span class="row-value">81.490 € (-------)</span></div><div class="data-row "><span class="row-label">2022-23</span><span class="row-dots"></span><span class="row-value">97.006 € (+19%)</span></div><div class="data-row "><span class="row-label">2023-24</span><span class="row-dots"></span><span class="row-value">93.553 € (- 4%)</span></div><div class="data-row "><span class="row-label">2024-25</span><span class="row-dots"></span><span class="row-value">119.757 € (+28%)</span></div><div class="data-row "><span class="row-label">2025-26</span><span class="row-dots"></span><span class="row-value">38.541 € (-68%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div><div class="chart-row"><div class="chart-lbl">2021-22</div><div class="chart-bar-area"><div class="chart-bar" style="width:68.04612673998179%; background-color: #85c1e9;"></div></div><div class="chart-val">81.490 €</div></div><div class="chart-row"><div class="chart-lbl">2022-23</div><div class="chart-bar-area"><div class="chart-bar" style="width:81.0023631186486%; background-color: #85c1e9;"></div></div><div class="chart-val">97.006 €</div></div><div class="chart-row"><div class="chart-lbl">2023-24</div><div class="chart-bar-area"><div class="chart-bar" style="width:78.11902435765758%; background-color: #85c1e9;"></div></div><div class="chart-val">93.553 €</div></div><div class="chart-row"><div class="chart-lbl">2024-25</div><div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div><div class="chart-val">119.757 €</div></div><div class="chart-row"><div class="chart-lbl">2025-26</div><div class="chart-bar-area"><div class="chart-bar" style="width:32.18266990656078%; background-color: #85c1e9;"></div></div><div class="chart-val">38.541 €</div></div></div><div class="info-footer">Analisi dei flussi di cassa fisici (solo Contanti) anno su anno.</div></div><div id="tab_8" class="detail-view">
+        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value " data-original="Δ -108.762 € (-60%)  •  ŷ 236.342 €" style="color:black !important"><b>Δ</b> -108.762 € (-60%)  •  <b>ŷ</b> 236.342 €</div></div>
+        <div class="data-row "><span class="row-label">2021-22</span><span class="row-dots"></span><span class="row-value">85.868 € (-------)</span></div><div class="data-row "><span class="row-label">2022-23</span><span class="row-dots"></span><span class="row-value">133.979 € (+56%)</span></div><div class="data-row "><span class="row-label">2023-24</span><span class="row-dots"></span><span class="row-value">152.015 € (+13%)</span></div><div class="data-row "><span class="row-label">2024-25</span><span class="row-dots"></span><span class="row-value">181.358 € (+19%)</span></div><div class="data-row "><span class="row-label">2025-26</span><span class="row-dots"></span><span class="row-value">72.596 € (-60%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div><div class="chart-row"><div class="chart-lbl">2021-22</div><div class="chart-bar-area"><div class="chart-bar" style="width:47.34723585394634%; background-color: #85c1e9;"></div></div><div class="chart-val">85.868 €</div></div><div class="chart-row"><div class="chart-lbl">2022-23</div><div class="chart-bar-area"><div class="chart-bar" style="width:73.87542871006517%; background-color: #85c1e9;"></div></div><div class="chart-val">133.979 €</div></div><div class="chart-row"><div class="chart-lbl">2023-24</div><div class="chart-bar-area"><div class="chart-bar" style="width:83.82039943095975%; background-color: #85c1e9;"></div></div><div class="chart-val">152.015 €</div></div><div class="chart-row"><div class="chart-lbl">2024-25</div><div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div><div class="chart-val">181.358 €</div></div><div class="chart-row"><div class="chart-lbl">2025-26</div><div class="chart-bar-area"><div class="chart-bar" style="width:40.02911368674114%; background-color: #85c1e9;"></div></div><div class="chart-val">72.596 €</div></div></div><div class="info-footer">Analisi dei pagamenti elettronici (Carta/Bancomat/Bonifico) anno su anno.</div></div><div id="tab_9" class="detail-view">
+        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value " data-original="Δ -981 € (-44%)  •  ŷ 4.131 €" style="color:black !important"><b>Δ</b> -981 € (-44%)  •  <b>ŷ</b> 4.131 €</div></div>
+        <div class="data-row "><span class="row-label">2021-22</span><span class="row-dots"></span><span class="row-value">3.487 € (-------)</span></div><div class="data-row "><span class="row-label">2022-23</span><span class="row-dots"></span><span class="row-value">3.521 € (+ 1%)</span></div><div class="data-row "><span class="row-label">2023-24</span><span class="row-dots"></span><span class="row-value">2.366 € (-33%)</span></div><div class="data-row "><span class="row-label">2024-25</span><span class="row-dots"></span><span class="row-value">2.250 € (- 5%)</span></div><div class="data-row "><span class="row-label">2025-26</span><span class="row-dots"></span><span class="row-value">1.269 € (-44%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div><div class="chart-row"><div class="chart-lbl">2021-22</div><div class="chart-bar-area"><div class="chart-bar" style="width:99.03436523714853%; background-color: #85c1e9;"></div></div><div class="chart-val">3.487 €</div></div><div class="chart-row"><div class="chart-lbl">2022-23</div><div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div><div class="chart-val">3.521 €</div></div><div class="chart-row"><div class="chart-lbl">2023-24</div><div class="chart-bar-area"><div class="chart-bar" style="width:67.19681908548708%; background-color: #85c1e9;"></div></div><div class="chart-val">2.366 €</div></div><div class="chart-row"><div class="chart-lbl">2024-25</div><div class="chart-bar-area"><div class="chart-bar" style="width:63.90230048281739%; background-color: #85c1e9;"></div></div><div class="chart-val">2.250 €</div></div><div class="chart-row"><div class="chart-lbl">2025-26</div><div class="chart-bar-area"><div class="chart-bar" style="width:36.040897472309005%; background-color: #85c1e9;"></div></div><div class="chart-val">1.269 €</div></div></div><div class="info-footer">Riepilogo annuale di tutte le spese operative.</div></div><div id="tab_10" class="detail-view">
+        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value " data-original="Δ -7.482 € (-62%)  •  ŷ 14.666 €" style="color:black !important"><b>Δ</b> -7.482 € (-62%)  •  <b>ŷ</b> 14.666 €</div></div>
+        <div class="data-row "><span class="row-label">2021-22</span><span class="row-dots"></span><span class="row-value">8.968 € (-------)</span></div><div class="data-row "><span class="row-label">2022-23</span><span class="row-dots"></span><span class="row-value">15.760 € (+76%)</span></div><div class="data-row "><span class="row-label">2023-24</span><span class="row-dots"></span><span class="row-value">12.291 € (-22%)</span></div><div class="data-row "><span class="row-label">2024-25</span><span class="row-dots"></span><span class="row-value">11.987 € (- 2%)</span></div><div class="data-row "><span class="row-label">2025-26</span><span class="row-dots"></span><span class="row-value">4.505 € (-62%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div><div class="chart-row"><div class="chart-lbl">2021-22</div><div class="chart-bar-area"><div class="chart-bar" style="width:56.90355329949238%; background-color: #85c1e9;"></div></div><div class="chart-val">8.968 €</div></div><div class="chart-row"><div class="chart-lbl">2022-23</div><div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div><div class="chart-val">15.760 €</div></div><div class="chart-row"><div class="chart-lbl">2023-24</div><div class="chart-bar-area"><div class="chart-bar" style="width:77.98857868020305%; background-color: #85c1e9;"></div></div><div class="chart-val">12.291 €</div></div><div class="chart-row"><div class="chart-lbl">2024-25</div><div class="chart-bar-area"><div class="chart-bar" style="width:76.05964467005076%; background-color: #85c1e9;"></div></div><div class="chart-val">11.987 €</div></div><div class="chart-row"><div class="chart-lbl">2025-26</div><div class="chart-bar-area"><div class="chart-bar" style="width:28.58502538071066%; background-color: #85c1e9;"></div></div><div class="chart-val">4.505 €</div></div></div><div class="info-footer">Monitoraggio delle entrate extra-gestione (incassi accessori).</div></div><div id="tab_11" class="detail-view">
+        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value " data-original="Δ +103 (+19%)" style="color:black !important"><b>Δ</b> +103 (+19%)</div></div>
+        <div class="data-row "><span class="row-label">2021-22</span><span class="row-dots"></span><span class="row-value">423 (-------)</span></div><div class="data-row "><span class="row-label">2022-23</span><span class="row-dots"></span><span class="row-value">513 (+21%)</span></div><div class="data-row "><span class="row-label">2023-24</span><span class="row-dots"></span><span class="row-value">520 (+ 1%)</span></div><div class="data-row "><span class="row-label">2024-25</span><span class="row-dots"></span><span class="row-value">551 (+ 6%)</span></div><div class="data-row "><span class="row-label">2025-26</span><span class="row-dots"></span><span class="row-value">654 (+19%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div><div class="chart-row"><div class="chart-lbl">2021-22</div><div class="chart-bar-area"><div class="chart-bar" style="width:64.6788990825688%; background-color: #85c1e9;"></div></div><div class="chart-val">423</div></div><div class="chart-row"><div class="chart-lbl">2022-23</div><div class="chart-bar-area"><div class="chart-bar" style="width:78.44036697247707%; background-color: #85c1e9;"></div></div><div class="chart-val">513</div></div><div class="chart-row"><div class="chart-lbl">2023-24</div><div class="chart-bar-area"><div class="chart-bar" style="width:79.51070336391437%; background-color: #85c1e9;"></div></div><div class="chart-val">520</div></div><div class="chart-row"><div class="chart-lbl">2024-25</div><div class="chart-bar-area"><div class="chart-bar" style="width:84.25076452599389%; background-color: #85c1e9;"></div></div><div class="chart-val">551</div></div><div class="chart-row"><div class="chart-lbl">2025-26</div><div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div><div class="chart-val">654</div></div></div><div class="info-footer">Conta le persone fisiche uniche (teste) che hanno effettuato almeno un pagamento.</div></div><div id="tab_12" class="detail-view">
+        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value " data-original="Δ +9 € (+ 6%)" style="color:black !important"><b>Δ</b> +9 € (+ 6%)</div></div>
+        <div class="data-row "><span class="row-label">2021-22</span><span class="row-dots"></span><span class="row-value">113 € (-------)</span></div><div class="data-row "><span class="row-label">2022-23</span><span class="row-dots"></span><span class="row-value">140 € (+25%)</span></div><div class="data-row "><span class="row-label">2023-24</span><span class="row-dots"></span><span class="row-value">150 € (+ 7%)</span></div><div class="data-row "><span class="row-label">2024-25</span><span class="row-dots"></span><span class="row-value">160 € (+ 7%)</span></div><div class="data-row "><span class="row-label">2025-26</span><span class="row-dots"></span><span class="row-value">170 € (+ 6%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div><div class="chart-row"><div class="chart-lbl">2021-22</div><div class="chart-bar-area"><div class="chart-bar" style="width:66.47058823529412%; background-color: #85c1e9;"></div></div><div class="chart-val">113 €</div></div><div class="chart-row"><div class="chart-lbl">2022-23</div><div class="chart-bar-area"><div class="chart-bar" style="width:82.35294117647058%; background-color: #85c1e9;"></div></div><div class="chart-val">140 €</div></div><div class="chart-row"><div class="chart-lbl">2023-24</div><div class="chart-bar-area"><div class="chart-bar" style="width:88.23529411764706%; background-color: #85c1e9;"></div></div><div class="chart-val">150 €</div></div><div class="chart-row"><div class="chart-lbl">2024-25</div><div class="chart-bar-area"><div class="chart-bar" style="width:94.11764705882352%; background-color: #85c1e9;"></div></div><div class="chart-val">160 €</div></div><div class="chart-row"><div class="chart-lbl">2025-26</div><div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div><div class="chart-val">170 €</div></div></div><div class="info-footer">Valore medio generato da ogni singolo cliente (Incassi / Clienti).</div></div><div id="tab_13" class="detail-view">
+        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value " data-original="Σ: 111.137 €" style="color:black !important"><b>Σ</b>: 111.137 €</div></div>
+        <div class="data-row "><span class="row-label">Marica</span><span class="row-dots"></span><span class="row-value">70.246 € (63%)</span></div><div class="data-row "><span class="row-label">Sabina</span><span class="row-dots"></span><span class="row-value">40.782 € (37%)</span></div><div class="data-row "><span class="row-label">Altri</span><span class="row-dots"></span><span class="row-value">109 € ( 0%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div><div class="chart-row"><div class="chart-lbl">Marica</div><div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div><div class="chart-val">70.246 €</div></div><div class="chart-row"><div class="chart-lbl">Sabina</div><div class="chart-bar-area"><div class="chart-bar" style="width:58.055974717421634%; background-color: #85c1e9;"></div></div><div class="chart-val">40.782 €</div></div><div class="chart-row"><div class="chart-lbl">Altri</div><div class="chart-bar-area"><div class="chart-bar" style="width:0.1551689775930302%; background-color: #85c1e9;"></div></div><div class="chart-val">109 €</div></div></div><div class="info-footer">Performance dello staff nella stagione corrente.</div></div><div id="tab_14" class="detail-view">
+        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value " data-original="Σ: 1.056.163 €" style="color:black !important"><b>Σ</b>: 1.056.163 €</div></div>
+        <div class="data-row "><span class="row-label">Marica</span><span class="row-dots"></span><span class="row-value">710.745 € (67%)</span></div><div class="data-row "><span class="row-label">Sabina</span><span class="row-dots"></span><span class="row-value">339.876 € (32%)</span></div><div class="data-row "><span class="row-label">Altri</span><span class="row-dots"></span><span class="row-value">5.542 € ( 1%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div><div class="chart-row"><div class="chart-lbl">Marica</div><div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div><div class="chart-val">710.745 €</div></div><div class="chart-row"><div class="chart-lbl">Sabina</div><div class="chart-bar-area"><div class="chart-bar" style="width:47.81968216448937%; background-color: #85c1e9;"></div></div><div class="chart-val">339.876 €</div></div><div class="chart-row"><div class="chart-lbl">Altri</div><div class="chart-bar-area"><div class="chart-bar" style="width:0.7797451969412377%; background-color: #85c1e9;"></div></div><div class="chart-val">5.542 €</div></div></div><div class="info-footer">Classifica "All-Time" dello staff dall'apertura ad oggi.</div></div><div id="tab_15" class="detail-view">
+        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value " data-original="Σ: 1.056.163 €" style="color:black !important"><b>Σ</b>: 1.056.163 €</div></div>
+        <div class="data-row "><span class="row-label">Lunedì</span><span class="row-dots"></span><span class="row-value">271.278 € (26%)</span></div><div class="data-row "><span class="row-label">Martedì</span><span class="row-dots"></span><span class="row-value">221.020 € (21%)</span></div><div class="data-row "><span class="row-label">Mercoledì</span><span class="row-dots"></span><span class="row-value">142.114 € (13%)</span></div><div class="data-row "><span class="row-label">Giovedì</span><span class="row-dots"></span><span class="row-value">180.736 € (17%)</span></div><div class="data-row "><span class="row-label">Venerdì</span><span class="row-dots"></span><span class="row-value">201.352 € (19%)</span></div><div class="data-row "><span class="row-label">Sabato</span><span class="row-dots"></span><span class="row-value">39.663 € ( 4%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div><div class="chart-row"><div class="chart-lbl">Lunedì</div><div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div><div class="chart-val">271.278 €</div></div><div class="chart-row"><div class="chart-lbl">Martedì</div><div class="chart-bar-area"><div class="chart-bar" style="width:81.47361746990173%; background-color: #85c1e9;"></div></div><div class="chart-val">221.020 €</div></div><div class="chart-row"><div class="chart-lbl">Mercoledì</div><div class="chart-bar-area"><div class="chart-bar" style="width:52.386850389637196%; background-color: #85c1e9;"></div></div><div class="chart-val">142.114 €</div></div><div class="chart-row"><div class="chart-lbl">Giovedì</div><div class="chart-bar-area"><div class="chart-bar" style="width:66.62390610370174%; background-color: #85c1e9;"></div></div><div class="chart-val">180.736 €</div></div><div class="chart-row"><div class="chart-lbl">Venerdì</div><div class="chart-bar-area"><div class="chart-bar" style="width:74.22349029408946%; background-color: #85c1e9;"></div></div><div class="chart-val">201.352 €</div></div><div class="chart-row"><div class="chart-lbl">Sabato</div><div class="chart-bar-area"><div class="chart-bar" style="width:14.620794904120496%; background-color: #85c1e9;"></div></div><div class="chart-val">39.663 €</div></div></div><div class="info-footer">Analisi statistica dei giorni della settimana più redditizi.</div></div><div id="tab_16" class="detail-view">
+        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value " data-original="Σ: 1.056.163 €" style="color:black !important"><b>Σ</b>: 1.056.163 €</div></div>
+        <div class="data-row "><span class="row-label">Gennaio</span><span class="row-dots"></span><span class="row-value">107.955 € (10%)</span></div><div class="data-row "><span class="row-label">Febbraio</span><span class="row-dots"></span><span class="row-value">83.122 € ( 8%)</span></div><div class="data-row "><span class="row-label">Marzo</span><span class="row-dots"></span><span class="row-value">84.714 € ( 8%)</span></div><div class="data-row "><span class="row-label">Aprile</span><span class="row-dots"></span><span class="row-value">76.566 € ( 7%)</span></div><div class="data-row "><span class="row-label">Maggio</span><span class="row-dots"></span><span class="row-value">72.490 € ( 7%)</span></div><div class="data-row "><span class="row-label">Giugno</span><span class="row-dots"></span><span class="row-value">56.516 € ( 5%)</span></div><div class="data-row "><span class="row-label">Luglio</span><span class="row-dots"></span><span class="row-value">36.283 € ( 3%)</span></div><div class="data-row "><span class="row-label">Agosto</span><span class="row-dots"></span><span class="row-value">28.746 € ( 3%)</span></div><div class="data-row "><span class="row-label">Settembre</span><span class="row-dots"></span><span class="row-value">139.376 € (13%)</span></div><div class="data-row "><span class="row-label">Ottobre</span><span class="row-dots"></span><span class="row-value">151.175 € (14%)</span></div><div class="data-row "><span class="row-label">Novembre</span><span class="row-dots"></span><span class="row-value">132.828 € (13%)</span></div><div class="data-row "><span class="row-label">Dicembre</span><span class="row-dots"></span><span class="row-value">86.392 € ( 8%)</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div><div class="chart-row"><div class="chart-lbl">Gennaio</div><div class="chart-bar-area"><div class="chart-bar" style="width:71.41061683479411%; background-color: #85c1e9;"></div></div><div class="chart-val">107.955 €</div></div><div class="chart-row"><div class="chart-lbl">Febbraio</div><div class="chart-bar-area"><div class="chart-bar" style="width:54.98395898792789%; background-color: #85c1e9;"></div></div><div class="chart-val">83.122 €</div></div><div class="chart-row"><div class="chart-lbl">Marzo</div><div class="chart-bar-area"><div class="chart-bar" style="width:56.03704316189846%; background-color: #85c1e9;"></div></div><div class="chart-val">84.714 €</div></div><div class="chart-row"><div class="chart-lbl">Aprile</div><div class="chart-bar-area"><div class="chart-bar" style="width:50.64726310567224%; background-color: #85c1e9;"></div></div><div class="chart-val">76.566 €</div></div><div class="chart-row"><div class="chart-lbl">Maggio</div><div class="chart-bar-area"><div class="chart-bar" style="width:47.95105010749132%; background-color: #85c1e9;"></div></div><div class="chart-val">72.490 €</div></div><div class="chart-row"><div class="chart-lbl">Giugno</div><div class="chart-bar-area"><div class="chart-bar" style="width:37.38448817595501%; background-color: #85c1e9;"></div></div><div class="chart-val">56.516 €</div></div><div class="chart-row"><div class="chart-lbl">Luglio</div><div class="chart-bar-area"><div class="chart-bar" style="width:24.0006614850339%; background-color: #85c1e9;"></div></div><div class="chart-val">36.283 €</div></div><div class="chart-row"><div class="chart-lbl">Agosto</div><div class="chart-bar-area"><div class="chart-bar" style="width:19.015048784521248%; background-color: #85c1e9;"></div></div><div class="chart-val">28.746 €</div></div><div class="chart-row"><div class="chart-lbl">Settembre</div><div class="chart-bar-area"><div class="chart-bar" style="width:92.19513808500082%; background-color: #85c1e9;"></div></div><div class="chart-val">139.376 €</div></div><div class="chart-row"><div class="chart-lbl">Ottobre</div><div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div><div class="chart-val">151.175 €</div></div><div class="chart-row"><div class="chart-lbl">Novembre</div><div class="chart-bar-area"><div class="chart-bar" style="width:87.86373408301638%; background-color: #85c1e9;"></div></div><div class="chart-val">132.828 €</div></div><div class="chart-row"><div class="chart-lbl">Dicembre</div><div class="chart-bar-area"><div class="chart-bar" style="width:57.147015048784525%; background-color: #85c1e9;"></div></div><div class="chart-val">86.392 €</div></div></div><div class="info-footer">Analisi della stagionalità aggregata per mese.</div></div><div id="tab_17" class="detail-view">
+        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value " data-original="Σ 12.890 €  •  µ 644 €" style="color:black !important"><b>Σ</b> 12.890 €  •  <b>µ</b> 644 €</div></div>
+        <div class="data-row "><span class="row-label">Deleonardis Pietro</span><span class="row-dots"></span><span class="row-value">925 €</span></div><div class="data-row "><span class="row-label">Mignozzi Francesco</span><span class="row-dots"></span><span class="row-value">850 €</span></div><div class="data-row "><span class="row-label">Pinto Nadia</span><span class="row-dots"></span><span class="row-value">785 €</span></div><div class="data-row "><span class="row-label">Netti Giulia</span><span class="row-dots"></span><span class="row-value">780 €</span></div><div class="data-row "><span class="row-label">Intini Cinzia</span><span class="row-dots"></span><span class="row-value">755 €</span></div><div class="data-row "><span class="row-label">Dibattista Emanuela</span><span class="row-dots"></span><span class="row-value">750 €</span></div><div class="data-row "><span class="row-label">Natile Gianna</span><span class="row-dots"></span><span class="row-value">690 €</span></div><div class="data-row "><span class="row-label">Pugliese Annalisa</span><span class="row-dots"></span><span class="row-value">660 €</span></div><div class="data-row "><span class="row-label">Lerede Luca</span><span class="row-dots"></span><span class="row-value">650 €</span></div><div class="data-row "><span class="row-label">Conteh Mariam</span><span class="row-dots"></span><span class="row-value">635 €</span></div><div class="data-row "><span class="row-label">Loliva Ivan</span><span class="row-dots"></span><span class="row-value">580 €</span></div><div class="data-row "><span class="row-label">Campanella Angela</span><span class="row-dots"></span><span class="row-value">570 €</span></div><div class="data-row "><span class="row-label">Tria Angela</span><span class="row-dots"></span><span class="row-value">565 €</span></div><div class="data-row "><span class="row-label">Dalena Giovanni</span><span class="row-dots"></span><span class="row-value">540 €</span></div><div class="data-row "><span class="row-label">Labate Gabriele</span><span class="row-dots"></span><span class="row-value">540 €</span></div><div class="data-row "><span class="row-label">Delfine Valentina</span><span class="row-dots"></span><span class="row-value">540 €</span></div><div class="data-row "><span class="row-label">Sbiroli Vito</span><span class="row-dots"></span><span class="row-value">540 €</span></div><div class="data-row "><span class="row-label">Pace Pietro</span><span class="row-dots"></span><span class="row-value">535 €</span></div><div class="data-row "><span class="row-label">Daprile Claudio</span><span class="row-dots"></span><span class="row-value">500 €</span></div><div class="data-row "><span class="row-label">Manelli Alessia</span><span class="row-dots"></span><span class="row-value">500 €</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div><div class="chart-row"><div class="chart-lbl">Deleonardis</div><div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div><div class="chart-val">925 €</div></div><div class="chart-row"><div class="chart-lbl">Mignozzi</div><div class="chart-bar-area"><div class="chart-bar" style="width:91.8918918918919%; background-color: #85c1e9;"></div></div><div class="chart-val">850 €</div></div><div class="chart-row"><div class="chart-lbl">Pinto</div><div class="chart-bar-area"><div class="chart-bar" style="width:84.86486486486487%; background-color: #85c1e9;"></div></div><div class="chart-val">785 €</div></div><div class="chart-row"><div class="chart-lbl">Netti</div><div class="chart-bar-area"><div class="chart-bar" style="width:84.32432432432432%; background-color: #85c1e9;"></div></div><div class="chart-val">780 €</div></div><div class="chart-row"><div class="chart-lbl">Intini</div><div class="chart-bar-area"><div class="chart-bar" style="width:81.62162162162161%; background-color: #85c1e9;"></div></div><div class="chart-val">755 €</div></div><div class="chart-row"><div class="chart-lbl">Dibattista</div><div class="chart-bar-area"><div class="chart-bar" style="width:81.08108108108108%; background-color: #85c1e9;"></div></div><div class="chart-val">750 €</div></div><div class="chart-row"><div class="chart-lbl">Natile</div><div class="chart-bar-area"><div class="chart-bar" style="width:74.5945945945946%; background-color: #85c1e9;"></div></div><div class="chart-val">690 €</div></div><div class="chart-row"><div class="chart-lbl">Pugliese</div><div class="chart-bar-area"><div class="chart-bar" style="width:71.35135135135135%; background-color: #85c1e9;"></div></div><div class="chart-val">660 €</div></div><div class="chart-row"><div class="chart-lbl">Lerede</div><div class="chart-bar-area"><div class="chart-bar" style="width:70.27027027027027%; background-color: #85c1e9;"></div></div><div class="chart-val">650 €</div></div><div class="chart-row"><div class="chart-lbl">Conteh</div><div class="chart-bar-area"><div class="chart-bar" style="width:68.64864864864865%; background-color: #85c1e9;"></div></div><div class="chart-val">635 €</div></div><div class="chart-row"><div class="chart-lbl">Loliva</div><div class="chart-bar-area"><div class="chart-bar" style="width:62.70270270270271%; background-color: #85c1e9;"></div></div><div class="chart-val">580 €</div></div><div class="chart-row"><div class="chart-lbl">Campanella</div><div class="chart-bar-area"><div class="chart-bar" style="width:61.62162162162163%; background-color: #85c1e9;"></div></div><div class="chart-val">570 €</div></div><div class="chart-row"><div class="chart-lbl">Tria</div><div class="chart-bar-area"><div class="chart-bar" style="width:61.08108108108108%; background-color: #85c1e9;"></div></div><div class="chart-val">565 €</div></div><div class="chart-row"><div class="chart-lbl">Dalena</div><div class="chart-bar-area"><div class="chart-bar" style="width:58.37837837837838%; background-color: #85c1e9;"></div></div><div class="chart-val">540 €</div></div><div class="chart-row"><div class="chart-lbl">Labate</div><div class="chart-bar-area"><div class="chart-bar" style="width:58.37837837837838%; background-color: #85c1e9;"></div></div><div class="chart-val">540 €</div></div><div class="chart-row"><div class="chart-lbl">Delfine</div><div class="chart-bar-area"><div class="chart-bar" style="width:58.37837837837838%; background-color: #85c1e9;"></div></div><div class="chart-val">540 €</div></div><div class="chart-row"><div class="chart-lbl">Sbiroli</div><div class="chart-bar-area"><div class="chart-bar" style="width:58.37837837837838%; background-color: #85c1e9;"></div></div><div class="chart-val">540 €</div></div><div class="chart-row"><div class="chart-lbl">Pace</div><div class="chart-bar-area"><div class="chart-bar" style="width:57.83783783783784%; background-color: #85c1e9;"></div></div><div class="chart-val">535 €</div></div><div class="chart-row"><div class="chart-lbl">Daprile</div><div class="chart-bar-area"><div class="chart-bar" style="width:54.054054054054056%; background-color: #85c1e9;"></div></div><div class="chart-val">500 €</div></div><div class="chart-row"><div class="chart-lbl">Manelli</div><div class="chart-bar-area"><div class="chart-bar" style="width:54.054054054054056%; background-color: #85c1e9;"></div></div><div class="chart-val">500 €</div></div></div><div class="info-footer">Andamento mensile della stagione sportiva attuale (dal 1° settembre al 31 agosto). Mostra l'accumulo delle entrate mese per mese.</div></div><div id="tab_18" class="detail-view">
+        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value " data-original="Σ 111.137 €" style="color:black !important"><b>Σ</b> 111.137 €</div></div>
+        <div class="data-row "><span class="row-label">Set 2025</span><span class="row-dots"></span><span class="row-value">41.316 €</span></div><div class="data-row "><span class="row-label">Ott 2025</span><span class="row-dots"></span><span class="row-value">41.202 €</span></div><div class="data-row "><span class="row-label">Nov 2025</span><span class="row-dots"></span><span class="row-value">28.619 €</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div><div class="chart-row"><div class="chart-lbl">Set 2025</div><div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div><div class="chart-val">41.316 €</div></div><div class="chart-row"><div class="chart-lbl">Ott 2025</div><div class="chart-bar-area"><div class="chart-bar" style="width:99.72407783909382%; background-color: #85c1e9;"></div></div><div class="chart-val">41.202 €</div></div><div class="chart-row"><div class="chart-lbl">Nov 2025</div><div class="chart-bar-area"><div class="chart-bar" style="width:69.26856423661536%; background-color: #85c1e9;"></div></div><div class="chart-val">28.619 €</div></div></div><div class="info-footer">Andamento mensile della stagione sportiva attuale (dal 1° settembre al 31 agosto). Mostra l'accumulo delle entrate mese per mese.</div></div><div id="tab_19" class="detail-view">
+        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value " data-original="Σ 30.845 €  •  µ 1.542 €" style="color:black !important"><b>Σ</b> 30.845 €  •  <b>µ</b> 1.542 €</div></div>
+        <div class="data-row "><span class="row-label">Mignozzi Francesco</span><span class="row-dots"></span><span class="row-value">3.180 €</span></div><div class="data-row "><span class="row-label">Manelli Alessia</span><span class="row-dots"></span><span class="row-value">2.250 €</span></div><div class="data-row "><span class="row-label">Mangini Alessia</span><span class="row-dots"></span><span class="row-value">2.230 €</span></div><div class="data-row "><span class="row-label">Colacicco Francesca</span><span class="row-dots"></span><span class="row-value">1.975 €</span></div><div class="data-row "><span class="row-label">Spinelli Vanna</span><span class="row-dots"></span><span class="row-value">1.805 €</span></div><div class="data-row "><span class="row-label">Intini Cinzia</span><span class="row-dots"></span><span class="row-value">1.655 €</span></div><div class="data-row "><span class="row-label">Dibattista Emanuela</span><span class="row-dots"></span><span class="row-value">1.600 €</span></div><div class="data-row "><span class="row-label">Sportelli Mary</span><span class="row-dots"></span><span class="row-value">1.560 €</span></div><div class="data-row "><span class="row-label">Longo Victor</span><span class="row-dots"></span><span class="row-value">1.500 €</span></div><div class="data-row "><span class="row-label">Delfine Marcella</span><span class="row-dots"></span><span class="row-value">1.480 €</span></div><div class="data-row "><span class="row-label">Delfine Mario</span><span class="row-dots"></span><span class="row-value">1.475 €</span></div><div class="data-row "><span class="row-label">Gaetano Vincenzo</span><span class="row-dots"></span><span class="row-value">1.375 €</span></div><div class="data-row "><span class="row-label">Giannoccaro Milena</span><span class="row-dots"></span><span class="row-value">1.250 €</span></div><div class="data-row "><span class="row-label">Intini Elisa</span><span class="row-dots"></span><span class="row-value">1.195 €</span></div><div class="data-row "><span class="row-label">Agherbino Gregory</span><span class="row-dots"></span><span class="row-value">1.180 €</span></div><div class="data-row "><span class="row-label">Pinto Nadia</span><span class="row-dots"></span><span class="row-value">1.080 €</span></div><div class="data-row "><span class="row-label">Netti Veronica</span><span class="row-dots"></span><span class="row-value">1.040 €</span></div><div class="data-row "><span class="row-label">Recchia Francesca</span><span class="row-dots"></span><span class="row-value">1.010 €</span></div><div class="data-row "><span class="row-label">Notarnicola Claudio</span><span class="row-dots"></span><span class="row-value">1.005 €</span></div><div class="data-row "><span class="row-label">Spada Angela</span><span class="row-dots"></span><span class="row-value">1.000 €</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div><div class="chart-row"><div class="chart-lbl">Mignozzi</div><div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div><div class="chart-val">3.180 €</div></div><div class="chart-row"><div class="chart-lbl">Manelli</div><div class="chart-bar-area"><div class="chart-bar" style="width:70.75471698113208%; background-color: #85c1e9;"></div></div><div class="chart-val">2.250 €</div></div><div class="chart-row"><div class="chart-lbl">Mangini</div><div class="chart-bar-area"><div class="chart-bar" style="width:70.12578616352201%; background-color: #85c1e9;"></div></div><div class="chart-val">2.230 €</div></div><div class="chart-row"><div class="chart-lbl">Colacicco</div><div class="chart-bar-area"><div class="chart-bar" style="width:62.106918238993714%; background-color: #85c1e9;"></div></div><div class="chart-val">1.975 €</div></div><div class="chart-row"><div class="chart-lbl">Spinelli</div><div class="chart-bar-area"><div class="chart-bar" style="width:56.76100628930818%; background-color: #85c1e9;"></div></div><div class="chart-val">1.805 €</div></div><div class="chart-row"><div class="chart-lbl">Intini</div><div class="chart-bar-area"><div class="chart-bar" style="width:52.04402515723271%; background-color: #85c1e9;"></div></div><div class="chart-val">1.655 €</div></div><div class="chart-row"><div class="chart-lbl">Dibattista</div><div class="chart-bar-area"><div class="chart-bar" style="width:50.314465408805034%; background-color: #85c1e9;"></div></div><div class="chart-val">1.600 €</div></div><div class="chart-row"><div class="chart-lbl">Sportelli</div><div class="chart-bar-area"><div class="chart-bar" style="width:49.056603773584904%; background-color: #85c1e9;"></div></div><div class="chart-val">1.560 €</div></div><div class="chart-row"><div class="chart-lbl">Longo</div><div class="chart-bar-area"><div class="chart-bar" style="width:47.16981132075472%; background-color: #85c1e9;"></div></div><div class="chart-val">1.500 €</div></div><div class="chart-row"><div class="chart-lbl">Delfine</div><div class="chart-bar-area"><div class="chart-bar" style="width:46.540880503144656%; background-color: #85c1e9;"></div></div><div class="chart-val">1.480 €</div></div><div class="chart-row"><div class="chart-lbl">Delfine</div><div class="chart-bar-area"><div class="chart-bar" style="width:46.38364779874214%; background-color: #85c1e9;"></div></div><div class="chart-val">1.475 €</div></div><div class="chart-row"><div class="chart-lbl">Gaetano</div><div class="chart-bar-area"><div class="chart-bar" style="width:43.23899371069182%; background-color: #85c1e9;"></div></div><div class="chart-val">1.375 €</div></div><div class="chart-row"><div class="chart-lbl">Giannoccaro</div><div class="chart-bar-area"><div class="chart-bar" style="width:39.308176100628934%; background-color: #85c1e9;"></div></div><div class="chart-val">1.250 €</div></div><div class="chart-row"><div class="chart-lbl">Intini</div><div class="chart-bar-area"><div class="chart-bar" style="width:37.57861635220126%; background-color: #85c1e9;"></div></div><div class="chart-val">1.195 €</div></div><div class="chart-row"><div class="chart-lbl">Agherbino</div><div class="chart-bar-area"><div class="chart-bar" style="width:37.10691823899371%; background-color: #85c1e9;"></div></div><div class="chart-val">1.180 €</div></div><div class="chart-row"><div class="chart-lbl">Pinto</div><div class="chart-bar-area"><div class="chart-bar" style="width:33.9622641509434%; background-color: #85c1e9;"></div></div><div class="chart-val">1.080 €</div></div><div class="chart-row"><div class="chart-lbl">Netti</div><div class="chart-bar-area"><div class="chart-bar" style="width:32.70440251572327%; background-color: #85c1e9;"></div></div><div class="chart-val">1.040 €</div></div><div class="chart-row"><div class="chart-lbl">Recchia</div><div class="chart-bar-area"><div class="chart-bar" style="width:31.761006289308174%; background-color: #85c1e9;"></div></div><div class="chart-val">1.010 €</div></div><div class="chart-row"><div class="chart-lbl">Notarnicola</div><div class="chart-bar-area"><div class="chart-bar" style="width:31.60377358490566%; background-color: #85c1e9;"></div></div><div class="chart-val">1.005 €</div></div><div class="chart-row"><div class="chart-lbl">Spada</div><div class="chart-bar-area"><div class="chart-bar" style="width:31.446540880503143%; background-color: #85c1e9;"></div></div><div class="chart-val">1.000 €</div></div></div><div class="info-footer">Classifica dei 20 clienti migliori della stagione sportiva passata.</div></div><div id="tab_20" class="detail-view">
+        <div class="total-row-container"><div class="back-arrow" onclick="goHome()">⬅️</div><div class="total-value " data-original="Σ 64.295 €  •  µ 3.215 €" style="color:black !important"><b>Σ</b> 64.295 €  •  <b>µ</b> 3.215 €</div></div>
+        <div class="data-row "><span class="row-label">Colacicco Francesca</span><span class="row-dots"></span><span class="row-value">5.425 €</span></div><div class="data-row "><span class="row-label">Fiume Stefania</span><span class="row-dots"></span><span class="row-value">4.300 €</span></div><div class="data-row "><span class="row-label">Mignozzi Francesco</span><span class="row-dots"></span><span class="row-value">4.030 €</span></div><div class="data-row "><span class="row-label">Detomaso Teresa</span><span class="row-dots"></span><span class="row-value">3.950 €</span></div><div class="data-row "><span class="row-label">Polignano Antonio</span><span class="row-dots"></span><span class="row-value">3.864 €</span></div><div class="data-row "><span class="row-label">Gaetano Vincenzo</span><span class="row-dots"></span><span class="row-value">3.375 €</span></div><div class="data-row "><span class="row-label">Delfine Marcella</span><span class="row-dots"></span><span class="row-value">3.343 €</span></div><div class="data-row "><span class="row-label">Vinella Gianni</span><span class="row-dots"></span><span class="row-value">3.320 €</span></div><div class="data-row "><span class="row-label">Convertino Valentina</span><span class="row-dots"></span><span class="row-value">3.172 €</span></div><div class="data-row "><span class="row-label">Manelli Alessia</span><span class="row-dots"></span><span class="row-value">3.000 €</span></div><div class="data-row "><span class="row-label">Lacarbonara Mariano</span><span class="row-dots"></span><span class="row-value">2.950 €</span></div><div class="data-row "><span class="row-label">Tieuli Claudia</span><span class="row-dots"></span><span class="row-value">2.910 €</span></div><div class="data-row "><span class="row-label">Mangini Alessia</span><span class="row-dots"></span><span class="row-value">2.855 €</span></div><div class="data-row "><span class="row-label">Delfine Giuseppe</span><span class="row-dots"></span><span class="row-value">2.745 €</span></div><div class="data-row "><span class="row-label">Tateo Chiara</span><span class="row-dots"></span><span class="row-value">2.562 €</span></div><div class="data-row "><span class="row-label">Netti Ivan</span><span class="row-dots"></span><span class="row-value">2.537 €</span></div><div class="data-row "><span class="row-label">Laterza Giancarlo</span><span class="row-dots"></span><span class="row-value">2.535 €</span></div><div class="data-row "><span class="row-label">Pizzutilo Domenico</span><span class="row-dots"></span><span class="row-value">2.483 €</span></div><div class="data-row "><span class="row-label">Andresini Angela</span><span class="row-dots"></span><span class="row-value">2.479 €</span></div><div class="data-row "><span class="row-label">Campanella Marilena</span><span class="row-dots"></span><span class="row-value">2.460 €</span></div><div class="chart-container"><div class="chart-title">Analisi Grafica</div><div class="chart-row"><div class="chart-lbl">Colacicco</div><div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div><div class="chart-val">5.425 €</div></div><div class="chart-row"><div class="chart-lbl">Fiume</div><div class="chart-bar-area"><div class="chart-bar" style="width:79.26267281105991%; background-color: #85c1e9;"></div></div><div class="chart-val">4.300 €</div></div><div class="chart-row"><div class="chart-lbl">Mignozzi</div><div class="chart-bar-area"><div class="chart-bar" style="width:74.28571428571429%; background-color: #85c1e9;"></div></div><div class="chart-val">4.030 €</div></div><div class="chart-row"><div class="chart-lbl">Detomaso</div><div class="chart-bar-area"><div class="chart-bar" style="width:72.81105990783409%; background-color: #85c1e9;"></div></div><div class="chart-val">3.950 €</div></div><div class="chart-row"><div class="chart-lbl">Polignano</div><div class="chart-bar-area"><div class="chart-bar" style="width:71.22580645161291%; background-color: #85c1e9;"></div></div><div class="chart-val">3.864 €</div></div><div class="chart-row"><div class="chart-lbl">Gaetano</div><div class="chart-bar-area"><div class="chart-bar" style="width:62.21198156682027%; background-color: #85c1e9;"></div></div><div class="chart-val">3.375 €</div></div><div class="chart-row"><div class="chart-lbl">Delfine</div><div class="chart-bar-area"><div class="chart-bar" style="width:61.622119815668206%; background-color: #85c1e9;"></div></div><div class="chart-val">3.343 €</div></div><div class="chart-row"><div class="chart-lbl">Vinella</div><div class="chart-bar-area"><div class="chart-bar" style="width:61.19815668202765%; background-color: #85c1e9;"></div></div><div class="chart-val">3.320 €</div></div><div class="chart-row"><div class="chart-lbl">Convertino</div><div class="chart-bar-area"><div class="chart-bar" style="width:58.47004608294931%; background-color: #85c1e9;"></div></div><div class="chart-val">3.172 €</div></div><div class="chart-row"><div class="chart-lbl">Manelli</div><div class="chart-bar-area"><div class="chart-bar" style="width:55.29953917050692%; background-color: #85c1e9;"></div></div><div class="chart-val">3.000 €</div></div><div class="chart-row"><div class="chart-lbl">Lacarbonara</div><div class="chart-bar-area"><div class="chart-bar" style="width:54.377880184331794%; background-color: #85c1e9;"></div></div><div class="chart-val">2.950 €</div></div><div class="chart-row"><div class="chart-lbl">Tieuli</div><div class="chart-bar-area"><div class="chart-bar" style="width:53.64055299539171%; background-color: #85c1e9;"></div></div><div class="chart-val">2.910 €</div></div><div class="chart-row"><div class="chart-lbl">Mangini</div><div class="chart-bar-area"><div class="chart-bar" style="width:52.626728110599075%; background-color: #85c1e9;"></div></div><div class="chart-val">2.855 €</div></div><div class="chart-row"><div class="chart-lbl">Delfine</div><div class="chart-bar-area"><div class="chart-bar" style="width:50.59907834101382%; background-color: #85c1e9;"></div></div><div class="chart-val">2.745 €</div></div><div class="chart-row"><div class="chart-lbl">Tateo</div><div class="chart-bar-area"><div class="chart-bar" style="width:47.225806451612904%; background-color: #85c1e9;"></div></div><div class="chart-val">2.562 €</div></div><div class="chart-row"><div class="chart-lbl">Netti</div><div class="chart-bar-area"><div class="chart-bar" style="width:46.764976958525345%; background-color: #85c1e9;"></div></div><div class="chart-val">2.537 €</div></div><div class="chart-row"><div class="chart-lbl">Laterza</div><div class="chart-bar-area"><div class="chart-bar" style="width:46.72811059907834%; background-color: #85c1e9;"></div></div><div class="chart-val">2.535 €</div></div><div class="chart-row"><div class="chart-lbl">Pizzutilo</div><div class="chart-bar-area"><div class="chart-bar" style="width:45.76958525345622%; background-color: #85c1e9;"></div></div><div class="chart-val">2.483 €</div></div><div class="chart-row"><div class="chart-lbl">Andresini</div><div class="chart-bar-area"><div class="chart-bar" style="width:45.69585253456221%; background-color: #85c1e9;"></div></div><div class="chart-val">2.479 €</div></div><div class="chart-row"><div class="chart-lbl">Campanella</div><div class="chart-bar-area"><div class="chart-bar" style="width:45.34562211981567%; background-color: #85c1e9;"></div></div><div class="chart-val">2.460 €</div></div></div><div class="info-footer">Classifica dei 20 migliori clienti dall'apertura ad oggi.</div></div></div><script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js'></script></body></html>
