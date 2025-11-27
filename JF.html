@@ -18,7 +18,7 @@
     #header-subtitle { margin-top: 5px; font-size: 16px; font-weight: 500; opacity: 0.9; }
     #menu-view { display: block; padding-bottom: 40px; padding-top: 20px; }
     
-    /* V152: Stile Menu Alternato */
+    /* V155: Stile Menu Alternato */
     .menu-item { padding: 3px 20px; border-bottom: none; font-size: 28px; color: #333; font-weight: 400; cursor: pointer; display: flex; justify-content: center; align-items: center; position: relative; }
     .menu-item:nth-child(odd) { background-color: #ffffff; }
     .menu-item:nth-child(even) { background-color: #f2f2f2; }
@@ -137,36 +137,17 @@
         function downloadPDF() {
             const pdfContainer = document.createElement('div');
             let filename = 'Report.pdf';
-            
-            // V152: Smart Detection for Mobile (to apply fix)
-            var isMobile = window.innerWidth < 800; 
-
-            var opt = {
-                margin: 0, 
-                filename: filename,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 1.5, scrollY: 0 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-            
-            // FIX: Apply windowWidth ONLY if mobile to prevent PC layout break
-            if (isMobile) {
-                opt.html2canvas.windowWidth = 1200;
-                opt.html2canvas.width = 1200;
-            }
 
             if (currIdx !== -1) {
                 const data = TABLE_DATA[currIdx];
                 filename = 'Report_' + data.title.substring(0, 10).replace(/[^a-z0-9]/gi, '_') + '.pdf';
-                opt.filename = filename;
                 const page = buildPdfPage(data, document.getElementById(data.id));
                 page.style.pageBreakAfter = "auto";
                 pdfContainer.appendChild(page);
             } else {
                 filename = 'Report_Completo.pdf';
-                opt.filename = filename;
                 
-                // V151 FIX: DOUBLE TABLES RESTORED
+                // RESTORE DOUBLE TABLES LOGIC FOR PC
                 for(let i=0; i<TABLE_DATA.length; i++) {
                     if (i >= 3 && i <= 15 && (i % 2 !== 0)) continue;
 
@@ -188,6 +169,14 @@
                     pdfContainer.lastElementChild.style.pageBreakAfter = "auto";
                 }
             }
+
+            var opt = {
+                margin: 0, 
+                filename: filename,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 1.5, scrollY: 0 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
             
             html2pdf().from(pdfContainer).set(opt).save();
         }
@@ -266,10 +255,8 @@
                 } 
                 else if(!child.classList.contains('total-row-container') && !child.classList.contains('back-arrow')) {
                     if(clone.classList.contains('data-row')) {
-                        // V147 Fix iOS shrinking specifics
+                        // V155: PDF Logic - 22px Standard, 15px Compact
                         let finalPdfFont = "22px";
-                        
-                        // 1) 2) e 18-23 shrink to 15px for PDF Only
                         if (data.title.startsWith("1)") || 
                             data.title.startsWith("2)") || 
                             data.title.startsWith("18)") || 
@@ -328,7 +315,6 @@
         function buildPdfPage(data1, el1, data2, el2) {
             const pdfDiv = document.createElement('div');
             pdfDiv.style.width = "210mm";
-            // Height auto to prevent freeze on long content
             pdfDiv.style.minHeight = "295mm"; 
             pdfDiv.style.height = "auto"; 
             pdfDiv.style.padding = "20mm"; 
@@ -364,7 +350,13 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            document.querySelector('.header-box').addEventListener('click', () => { startDownload(); });
+            // V155: Click Listener on Header
+            document.querySelector('.header-box').addEventListener('click', () => { 
+                // Only allow PDF download on PC (width > 800px)
+                if (window.innerWidth >= 800) {
+                    startDownload();
+                }
+            });
             
             document.addEventListener('keydown', e => {
                 if(e.key==="Backspace" && currIdx!==-1) goHome();
@@ -400,7 +392,7 @@
     </div>
 
     <div class="main-container">
-        <div class="header-box" title="Clicca per scaricare PDF">
+        <div class="header-box" title="Clicca per scaricare PDF (Solo PC)">
             <div id="header-title">ANALISI DATI</div>
             <div id="header-subtitle">Aggiornato al: 21 Nov 2025</div>
         </div>
