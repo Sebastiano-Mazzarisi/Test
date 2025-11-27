@@ -1,12 +1,20 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang='it'>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name='apple-mobile-web-app-capable' content='yes'>
+    <meta name='apple-mobile-web-app-status-bar-style' content='black-translucent'>
     <title>Analisi Dati</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="apple-touch-icon" href="https://sebastiano-mazzarisi.github.io/Test/JoyFit.jpg">
+    <link rel="icon" href="https://sebastiano-mazzarisi.github.io/Test/JoyFit.jpg">
+    <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css' rel='stylesheet'>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'></script>
     <style>
+    /* V166: PARAMETRIC FONT & NO BLANK PAGE */
     body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; overscroll-behavior-x: none; touch-action: pan-y; }
     .main-container { background-color: white; margin: 0 auto; width: 100%; max-width: 490px; min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; padding-bottom: 20px; }
     .header-box { background-color: #b8860b; color: white; padding: 20px 15px; text-align: center; position: sticky; top: 0; z-index: 100; cursor: pointer; user-select: none; }
@@ -14,7 +22,8 @@
     #header-subtitle { margin-top: 5px; font-size: 16px; font-weight: 500; opacity: 0.9; }
     #menu-view { display: block; padding-bottom: 40px; padding-top: 20px; }
     
-    /* V144: Stile Menu Alternato */
+    @page { margin: 0; }
+    
     .menu-item { padding: 3px 20px; border-bottom: none; font-size: 28px; color: #333; font-weight: 400; cursor: pointer; display: flex; justify-content: center; align-items: center; position: relative; }
     .menu-item:nth-child(odd) { background-color: #ffffff; }
     .menu-item:nth-child(even) { background-color: #f2f2f2; }
@@ -22,20 +31,63 @@
     
     .menu-item::after { content: '›'; font-size: 24px; color: #ccc; position: absolute; right: 20px; top: 50%; transform: translateY(-50%); }
     .detail-view { display: none; padding: 5px 10px; }
-    .data-row { display: flex; justify-content: space-between; align-items: flex-end; padding: 2px 0; font-size: 28px; width: 100%; max-width: 430px; margin: 0 auto; }
+    
+    .data-row { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: flex-end; 
+        padding: 2px 0; 
+        font-size: 28px; 
+        width: 100%; 
+        max-width: 430px; 
+        margin: 0 auto;
+        page-break-inside: avoid; 
+    }
+    
     .monday-separator { border-top: 2px solid #ccc; margin-top: 8px; margin-bottom: 8px; width: 100%; max-width: 430px; margin-left: auto; margin-right: auto; }
     .strong-separator { border-top: 3px solid #000; margin-top: 15px; margin-bottom: 15px; width: 100%; max-width: 430px; margin-left: auto; margin-right: auto; }
     .row-label { text-align: left; font-weight: 500; color: #495057; white-space: nowrap; flex-shrink: 1; overflow: hidden; text-overflow: ellipsis; max-width: 85%; }
     .row-dots { flex-grow: 1; border-bottom: 3px dotted #ccc; margin: 0 6px 7px 6px; min-width: 15px; }
     .row-value { text-align: right; font-weight: 700; color: #000; white-space: nowrap; flex-shrink: 0; }
-    .total-row-container { position: relative; display: flex; justify-content: center; align-items: center; background-color: #f0f8ff; border-radius: 10px; padding: 6px 12px; margin-bottom: 15px; margin-top: 15px; border: 2px solid #0d6efd; }
+    
+    .total-row-container { 
+        position: relative; 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        background-color: #f0f8ff; 
+        border-radius: 10px; 
+        padding: 6px 12px; 
+        margin-bottom: 15px; 
+        margin-top: 15px; 
+        border: 2px solid #0d6efd;
+        page-break-inside: avoid; 
+    }
     .back-arrow { position: absolute; left: 15px; font-size: 28px; cursor: pointer; line-height: 1; user-select: none; color: #b8860b; }
     .total-value { font-size: 25px; font-weight: 400; color: #000 !important; }
     
-    .info-footer { margin-top: 10px; padding-top: 8px; border-top: 1px solid #e0e0e0; text-align: left; font-size: 11px; color: #666; line-height: 1.3; padding-bottom: 20px; }
+    .info-footer { 
+        margin-top: 10px; 
+        padding-top: 8px; 
+        border-top: 1px solid #e0e0e0; 
+        text-align: left; 
+        font-size: 11px; 
+        color: #666; 
+        line-height: 1.3; 
+        padding-bottom: 20px;
+        page-break-inside: avoid;
+    }
     .info-footer strong { color: #333; }
     
-    .chart-container { margin-top: 20px; padding: 10px 5px; background-color: #fafafa; border-radius: 8px; border: 1px solid #eee; margin-bottom: 5px; }
+    .chart-container { 
+        margin-top: 20px; 
+        padding: 10px 5px; 
+        background-color: #fafafa; 
+        border-radius: 8px; 
+        border: 1px solid #eee; 
+        margin-bottom: 5px;
+        page-break-inside: avoid; 
+    }
     .chart-title { text-align: center; font-weight: 700; font-size: 16px; margin-bottom: 10px; color: #333; text-transform: uppercase; }
     .chart-row { display: flex; align-items: center; margin-bottom: 6px; font-size: 13px; width: 100%; }
     .chart-lbl { width: 80px; text-align: right; padding-right: 6px; color: #555; font-weight: 500; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -51,7 +103,7 @@
     .row-yellow { background-color: #ffffcc; border-radius: 4px; }
     .row-yellow .row-value { color: #b8860b !important; }
     
-    #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 9999; display: none; justify-content: center; align-items: center; flex-direction: column; }
+    #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 9999; display: none; justify-content: center; align-items: center; flex-direction: column; cursor: pointer; }
     .loading-box { background-color: #333; color: white; padding: 20px 40px; border-radius: 8px; font-size: 18px; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: center; }
 
     @media (max-width: 500px) {
@@ -63,6 +115,19 @@
         .chart-val { flex: 0 0 70px; font-size: 10px; }
         .menu-item { font-size: 26px; padding: 4px 10px; }
         #header-title { font-size: 24px; }
+    }
+    
+    /* V166: EXACT A4 HEIGHT + OVERFLOW HIDDEN TO KILL BLANK PAGES */
+    .pdf-page {
+        page-break-after: always;
+        break-after: page;
+        margin-bottom: 0;
+        padding-bottom: 0;
+        width: 210mm;
+        height: 296mm; /* 1mm less than A4 to be safe */
+        overflow: hidden; /* Cut anything that overflows */
+        position: relative;
+        background-color: white;
     }
     </style>
     <script>
@@ -121,45 +186,91 @@
         }
 
         function startDownload() {
-            document.getElementById('loading-overlay').style.display = 'flex';
+            const overlay = document.getElementById('loading-overlay');
+            overlay.style.display = 'flex';
+            overlay.onclick = function() { this.style.display = 'none'; };
+
             setTimeout(() => {
-                downloadPDF();
-                setTimeout(() => {
-                     document.getElementById('loading-overlay').style.display = 'none';
-                }, 2000);
+                try {
+                    downloadPDF();
+                } catch (e) {
+                    console.error(e);
+                    alert("Errore generazione PDF.");
+                } finally {
+                    setTimeout(() => { overlay.style.display = 'none'; }, 3000);
+                }
             }, 100);
         }
 
         function downloadPDF() {
             const pdfContainer = document.createElement('div');
             let filename = 'Report.pdf';
-
-            if (currIdx !== -1) {
-                const data = TABLE_DATA[currIdx];
-                filename = 'Report_' + data.title.substring(0, 10).replace(/[^a-z0-9]/gi, '_') + '.pdf';
-                const page = buildPdfPage(data, document.getElementById(data.id));
-                pdfContainer.appendChild(page);
-            } else {
-                filename = 'Report_Completo.pdf';
-                for(let i=0; i<TABLE_DATA.length; i++) {
-                    if (i >= 3 && i <= 15 && (i % 2 !== 0)) continue;
-                    const data = TABLE_DATA[i];
-                    let nextData = null;
-                    if (i >= 2 && i < 16 && (i % 2 === 0)) nextData = TABLE_DATA[i+1];
-                    const el1 = document.getElementById(data.id);
-                    const el2 = nextData ? document.getElementById(nextData.id) : null;
-                    const page = buildPdfPage(data, el1, nextData, el2);
-                    pdfContainer.appendChild(page);
-                }
-            }
+            
+            var isMobile = window.innerWidth < 800; 
 
             var opt = {
-                margin: 0, 
+                margin: 0, // V166: ZERO MARGINS (Handled by CSS)
                 filename: filename,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 1.5, scrollY: 0 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                html2canvas: { scale: 1.5, scrollY: 0 }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
             };
+            
+            if (isMobile) {
+                opt.html2canvas.scale = 1.1;
+                opt.html2canvas.width = 800;
+                opt.html2canvas.windowWidth = 800;
+            }
+
+            if (currIdx !== -1) {
+                // SINGLE TABLE
+                const data = TABLE_DATA[currIdx];
+                filename = 'Report_' + data.title.substring(0, 10).replace(/[^a-z0-9]/gi, '_') + '.pdf';
+                opt.filename = filename;
+                const page = buildPdfPage(data, document.getElementById(data.id));
+                page.style.pageBreakAfter = "auto";
+                pdfContainer.appendChild(page);
+            } else {
+                // FULL REPORT
+                filename = 'Report_Completo.pdf';
+                opt.filename = filename;
+                
+                if (isMobile) {
+                    // MOBILE: ONE TABLE PER PAGE
+                    for(let i=0; i<TABLE_DATA.length; i++) {
+                        const data = TABLE_DATA[i];
+                        const el = document.getElementById(data.id);
+                        const page = buildPdfPage(data, el);
+                        pdfContainer.appendChild(page);
+                    }
+                } else {
+                    // PC: DOUBLE TABLES
+                    for(let i=0; i<TABLE_DATA.length; i++) {
+                        if (i >= 3 && i <= 15 && (i % 2 !== 0)) continue;
+
+                        const data = TABLE_DATA[i];
+                        let nextData = null;
+                        let el2 = null;
+
+                        if (i >= 2 && i < 16 && (i % 2 === 0)) {
+                            nextData = TABLE_DATA[i+1];
+                            el2 = document.getElementById(nextData.id);
+                        }
+                        
+                        const el1 = document.getElementById(data.id);
+                        const page = buildPdfPage(data, el1, nextData, el2);
+                        pdfContainer.appendChild(page);
+                    }
+                }
+                
+                // V166: FORCE REMOVE LAST PAGE BREAK
+                if (pdfContainer.lastElementChild) {
+                    pdfContainer.lastElementChild.style.pageBreakAfter = "auto";
+                    pdfContainer.lastElementChild.style.breakAfter = "auto";
+                    pdfContainer.lastElementChild.style.height = "auto"; // Let last page shrink
+                }
+            }
             
             html2pdf().from(pdfContainer).set(opt).save();
         }
@@ -238,12 +349,20 @@
                 } 
                 else if(!child.classList.contains('total-row-container') && !child.classList.contains('back-arrow')) {
                     if(clone.classList.contains('data-row')) {
-                        // V146: Font 17px solo per Tabelle 1 e 2, altrimenti 22px
-                        let fontSize = "22px";
-                        if (data.title.startsWith("1)") || data.title.startsWith("2)")) {
-                             fontSize = "17px";
+                        // V157: PDF Logic
+                        let finalPdfFont = "22px";
+                        if (data.title.startsWith("1)") || 
+                            data.title.startsWith("2)") || 
+                            data.title.startsWith("18)") || 
+                            data.title.startsWith("19)") || 
+                            data.title.startsWith("20)") || 
+                            data.title.startsWith("21)") || 
+                            data.title.startsWith("22)") || 
+                            data.title.startsWith("23)") ) {
+                             finalPdfFont = "15px";
                         }
-                        clone.style.fontSize = fontSize; 
+                        
+                        clone.style.fontSize = finalPdfFont; 
                         clone.style.padding = "1px 0";
                         if(clone.classList.contains('row-negative')) {
                             clone.querySelector('.row-value').style.color = "#dc3545";
@@ -262,8 +381,7 @@
                 }
             });
             
-            // V146: Logic correction - ONLY restrict TOP 20 rows, show ALL for Activities
-            if(data.title.indexOf("TOP 20") !== -1) {
+            if(data.title.indexOf("TOP 20") !== -1 || data.title.indexOf("ATTIVITÀ") !== -1) {
                  let newTotal = 0.0;
                  let rowCount = 0;
                  left.querySelectorAll('.data-row').forEach(row => {
@@ -289,17 +407,12 @@
 
         function buildPdfPage(data1, el1, data2, el2) {
             const pdfDiv = document.createElement('div');
-            pdfDiv.style.width = "210mm";
-            // V146: Allow height auto to prevent freezing on long lists
-            pdfDiv.style.minHeight = "295mm"; 
-            pdfDiv.style.height = "auto";
-            pdfDiv.style.padding = "20mm"; 
+            pdfDiv.className = 'pdf-page';
+            pdfDiv.style.padding = "5mm"; 
             pdfDiv.style.boxSizing = "border-box";
             pdfDiv.style.fontFamily = "Arial, sans-serif";
             pdfDiv.style.backgroundColor = "#fff";
-            pdfDiv.style.position = "relative"; 
-            pdfDiv.style.pageBreakAfter = "always"; 
-
+            
             appendTableToPdf(pdfDiv, data1, el1);
             
             if(data2 && el2) {
@@ -312,7 +425,7 @@
 
             const foot = document.createElement('div');
             foot.style.position = "absolute";
-            foot.style.bottom = "10mm"; 
+            foot.style.bottom = "15px"; // V166: LOWERED FOOTER TO 15px
             foot.style.left = "0";
             foot.style.width = "100%";
             foot.style.textAlign = "center";
@@ -326,7 +439,9 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            document.querySelector('.header-box').addEventListener('click', () => { startDownload(); });
+            document.querySelector('.header-box').addEventListener('click', () => { 
+                startDownload();
+            });
             
             document.addEventListener('keydown', e => {
                 if(e.key==="Backspace" && currIdx!==-1) goHome();
@@ -357,17 +472,18 @@
     </script>
 </head>
 <body>
-    <div id="loading-overlay">
-        <div class="loading-box">Elaborazione in corso...</div>
+    <div id='loading-overlay'>
+        <div class='loading-box'>Generazione PDF in corso...<br><span style='font-size:14px; font-weight:normal; margin-top:5px; display:block;'>(Clicca qui se si blocca)</span></div>
     </div>
-
-    <div class="main-container">
-        <div class="header-box" title="Clicca per scaricare PDF">
-            <div id="header-title">ANALISI DATI</div>
-            <div id="header-subtitle">Aggiornato al: 21 Nov 2025</div>
+    <div class='main-container'>
+        <div class='header-box' title='Clicca per scaricare PDF (Solo PC)'>
+            <div id='header-title'>ANALISI DATI</div>
+            <div id='header-subtitle'>Aggiornato al: 21 Nov 2025</div>
         </div>
-        <div id="menu-view">
-<div class="menu-item" onclick="loadTable(0)">1) MESE IN CORSO</div><div class="menu-item" onclick="loadTable(1)">2) MESE SCORSO</div><div class="menu-item" onclick="loadTable(2)">3) MENSILE</div><div class="menu-item" onclick="loadTable(3)">4) ANNO IN CORSO</div><div class="menu-item" onclick="loadTable(4)">5) CUMULATIVA</div><div class="menu-item" onclick="loadTable(5)">6) ANNO SPORTIVO</div><div class="menu-item" onclick="loadTable(6)">7) ANNO PREVISIONI</div><div class="menu-item" onclick="loadTable(7)">8) ANNO CONTANTI</div><div class="menu-item" onclick="loadTable(8)">9) ANNO POS</div><div class="menu-item" onclick="loadTable(9)">10) ANNO USCITE</div><div class="menu-item" onclick="loadTable(10)">11) ANNO ENTRATE (x)</div><div class="menu-item" onclick="loadTable(11)">12) NUMERO CLIENTI</div><div class="menu-item" onclick="loadTable(12)">13) INTROITO MEDIO CLIENTE</div><div class="menu-item" onclick="loadTable(13)">14) OPERATORI (ANNO)</div><div class="menu-item" onclick="loadTable(14)">15) OPERATORI (STORICO)</div><div class="menu-item" onclick="loadTable(15)">16) SETTIMANA (STORICO)</div><div class="menu-item" onclick="loadTable(16)">17) MESE (STORICO)</div><div class="menu-item" onclick="loadTable(17)">18) TOP 20 ANNO IN CORSO</div><div class="menu-item" onclick="loadTable(18)">19) TOP 20 ANNO SCORSO</div><div class="menu-item" onclick="loadTable(19)">20) TOP 20 STORICI</div><div class="menu-item" onclick="loadTable(20)">21) ATTIVITÀ IN CORSO</div><div class="menu-item" onclick="loadTable(21)">22) ATTIVITÀ ANNO SCORSO</div><div class="menu-item" onclick="loadTable(22)">23) ATTIVITÀ STORICHE</div></div>
+        <div id='menu-view'>
+<div class='menu-item' onclick='loadTable(0)'>1) MESE IN CORSO</div><div class='menu-item' onclick='loadTable(1)'>2) MESE SCORSO</div><div class='menu-item' onclick='loadTable(2)'>3) MENSILE</div><div class='menu-item' onclick='loadTable(3)'>4) ANNO IN CORSO</div><div class='menu-item' onclick='loadTable(4)'>5) CUMULATIVA</div><div class='menu-item' onclick='loadTable(5)'>6) ANNO SPORTIVO</div><div class='menu-item' onclick='loadTable(6)'>7) ANNO PREVISIONI</div><div class='menu-item' onclick='loadTable(7)'>8) ANNO CONTANTI</div><div class='menu-item' onclick='loadTable(8)'>9) ANNO POS</div><div class='menu-item' onclick='loadTable(9)'>10) ANNO USCITE</div><div class='menu-item' onclick='loadTable(10)'>11) ANNO ENTRATE (x)</div><div class='menu-item' onclick='loadTable(11)'>12) NUMERO CLIENTI</div><div class='menu-item' onclick='loadTable(12)'>13) INTROITO MEDIO CLIENTE</div><div class='menu-item' onclick='loadTable(13)'>14) OPERATORI (ANNO)</div><div class='menu-item' onclick='loadTable(14)'>15) OPERATORI (STORICO)</div><div class='menu-item' onclick='loadTable(15)'>16) SETTIMANA (STORICO)</div><div class='menu-item' onclick='loadTable(16)'>17) MESE (STORICO)</div><div class='menu-item' onclick='loadTable(17)'>18) TOP 20 ANNO IN CORSO</div><div class='menu-item' onclick='loadTable(18)'>19) TOP 20 ANNO SCORSO</div><div class='menu-item' onclick='loadTable(19)'>20) TOP 20 STORICI</div><div class='menu-item' onclick='loadTable(20)'>21) ATTIVITÀ IN CORSO</div><div class='menu-item' onclick='loadTable(21)'>22) ATTIVITÀ ANNO SCORSO</div><div class='menu-item' onclick='loadTable(22)'>23) ATTIVITÀ STORICHE</div>
+        </div>
+
         <div id="tab_0" class="detail-view">
             <div class="total-row-container ">
                 <div class="back-arrow" onclick="goHome()">‹</div>
