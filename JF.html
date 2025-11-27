@@ -238,12 +238,22 @@
                 } 
                 else if(!child.classList.contains('total-row-container') && !child.classList.contains('back-arrow')) {
                     if(clone.classList.contains('data-row')) {
-                        // V146: Font 17px solo per Tabelle 1 e 2, altrimenti 22px
-                        let fontSize = "22px";
-                        if (data.title.startsWith("1)") || data.title.startsWith("2)")) {
-                             fontSize = "17px";
+                        // V147: Fix iOS shrinking specifics
+                        let finalPdfFont = "22px";
+                        
+                        // 1) 2) e 18-23 shrink to 15px for PDF Only
+                        if (data.title.startsWith("1)") || 
+                            data.title.startsWith("2)") || 
+                            data.title.startsWith("18)") || 
+                            data.title.startsWith("19)") || 
+                            data.title.startsWith("20)") || 
+                            data.title.startsWith("21)") || 
+                            data.title.startsWith("22)") || 
+                            data.title.startsWith("23)") ) {
+                             finalPdfFont = "15px";
                         }
-                        clone.style.fontSize = fontSize; 
+                        
+                        clone.style.fontSize = finalPdfFont; 
                         clone.style.padding = "1px 0";
                         if(clone.classList.contains('row-negative')) {
                             clone.querySelector('.row-value').style.color = "#dc3545";
@@ -262,8 +272,7 @@
                 }
             });
             
-            // V146: Logic correction - ONLY restrict TOP 20 rows, show ALL for Activities
-            if(data.title.indexOf("TOP 20") !== -1) {
+            if(data.title.indexOf("TOP 20") !== -1 || data.title.indexOf("ATTIVITÀ") !== -1) {
                  let newTotal = 0.0;
                  let rowCount = 0;
                  left.querySelectorAll('.data-row').forEach(row => {
@@ -290,9 +299,9 @@
         function buildPdfPage(data1, el1, data2, el2) {
             const pdfDiv = document.createElement('div');
             pdfDiv.style.width = "210mm";
-            // V146: Allow height auto to prevent freezing on long lists
+            // Height auto to prevent freeze
             pdfDiv.style.minHeight = "295mm"; 
-            pdfDiv.style.height = "auto";
+            pdfDiv.style.height = "auto"; 
             pdfDiv.style.padding = "20mm"; 
             pdfDiv.style.boxSizing = "border-box";
             pdfDiv.style.fontFamily = "Arial, sans-serif";
