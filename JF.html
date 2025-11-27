@@ -18,7 +18,7 @@
     #header-subtitle { margin-top: 5px; font-size: 16px; font-weight: 500; opacity: 0.9; }
     #menu-view { display: block; padding-bottom: 40px; padding-top: 20px; }
     
-    /* V149: Stile Menu Alternato */
+    /* V152: Stile Menu Alternato */
     .menu-item { padding: 3px 20px; border-bottom: none; font-size: 28px; color: #333; font-weight: 400; cursor: pointer; display: flex; justify-content: center; align-items: center; position: relative; }
     .menu-item:nth-child(odd) { background-color: #ffffff; }
     .menu-item:nth-child(even) { background-color: #f2f2f2; }
@@ -137,24 +137,37 @@
         function downloadPDF() {
             const pdfContainer = document.createElement('div');
             let filename = 'Report.pdf';
+            
+            // V152: Smart Detection for Mobile (to apply fix)
+            var isMobile = window.innerWidth < 800; 
+
+            var opt = {
+                margin: 0, 
+                filename: filename,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 1.5, scrollY: 0 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            // FIX: Apply windowWidth ONLY if mobile to prevent PC layout break
+            if (isMobile) {
+                opt.html2canvas.windowWidth = 1200;
+                opt.html2canvas.width = 1200;
+            }
 
             if (currIdx !== -1) {
                 const data = TABLE_DATA[currIdx];
                 filename = 'Report_' + data.title.substring(0, 10).replace(/[^a-z0-9]/gi, '_') + '.pdf';
+                opt.filename = filename;
                 const page = buildPdfPage(data, document.getElementById(data.id));
-                // FIX V150: remove page-break-after from single page download to avoid empty sheet
                 page.style.pageBreakAfter = "auto";
                 pdfContainer.appendChild(page);
             } else {
                 filename = 'Report_Completo.pdf';
+                opt.filename = filename;
                 
-                // V149 FIX: RESTORE DOUBLE TABLES (BUT HANDLE SIZE)
+                // V151 FIX: DOUBLE TABLES RESTORED
                 for(let i=0; i<TABLE_DATA.length; i++) {
-                    // LOGIC:
-                    // 0, 1, 2 -> Single
-                    // 3-15 -> Paired (if even, take next)
-                    // 16+ -> Single (Top 20, Activities are huge)
-                    
                     if (i >= 3 && i <= 15 && (i % 2 !== 0)) continue;
 
                     const data = TABLE_DATA[i];
@@ -171,19 +184,10 @@
                     pdfContainer.appendChild(page);
                 }
                 
-                // FIX V150: Remove page-break from the very last page
                 if (pdfContainer.lastElementChild) {
                     pdfContainer.lastElementChild.style.pageBreakAfter = "auto";
                 }
             }
-
-            var opt = {
-                margin: 0, 
-                filename: filename,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 1.2, scrollY: 0 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
             
             html2pdf().from(pdfContainer).set(opt).save();
         }
