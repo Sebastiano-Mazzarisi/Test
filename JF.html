@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Analisi Dati</title>
+    <link rel="apple-touch-icon" href="https://sebastiano-mazzarisi.github.io/Test/JoyFit.jpg">
+    <link rel="icon" href="https://sebastiano-mazzarisi.github.io/Test/JoyFit.jpg">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -14,7 +18,7 @@
     #header-subtitle { margin-top: 5px; font-size: 16px; font-weight: 500; opacity: 0.9; }
     #menu-view { display: block; padding-bottom: 40px; padding-top: 20px; }
     
-    /* V144: Stile Menu Alternato */
+    /* V149: Stile Menu Alternato */
     .menu-item { padding: 3px 20px; border-bottom: none; font-size: 28px; color: #333; font-weight: 400; cursor: pointer; display: flex; justify-content: center; align-items: center; position: relative; }
     .menu-item:nth-child(odd) { background-color: #ffffff; }
     .menu-item:nth-child(even) { background-color: #f2f2f2; }
@@ -141,13 +145,26 @@
                 pdfContainer.appendChild(page);
             } else {
                 filename = 'Report_Completo.pdf';
+                
+                // V149 FIX: RESTORE DOUBLE TABLES (BUT HANDLE SIZE)
                 for(let i=0; i<TABLE_DATA.length; i++) {
+                    // LOGIC:
+                    // 0, 1, 2 -> Single
+                    // 3-15 -> Paired (if even, take next)
+                    // 16+ -> Single (Top 20, Activities are huge)
+                    
                     if (i >= 3 && i <= 15 && (i % 2 !== 0)) continue;
+
                     const data = TABLE_DATA[i];
                     let nextData = null;
-                    if (i >= 2 && i < 16 && (i % 2 === 0)) nextData = TABLE_DATA[i+1];
+                    let el2 = null;
+
+                    if (i >= 2 && i < 16 && (i % 2 === 0)) {
+                        nextData = TABLE_DATA[i+1];
+                        el2 = document.getElementById(nextData.id);
+                    }
+                    
                     const el1 = document.getElementById(data.id);
-                    const el2 = nextData ? document.getElementById(nextData.id) : null;
                     const page = buildPdfPage(data, el1, nextData, el2);
                     pdfContainer.appendChild(page);
                 }
@@ -157,7 +174,7 @@
                 margin: 0, 
                 filename: filename,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 1.5, scrollY: 0 },
+                html2canvas: { scale: 1.2, scrollY: 0 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
             
@@ -238,7 +255,7 @@
                 } 
                 else if(!child.classList.contains('total-row-container') && !child.classList.contains('back-arrow')) {
                     if(clone.classList.contains('data-row')) {
-                        // V147: Fix iOS shrinking specifics
+                        // V147 Fix iOS shrinking specifics
                         let finalPdfFont = "22px";
                         
                         // 1) 2) e 18-23 shrink to 15px for PDF Only
@@ -272,7 +289,8 @@
                 }
             });
             
-            if(data.title.indexOf("TOP 20") !== -1 || data.title.indexOf("ATTIVITÀ") !== -1) {
+            // V146: Logic correction - ONLY restrict TOP 20 rows, show ALL for Activities
+            if(data.title.indexOf("TOP 20") !== -1) {
                  let newTotal = 0.0;
                  let rowCount = 0;
                  left.querySelectorAll('.data-row').forEach(row => {
@@ -299,7 +317,7 @@
         function buildPdfPage(data1, el1, data2, el2) {
             const pdfDiv = document.createElement('div');
             pdfDiv.style.width = "210mm";
-            // Height auto to prevent freeze
+            // Height auto to prevent freeze on long content
             pdfDiv.style.minHeight = "295mm"; 
             pdfDiv.style.height = "auto"; 
             pdfDiv.style.padding = "20mm"; 
