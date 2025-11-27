@@ -142,6 +142,8 @@
                 const data = TABLE_DATA[currIdx];
                 filename = 'Report_' + data.title.substring(0, 10).replace(/[^a-z0-9]/gi, '_') + '.pdf';
                 const page = buildPdfPage(data, document.getElementById(data.id));
+                // FIX V150: remove page-break-after from single page download to avoid empty sheet
+                page.style.pageBreakAfter = "auto";
                 pdfContainer.appendChild(page);
             } else {
                 filename = 'Report_Completo.pdf';
@@ -167,6 +169,11 @@
                     const el1 = document.getElementById(data.id);
                     const page = buildPdfPage(data, el1, nextData, el2);
                     pdfContainer.appendChild(page);
+                }
+                
+                // FIX V150: Remove page-break from the very last page
+                if (pdfContainer.lastElementChild) {
+                    pdfContainer.lastElementChild.style.pageBreakAfter = "auto";
                 }
             }
 
