@@ -18,7 +18,7 @@
     #header-subtitle { margin-top: 5px; font-size: 16px; font-weight: 500; opacity: 0.9; }
     #menu-view { display: block; padding-bottom: 40px; padding-top: 20px; }
     
-    /* V155: Stile Menu Alternato */
+    /* V157: Stile Menu Alternato */
     .menu-item { padding: 3px 20px; border-bottom: none; font-size: 28px; color: #333; font-weight: 400; cursor: pointer; display: flex; justify-content: center; align-items: center; position: relative; }
     .menu-item:nth-child(odd) { background-color: #ffffff; }
     .menu-item:nth-child(even) { background-color: #f2f2f2; }
@@ -137,46 +137,69 @@
         function downloadPDF() {
             const pdfContainer = document.createElement('div');
             let filename = 'Report.pdf';
+            
+            // V157: SMART MOBILE MODE
+            var isMobile = window.innerWidth < 800; 
+
+            var opt = {
+                margin: 0, 
+                filename: filename,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 1.5, scrollY: 0 }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            if (isMobile) {
+                opt.html2canvas.scale = 0.9;
+                opt.html2canvas.width = 800;
+                opt.html2canvas.windowWidth = 800;
+            }
 
             if (currIdx !== -1) {
+                // SINGLE TABLE
                 const data = TABLE_DATA[currIdx];
                 filename = 'Report_' + data.title.substring(0, 10).replace(/[^a-z0-9]/gi, '_') + '.pdf';
+                opt.filename = filename;
                 const page = buildPdfPage(data, document.getElementById(data.id));
                 page.style.pageBreakAfter = "auto";
                 pdfContainer.appendChild(page);
             } else {
+                // FULL REPORT
                 filename = 'Report_Completo.pdf';
+                opt.filename = filename;
                 
-                // RESTORE DOUBLE TABLES LOGIC FOR PC
-                for(let i=0; i<TABLE_DATA.length; i++) {
-                    if (i >= 3 && i <= 15 && (i % 2 !== 0)) continue;
-
-                    const data = TABLE_DATA[i];
-                    let nextData = null;
-                    let el2 = null;
-
-                    if (i >= 2 && i < 16 && (i % 2 === 0)) {
-                        nextData = TABLE_DATA[i+1];
-                        el2 = document.getElementById(nextData.id);
+                if (isMobile) {
+                    // MOBILE MODE: 1 TABLE PER PAGE
+                    for(let i=0; i<TABLE_DATA.length; i++) {
+                        const data = TABLE_DATA[i];
+                        const el = document.getElementById(data.id);
+                        const page = buildPdfPage(data, el);
+                        pdfContainer.appendChild(page);
                     }
-                    
-                    const el1 = document.getElementById(data.id);
-                    const page = buildPdfPage(data, el1, nextData, el2);
-                    pdfContainer.appendChild(page);
+                } else {
+                    // PC MODE: 2 TABLES PER PAGE
+                    for(let i=0; i<TABLE_DATA.length; i++) {
+                        if (i >= 3 && i <= 15 && (i % 2 !== 0)) continue;
+
+                        const data = TABLE_DATA[i];
+                        let nextData = null;
+                        let el2 = null;
+
+                        if (i >= 2 && i < 16 && (i % 2 === 0)) {
+                            nextData = TABLE_DATA[i+1];
+                            el2 = document.getElementById(nextData.id);
+                        }
+                        
+                        const el1 = document.getElementById(data.id);
+                        const page = buildPdfPage(data, el1, nextData, el2);
+                        pdfContainer.appendChild(page);
+                    }
                 }
                 
                 if (pdfContainer.lastElementChild) {
                     pdfContainer.lastElementChild.style.pageBreakAfter = "auto";
                 }
             }
-
-            var opt = {
-                margin: 0, 
-                filename: filename,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 1.5, scrollY: 0 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
             
             html2pdf().from(pdfContainer).set(opt).save();
         }
@@ -255,7 +278,7 @@
                 } 
                 else if(!child.classList.contains('total-row-container') && !child.classList.contains('back-arrow')) {
                     if(clone.classList.contains('data-row')) {
-                        // V155: PDF Logic - 22px Standard, 15px Compact
+                        // V157: PDF Font 22px / 15px (Same as PC)
                         let finalPdfFont = "22px";
                         if (data.title.startsWith("1)") || 
                             data.title.startsWith("2)") || 
@@ -287,7 +310,7 @@
                 }
             });
             
-            // V146: Logic correction - ONLY restrict TOP 20 rows, show ALL for Activities
+            // Limit Top 20 but NOT Activities
             if(data.title.indexOf("TOP 20") !== -1) {
                  let newTotal = 0.0;
                  let rowCount = 0;
@@ -350,12 +373,9 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // V155: Click Listener on Header
+            // V157: NO BUTTON. Click Header to Download.
             document.querySelector('.header-box').addEventListener('click', () => { 
-                // Only allow PDF download on PC (width > 800px)
-                if (window.innerWidth >= 800) {
-                    startDownload();
-                }
+                startDownload();
             });
             
             document.addEventListener('keydown', e => {
@@ -392,7 +412,7 @@
     </div>
 
     <div class="main-container">
-        <div class="header-box" title="Clicca per scaricare PDF (Solo PC)">
+        <div class="header-box" title="Clicca per scaricare PDF">
             <div id="header-title">ANALISI DATI</div>
             <div id="header-subtitle">Aggiornato al: 21 Nov 2025</div>
         </div>
