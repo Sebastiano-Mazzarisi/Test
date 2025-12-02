@@ -13,37 +13,92 @@
     <style>
     body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; touch-action: pan-y; }
     .main-container { background-color: white; margin: 0 auto; width: 100%; max-width: 490px; min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; padding-bottom: 20px; }
+    
     .header-box { background-color: #1F497D; color: white; padding: 20px 15px; text-align: center; position: sticky; top: 0; z-index: 100; cursor: pointer; }
     #header-title { margin: 0; font-size: 26px; font-weight: 800; text-transform: uppercase; }
     #header-subtitle { margin-top: 5px; font-size: 16px; opacity: 0.9; }
+    
+    /* MENU PRINCIPALE - SPAZIATURA 3.5px */
     #menu-view { padding-bottom: 40px; padding-top: 20px; }
-    .menu-item { padding: 5px 20px; border-bottom: 1px solid #f0f0f0; font-size: 34px; color: #333; font-weight: 500; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .menu-item { 
+        padding: 3.5px 20px; 
+        border-bottom: 1px solid #f0f0f0; 
+        font-size: 34px; 
+        color: #333; 
+        font-weight: 500; 
+        cursor: pointer; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+    }
     .menu-item:hover { background-color: #cfcfcf; }
     .menu-item::after { content: '›'; font-size: 40px; color: #ccc; }
+    
     .detail-view { display: none; padding: 5px 10px; animation: fadeIn 0.3s; }
     @keyframes fadeIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
-    .header-row { display: flex; justify-content: space-between; background-color: #c0c4c9; padding: 8px 2px; font-size: 26px; font-weight: 700; color: #495057; border-radius: 4px; margin-bottom: 5px; align-items: flex-start; }
+
+    /* HEADER TABELLA */
+    .header-row { 
+        display: flex; 
+        justify-content: space-between; 
+        background-color: #c0c4c9; 
+        padding: 8px 2px; 
+        font-size: 26px; 
+        font-weight: 700; 
+        color: #495057; 
+        border-radius: 4px; 
+        margin-bottom: 5px; 
+        align-items: flex-start; 
+    }
     .euro-sub { font-size: 0.9em; font-weight: 400; margin-top: -6px; line-height: 1; } 
     .col-lbl { width: 13%; text-align: left; font-size: 26px; white-space: nowrap; overflow: hidden; font-weight:600; color: #555; padding-top:2px; }
     .col-val { width: 29%; text-align: center; font-size: 26px; line-height: 1.1; }
+    
+    /* DATI: Padding ridotto, linea grigia anche su giallo */
     .data-row-3col { display: flex; justify-content: space-between; padding: 0; border-bottom: none; align-items: stretch; font-size: 20px; }
+    
+    /* span con bordo di separazione esplicito */
     .data-row-3col span { padding: 2px 2px; border-bottom: 1px solid #bfbfbf; display: flex; align-items: center; justify-content: center; font-weight: 400; }
     .data-row-3col .col-lbl { justify-content: flex-start; font-weight: 500; }
-    .data-row { display: flex; justify-content: space-between; align-items: flex-end; padding: 6px 0; font-size: 20px; width: 100%; border-bottom: 1px dotted #eee; }
-    .row-label { text-align: left; font-weight: 500; color: #495057; white-space: nowrap; flex-shrink: 1; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
-    .row-dots { flex-grow: 1; margin: 0 6px 4px 6px; border-bottom: 1px dotted #ccc; }
-    .row-value { text-align: right; font-weight: 400; color: #000; white-space: nowrap; flex-shrink: 0; }
-    .total-row-container { position: relative; display: flex; justify-content: center; align-items: center; background-color: #f0f8ff; border-radius: 10px; padding: 10px; margin-bottom: 15px; margin-top: 10px; border: 1px solid #999; }
+
+    /* RIGO TOTALE - CORNICE GRIGIA COME GRAFICO */
+    .total-row-container { 
+        position: relative; 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        background-color: #f0f8ff; 
+        border-radius: 10px; 
+        padding: 10px; 
+        margin-bottom: 15px; 
+        margin-top: 10px; 
+        border: 1px solid #999; /* CORNICE GRIGIA */
+    }
     .back-arrow { position: absolute; left: 15px; font-size: 24px; cursor: pointer; }
     .total-value { font-size: 24px; font-weight: 600; color: #000; }
-    .chart-container { margin-top: 20px; padding: 15px 10px; background-color: #fafafa; border-radius: 8px; border: 1px solid #999; margin-bottom: 20px; }
+    
+    /* GRAFICO CON CORNICE */
+    .chart-container { 
+        margin-top: 20px; 
+        padding: 15px 10px; 
+        background-color: #fafafa; 
+        border-radius: 8px; 
+        border: 1px solid #999; 
+        margin-bottom: 20px; 
+    }
     .chart-title { text-align: center; font-weight: 700; font-size: 16px; margin-bottom: 15px; color: #666; text-transform: uppercase; }
     .chart-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 13px; width: 100%; }
+    
+    /* Label standard (70px) */
     .chart-lbl { width: 70px; text-align: right; padding-right: 8px; color: #555; font-weight: 500; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    
+    /* Label WIDE dimezzata da 220 a 110 */
     .chart-lbl-wide { width: 110px; text-align: right; padding-right: 8px; color: #555; font-weight: 500; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; }
+
     .chart-bar-area { flex-grow: 1; background-color: #e9ecef; height: 12px; border-radius: 6px; overflow: hidden; margin-right: 8px; }
     .chart-bar { height: 100%; border-radius: 6px; }
     .chart-val { width: 60px; text-align: left; font-weight: 400; color: #333; font-size: 12px; flex-shrink: 0; white-space: nowrap; }
+    
     .info-footer { margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; text-align: center; font-size: 11px; color: #999; }
     </style>
     <script>
@@ -53,7 +108,47 @@
         let currIdx = -1; 
         function loadTable(index) { currIdx = index; const data = TABLE_DATA[index]; document.getElementById('header-title').innerText = data.title; document.getElementById('header-subtitle').innerText = data.date; document.getElementById('menu-view').style.display = 'none'; const details = document.getElementsByClassName('detail-view'); for(let d of details) d.style.display = 'none'; const target = document.getElementById(data.id); if(target) { target.style.display = 'block'; window.scrollTo(0,0); } }
         function goHome() { currIdx = -1; const details = document.getElementsByClassName('detail-view'); for(let d of details) d.style.display = 'none'; document.getElementById('header-title').innerText = HOME_TITLE; document.getElementById('header-subtitle').innerText = HOME_SUBTITLE; document.getElementById('menu-view').style.display = 'block'; window.scrollTo(0,0); }
-        document.addEventListener('keydown', e => { if(e.key==="ArrowRight") { if(currIdx === -1) loadTable(0); else if (currIdx === TABLE_DATA.length - 1) goHome(); else loadTable(currIdx + 1); } if(e.key==="ArrowLeft") { if(currIdx === -1) loadTable(TABLE_DATA.length - 1); else if (currIdx === 0) goHome(); else loadTable(currIdx - 1); } if(e.key==="Backspace" && currIdx!==-1) goHome(); });
+        
+        // GESTIONE KEYBOARD
+        document.addEventListener('keydown', e => { 
+            if(e.key==="ArrowRight") { if(currIdx === -1) loadTable(0); else if (currIdx === TABLE_DATA.length - 1) goHome(); else loadTable(currIdx + 1); } 
+            if(e.key==="ArrowLeft") { if(currIdx === -1) loadTable(TABLE_DATA.length - 1); else if (currIdx === 0) goHome(); else loadTable(currIdx - 1); } 
+            if(e.key==="Backspace" && currIdx!==-1) goHome(); 
+        });
+
+        // GESTIONE SWIPE TOUCH
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+        
+        function handleSwipe() {
+            const threshold = 50; 
+            const distance = touchEndX - touchStartX;
+            
+            if (Math.abs(distance) < threshold) return; 
+            
+            // SWIPE LEFT (Dito da destra a sinistra) -> VAI AVANTI
+            if (distance < 0) {
+                if(currIdx === -1) loadTable(0); 
+                else if (currIdx === TABLE_DATA.length - 1) goHome(); 
+                else loadTable(currIdx + 1);
+            }
+            
+            // SWIPE RIGHT (Dito da sinistra a destra) -> VAI INDIETRO
+            if (distance > 0) {
+                if(currIdx === -1) loadTable(TABLE_DATA.length - 1);
+                else if (currIdx === 0) goHome(); 
+                else loadTable(currIdx - 1);
+            }
+        }
     </script>
 </head>
 <body>
