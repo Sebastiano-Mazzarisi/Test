@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="JoyFit Report">
+    <link rel="apple-touch-icon" href="https://sebastiano-mazzarisi.github.io/Test/JoyFit.jpg">
+    <link rel="icon" type="image/jpeg" href="https://sebastiano-mazzarisi.github.io/Test/JoyFit.jpg">
+    <title>Analisi Dati</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+    body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; touch-action: pan-y; }
+    .main-container { background-color: white; margin: 0 auto; width: 100%; max-width: 490px; min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; padding-bottom: 20px; }
+    .header-box { background-color: #1F497D; color: white; padding: 20px 15px; text-align: center; position: sticky; top: 0; z-index: 100; cursor: pointer; }
+    #header-title { margin: 0; font-size: 26px; font-weight: 800; text-transform: uppercase; }
+    #header-subtitle { margin-top: 5px; font-size: 16px; opacity: 0.9; }
+    #menu-view { padding-bottom: 40px; padding-top: 20px; }
+    .menu-item { padding: 5px 20px; border-bottom: 1px solid #f0f0f0; font-size: 34px; color: #333; font-weight: 500; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .menu-item:hover { background-color: #cfcfcf; }
+    .menu-item::after { content: '›'; font-size: 40px; color: #ccc; }
+    .detail-view { display: none; padding: 5px 10px; animation: fadeIn 0.3s; }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+    .header-row { display: flex; justify-content: space-between; background-color: #c0c4c9; padding: 8px 2px; font-size: 26px; font-weight: 700; color: #495057; border-radius: 4px; margin-bottom: 5px; align-items: flex-start; }
+    .euro-sub { font-size: 0.9em; font-weight: 400; margin-top: -6px; line-height: 1; } 
+    .col-lbl { width: 13%; text-align: left; font-size: 26px; white-space: nowrap; overflow: hidden; font-weight:600; color: #555; padding-top:2px; }
+    .col-val { width: 29%; text-align: center; font-size: 26px; line-height: 1.1; }
+    .data-row-3col { display: flex; justify-content: space-between; padding: 0; border-bottom: none; align-items: stretch; font-size: 20px; }
+    .data-row-3col span { padding: 2px 2px; border-bottom: 1px solid #bfbfbf; display: flex; align-items: center; justify-content: center; font-weight: 400; }
+    .data-row-3col .col-lbl { justify-content: flex-start; font-weight: 500; }
+    .data-row { display: flex; justify-content: space-between; align-items: flex-end; padding: 6px 0; font-size: 20px; width: 100%; border-bottom: 1px dotted #eee; }
+    .row-label { text-align: left; font-weight: 500; color: #495057; white-space: nowrap; flex-shrink: 1; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
+    .row-dots { flex-grow: 1; margin: 0 6px 4px 6px; border-bottom: 1px dotted #ccc; }
+    .row-value { text-align: right; font-weight: 400; color: #000; white-space: nowrap; flex-shrink: 0; }
+    .total-row-container { position: relative; display: flex; justify-content: center; align-items: center; background-color: #f0f8ff; border-radius: 10px; padding: 10px; margin-bottom: 15px; margin-top: 10px; border: 1px solid #999; }
+    .back-arrow { position: absolute; left: 15px; font-size: 24px; cursor: pointer; }
+    .total-value { font-size: 24px; font-weight: 600; color: #000; }
+    .chart-container { margin-top: 20px; padding: 15px 10px; background-color: #fafafa; border-radius: 8px; border: 1px solid #999; margin-bottom: 20px; }
+    .chart-title { text-align: center; font-weight: 700; font-size: 16px; margin-bottom: 15px; color: #666; text-transform: uppercase; }
+    .chart-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 13px; width: 100%; }
+    .chart-lbl { width: 70px; text-align: right; padding-right: 8px; color: #555; font-weight: 500; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .chart-lbl-wide { width: 110px; text-align: right; padding-right: 8px; color: #555; font-weight: 500; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; }
+    .chart-bar-area { flex-grow: 1; background-color: #e9ecef; height: 12px; border-radius: 6px; overflow: hidden; margin-right: 8px; }
+    .chart-bar { height: 100%; border-radius: 6px; }
+    .chart-val { width: 60px; text-align: left; font-weight: 400; color: #333; font-size: 12px; flex-shrink: 0; white-space: nowrap; }
+    .info-footer { margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; text-align: center; font-size: 11px; color: #999; }
+    </style>
+    <script>
+        const TABLE_DATA = [{"id": "tab_0", "title": "1. Riepilogo", "date": ""}, {"id": "tab_1", "title": "2. Contanti", "date": ""}, {"id": "tab_2", "title": "3. POS", "date": ""}, {"id": "tab_3", "title": "4. Entrate X", "date": ""}, {"id": "tab_4", "title": "5. Clienti", "date": ""}, {"id": "tab_5", "title": "6. Media Spesa", "date": ""}, {"id": "tab_6", "title": "7. Operatori", "date": ""}, {"id": "tab_7", "title": "8. Giorni", "date": ""}, {"id": "tab_8", "title": "9. Top Clienti", "date": ""}, {"id": "tab_9", "title": "10. Top Attivit\u00e0", "date": ""}];
+        const HOME_TITLE = "ANALISI DATI";
+        const HOME_SUBTITLE = "Aggiornato al: 28/11/2025";
+        let currIdx = -1; 
+        function loadTable(index) { currIdx = index; const data = TABLE_DATA[index]; document.getElementById('header-title').innerText = data.title; document.getElementById('header-subtitle').innerText = data.date; document.getElementById('menu-view').style.display = 'none'; const details = document.getElementsByClassName('detail-view'); for(let d of details) d.style.display = 'none'; const target = document.getElementById(data.id); if(target) { target.style.display = 'block'; window.scrollTo(0,0); } }
+        function goHome() { currIdx = -1; const details = document.getElementsByClassName('detail-view'); for(let d of details) d.style.display = 'none'; document.getElementById('header-title').innerText = HOME_TITLE; document.getElementById('header-subtitle').innerText = HOME_SUBTITLE; document.getElementById('menu-view').style.display = 'block'; window.scrollTo(0,0); }
+        document.addEventListener('keydown', e => { if(e.key==="ArrowRight") { if(currIdx === -1) loadTable(0); else if (currIdx === TABLE_DATA.length - 1) goHome(); else loadTable(currIdx + 1); } if(e.key==="ArrowLeft") { if(currIdx === -1) loadTable(TABLE_DATA.length - 1); else if (currIdx === 0) goHome(); else loadTable(currIdx - 1); } if(e.key==="Backspace" && currIdx!==-1) goHome(); });
+    </script>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header-box" onclick="window.location.href='JF-Excel.pdf'">
+            <div id="header-title">ANALISI DATI</div>
+            <div id="header-subtitle">Aggiornato al: 28/11/2025</div>
+        </div>
+        <div id="menu-view"><div class="menu-item" onclick="loadTable(0)">1. Riepilogo</div><div class="menu-item" onclick="loadTable(1)">2. Contanti</div><div class="menu-item" onclick="loadTable(2)">3. POS</div><div class="menu-item" onclick="loadTable(3)">4. Entrate X</div><div class="menu-item" onclick="loadTable(4)">5. Clienti</div><div class="menu-item" onclick="loadTable(5)">6. Media Spesa</div><div class="menu-item" onclick="loadTable(6)">7. Operatori</div><div class="menu-item" onclick="loadTable(7)">8. Giorni</div><div class="menu-item" onclick="loadTable(8)">9. Top Clienti</div><div class="menu-item" onclick="loadTable(9)">10. Top Attività</div></div>
+        
+        <div id="tab_0" class="detail-view">
+            <div class="total-row-container">
+                <div class="back-arrow" onclick="goHome()">⬅️</div>
+                <div class="total-value"><b style="color:#800000">Σ 2025-26</b>: 116.403 €</div>
+            </div>
+            
+        <div class="header-row">
+            <span class="col-lbl"></span>
+            <span class="col-val">2024-25<div class="euro-sub">(€)</div></span>
+            <span class="col-val">2025-26<div class="euro-sub">(€)</div></span>
+            <span class="col-val">Previsto<div class="euro-sub">(€)</div></span>
+        </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Set</span>
+                <span class="col-val">30.997</span>
+                <span class="col-val" style="font-weight:bold;">41.316</span>
+                <span class="col-val" style="">41.316</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Ott</span>
+                <span class="col-val">33.138</span>
+                <span class="col-val" style="font-weight:bold;">41.202</span>
+                <span class="col-val" style="">41.202</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Nov</span>
+                <span class="col-val">31.575</span>
+                <span class="col-val" style="font-weight:bold;">33.885</span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">33.935</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Dic</span>
+                <span class="col-val">23.376</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">30.413</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Gen</span>
+                <span class="col-val">32.400</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">40.473</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Feb</span>
+                <span class="col-val">26.390</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">29.481</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Mar</span>
+                <span class="col-val">28.694</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">28.787</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Apr</span>
+                <span class="col-val">25.342</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">26.615</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Mag</span>
+                <span class="col-val">23.493</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">25.467</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Giu</span>
+                <span class="col-val">18.397</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">19.904</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Lug</span>
+                <span class="col-val">12.570</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">13.470</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Ago</span>
+                <span class="col-val">13.400</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">11.080</span>
+            </div>
+            <div class="chart-container"><div class="chart-title">Analisi Grafica</div>
+        <div class="chart-row">
+            <div class="chart-lbl">2024-25</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:87.61599682004308%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">299.772 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl">2025-26</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:34.021739448125494%; background-color: #dc3545;"></div></div>
+            <div class="chart-val">116.403 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl">Previsto</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #ffc107;"></div></div>
+            <div class="chart-val">342.143 €</div>
+        </div></div>
+            <div class="info-footer">1. Riepilogo</div>
+        </div>
+        <div id="tab_1" class="detail-view">
+            <div class="total-row-container">
+                <div class="back-arrow" onclick="goHome()">⬅️</div>
+                <div class="total-value"><b style="color:#800000">Σ 2025-26</b>: 40.781 €</div>
+            </div>
+            
+        <div class="header-row">
+            <span class="col-lbl"></span>
+            <span class="col-val">2024-25<div class="euro-sub">(€)</div></span>
+            <span class="col-val">2025-26<div class="euro-sub">(€)</div></span>
+            <span class="col-val">Previsto<div class="euro-sub">(€)</div></span>
+        </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Set</span>
+                <span class="col-val">10.772</span>
+                <span class="col-val" style="font-weight:bold;">14.498</span>
+                <span class="col-val" style="">14.498</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Ott</span>
+                <span class="col-val">11.775</span>
+                <span class="col-val" style="font-weight:bold;">13.853</span>
+                <span class="col-val" style="">13.853</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Nov</span>
+                <span class="col-val">11.211</span>
+                <span class="col-val" style="font-weight:bold;">12.430</span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">12.480</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Dic</span>
+                <span class="col-val">9.096</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">11.864</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Gen</span>
+                <span class="col-val">13.328</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">15.824</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Feb</span>
+                <span class="col-val">10.300</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">11.565</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Mar</span>
+                <span class="col-val">12.705</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">13.047</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Apr</span>
+                <span class="col-val">9.325</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">10.639</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Mag</span>
+                <span class="col-val">12.245</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">12.145</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Giu</span>
+                <span class="col-val">8.154</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">8.452</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Lug</span>
+                <span class="col-val">6.345</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">6.523</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Ago</span>
+                <span class="col-val">3.876</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">3.818</span>
+            </div>
+            <div class="chart-container"><div class="chart-title">Analisi Grafica</div>
+        <div class="chart-row">
+            <div class="chart-lbl">2024-25</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:88.43721234076669%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">119.132 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl">2025-26</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:30.273628886183452%; background-color: #dc3545;"></div></div>
+            <div class="chart-val">40.781 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl">Previsto</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #ffc107;"></div></div>
+            <div class="chart-val">134.708 €</div>
+        </div></div>
+            <div class="info-footer">2. Contanti</div>
+        </div>
+        <div id="tab_2" class="detail-view">
+            <div class="total-row-container">
+                <div class="back-arrow" onclick="goHome()">⬅️</div>
+                <div class="total-value"><b style="color:#800000">Σ 2025-26</b>: 75.622 €</div>
+            </div>
+            
+        <div class="header-row">
+            <span class="col-lbl"></span>
+            <span class="col-val">2024-25<div class="euro-sub">(€)</div></span>
+            <span class="col-val">2025-26<div class="euro-sub">(€)</div></span>
+            <span class="col-val">Previsto<div class="euro-sub">(€)</div></span>
+        </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Set</span>
+                <span class="col-val">20.225</span>
+                <span class="col-val" style="font-weight:bold;">26.818</span>
+                <span class="col-val" style="">26.818</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Ott</span>
+                <span class="col-val">21.363</span>
+                <span class="col-val" style="font-weight:bold;">27.349</span>
+                <span class="col-val" style="">27.349</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Nov</span>
+                <span class="col-val">20.364</span>
+                <span class="col-val" style="font-weight:bold;">21.455</span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">21.505</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Dic</span>
+                <span class="col-val">14.280</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">18.548</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Gen</span>
+                <span class="col-val">19.072</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">24.649</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Feb</span>
+                <span class="col-val">16.090</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">17.915</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Mar</span>
+                <span class="col-val">15.989</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">15.740</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Apr</span>
+                <span class="col-val">16.017</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">15.976</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Mag</span>
+                <span class="col-val">11.248</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">13.321</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Giu</span>
+                <span class="col-val">10.243</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">11.452</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Lug</span>
+                <span class="col-val">6.225</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">6.946</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Ago</span>
+                <span class="col-val">9.524</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">7.261</span>
+            </div>
+            <div class="chart-container"><div class="chart-title">Analisi Grafica</div>
+        <div class="chart-row">
+            <div class="chart-lbl">2024-25</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:87.06381337960285%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">180.640 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl">2025-26</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:36.447850395218815%; background-color: #dc3545;"></div></div>
+            <div class="chart-val">75.622 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl">Previsto</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #ffc107;"></div></div>
+            <div class="chart-val">207.480 €</div>
+        </div></div>
+            <div class="info-footer">3. POS</div>
+        </div>
+        <div id="tab_3" class="detail-view">
+            <div class="total-row-container">
+                <div class="back-arrow" onclick="goHome()">⬅️</div>
+                <div class="total-value"><b style="color:#800000">Σ 2025-26</b>: 5.095 €</div>
+            </div>
+            
+        <div class="header-row">
+            <span class="col-lbl"></span>
+            <span class="col-val">2024-25<div class="euro-sub">(€)</div></span>
+            <span class="col-val">2025-26<div class="euro-sub">(€)</div></span>
+            <span class="col-val">Previsto<div class="euro-sub">(€)</div></span>
+        </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Set</span>
+                <span class="col-val">985</span>
+                <span class="col-val" style="font-weight:bold;">2.601</span>
+                <span class="col-val" style="">2.601</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Ott</span>
+                <span class="col-val">1.258</span>
+                <span class="col-val" style="font-weight:bold;">1.133</span>
+                <span class="col-val" style="">1.133</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Nov</span>
+                <span class="col-val">1.241</span>
+                <span class="col-val" style="font-weight:bold;">1.361</span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">1.373</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Dic</span>
+                <span class="col-val">764</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">1.624</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Gen</span>
+                <span class="col-val">995</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">2.095</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Feb</span>
+                <span class="col-val">664</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">1.365</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Mar</span>
+                <span class="col-val">1.245</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">1.317</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Apr</span>
+                <span class="col-val">1.834</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">1.983</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Mag</span>
+                <span class="col-val">833</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">2.027</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Giu</span>
+                <span class="col-val">751</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">1.287</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Lug</span>
+                <span class="col-val">510</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">1.074</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Ago</span>
+                <span class="col-val">1.016</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">1.055</span>
+            </div>
+            <div class="chart-container"><div class="chart-title">Analisi Grafica</div>
+        <div class="chart-row">
+            <div class="chart-lbl">2024-25</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:63.88507446920884%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">12.096 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl">2025-26</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:26.909263758318367%; background-color: #dc3545;"></div></div>
+            <div class="chart-val">5.095 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl">Previsto</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #ffc107;"></div></div>
+            <div class="chart-val">18.934 €</div>
+        </div></div>
+            <div class="info-footer">4. Entrate X</div>
+        </div>
+        <div id="tab_4" class="detail-view">
+            <div class="total-row-container">
+                <div class="back-arrow" onclick="goHome()">⬅️</div>
+                <div class="total-value"><b style="color:#800000">Σ 2025-26</b>: 667</div>
+            </div>
+            
+        <div class="header-row">
+            <span class="col-lbl"></span>
+            <span class="col-val">2024-25<div class="euro-sub">&nbsp;</div></span>
+            <span class="col-val">2025-26<div class="euro-sub">&nbsp;</div></span>
+            <span class="col-val">Previsto<div class="euro-sub">&nbsp;</div></span>
+        </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Set</span>
+                <span class="col-val">258</span>
+                <span class="col-val" style="font-weight:bold;">328</span>
+                <span class="col-val" style="">328</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Ott</span>
+                <span class="col-val">317</span>
+                <span class="col-val" style="font-weight:bold;">367</span>
+                <span class="col-val" style="">367</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Nov</span>
+                <span class="col-val">319</span>
+                <span class="col-val" style="font-weight:bold;">317</span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">319</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Dic</span>
+                <span class="col-val">267</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">316</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Gen</span>
+                <span class="col-val">367</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">421</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Feb</span>
+                <span class="col-val">302</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">343</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Mar</span>
+                <span class="col-val">316</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">328</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Apr</span>
+                <span class="col-val">292</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">327</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Mag</span>
+                <span class="col-val">297</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">317</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Giu</span>
+                <span class="col-val">220</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">235</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Lug</span>
+                <span class="col-val">153</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">164</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Ago</span>
+                <span class="col-val">112</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">99</span>
+            </div>
+            <div class="chart-container"><div class="chart-title">Analisi Grafica</div>
+        <div class="chart-row">
+            <div class="chart-lbl">2024-25</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:90.05947323704333%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">1.060</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl">2025-26</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:56.6694987255735%; background-color: #dc3545;"></div></div>
+            <div class="chart-val">667</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl">Previsto</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #ffc107;"></div></div>
+            <div class="chart-val">1.177</div>
+        </div></div>
+            <div class="info-footer">5. Clienti</div>
+        </div>
+        <div id="tab_5" class="detail-view">
+            <div class="total-row-container">
+                <div class="back-arrow" onclick="goHome()">⬅️</div>
+                <div class="total-value"><b style="color:#800000">µ 2025-26</b>: 175 €</div>
+            </div>
+            
+        <div class="header-row">
+            <span class="col-lbl"></span>
+            <span class="col-val">2024-25<div class="euro-sub">(€)</div></span>
+            <span class="col-val">2025-26<div class="euro-sub">(€)</div></span>
+            <span class="col-val">Previsto<div class="euro-sub">(€)</div></span>
+        </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Set</span>
+                <span class="col-val">120</span>
+                <span class="col-val" style="font-weight:bold;">126</span>
+                <span class="col-val" style="">126</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Ott</span>
+                <span class="col-val">105</span>
+                <span class="col-val" style="font-weight:bold;">112</span>
+                <span class="col-val" style="">112</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Nov</span>
+                <span class="col-val">99</span>
+                <span class="col-val" style="font-weight:bold;">107</span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">106</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Dic</span>
+                <span class="col-val">88</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">96</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Gen</span>
+                <span class="col-val">88</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">96</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Feb</span>
+                <span class="col-val">87</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">86</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Mar</span>
+                <span class="col-val">91</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">88</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Apr</span>
+                <span class="col-val">87</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">81</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Mag</span>
+                <span class="col-val">79</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">80</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Giu</span>
+                <span class="col-val">84</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">85</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Lug</span>
+                <span class="col-val">82</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">82</span>
+            </div>
+            <div class="data-row-3col">
+                <span class="col-lbl">Ago</span>
+                <span class="col-val">120</span>
+                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">112</span>
+            </div>
+            <div class="chart-container"><div class="chart-title">Analisi Grafica</div>
+        <div class="chart-row">
+            <div class="chart-lbl">2024-25</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:97.28681911055729%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">283 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl">2025-26</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:60.03536331400856%; background-color: #dc3545;"></div></div>
+            <div class="chart-val">175 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl">Previsto</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #ffc107;"></div></div>
+            <div class="chart-val">291 €</div>
+        </div></div>
+            <div class="info-footer">6. Media Spesa</div>
+        </div>
+        <div id="tab_6" class="detail-view">
+            <div class="total-row-container">
+                <div class="back-arrow" onclick="goHome()">⬅️</div>
+                <div class="total-value"><b style="color:#800000">Σ Totale</b>: 1.060.296 €</div>
+            </div>
+            
+            <div class="chart-container">
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Marica</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
+            <div class="chart-val">713.665 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Sabina</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:47.79399297989953%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">341.089 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Altri</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:1%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">5.542 €</div>
+        </div></div>
+            <div class="info-footer">7. Operatori</div>
+        </div>
+        <div id="tab_7" class="detail-view">
+            <div class="total-row-container">
+                <div class="back-arrow" onclick="goHome()">⬅️</div>
+                <div class="total-value"><b style="color:#800000">Σ Totale</b>: 1.060.296 €</div>
+            </div>
+            
+            <div class="chart-container">
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Lun</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
+            <div class="chart-val">272.750 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Mar</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:81.71842346471128%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">222.887 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Ven</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:74.22988084326306%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">202.462 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Gio</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:66.30284142988084%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">180.841 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Mer</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:51.892942254812105%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">141.538 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Sab</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:14.598716773602199%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">39.818 €</div>
+        </div></div>
+            <div class="info-footer">8. Giorni</div>
+        </div>
+        <div id="tab_8" class="detail-view">
+            <div class="total-row-container">
+                <div class="back-arrow" onclick="goHome()">⬅️</div>
+                <div class="total-value"><b style="color:#800000">Σ Totale</b>: 186.793 €</div>
+            </div>
+            
+            <div class="chart-container">
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Bianco</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
+            <div class="chart-val">24.134 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Campanella</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:94.31507416922184%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">22.762 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Sportelli</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:86.67025772768709%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">20.917 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Intini</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:81.08892019557472%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">19.570 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Vinella</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:79.03372835004558%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">19.074 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Laera</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:71.26046241816525%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">17.198 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Delfine</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:70.23701002734731%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">16.951 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Netti</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:67.24537996187951%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">16.229 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Polignano</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:64.01756857545372%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">15.450 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Castellana</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:60.114361481727016%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">14.508 €</div>
+        </div></div>
+            <div class="info-footer">9. Top Clienti</div>
+        </div>
+        <div id="tab_9" class="detail-view">
+            <div class="total-row-container">
+                <div class="back-arrow" onclick="goHome()">⬅️</div>
+                <div class="total-value"><b style="color:#800000">Σ Totale</b>: 901.233 €</div>
+            </div>
+            
+            <div class="chart-container">
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Fitness</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
+            <div class="chart-val">473.791 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Rieducazione</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:24.777380743830086%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">117.393 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Personal</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:17.286736134709184%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">81.903 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Pilates</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:8.965134415807814%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">42.476 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Bodysculpt</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:8.479688301381833%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">40.176 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Calisthenics</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:8.067270167647761%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">38.222 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Funzionale</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:7.731468094581788%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">36.631 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">KravMaga</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:5.438051799211045%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">25.765 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">Postural</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:5.001361359755673%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">23.696 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl-wide">SlowFit</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:4.470325523279252%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">21.180 €</div>
+        </div></div>
+            <div class="info-footer">10. Top Attività</div>
+        </div>
+    </div>
+</body>
+</html>
