@@ -16,11 +16,9 @@
     .header-box { background-color: #1F497D; color: white; padding: 20px 15px; text-align: center; position: sticky; top: 0; z-index: 100; cursor: pointer; }
     #header-title { margin: 0; font-size: 26px; font-weight: 800; text-transform: uppercase; }
     #header-subtitle { margin-top: 5px; font-size: 16px; opacity: 0.9; }
-    
-    /* MENU PRINCIPALE */
     #menu-view { padding-bottom: 40px; padding-top: 20px; }
     .menu-item { 
-        padding: 3.5px 20px; 
+        padding: 3px 20px; 
         border-bottom: 1px solid #f0f0f0; 
         font-size: 34px; 
         color: #333; 
@@ -30,30 +28,16 @@
         justify-content: space-between; 
         align-items: center; 
     }
-    .menu-item:hover, .menu-item.selected { background-color: #cfcfcf; } /* Focus/Hover */
+    .menu-item:hover { background-color: #cfcfcf; }
+    .menu-item.selected { background-color: #cfcfcf; }
     .menu-item::after { content: '›'; font-size: 40px; color: #ccc; }
     
     .detail-view { display: none; padding: 5px 10px; animation: fadeIn 0.3s; }
     @keyframes fadeIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
-    
-    /* HEADER TABELLA */
-    .header-row { 
-        display: flex; 
-        justify-content: space-between; 
-        background-color: #c0c4c9; 
-        padding: 8px 2px; 
-        font-size: 26px; 
-        font-weight: 700; 
-        color: #495057; 
-        border-radius: 4px; 
-        margin-bottom: 5px; 
-        align-items: flex-start; 
-    }
+    .header-row { display: flex; justify-content: space-between; background-color: #c0c4c9; padding: 8px 2px; font-size: 26px; font-weight: 700; color: #495057; border-radius: 4px; margin-bottom: 5px; align-items: flex-start; }
     .euro-sub { font-size: 0.9em; font-weight: 400; margin-top: -6px; line-height: 1; } 
     .col-lbl { width: 13%; text-align: left; font-size: 26px; white-space: nowrap; overflow: hidden; font-weight:600; color: #555; padding-top:2px; }
     .col-val { width: 29%; text-align: center; font-size: 26px; line-height: 1.1; }
-    
-    /* DATI */
     .data-row-3col { display: flex; justify-content: space-between; padding: 0; border-bottom: none; align-items: stretch; font-size: 20px; }
     .data-row-3col span { padding: 2px 2px; border-bottom: 1px solid #bfbfbf; display: flex; align-items: center; justify-content: center; font-weight: 400; }
     .data-row-3col .col-lbl { justify-content: flex-start; font-weight: 500; }
@@ -115,6 +99,7 @@
             document.getElementById('header-subtitle').innerText = HOME_SUBTITLE; 
             document.getElementById('menu-view').style.display = 'block'; 
             window.scrollTo(0,0); 
+            menuIdx = 0; // RESET FOCUS ALLA PRIMA VOCE
             updateMenuFocus(); 
         }
 
@@ -134,7 +119,7 @@
                     loadTable(menuIdx);
                 }
                 if(e.key === "ArrowLeft") {
-                    // Circular backwards from menu -> Last Table
+                    // Naviga circolare all'indietro: Home -> Ultima Tabella (Top Attività)
                     loadTable(totalItems - 1);
                 }
             } else {
@@ -143,14 +128,13 @@
                     else loadTable(currIdx + 1);
                 } 
                 if(e.key === "ArrowLeft") {
-                    if(currIdx === 0) goHome();
+                    if (currIdx === 0) goHome();
                     else loadTable(currIdx - 1);
                 } 
                 if(e.key === "Backspace") goHome(); 
             }
         });
 
-        // TOUCH SUPPORT
         let touchStartX = 0; let touchEndX = 0;
         document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
         document.addEventListener('touchend', e => { 
@@ -159,10 +143,11 @@
             if (Math.abs(dist) < 50) return;
             
             if (currIdx === -1) {
-                // Menu mode swipe
-                if (dist < 0) loadTable(menuIdx); // Left swipe -> Enter
+                // Swipe nel menu
+                if (dist < 0) loadTable(menuIdx); // Left swipe -> Enter selected item
+                if (dist > 0) loadTable(totalItems - 1); // Right swipe -> Go to Last Table (Circular Back)
             } else {
-                // Table mode swipe
+                // Swipe nelle tabelle
                 if (dist < 0) { if(currIdx < TABLE_DATA.length - 1) loadTable(currIdx + 1); else goHome(); } 
                 if (dist > 0) { if(currIdx === 0) goHome(); else loadTable(currIdx - 1); }
             }
