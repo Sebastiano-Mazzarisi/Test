@@ -13,12 +13,11 @@
     <style>
     body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; touch-action: pan-y; }
     .main-container { background-color: white; margin: 0 auto; width: 100%; max-width: 490px; min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; padding-bottom: 20px; }
-    
     .header-box { background-color: #1F497D; color: white; padding: 20px 15px; text-align: center; position: sticky; top: 0; z-index: 100; cursor: pointer; }
     #header-title { margin: 0; font-size: 26px; font-weight: 800; text-transform: uppercase; }
     #header-subtitle { margin-top: 5px; font-size: 16px; opacity: 0.9; }
     
-    /* MENU PRINCIPALE - SPAZIATURA 3.5px */
+    /* MENU PRINCIPALE */
     #menu-view { padding-bottom: 40px; padding-top: 20px; }
     .menu-item { 
         padding: 3.5px 20px; 
@@ -31,12 +30,12 @@
         justify-content: space-between; 
         align-items: center; 
     }
-    .menu-item:hover { background-color: #cfcfcf; }
+    .menu-item:hover, .menu-item.selected { background-color: #cfcfcf; } /* Focus/Hover */
     .menu-item::after { content: '›'; font-size: 40px; color: #ccc; }
     
     .detail-view { display: none; padding: 5px 10px; animation: fadeIn 0.3s; }
     @keyframes fadeIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
-
+    
     /* HEADER TABELLA */
     .header-row { 
         display: flex; 
@@ -54,51 +53,25 @@
     .col-lbl { width: 13%; text-align: left; font-size: 26px; white-space: nowrap; overflow: hidden; font-weight:600; color: #555; padding-top:2px; }
     .col-val { width: 29%; text-align: center; font-size: 26px; line-height: 1.1; }
     
-    /* DATI: Padding ridotto, linea grigia anche su giallo */
+    /* DATI */
     .data-row-3col { display: flex; justify-content: space-between; padding: 0; border-bottom: none; align-items: stretch; font-size: 20px; }
-    
-    /* span con bordo di separazione esplicito */
     .data-row-3col span { padding: 2px 2px; border-bottom: 1px solid #bfbfbf; display: flex; align-items: center; justify-content: center; font-weight: 400; }
     .data-row-3col .col-lbl { justify-content: flex-start; font-weight: 500; }
-
-    /* RIGO TOTALE - CORNICE GRIGIA COME GRAFICO */
-    .total-row-container { 
-        position: relative; 
-        display: flex; 
-        justify-content: center; 
-        align-items: center; 
-        background-color: #f0f8ff; 
-        border-radius: 10px; 
-        padding: 10px; 
-        margin-bottom: 15px; 
-        margin-top: 10px; 
-        border: 1px solid #999; /* CORNICE GRIGIA */
-    }
+    .data-row { display: flex; justify-content: space-between; align-items: flex-end; padding: 6px 0; font-size: 20px; width: 100%; border-bottom: 1px dotted #eee; }
+    .row-label { text-align: left; font-weight: 500; color: #495057; white-space: nowrap; flex-shrink: 1; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
+    .row-dots { flex-grow: 1; margin: 0 6px 4px 6px; border-bottom: 1px dotted #ccc; }
+    .row-value { text-align: right; font-weight: 400; color: #000; white-space: nowrap; flex-shrink: 0; }
+    .total-row-container { position: relative; display: flex; justify-content: center; align-items: center; background-color: #f0f8ff; border-radius: 10px; padding: 10px; margin-bottom: 15px; margin-top: 10px; border: 1px solid #999; }
     .back-arrow { position: absolute; left: 15px; font-size: 24px; cursor: pointer; }
     .total-value { font-size: 24px; font-weight: 600; color: #000; }
-    
-    /* GRAFICO CON CORNICE */
-    .chart-container { 
-        margin-top: 20px; 
-        padding: 15px 10px; 
-        background-color: #fafafa; 
-        border-radius: 8px; 
-        border: 1px solid #999; 
-        margin-bottom: 20px; 
-    }
+    .chart-container { margin-top: 20px; padding: 15px 10px; background-color: #fafafa; border-radius: 8px; border: 1px solid #999; margin-bottom: 20px; }
     .chart-title { text-align: center; font-weight: 700; font-size: 16px; margin-bottom: 15px; color: #666; text-transform: uppercase; }
     .chart-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 13px; width: 100%; }
-    
-    /* Label standard (70px) */
     .chart-lbl { width: 70px; text-align: right; padding-right: 8px; color: #555; font-weight: 500; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    
-    /* Label WIDE dimezzata da 220 a 110 */
     .chart-lbl-wide { width: 110px; text-align: right; padding-right: 8px; color: #555; font-weight: 500; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; }
-
     .chart-bar-area { flex-grow: 1; background-color: #e9ecef; height: 12px; border-radius: 6px; overflow: hidden; margin-right: 8px; }
     .chart-bar { height: 100%; border-radius: 6px; }
     .chart-val { width: 60px; text-align: left; font-weight: 400; color: #333; font-size: 12px; flex-shrink: 0; white-space: nowrap; }
-    
     .info-footer { margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; text-align: center; font-size: 11px; color: #999; }
     </style>
     <script>
@@ -106,49 +79,96 @@
         const HOME_TITLE = "ANALISI DATI";
         const HOME_SUBTITLE = "Aggiornato al: 28/11/2025";
         let currIdx = -1; 
-        function loadTable(index) { currIdx = index; const data = TABLE_DATA[index]; document.getElementById('header-title').innerText = data.title; document.getElementById('header-subtitle').innerText = data.date; document.getElementById('menu-view').style.display = 'none'; const details = document.getElementsByClassName('detail-view'); for(let d of details) d.style.display = 'none'; const target = document.getElementById(data.id); if(target) { target.style.display = 'block'; window.scrollTo(0,0); } }
-        function goHome() { currIdx = -1; const details = document.getElementsByClassName('detail-view'); for(let d of details) d.style.display = 'none'; document.getElementById('header-title').innerText = HOME_TITLE; document.getElementById('header-subtitle').innerText = HOME_SUBTITLE; document.getElementById('menu-view').style.display = 'block'; window.scrollTo(0,0); }
-        
-        // GESTIONE KEYBOARD
-        document.addEventListener('keydown', e => { 
-            if(e.key==="ArrowRight") { if(currIdx === -1) loadTable(0); else if (currIdx === TABLE_DATA.length - 1) goHome(); else loadTable(currIdx + 1); } 
-            if(e.key==="ArrowLeft") { if(currIdx === -1) loadTable(TABLE_DATA.length - 1); else if (currIdx === 0) goHome(); else loadTable(currIdx - 1); } 
-            if(e.key==="Backspace" && currIdx!==-1) goHome(); 
-        });
+        let menuIdx = 0; 
+        const totalItems = 10;
 
-        // GESTIONE SWIPE TOUCH
-        let touchStartX = 0;
-        let touchEndX = 0;
-        
-        document.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].screenX;
-        });
-        
-        document.addEventListener('touchend', e => {
-            touchEndX = e.changedTouches[0].screenX;
-            handleSwipe();
-        });
-        
-        function handleSwipe() {
-            const threshold = 50; 
-            const distance = touchEndX - touchStartX;
-            
-            if (Math.abs(distance) < threshold) return; 
-            
-            // SWIPE LEFT (Dito da destra a sinistra) -> VAI AVANTI
-            if (distance < 0) {
-                if(currIdx === -1) loadTable(0); 
-                else if (currIdx === TABLE_DATA.length - 1) goHome(); 
-                else loadTable(currIdx + 1);
+        function updateMenuFocus() {
+            for(let i=0; i<totalItems; i++) {
+                let el = document.getElementById('menu-item-'+i);
+                if(el) el.classList.remove('selected');
             }
-            
-            // SWIPE RIGHT (Dito da sinistra a destra) -> VAI INDIETRO
-            if (distance > 0) {
-                if(currIdx === -1) loadTable(TABLE_DATA.length - 1);
-                else if (currIdx === 0) goHome(); 
-                else loadTable(currIdx - 1);
+            let cur = document.getElementById('menu-item-'+menuIdx);
+            if(cur) {
+                cur.classList.add('selected');
+                cur.scrollIntoView({block: 'nearest'});
             }
         }
+
+        function loadTable(index) { 
+            currIdx = index; 
+            menuIdx = index; 
+            const data = TABLE_DATA[index]; 
+            document.getElementById('header-title').innerText = data.title; 
+            document.getElementById('header-subtitle').innerText = data.date; 
+            document.getElementById('menu-view').style.display = 'none'; 
+            const details = document.getElementsByClassName('detail-view'); 
+            for(let d of details) d.style.display = 'none'; 
+            const target = document.getElementById(data.id); 
+            if(target) { target.style.display = 'block'; window.scrollTo(0,0); } 
+        }
+
+        function goHome() { 
+            currIdx = -1; 
+            const details = document.getElementsByClassName('detail-view'); 
+            for(let d of details) d.style.display = 'none'; 
+            document.getElementById('header-title').innerText = HOME_TITLE; 
+            document.getElementById('header-subtitle').innerText = HOME_SUBTITLE; 
+            document.getElementById('menu-view').style.display = 'block'; 
+            window.scrollTo(0,0); 
+            updateMenuFocus(); 
+        }
+
+        document.addEventListener('keydown', e => { 
+            if (currIdx === -1) {
+                if(e.key === "ArrowDown") {
+                    menuIdx = (menuIdx + 1) % totalItems;
+                    updateMenuFocus();
+                    e.preventDefault(); 
+                }
+                if(e.key === "ArrowUp") {
+                    menuIdx = (menuIdx - 1 + totalItems) % totalItems;
+                    updateMenuFocus();
+                    e.preventDefault();
+                }
+                if(e.key === "Enter" || e.key === "ArrowRight") {
+                    loadTable(menuIdx);
+                }
+                if(e.key === "ArrowLeft") {
+                    // Circular backwards from menu -> Last Table
+                    loadTable(totalItems - 1);
+                }
+            } else {
+                if(e.key === "ArrowRight") {
+                    if (currIdx === TABLE_DATA.length - 1) goHome();
+                    else loadTable(currIdx + 1);
+                } 
+                if(e.key === "ArrowLeft") {
+                    if(currIdx === 0) goHome();
+                    else loadTable(currIdx - 1);
+                } 
+                if(e.key === "Backspace") goHome(); 
+            }
+        });
+
+        // TOUCH SUPPORT
+        let touchStartX = 0; let touchEndX = 0;
+        document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+        document.addEventListener('touchend', e => { 
+            touchEndX = e.changedTouches[0].screenX; 
+            const dist = touchEndX - touchStartX;
+            if (Math.abs(dist) < 50) return;
+            
+            if (currIdx === -1) {
+                // Menu mode swipe
+                if (dist < 0) loadTable(menuIdx); // Left swipe -> Enter
+            } else {
+                // Table mode swipe
+                if (dist < 0) { if(currIdx < TABLE_DATA.length - 1) loadTable(currIdx + 1); else goHome(); } 
+                if (dist > 0) { if(currIdx === 0) goHome(); else loadTable(currIdx - 1); }
+            }
+        });
+        
+        window.onload = function() { updateMenuFocus(); };
     </script>
 </head>
 <body>
@@ -157,7 +177,7 @@
             <div id="header-title">ANALISI DATI</div>
             <div id="header-subtitle">Aggiornato al: 28/11/2025</div>
         </div>
-        <div id="menu-view"><div class="menu-item" onclick="loadTable(0)">1. Riepilogo</div><div class="menu-item" onclick="loadTable(1)">2. Contanti</div><div class="menu-item" onclick="loadTable(2)">3. POS</div><div class="menu-item" onclick="loadTable(3)">4. Entrate X</div><div class="menu-item" onclick="loadTable(4)">5. Clienti</div><div class="menu-item" onclick="loadTable(5)">6. Media Spesa</div><div class="menu-item" onclick="loadTable(6)">7. Operatori</div><div class="menu-item" onclick="loadTable(7)">8. Giorni</div><div class="menu-item" onclick="loadTable(8)">9. Top Clienti</div><div class="menu-item" onclick="loadTable(9)">10. Top Attività</div></div>
+        <div id="menu-view"><div class="menu-item" id="menu-item-0" onclick="loadTable(0)">1. Riepilogo</div><div class="menu-item" id="menu-item-1" onclick="loadTable(1)">2. Contanti</div><div class="menu-item" id="menu-item-2" onclick="loadTable(2)">3. POS</div><div class="menu-item" id="menu-item-3" onclick="loadTable(3)">4. Entrate X</div><div class="menu-item" id="menu-item-4" onclick="loadTable(4)">5. Clienti</div><div class="menu-item" id="menu-item-5" onclick="loadTable(5)">6. Media Spesa</div><div class="menu-item" id="menu-item-6" onclick="loadTable(6)">7. Operatori</div><div class="menu-item" id="menu-item-7" onclick="loadTable(7)">8. Giorni</div><div class="menu-item" id="menu-item-8" onclick="loadTable(8)">9. Top Clienti</div><div class="menu-item" id="menu-item-9" onclick="loadTable(9)">10. Top Attività</div></div>
         
         <div id="tab_0" class="detail-view">
             <div class="total-row-container">
@@ -174,73 +194,73 @@
             <div class="data-row-3col">
                 <span class="col-lbl">Set</span>
                 <span class="col-val">30.997</span>
-                <span class="col-val" style="font-weight:bold;">41.316</span>
+                <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">41.316</span>
                 <span class="col-val" style="">41.316</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Ott</span>
                 <span class="col-val">33.138</span>
-                <span class="col-val" style="font-weight:bold;">41.202</span>
+                <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">41.202</span>
                 <span class="col-val" style="">41.202</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Nov</span>
                 <span class="col-val">31.575</span>
-                <span class="col-val" style="font-weight:bold;">33.885</span>
+                <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">33.885</span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">33.935</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Dic</span>
                 <span class="col-val">23.376</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">30.413</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Gen</span>
                 <span class="col-val">32.400</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">40.473</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Feb</span>
                 <span class="col-val">26.390</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">29.481</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Mar</span>
                 <span class="col-val">28.694</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">28.787</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Apr</span>
                 <span class="col-val">25.342</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">26.615</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Mag</span>
                 <span class="col-val">23.493</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">25.467</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Giu</span>
                 <span class="col-val">18.397</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">19.904</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Lug</span>
                 <span class="col-val">12.570</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">13.470</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Ago</span>
                 <span class="col-val">13.400</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">11.080</span>
             </div>
             <div class="chart-container"><div class="chart-title">Analisi Grafica</div>
@@ -276,73 +296,73 @@
             <div class="data-row-3col">
                 <span class="col-lbl">Set</span>
                 <span class="col-val">10.772</span>
-                <span class="col-val" style="font-weight:bold;">14.498</span>
+                <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">14.498</span>
                 <span class="col-val" style="">14.498</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Ott</span>
                 <span class="col-val">11.775</span>
-                <span class="col-val" style="font-weight:bold;">13.853</span>
+                <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">13.853</span>
                 <span class="col-val" style="">13.853</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Nov</span>
                 <span class="col-val">11.211</span>
-                <span class="col-val" style="font-weight:bold;">12.430</span>
+                <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">12.430</span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">12.480</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Dic</span>
                 <span class="col-val">9.096</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">11.864</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Gen</span>
                 <span class="col-val">13.328</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">15.824</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Feb</span>
                 <span class="col-val">10.300</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">11.565</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Mar</span>
                 <span class="col-val">12.705</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">13.047</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Apr</span>
                 <span class="col-val">9.325</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">10.639</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Mag</span>
                 <span class="col-val">12.245</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">12.145</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Giu</span>
                 <span class="col-val">8.154</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">8.452</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Lug</span>
                 <span class="col-val">6.345</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">6.523</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Ago</span>
                 <span class="col-val">3.876</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">3.818</span>
             </div>
             <div class="chart-container"><div class="chart-title">Analisi Grafica</div>
@@ -378,73 +398,73 @@
             <div class="data-row-3col">
                 <span class="col-lbl">Set</span>
                 <span class="col-val">20.225</span>
-                <span class="col-val" style="font-weight:bold;">26.818</span>
+                <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">26.818</span>
                 <span class="col-val" style="">26.818</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Ott</span>
                 <span class="col-val">21.363</span>
-                <span class="col-val" style="font-weight:bold;">27.349</span>
+                <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">27.349</span>
                 <span class="col-val" style="">27.349</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Nov</span>
                 <span class="col-val">20.364</span>
-                <span class="col-val" style="font-weight:bold;">21.455</span>
+                <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">21.455</span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">21.505</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Dic</span>
                 <span class="col-val">14.280</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">18.548</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Gen</span>
                 <span class="col-val">19.072</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">24.649</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Feb</span>
                 <span class="col-val">16.090</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">17.915</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Mar</span>
                 <span class="col-val">15.989</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">15.740</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Apr</span>
                 <span class="col-val">16.017</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">15.976</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Mag</span>
                 <span class="col-val">11.248</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">13.321</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Giu</span>
                 <span class="col-val">10.243</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">11.452</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Lug</span>
                 <span class="col-val">6.225</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">6.946</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Ago</span>
                 <span class="col-val">9.524</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">7.261</span>
             </div>
             <div class="chart-container"><div class="chart-title">Analisi Grafica</div>
@@ -480,73 +500,73 @@
             <div class="data-row-3col">
                 <span class="col-lbl">Set</span>
                 <span class="col-val">985</span>
-                <span class="col-val" style="font-weight:bold;">2.601</span>
+                <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">2.601</span>
                 <span class="col-val" style="">2.601</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Ott</span>
                 <span class="col-val">1.258</span>
-                <span class="col-val" style="font-weight:bold;">1.133</span>
+                <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">1.133</span>
                 <span class="col-val" style="">1.133</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Nov</span>
                 <span class="col-val">1.241</span>
-                <span class="col-val" style="font-weight:bold;">1.361</span>
+                <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">1.361</span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">1.373</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Dic</span>
                 <span class="col-val">764</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">1.624</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Gen</span>
                 <span class="col-val">995</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">2.095</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Feb</span>
                 <span class="col-val">664</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">1.365</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Mar</span>
                 <span class="col-val">1.245</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">1.317</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Apr</span>
                 <span class="col-val">1.834</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">1.983</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Mag</span>
                 <span class="col-val">833</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">2.027</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Giu</span>
                 <span class="col-val">751</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">1.287</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Lug</span>
                 <span class="col-val">510</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">1.074</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Ago</span>
                 <span class="col-val">1.016</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">1.055</span>
             </div>
             <div class="chart-container"><div class="chart-title">Analisi Grafica</div>
@@ -582,73 +602,73 @@
             <div class="data-row-3col">
                 <span class="col-lbl">Set</span>
                 <span class="col-val">258</span>
-                <span class="col-val" style="font-weight:bold;">328</span>
+                <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">328</span>
                 <span class="col-val" style="">328</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Ott</span>
                 <span class="col-val">317</span>
-                <span class="col-val" style="font-weight:bold;">367</span>
+                <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">367</span>
                 <span class="col-val" style="">367</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Nov</span>
                 <span class="col-val">319</span>
-                <span class="col-val" style="font-weight:bold;">317</span>
+                <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">317</span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">319</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Dic</span>
                 <span class="col-val">267</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">316</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Gen</span>
                 <span class="col-val">367</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">421</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Feb</span>
                 <span class="col-val">302</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">343</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Mar</span>
                 <span class="col-val">316</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">328</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Apr</span>
                 <span class="col-val">292</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">327</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Mag</span>
                 <span class="col-val">297</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">317</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Giu</span>
                 <span class="col-val">220</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">235</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Lug</span>
                 <span class="col-val">153</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">164</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Ago</span>
                 <span class="col-val">112</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">99</span>
             </div>
             <div class="chart-container"><div class="chart-title">Analisi Grafica</div>
@@ -684,73 +704,73 @@
             <div class="data-row-3col">
                 <span class="col-lbl">Set</span>
                 <span class="col-val">120</span>
-                <span class="col-val" style="font-weight:bold;">126</span>
+                <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">126</span>
                 <span class="col-val" style="">126</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Ott</span>
                 <span class="col-val">105</span>
-                <span class="col-val" style="font-weight:bold;">112</span>
+                <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">112</span>
                 <span class="col-val" style="">112</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Nov</span>
                 <span class="col-val">99</span>
-                <span class="col-val" style="font-weight:bold;">107</span>
+                <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">107</span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">106</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Dic</span>
                 <span class="col-val">88</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">96</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Gen</span>
                 <span class="col-val">88</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">96</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Feb</span>
                 <span class="col-val">87</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">86</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Mar</span>
                 <span class="col-val">91</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">88</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Apr</span>
                 <span class="col-val">87</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">81</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Mag</span>
                 <span class="col-val">79</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">80</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Giu</span>
                 <span class="col-val">84</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">85</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Lug</span>
                 <span class="col-val">82</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">82</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Ago</span>
                 <span class="col-val">120</span>
-                <span class="col-val" style="font-weight:bold;"></span>
+                <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">112</span>
             </div>
             <div class="chart-container"><div class="chart-title">Analisi Grafica</div>
