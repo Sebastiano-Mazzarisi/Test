@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<title>Gestione Contatori JoyFit</title>
+<style>
+  :root{ --ink:#0f172a; --bg:#e9edf5; --blue:#2563eb; --rad:10px; --border:#d1d5db; --danger:#dc2626; }
+  body{ margin:0; padding:10px; font-family:sans-serif; background:var(--bg); color:var(--ink); }
+  .box{ background:#fff; border-radius:var(--rad); padding:15px; max-width:600px; margin:0 auto; box-shadow:0 2px 5px rgba(0,0,0,0.05); }
+  h1{ text-align:center; color:var(--blue); margin-top:0; }
+  table{ width:100%; border-collapse:collapse; margin-top:15px; }
+  th, td{ padding:10px; border-bottom:1px solid #eee; text-align:left; }
+  th{ background:#f8fafc; font-weight:600; }
+  .num{ font-weight:700; font-size:1.1em; }
+  .btn-reset{ background:#fff; border:1px solid var(--danger); color:var(--danger); border-radius:4px; cursor:pointer; padding:2px 8px; font-weight:bold; }
+  .btn-reset:hover{ background:var(--danger); color:#fff; }
+  .refresh-btn{ display:block; width:100%; padding:12px; background:var(--blue); color:#fff; border:none; border-radius:var(--rad); font-size:1.1em; cursor:pointer; margin-top:20px; }
+</style>
+</head>
+<body>
+
+<div class="box">
+  <h1>📊 Contatori JoyFit</h1>
+  <table id="tbl">
+    <thead><tr><th>Tabella</th><th style="text-align:right">Visite</th><th style="text-align:right">Reset</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <button class="refresh-btn" onclick="loadCounts()">Aggiorna Dati</button>
+</div>
+
+<script>
+// CONFIGURAZIONE API (DEVE ESSERE IDENTICA AL PYTHON)
+const NAMESPACE = "joyfit-stats-v1"; 
+const BASE_URL = "https://countapi.mileshilliard.com/api/v1";
+
+const TABLES = [
+  { id: 0, name: "Sintesi" },
+  { id: 1, name: "1. Riepilogo" },
+  { id: 2, name: "2. Contanti" },
+  { id: 3, name: "3. POS" },
+  { id: 4, name: "4. Entrate X" },
+  { id: 5, name: "5. Clienti" },
+  { id: 6, name: "6. Spesa Media" },
+  { id: 7, name: "7. Operatori" },
+  { id: 8, name: "8. Giorni" },
+  { id: 9, name: "9. Top Attività" },
+  { id: 10, name: "10. Top Clienti" },
+  { id: 11, name: "11. Clienti Persi" },
+  { id: 12, name: "12. Clienti Storici" }
+];
+
+async function getCount(key) {
+    try {
+        const res = await fetch(`${BASE_URL}/get/${NAMESPACE}_${key}`);
+        const data = await res.json();
+        return data.value || 0;
+    } catch { return 0; }
+}
+
+async function resetCount(key) {
+    if(!confirm("Azzerare contatore " + key + "?")) return;
+    try {
+        await fetch(`${BASE_URL}/set/${NAMESPACE}_${key}?value=0`);
+        loadCounts();
+    } catch(e) { alert("Errore reset"); }
+}
+
+async function loadCounts() {
+    const tbody = document.querySelector("#tbl tbody");
+    tbody.innerHTML = "<tr><td colspan='3' style='text-align:center'>Caricamento...</td></tr>";
+    
+    let html = "";
+    for(let t of TABLES) {
+        const key = "tab_" + t.id;
+        const val = await getCount(key);
+        html += `
+        <tr>
+            <td>${t.name}</td>
+            <td style="text-align:right"><span class="num">${val}</span></td>
+            <td style="text-align:right"><button class="btn-reset" onclick="resetCount('${key}')">X</button></td>
+        </tr>`;
+    }
+    tbody.innerHTML = html;
+}
+
+// Avvio
+loadCounts();
+</script>
+
+</body>
+</html>
