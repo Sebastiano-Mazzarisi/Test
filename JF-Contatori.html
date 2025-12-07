@@ -2,35 +2,193 @@
 <html lang="it">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
 <title>Gestione Contatori JoyFit</title>
 <style>
-  :root{ --ink:#0f172a; --bg:#e9edf5; --blue:#2563eb; --rad:10px; --border:#d1d5db; --danger:#dc2626; }
-  body{ margin:0; padding:10px; font-family:sans-serif; background:var(--bg); color:var(--ink); }
-  .box{ background:#fff; border-radius:var(--rad); padding:15px; max-width:600px; margin:0 auto; box-shadow:0 2px 5px rgba(0,0,0,0.05); }
-  h1{ text-align:center; color:var(--blue); margin-top:0; }
-  table{ width:100%; border-collapse:collapse; margin-top:15px; }
-  th, td{ padding:10px; border-bottom:1px solid #eee; text-align:left; }
-  th{ background:#f8fafc; font-weight:600; }
-  .num{ font-weight:700; font-size:1.1em; }
-  .btn-reset{ background:#fff; border:1px solid var(--danger); color:var(--danger); border-radius:4px; cursor:pointer; padding:2px 8px; font-weight:bold; }
-  .btn-reset:hover{ background:var(--danger); color:#fff; }
-  .refresh-btn{ display:block; width:100%; padding:12px; background:var(--blue); color:#fff; border:none; border-radius:var(--rad); font-size:1.1em; cursor:pointer; margin-top:20px; }
+  :root{ 
+    --ink: #0f172a; 
+    --bg: #e9edf5; 
+    --blue: #2563eb; 
+    --dark-blue: #1F497D;
+    --rad: 12px; 
+    --danger: #dc2626; 
+  }
+  
+  * { box-sizing: border-box; }
+
+  body{ 
+    margin: 0; 
+    padding: 10px; 
+    font-family: 'Segoe UI', sans-serif; 
+    background: var(--bg); 
+    color: var(--ink); 
+    font-size: 17px; /* RIDOTTO: Un po' più piccolo */
+    display: flex;
+    justify-content: center; 
+  }
+
+  .box{ 
+    background: #fff; 
+    border-radius: var(--rad); 
+    padding: 15px; 
+    width: 100%;
+    max-width: 500px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+  }
+
+  h1{ 
+    text-align: center; 
+    color: var(--dark-blue); 
+    margin-top: 5px; 
+    font-size: 1.6em; 
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    line-height: 1.1;
+  }
+
+  .total-header {
+      text-align: center;
+      font-size: 1em;
+      color: #64748b;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+  }
+  .total-header span {
+      font-weight: 700;
+      color: var(--blue);
+      font-size: 1.3em;
+  }
+
+  /* Indicatore Auto Update */
+  .live-indicator {
+      font-size: 0.7em;
+      color: #16a34a;
+      background: #dcfce7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      opacity: 0;
+      transition: opacity 0.5s;
+  }
+  .live-indicator.active { opacity: 1; }
+
+  table{ 
+    width: 100%; 
+    border-collapse: collapse; 
+    table-layout: fixed; 
+  }
+
+  th, td{ 
+    padding: 8px 5px; 
+    border-bottom: 1px solid #f1f5f9; 
+    text-align: left; 
+    vertical-align: middle;
+  }
+
+  th{ 
+    background: #f8fafc; 
+    font-weight: 600; 
+    color: #64748b;
+    font-size: 0.85em;
+    text-transform: uppercase;
+  }
+
+  /* MODIFICA: Niente grassetto per i nomi */
+  td:first-child {
+      font-weight: 400; /* Normale, non grassetto */
+      font-size: 1em;
+      color: #334155;
+      overflow: hidden;
+      white-space: nowrap; 
+      text-overflow: ellipsis;
+  }
+
+  /* Colonna Numero */
+  .num{ 
+    font-weight: 600; 
+    font-size: 1.1em; 
+    color: var(--blue);
+    display: block;
+    text-align: right;
+  }
+
+  /* Bottone Reset */
+  .btn-reset{ 
+    background: #fff; 
+    border: 1px solid var(--danger); 
+    color: var(--danger); 
+    border-radius: 6px; 
+    cursor: pointer; 
+    padding: 3px 0; 
+    font-weight: 600; 
+    font-size: 0.85em;
+    width: 100%;
+    display: block;
+  }
+
+  /* Bottone Reset per il Totale */
+  .btn-reset-all {
+    background: #fff;
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    border-radius: 6px;
+    cursor: pointer;
+    padding: 2px 8px;
+    font-weight: 600;
+    font-size: 0.8em;
+  }
+  
+  .btn-reset:hover, .btn-reset-all:hover {
+      background: var(--danger);
+      color: #fff;
+  }
+  
+  .refresh-btn{ 
+    display: block; 
+    width: 100%; 
+    padding: 15px; 
+    background: var(--dark-blue); 
+    color: #fff; 
+    border: none; 
+    border-radius: var(--rad); 
+    font-size: 1.1em; 
+    font-weight: 600;
+    cursor: pointer; 
+    margin-top: 20px; 
+    box-shadow: 0 4px 6px rgba(31, 73, 125, 0.2);
+  }
+  .refresh-btn:active { transform: scale(0.98); }
+
 </style>
 </head>
 <body>
 
 <div class="box">
-  <h1>📊 Contatori JoyFit</h1>
+  <h1>📊 Contatori <span class="live-indicator" id="liveDot">● Live</span></h1>
+  
+  <div class="total-header">
+      Totale: <span id="grandTotal">...</span>
+      <button class="btn-reset-all" onclick="resetAllCounts()" title="Azzera TUTTO">X</button>
+  </div>
+
   <table id="tbl">
-    <thead><tr><th>Tabella</th><th style="text-align:right">Visite</th><th style="text-align:right">Reset</th></tr></thead>
+    <thead>
+        <tr>
+            <th width="60%">Tabella</th> 
+            <th width="25%" style="text-align:right">Visite</th>
+            <th width="15%" style="text-align:center">Reset</th>
+        </tr>
+    </thead>
     <tbody></tbody>
   </table>
-  <button class="refresh-btn" onclick="loadCounts()">Aggiorna Dati</button>
+  <button class="refresh-btn" onclick="manualRefresh()">AGGIORNA ORA</button>
 </div>
 
 <script>
-// CONFIGURAZIONE API (DEVE ESSERE IDENTICA AL PYTHON)
 const NAMESPACE = "joyfit-stats-v1"; 
 const BASE_URL = "https://countapi.mileshilliard.com/api/v1";
 
@@ -44,10 +202,10 @@ const TABLES = [
   { id: 6, name: "6. Spesa Media" },
   { id: 7, name: "7. Operatori" },
   { id: 8, name: "8. Giorni" },
-  { id: 9, name: "9. Top Attività" },
-  { id: 10, name: "10. Top Clienti" },
-  { id: 11, name: "11. Clienti Persi" },
-  { id: 12, name: "12. Clienti Storici" }
+  { id: 9, name: "9. Top Att." },
+  { id: 10, name: "10. Top Cli." },
+  { id: 11, name: "11. Cl. Persi" },
+  { id: 12, name: "12. Cl. Storici" }
 ];
 
 async function getCount(key) {
@@ -59,33 +217,81 @@ async function getCount(key) {
 }
 
 async function resetCount(key) {
-    if(!confirm("Azzerare contatore " + key + "?")) return;
+    if(!confirm("Azzerare contatore?")) return;
     try {
         await fetch(`${BASE_URL}/set/${NAMESPACE}_${key}?value=0`);
-        loadCounts();
+        loadCounts(false); // Reload immediato
     } catch(e) { alert("Errore reset"); }
 }
 
-async function loadCounts() {
+async function resetAllCounts() {
+    if(!confirm("ATTENZIONE: Sei sicuro di voler azzerare TUTTI i contatori?")) return;
+    document.getElementById("grandTotal").innerText = "Wait...";
+    const promises = TABLES.map(t => {
+        const key = "tab_" + t.id;
+        return fetch(`${BASE_URL}/set/${NAMESPACE}_${key}?value=0`);
+    });
+    try {
+        await Promise.all(promises);
+        loadCounts(false);
+    } catch (e) { alert("Errore durante il reset totale"); loadCounts(false); }
+}
+
+async function loadCounts(isAuto = true) {
     const tbody = document.querySelector("#tbl tbody");
-    tbody.innerHTML = "<tr><td colspan='3' style='text-align:center'>Caricamento...</td></tr>";
-    
+    const grandTotalEl = document.getElementById("grandTotal");
+    const liveDot = document.getElementById("liveDot");
+
+    // Mostra "Caricamento" solo se la tabella è vuota (prima volta)
+    if (tbody.children.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='3' style='text-align:center; padding:20px; color:#999;'>Caricamento...</td></tr>";
+    }
+
+    if(isAuto) liveDot.classList.add("active"); // Feedback visivo aggiornamento
+
     let html = "";
-    for(let t of TABLES) {
+    let totalVisits = 0; 
+
+    // Recupera dati in parallelo per velocità
+    const promises = TABLES.map(async t => {
         const key = "tab_" + t.id;
         const val = await getCount(key);
+        return { ...t, key, val };
+    });
+
+    const results = await Promise.all(promises);
+
+    // Costruisci HTML ordinato (Promises.all mantiene l'ordine dell'array originale?)
+    // Sì, ma per sicurezza iteriamo sull'array originale TABLES
+    for(let t of TABLES) {
+        const data = results.find(r => r.id === t.id);
+        totalVisits += data.val;
         html += `
         <tr>
             <td>${t.name}</td>
-            <td style="text-align:right"><span class="num">${val}</span></td>
-            <td style="text-align:right"><button class="btn-reset" onclick="resetCount('${key}')">X</button></td>
+            <td style="text-align:right"><span class="num">${data.val}</span></td>
+            <td style="text-align:center"><button class="btn-reset" onclick="resetCount('${data.key}')">X</button></td>
         </tr>`;
     }
+    
     tbody.innerHTML = html;
+    grandTotalEl.innerText = totalVisits.toLocaleString('it-IT');
+    
+    setTimeout(() => liveDot.classList.remove("active"), 1000);
 }
 
-// Avvio
-loadCounts();
+function manualRefresh() {
+    loadCounts(false);
+}
+
+// Avvio iniziale
+loadCounts(false);
+
+// MODIFICA: Refresh automatico ogni 10 secondi
+setInterval(() => {
+    loadCounts(true);
+}, 10000);
+
 </script>
 
 </body>
