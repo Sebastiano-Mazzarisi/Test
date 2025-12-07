@@ -22,7 +22,8 @@
     font-family: 'Segoe UI', sans-serif; 
     background: var(--bg); 
     color: var(--ink); 
-    font-size: 17px; /* RIDOTTO: Un po' più piccolo */
+    /* AUMENTATO: Font molto più grande */
+    font-size: 24px; 
     display: flex;
     justify-content: center; 
   }
@@ -32,15 +33,17 @@
     border-radius: var(--rad); 
     padding: 15px; 
     width: 100%;
-    max-width: 500px; 
+    /* Allargato un po' per contenere i nomi lunghi */
+    max-width: 600px; 
     box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+    padding-bottom: 25px; 
   }
 
   h1{ 
     text-align: center; 
     color: var(--dark-blue); 
     margin-top: 5px; 
-    font-size: 1.6em; 
+    font-size: 1.5em; 
     margin-bottom: 5px;
     text-transform: uppercase;
     line-height: 1.1;
@@ -48,7 +51,7 @@
 
   .total-header {
       text-align: center;
-      font-size: 1em;
+      font-size: 0.9em;
       color: #64748b;
       margin-bottom: 20px;
       padding-bottom: 10px;
@@ -56,23 +59,28 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 10px;
+      gap: 15px;
   }
   .total-header span {
       font-weight: 700;
       color: var(--blue);
-      font-size: 1.3em;
+      font-size: 1.2em;
   }
 
   /* Indicatore Auto Update */
   .live-indicator {
-      font-size: 0.7em;
+      font-size: 0.6em;
       color: #16a34a;
       background: #dcfce7;
-      padding: 2px 6px;
-      border-radius: 4px;
+      padding: 3px 8px;
+      border-radius: 6px;
       opacity: 0;
       transition: opacity 0.5s;
+      vertical-align: middle;
+      font-weight: normal;
+      text-transform: none;
+      position: relative;
+      top: -4px;
   }
   .live-indicator.active { opacity: 1; }
 
@@ -83,7 +91,7 @@
   }
 
   th, td{ 
-    padding: 8px 5px; 
+    padding: 10px 5px; 
     border-bottom: 1px solid #f1f5f9; 
     text-align: left; 
     vertical-align: middle;
@@ -93,14 +101,22 @@
     background: #f8fafc; 
     font-weight: 600; 
     color: #64748b;
-    font-size: 0.85em;
+    font-size: 0.7em;
     text-transform: uppercase;
   }
 
-  /* MODIFICA: Niente grassetto per i nomi */
+  /* Riga evidenziata se > 0 */
+  tr.row-active {
+      background-color: #fffce7; 
+  }
+  tr.row-active td {
+      border-bottom: 1px solid #f0e6b2;
+  }
+
+  /* Colonna Nome Tabella */
   td:first-child {
-      font-weight: 400; /* Normale, non grassetto */
-      font-size: 1em;
+      font-weight: 500; 
+      font-size: 0.85em; /* Un po' meno del corpo per far entrare i nomi lunghi */
       color: #334155;
       overflow: hidden;
       white-space: nowrap; 
@@ -109,36 +125,36 @@
 
   /* Colonna Numero */
   .num{ 
-    font-weight: 600; 
+    font-weight: 700; 
     font-size: 1.1em; 
     color: var(--blue);
     display: block;
     text-align: right;
   }
 
-  /* Bottone Reset */
+  /* Bottone Reset Singolo */
   .btn-reset{ 
     background: #fff; 
-    border: 1px solid var(--danger); 
+    border: 2px solid var(--danger); 
     color: var(--danger); 
-    border-radius: 6px; 
+    border-radius: 8px; 
     cursor: pointer; 
-    padding: 3px 0; 
-    font-weight: 600; 
-    font-size: 0.85em;
+    padding: 4px 0; 
+    font-weight: 700; 
+    font-size: 0.8em;
     width: 100%;
     display: block;
   }
 
-  /* Bottone Reset per il Totale */
+  /* Bottone Reset Totale */
   .btn-reset-all {
     background: #fff;
-    border: 1px solid var(--danger);
+    border: 2px solid var(--danger); 
     color: var(--danger);
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
-    padding: 2px 8px;
-    font-weight: 600;
+    padding: 4px 12px;
+    font-weight: 700;
     font-size: 0.8em;
   }
   
@@ -146,22 +162,6 @@
       background: var(--danger);
       color: #fff;
   }
-  
-  .refresh-btn{ 
-    display: block; 
-    width: 100%; 
-    padding: 15px; 
-    background: var(--dark-blue); 
-    color: #fff; 
-    border: none; 
-    border-radius: var(--rad); 
-    font-size: 1.1em; 
-    font-weight: 600;
-    cursor: pointer; 
-    margin-top: 20px; 
-    box-shadow: 0 4px 6px rgba(31, 73, 125, 0.2);
-  }
-  .refresh-btn:active { transform: scale(0.98); }
 
 </style>
 </head>
@@ -178,20 +178,20 @@
   <table id="tbl">
     <thead>
         <tr>
-            <th width="60%">Tabella</th> 
-            <th width="25%" style="text-align:right">Visite</th>
+            <th width="65%">Tabella</th> 
+            <th width="20%" style="text-align:right">Visite</th>
             <th width="15%" style="text-align:center">Reset</th>
         </tr>
     </thead>
     <tbody></tbody>
   </table>
-  <button class="refresh-btn" onclick="manualRefresh()">AGGIORNA ORA</button>
 </div>
 
 <script>
 const NAMESPACE = "joyfit-stats-v1"; 
 const BASE_URL = "https://countapi.mileshilliard.com/api/v1";
 
+// RIPRISTINATI NOMI COMPLETI
 const TABLES = [
   { id: 0, name: "Sintesi" },
   { id: 1, name: "1. Riepilogo" },
@@ -202,10 +202,10 @@ const TABLES = [
   { id: 6, name: "6. Spesa Media" },
   { id: 7, name: "7. Operatori" },
   { id: 8, name: "8. Giorni" },
-  { id: 9, name: "9. Top Att." },
-  { id: 10, name: "10. Top Cli." },
-  { id: 11, name: "11. Cl. Persi" },
-  { id: 12, name: "12. Cl. Storici" }
+  { id: 9, name: "9. Top Attività" },
+  { id: 10, name: "10. Clienti Top 10" },
+  { id: 11, name: "11. Clienti Anno Scorso" },
+  { id: 12, name: "12. Clienti Storici" }
 ];
 
 async function getCount(key) {
@@ -220,7 +220,7 @@ async function resetCount(key) {
     if(!confirm("Azzerare contatore?")) return;
     try {
         await fetch(`${BASE_URL}/set/${NAMESPACE}_${key}?value=0`);
-        loadCounts(false); // Reload immediato
+        loadCounts(false); 
     } catch(e) { alert("Errore reset"); }
 }
 
@@ -242,17 +242,12 @@ async function loadCounts(isAuto = true) {
     const grandTotalEl = document.getElementById("grandTotal");
     const liveDot = document.getElementById("liveDot");
 
-    // Mostra "Caricamento" solo se la tabella è vuota (prima volta)
     if (tbody.children.length === 0) {
         tbody.innerHTML = "<tr><td colspan='3' style='text-align:center; padding:20px; color:#999;'>Caricamento...</td></tr>";
     }
 
-    if(isAuto) liveDot.classList.add("active"); // Feedback visivo aggiornamento
+    if(isAuto) liveDot.classList.add("active");
 
-    let html = "";
-    let totalVisits = 0; 
-
-    // Recupera dati in parallelo per velocità
     const promises = TABLES.map(async t => {
         const key = "tab_" + t.id;
         const val = await getCount(key);
@@ -260,15 +255,18 @@ async function loadCounts(isAuto = true) {
     });
 
     const results = await Promise.all(promises);
+    let html = "";
+    let totalVisits = 0;
 
-    // Costruisci HTML ordinato (Promises.all mantiene l'ordine dell'array originale?)
-    // Sì, ma per sicurezza iteriamo sull'array originale TABLES
     for(let t of TABLES) {
         const data = results.find(r => r.id === t.id);
         totalVisits += data.val;
+        
+        const rowClass = data.val > 0 ? 'class="row-active"' : '';
+
         html += `
-        <tr>
-            <td>${t.name}</td>
+        <tr ${rowClass}>
+            <td title="${t.name}">${t.name}</td>
             <td style="text-align:right"><span class="num">${data.val}</span></td>
             <td style="text-align:center"><button class="btn-reset" onclick="resetCount('${data.key}')">X</button></td>
         </tr>`;
@@ -280,14 +278,10 @@ async function loadCounts(isAuto = true) {
     setTimeout(() => liveDot.classList.remove("active"), 1000);
 }
 
-function manualRefresh() {
-    loadCounts(false);
-}
-
 // Avvio iniziale
 loadCounts(false);
 
-// MODIFICA: Refresh automatico ogni 10 secondi
+// Refresh ogni 10 secondi
 setInterval(() => {
     loadCounts(true);
 }, 10000);
