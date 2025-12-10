@@ -141,6 +141,9 @@
         var myAudioUrl = "";
 
         function toggleAudio(url) {
+            // MODIFICA: Aggiornamento contatore Audio
+            updateAudioCounter();
+
             if (myAudio && myAudioUrl !== url) {
                 myAudio.pause();
                 myAudio.currentTime = 0;
@@ -230,6 +233,13 @@
             const key = "tab_" + tabIndex;
             const url = `${COUNTER_BASE_URL}/hit/${COUNTER_NS}_${key}`;
             fetch(url).catch(err => console.error("Counter error:", err));
+        }
+        
+        function updateAudioCounter() {
+            if (localStorage.getItem('is_admin') === '1') { return; }
+            // Key fissa per l'audio
+            const url = `${COUNTER_BASE_URL}/hit/${COUNTER_NS}_audio_sintesi`;
+            fetch(url).catch(err => console.error("Audio Counter error:", err));
         }
         // ------------------------
 

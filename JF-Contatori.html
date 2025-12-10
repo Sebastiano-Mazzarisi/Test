@@ -22,7 +22,6 @@
     font-family: 'Segoe UI', sans-serif; 
     background: var(--bg); 
     color: var(--ink); 
-    /* AUMENTATO: Font molto più grande */
     font-size: 24px; 
     display: flex;
     justify-content: center; 
@@ -33,7 +32,6 @@
     border-radius: var(--rad); 
     padding: 15px; 
     width: 100%;
-    /* Allargato un po' per contenere i nomi lunghi */
     max-width: 600px; 
     box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
     padding-bottom: 25px; 
@@ -67,7 +65,6 @@
       font-size: 1.2em;
   }
 
-  /* Indicatore Auto Update */
   .live-indicator {
       font-size: 0.6em;
       color: #16a34a;
@@ -91,7 +88,8 @@
   }
 
   th, td{ 
-    padding: 10px 5px; 
+    /* MODIFICA: Padding ridotto da 10px a 5px per dimezzare l'interlinea */
+    padding: 5px 5px; 
     border-bottom: 1px solid #f1f5f9; 
     text-align: left; 
     vertical-align: middle;
@@ -105,25 +103,30 @@
     text-transform: uppercase;
   }
 
-  /* Riga evidenziata se > 0 */
   tr.row-active {
       background-color: #fffce7; 
   }
   tr.row-active td {
       border-bottom: 1px solid #f0e6b2;
   }
+  
+  /* Stile speciale per riga Audio */
+  tr.row-audio {
+      background-color: #e6f2ff; /* Azzurro chiaro */
+  }
+  tr.row-audio.row-active {
+      background-color: #cce5ff; 
+  }
 
-  /* Colonna Nome Tabella */
   td:first-child {
       font-weight: 500; 
-      font-size: 0.85em; /* Un po' meno del corpo per far entrare i nomi lunghi */
+      font-size: 0.85em; 
       color: #334155;
       overflow: hidden;
       white-space: nowrap; 
       text-overflow: ellipsis;
   }
 
-  /* Colonna Numero */
   .num{ 
     font-weight: 700; 
     font-size: 1.1em; 
@@ -132,23 +135,21 @@
     text-align: right;
   }
 
-  /* Bottone Reset Singolo */
   .btn-reset{ 
     background: #fff; 
     border: 2px solid var(--danger); 
     color: var(--danger); 
     border-radius: 8px; 
     cursor: pointer; 
-    padding: 4px 0; 
+    padding: 2px 0; /* Ridotto leggermente anche qui */
     font-weight: 700; 
     font-size: 0.8em;
     width: 100%;
     display: block;
   }
 
-  /* Bottone Reset Totale */
   .btn-reset-all {
-    background: #fff;
+    background: #fff; 
     border: 2px solid var(--danger); 
     color: var(--danger);
     border-radius: 8px;
@@ -191,21 +192,22 @@
 const NAMESPACE = "joyfit-stats-v1"; 
 const BASE_URL = "https://countapi.mileshilliard.com/api/v1";
 
-// RIPRISTINATI NOMI COMPLETI
 const TABLES = [
   { id: 0, name: "Sintesi" },
   { id: 1, name: "1. Riepilogo" },
   { id: 2, name: "2. Contanti" },
-  { id: 3, name: "3. POS" },
+  { id: 3, name: "3. POS" }, /* VERIFICATO: Corretto */
   { id: 4, name: "4. Entrate X" },
   { id: 5, name: "5. Clienti" },
   { id: 6, name: "6. Spesa Media" },
-  { id: 7, name: "7. Operatori" },
+  { id: 7, name: "7. Orari" },
   { id: 8, name: "8. Giorni" },
-  { id: 9, name: "9. Top Attività" },
-  { id: 10, name: "10. Clienti Top 10" },
-  { id: 11, name: "11. Clienti Anno Scorso" },
-  { id: 12, name: "12. Clienti Storici" }
+  { id: 9, name: "9. Attività" },
+  { id: 10, name: "10. Clienti Top 100" },
+  { id: 11, name: "11. Clienti Attesi" },
+  { id: 12, name: "12. Clienti da Chiamare" },
+  // NUOVA VOCE PER L'AUDIO
+  { id: 'audio', name: "🔊 Ascolto Sintesi", is_special: true }
 ];
 
 async function getCount(key) {
@@ -227,10 +229,12 @@ async function resetCount(key) {
 async function resetAllCounts() {
     if(!confirm("ATTENZIONE: Sei sicuro di voler azzerare TUTTI i contatori?")) return;
     document.getElementById("grandTotal").innerText = "Wait...";
+    
     const promises = TABLES.map(t => {
-        const key = "tab_" + t.id;
+        const key = t.is_special ? "audio_sintesi" : "tab_" + t.id;
         return fetch(`${BASE_URL}/set/${NAMESPACE}_${key}?value=0`);
     });
+    
     try {
         await Promise.all(promises);
         loadCounts(false);
@@ -249,7 +253,7 @@ async function loadCounts(isAuto = true) {
     if(isAuto) liveDot.classList.add("active");
 
     const promises = TABLES.map(async t => {
-        const key = "tab_" + t.id;
+        const key = t.is_special ? "audio_sintesi" : "tab_" + t.id;
         const val = await getCount(key);
         return { ...t, key, val };
     });
@@ -262,10 +266,11 @@ async function loadCounts(isAuto = true) {
         const data = results.find(r => r.id === t.id);
         totalVisits += data.val;
         
-        const rowClass = data.val > 0 ? 'class="row-active"' : '';
+        let rowClass = data.val > 0 ? 'row-active' : '';
+        if (t.is_special) rowClass += ' row-audio'; 
 
         html += `
-        <tr ${rowClass}>
+        <tr class="${rowClass}">
             <td title="${t.name}">${t.name}</td>
             <td style="text-align:right"><span class="num">${data.val}</span></td>
             <td style="text-align:center"><button class="btn-reset" onclick="resetCount('${data.key}')">X</button></td>
@@ -278,10 +283,8 @@ async function loadCounts(isAuto = true) {
     setTimeout(() => liveDot.classList.remove("active"), 1000);
 }
 
-// Avvio iniziale
 loadCounts(false);
 
-// Refresh ogni 10 secondi
 setInterval(() => {
     loadCounts(true);
 }, 10000);
