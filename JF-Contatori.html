@@ -32,7 +32,7 @@
     border-radius: var(--rad); 
     padding: 15px; 
     width: 100%;
-    max-width: 600px; 
+    max-width: 800px; /* Allargato per far entrare la data */
     box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
     padding-bottom: 25px; 
   }
@@ -88,7 +88,6 @@
   }
 
   th, td{ 
-    /* MODIFICA: Padding ridotto da 10px a 5px per dimezzare l'interlinea */
     padding: 5px 5px; 
     border-bottom: 1px solid #f1f5f9; 
     text-align: left; 
@@ -110,14 +109,14 @@
       border-bottom: 1px solid #f0e6b2;
   }
   
-  /* Stile speciale per riga Audio */
   tr.row-audio {
-      background-color: #e6f2ff; /* Azzurro chiaro */
+      background-color: #e6f2ff; 
   }
   tr.row-audio.row-active {
       background-color: #cce5ff; 
   }
 
+  /* Colonna Nome */
   td:first-child {
       font-weight: 500; 
       font-size: 0.85em; 
@@ -125,6 +124,23 @@
       overflow: hidden;
       white-space: nowrap; 
       text-overflow: ellipsis;
+  }
+  
+  /* Colonna Ora */
+  .time-cell {
+      font-size: 0.75em;
+      color: #666;
+      text-align: center;
+  }
+  .time-new {
+      color: #dc2626;
+      font-weight: bold;
+      animation: flash 1s;
+  }
+  
+  @keyframes flash {
+      0% { color: red; opacity: 0; }
+      100% { color: #dc2626; opacity: 1; }
   }
 
   .num{ 
@@ -141,7 +157,7 @@
     color: var(--danger); 
     border-radius: 8px; 
     cursor: pointer; 
-    padding: 2px 0; /* Ridotto leggermente anche qui */
+    padding: 2px 0; 
     font-weight: 700; 
     font-size: 0.8em;
     width: 100%;
@@ -169,7 +185,7 @@
 <body>
 
 <div class="box">
-  <h1>📊 Contatori <span class="live-indicator" id="liveDot">● Live</span></h1>
+  <h1>📊 Contatori <span class="live-indicator" id="liveDot">● Live (2s)</span></h1>
   
   <div class="total-header">
       Totale: <span id="grandTotal">...</span>
@@ -179,8 +195,9 @@
   <table id="tbl">
     <thead>
         <tr>
-            <th width="65%">Tabella</th> 
-            <th width="20%" style="text-align:right">Visite</th>
+            <th width="50%">Tabella</th> 
+            <th width="15%" style="text-align:right">Visite</th>
+            <th width="20%" style="text-align:center">Ultimo Click</th>
             <th width="15%" style="text-align:center">Reset</th>
         </tr>
     </thead>
@@ -192,11 +209,15 @@
 const NAMESPACE = "joyfit-stats-v1"; 
 const BASE_URL = "https://countapi.mileshilliard.com/api/v1";
 
+// Memoria locale per rilevare cambiamenti e orari
+let previousCounts = {};
+let lastTimes = {};
+
 const TABLES = [
   { id: 0, name: "Sintesi" },
   { id: 1, name: "1. Riepilogo" },
   { id: 2, name: "2. Contanti" },
-  { id: 3, name: "3. POS" }, /* VERIFICATO: Corretto */
+  { id: 3, name: "3. POS" },
   { id: 4, name: "4. Entrate X" },
   { id: 5, name: "5. Clienti" },
   { id: 6, name: "6. Spesa Media" },
@@ -206,7 +227,6 @@ const TABLES = [
   { id: 10, name: "10. Clienti Top 100" },
   { id: 11, name: "11. Clienti Attesi" },
   { id: 12, name: "12. Clienti da Chiamare" },
-  // NUOVA VOCE PER L'AUDIO
   { id: 'audio', name: "🔊 Ascolto Sintesi", is_special: true }
 ];
 
@@ -218,10 +238,13 @@ async function getCount(key) {
     } catch { return 0; }
 }
 
-async function resetCount(key) {
+async function resetCount(key, id) {
     if(!confirm("Azzerare contatore?")) return;
     try {
         await fetch(`${BASE_URL}/set/${NAMESPACE}_${key}?value=0`);
+        // Resetta anche la memoria locale per quell'ID
+        previousCounts[id] = 0;
+        lastTimes[id] = "-";
         loadCounts(false); 
     } catch(e) { alert("Errore reset"); }
 }
@@ -237,8 +260,16 @@ async function resetAllCounts() {
     
     try {
         await Promise.all(promises);
+        // Reset memorie
+        previousCounts = {};
+        lastTimes = {};
         loadCounts(false);
     } catch (e) { alert("Errore durante il reset totale"); loadCounts(false); }
+}
+
+function getCurrentTime() {
+    const now = new Date();
+    return now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 }
 
 async function loadCounts(isAuto = true) {
@@ -247,7 +278,7 @@ async function loadCounts(isAuto = true) {
     const liveDot = document.getElementById("liveDot");
 
     if (tbody.children.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='3' style='text-align:center; padding:20px; color:#999;'>Caricamento...</td></tr>";
+        tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px; color:#999;'>Caricamento...</td></tr>";
     }
 
     if(isAuto) liveDot.classList.add("active");
@@ -264,30 +295,48 @@ async function loadCounts(isAuto = true) {
 
     for(let t of TABLES) {
         const data = results.find(r => r.id === t.id);
-        totalVisits += data.val;
+        const currentVal = data.val;
+        const prevVal = previousCounts[t.id];
         
-        let rowClass = data.val > 0 ? 'row-active' : '';
+        // Se il valore è aumentato e non è il primo caricamento (undefined)
+        if (prevVal !== undefined && currentVal > prevVal) {
+            lastTimes[t.id] = getCurrentTime();
+        }
+        
+        // Aggiorna memoria
+        previousCounts[t.id] = currentVal;
+        
+        totalVisits += currentVal;
+        
+        let rowClass = currentVal > 0 ? 'row-active' : '';
         if (t.is_special) rowClass += ' row-audio'; 
+        
+        // Stile orario: rosso se è appena cambiato (o recente), grigio altrimenti
+        const timeDisplay = lastTimes[t.id] || "-";
+        const timeClass = (prevVal !== undefined && currentVal > prevVal) ? "time-cell time-new" : "time-cell";
 
         html += `
         <tr class="${rowClass}">
             <td title="${t.name}">${t.name}</td>
-            <td style="text-align:right"><span class="num">${data.val}</span></td>
-            <td style="text-align:center"><button class="btn-reset" onclick="resetCount('${data.key}')">X</button></td>
+            <td style="text-align:right"><span class="num">${currentVal}</span></td>
+            <td class="${timeClass}">${timeDisplay}</td>
+            <td style="text-align:center"><button class="btn-reset" onclick="resetCount('${data.key}', '${t.id}')">X</button></td>
         </tr>`;
     }
     
     tbody.innerHTML = html;
     grandTotalEl.innerText = totalVisits.toLocaleString('it-IT');
     
-    setTimeout(() => liveDot.classList.remove("active"), 1000);
+    setTimeout(() => liveDot.classList.remove("active"), 500);
 }
 
+// Avvio iniziale
 loadCounts(false);
 
+// Refresh ogni 2 secondi (2000 ms)
 setInterval(() => {
     loadCounts(true);
-}, 10000);
+}, 2000);
 
 </script>
 
