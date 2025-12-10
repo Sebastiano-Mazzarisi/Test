@@ -15,8 +15,16 @@
     body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; touch-action: pan-y; }
     .main-container { background-color: white; margin: 0 auto; width: 100%; max-width: 490px; min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; padding-bottom: 20px; }
     .header-box { background-color: #1F497D; color: white; padding: 20px 15px; text-align: center; position: sticky; top: 0; z-index: 100; cursor: pointer; }
-    #header-title { margin: 0; font-size: 32px; font-weight: 800; text-transform: uppercase; }
+    
+    /* MODIFICA: Font ridotto titolo */
+    #header-title { margin: 0; font-size: 24px; font-weight: 800; text-transform: uppercase; }
     #header-subtitle { margin-top: 5px; font-size: 16px; opacity: 0.9; }
+    
+    /* Layout header con frecce */
+    .header-nav-container { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+    .nav-arrow-header { font-size: 28px; cursor: pointer; padding: 0 10px; user-select: none; }
+    .header-center { flex-grow: 1; }
+
     #menu-view { padding-bottom: 40px; padding-top: 20px; }
     .menu-item { padding: 3px 20px; height: 50px; border-bottom: none; font-size: 34px; font-weight: 500; color: #333; cursor: pointer; display: flex; justify-content: space-between; align-items: center; line-height: 1; }
     .menu-item:nth-child(odd) { background-color: #ffffff; }
@@ -63,11 +71,29 @@
     .sort-active { color: #dc3545; font-size: 1.2em; }
     .data-row-4col .col-name { justify-content: flex-start; padding-left: 5px; align-items: center; }
     .data-row-4col .col-money { justify-content: flex-end; align-items: center; }
-    .total-row-container { position: relative; display: flex; justify-content: center; align-items: center; background-color: #f0f8ff; border-radius: 10px; padding: 10px; margin-bottom: 5px; margin-top: 10px; border: 1px solid #999; }
-    .back-arrow { position: absolute; left: 15px; font-size: 24px; cursor: pointer; }
-    .total-value { font-size: 24px; font-weight: 600; color: #000; }
+    
+    /* MODIFICA: Layout navigazione dettaglio (Home - Centro - Stampante) */
+    .total-row-container { position: relative; display: flex; justify-content: space-between; align-items: center; background-color: #f0f8ff; border-radius: 10px; padding: 10px; margin-bottom: 5px; margin-top: 10px; border: 1px solid #999; }
+    .nav-icon { font-size: 24px; cursor: pointer; padding: 0 10px; user-select: none; }
+    .total-value { font-size: 24px; font-weight: 600; color: #000; text-align: center; flex-grow: 1; }
     
     .desc-box { background-color: #ffffff; padding: 10px; margin: 5px 2px 15px 2px; border-radius: 8px; border: 1px solid #999; font-size: 15px; color: #555; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); line-height: 1.3; }
+
+    /* STILE PER IL CERCHIO VERDE LAMPEGGIANTE (VELOCE 0.5s) */
+    .flash-dot {
+        width: 12px;
+        height: 12px;
+        background-color: #32CD32;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+        vertical-align: middle;
+        animation: flashing 0.5s infinite alternate;
+    }
+    @keyframes flashing {
+        from { opacity: 1; box-shadow: 0 0 5px #32CD32; }
+        to { opacity: 0.3; box-shadow: 0 0 1px #32CD32; }
+    }
 
     /* CHART CSS REINSERITO */
     .chart-container { margin-top: 20px; padding: 15px 10px; background-color: #fafafa; border-radius: 8px; border: 1px solid #999; margin-bottom: 20px; }
@@ -122,6 +148,7 @@
         const HOME_SUBTITLE = "Aggiornato al: 06/12/2025";
         const COUNTER_NS = "joyfit-stats-v1";
         const COUNTER_BASE_URL = "https://countapi.mileshilliard.com/api/v1";
+        const FINAL_LINK_JS = 'JF-Excel.pdf';
         
         (function() {
             try {
@@ -266,15 +293,36 @@
         }
 
         function handleHeaderClick() {
-            if (currIdx === 0) {
+            // MODIFICATO: L'header principale gestisce SOLO la navigazione visiva se cliccato al centro (opzionale), ma le frecce sono separate.
+            // Le azioni PDF sono ora delegate alla stampante.
+        }
+        
+        // --- FUNZIONE SPECIFICA PER IL TASTO STAMPANTE ---
+        function handlePrintAction(idx) {
+            if (idx === 0) {
                 generateSintesiPDF();
                 return;
             }
             
-            if(currIdx === 9) generateCompactPDF(10, "10. TOP 100 CLIENTI", PDF_DATA_10, 686, 0, "127.711");
-            else if(currIdx === 10) generateCompactPDF(11, "11. CLIENTI ATTESI", PDF_DATA_11, 554, 1732, "119.918");
-            else if(currIdx === 11) generateCompactPDF(12, "12. CLIENTI DA CHIAMARE", PDF_DATA_12, 68, 0, "89.824");
-            else window.location.href = 'JF-Excel.pdf';
+            if(idx === 9) generateCompactPDF(10, "10. TOP 100 CLIENTI", PDF_DATA_10, 686, 0, "127.711");
+            else if(idx === 10) generateCompactPDF(11, "11. CLIENTI ATTESI", PDF_DATA_11, 554, 1732, "119.918");
+            else if(idx === 11) generateCompactPDF(12, "12. CLIENTI DA CHIAMARE", PDF_DATA_12, 68, 0, "89.824");
+            else window.location.href = FINAL_LINK_JS;
+        }
+        
+        // --- FUNZIONI NAVIGAZIONE AGGIUNTE ---
+        function navPrev(e) {
+            e.stopPropagation();
+            if(currIdx === -1) loadTable(totalItems - 1); // Da Home all'ultimo
+            else if(currIdx === 0) goHome(); // Da Tab 0 a Home
+            else loadTable(currIdx - 1); // Tab precedente
+        }
+        
+        function navNext(e) {
+            e.stopPropagation();
+            if(currIdx === -1) loadTable(0); // Da Home a Tab 0
+            else if(currIdx === totalItems - 1) goHome(); // Dall'ultimo a Home
+            else loadTable(currIdx + 1); // Tab successiva
         }
         
         // --- FUNZIONE NUOVA GENERAZIONE PDF SINTESI ---
@@ -604,17 +652,27 @@
     <div id="ptr-indicator">⬇️ Trascina giù per aggiornare</div>
     <div class="main-container">
         <div class="header-box" onclick="handleHeaderClick()">
-            <div id="header-title">ANALISI DATI</div>
-            <div id="header-subtitle">Aggiornato al: 06/12/2025</div>
+            <div class="header-nav-container">
+                <div class="nav-arrow-header" onclick="navPrev(event)">◀️</div>
+                <div class="header-center">
+                    <div id="header-title">ANALISI DATI</div>
+                    <div id="header-subtitle">Aggiornato al: 06/12/2025</div>
+                </div>
+                <div class="nav-arrow-header" onclick="navNext(event)">▶️</div>
+            </div>
         </div>
         <div id="menu-view"><div class="menu-item" id="menu-item-0" onclick="loadTable(0)" style="justify-content: center; text-align: center; border: 3px solid #1F497D; border-radius: 10px; margin: 5px 15px; height: 75px;">Sintesi</div><div class="menu-item" id="menu-item-1" onclick="loadTable(1)">1. Riepilogo</div><div class="menu-item" id="menu-item-2" onclick="loadTable(2)">2. Contanti</div><div class="menu-item" id="menu-item-3" onclick="loadTable(3)">3. POS</div><div class="menu-item" id="menu-item-4" onclick="loadTable(4)">4. Entrate X</div><div class="menu-item" id="menu-item-5" onclick="loadTable(5)">5. Clienti</div><div class="menu-item" id="menu-item-6" onclick="loadTable(6)">6. Spesa Media</div><div class="menu-item" id="menu-item-7" onclick="loadTable(7)">7. Orari</div><div class="menu-item" id="menu-item-8" onclick="loadTable(8)">8. Giorni</div><div class="menu-item" id="menu-item-9" onclick="loadTable(9)">9. Attività</div><div class="menu-item" id="menu-item-10" onclick="loadTable(10)">10. Clienti Top 100</div><div class="menu-item" id="menu-item-11" onclick="loadTable(11)">11. Clienti Attesi</div><div class="menu-item" id="menu-item-12" onclick="loadTable(12)">12. Clienti da Chiamare</div></div>
         
             <div id="tab_0" class="detail-view">
                 
             <div class="total-row-container" onclick="copyToClipboard(this)" style="cursor:copy; position:relative; margin-bottom:15px;">
-                <div class="back-arrow" onclick="event.stopPropagation(); goHome()">⬅️</div>
-                <div class="total-value" style="font-size:22px;">I numeri che parlano</div>
-                <div style="position:absolute; right:15px; font-size:24px; cursor:pointer;" onclick="event.stopPropagation(); toggleAudio('https://sebastiano-mazzarisi.github.io/Test/Sintesi.mp3')">📢</div>
+                <div class="nav-icon" onclick="goHome()">🏠</div>
+                
+             <div class="total-value" style="font-size:22px; display:flex; align-items:center; justify-content:center;">
+                 <span class="flash-dot"></span>I numeri che parlano
+                 <span onclick="event.stopPropagation(); toggleAudio('https://sebastiano-mazzarisi.github.io/Test/Sintesi.mp3')" style="margin-left:5px; cursor:pointer;">📢</span>
+             </div>
+                <div class="nav-icon" onclick="handlePrintAction(0)">🖨️</div>
             </div>
                 <div style="margin-top:10px;">
                     <div style="margin-bottom:25px;">
@@ -764,8 +822,9 @@
             </div>
             <div id="tab_1" class="detail-view">
                 <div class="total-row-container">
-                    <div class="back-arrow" onclick="goHome()">⬅️</div>
+                    <div class="nav-icon" onclick="goHome()">🏠</div>
                     <div class="total-value"><b style="color:#800000">Σ 2025-26</b>: 127.875 €</div>
+                    <div class="nav-icon" onclick="handlePrintAction(1)">🖨️</div>
                 </div>
                 <div class="desc-box">Mostra l’andamento complessivo degli incassi mese per mese tra anno precedente, anno corrente e previsione finale basata sull’andamento reale e pesi settimanali.</div>
                 
@@ -866,8 +925,9 @@
             </div>
             <div id="tab_2" class="detail-view">
                 <div class="total-row-container">
-                    <div class="back-arrow" onclick="goHome()">⬅️</div>
+                    <div class="nav-icon" onclick="goHome()">🏠</div>
                     <div class="total-value"><b style="color:#800000">Σ 2025-26</b>: 44.882 €</div>
+                    <div class="nav-icon" onclick="handlePrintAction(2)">🖨️</div>
                 </div>
                 <div class="desc-box">Evidenzia la parte di incasso proveniente esclusivamente dai pagamenti in contanti. Utile per valutare il peso della cassa rispetto al totale.</div>
                 
@@ -968,8 +1028,9 @@
             </div>
             <div id="tab_3" class="detail-view">
                 <div class="total-row-container">
-                    <div class="back-arrow" onclick="goHome()">⬅️</div>
+                    <div class="nav-icon" onclick="goHome()">🏠</div>
                     <div class="total-value"><b style="color:#800000">Σ 2025-26</b>: 82.993 €</div>
+                    <div class="nav-icon" onclick="handlePrintAction(3)">🖨️</div>
                 </div>
                 <div class="desc-box">Mostra gli incassi derivanti dai pagamenti elettronici tramite POS. Indica la quota digitale del fatturato.</div>
                 
@@ -1070,8 +1131,9 @@
             </div>
             <div id="tab_4" class="detail-view">
                 <div class="total-row-container">
-                    <div class="back-arrow" onclick="goHome()">⬅️</div>
+                    <div class="nav-icon" onclick="goHome()">🏠</div>
                     <div class="total-value"><b style="color:#800000">Σ 2025-26</b>: 5.604 €</div>
+                    <div class="nav-icon" onclick="handlePrintAction(4)">🖨️</div>
                 </div>
                 <div class="desc-box">Raccoglie gli incassi attribuiti a clienti non registrati o ingressi occasionali. Serve per stimare il peso del ‘non ricorrente’.</div>
                 
@@ -1172,8 +1234,9 @@
             </div>
             <div id="tab_5" class="detail-view">
                 <div class="total-row-container">
-                    <div class="back-arrow" onclick="goHome()">⬅️</div>
+                    <div class="nav-icon" onclick="goHome()">🏠</div>
                     <div class="total-value"><b style="color:#800000">Σ 2025-26</b>: 701</div>
+                    <div class="nav-icon" onclick="handlePrintAction(5)">🖨️</div>
                 </div>
                 <div class="desc-box">Indica il numero di clienti unici attivi mese per mese, confrontando anno Precedente, anno Corrente e una Previsione automatica basata sugli anni precedenti.</div>
                 
@@ -1274,8 +1337,9 @@
             </div>
             <div id="tab_6" class="detail-view">
                 <div class="total-row-container">
-                    <div class="back-arrow" onclick="goHome()">⬅️</div>
+                    <div class="nav-icon" onclick="goHome()">🏠</div>
                     <div class="total-value"><b style="color:#800000">µ 2025-26</b>: 182 €</div>
+                    <div class="nav-icon" onclick="handlePrintAction(6)">🖨️</div>
                 </div>
                 <div class="desc-box">Calcola la media di spesa per cliente dividendo l’incasso totale per il numero di clienti unici. Misura la qualità della spesa.</div>
                 
@@ -1376,8 +1440,9 @@
             </div>
             <div id="tab_7" class="detail-view">
                 <div class="total-row-container">
-                    <div class="back-arrow" onclick="goHome()">⬅️</div>
+                    <div class="nav-icon" onclick="goHome()">🏠</div>
                     <div class="total-value"><b style="color:#800000">Σ Totale</b>: 1.071.768 €</div>
+                    <div class="nav-icon" onclick="handlePrintAction(7)">🖨️</div>
                 </div>
                 <div class="desc-box">Mostra quanto incasso è stato generato la MATTINA (Sabina) e nel POMERIGGIO-SERA (Marica). Aiuta a capire come distribuire le attività di segreteria.</div>
                 <div class="chart-container">
@@ -1400,8 +1465,9 @@
             </div>
             <div id="tab_8" class="detail-view">
                 <div class="total-row-container">
-                    <div class="back-arrow" onclick="goHome()">⬅️</div>
+                    <div class="nav-icon" onclick="goHome()">🏠</div>
                     <div class="total-value"><b style="color:#800000">Σ Totale</b>: 1.071.768 €</div>
+                    <div class="nav-icon" onclick="handlePrintAction(8)">🖨️</div>
                 </div>
                 <div class="desc-box">Classifica gli incassi in base ai giorni, per individuare picchi e debolezze settimanali.</div>
                 <div class="chart-container">
@@ -1439,8 +1505,9 @@
             </div>
             <div id="tab_9" class="detail-view">
                 <div class="total-row-container">
-                    <div class="back-arrow" onclick="goHome()">⬅️</div>
+                    <div class="nav-icon" onclick="goHome()">🏠</div>
                     <div class="total-value"><b style="color:#800000">Σ Totale</b>: 911.720 €</div>
+                    <div class="nav-icon" onclick="handlePrintAction(9)">🖨️</div>
                 </div>
                 <div class="desc-box">Ordina le attività in base al totale incassato, mostrando quali corsi trainano e quali rendono meno.</div>
                 <div class="chart-container">
@@ -1498,8 +1565,9 @@
             </div>
             <div id="tab_10" class="detail-view">
                 <div class="total-row-container">
-                    <div class="back-arrow" onclick="goHome()">⬅️</div>
+                    <div class="nav-icon" onclick="goHome()">🏠</div>
                     <div class="total-value"><b style="color:#800000">Clienti:</b> 686 <span style="margin-left:10px"></span> <b style="color:#800000">Tot:</b> 127.711 €</div>
+                    <div class="nav-icon" onclick="handlePrintAction(10)">🖨️</div>
                 </div>
                 <div class="desc-box">Elenca i 100 clienti che hanno speso di più nell’anno corrente, con numero pagamenti e totale acquistato.</div>
                 <div class="chart-container">
@@ -5680,8 +5748,9 @@
             </div>
             <div id="tab_11" class="detail-view">
                 <div class="total-row-container">
-                    <div class="back-arrow" onclick="goHome()">⬅️</div>
+                    <div class="nav-icon" onclick="goHome()">🏠</div>
                     <div class="total-value"><b style="color:#800000">Clienti:</b> 554 <span style="margin-left:10px"></span> <b style="color:#800000">Tot:</b> 119.918 €</div>
+                    <div class="nav-icon" onclick="handlePrintAction(11)">🖨️</div>
                 </div>
                 <div class="desc-box">Mostra i clienti presenti l’anno precedente ma non tornati quest’anno, con totale pagamenti e spesa associata.</div>
                 <div class="chart-container">
@@ -9070,8 +9139,9 @@
             </div>
             <div id="tab_12" class="detail-view">
                 <div class="total-row-container">
-                    <div class="back-arrow" onclick="goHome()">⬅️</div>
+                    <div class="nav-icon" onclick="goHome()">🏠</div>
                     <div class="total-value"><b style="color:#800000">Clienti:</b> 68 <span style="margin-left:10px"></span> <b style="color:#800000">Tot:</b> 89.824 €</div>
+                    <div class="nav-icon" onclick="handlePrintAction(12)">🖨️</div>
                 </div>
                 <div class="desc-box">Indica i clienti presenti in tutti gli ultimi anni ma assenti quest’anno. Segnala cali strutturali della clientela più fedele.</div>
                 <div class="chart-container">
