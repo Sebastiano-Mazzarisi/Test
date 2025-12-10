@@ -32,7 +32,7 @@
     border-radius: var(--rad); 
     padding: 15px; 
     width: 100%;
-    max-width: 800px; /* Allargato per far entrare la data */
+    max-width: 800px; 
     box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
     padding-bottom: 25px; 
   }
@@ -65,21 +65,20 @@
       font-size: 1.2em;
   }
 
+  /* MODIFICA: Puntino verde più evidente e senza sfondo testo */
   .live-indicator {
-      font-size: 0.6em;
-      color: #16a34a;
-      background: #dcfce7;
-      padding: 3px 8px;
-      border-radius: 6px;
-      opacity: 0;
-      transition: opacity 0.5s;
+      font-size: 0.8em;
+      color: #ccc; /* Grigio quando inattivo */
+      transition: color 0.3s;
       vertical-align: middle;
-      font-weight: normal;
-      text-transform: none;
       position: relative;
       top: -4px;
+      margin-left: 10px;
   }
-  .live-indicator.active { opacity: 1; }
+  .live-indicator.active { 
+      color: #16a34a; /* Verde acceso quando attivo */
+      text-shadow: 0 0 5px #16a34a; /* Effetto glow */
+  }
 
   table{ 
     width: 100%; 
@@ -116,7 +115,6 @@
       background-color: #cce5ff; 
   }
 
-  /* Colonna Nome */
   td:first-child {
       font-weight: 500; 
       font-size: 0.85em; 
@@ -126,7 +124,6 @@
       text-overflow: ellipsis;
   }
   
-  /* Colonna Ora */
   .time-cell {
       font-size: 0.75em;
       color: #666;
@@ -185,7 +182,7 @@
 <body>
 
 <div class="box">
-  <h1>📊 Contatori <span class="live-indicator" id="liveDot">● Live (2s)</span></h1>
+  <h1>📊 Contatori <span class="live-indicator" id="liveDot" title="Live">●</span></h1>
   
   <div class="total-header">
       Totale: <span id="grandTotal">...</span>
@@ -209,7 +206,6 @@
 const NAMESPACE = "joyfit-stats-v1"; 
 const BASE_URL = "https://countapi.mileshilliard.com/api/v1";
 
-// Memoria locale per rilevare cambiamenti e orari
 let previousCounts = {};
 let lastTimes = {};
 
@@ -230,6 +226,35 @@ const TABLES = [
   { id: 'audio', name: "🔊 Ascolto Sintesi", is_special: true }
 ];
 
+// --- FUNZIONE PER IL BEEP ---
+function playBeep() {
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        // Configurazione suono: 220Hz (La basso)
+        osc.type = 'sine';
+        osc.frequency.value = 220; 
+        
+        // Volume basso
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start();
+        osc.stop(ctx.currentTime + 0.3);
+    } catch(e) {
+        // Ignora errori audio (es. utente non ha ancora interagito)
+        console.log("Audio non ancora attivo o non supportato");
+    }
+}
+
 async function getCount(key) {
     try {
         const res = await fetch(`${BASE_URL}/get/${NAMESPACE}_${key}`);
@@ -242,7 +267,6 @@ async function resetCount(key, id) {
     if(!confirm("Azzerare contatore?")) return;
     try {
         await fetch(`${BASE_URL}/set/${NAMESPACE}_${key}?value=0`);
-        // Resetta anche la memoria locale per quell'ID
         previousCounts[id] = 0;
         lastTimes[id] = "-";
         loadCounts(false); 
@@ -260,7 +284,6 @@ async function resetAllCounts() {
     
     try {
         await Promise.all(promises);
-        // Reset memorie
         previousCounts = {};
         lastTimes = {};
         loadCounts(false);
@@ -292,26 +315,25 @@ async function loadCounts(isAuto = true) {
     const results = await Promise.all(promises);
     let html = "";
     let totalVisits = 0;
+    let anyChange = false;
 
     for(let t of TABLES) {
         const data = results.find(r => r.id === t.id);
         const currentVal = data.val;
         const prevVal = previousCounts[t.id];
         
-        // Se il valore è aumentato e non è il primo caricamento (undefined)
+        // Rileva cambiamento
         if (prevVal !== undefined && currentVal > prevVal) {
             lastTimes[t.id] = getCurrentTime();
+            anyChange = true;
         }
         
-        // Aggiorna memoria
         previousCounts[t.id] = currentVal;
-        
         totalVisits += currentVal;
         
         let rowClass = currentVal > 0 ? 'row-active' : '';
         if (t.is_special) rowClass += ' row-audio'; 
         
-        // Stile orario: rosso se è appena cambiato (o recente), grigio altrimenti
         const timeDisplay = lastTimes[t.id] || "-";
         const timeClass = (prevVal !== undefined && currentVal > prevVal) ? "time-cell time-new" : "time-cell";
 
@@ -327,13 +349,17 @@ async function loadCounts(isAuto = true) {
     tbody.innerHTML = html;
     grandTotalEl.innerText = totalVisits.toLocaleString('it-IT');
     
+    // Esegui il beep se c'è stato un cambiamento ed è un refresh automatico
+    if(anyChange && isAuto) {
+        playBeep();
+    }
+    
     setTimeout(() => liveDot.classList.remove("active"), 500);
 }
 
-// Avvio iniziale
 loadCounts(false);
 
-// Refresh ogni 2 secondi (2000 ms)
+// Refresh ogni 2 secondi
 setInterval(() => {
     loadCounts(true);
 }, 2000);
