@@ -117,8 +117,24 @@
         function copySintesiAll() { const container = document.getElementById('tab_0'); if(!container) return; let textResult = "SINTESI - I NUMERI CHE PARLANO\nAggiornato al: 29/11/2025\n\n"; const sections = container.querySelectorAll('div[style*="margin-bottom:25px"]'); sections.forEach(sec => { const title = sec.querySelector('.sintesi-header-bar').innerText; textResult += "--- " + title + " ---\n"; const boxes = sec.querySelectorAll('.sintesi-box-detail'); if(boxes.length === 2) { const valLeft = boxes[0].querySelector('.sintesi-val-det').innerText.replace(/\n/g, ' '); const pctLeft = boxes[0].querySelector('.sintesi-pct-det').innerText; const totLeftDiv = boxes[0].querySelector('.sintesi-sub-det'); const totLeft = totLeftDiv ? totLeftDiv.innerText : ""; textResult += `FINE MESE: ${valLeft} (${pctLeft}) | ${totLeft}\n`; const valRight = boxes[1].querySelector('.sintesi-val-det').innerText.replace(/\n/g, ' '); const pctRight = boxes[1].querySelector('.sintesi-pct-det').innerText; const totRightDiv = boxes[1].querySelector('.sintesi-sub-det'); const totRight = totRightDiv ? totRightDiv.innerText : ""; textResult += `FINE ANNO: ${valRight} (${pctRight}) | ${totRight}\n`; } const singleBox = sec.querySelector('.sintesi-box-single'); if(singleBox) { const val = singleBox.querySelector('.sintesi-val-single').innerText; const desc = singleBox.querySelector('.sintesi-desc-single').innerText; textResult += `${val} - ${desc}\n`; } textResult += "\n"; }); navigator.clipboard.writeText(textResult).then(() => { showToast(); }).catch(err => console.error(err)); }
         function showToast() { var x = document.getElementById("toast"); x.className = "show"; setTimeout(function(){ x.className = x.className.replace("show", ""); }, 2000); }
         function checkAdmin() { const urlParams = new URLSearchParams(window.location.search); if (urlParams.has('admin')) { localStorage.setItem('is_admin', '1'); } if (localStorage.getItem('is_admin') === '1') { const sub = document.getElementById('header-subtitle'); sub.style.color = "#ffdd00"; sub.style.fontWeight = "800"; sub.style.fontSize = "20px"; } }
+        
+        // --- FUNZIONI CONTATORI AGGIORNATE ---
         function updateCounter(tabIndex) { if (localStorage.getItem('is_admin') === '1') { return; } const key = "tab_" + tabIndex; const url = `${COUNTER_BASE_URL}/hit/${COUNTER_NS}_${key}`; fetch(url).catch(err => console.error("Counter error:", err)); }
         function updateAudioCounter() { if (localStorage.getItem('is_admin') === '1') { return; } const url = `${COUNTER_BASE_URL}/hit/${COUNTER_NS}_audio_sintesi`; fetch(url).catch(err => console.error("Audio Counter error:", err)); }
+        
+        // Traccia evento generico (usato per PDF e Video)
+        function trackCustomEvent(eventName) {
+            if (localStorage.getItem('is_admin') === '1') return;
+            const url = `${COUNTER_BASE_URL}/hit/${COUNTER_NS}_${eventName}`;
+            fetch(url).catch(err => console.error("Track error:", err));
+        }
+        
+        // Traccia e poi apre il link
+        function trackAndOpen(eventName, linkUrl) {
+            trackCustomEvent(eventName);
+            window.open(linkUrl, '_blank');
+        }
+
         let currIdx = -1; let menuIdx = 0; const totalItems = 13;
         function sortTable(wrapperId, criteria) { const container = document.getElementById(wrapperId); if(!container) return; const header = container.previousElementSibling; header.querySelectorAll('.sort-arrow').forEach(a => { a.classList.remove('sort-active'); a.style.color="#777"; }); const activeArrow = header.querySelector('#sort-arrow-' + criteria); if(activeArrow) { activeArrow.classList.add('sort-active'); activeArrow.style.color="#dc3545"; } const rows = Array.from(container.getElementsByClassName('data-row-4col')); rows.sort((a, b) => { if(criteria === 'name') { const nA = a.getAttribute('data-name').toLowerCase(); const nB = b.getAttribute('data-name').toLowerCase(); return nA.localeCompare(nB); } else if(criteria === 'volte') { return parseFloat(b.getAttribute('data-volte')) - parseFloat(a.getAttribute('data-volte')); } else if(criteria === 'amount') { return parseFloat(b.getAttribute('data-amount')) - parseFloat(a.getAttribute('data-amount')); } }); let c = 1; rows.forEach(row => { row.querySelector('.col-prog').innerText = c++; container.appendChild(row); }); }
         function handleHeaderClick() { }
@@ -216,7 +232,8 @@
             }
             drawCalendar(rightX, rightY, calColW, totalCalHeight, TITLE_PREV, CAL_PREV);
             drawCalendar(rightX + calColW + gutter, rightY, calColW, totalCalHeight, TITLE_CURR, CAL_CURR);
-            doc.save("Sintesi.pdf"); updateCounter(0);
+            doc.save("Sintesi.pdf"); 
+            trackCustomEvent("pdf_sintesi");
         }
         function generateCompactPDF(tabNum, pdfTitle, dataSet, statCount, statMov, statEuro) {
              const { jsPDF } = window.jspdf; const doc = new jsPDF(); const d = new Date(); const pad = (n) => n.toString().padStart(2, '0');
@@ -271,15 +288,15 @@
             </div><div class="menu-item" id="menu-item-1" onclick="loadTable(1)" style="justify-content: center; font-weight: bold; font-size: 22px;">1. Riepilogo</div><div class="menu-item" id="menu-item-2" onclick="loadTable(2)" style="justify-content: center; font-weight: bold; font-size: 22px;">2. Contanti</div><div class="menu-item" id="menu-item-3" onclick="loadTable(3)" style="justify-content: center; font-weight: bold; font-size: 22px;">3. POS</div><div class="menu-item" id="menu-item-4" onclick="loadTable(4)" style="justify-content: center; font-weight: bold; font-size: 22px;">4. Entrate X</div><div class="menu-item" id="menu-item-5" onclick="loadTable(5)" style="justify-content: center; font-weight: bold; font-size: 22px;">5. Clienti</div><div class="menu-item" id="menu-item-6" onclick="loadTable(6)" style="justify-content: center; font-weight: bold; font-size: 22px;">6. Spesa Media</div><div class="menu-item" id="menu-item-7" onclick="loadTable(7)" style="justify-content: center; font-weight: bold; font-size: 22px;">7. Orari</div><div class="menu-item" id="menu-item-8" onclick="loadTable(8)" style="justify-content: center; font-weight: bold; font-size: 22px;">8. Giorni</div><div class="menu-item" id="menu-item-9" onclick="loadTable(9)" style="justify-content: center; font-weight: bold; font-size: 22px;">9. Attività</div><div class="menu-item" id="menu-item-10" onclick="loadTable(10)" style="justify-content: center; font-weight: bold; font-size: 22px;">10. Clienti Top 100</div><div class="menu-item" id="menu-item-11" onclick="loadTable(11)" style="justify-content: center; font-weight: bold; font-size: 22px;">11. Clienti Attesi</div><div class="menu-item" id="menu-item-12" onclick="loadTable(12)" style="justify-content: center; font-weight: bold; font-size: 22px;">12. Clienti da Chiamare</div></div>
         <div id="tab_0" class="detail-view"><div class="total-row-container" onclick="copyToClipboard(this)" style="cursor:copy; position:relative; margin-bottom:10px;"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value" style="font-size:22px; display:flex; align-items:center; justify-content:center;"><span class="flash-dot"></span>I numeri che parlano</div><div class="nav-icon" onclick="event.stopPropagation(); toggleAudio('https://sebastiano-mazzarisi.github.io/Test/Sintesi.mp3')">📢</div></div>
             <div class="total-row-container" style="margin-bottom:15px; padding: 5px 0;">
-                 <div style="flex:1; text-align:center; cursor:pointer; padding: 5px; border-right: 1px solid #ccc; color: #000;" onclick="handlePrintAction(0)">
+                 <div style="flex:1; text-align:center; cursor:pointer; padding: 5px; border-right: 1px solid #ccc; color: #000;" onclick="trackCustomEvent('tab_13'); handlePrintAction(0)">
                      <div style="font-size: 30px;">📝</div>
                      <div style="font-size: 18px; font-weight: 600;">Riepilogo</div>
                  </div>
-                 <div style="flex:1; text-align:center; cursor:pointer; padding: 5px; border-right: 1px solid #ccc; color: #000;" onclick="window.open('https://sebastiano-mazzarisi.github.io/Test/JF-Calendari.pdf', '_blank')">
+                 <div style="flex:1; text-align:center; cursor:pointer; padding: 5px; border-right: 1px solid #ccc; color: #000;" onclick="trackAndOpen('tab_14', 'https://sebastiano-mazzarisi.github.io/Test/JF-Calendari.pdf')">
                      <div style="font-size: 30px;">📅</div>
                      <div style="font-size: 18px; font-weight: 600;">Calendari</div>
                  </div>
-                 <div style="flex:1; text-align:center; cursor:pointer; padding: 5px; color: #000;" onclick="window.open('https://sebastiano-mazzarisi.github.io/Test/Sintesi.mp4', '_blank')">
+                 <div style="flex:1; text-align:center; cursor:pointer; padding: 5px; color: #000;" onclick="trackAndOpen('tab_15', 'https://sebastiano-mazzarisi.github.io/Test/Sintesi.mp4')">
                      <div style="font-size: 30px;">📹</div>
                      <div style="font-size: 18px; font-weight: 600;">Video</div>
                  </div>
