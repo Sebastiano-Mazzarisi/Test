@@ -3,60 +3,58 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Dashboard Contatori</title>
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
+<title>Monitoraggio Accessi</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
-body { background-color:#f4f6f9; font-family:'Segoe UI',Tahoma; }
-.header { background:#2c3e50; color:white; padding:20px; text-align:center; margin-bottom:30px; border-radius:0 0 15px 15px; }
-.card-counter { box-shadow:2px 2px 10px #DADADA; margin:5px; padding:20px 10px; background:#fff; height:100px; border-radius:5px; position:relative; }
-.count-numbers { position:absolute; right:30px; top:20px; font-size:32px; font-weight:bold; }
-.count-name { position:absolute; left:15px; top:35px; font-size:16px; font-weight:600; color:#7f8c8d; }
-.border-left-primary { border-left:5px solid #007bff; }
-.border-left-success { border-left:5px solid #28a745; }
-.border-left-danger { border-left:5px solid #dc3545; }
-.border-left-warning { border-left:5px solid #ffc107; }
-.refresh-btn { position:fixed; bottom:20px; right:20px; width:60px; height:60px; border-radius:50%; font-size:24px; }
-.small-note { font-size:12px; opacity:0.85; }
+  body { background:#f4f6f9; font-family:Segoe UI, Tahoma, sans-serif; }
+  .header { background:#2c3e50; color:white; padding:24px; text-align:center; border-radius:0 0 16px 16px; margin-bottom:26px; }
+  .card-counter { background:#fff; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,.08); padding:18px; height:96px; position:relative; }
+  .count-name { color:#7f8c8d; font-weight:600; font-size:15px; }
+  .count-value { position:absolute; right:18px; top:18px; font-size:34px; font-weight:800; }
+  .b-green{border-left:5px solid #28a745;} .b-yellow{border-left:5px solid #ffc107;}
+  .b-red{border-left:5px solid #dc3545;} .b-blue{border-left:5px solid #007bff;}
+  .refresh-btn{position:fixed; bottom:18px; right:18px; width:60px; height:60px; border-radius:50%; font-size:24px;}
+  .small{opacity:.85; font-size:12px;}
 </style>
 </head>
 
 <body>
-
 <div class="header">
-  <h1>📊 Monitoraggio Accessi</h1>
-  <p id="status-msg" class="mb-1">In attesa…</p>
-  <div id="err-msg" class="small-note"></div>
+  <h1 class="mb-1">📊 Monitoraggio Accessi</h1>
+  <div id="status" class="small">Caricamento…</div>
 </div>
 
 <div class="container mb-5">
-
-  <h4 class="mb-3 text-muted">Azioni & Download</h4>
+  <h5 class="text-muted mb-3">Azioni & Download</h5>
   <div class="row mb-4">
-    <div class="col-md-3"><div class="card-counter border-left-success"><span class="count-name">PDF Sintesi</span><span class="count-numbers" id="val_pdf_sintesi">…</span></div></div>
-    <div class="col-md-3"><div class="card-counter border-left-warning"><span class="count-name">PDF Calendari</span><span class="count-numbers" id="val_pdf_calendari">…</span></div></div>
-    <div class="col-md-3"><div class="card-counter border-left-danger"><span class="count-name">Video Sintesi</span><span class="count-numbers" id="val_video_sintesi">…</span></div></div>
-    <div class="col-md-3"><div class="card-counter border-left-danger"><span class="count-name">Audio Sintesi</span><span class="count-numbers" id="val_audio_sintesi">…</span></div></div>
+    <div class="col-md-3 mb-3"><div class="card-counter b-green"><div class="count-name">PDF Sintesi</div><div class="count-value" id="pdf_sintesi">—</div></div></div>
+    <div class="col-md-3 mb-3"><div class="card-counter b-yellow"><div class="count-name">PDF Calendari</div><div class="count-value" id="pdf_calendari">—</div></div></div>
+    <div class="col-md-3 mb-3"><div class="card-counter b-red"><div class="count-name">Video Sintesi</div><div class="count-value" id="video_sintesi">—</div></div></div>
+    <div class="col-md-3 mb-3"><div class="card-counter b-red"><div class="count-name">Audio Sintesi</div><div class="count-value" id="audio_sintesi">—</div></div></div>
   </div>
 
-  <h4 class="mb-3 text-muted">Visualizzazioni Tabelle</h4>
-  <div class="row" id="tables-container"></div>
-
+  <h5 class="text-muted mb-3">Visualizzazioni Tabelle</h5>
+  <div class="row" id="tables"></div>
 </div>
 
-<button class="btn btn-primary refresh-btn" onclick="fetchAll()">↻</button>
+<button class="btn btn-primary refresh-btn" onclick="loadCounters()">↻</button>
+
+<!-- Firebase (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
 
 <script>
-const NAMESPACE = "Seba_Test";
-const BASE_URL = "https://api.countapi.xyz";
-
-const BASE_METRICS = [
-  { key:'pdf_sintesi', id:'val_pdf_sintesi' },
-  { key:'pdf_calendari', id:'val_pdf_calendari' },
-  { key:'video_sintesi', id:'val_video_sintesi' },
-  { key:'audio_sintesi', id:'val_audio_sintesi' }
-];
+/* ========= 1) INCOLLA QUI LA TUA firebaseConfig ========= */
+const firebaseConfig = {
+  // apiKey: "...",
+  // authDomain: "...",
+  // databaseURL: "https://<PROJECT>.firebaseio.com",
+  // projectId: "...",
+  // storageBucket: "...",
+  // messagingSenderId: "...",
+  // appId: "..."
+};
+/* ======================================================= */
 
 const TABLE_NAMES = [
   "0. Sintesi","1. Riepilogo Incassi","2. Contanti","3. POS",
@@ -65,92 +63,60 @@ const TABLE_NAMES = [
   "12. Da Chiamare"
 ];
 
-const METRICS = [...BASE_METRICS];
+const KEYS = [
+  "pdf_sintesi","pdf_calendari","video_sintesi","audio_sintesi",
+  ...Array.from({length:13}, (_,i)=>`tab_${i}`)
+];
 
-function initGrid(){
-  const c = document.getElementById('tables-container');
-  TABLE_NAMES.forEach((n,i)=>{
+function buildUI(){
+  const c = document.getElementById("tables");
+  TABLE_NAMES.forEach((name,i)=>{
     c.innerHTML += `
       <div class="col-md-3 mb-3">
-        <div class="card-counter border-left-primary">
-          <span class="count-name">${n}</span>
-          <span class="count-numbers" id="val_tab_${i}">…</span>
+        <div class="card-counter b-blue">
+          <div class="count-name">${name}</div>
+          <div class="count-value" id="tab_${i}">—</div>
         </div>
       </div>`;
-    METRICS.push({ key:`tab_${i}`, id:`val_tab_${i}` });
   });
 }
 
-function setStatus(msg, err=""){
-  document.getElementById("status-msg").innerText = msg;
-  document.getElementById("err-msg").innerText = err;
+let db = null;
+
+function setStatus(msg){ document.getElementById("status").innerText = msg; }
+
+function ensureFirebase(){
+  if (!firebaseConfig || !firebaseConfig.databaseURL) {
+    setStatus("ERRORE: manca firebaseConfig (databaseURL).");
+    return false;
+  }
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  db = firebase.database();
+  return true;
 }
 
-async function apiGet(key){
-  // /get è più adatto per leggere il valore
-  const r = await fetch(`${BASE_URL}/get/${NAMESPACE}/${key}`);
-  if (!r.ok) return { ok:false, status:r.status, json:null };
-  const j = await r.json();
-  return { ok:true, status:r.status, json:j };
-}
-
-async function apiCreate(key){
-  // crea con valore 0 se non esiste
-  const r = await fetch(`${BASE_URL}/create?namespace=${encodeURIComponent(NAMESPACE)}&key=${encodeURIComponent(key)}&value=0`);
-  if (!r.ok) return { ok:false, status:r.status };
-  return { ok:true, status:r.status };
-}
-
-async function fetchValue(key,id){
-  const el = document.getElementById(id);
+async function loadCounters(){
+  if (!ensureFirebase()) return;
 
   try{
-    let g = await apiGet(key);
+    setStatus("Aggiornamento…");
+    const snap = await db.ref("counters").get();
+    const data = snap.exists() ? snap.val() : {};
 
-    // se non esiste, proviamo a crearlo e rileggerlo
-    if (!g.ok && (g.status === 404 || g.status === 400)){
-      const c = await apiCreate(key);
-      if (c.ok){
-        g = await apiGet(key);
-      }
+    // default 0 se non c’è
+    for (const k of KEYS){
+      const el = document.getElementById(k);
+      if (el) el.innerText = (data && typeof data[k] === "number") ? data[k] : 0;
     }
-
-    if (g.ok && g.json && typeof g.json.value !== "undefined"){
-      el.innerText = g.json.value;
-      return { ok:true };
-    } else {
-      el.innerText = "0";
-      return { ok:false, reason:`HTTP ${g.status}` };
-    }
-
-  }catch(err){
-    el.innerHTML = "<span style='font-size:14px;color:red'>Err</span>";
-    return { ok:false, reason:String(err) };
+    setStatus("Aggiornato: " + new Date().toLocaleTimeString());
+  } catch (e){
+    setStatus("Errore lettura contatori (regole DB?)");
   }
 }
 
-async function fetchAll(){
-  setStatus("Aggiornamento…", "");
-  const results = await Promise.all(METRICS.map(m => fetchValue(m.key, m.id)));
-
-  const errors = results.filter(r => !r.ok);
-  if (errors.length){
-    // se hai aperto in file:// qui quasi sempre è CORS/origin null
-    const hint = location.protocol === "file:"
-      ? "Stai aprendo da file://. Prova con http://localhost (python -m http.server)."
-      : "Possibile blocco rete/estensione (adblock) o CORS.";
-
-    setStatus("Aggiornato con errori: " + new Date().toLocaleTimeString(),
-              `${errors.length} errori. ${hint}`);
-  } else {
-    setStatus("Aggiornato: " + new Date().toLocaleTimeString(), "");
-  }
-}
-
-initGrid();
-fetchAll();
-setInterval(fetchAll, 30000);
+buildUI();
+loadCounters();
+setInterval(loadCounters, 30000);
 </script>
-
 </body>
 </html>
