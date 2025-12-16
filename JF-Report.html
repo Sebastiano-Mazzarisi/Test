@@ -89,7 +89,8 @@
     #toast.show { visibility: visible; -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
     @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
     @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
-</style>
+
+body { overscroll-behavior-y: none; touch-action: pan-x; }</style>
     
     <script>
         
@@ -260,17 +261,18 @@
         function loadTable(index) { currIdx = index; menuIdx = index; const data = TABLE_DATA[index]; document.getElementById('header-title').innerText = data.title; document.getElementById('header-subtitle').innerText = data.date; document.getElementById('menu-view').style.display = 'none'; const details = document.getElementsByClassName('detail-view'); for(let d of details) d.style.display = 'none'; const target = document.getElementById(data.id); if(target) { target.style.display = 'block'; window.scrollTo(0,0); } updateCounter(index); }
         function goHome() { currIdx = -1; menuIdx = 0; const details = document.getElementsByClassName('detail-view'); for(let d of details) d.style.display = 'none'; document.getElementById('header-title').innerText = HOME_TITLE; document.getElementById('header-subtitle').innerText = HOME_SUBTITLE; document.getElementById('menu-view').style.display = 'block'; window.scrollTo(0,0); updateMenuFocus(); }
         document.addEventListener('keydown', e => { if (currIdx === -1) { if(e.key === "ArrowDown") { menuIdx = (menuIdx + 1) % totalItems; updateMenuFocus(); e.preventDefault(); } if(e.key === "ArrowUp") { menuIdx = (menuIdx - 1 + totalItems) % totalItems; updateMenuFocus(); e.preventDefault(); } if(e.key === "Enter" || e.key === "ArrowRight") { loadTable(menuIdx); } if(e.key === "ArrowLeft") { loadTable(totalItems - 1); } } else { if(e.key === "ArrowRight") { if (currIdx === TABLE_DATA.length - 1) goHome(); else loadTable(currIdx + 1); } if(e.key === "ArrowLeft") { if (currIdx === 0) goHome(); else loadTable(currIdx - 1); } if(e.key === "Backspace") goHome(); } });
-        let touchStartX = 0; let touchEndX = 0; let pStart = {x: 0, y:0}; let pCurrent = {x: 0, y:0}; const ptr = document.getElementById('ptr-indicator');
-        document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; pStart.x = e.touches[0].screenX; pStart.y = e.touches[0].screenY; }, {passive: false});
-        document.addEventListener('touchmove', e => { pCurrent.x = e.touches[0].screenX; pCurrent.y = e.touches[0].screenY; const changeY = pCurrent.y - pStart.y; if (window.scrollY === 0 && changeY > 0 && currIdx === -1) { if (changeY > 60) { ptr.style.top = "0px"; ptr.innerText = "⬇️ Rilascia per aggiornare..."; } } }, {passive: false});
-        document.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; const dist = touchEndX - touchStartX; const changeY = pCurrent.y - pStart.y; if (Math.abs(dist) > 50 && Math.abs(changeY) < 50) { if (currIdx === -1) { if (dist < 0) loadTable(menuIdx); if (dist > 0) loadTable(totalItems-1); } else { if (dist < 0) { if(currIdx < TABLE_DATA.length - 1) loadTable(currIdx + 1); else goHome(); } if (dist > 0) { if(currIdx === 0) goHome(); else loadTable(currIdx - 1); } } } if (window.scrollY === 0 && changeY > 80 && currIdx === -1) { location.reload(true); } else { ptr.style.top = "-50px"; } });
+        let touchStartX = 0; let touchEndX = 0;
+        document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: false});
+        // --- FIX 2: RIMOSSO TOUCHMOVE E LOGICA PULL-TO-REFRESH ---
+        document.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; const dist = touchEndX - touchStartX; 
+        // Solo swipe orizzontale
+        if (Math.abs(dist) > 50) { if (currIdx === -1) { if (dist < 0) loadTable(menuIdx); if (dist > 0) loadTable(totalItems-1); } else { if (dist < 0) { if(currIdx < TABLE_DATA.length - 1) loadTable(currIdx + 1); else goHome(); } if (dist > 0) { if(currIdx === 0) goHome(); else loadTable(currIdx - 1); } } } });
         window.onload = function() { checkAdmin(); updateMenuFocus(); };
     </script>
     
 </head>
 <body>
     <div id="toast">Copiato!</div>
-    <div id="ptr-indicator">⬇️ Trascina giù per aggiornare</div>
     <div class="main-container">
         <div class="header-box" onclick="handleHeaderClick()">
             <div class="header-nav-container">
@@ -444,7 +446,22 @@
                                 <div class="sintesi-desc-single">Percentuale di clienti storici (dal 2021) che bisogna chiamare</div>
                              </div>
                         </div>
-                    </div></div></div><div id="tab_1" class="detail-view"><div class="total-row-container"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value"><b style="color:#800000">Σ 2025-26</b>: 117.147 €</div><div class="nav-icon" onclick="handlePrintAction(1)">🖨️</div></div><div class="desc-box">Mostra l’andamento complessivo degli incassi mese per mese tra anno precedente, anno corrente e previsione finale basata sull’andamento reale e pesi settimanali.</div>
+                    </div></div></div><div id="tab_1" class="detail-view"><div class="total-row-container"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value"><b style="color:#800000">Σ 2025-26</b>: 117.147 €</div><div class="nav-icon" onclick="handlePrintAction(1)">🖨️</div></div><div class="chart-container">
+        <div class="chart-row">
+            <div class="chart-lbl" style="width: 70px !important;">2024-25</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:87.43863701992493%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">299.772 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl" style="width: 70px !important;">2025-26</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:34.16988248059574%; background-color: #dc3545;"></div></div>
+            <div class="chart-val">117.147 €</div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-lbl" style="width: 70px !important;">Previsto</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #ffc107;"></div></div>
+            <div class="chart-val">342.837 €</div>
+        </div></div>
         <div class="header-row">
             <span class="col-lbl"></span>
             <span class="col-val">2024-25<div class="euro-sub">(€)</div></span>
@@ -455,19 +472,19 @@
                 <span class="col-lbl">Set</span>
                 <span class="col-val" style="background-color: #e6f2ff; border-bottom: 1px solid #bfbfbf;">30.997</span>
                 <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">41.316</span>
-                <span class="col-val" style="">41.316</span>
+                <span class="col-val" style="border-bottom: 1px solid #bfbfbf;">41.316</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Ott</span>
                 <span class="col-val" style="background-color: #e6f2ff; border-bottom: 1px solid #bfbfbf;">33.138</span>
                 <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">41.202</span>
-                <span class="col-val" style="">41.202</span>
+                <span class="col-val" style="border-bottom: 1px solid #bfbfbf;">41.202</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Nov</span>
                 <span class="col-val" style="background-color: #e6f2ff; border-bottom: 1px solid #bfbfbf;">31.575</span>
                 <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">34.629</span>
-                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">34.629</span>
+                <span class="col-val" style="border-bottom: 1px solid #bfbfbf;">34.629</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Dic</span>
@@ -522,22 +539,22 @@
                 <span class="col-val" style="background-color: #e6f2ff; border-bottom: 1px solid #bfbfbf;">13.400</span>
                 <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">11.080</span>
-            </div><div class="chart-container"><div class="chart-title">Analisi Grafica</div>
+            </div><div style="height:5mm"></div><div class="desc-box">Mostra l’andamento complessivo degli incassi mese per mese tra anno precedente, anno corrente e previsione finale basata sull’andamento reale e pesi settimanali.</div><div class="info-footer">1. Riepilogo</div></div><div id="tab_2" class="detail-view"><div class="total-row-container"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value"><b style="color:#800000">Σ 2025-26</b>: 41.080 €</div><div class="nav-icon" onclick="handlePrintAction(2)">🖨️</div></div><div class="chart-container">
         <div class="chart-row">
             <div class="chart-lbl" style="width: 70px !important;">2024-25</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:87.43863701992493%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">299.772 €</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:88.274042843276%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">119.132 €</div>
         </div>
         <div class="chart-row">
             <div class="chart-lbl" style="width: 70px !important;">2025-26</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:34.16988248059574%; background-color: #dc3545;"></div></div>
-            <div class="chart-val">117.147 €</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:30.439325118371034%; background-color: #dc3545;"></div></div>
+            <div class="chart-val">41.080 €</div>
         </div>
         <div class="chart-row">
             <div class="chart-lbl" style="width: 70px !important;">Previsto</div>
             <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #ffc107;"></div></div>
-            <div class="chart-val">342.837 €</div>
-        </div></div><div class="info-footer">1. Riepilogo</div></div><div id="tab_2" class="detail-view"><div class="total-row-container"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value"><b style="color:#800000">Σ 2025-26</b>: 41.080 €</div><div class="nav-icon" onclick="handlePrintAction(2)">🖨️</div></div><div class="desc-box">Evidenzia la parte di incasso proveniente esclusivamente dai pagamenti in contanti. Utile per valutare il peso della cassa rispetto al totale.</div>
+            <div class="chart-val">134.957 €</div>
+        </div></div>
         <div class="header-row">
             <span class="col-lbl"></span>
             <span class="col-val">2024-25<div class="euro-sub">(€)</div></span>
@@ -548,19 +565,19 @@
                 <span class="col-lbl">Set</span>
                 <span class="col-val" style="background-color: #e6f2ff; border-bottom: 1px solid #bfbfbf;">10.772</span>
                 <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">14.498</span>
-                <span class="col-val" style="">14.498</span>
+                <span class="col-val" style="border-bottom: 1px solid #bfbfbf;">14.498</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Ott</span>
                 <span class="col-val" style="background-color: #e6f2ff; border-bottom: 1px solid #bfbfbf;">11.775</span>
                 <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">13.853</span>
-                <span class="col-val" style="">13.853</span>
+                <span class="col-val" style="border-bottom: 1px solid #bfbfbf;">13.853</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Nov</span>
                 <span class="col-val" style="background-color: #e6f2ff; border-bottom: 1px solid #bfbfbf;">11.211</span>
                 <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">12.729</span>
-                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">12.729</span>
+                <span class="col-val" style="border-bottom: 1px solid #bfbfbf;">12.729</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Dic</span>
@@ -615,22 +632,22 @@
                 <span class="col-val" style="background-color: #e6f2ff; border-bottom: 1px solid #bfbfbf;">3.876</span>
                 <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">3.818</span>
-            </div><div class="chart-container"><div class="chart-title">Analisi Grafica</div>
+            </div><div style="height:5mm"></div><div class="desc-box">Evidenzia la parte di incasso proveniente esclusivamente dai pagamenti in contanti. Utile per valutare il peso della cassa rispetto al totale.</div><div class="info-footer">2. Contanti</div></div><div id="tab_3" class="detail-view"><div class="total-row-container"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value"><b style="color:#800000">Σ 2025-26</b>: 76.067 €</div><div class="nav-icon" onclick="handlePrintAction(3)">🖨️</div></div><div class="chart-container">
         <div class="chart-row">
             <div class="chart-lbl" style="width: 70px !important;">2024-25</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:88.274042843276%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">119.132 €</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:86.89837642814192%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">180.640 €</div>
         </div>
         <div class="chart-row">
             <div class="chart-lbl" style="width: 70px !important;">2025-26</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:30.439325118371034%; background-color: #dc3545;"></div></div>
-            <div class="chart-val">41.080 €</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:36.59266386049308%; background-color: #dc3545;"></div></div>
+            <div class="chart-val">76.067 €</div>
         </div>
         <div class="chart-row">
             <div class="chart-lbl" style="width: 70px !important;">Previsto</div>
             <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #ffc107;"></div></div>
-            <div class="chart-val">134.957 €</div>
-        </div></div><div class="info-footer">2. Contanti</div></div><div id="tab_3" class="detail-view"><div class="total-row-container"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value"><b style="color:#800000">Σ 2025-26</b>: 76.067 €</div><div class="nav-icon" onclick="handlePrintAction(3)">🖨️</div></div><div class="desc-box">Mostra gli incassi derivanti dai pagamenti elettronici tramite POS. Indica la quota digitale del fatturato.</div>
+            <div class="chart-val">207.875 €</div>
+        </div></div>
         <div class="header-row">
             <span class="col-lbl"></span>
             <span class="col-val">2024-25<div class="euro-sub">(€)</div></span>
@@ -641,19 +658,19 @@
                 <span class="col-lbl">Set</span>
                 <span class="col-val" style="background-color: #e6f2ff; border-bottom: 1px solid #bfbfbf;">20.225</span>
                 <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">26.818</span>
-                <span class="col-val" style="">26.818</span>
+                <span class="col-val" style="border-bottom: 1px solid #bfbfbf;">26.818</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Ott</span>
                 <span class="col-val" style="background-color: #e6f2ff; border-bottom: 1px solid #bfbfbf;">21.363</span>
                 <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">27.349</span>
-                <span class="col-val" style="">27.349</span>
+                <span class="col-val" style="border-bottom: 1px solid #bfbfbf;">27.349</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Nov</span>
                 <span class="col-val" style="background-color: #e6f2ff; border-bottom: 1px solid #bfbfbf;">20.364</span>
                 <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">21.900</span>
-                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">21.900</span>
+                <span class="col-val" style="border-bottom: 1px solid #bfbfbf;">21.900</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Dic</span>
@@ -708,22 +725,22 @@
                 <span class="col-val" style="background-color: #e6f2ff; border-bottom: 1px solid #bfbfbf;">9.524</span>
                 <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">7.261</span>
-            </div><div class="chart-container"><div class="chart-title">Analisi Grafica</div>
+            </div><div style="height:5mm"></div><div class="desc-box">Mostra gli incassi derivanti dai pagamenti elettronici tramite POS. Indica la quota digitale del fatturato.</div><div class="info-footer">3. POS</div></div><div id="tab_4" class="detail-view"><div class="total-row-container"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value"><b style="color:#800000">Σ 2025-26</b>: 5.345 €</div><div class="nav-icon" onclick="handlePrintAction(4)">🖨️</div></div><div class="chart-container">
         <div class="chart-row">
             <div class="chart-lbl" style="width: 70px !important;">2024-25</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:86.89837642814192%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">180.640 €</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:63.09200918005424%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">12.096 €</div>
         </div>
         <div class="chart-row">
             <div class="chart-lbl" style="width: 70px !important;">2025-26</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:36.59266386049308%; background-color: #dc3545;"></div></div>
-            <div class="chart-val">76.067 €</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:27.87919883162946%; background-color: #dc3545;"></div></div>
+            <div class="chart-val">5.345 €</div>
         </div>
         <div class="chart-row">
             <div class="chart-lbl" style="width: 70px !important;">Previsto</div>
             <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #ffc107;"></div></div>
-            <div class="chart-val">207.875 €</div>
-        </div></div><div class="info-footer">3. POS</div></div><div id="tab_4" class="detail-view"><div class="total-row-container"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value"><b style="color:#800000">Σ 2025-26</b>: 5.345 €</div><div class="nav-icon" onclick="handlePrintAction(4)">🖨️</div></div><div class="desc-box">Raccoglie gli incassi attribuiti a clienti non registrati o ingressi occasionali. Serve per stimare il peso del ‘non ricorrente’.</div>
+            <div class="chart-val">19.172 €</div>
+        </div></div>
         <div class="header-row">
             <span class="col-lbl"></span>
             <span class="col-val">2024-25<div class="euro-sub">(€)</div></span>
@@ -734,19 +751,19 @@
                 <span class="col-lbl">Set</span>
                 <span class="col-val" style="background-color: #e6f2ff; border-bottom: 1px solid #bfbfbf;">985</span>
                 <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">2.601</span>
-                <span class="col-val" style="">2.601</span>
+                <span class="col-val" style="border-bottom: 1px solid #bfbfbf;">2.601</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Ott</span>
                 <span class="col-val" style="background-color: #e6f2ff; border-bottom: 1px solid #bfbfbf;">1.258</span>
                 <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">1.133</span>
-                <span class="col-val" style="">1.133</span>
+                <span class="col-val" style="border-bottom: 1px solid #bfbfbf;">1.133</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Nov</span>
                 <span class="col-val" style="background-color: #e6f2ff; border-bottom: 1px solid #bfbfbf;">1.241</span>
                 <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">1.611</span>
-                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">1.611</span>
+                <span class="col-val" style="border-bottom: 1px solid #bfbfbf;">1.611</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Dic</span>
@@ -801,22 +818,22 @@
                 <span class="col-val" style="background-color: #e6f2ff; border-bottom: 1px solid #bfbfbf;">1.016</span>
                 <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">1.055</span>
-            </div><div class="chart-container"><div class="chart-title">Analisi Grafica</div>
+            </div><div style="height:5mm"></div><div class="desc-box">Raccoglie gli incassi attribuiti a clienti non registrati o ingressi occasionali. Serve per stimare il peso del ‘non ricorrente’.</div><div class="info-footer">4. Entrate X</div></div><div id="tab_5" class="detail-view"><div class="total-row-container"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value"><b style="color:#800000">Σ 2025-26</b>: 671</div><div class="nav-icon" onclick="handlePrintAction(5)">🖨️</div></div><div class="chart-container">
         <div class="chart-row">
             <div class="chart-lbl" style="width: 70px !important;">2024-25</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:63.09200918005424%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">12.096 €</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:89.39779474130619%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">1.054</div>
         </div>
         <div class="chart-row">
             <div class="chart-lbl" style="width: 70px !important;">2025-26</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:27.87919883162946%; background-color: #dc3545;"></div></div>
-            <div class="chart-val">5.345 €</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:56.912637828668366%; background-color: #dc3545;"></div></div>
+            <div class="chart-val">671</div>
         </div>
         <div class="chart-row">
             <div class="chart-lbl" style="width: 70px !important;">Previsto</div>
             <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #ffc107;"></div></div>
-            <div class="chart-val">19.172 €</div>
-        </div></div><div class="info-footer">4. Entrate X</div></div><div id="tab_5" class="detail-view"><div class="total-row-container"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value"><b style="color:#800000">Σ 2025-26</b>: 671</div><div class="nav-icon" onclick="handlePrintAction(5)">🖨️</div></div><div class="desc-box">Indica il numero di clienti unici attivi mese per mese, confrontando anno Precedente, anno Corrente e una Previsione automatica basata sugli anni precedenti.</div>
+            <div class="chart-val">1.179</div>
+        </div></div>
         <div class="header-row">
             <span class="col-lbl"></span>
             <span class="col-val">2024-25<div class="euro-sub">&nbsp;</div></span>
@@ -827,19 +844,19 @@
                 <span class="col-lbl">Set</span>
                 <span class="col-val" style="background-color: #e6f2ff; border-bottom: 1px solid #bfbfbf;">258</span>
                 <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">328</span>
-                <span class="col-val" style="">328</span>
+                <span class="col-val" style="border-bottom: 1px solid #bfbfbf;">328</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Ott</span>
                 <span class="col-val" style="background-color: #e6f2ff; border-bottom: 1px solid #bfbfbf;">317</span>
                 <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">366</span>
-                <span class="col-val" style="">366</span>
+                <span class="col-val" style="border-bottom: 1px solid #bfbfbf;">366</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Nov</span>
                 <span class="col-val" style="background-color: #e6f2ff; border-bottom: 1px solid #bfbfbf;">319</span>
                 <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">327</span>
-                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">327</span>
+                <span class="col-val" style="border-bottom: 1px solid #bfbfbf;">327</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Dic</span>
@@ -894,22 +911,22 @@
                 <span class="col-val" style="background-color: #e6f2ff; border-bottom: 1px solid #bfbfbf;">112</span>
                 <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">99</span>
-            </div><div class="chart-container"><div class="chart-title">Analisi Grafica</div>
+            </div><div style="height:5mm"></div><div class="desc-box">Indica il numero di clienti unici attivi mese per mese, confrontando anno Precedente, anno Corrente e una Previsione automatica basata sugli anni precedenti.</div><div class="info-footer">5. Clienti</div></div><div id="tab_6" class="detail-view"><div class="total-row-container"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value"><b style="color:#800000">µ 2025-26</b>: 175 €</div><div class="nav-icon" onclick="handlePrintAction(6)">🖨️</div></div><div class="chart-container">
         <div class="chart-row">
             <div class="chart-lbl" style="width: 70px !important;">2024-25</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:89.39779474130619%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">1.054</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:97.80849435150995%; background-color: #85c1e9;"></div></div>
+            <div class="chart-val">284 €</div>
         </div>
         <div class="chart-row">
             <div class="chart-lbl" style="width: 70px !important;">2025-26</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:56.912637828668366%; background-color: #dc3545;"></div></div>
-            <div class="chart-val">671</div>
+            <div class="chart-bar-area"><div class="chart-bar" style="width:60.03918248080829%; background-color: #dc3545;"></div></div>
+            <div class="chart-val">175 €</div>
         </div>
         <div class="chart-row">
             <div class="chart-lbl" style="width: 70px !important;">Previsto</div>
             <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #ffc107;"></div></div>
-            <div class="chart-val">1.179</div>
-        </div></div><div class="info-footer">5. Clienti</div></div><div id="tab_6" class="detail-view"><div class="total-row-container"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value"><b style="color:#800000">µ 2025-26</b>: 175 €</div><div class="nav-icon" onclick="handlePrintAction(6)">🖨️</div></div><div class="desc-box">Calcola la media di spesa per cliente dividendo l’incasso totale per il numero di clienti unici. Misura la qualità della spesa.</div>
+            <div class="chart-val">291 €</div>
+        </div></div>
         <div class="header-row">
             <span class="col-lbl"></span>
             <span class="col-val">2024-25<div class="euro-sub">(€)</div></span>
@@ -920,19 +937,19 @@
                 <span class="col-lbl">Set</span>
                 <span class="col-val" style="background-color: #e6f2ff; border-bottom: 1px solid #bfbfbf;">120</span>
                 <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">126</span>
-                <span class="col-val" style="">126</span>
+                <span class="col-val" style="border-bottom: 1px solid #bfbfbf;">126</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Ott</span>
                 <span class="col-val" style="background-color: #e6f2ff; border-bottom: 1px solid #bfbfbf;">105</span>
                 <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">113</span>
-                <span class="col-val" style="">113</span>
+                <span class="col-val" style="border-bottom: 1px solid #bfbfbf;">113</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Nov</span>
                 <span class="col-val" style="background-color: #e6f2ff; border-bottom: 1px solid #bfbfbf;">99</span>
                 <span class="col-val" style="background-color: #ffe6e6; font-weight:bold; border-bottom: 1px solid #bfbfbf;">106</span>
-                <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">106</span>
+                <span class="col-val" style="border-bottom: 1px solid #bfbfbf;">106</span>
             </div>
             <div class="data-row-3col">
                 <span class="col-lbl">Dic</span>
@@ -987,22 +1004,7 @@
                 <span class="col-val" style="background-color: #e6f2ff; border-bottom: 1px solid #bfbfbf;">120</span>
                 <span class="col-val" style="font-weight:bold; border-bottom: 1px solid #bfbfbf;"></span>
                 <span class="col-val" style="background-color: #fff59d; font-weight:bold; border-bottom: 1px solid #bfbfbf;">112</span>
-            </div><div class="chart-container"><div class="chart-title">Analisi Grafica</div>
-        <div class="chart-row">
-            <div class="chart-lbl" style="width: 70px !important;">2024-25</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:97.80849435150995%; background-color: #85c1e9;"></div></div>
-            <div class="chart-val">284 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl" style="width: 70px !important;">2025-26</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:60.03918248080829%; background-color: #dc3545;"></div></div>
-            <div class="chart-val">175 €</div>
-        </div>
-        <div class="chart-row">
-            <div class="chart-lbl" style="width: 70px !important;">Previsto</div>
-            <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #ffc107;"></div></div>
-            <div class="chart-val">291 €</div>
-        </div></div><div class="info-footer">6. Spesa Media</div></div><div id="tab_7" class="detail-view"><div class="total-row-container"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value"><b style="color:#800000">Σ Totale</b>: 1.061.040 €</div><div class="nav-icon" onclick="handlePrintAction(7)">🖨️</div></div><div class="desc-box">Mostra quanto incasso è stato generato la MATTINA (Sabina) e nel POMERIGGIO-SERA (Marica). Aiuta a capire come distribuire le attività di segreteria.</div><div class="chart-container">
+            </div><div style="height:5mm"></div><div class="desc-box">Calcola la media di spesa per cliente dividendo l’incasso totale per il numero di clienti unici. Misura la qualità della spesa.</div><div class="info-footer">6. Spesa Media</div></div><div id="tab_7" class="detail-view"><div class="total-row-container"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value"><b style="color:#800000">Σ Totale</b>: 1.061.040 €</div><div class="nav-icon" onclick="handlePrintAction(7)">🖨️</div></div><div class="chart-container">
         <div class="chart-row">
             <div class="chart-lbl-wide" style="width: 80px !important;">Marica</div>
             <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
@@ -1017,7 +1019,7 @@
             <div class="chart-lbl-wide" style="width: 80px !important;">Altri</div>
             <div class="chart-bar-area"><div class="chart-bar" style="width:1%; background-color: #85c1e9;"></div></div>
             <div class="chart-val">5.542 €</div>
-        </div></div><div class="info-footer">7. Orari</div></div><div id="tab_8" class="detail-view"><div class="total-row-container"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value"><b style="color:#800000">Σ Totale</b>: 1.061.040 €</div><div class="nav-icon" onclick="handlePrintAction(8)">🖨️</div></div><div class="desc-box">Classifica gli incassi in base ai giorni, per individuare picchi e debolezze settimanali.</div><div class="chart-container">
+        </div></div><div class="desc-box">Mostra quanto incasso è stato generato la MATTINA (Sabina) e nel POMERIGGIO-SERA (Marica). Aiuta a capire come distribuire le attività di segreteria.</div><div class="info-footer">7. Orari</div></div><div id="tab_8" class="detail-view"><div class="total-row-container"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value"><b style="color:#800000">Σ Totale</b>: 1.061.040 €</div><div class="nav-icon" onclick="handlePrintAction(8)">🖨️</div></div><div class="chart-container">
         <div class="chart-row">
             <div class="chart-lbl-wide" style="width: 80px !important;">Lun</div>
             <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
@@ -1047,7 +1049,7 @@
             <div class="chart-lbl-wide" style="width: 80px !important;">Sab</div>
             <div class="chart-bar-area"><div class="chart-bar" style="width:14.871494042163153%; background-color: #85c1e9;"></div></div>
             <div class="chart-val">40.562 €</div>
-        </div></div><div class="info-footer">8. Giorni</div></div><div id="tab_9" class="detail-view"><div class="total-row-container"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value"><b style="color:#800000">Σ Totale</b>: 901.912 €</div><div class="nav-icon" onclick="handlePrintAction(9)">🖨️</div></div><div class="desc-box">Ordina le attività in base al totale incassato, mostrando quali corsi trainano e quali rendono meno.</div><div class="chart-container">
+        </div></div><div class="desc-box">Classifica gli incassi in base ai giorni, per individuare picchi e debolezze settimanali.</div><div class="info-footer">8. Giorni</div></div><div id="tab_9" class="detail-view"><div class="total-row-container"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value"><b style="color:#800000">Σ Totale</b>: 901.912 €</div><div class="nav-icon" onclick="handlePrintAction(9)">🖨️</div></div><div class="chart-container">
         <div class="chart-row">
             <div class="chart-lbl-wide" style="width: 130px !important;">Fitness</div>
             <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
@@ -1097,7 +1099,7 @@
             <div class="chart-lbl-wide" style="width: 130px !important;">SlowFit</div>
             <div class="chart-bar-area"><div class="chart-bar" style="width:4.467826585888587%; background-color: #85c1e9;"></div></div>
             <div class="chart-val">21.180 €</div>
-        </div></div><div class="info-footer">9. Attività</div></div><div id="tab_10" class="detail-view"><div class="total-row-container"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value"><b style="color:#800000">Clienti:</b> 657 <span style="margin-left:10px"></span> <b style="color:#800000">Tot:</b> 116.983 €</div><div class="nav-icon" onclick="handlePrintAction(10)">🖨️</div></div><div class="desc-box">Elenca i 100 clienti che hanno speso di più nell’anno corrente, con numero pagamenti e totale acquistato.</div><div class="chart-container">
+        </div></div><div class="desc-box">Ordina le attività in base al totale incassato, mostrando quali corsi trainano e quali rendono meno.</div><div class="info-footer">9. Attività</div></div><div id="tab_10" class="detail-view"><div class="total-row-container"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value"><b style="color:#800000">Clienti:</b> 657 <span style="margin-left:10px"></span> <b style="color:#800000">Tot:</b> 116.983 €</div><div class="nav-icon" onclick="handlePrintAction(10)">🖨️</div></div><div class="chart-container">
         <div class="chart-row">
             <div class="chart-lbl-wide" style="width: 165px !important;">Mignozzi Francesco</div>
             <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
@@ -5096,7 +5098,7 @@
                 <span class="col-name">Trochoutsos Elisavet</span>
                 <span class="col-freq">1</span>
                 <span class="col-money">5</span>
-            </div></div><div class="info-footer">10. Clienti Top 100</div></div><div id="tab_11" class="detail-view"><div class="total-row-container"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value"><b style="color:#800000">Clienti:</b> 565 <span style="margin-left:10px"></span> <b style="color:#800000">Tot:</b> 123.018 €</div><div class="nav-icon" onclick="handlePrintAction(11)">🖨️</div></div><div class="desc-box">Mostra i clienti presenti l’anno precedente ma non tornati quest’anno, con totale pagamenti e spesa associata.</div><div class="chart-container">
+            </div></div><div class="desc-box">Elenca i 100 clienti che hanno speso di più nell’anno corrente, con numero pagamenti e totale acquistato.</div><div class="info-footer">10. Clienti Top 100</div></div><div id="tab_11" class="detail-view"><div class="total-row-container"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value"><b style="color:#800000">Clienti:</b> 565 <span style="margin-left:10px"></span> <b style="color:#800000">Tot:</b> 123.018 €</div><div class="nav-icon" onclick="handlePrintAction(11)">🖨️</div></div><div class="chart-container">
         <div class="chart-row">
             <div class="chart-lbl-wide" style="width: 165px !important;">Longo Victor</div>
             <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
@@ -8543,7 +8545,7 @@
                 <span class="col-name">Ruggeri Valentina</span>
                 <span class="col-freq">1</span>
                 <span class="col-money">5</span>
-            </div></div><div class="info-footer">11. Clienti Attesi</div></div><div id="tab_12" class="detail-view"><div class="total-row-container"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value"><b style="color:#800000">Clienti:</b> 70 <span style="margin-left:10px"></span> <b style="color:#800000">Tot:</b> 91.544 €</div><div class="nav-icon" onclick="handlePrintAction(12)">🖨️</div></div><div class="desc-box">Indica i clienti presenti in tutti gli ultimi anni ma assenti quest’anno. Segnala cali strutturali della clientela più fedele.</div><div class="chart-container">
+            </div></div><div class="desc-box">Mostra i clienti presenti l’anno precedente ma non tornati quest’anno, con totale pagamenti e spesa associata.</div><div class="info-footer">11. Clienti Attesi</div></div><div id="tab_12" class="detail-view"><div class="total-row-container"><div class="nav-icon" onclick="goHome()">🏠</div><div class="total-value"><b style="color:#800000">Clienti:</b> 70 <span style="margin-left:10px"></span> <b style="color:#800000">Tot:</b> 91.544 €</div><div class="nav-icon" onclick="handlePrintAction(12)">🖨️</div></div><div class="chart-container">
         <div class="chart-row">
             <div class="chart-lbl-wide" style="width: 165px !important;">Ventrella Edoardo</div>
             <div class="chart-bar-area"><div class="chart-bar" style="width:100.0%; background-color: #dc3545;"></div></div>
@@ -9020,7 +9022,7 @@
                 <span class="col-name">Mazzarisi Maria Grazia</span>
                 <span class="col-freq">4</span>
                 <span class="col-money">140</span>
-            </div></div><div class="info-footer">12. Clienti da Chiamare</div></div>
+            </div></div><div class="desc-box">Indica i clienti presenti in tutti gli ultimi anni ma assenti quest’anno. Segnala cali strutturali della clientela più fedele.</div><div class="info-footer">12. Clienti da Chiamare</div></div>
     </div>
 </body>
 </html>
