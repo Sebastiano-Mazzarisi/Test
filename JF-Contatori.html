@@ -4,375 +4,197 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
 <title>Gestione Contatori JoyFit</title>
+
 <style>
-  :root{ 
-    --ink: #0f172a; 
-    --bg: #e9edf5; 
-    --blue: #2563eb; 
-    --dark-blue: #1F497D;
-    --rad: 12px; 
-    --danger: #dc2626; 
-  }
-  
-  * { box-sizing: border-box; }
+:root{
+  --ink:#0f172a; --bg:#e9edf5; --blue:#2563eb; --dark-blue:#1F497D;
+  --rad:12px; --danger:#dc2626;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; padding:10px; font-family:'Segoe UI',sans-serif;
+  background:var(--bg); color:var(--ink); font-size:22px;
+  display:flex; justify-content:center;
+}
+.box{
+  background:#fff; border-radius:var(--rad); padding:15px;
+  width:100%; max-width:900px;
+  box-shadow:0 4px 15px rgba(0,0,0,.1);
+}
+h1{
+  text-align:center; color:var(--dark-blue);
+  margin:5px 0 10px; font-size:1.4em; text-transform:uppercase;
+}
+.total-header{
+  display:flex; justify-content:center; align-items:center; gap:15px;
+  border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:15px;
+  font-size:.9em;
+}
+.total-header span{font-weight:700; color:var(--blue); font-size:1.2em}
 
-  body{ 
-    margin: 0; 
-    padding: 10px; 
-    font-family: 'Segoe UI', sans-serif; 
-    background: var(--bg); 
-    color: var(--ink); 
-    font-size: 24px; 
-    display: flex;
-    justify-content: center; 
-  }
+table{width:100%; border-collapse:collapse}
+th,td{
+  padding:4px 6px;
+  border-bottom:1px solid #eee;
+  vertical-align:middle;
+}
+th{
+  background:#f8fafc;
+  font-size:.7em;
+  text-transform:uppercase;
+}
 
-  .box{ 
-    background: #fff; 
-    border-radius: var(--rad); 
-    padding: 15px; 
-    width: 100%;
-    max-width: 800px; 
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-    padding-bottom: 25px; 
-  }
+th:nth-child(1), td:nth-child(1){ width:70%; }
+th:nth-child(2), td:nth-child(2){ width:15%; text-align:right; }
+th:nth-child(3), td:nth-child(3){ width:15%; text-align:center; }
 
-  h1{ 
-    text-align: center; 
-    color: var(--dark-blue); 
-    margin-top: 5px; 
-    font-size: 1.5em; 
-    margin-bottom: 5px;
-    text-transform: uppercase;
-    line-height: 1.1;
-  }
+.num{font-weight:700; color:var(--blue)}
+.row-active{background:#fffce7}
+.row-audio{background:#e6f2ff}
 
-  .total-header {
-      text-align: center;
-      font-size: 0.9em;
-      color: #64748b;
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #eee;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 15px;
-  }
-  .total-header span {
-      font-weight: 700;
-      color: var(--blue);
-      font-size: 1.2em;
-  }
+.btn-reset{
+  width:100%;
+  font-weight:700;
+  border:2px solid var(--danger);
+  color:var(--danger);
+  background:#fff;
+  border-radius:6px;
+  cursor:pointer;
+}
+.btn-reset:hover{background:var(--danger); color:#fff}
 
-  .live-indicator {
-      font-size: 0.8em;
-      color: #ccc; 
-      transition: color 0.3s;
-      vertical-align: middle;
-      position: relative;
-      top: -4px;
-      margin-left: 10px;
-  }
-  .live-indicator.active { 
-      color: #16a34a; 
-      text-shadow: 0 0 5px #16a34a; 
-  }
-
-  table{ 
-    width: 100%; 
-    border-collapse: collapse; 
-    table-layout: fixed; 
-  }
-
-  th, td{ 
-    padding: 5px 5px; 
-    border-bottom: 1px solid #f1f5f9; 
-    text-align: left; 
-    vertical-align: middle;
-  }
-
-  th{ 
-    background: #f8fafc; 
-    font-weight: 600; 
-    color: #64748b;
-    font-size: 0.7em;
-    text-transform: uppercase;
-  }
-
-  tr.row-active {
-      background-color: #fffce7; 
-  }
-  tr.row-active td {
-      border-bottom: 1px solid #f0e6b2;
-  }
-  
-  tr.row-audio {
-      background-color: #e6f2ff; 
-  }
-  tr.row-audio.row-active {
-      background-color: #cce5ff; 
-  }
-
-  td:first-child {
-      font-weight: 500; 
-      font-size: 0.85em; 
-      color: #334155;
-      overflow: hidden;
-      white-space: nowrap; 
-      text-overflow: ellipsis;
-  }
-  
-  .time-cell {
-      font-size: 0.75em;
-      color: #666;
-      text-align: center;
-  }
-  .time-new {
-      color: #dc2626;
-      font-weight: bold;
-      animation: flash 1s;
-  }
-  
-  @keyframes flash {
-      0% { color: red; opacity: 0; }
-      100% { color: #dc2626; opacity: 1; }
-  }
-
-  .num{ 
-    font-weight: 700; 
-    font-size: 1.1em; 
-    color: var(--blue);
-    display: block;
-    text-align: right;
-  }
-
-  .btn-reset{ 
-    background: #fff; 
-    border: 2px solid var(--danger); 
-    color: var(--danger); 
-    border-radius: 8px; 
-    cursor: pointer; 
-    padding: 2px 0; 
-    font-weight: 700; 
-    font-size: 0.8em;
-    width: 100%;
-    display: block;
-  }
-
-  .btn-reset-all {
-    background: #fff; 
-    border: 2px solid var(--danger); 
-    color: var(--danger);
-    border-radius: 8px;
-    cursor: pointer;
-    padding: 4px 12px;
-    font-weight: 700;
-    font-size: 0.8em;
-  }
-  
-  .btn-reset:hover, .btn-reset-all:hover {
-      background: var(--danger);
-      color: #fff;
-  }
-
+.btn-reset-all{
+  padding:4px 12px;
+  font-weight:700;
+  border-radius:8px;
+  border:2px solid var(--danger);
+  color:var(--danger);
+  background:#fff;
+  cursor:pointer;
+}
+.btn-reset-all:hover{background:var(--danger); color:#fff}
 </style>
 </head>
-<body>
 
+<body>
 <div class="box">
-  <h1>📊 Contatori <span class="live-indicator" id="liveDot" title="Live">●</span></h1>
-  
+  <h1>📊 Contatori JoyFit</h1>
+
   <div class="total-header">
-      Totale: <span id="grandTotal">...</span>
-      <button class="btn-reset-all" onclick="resetAllCounts()" title="Azzera TUTTO">X</button>
+    Totale eventi: <span id="grandTotal">0</span>
+    <button class="btn-reset-all" onclick="resetAll()">RESET TUTTO</button>
   </div>
 
-  <table id="tbl">
+  <table>
     <thead>
-        <tr>
-            <th width="50%">Tabella</th> 
-            <th width="15%" style="text-align:right">Visite</th>
-            <th width="20%" style="text-align:center">Ultimo Click</th>
-            <th width="15%" style="text-align:center">Reset</th>
-        </tr>
+      <tr>
+        <th>Evento</th>
+        <th>Conteggio</th>
+        <th>Reset</th>
+      </tr>
     </thead>
-    <tbody></tbody>
+    <tbody id="tbody"></tbody>
   </table>
 </div>
 
 <script>
-// --- CONFIGURAZIONE ---
-const NAMESPACE = "joyfit-stats-v1"; 
 const BASE_URL = "https://countapi.mileshilliard.com/api/v1";
+const NAMESPACE = "joyfit-stats-v1";
 
-let previousCounts = {};
-let lastTimes = {};
+const EVENTS = [
+  { key:"tab_0", name:"Tabella 0 – Sintesi" },
+  { key:"tab_1", name:"Tabella 1 – Riepilogo Incassi" },
+  { key:"tab_2", name:"Tabella 2 – Contanti" },
+  { key:"tab_3", name:"Tabella 3 – POS" },
+  { key:"tab_4", name:"Tabella 4 – Entrate X" },
+  { key:"tab_5", name:"Tabella 5 – Clienti" },
+  { key:"tab_6", name:"Tabella 6 – Spesa Media" },
+  { key:"tab_7", name:"Tabella 7 – Orari" },
+  { key:"tab_8", name:"Tabella 8 – Giorni" },
+  { key:"tab_9", name:"Tabella 9 – Attività" },
+  { key:"tab_10", name:"Tabella 10 – Clienti Top 100" },
+  { key:"tab_11", name:"Tabella 11 – Clienti Attesi" },
+  { key:"tab_12", name:"Tabella 12 – Clienti da Chiamare" },
+  { key:"tab_13", name:"Tabella 13 – Fedeltà" },
 
-// --- ELENCO TABELLE COMPLETO (ALLINEATO A PYTHON) ---
-const TABLES = [
-  { id: 0, name: "Sintesi" },
-  { id: 1, name: "1. Riepilogo" },
-  { id: 2, name: "2. Contanti" },
-  { id: 3, name: "3. POS" },
-  { id: 4, name: "4. Entrate X" },
-  { id: 5, name: "5. Clienti" },
-  { id: 6, name: "6. Spesa Media" },
-  { id: 7, name: "7. Orari" },
-  { id: 8, name: "8. Giorni" },
-  { id: 9, name: "9. Attività" },
-  { id: 10, name: "10. Clienti Top 100" },
-  { id: 11, name: "11. Clienti Attesi" },
-  { id: 12, name: "12. Clienti da Chiamare" },
-  // --- NUOVI PUNTI EXTRA ---
-  { id: 13, name: "13. Riepilogo (PDF)" }, 
-  { id: 14, name: "14. Calendari" }, 
-  { id: 15, name: "15. Video" },
-  // -------------------------
-  { id: 'audio', name: "🔊 Ascolto Sintesi", is_special: true }
+  { key:"home", name:"🏠 Home" },
+  { key:"icon_riepilogo_pdf", name:"📝 Riepilogo PDF" },
+  { key:"icon_calendari", name:"📅 Calendari" },
+  { key:"icon_video_sintesi", name:"📹 Video Sintesi" },
+
+  { key:"audio_sintesi", name:"🔊 Audio Sintesi", audio:true }
 ];
 
-// --- FUNZIONE PER IL BEEP ---
-function playBeep() {
-    try {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContext) return;
+let lastSnapshot = {};
 
-        const ctx = new AudioContext();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-
-        // Configurazione suono: 220Hz (La basso)
-        osc.type = 'sine';
-        osc.frequency.value = 220; 
-        
-        // Volume basso
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-
-        osc.start();
-        osc.stop(ctx.currentTime + 0.3);
-    } catch(e) {
-        console.log("Audio non ancora attivo o non supportato");
-    }
+async function getVal(key){
+  try{
+    const r = await fetch(`${BASE_URL}/get/${NAMESPACE}_${key}`);
+    const j = await r.json();
+    return j.value || 0;
+  }catch{
+    return 0;
+  }
 }
 
-async function getCount(key) {
-    try {
-        const res = await fetch(`${BASE_URL}/get/${NAMESPACE}_${key}`);
-        const data = await res.json();
-        return data.value || 0;
-    } catch (e) { 
-        return 0; 
-    }
+async function resetKey(key){
+  if(!confirm("Azzerare questo contatore?")) return;
+  await fetch(`${BASE_URL}/set/${NAMESPACE}_${key}?value=0`);
+  lastSnapshot = {};
+  load();
 }
 
-async function resetCount(key, id) {
-    if(!confirm("Azzerare contatore?")) return;
-    try {
-        await fetch(`${BASE_URL}/set/${NAMESPACE}_${key}?value=0`);
-        previousCounts[id] = 0;
-        lastTimes[id] = "-";
-        loadCounts(false); 
-    } catch(e) { alert("Errore reset. Controlla connessione."); }
+async function resetAll(){
+  if(!confirm("AZZERARE TUTTI I CONTATORI?")) return;
+  await Promise.all(EVENTS.map(e =>
+    fetch(`${BASE_URL}/set/${NAMESPACE}_${e.key}?value=0`)
+  ));
+  lastSnapshot = {};
+  load();
 }
 
-async function resetAllCounts() {
-    if(!confirm("ATTENZIONE: Sei sicuro di voler azzerare TUTTI i contatori?")) return;
-    document.getElementById("grandTotal").innerText = "Wait...";
-    
-    const promises = TABLES.map(t => {
-        const key = t.is_special ? "audio_sintesi" : "tab_" + t.id;
-        return fetch(`${BASE_URL}/set/${NAMESPACE}_${key}?value=0`);
-    });
-    
-    try {
-        await Promise.all(promises);
-        previousCounts = {};
-        lastTimes = {};
-        loadCounts(false);
-    } catch (e) { alert("Errore durante il reset totale"); loadCounts(false); }
+function redraw(snapshot, total){
+  const tb = document.getElementById("tbody");
+  tb.innerHTML = "";
+
+  for(const e of EVENTS){
+    const v = snapshot[e.key];
+    const tr = document.createElement("tr");
+    if(v > 0) tr.classList.add("row-active");
+    if(e.audio) tr.classList.add("row-audio");
+
+    tr.innerHTML = `
+      <td>${e.name}</td>
+      <td class="num">${v}</td>
+      <td><button class="btn-reset" onclick="resetKey('${e.key}')">X</button></td>
+    `;
+    tb.appendChild(tr);
+  }
+
+  document.getElementById("grandTotal").innerText =
+    total.toLocaleString("it-IT");
 }
 
-function getCurrentTime() {
-    const now = new Date();
-    return now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+async function load(){
+  let snapshot = {};
+  let total = 0;
+  let changed = false;
+
+  for(const e of EVENTS){
+    const v = await getVal(e.key);
+    snapshot[e.key] = v;
+    total += v;
+    if(lastSnapshot[e.key] !== v) changed = true;
+  }
+
+  if(!changed && Object.keys(lastSnapshot).length > 0) return;
+
+  lastSnapshot = snapshot;
+  redraw(snapshot, total);
 }
 
-async function loadCounts(isAuto = true) {
-    const tbody = document.querySelector("#tbl tbody");
-    const grandTotalEl = document.getElementById("grandTotal");
-    const liveDot = document.getElementById("liveDot");
-
-    if (tbody.children.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px; color:#999;'>In attesa dei dati...</td></tr>";
-    }
-
-    if(isAuto) liveDot.classList.add("active");
-
-    const promises = TABLES.map(async t => {
-        const key = t.is_special ? "audio_sintesi" : "tab_" + t.id;
-        const val = await getCount(key);
-        return { ...t, key, val };
-    });
-
-    const results = await Promise.all(promises);
-    let html = "";
-    let totalVisits = 0;
-    let anyChange = false;
-
-    for(let t of TABLES) {
-        const data = results.find(r => r.id === t.id);
-        const currentVal = data.val;
-        const prevVal = previousCounts[t.id];
-        
-        // Rileva cambiamento
-        if (prevVal !== undefined && currentVal > prevVal) {
-            lastTimes[t.id] = getCurrentTime();
-            anyChange = true;
-        }
-        
-        previousCounts[t.id] = currentVal;
-        totalVisits += currentVal;
-        
-        let rowClass = currentVal > 0 ? 'row-active' : '';
-        if (t.is_special) rowClass += ' row-audio'; 
-        
-        const timeDisplay = lastTimes[t.id] || "-";
-        const timeClass = (prevVal !== undefined && currentVal > prevVal) ? "time-cell time-new" : "time-cell";
-
-        html += `
-        <tr class="${rowClass}">
-            <td title="${t.name}">${t.name}</td>
-            <td style="text-align:right"><span class="num">${currentVal}</span></td>
-            <td class="${timeClass}">${timeDisplay}</td>
-            <td style="text-align:center"><button class="btn-reset" onclick="resetCount('${data.key}', '${t.id}')">X</button></td>
-        </tr>`;
-    }
-    
-    tbody.innerHTML = html;
-    grandTotalEl.innerText = totalVisits.toLocaleString('it-IT');
-    
-    // Esegui il beep se c'è stato un cambiamento ed è un refresh automatico
-    if(anyChange && isAuto) {
-        playBeep();
-    }
-    
-    setTimeout(() => liveDot.classList.remove("active"), 500);
-}
-
-// Avvio iniziale
-loadCounts(false);
-
-// Refresh ogni 2 secondi
-setInterval(() => {
-    loadCounts(true);
-}, 2000);
-
+load();
+setInterval(load, 3000);
 </script>
-
 </body>
 </html>
