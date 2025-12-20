@@ -1,3 +1,9 @@
+<!--
+Nome script: JF-Contatori.html
+Data aggiornamento: 20/12/2025 08:35
+Descrizione: Dashboard per la visualizzazione e gestione dei contatori JoyFit
+-->
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -78,10 +84,17 @@ th{
   text-transform:uppercase;
 }
 
-/* COLONNE FINALI */
-th:nth-child(1), td:nth-child(1){ width:48%; }   /* EVENTO */
-th:nth-child(2), td:nth-child(2){ width:35%; text-align:right; } /* CONTEGGIO */
-th:nth-child(3), td:nth-child(3){ width:17%; text-align:center; } /* RESET */
+/* ===== LAYOUT DESKTOP ===== */
+th:nth-child(1), td:nth-child(1){ width:48%; }
+th:nth-child(2), td:nth-child(2){ width:35%; text-align:right; }
+th:nth-child(3), td:nth-child(3){ width:17%; text-align:center; }
+
+/* ===== LAYOUT MOBILE ===== */
+@media (max-width: 480px){
+  th:nth-child(1), td:nth-child(1){ width:60%; }
+  th:nth-child(2), td:nth-child(2){ width:20%; text-align:right; }
+  th:nth-child(3), td:nth-child(3){ width:20%; text-align:center; }
+}
 
 .num{
   font-weight:700;
@@ -138,7 +151,7 @@ th:nth-child(3), td:nth-child(3){ width:17%; text-align:center; } /* RESET */
     <thead>
       <tr>
         <th>Evento</th>
-        <th>Conteggio</th>
+        <th>#</th>
         <th>Reset</th>
       </tr>
     </thead>
@@ -147,13 +160,6 @@ th:nth-child(3), td:nth-child(3){ width:17%; text-align:center; } /* RESET */
 </div>
 
 <script>
-/* === REFRESH AUTOMATICO UNA SOLA VOLTA === */
-if (!sessionStorage.getItem("jf_contatori_refreshed")) {
-  sessionStorage.setItem("jf_contatori_refreshed", "1");
-  location.reload(true);
-}
-
-/* === CONTATORI === */
 const BASE_URL = "https://countapi.mileshilliard.com/api/v1";
 const NAMESPACE = "joyfit-stats-v1";
 
