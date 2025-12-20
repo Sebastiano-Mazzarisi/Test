@@ -7,50 +7,90 @@
 
 <style>
 :root{
-  --ink:#0f172a; --bg:#e9edf5; --blue:#2563eb; --dark-blue:#1F497D;
-  --rad:12px; --danger:#dc2626;
+  --ink:#0f172a;
+  --bg:#e9edf5;
+  --blue:#2563eb;
+  --dark-blue:#1F497D;
+  --rad:12px;
+  --danger:#dc2626;
 }
 *{box-sizing:border-box}
+
 body{
-  margin:0; padding:10px; font-family:'Segoe UI',sans-serif;
-  background:var(--bg); color:var(--ink); font-size:22px;
-  display:flex; justify-content:center;
+  margin:0;
+  padding:10px;
+  font-family:'Segoe UI',sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  font-size:22px;
+  display:flex;
+  justify-content:center;
 }
+
 .box{
-  background:#fff; border-radius:var(--rad); padding:15px;
-  width:100%; max-width:900px;
+  background:#fff;
+  border-radius:var(--rad);
+  padding:15px;
+  width:100%;
+  max-width:600px;   /* box compatto */
   box-shadow:0 4px 15px rgba(0,0,0,.1);
 }
+
 h1{
-  text-align:center; color:var(--dark-blue);
-  margin:5px 0 10px; font-size:1.4em; text-transform:uppercase;
+  text-align:center;
+  color:var(--dark-blue);
+  margin:5px 0 10px;
+  font-size:1.4em;
+  text-transform:uppercase;
 }
+
 .total-header{
-  display:flex; justify-content:center; align-items:center; gap:15px;
-  border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:15px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:15px;
+  border-bottom:1px solid #eee;
+  padding-bottom:10px;
+  margin-bottom:15px;
   font-size:.9em;
 }
-.total-header span{font-weight:700; color:var(--blue); font-size:1.2em}
 
-table{width:100%; border-collapse:collapse}
+.total-header span{
+  font-weight:700;
+  color:var(--blue);
+  font-size:1.2em;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
 th,td{
   padding:4px 6px;
   border-bottom:1px solid #eee;
   vertical-align:middle;
 }
+
 th{
   background:#f8fafc;
   font-size:.7em;
   text-transform:uppercase;
 }
 
-th:nth-child(1), td:nth-child(1){ width:70%; }
-th:nth-child(2), td:nth-child(2){ width:15%; text-align:right; }
-th:nth-child(3), td:nth-child(3){ width:15%; text-align:center; }
+/* ===== COLONNE FINALI (COME RICHIESTO) ===== */
+/* EVENTO cresce, RESET dimezzato */
+th:nth-child(1), td:nth-child(1){ width:48%; }   /* EVENTO */
+th:nth-child(2), td:nth-child(2){ width:35%; text-align:right; } /* CONTEGGIO */
+th:nth-child(3), td:nth-child(3){ width:17%; text-align:center; } /* RESET */
 
-.num{font-weight:700; color:var(--blue)}
-.row-active{background:#fffce7}
-.row-audio{background:#e6f2ff}
+.num{
+  font-weight:700;
+  color:var(--blue);
+}
+
+.row-active{ background:#fffce7 }
+.row-audio{ background:#e6f2ff }
 
 .btn-reset{
   width:100%;
@@ -60,8 +100,13 @@ th:nth-child(3), td:nth-child(3){ width:15%; text-align:center; }
   background:#fff;
   border-radius:6px;
   cursor:pointer;
+  padding:2px 0;   /* più compatto */
 }
-.btn-reset:hover{background:var(--danger); color:#fff}
+
+.btn-reset:hover{
+  background:var(--danger);
+  color:#fff;
+}
 
 .btn-reset-all{
   padding:4px 12px;
@@ -72,7 +117,11 @@ th:nth-child(3), td:nth-child(3){ width:15%; text-align:center; }
   background:#fff;
   cursor:pointer;
 }
-.btn-reset-all:hover{background:var(--danger); color:#fff}
+
+.btn-reset-all:hover{
+  background:var(--danger);
+  color:#fff;
+}
 </style>
 </head>
 
@@ -81,7 +130,8 @@ th:nth-child(3), td:nth-child(3){ width:15%; text-align:center; }
   <h1>📊 Contatori JoyFit</h1>
 
   <div class="total-header">
-    Totale eventi: <span id="grandTotal">0</span>
+    Totale eventi:
+    <span id="grandTotal">0</span>
     <button class="btn-reset-all" onclick="resetAll()">RESET TUTTO</button>
   </div>
 
@@ -102,27 +152,26 @@ const BASE_URL = "https://countapi.mileshilliard.com/api/v1";
 const NAMESPACE = "joyfit-stats-v1";
 
 const EVENTS = [
-  { key:"tab_0", name:"Tabella 0 – Sintesi" },
-  { key:"tab_1", name:"Tabella 1 – Riepilogo Incassi" },
-  { key:"tab_2", name:"Tabella 2 – Contanti" },
-  { key:"tab_3", name:"Tabella 3 – POS" },
-  { key:"tab_4", name:"Tabella 4 – Entrate X" },
-  { key:"tab_5", name:"Tabella 5 – Clienti" },
-  { key:"tab_6", name:"Tabella 6 – Spesa Media" },
-  { key:"tab_7", name:"Tabella 7 – Orari" },
-  { key:"tab_8", name:"Tabella 8 – Giorni" },
-  { key:"tab_9", name:"Tabella 9 – Attività" },
-  { key:"tab_10", name:"Tabella 10 – Clienti Top 100" },
-  { key:"tab_11", name:"Tabella 11 – Clienti Attesi" },
-  { key:"tab_12", name:"Tabella 12 – Clienti da Chiamare" },
-  { key:"tab_13", name:"Tabella 13 – Fedeltà" },
+  { key:"tab_0",  name:"T.0 - Sintesi" },
+  { key:"tab_1",  name:"T.1 - Riepilogo Incassi" },
+  { key:"tab_2",  name:"T.2 - Contanti" },
+  { key:"tab_3",  name:"T.3 - POS" },
+  { key:"tab_4",  name:"T.4 - Entrate X" },
+  { key:"tab_5",  name:"T.5 - Clienti" },
+  { key:"tab_6",  name:"T.6 - Spesa Media" },
+  { key:"tab_7",  name:"T.7 - Orari" },
+  { key:"tab_8",  name:"T.8 - Giorni" },
+  { key:"tab_9",  name:"T.9 - Attività" },
+  { key:"tab_10", name:"T.10 - Clienti Top 100" },
+  { key:"tab_11", name:"T.11 - Clienti Attesi" },
+  { key:"tab_12", name:"T.12 - Clienti da Chiamare" },
+  { key:"tab_13", name:"T.13 - Fedeltà" },
 
-  { key:"home", name:"🏠 Home" },
+  { key:"home",               name:"🏠 Home" },
   { key:"icon_riepilogo_pdf", name:"📝 Riepilogo PDF" },
-  { key:"icon_calendari", name:"📅 Calendari" },
+  { key:"icon_calendari",     name:"📅 Calendari" },
   { key:"icon_video_sintesi", name:"📹 Video Sintesi" },
-
-  { key:"audio_sintesi", name:"🔊 Audio Sintesi", audio:true }
+  { key:"audio_sintesi",      name:"🔊 Audio Sintesi", audio:true }
 ];
 
 let lastSnapshot = {};
@@ -160,6 +209,7 @@ function redraw(snapshot, total){
   for(const e of EVENTS){
     const v = snapshot[e.key];
     const tr = document.createElement("tr");
+
     if(v > 0) tr.classList.add("row-active");
     if(e.audio) tr.classList.add("row-audio");
 
