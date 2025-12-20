@@ -6,10 +6,51 @@ from reportlab.platypus import BaseDocTemplate, PageTemplate, Frame, Table, Tabl
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import mm
-from reportlab.lib.enums import TA_RIGHT, TA_CENTER
+from reportlab.lib.enums import TA_RIGHT
 
-# --- CONFIGURAZIONE ---
-LIGHT_GRAY = colors.Color(0.90, 0.90, 0.90)
+# --- CONFIGURAZIONE PAGINA (Mobile Friendly) ---
+st.set_page_config(page_title="JF Report", page_icon="🖨️", layout="centered")
+
+# --- CSS PERSONALIZZATO PER MOBILE ---
+# Questo blocco ingrandisce i font e i bottoni per schermi touch
+st.markdown("""
+<style>
+    /* Ingrandisce il testo delle etichette (Label) */
+    .stMarkdown label, .stSelectbox label, .stDateInput label, .stTextInput label, .stRadio label {
+        font-size: 1.2rem !important;
+        font-weight: bold;
+    }
+    /* Ingrandisce il testo dentro gli input */
+    .stTextInput input {
+        font-size: 1.1rem !important;
+    }
+    /* Rende il bottone Download Enorme e facile da premere */
+    div.stDownloadButton > button {
+        width: 100%;
+        height: 3.5rem;
+        font-size: 1.5rem !important;
+        font-weight: bold;
+        background-color: #FF4B4B;
+        color: white;
+        border-radius: 10px;
+    }
+    div.stButton > button {
+        width: 100%;
+        height: 3.5rem;
+        font-size: 1.3rem !important;
+        font-weight: bold;
+        border-radius: 10px;
+    }
+    /* Spaziatura più ariosa */
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 5rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# --- CONFIGURAZIONE LOGICA ---
+LIGHT_GRAY = colors.Color(0.90, 0.90, 0.90) 
 
 # ==========================================
 # FUNZIONI DI UTILITÀ
@@ -38,14 +79,12 @@ def format_currency_total(val):
     return f"{s} €"
 
 # ==========================================
-# MOTORE GENERAZIONE PDF (IN MEMORIA)
+# MOTORE GENERAZIONE PDF
 # ==========================================
 
 def generate_pdf_bytes(df, mode, date_args, sintetic_mode):
-    # Buffer in memoria invece di file su disco
     buffer = io.BytesIO()
     
-    # Filtro date nel DataFrame
     try:
         if mode == 'SINGLE':
             target = pd.to_datetime(date_args[0])
@@ -71,7 +110,6 @@ def generate_pdf_bytes(df, mode, date_args, sintetic_mode):
     grand_tot_c, grand_tot_p, grand_tot_u = 0, 0, 0
     giorni_stampati = 0
 
-    # --- SETUP MODALITÀ ---
     if sintetic_mode:
         page_width, page_height = A4
         margin = 5*mm; gutter = 3*mm 
@@ -83,13 +121,12 @@ def generate_pdf_bytes(df, mode, date_args, sintetic_mode):
             Frame(margin + 2*col_width + 2*gutter, margin, col_width, page_height - 2*margin, id='col3')
         ]
         doc.addPageTemplates([PageTemplate(id='ThreeCol', frames=frames)])
-        col_widths = [col_width - 26*mm, 13*mm, 13*mm] # Nom, Cont, Pos
+        col_widths = [col_width - 26*mm, 13*mm, 13*mm] 
     else:
         frame = Frame(10*mm, 10*mm, A4[0]-20*mm, A4[1]-20*mm, id='normal')
         doc.addPageTemplates([PageTemplate(id='OneCol', frames=[frame])])
         col_widths = [45*mm, 30*mm, 30*mm, 18*mm, 18*mm, 18*mm, 20*mm, 8*mm, 8*mm]
 
-    # --- CICLO DATI ---
     for date, group in grouped:
         group = group.sort_values('Nominativo')
         income = group[group['Uscite'] == 0]
@@ -104,7 +141,6 @@ def generate_pdf_bytes(df, mode, date_args, sintetic_mode):
         giorni_stampati += 1
         grand_tot_c += tc; grand_tot_p += tp; grand_tot_u += tu
 
-        # INTESTAZIONE GIORNO
         if sintetic_mode:
             h_txt = f"{get_compact_date_string(date)} - Totale: {format_currency_total(tot_inc)}"
             h_style = TableStyle([
@@ -114,7 +150,6 @@ def generate_pdf_bytes(df, mode, date_args, sintetic_mode):
             ])
             elements.append(Table([[h_txt]], colWidths=[col_width], style=h_style))
             
-            # DATI SINTETICI
             t_data = []
             for _, r in income.iterrows():
                 t_data.append([r['Nominativo'], format_currency(r['Contanti']), format_currency(r['Pos'])])
@@ -124,7 +159,6 @@ def generate_pdf_bytes(df, mode, date_args, sintetic_mode):
             t = Table(t_data, colWidths=col_widths)
             ts = [('FONTNAME', (0,0), (-1,-1), 'Helvetica'), ('FONTSIZE', (0,0), (-1,-1), 7),
                   ('ALIGN', (1,0), (2,-1), 'RIGHT'), ('GRID', (0,0), (-1,-1), 0.5, colors.black)]
-            # Span uscite
             start_exp = len(income)
             for i in range(start_exp, len(t_data)):
                 ts.append(('SPAN', (0,i), (-1,i)))
@@ -132,7 +166,7 @@ def generate_pdf_bytes(df, mode, date_args, sintetic_mode):
             elements.append(t)
             elements.append(Spacer(1, 3*mm))
 
-        else: # STANDARD
+        else: 
             h_txt = f"{get_italian_date_string(date)} - Totale {format_currency_total(tot_inc)}"
             elements.append(Table([[h_txt]], colWidths=[sum(col_widths)], style=TableStyle([
                 ('ALIGN', (0,0), (-1,-1), 'CENTER'), ('BOX', (0,0), (-1,-1), 0.5, colors.black),
@@ -157,7 +191,6 @@ def generate_pdf_bytes(df, mode, date_args, sintetic_mode):
             elements.append(t)
             elements.append(Spacer(1, 5*mm))
 
-    # TOTALI FINALI
     if giorni_stampati > 0:
         elements.append(Spacer(1, 5*mm))
         s_style = ParagraphStyle('S', parent=getSampleStyleSheet()['Normal'], alignment=TA_RIGHT, fontSize=10)
@@ -179,15 +212,11 @@ def generate_pdf_bytes(df, mode, date_args, sintetic_mode):
 # INTERFACCIA WEB (STREAMLIT)
 # ==========================================
 
-st.set_page_config(page_title="JF Report", layout="centered")
-
-st.title("🖨️ JF Report Manager")
-st.markdown("---")
+st.title("🖨️ JF Report")
 
 # 1. Caricamento Dati
 try:
     df = pd.read_csv('JF-DB.csv')
-    # Pulizia preliminare
     df['Data'] = pd.to_datetime(df['Data'], dayfirst=True, errors='coerce')
     df = df.dropna(subset=['Data'])
     
@@ -200,38 +229,37 @@ try:
     if 'Nominativo' not in df.columns: df['Nominativo'] = ""
     df['Nominativo'] = df['Nominativo'].astype(str).str.strip()
     
-    # Sostituzioni nomi
     df.loc[df['Nominativo'].str.lower() == 'marica', 'Nominativo'] = 'Pricci Marica'
     df.loc[df['Nominativo'].str.lower() == 'checco', 'Nominativo'] = 'Di Stasio Checco'
 
 except FileNotFoundError:
-    st.error("ERRORE: File 'JF-DB.csv' non trovato sul server.")
+    st.error("ERRORE CRITICO: File 'JF-DB.csv' non trovato sul server.")
     st.stop()
 
-# 2. Input Utente
-col1, col2 = st.columns(2)
-
-with col1:
-    st.subheader("📅 Periodo")
-    periodo_tutto = st.checkbox("Tutto il database", value=True)
+# 2. SEZIONE FILTRI (In un expander per pulizia su mobile)
+with st.expander("📅 Impostazioni Ricerca (Clicca)", expanded=True):
     
-    d1 = st.date_input("Dal:", disabled=periodo_tutto)
-    d2 = st.date_input("Al:", disabled=periodo_tutto)
+    st.markdown("### Periodo")
+    periodo_tutto = st.checkbox("Tutto il periodo", value=True)
+    
+    # Due colonne per le date, su mobile vanno una sotto l'altra
+    c1, c2 = st.columns(2)
+    d1 = c1.date_input("Dal:", disabled=periodo_tutto)
+    d2 = c2.date_input("Al:", disabled=periodo_tutto)
 
-with col2:
-    st.subheader("📄 Formato")
-    formato = st.radio("Tipo di stampa", ["Sintetico (3 Colonne)", "Standard (Dettagliato)"])
+    st.markdown("---")
+    st.markdown("### Formato")
+    formato = st.radio("Scegli layout:", ["Sintetico (3 Colonne)", "Standard"], horizontal=True)
     is_sintetico = (formato == "Sintetico (3 Colonne)")
 
-st.subheader("🔍 Filtri Nominativo")
-c1, c2 = st.columns(2)
-filter_inc = c1.text_input("Solo chi contiene (es. giulia)")
-filter_exc = c2.text_input("Escludi chi contiene (es. rossi)")
+    st.markdown("---")
+    st.markdown("### Filtri Nome")
+    filter_inc = st.text_input("Solo chi contiene:", placeholder="es. giulia")
+    filter_exc = st.text_input("Escludi chi contiene:", placeholder="es. rossi")
 
-# 3. Logica Filtri
+# 3. LOGICA APPLICAZIONE FILTRI
 df_filtered = df.copy()
 
-# Filtro Parole
 if filter_inc:
     for w in filter_inc.split():
         df_filtered = df_filtered[df_filtered['Nominativo'].str.contains(w, case=False, na=False)]
@@ -239,7 +267,6 @@ if filter_exc:
     for w in filter_exc.split():
         df_filtered = df_filtered[~df_filtered['Nominativo'].str.contains(w, case=False, na=False)]
 
-# Filtro Date
 mode = 'ALL'
 date_args = []
 if not periodo_tutto:
@@ -250,20 +277,23 @@ if not periodo_tutto:
         mode = 'RANGE'
         date_args = [d1, d2]
 
-# 4. Bottone Generazione
-st.markdown("---")
-if st.button("GENERARE REPORT PDF", type="primary", use_container_width=True):
-    
-    pdf_bytes, msg = generate_pdf_bytes(df_filtered, mode, date_args, is_sintetico)
-    
-    if pdf_bytes:
-        st.success("Report generato con successo!")
-        st.download_button(
-            label="⬇️ SCARICA IL PDF",
-            data=pdf_bytes,
-            file_name="JF-Stampa.pdf",
-            mime="application/pdf",
-            use_container_width=True
-        )
-    else:
-        st.warning(msg)
+# 4. BOTTONE E GENERAZIONE
+st.markdown("###") # Spazio vuoto
+
+# Generazione in memoria
+pdf_bytes, msg = generate_pdf_bytes(df_filtered, mode, date_args, is_sintetico)
+
+if pdf_bytes:
+    # Se il PDF è pronto, mostra il bottone per scaricarlo
+    # Usiamo use_container_width=True per farlo largo quanto lo schermo
+    st.download_button(
+        label="⬇️ SCARICA IL REPORT PDF",
+        data=pdf_bytes,
+        file_name="JF-Stampa.pdf",
+        mime="application/pdf",
+        use_container_width=True
+    )
+    st.success(f"Trovati dati per {len(df_filtered)} righe.")
+else:
+    # Se non ci sono dati o c'è errore
+    st.error(msg)
