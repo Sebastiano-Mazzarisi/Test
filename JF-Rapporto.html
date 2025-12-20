@@ -4,34 +4,70 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JF Report Manager</title>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; padding: 20px; max-width: 600px; margin: 0 auto; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        h1 { text-align: center; color: #333; }
-        label { display: block; margin-top: 10px; font-weight: bold; color: #555; }
-        input[type="text"], input[type="date"] { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
-        .row { display: flex; gap: 10px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; padding: 20px; max-width: 900px; margin: 0 auto; color: #333; }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        
+        label { display: block; margin-top: 10px; font-weight: bold; font-size: 1.1em; color: #444; }
+        input[type="text"], input[type="date"] { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        
+        .row { display: flex; gap: 15px; }
         .col { flex: 1; }
-        button { width: 100%; padding: 15px; background-color: #e74c3c; color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 20px; }
-        button:hover { background-color: #c0392b; }
-        .radio-group { margin-top: 5px; }
-        .radio-group label { display: inline-block; margin-right: 15px; font-weight: normal; }
-        .status { text-align: center; margin-top: 10px; font-weight: bold; color: #333; }
+        
+        /* Bottoni */
+        .btn-group { display: flex; gap: 15px; margin-top: 25px; }
+        button { flex: 1; padding: 15px; border: none; border-radius: 8px; font-size: 1.2em; font-weight: bold; cursor: pointer; transition: transform 0.1s; color: white; }
+        button:active { transform: scale(0.98); }
+        
+        .btn-cerca { background-color: #3498db; }
+        .btn-pdf { background-color: #e74c3c; }
+
+        .radio-group { margin-top: 10px; }
+        .radio-group label { display: inline-flex; align-items: center; margin-right: 20px; font-weight: normal; cursor: pointer; }
+        .radio-group input { margin-right: 8px; transform: scale(1.2); }
+
+        /* Riquadro Totali */
+        .summary-box { 
+            display: flex; justify-content: space-around; flex-wrap: wrap;
+            background-color: #e8f8f5; border: 2px solid #1abc9c; 
+            padding: 20px; border-radius: 10px; margin: 25px 0;
+            text-align: center;
+        }
+        .summary-item { margin: 5px 10px; }
+        .summary-item strong { display: block; font-size: 1em; color: #16a085; text-transform: uppercase; letter-spacing: 1px; }
+        .summary-item span { display: block; font-size: 1.8em; font-weight: bold; color: #2c3e50; margin-top: 5px; }
+
+        /* Tabella Risultati */
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; background: white; margin-top: 10px; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background-color: #34495e; color: white; font-weight: 600; text-transform: uppercase; font-size: 0.9em; }
+        td.num { text-align: right; font-family: 'Consolas', monospace; font-weight: bold; }
+        tr:nth-child(even) { background-color: #f8f9fa; }
+        tr:hover { background-color: #eef2f7; }
+
+        .status { text-align: center; margin-top: 15px; font-weight: bold; min-height: 24px; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <h1>🖨️ JF Report Web</h1>
+    <h1>🖨️ JF Report Manager</h1>
 
     <div class="card">
         <label>📅 Intervallo Date</label>
-        <div style="margin-top:5px; margin-bottom:10px;">
-            <input type="checkbox" id="chk_tutto" checked onchange="toggleDates()">
-            <label for="chk_tutto" style="display:inline; font-weight:normal;">Tutto il periodo</label>
+        <div style="margin: 10px 0;">
+            <label style="display:flex; align-items:center; font-weight:normal;">
+                <input type="checkbox" id="chk_tutto" checked onchange="toggleDates()" style="width:20px; height:20px; margin-right:10px;">
+                Tutto il periodo
+            </label>
         </div>
         <div class="row">
             <div class="col"><input type="date" id="date_start" disabled></div>
@@ -40,27 +76,54 @@
     </div>
 
     <div class="card">
-        <label>📄 Formato Stampa</label>
+        <label>📄 Formato Stampa (Solo per PDF)</label>
         <div class="radio-group">
-            <input type="radio" id="fmt_sint" name="formato" value="SINT" checked>
-            <label for="fmt_sint">Sintetico</label>
-            <input type="radio" id="fmt_std" name="formato" value="STD">
-            <label for="fmt_std">Standard</label>
+            <label><input type="radio" name="formato" value="SINT" checked> Sintetico (3 Colonne)</label>
+            <label><input type="radio" name="formato" value="STD"> Standard</label>
         </div>
     </div>
 
     <div class="card">
         <label>🔍 Filtri Nominativo</label>
-        <input type="text" id="filter_inc" placeholder="Solo chi contiene (es. giulia)">
-        <input type="text" id="filter_exc" placeholder="Escludi chi contiene (es. rossi)">
+        <div class="row">
+            <div class="col"><input type="text" id="filter_inc" placeholder="Solo chi contiene (es. giulia)"></div>
+            <div class="col"><input type="text" id="filter_exc" placeholder="Escludi chi contiene (es. rossi)"></div>
+        </div>
     </div>
 
-    <button onclick="generaReport()">SCARICA PDF</button>
+    <div class="btn-group">
+        <button class="btn-cerca" onclick="avviaProcesso('CERCA')">🔍 CERCA A VIDEO</button>
+        <button class="btn-pdf" onclick="avviaProcesso('PDF')">⬇️ SCARICA PDF</button>
+    </div>
+    
     <div class="status" id="statusMsg"></div>
 
+    <div id="resultsArea" class="hidden">
+        <div class="summary-box">
+            <div class="summary-item"><strong>Totale</strong><span id="sumTot">0 €</span></div>
+            <div class="summary-item"><strong>Contanti</strong><span id="sumCont">0 €</span></div>
+            <div class="summary-item"><strong>Pos</strong><span id="sumPos">0 €</span></div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Nominativo</th>
+                        <th style="text-align:right">Totale Riga</th>
+                        <th style="text-align:right">Contanti</th>
+                        <th style="text-align:right">Pos</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
 <script>
-    // URL DEL FILE CSV (Deve essere nella stessa cartella su GitHub)
-    const CSV_FILE = 'JF-DB.csv'; 
+    // IMPORTANTE: Assicurati che questo file sia nella stessa cartella dell'HTML
+    const CSV_FILENAME = 'JF-DB.csv';
 
     function toggleDates() {
         const isAll = document.getElementById('chk_tutto').checked;
@@ -68,87 +131,101 @@
         document.getElementById('date_end').disabled = isAll;
     }
 
-    // Funzione principale
-    async function generaReport() {
+    function formatEuro(n) {
+        return n.toLocaleString('it-IT', {minimumFractionDigits: 0, maximumFractionDigits: 2}) + " €";
+    }
+
+    async function avviaProcesso(azione) {
         const status = document.getElementById('statusMsg');
-        status.textContent = "Caricamento dati...";
-        status.style.color = "blue";
+        const resultsArea = document.getElementById('resultsArea');
+        
+        status.textContent = "Elaborazione in corso...";
+        status.style.color = "#3498db";
+        
+        if(azione === 'CERCA') resultsArea.classList.add('hidden');
 
         try {
-            // 1. Scarica il CSV
-            const response = await fetch(CSV_FILE);
-            if (!response.ok) throw new Error("Impossibile trovare JF-DB.csv");
+            // 1. Fetch CSV
+            const response = await fetch(CSV_FILENAME);
+            if (!response.ok) throw new Error("File CSV non trovato. Assicurati che JF-DB.csv sia su GitHub nella stessa cartella.");
             const csvText = await response.text();
 
-            // 2. Parsea il CSV
-            const results = Papa.parse(csvText, { header: true, skipEmptyLines: true });
-            let data = results.data;
+            // 2. Parse CSV
+            const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
+            let data = parsed.data;
 
-            // 3. Pulisci e Prepara Dati
+            // 3. Clean & Prepare Data
             data.forEach(row => {
-                // Parsing data (DD/MM/YYYY)
-                const parts = row.Data.split('/');
-                if (parts.length === 3) {
-                    // Crea oggetto Date JS (Mese è 0-based in JS)
-                    row.dateObj = new Date(parts[2], parts[1] - 1, parts[0]); 
-                } else {
-                    row.dateObj = null; 
+                // Gestione Data (DD/MM/YYYY)
+                if (row.Data) {
+                    const parts = row.Data.split('/');
+                    if (parts.length === 3) {
+                        row.dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
+                    }
                 }
-
-                // Numeri
+                
+                // Gestione Numeri
                 ['Contanti', 'Pos', 'Uscite'].forEach(k => {
-                    let val = row[k] ? row[k].toString().replace('.', '').replace(',', '.') : "0";
+                    let val = row[k] ? row[k].toString().replace(/\./g, '').replace(',', '.') : "0";
                     row[k] = parseFloat(val) || 0;
                 });
 
-                // Normalizza nomi
+                // Gestione Nomi
                 if (!row.Nominativo) row.Nominativo = "";
-                let nom = row.Nominativo.trim().toLowerCase();
-                if (nom === 'marica') row.Nominativo = "Pricci Marica";
-                if (nom === 'checco') row.Nominativo = "Di Stasio Checco";
+                let n = row.Nominativo.trim().toLowerCase();
+                if (n === 'marica') row.Nominativo = "Pricci Marica";
+                if (n === 'checco') row.Nominativo = "Di Stasio Checco";
             });
 
-            // Rimuovi date non valide
-            data = data.filter(r => r.dateObj);
+            // Filtro righe valide
+            data = data.filter(r => r.dateObj && !isNaN(r.dateObj));
 
-            // 4. Applica Filtri
+            // 4. Filtri Utente
             // Date
             if (!document.getElementById('chk_tutto').checked) {
-                const s = document.getElementById('date_start').valueAsDate;
-                const e = document.getElementById('date_end').valueAsDate;
-                if (s && e) {
+                const sVal = document.getElementById('date_start').value;
+                const eVal = document.getElementById('date_end').value;
+                if (sVal && eVal) {
+                    const s = new Date(sVal);
+                    const e = new Date(eVal);
                     data = data.filter(r => r.dateObj >= s && r.dateObj <= e);
                 }
             }
+
             // Nomi
             const inc = document.getElementById('filter_inc').value.toLowerCase().trim();
             const exc = document.getElementById('filter_exc').value.toLowerCase().trim();
             
             if (inc) {
-                const terms = inc.split(' ');
-                data = data.filter(r => terms.some(t => r.Nominativo.toLowerCase().includes(t)));
+                inc.split(' ').forEach(term => {
+                    if(term) data = data.filter(r => r.Nominativo.toLowerCase().includes(term));
+                });
             }
             if (exc) {
-                const terms = exc.split(' ');
-                data = data.filter(r => !terms.some(t => r.Nominativo.toLowerCase().includes(t)));
+                exc.split(' ').forEach(term => {
+                    if(term) data = data.filter(r => !r.Nominativo.toLowerCase().includes(term));
+                });
             }
 
             if (data.length === 0) {
                 status.textContent = "Nessun dato trovato.";
-                status.style.color = "red";
+                status.style.color = "#e74c3c";
                 return;
             }
 
-            // 5. Ordina: Data poi Nominativo
-            data.sort((a, b) => {
-                if (a.dateObj - b.dateObj !== 0) return a.dateObj - b.dateObj;
-                return a.Nominativo.localeCompare(b.Nominativo);
-            });
+            // Ordinamento: Data, poi Nome
+            data.sort((a, b) => (a.dateObj - b.dateObj) || a.Nominativo.localeCompare(b.Nominativo));
 
-            // 6. Genera PDF
-            createPdf(data);
-            status.textContent = "PDF Scaricato!";
-            status.style.color = "green";
+            // 5. Azione
+            if (azione === 'CERCA') {
+                renderTable(data);
+                status.textContent = `Trovate ${data.length} righe.`;
+                status.style.color = "#27ae60";
+            } else {
+                generatePDF(data);
+                status.textContent = "PDF Scaricato con successo!";
+                status.style.color = "#27ae60";
+            }
 
         } catch (err) {
             console.error(err);
@@ -157,7 +234,39 @@
         }
     }
 
-    function createPdf(data) {
+    function renderTable(data) {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = "";
+        
+        let tC = 0, tP = 0;
+
+        data.forEach(r => {
+            const totRow = r.Contanti + r.Pos;
+            // Mostriamo solo se c'è movimento > 0 (come nel PDF) oppure uscite > 0
+            if (totRow === 0 && r.Uscite === 0) return;
+
+            tC += r.Contanti;
+            tP += r.Pos;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${r.dateObj.toLocaleDateString('it-IT')}</td>
+                <td>${r.Nominativo}</td>
+                <td class="num" style="color:#2980b9">${formatEuro(totRow)}</td>
+                <td class="num">${formatEuro(r.Contanti)}</td>
+                <td class="num">${formatEuro(r.Pos)}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('sumTot').textContent = formatEuro(tC + tP);
+        document.getElementById('sumCont').textContent = formatEuro(tC);
+        document.getElementById('sumPos').textContent = formatEuro(tP);
+        
+        document.getElementById('resultsArea').classList.remove('hidden');
+    }
+
+    function generatePDF(data) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         const isSint = document.querySelector('input[name="formato"]:checked').value === "SINT";
@@ -165,139 +274,121 @@
         let y = 15;
         let grandTotC = 0, grandTotP = 0, grandTotU = 0;
 
-        // Raggruppa per data
+        // Raggruppa per data (stringa originale per univocità o formattata)
         const groups = {};
         data.forEach(r => {
-            const dKey = r.Data; // Usa la stringa originale come chiave
-            if (!groups[dKey]) groups[dKey] = [];
-            groups[dKey].push(r);
+            const k = r.dateObj.getTime(); // Timestamp come chiave per ordinamento sicuro
+            if (!groups[k]) groups[k] = [];
+            groups[k].push(r);
         });
 
-        // Configurazione Tabella
-        const formatEuro = (n) => n === 0 ? "" : n.toLocaleString('it-IT', {minimumFractionDigits: 0, maximumFractionDigits: 2}) + " €";
-
-        for (const dateKey in groups) {
-            const group = groups[dateKey];
-            
-            // Ordina gruppo per nome
-            group.sort((a, b) => a.Nominativo.localeCompare(b.Nominativo));
+        // Iterazione sui gruppi (ordinati per chiave temporale)
+        Object.keys(groups).sort().forEach(key => {
+            const group = groups[key];
+            // Ordina per nome dentro il gruppo
+            group.sort((a,b) => a.Nominativo.localeCompare(b.Nominativo));
 
             let tc = 0, tp = 0, tu = 0;
-            const rows = [];
+            const income = [], expense = [];
 
-            // Separa entrate e uscite
-            const income = group.filter(r => r.Uscite === 0);
-            const expense = group.filter(r => r.Uscite > 0);
+            group.forEach(r => {
+                if (r.Uscite > 0) expense.push(r);
+                else income.push(r);
+                
+                tc += r.Contanti; tp += r.Pos; tu += r.Uscite;
+            });
 
-            // Calcoli
-            group.forEach(r => { tc += r.Contanti; tp += r.Pos; tu += r.Uscite; });
-            
-            if ((tc + tp) === 0 && tu === 0) continue;
+            if ((tc + tp) === 0 && tu === 0) return;
 
             grandTotC += tc; grandTotP += tp; grandTotU += tu;
 
-            // Header Giorno
-            const wd = group[0].dateObj.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-            const wdShort = group[0].dateObj.toLocaleDateString('it-IT', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
-            
-            // Layout Sintetico
+            // Formattazione Data Header
+            const dObj = group[0].dateObj;
+            const wdFull = dObj.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            const wdShort = dObj.toLocaleDateString('it-IT', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+            const headerTot = formatEuro(tc + tp);
+
+            // Controllo salto pagina
+            if (y > 270) { doc.addPage(); y = 15; }
+
             if (isSint) {
-                // Titolo Giorno
-                doc.setFillColor(230, 230, 230); // Grigio chiaro
+                // Header Sintetico: Grigio chiaro, Boxato
+                doc.setFillColor(230, 230, 230);
                 doc.setDrawColor(0);
-                doc.rect(14, y, 182, 7, 'FD'); // Box
+                doc.rect(14, y, 182, 7, 'FD');
+                
                 doc.setFont("helvetica", "normal");
                 doc.setFontSize(10);
-                doc.text(`${wdShort} - Totale: ${formatEuro(tc + tp)}`, 105, y + 5, { align: "center" });
+                doc.text(`${wdShort} - Totale: ${headerTot}`, 105, y + 5, { align: "center" });
                 y += 7;
 
-                // Righe
-                income.forEach(r => rows.push([r.Nominativo, formatEuro(r.Contanti), formatEuro(r.Pos)]));
-                expense.forEach(r => rows.push([`${r.Nominativo} (${formatEuro(r.Uscite)})`, "", ""]));
-
-                // Totale Uscite Giornaliero in coda se presente (Opzionale, come da script precedente)
-                if (tu > 0) {
-                    rows.push([`Totale uscite: ${formatEuro(tu)}`, "", ""]);
-                }
+                const body = [];
+                income.forEach(r => body.push([r.Nominativo, formatEuro(r.Contanti), formatEuro(r.Pos)]));
+                expense.forEach(r => body.push([`${r.Nominativo} (${formatEuro(r.Uscite)})`, "", ""]));
 
                 doc.autoTable({
                     startY: y,
-                    body: rows,
-                    theme: 'plain',
+                    body: body,
+                    theme: 'plain', // No strisce alternate default
                     styles: { fontSize: 8, cellPadding: 1, lineColor: 0, lineWidth: 0.1 },
                     columnStyles: { 
                         0: { cellWidth: 'auto' }, 
                         1: { cellWidth: 20, halign: 'right' }, 
-                        2: { cellWidth: 20, halign: 'right' }
+                        2: { cellWidth: 20, halign: 'right' } 
                     },
-                    // Disegna le linee verticali esterne manualmente tramite hook se necessario o usa grid
-                    // Usiamo 'grid' per semplicità in JS che fa le linee
-                    theme: 'grid',
-                    headStyles: { fillColor: false, textColor: 0, fontStyle: 'bold' },
-                    showHead: 'firstPage', // Nascondi header standard se non vogliamo "Nominativo, Cont, Pos"
-                    didParseCell: (data) => {
-                       // Rimuovi bordi interni se vuoi simulare lo stile python
-                    } 
+                    // Simula griglia
+                    didDrawCell: function(data) {
+                        // Bordi manuali se necessario, o affidarsi a theme grid
+                    },
+                    theme: 'grid'
                 });
-                
-                // Nota: jspdf-autotable gestisce lo spazio pagina. Aggiorniamo y
-                y = doc.lastAutoTable.finalY + 5;
+                y = doc.lastAutoTable.finalY + 3; // Spazietto dopo il giorno
 
             } else {
-                // Layout Standard
+                // Header Standard
                 doc.setFillColor(230, 230, 230);
                 doc.rect(14, y, 182, 8, 'FD');
                 doc.setFontSize(11);
-                doc.text(`${wd} - Totale ${formatEuro(tc + tp)}`, 105, y + 5.5, { align: "center" });
+                doc.text(`${wdFull} - Totale ${headerTot}`, 105, y + 5.5, { align: "center" });
                 y += 8;
 
-                const headers = [["Nominativo", "Attività", "Abbonamento", "Contanti", "Pos", "Uscite", "Operatore", "X", "Reg"]];
-                
+                const head = [["Nominativo", "Attività", "Abbonamento", "Contanti", "Pos", "Uscite", "Operatore", "X", "Reg"]];
+                const body = [];
                 [...income, ...expense].forEach(r => {
-                    rows.push([
+                    body.push([
                         r.Nominativo, r.Attività || "", r.Abbonamento || "",
                         formatEuro(r.Contanti), formatEuro(r.Pos), formatEuro(r.Uscite),
                         r.Operatore || "", r.CassaX || "", r.Registrato || ""
                     ]);
                 });
-                // Totali riga
-                rows.push(["TOTALI", "", "", formatEuro(tc), formatEuro(tp), formatEuro(tu), "", "", ""]);
+                // Totale Giorno Footer
+                body.push(["TOTALI", "", "", formatEuro(tc), formatEuro(tp), formatEuro(tu), "", "", ""]);
 
                 doc.autoTable({
-                    startY: y,
-                    head: headers,
-                    body: rows,
+                    startY: y, head: head, body: body,
                     theme: 'grid',
                     styles: { fontSize: 8, cellPadding: 1, lineColor: 0 },
                     headStyles: { fillColor: 255, textColor: 0, fontStyle: 'normal', lineWidth: 0.1 },
                     columnStyles: { 3: {halign:'right'}, 4: {halign:'right'}, 5: {halign:'right'} },
                     didParseCell: function(data) {
-                        if (data.row.index === rows.length - 1) {
-                            data.cell.styles.fontStyle = 'bold';
-                        }
+                        if (data.row.index === body.length - 1) data.cell.styles.fontStyle = 'bold';
                     }
                 });
                 y = doc.lastAutoTable.finalY + 10;
             }
-
-            // Check page break manuale approssimativo per il prossimo loop
-            if (y > 270) { doc.addPage(); y = 15; }
-        }
+        });
 
         // Totali Finali
-        if (y > 250) { doc.addPage(); y = 20; } else { y += 5; }
+        if (y > 250) { doc.addPage(); y = 20; } else { y += 10; }
         
         doc.setFont("helvetica", "normal");
-        doc.setFontSize(12);
-        const rightX = 190;
+        doc.setFontSize(11);
+        const rX = 190;
         
-        doc.text(`TOTALE: ${formatEuro(grandTotC + grandTotP)}`, rightX, y, { align: "right" });
-        y += 6;
-        doc.text(`Contanti: ${formatEuro(grandTotC)}`, rightX, y, { align: "right" });
-        y += 6;
-        doc.text(`Pos: ${formatEuro(grandTotP)}`, rightX, y, { align: "right" });
-        y += 8; // Spazio extra
-        doc.text(`Uscite: ${formatEuro(grandTotU)}`, rightX, y, { align: "right" });
+        doc.text(`TOTALE: ${formatEuro(grandTotC + grandTotP)}`, rX, y, { align: "right" }); y += 6;
+        doc.text(`Contanti: ${formatEuro(grandTotC)}`, rX, y, { align: "right" }); y += 6;
+        doc.text(`Pos: ${formatEuro(grandTotP)}`, rX, y, { align: "right" }); y += 10; // Spazio extra
+        doc.text(`Uscite: ${formatEuro(grandTotU)}`, rX, y, { align: "right" });
 
         doc.save("JF-Stampa.pdf");
     }
