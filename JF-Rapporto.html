@@ -10,73 +10,112 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; padding: 20px; max-width: 900px; margin: 0 auto; color: #333; }
-        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background-color: #f2f2f7; 
+            padding: 15px; 
+            /* Forza larghezza smartphone anche su PC */
+            max-width: 400px; 
+            margin: 0 auto; 
+            color: #1c1c1e; 
+        }
+        h1 { text-align: center; color: #000; font-size: 1.5rem; margin-bottom: 20px; }
         
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .card { 
+            background: white; 
+            padding: 15px; 
+            border-radius: 12px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+            margin-bottom: 15px; 
+        }
         
-        label { display: block; margin-top: 10px; font-weight: bold; font-size: 1.1em; color: #444; }
-        input[type="text"], input[type="date"] { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        label { display: block; margin-top: 10px; margin-bottom: 4px; font-weight: 600; font-size: 0.95rem; color: #3a3a3c; }
         
-        .row { display: flex; gap: 15px; }
-        .col { flex: 1; }
+        /* Input impilati verticalmente */
+        input[type="text"], input[type="date"] { 
+            width: 100%; 
+            padding: 12px; 
+            margin-bottom: 10px; /* Spazio tra i campi */
+            border: 1px solid #d1d1d6; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            font-size: 16px; /* Evita zoom su iOS */
+            background-color: #f9f9f9;
+        }
+        
+        /* Checkbox */
+        .checkbox-wrapper { display: flex; align-items: center; margin-bottom: 10px; }
+        input[type="checkbox"] { transform: scale(1.3); margin-right: 10px; accent-color: #007aff; }
         
         /* Bottoni */
-        .btn-group { display: flex; gap: 15px; margin-top: 25px; }
-        button { flex: 1; padding: 15px; border: none; border-radius: 8px; font-size: 1.2em; font-weight: bold; cursor: pointer; transition: transform 0.1s; color: white; }
-        button:active { transform: scale(0.98); }
+        .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            border: none; 
+            border-radius: 10px; 
+            font-size: 1.1rem; 
+            font-weight: bold; 
+            cursor: pointer; 
+            color: white; 
+        }
         
-        .btn-cerca { background-color: #3498db; }
-        .btn-pdf { background-color: #e74c3c; }
+        .btn-cerca { background-color: #007aff; } /* iOS Blue */
+        .btn-pdf { background-color: #ff3b30; }   /* iOS Red */
 
-        .radio-group { margin-top: 10px; }
-        .radio-group label { display: inline-flex; align-items: center; margin-right: 20px; font-weight: normal; cursor: pointer; }
-        .radio-group input { margin-right: 8px; transform: scale(1.2); }
+        /* Radio Buttons */
+        .radio-group { margin-top: 5px; display: flex; flex-direction: column; gap: 8px; }
+        .radio-group label { font-weight: normal; display: flex; align-items: center; margin: 0; }
+        .radio-group input { margin-right: 10px; transform: scale(1.2); accent-color: #007aff; }
 
         /* Riquadro Totali */
         .summary-box { 
-            display: flex; justify-content: space-around; flex-wrap: wrap;
-            background-color: #e8f8f5; border: 2px solid #1abc9c; 
-            padding: 20px; border-radius: 10px; margin: 25px 0;
+            background-color: #eef9ff; border: 1px solid #bce0fd; 
+            padding: 15px; border-radius: 10px; margin: 20px 0;
             text-align: center;
         }
-        .summary-item { margin: 5px 10px; }
-        .summary-item strong { display: block; font-size: 1em; color: #16a085; text-transform: uppercase; letter-spacing: 1px; }
-        .summary-item span { display: block; font-size: 1.8em; font-weight: bold; color: #2c3e50; margin-top: 5px; }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 1rem; border-bottom: 1px solid #daeefc; padding-bottom: 4px; }
+        .summary-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .summary-row strong { color: #007aff; }
+        .summary-row span { font-weight: bold; }
 
         /* Tabella Risultati */
-        .table-container { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; background: white; margin-top: 10px; border-radius: 8px; overflow: hidden; }
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background-color: #34495e; color: white; font-weight: 600; text-transform: uppercase; font-size: 0.9em; }
-        td.num { text-align: right; font-family: 'Consolas', monospace; font-weight: bold; }
-        tr:nth-child(even) { background-color: #f8f9fa; }
-        tr:hover { background-color: #eef2f7; }
+        .table-container { 
+            border-radius: 8px; 
+            overflow: hidden; 
+            border: 1px solid #d1d1d6;
+            background: white;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e5e5ea; font-size: 0.9rem; }
+        th { background-color: #f2f2f7; font-weight: 600; color: #636366; }
+        td.num { text-align: right; font-weight: bold; white-space: nowrap; }
+        tr:last-child td { border-bottom: none; }
 
-        .status { text-align: center; margin-top: 15px; font-weight: bold; min-height: 24px; }
+        .status { text-align: center; margin-top: 15px; font-weight: bold; font-size: 0.9rem; min-height: 20px; }
         .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <h1>🖨️ JF Report Manager</h1>
+    <h1>🖨️ JF Report</h1>
 
     <div class="card">
-        <label>📅 Intervallo Date</label>
-        <div style="margin: 10px 0;">
-            <label style="display:flex; align-items:center; font-weight:normal;">
-                <input type="checkbox" id="chk_tutto" checked onchange="toggleDates()" style="width:20px; height:20px; margin-right:10px;">
-                Tutto il periodo
-            </label>
+        <label>📅 Periodo</label>
+        <div class="checkbox-wrapper">
+            <input type="checkbox" id="chk_tutto" checked onchange="toggleDates()">
+            <span style="font-size: 1rem;">Tutto il periodo</span>
         </div>
-        <div class="row">
-            <div class="col"><input type="date" id="date_start" disabled></div>
-            <div class="col"><input type="date" id="date_end" disabled></div>
-        </div>
+        
+        <label>Da:</label>
+        <input type="date" id="date_start" disabled>
+        
+        <label>A:</label>
+        <input type="date" id="date_end" disabled>
     </div>
 
     <div class="card">
-        <label>📄 Formato Stampa (Solo per PDF)</label>
+        <label>📄 Formato Stampa (Solo PDF)</label>
         <div class="radio-group">
             <label><input type="radio" name="formato" value="SINT" checked> Sintetico (3 Colonne)</label>
             <label><input type="radio" name="formato" value="STD"> Standard</label>
@@ -84,45 +123,44 @@
     </div>
 
     <div class="card">
-        <label>🔍 Filtri Nominativo</label>
-        <div class="row">
-            <div class="col"><input type="text" id="filter_inc" placeholder="Solo chi contiene (es. giulia)"></div>
-            <div class="col"><input type="text" id="filter_exc" placeholder="Escludi chi contiene (es. rossi)"></div>
-        </div>
+        <label>🔍 Cerca Nominativo</label>
+        <label style="font-weight:normal; font-size:0.8em; margin-top:0;">Contiene:</label>
+        <input type="text" id="filter_inc" placeholder="es. giulia">
+        
+        <label style="font-weight:normal; font-size:0.8em; margin-top:0;">NON contiene:</label>
+        <input type="text" id="filter_exc" placeholder="es. rossi">
     </div>
 
     <div class="btn-group">
-        <button class="btn-cerca" onclick="avviaProcesso('CERCA')">🔍 CERCA A VIDEO</button>
+        <button class="btn-cerca" onclick="avviaProcesso('CERCA')">🔍 CERCA</button>
         <button class="btn-pdf" onclick="avviaProcesso('PDF')">⬇️ SCARICA PDF</button>
     </div>
     
     <div class="status" id="statusMsg"></div>
 
     <div id="resultsArea" class="hidden">
+        
         <div class="summary-box">
-            <div class="summary-item"><strong>Totale</strong><span id="sumTot">0 €</span></div>
-            <div class="summary-item"><strong>Contanti</strong><span id="sumCont">0 €</span></div>
-            <div class="summary-item"><strong>Pos</strong><span id="sumPos">0 €</span></div>
+            <div class="summary-row"><strong>Totale</strong><span id="sumTot">0 €</span></div>
+            <div class="summary-row"><strong>Contanti</strong><span id="sumCont">0 €</span></div>
+            <div class="summary-row"><strong>Pos</strong><span id="sumPos">0 €</span></div>
         </div>
 
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
-                        <th>Data</th>
+                        <th style="width: 25%">Data</th>
                         <th>Nominativo</th>
-                        <th style="text-align:right">Totale Riga</th>
-                        <th style="text-align:right">Contanti</th>
-                        <th style="text-align:right">Pos</th>
+                        <th style="text-align:right">Totale</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody"></tbody>
             </table>
         </div>
-    </div>
+        <div style="height: 30px;"></div> </div>
 
 <script>
-    // IMPORTANTE: Assicurati che questo file sia nella stessa cartella dell'HTML
     const CSV_FILENAME = 'JF-DB.csv';
 
     function toggleDates() {
@@ -139,49 +177,37 @@
         const status = document.getElementById('statusMsg');
         const resultsArea = document.getElementById('resultsArea');
         
-        status.textContent = "Elaborazione in corso...";
-        status.style.color = "#3498db";
+        status.textContent = "Elaborazione...";
+        status.style.color = "#007aff";
         
         if(azione === 'CERCA') resultsArea.classList.add('hidden');
 
         try {
-            // 1. Fetch CSV
             const response = await fetch(CSV_FILENAME);
-            if (!response.ok) throw new Error("File CSV non trovato. Assicurati che JF-DB.csv sia su GitHub nella stessa cartella.");
+            if (!response.ok) throw new Error("File CSV non trovato.");
             const csvText = await response.text();
-
-            // 2. Parse CSV
             const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
             let data = parsed.data;
 
-            // 3. Clean & Prepare Data
+            // Pulizia
             data.forEach(row => {
-                // Gestione Data (DD/MM/YYYY)
                 if (row.Data) {
                     const parts = row.Data.split('/');
-                    if (parts.length === 3) {
-                        row.dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
-                    }
+                    if (parts.length === 3) row.dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
                 }
-                
-                // Gestione Numeri
                 ['Contanti', 'Pos', 'Uscite'].forEach(k => {
                     let val = row[k] ? row[k].toString().replace(/\./g, '').replace(',', '.') : "0";
                     row[k] = parseFloat(val) || 0;
                 });
-
-                // Gestione Nomi
                 if (!row.Nominativo) row.Nominativo = "";
                 let n = row.Nominativo.trim().toLowerCase();
                 if (n === 'marica') row.Nominativo = "Pricci Marica";
                 if (n === 'checco') row.Nominativo = "Di Stasio Checco";
             });
 
-            // Filtro righe valide
             data = data.filter(r => r.dateObj && !isNaN(r.dateObj));
 
-            // 4. Filtri Utente
-            // Date
+            // Filtri
             if (!document.getElementById('chk_tutto').checked) {
                 const sVal = document.getElementById('date_start').value;
                 const eVal = document.getElementById('date_end').value;
@@ -192,39 +218,28 @@
                 }
             }
 
-            // Nomi
             const inc = document.getElementById('filter_inc').value.toLowerCase().trim();
             const exc = document.getElementById('filter_exc').value.toLowerCase().trim();
             
-            if (inc) {
-                inc.split(' ').forEach(term => {
-                    if(term) data = data.filter(r => r.Nominativo.toLowerCase().includes(term));
-                });
-            }
-            if (exc) {
-                exc.split(' ').forEach(term => {
-                    if(term) data = data.filter(r => !r.Nominativo.toLowerCase().includes(term));
-                });
-            }
+            if (inc) inc.split(' ').forEach(t => { if(t) data = data.filter(r => r.Nominativo.toLowerCase().includes(t)); });
+            if (exc) exc.split(' ').forEach(t => { if(t) data = data.filter(r => !r.Nominativo.toLowerCase().includes(t)); });
 
             if (data.length === 0) {
                 status.textContent = "Nessun dato trovato.";
-                status.style.color = "#e74c3c";
+                status.style.color = "#ff3b30";
                 return;
             }
 
-            // Ordinamento: Data, poi Nome
             data.sort((a, b) => (a.dateObj - b.dateObj) || a.Nominativo.localeCompare(b.Nominativo));
 
-            // 5. Azione
             if (azione === 'CERCA') {
                 renderTable(data);
-                status.textContent = `Trovate ${data.length} righe.`;
-                status.style.color = "#27ae60";
+                status.textContent = `Risultati: ${data.length}`;
+                status.style.color = "#34c759";
             } else {
                 generatePDF(data);
-                status.textContent = "PDF Scaricato con successo!";
-                status.style.color = "#27ae60";
+                status.textContent = "PDF Pronto!";
+                status.style.color = "#34c759";
             }
 
         } catch (err) {
@@ -242,19 +257,19 @@
 
         data.forEach(r => {
             const totRow = r.Contanti + r.Pos;
-            // Mostriamo solo se c'è movimento > 0 (come nel PDF) oppure uscite > 0
             if (totRow === 0 && r.Uscite === 0) return;
 
             tC += r.Contanti;
             tP += r.Pos;
 
             const tr = document.createElement('tr');
+            // Formato Data breve per mobile: GG/MM
+            const dShort = r.dateObj.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
+            
             tr.innerHTML = `
-                <td>${r.dateObj.toLocaleDateString('it-IT')}</td>
+                <td>${dShort}</td>
                 <td>${r.Nominativo}</td>
-                <td class="num" style="color:#2980b9">${formatEuro(totRow)}</td>
-                <td class="num">${formatEuro(r.Contanti)}</td>
-                <td class="num">${formatEuro(r.Pos)}</td>
+                <td class="num" style="color:#007aff">${formatEuro(totRow)}</td>
             `;
             tbody.appendChild(tr);
         });
@@ -264,6 +279,8 @@
         document.getElementById('sumPos').textContent = formatEuro(tP);
         
         document.getElementById('resultsArea').classList.remove('hidden');
+        // Scroll automatico ai risultati
+        document.getElementById('resultsArea').scrollIntoView({ behavior: 'smooth' });
     }
 
     function generatePDF(data) {
@@ -274,18 +291,15 @@
         let y = 15;
         let grandTotC = 0, grandTotP = 0, grandTotU = 0;
 
-        // Raggruppa per data (stringa originale per univocità o formattata)
         const groups = {};
         data.forEach(r => {
-            const k = r.dateObj.getTime(); // Timestamp come chiave per ordinamento sicuro
+            const k = r.dateObj.getTime();
             if (!groups[k]) groups[k] = [];
             groups[k].push(r);
         });
 
-        // Iterazione sui gruppi (ordinati per chiave temporale)
         Object.keys(groups).sort().forEach(key => {
             const group = groups[key];
-            // Ordina per nome dentro il gruppo
             group.sort((a,b) => a.Nominativo.localeCompare(b.Nominativo));
 
             let tc = 0, tp = 0, tu = 0;
@@ -294,7 +308,6 @@
             group.forEach(r => {
                 if (r.Uscite > 0) expense.push(r);
                 else income.push(r);
-                
                 tc += r.Contanti; tp += r.Pos; tu += r.Uscite;
             });
 
@@ -302,23 +315,16 @@
 
             grandTotC += tc; grandTotP += tp; grandTotU += tu;
 
-            // Formattazione Data Header
             const dObj = group[0].dateObj;
             const wdFull = dObj.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
             const wdShort = dObj.toLocaleDateString('it-IT', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
             const headerTot = formatEuro(tc + tp);
 
-            // Controllo salto pagina
             if (y > 270) { doc.addPage(); y = 15; }
 
             if (isSint) {
-                // Header Sintetico: Grigio chiaro, Boxato
-                doc.setFillColor(230, 230, 230);
-                doc.setDrawColor(0);
-                doc.rect(14, y, 182, 7, 'FD');
-                
-                doc.setFont("helvetica", "normal");
-                doc.setFontSize(10);
+                doc.setFillColor(230, 230, 230); doc.setDrawColor(0); doc.rect(14, y, 182, 7, 'FD');
+                doc.setFont("helvetica", "normal"); doc.setFontSize(10);
                 doc.text(`${wdShort} - Totale: ${headerTot}`, 105, y + 5, { align: "center" });
                 y += 7;
 
@@ -327,27 +333,13 @@
                 expense.forEach(r => body.push([`${r.Nominativo} (${formatEuro(r.Uscite)})`, "", ""]));
 
                 doc.autoTable({
-                    startY: y,
-                    body: body,
-                    theme: 'plain', // No strisce alternate default
+                    startY: y, body: body, theme: 'grid', showHead: 'firstPage',
                     styles: { fontSize: 8, cellPadding: 1, lineColor: 0, lineWidth: 0.1 },
-                    columnStyles: { 
-                        0: { cellWidth: 'auto' }, 
-                        1: { cellWidth: 20, halign: 'right' }, 
-                        2: { cellWidth: 20, halign: 'right' } 
-                    },
-                    // Simula griglia
-                    didDrawCell: function(data) {
-                        // Bordi manuali se necessario, o affidarsi a theme grid
-                    },
-                    theme: 'grid'
+                    columnStyles: { 0: { cellWidth: 'auto' }, 1: { cellWidth: 20, halign: 'right' }, 2: { cellWidth: 20, halign: 'right' } }
                 });
-                y = doc.lastAutoTable.finalY + 3; // Spazietto dopo il giorno
-
+                y = doc.lastAutoTable.finalY + 3;
             } else {
-                // Header Standard
-                doc.setFillColor(230, 230, 230);
-                doc.rect(14, y, 182, 8, 'FD');
+                doc.setFillColor(230, 230, 230); doc.rect(14, y, 182, 8, 'FD');
                 doc.setFontSize(11);
                 doc.text(`${wdFull} - Totale ${headerTot}`, 105, y + 5.5, { align: "center" });
                 y += 8;
@@ -355,39 +347,27 @@
                 const head = [["Nominativo", "Attività", "Abbonamento", "Contanti", "Pos", "Uscite", "Operatore", "X", "Reg"]];
                 const body = [];
                 [...income, ...expense].forEach(r => {
-                    body.push([
-                        r.Nominativo, r.Attività || "", r.Abbonamento || "",
-                        formatEuro(r.Contanti), formatEuro(r.Pos), formatEuro(r.Uscite),
-                        r.Operatore || "", r.CassaX || "", r.Registrato || ""
-                    ]);
+                    body.push([r.Nominativo, r.Attività, r.Abbonamento, formatEuro(r.Contanti), formatEuro(r.Pos), formatEuro(r.Uscite), r.Operatore, r.CassaX, r.Registrato]);
                 });
-                // Totale Giorno Footer
                 body.push(["TOTALI", "", "", formatEuro(tc), formatEuro(tp), formatEuro(tu), "", "", ""]);
 
                 doc.autoTable({
-                    startY: y, head: head, body: body,
-                    theme: 'grid',
+                    startY: y, head: head, body: body, theme: 'grid',
                     styles: { fontSize: 8, cellPadding: 1, lineColor: 0 },
                     headStyles: { fillColor: 255, textColor: 0, fontStyle: 'normal', lineWidth: 0.1 },
                     columnStyles: { 3: {halign:'right'}, 4: {halign:'right'}, 5: {halign:'right'} },
-                    didParseCell: function(data) {
-                        if (data.row.index === body.length - 1) data.cell.styles.fontStyle = 'bold';
-                    }
+                    didParseCell: function(data) { if (data.row.index === body.length - 1) data.cell.styles.fontStyle = 'bold'; }
                 });
                 y = doc.lastAutoTable.finalY + 10;
             }
         });
 
-        // Totali Finali
         if (y > 250) { doc.addPage(); y = 20; } else { y += 10; }
-        
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal"); doc.setFontSize(11);
         const rX = 190;
-        
         doc.text(`TOTALE: ${formatEuro(grandTotC + grandTotP)}`, rX, y, { align: "right" }); y += 6;
         doc.text(`Contanti: ${formatEuro(grandTotC)}`, rX, y, { align: "right" }); y += 6;
-        doc.text(`Pos: ${formatEuro(grandTotP)}`, rX, y, { align: "right" }); y += 10; // Spazio extra
+        doc.text(`Pos: ${formatEuro(grandTotP)}`, rX, y, { align: "right" }); y += 10;
         doc.text(`Uscite: ${formatEuro(grandTotU)}`, rX, y, { align: "right" });
 
         doc.save("JF-Stampa.pdf");
