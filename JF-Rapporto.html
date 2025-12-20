@@ -3,96 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JF Report Manager</title>
+    <title>JF Report</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     
     <style>
+        /* Stile Base Mobile */
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
             background-color: #f2f2f7; 
-            padding: 15px; 
-            /* Forza larghezza smartphone anche su PC */
-            max-width: 400px; 
+            padding: 10px; 
+            max-width: 400px; /* Forza larghezza telefono */
             margin: 0 auto; 
             color: #1c1c1e; 
         }
-        h1 { text-align: center; color: #000; font-size: 1.5rem; margin-bottom: 20px; }
+        h1 { text-align: center; color: #000; font-size: 1.3rem; margin-bottom: 15px; margin-top: 5px; }
         
         .card { 
             background: white; 
-            padding: 15px; 
-            border-radius: 12px; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
-            margin-bottom: 15px; 
-        }
-        
-        label { display: block; margin-top: 10px; margin-bottom: 4px; font-weight: 600; font-size: 0.95rem; color: #3a3a3c; }
-        
-        /* Input impilati verticalmente */
-        input[type="text"], input[type="date"] { 
-            width: 100%; 
             padding: 12px; 
-            margin-bottom: 10px; /* Spazio tra i campi */
-            border: 1px solid #d1d1d6; 
-            border-radius: 8px; 
-            box-sizing: border-box; 
-            font-size: 16px; /* Evita zoom su iOS */
-            background-color: #f9f9f9;
-        }
-        
-        /* Checkbox */
-        .checkbox-wrapper { display: flex; align-items: center; margin-bottom: 10px; }
-        input[type="checkbox"] { transform: scale(1.3); margin-right: 10px; accent-color: #007aff; }
-        
-        /* Bottoni */
-        .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
-        button { 
-            width: 100%; 
-            padding: 14px; 
-            border: none; 
             border-radius: 10px; 
-            font-size: 1.1rem; 
-            font-weight: bold; 
-            cursor: pointer; 
-            color: white; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
+            margin-bottom: 10px; 
         }
         
-        .btn-cerca { background-color: #007aff; } /* iOS Blue */
-        .btn-pdf { background-color: #ff3b30; }   /* iOS Red */
+        /* Input Data in linea (Label + Input) */
+        .date-row { display: flex; align-items: center; margin-bottom: 8px; }
+        .date-row label { width: 30px; font-weight: 600; font-size: 0.95rem; }
+        .date-row input[type="date"] { flex: 1; padding: 8px; border: 1px solid #d1d1d6; border-radius: 6px; font-size: 15px; background-color: #f9f9f9; }
+
+        /* Checkbox Tutto */
+        .checkbox-wrapper { display: flex; align-items: center; margin-bottom: 10px; padding-left: 2px; }
+        input[type="checkbox"] { transform: scale(1.2); margin-right: 8px; accent-color: #007aff; }
+        .chk-label { font-size: 0.95rem; }
+
+        /* Input Testo (Ricerca) */
+        input[type="text"] { width: 100%; padding: 10px; margin-bottom: 8px; border: 1px solid #d1d1d6; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
+        input[type="text"]::placeholder { color: #8e8e93; }
 
         /* Radio Buttons */
-        .radio-group { margin-top: 5px; display: flex; flex-direction: column; gap: 8px; }
-        .radio-group label { font-weight: normal; display: flex; align-items: center; margin: 0; }
-        .radio-group input { margin-right: 10px; transform: scale(1.2); accent-color: #007aff; }
+        .radio-group { display: flex; flex-direction: column; gap: 6px; margin: 5px 0; }
+        .radio-group label { font-size: 0.95rem; display: flex; align-items: center; margin: 0; }
+        .radio-group input { margin-right: 8px; transform: scale(1.1); accent-color: #007aff; }
 
-        /* Riquadro Totali */
+        /* Bottoni */
+        .btn-group { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; color: white; }
+        .btn-cerca { background-color: #007aff; }
+        .btn-pdf { background-color: #ff3b30; }
+
+        /* Riquadro Totali (Riga Singola) */
         .summary-box { 
             background-color: #eef9ff; border: 1px solid #bce0fd; 
-            padding: 15px; border-radius: 10px; margin: 20px 0;
-            text-align: center;
+            padding: 10px; border-radius: 8px; margin: 15px 0;
+            text-align: center; font-size: 0.85rem; color: #333; line-height: 1.4;
         }
-        .summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 1rem; border-bottom: 1px solid #daeefc; padding-bottom: 4px; }
-        .summary-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .summary-row strong { color: #007aff; }
-        .summary-row span { font-weight: bold; }
+        .summary-box strong { color: #007aff; font-size: 1rem; }
 
-        /* Tabella Risultati */
-        .table-container { 
-            border-radius: 8px; 
-            overflow: hidden; 
-            border: 1px solid #d1d1d6;
-            background: white;
-        }
+        /* Tabella */
+        .table-container { border-radius: 8px; overflow: hidden; border: 1px solid #d1d1d6; background: white; }
         table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e5e5ea; font-size: 0.9rem; }
+        th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #e5e5ea; font-size: 0.85rem; }
         th { background-color: #f2f2f7; font-weight: 600; color: #636366; }
         td.num { text-align: right; font-weight: bold; white-space: nowrap; }
         tr:last-child td { border-bottom: none; }
 
-        .status { text-align: center; margin-top: 15px; font-weight: bold; font-size: 0.9rem; min-height: 20px; }
+        .status { text-align: center; margin-top: 10px; font-weight: bold; font-size: 0.85rem; min-height: 20px; }
         .hidden { display: none; }
     </style>
 </head>
@@ -101,34 +79,31 @@
     <h1>🖨️ JF Report</h1>
 
     <div class="card">
-        <label>📅 Periodo</label>
         <div class="checkbox-wrapper">
             <input type="checkbox" id="chk_tutto" checked onchange="toggleDates()">
-            <span style="font-size: 1rem;">Tutto il periodo</span>
+            <span class="chk-label">Tutto il periodo</span>
         </div>
         
-        <label>Da:</label>
-        <input type="date" id="date_start" disabled>
-        
-        <label>A:</label>
-        <input type="date" id="date_end" disabled>
+        <div class="date-row">
+            <label>Da:</label>
+            <input type="date" id="date_start" disabled>
+        </div>
+        <div class="date-row">
+            <label>A:</label>
+            <input type="date" id="date_end" disabled>
+        </div>
     </div>
 
     <div class="card">
-        <label>📄 Formato Stampa (Solo PDF)</label>
         <div class="radio-group">
-            <label><input type="radio" name="formato" value="SINT" checked> Sintetico (3 Colonne)</label>
-            <label><input type="radio" name="formato" value="STD"> Standard</label>
+            <label><input type="radio" name="formato" value="SINT" checked> PDF Sintetico (3 colonne)</label>
+            <label><input type="radio" name="formato" value="STD"> PDF Standard</label>
         </div>
     </div>
 
     <div class="card">
-        <label>🔍 Cerca Nominativo</label>
-        <label style="font-weight:normal; font-size:0.8em; margin-top:0;">Contiene:</label>
-        <input type="text" id="filter_inc" placeholder="es. giulia">
-        
-        <label style="font-weight:normal; font-size:0.8em; margin-top:0;">NON contiene:</label>
-        <input type="text" id="filter_exc" placeholder="es. rossi">
+        <input type="text" id="filter_inc" placeholder="Cerca nominativi con...">
+        <input type="text" id="filter_exc" placeholder="Cerca nominativi senza...">
     </div>
 
     <div class="btn-group">
@@ -141,9 +116,7 @@
     <div id="resultsArea" class="hidden">
         
         <div class="summary-box">
-            <div class="summary-row"><strong>Totale</strong><span id="sumTot">0 €</span></div>
-            <div class="summary-row"><strong>Contanti</strong><span id="sumCont">0 €</span></div>
-            <div class="summary-row"><strong>Pos</strong><span id="sumPos">0 €</span></div>
+            <span id="txtTotale"></span>
         </div>
 
         <div class="table-container">
@@ -158,10 +131,15 @@
                 <tbody id="tableBody"></tbody>
             </table>
         </div>
-        <div style="height: 30px;"></div> </div>
+        <div style="height: 30px;"></div>
+    </div>
 
 <script>
-    const CSV_FILENAME = 'JF-DB.csv';
+    // =================================================================================
+    // LINK DIRETTO AL TUO REPOSITORY (Raw)
+    // =================================================================================
+    const CSV_URL = 'https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/JF-DB.csv'; 
+    // =================================================================================
 
     function toggleDates() {
         const isAll = document.getElementById('chk_tutto').checked;
@@ -177,19 +155,24 @@
         const status = document.getElementById('statusMsg');
         const resultsArea = document.getElementById('resultsArea');
         
-        status.textContent = "Elaborazione...";
+        status.textContent = "Connessione al database...";
         status.style.color = "#007aff";
         
         if(azione === 'CERCA') resultsArea.classList.add('hidden');
 
         try {
-            const response = await fetch(CSV_FILENAME);
-            if (!response.ok) throw new Error("File CSV non trovato.");
+            const response = await fetch(CSV_URL);
+            
+            if (!response.ok) {
+                if(response.status === 404) throw new Error("File CSV non trovato su GitHub.");
+                throw new Error(`Errore connessione: ${response.status}`);
+            }
+            
             const csvText = await response.text();
             const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
             let data = parsed.data;
 
-            // Pulizia
+            // Pulizia e Normalizzazione Dati
             data.forEach(row => {
                 if (row.Data) {
                     const parts = row.Data.split('/');
@@ -199,15 +182,18 @@
                     let val = row[k] ? row[k].toString().replace(/\./g, '').replace(',', '.') : "0";
                     row[k] = parseFloat(val) || 0;
                 });
+                
                 if (!row.Nominativo) row.Nominativo = "";
                 let n = row.Nominativo.trim().toLowerCase();
+                // Sostituzione Nomi
                 if (n === 'marica') row.Nominativo = "Pricci Marica";
                 if (n === 'checco') row.Nominativo = "Di Stasio Checco";
             });
 
+            // Escludi righe senza data valida
             data = data.filter(r => r.dateObj && !isNaN(r.dateObj));
 
-            // Filtri
+            // Filtro Date
             if (!document.getElementById('chk_tutto').checked) {
                 const sVal = document.getElementById('date_start').value;
                 const eVal = document.getElementById('date_end').value;
@@ -218,6 +204,7 @@
                 }
             }
 
+            // Filtro Nomi
             const inc = document.getElementById('filter_inc').value.toLowerCase().trim();
             const exc = document.getElementById('filter_exc').value.toLowerCase().trim();
             
@@ -230,11 +217,12 @@
                 return;
             }
 
+            // Ordinamento
             data.sort((a, b) => (a.dateObj - b.dateObj) || a.Nominativo.localeCompare(b.Nominativo));
 
             if (azione === 'CERCA') {
                 renderTable(data);
-                status.textContent = `Risultati: ${data.length}`;
+                status.textContent = `Trovati: ${data.length} record`;
                 status.style.color = "#34c759";
             } else {
                 generatePDF(data);
@@ -263,7 +251,6 @@
             tP += r.Pos;
 
             const tr = document.createElement('tr');
-            // Formato Data breve per mobile: GG/MM
             const dShort = r.dateObj.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
             
             tr.innerHTML = `
@@ -274,12 +261,12 @@
             tbody.appendChild(tr);
         });
 
-        document.getElementById('sumTot').textContent = formatEuro(tC + tP);
-        document.getElementById('sumCont').textContent = formatEuro(tC);
-        document.getElementById('sumPos').textContent = formatEuro(tP);
+        const tTot = tC + tP;
+        // Totali su riga singola come richiesto
+        const txt = `<strong>Totale: ${formatEuro(tTot)}</strong><br>(Contanti: ${formatEuro(tC)} + Pos: ${formatEuro(tP)})`;
+        document.getElementById('txtTotale').innerHTML = txt;
         
         document.getElementById('resultsArea').classList.remove('hidden');
-        // Scroll automatico ai risultati
         document.getElementById('resultsArea').scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -291,6 +278,7 @@
         let y = 15;
         let grandTotC = 0, grandTotP = 0, grandTotU = 0;
 
+        // Raggruppa per data
         const groups = {};
         data.forEach(r => {
             const k = r.dateObj.getTime();
@@ -298,6 +286,7 @@
             groups[k].push(r);
         });
 
+        // Loop Gruppi
         Object.keys(groups).sort().forEach(key => {
             const group = groups[key];
             group.sort((a,b) => a.Nominativo.localeCompare(b.Nominativo));
@@ -323,6 +312,7 @@
             if (y > 270) { doc.addPage(); y = 15; }
 
             if (isSint) {
+                // Sintetico
                 doc.setFillColor(230, 230, 230); doc.setDrawColor(0); doc.rect(14, y, 182, 7, 'FD');
                 doc.setFont("helvetica", "normal"); doc.setFontSize(10);
                 doc.text(`${wdShort} - Totale: ${headerTot}`, 105, y + 5, { align: "center" });
@@ -339,6 +329,7 @@
                 });
                 y = doc.lastAutoTable.finalY + 3;
             } else {
+                // Standard
                 doc.setFillColor(230, 230, 230); doc.rect(14, y, 182, 8, 'FD');
                 doc.setFontSize(11);
                 doc.text(`${wdFull} - Totale ${headerTot}`, 105, y + 5.5, { align: "center" });
@@ -362,6 +353,7 @@
             }
         });
 
+        // Totali Finali PDF
         if (y > 250) { doc.addPage(); y = 20; } else { y += 10; }
         doc.setFont("helvetica", "normal"); doc.setFontSize(11);
         const rX = 190;
