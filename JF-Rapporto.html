@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JF Report</title>
+    <title>JF Rapporto</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -25,6 +25,35 @@
             box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-bottom: 10px; 
         }
         
+        /* --- STILE INPUT CON X DI CANCELLAZIONE --- */
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 8px;
+        }
+        .input-wrapper input[type="text"] {
+            width: 100%;
+            padding: 10px 35px 10px 10px; 
+            border: 1px solid #d1d1d6;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 15px;
+            margin-bottom: 0; 
+        }
+        .clear-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #8e8e93;
+            font-weight: bold;
+            font-size: 18px;
+            user-select: none;
+            display: none; 
+        }
+        .clear-btn:hover { color: #333; }
+        .show-x { display: block !important; }
+
         /* Stile Griglia Preset Anni */
         .period-presets {
             display: flex;
@@ -105,31 +134,42 @@
 </head>
 <body>
 
-    <h1>🖨️ JF Report</h1>
+    <h1>🖨️ JF Rapporto</h1>
 
     <div class="card">
         <div class="period-presets">
             <label><input type="radio" name="periodo" value="ALL" onclick="applyPreset('ALL')" checked> Tutto</label>
-            <label><input type="radio" name="periodo" value="21-22" onclick="applyPreset('21-22')"> 2021-22</label>
-            <label><input type="radio" name="periodo" value="22-23" onclick="applyPreset('22-23')"> 2022-23</label>
-            <label><input type="radio" name="periodo" value="23-24" onclick="applyPreset('23-24')"> 2023-24</label>
-            <label><input type="radio" name="periodo" value="24-25" onclick="applyPreset('24-25')"> 2024-25</label>
-            <label><input type="radio" name="periodo" value="25-26" onclick="applyPreset('25-26')"> 2025-26</label>
+            <label><input type="radio" name="periodo" value="2021-22" onclick="applyPreset('2021-22')"> 2021-22</label>
+            <label><input type="radio" name="periodo" value="2022-23" onclick="applyPreset('2022-23')"> 2022-23</label>
+            <label><input type="radio" name="periodo" value="2023-24" onclick="applyPreset('2023-24')"> 2023-24</label>
+            <label><input type="radio" name="periodo" value="2024-25" onclick="applyPreset('2024-25')"> 2024-25</label>
+            <label><input type="radio" name="periodo" value="2025-26" onclick="applyPreset('2025-26')"> 2025-26</label>
         </div>
 
         <div class="date-row">
             <label>Da:</label>
-            <input type="date" id="date_start" onchange="resetView()">
+            <input type="date" id="date_start" oninput="uncheckPresets(); resetView()">
         </div>
         <div class="date-row">
             <label>A:</label>
-            <input type="date" id="date_end" onchange="resetView()">
+            <input type="date" id="date_end" oninput="uncheckPresets(); resetView()">
         </div>
     </div>
 
     <div class="card">
-        <input type="text" id="filter_inc" placeholder="Cerca nominativi con..." onkeydown="checkEnter(event)" oninput="resetView()">
-        <input type="text" id="filter_exc" placeholder="Cerca nominativi senza..." onkeydown="checkEnter(event)" oninput="resetView()">
+        <div class="input-wrapper">
+            <input type="text" id="filter_inc" placeholder="Cerca nominativi con..." 
+                   onkeydown="checkEnter(event)" 
+                   oninput="toggleClearBtn(this); resetView()">
+            <span class="clear-btn" onclick="clearField('filter_inc', this)">&times;</span>
+        </div>
+
+        <div class="input-wrapper">
+            <input type="text" id="filter_exc" placeholder="Cerca nominativi senza..." 
+                   onkeydown="checkEnter(event)" 
+                   oninput="toggleClearBtn(this); resetView()">
+            <span class="clear-btn" onclick="clearField('filter_exc', this)">&times;</span>
+        </div>
     </div>
 
     <button class="btn-cerca" onclick="avviaProcesso('CERCA')">🔍 CERCA</button>
@@ -184,6 +224,23 @@
     let currentFooterLabel = ""; 
     let maxDateInDB = new Date(); 
 
+    function toggleClearBtn(input) {
+        const btn = input.nextElementSibling;
+        if (input.value.length > 0) {
+            btn.classList.add('show-x');
+        } else {
+            btn.classList.remove('show-x');
+        }
+    }
+
+    function clearField(id, btn) {
+        const input = document.getElementById(id);
+        input.value = "";
+        btn.classList.remove('show-x');
+        input.focus();
+        resetView(); 
+    }
+
     window.addEventListener('DOMContentLoaded', async () => {
         try {
             const response = await fetch(CSV_URL);
@@ -217,16 +274,20 @@
                 s = '2021-09-01';
                 e = maxDateInDB.toISOString().split('T')[0];
                 break;
-            case '21-22': s = '2021-09-01'; e = '2022-08-31'; break;
-            case '22-23': s = '2022-09-01'; e = '2023-08-31'; break;
-            case '23-24': s = '2023-09-01'; e = '2024-08-31'; break;
-            case '24-25': s = '2024-09-01'; e = '2025-08-31'; break;
-            case '25-26': s = '2025-09-01'; e = '2026-08-31'; break;
+            case '2021-22': s = '2021-09-01'; e = '2022-08-31'; break;
+            case '2022-23': s = '2022-09-01'; e = '2023-08-31'; break;
+            case '2023-24': s = '2023-09-01'; e = '2024-08-31'; break;
+            case '2024-25': s = '2024-09-01'; e = '2025-08-31'; break;
+            case '2025-26': s = '2025-09-01'; e = '2026-08-31'; break;
         }
         if(s && e) {
             dStart.value = s;
             dEnd.value = e;
         }
+    }
+
+    function uncheckPresets() {
+        document.querySelectorAll('input[name="periodo"]').forEach(r => r.checked = false);
     }
 
     document.addEventListener('keydown', function(event) {
@@ -296,10 +357,14 @@
             const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
             let data = parsed.data;
 
+            // 1. CARICAMENTO E PULIZIA INIZIALE
             data.forEach(row => {
                 if (row.Data) {
                     const parts = row.Data.split('/');
-                    if (parts.length === 3) row.dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
+                    if (parts.length === 3) {
+                        row.dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
+                        row.dateObj.setHours(0,0,0,0); 
+                    }
                 }
                 ['Contanti', 'Pos', 'Uscite'].forEach(k => {
                     let val = row[k] ? row[k].toString().replace(/\./g, '').replace(',', '.') : "0";
@@ -318,16 +383,30 @@
                 }
             });
 
+            // 2. FILTRI BASE
             data = data.filter(r => r.dateObj && !isNaN(r.dateObj));
             data = data.filter(r => (r.Contanti + r.Pos) !== 0);
 
+            // 3. FILTRO DATE (CON VALIDAZIONE RIGIDA)
             const sVal = document.getElementById('date_start').value;
             const eVal = document.getElementById('date_end').value;
-            if (sVal && eVal) {
-                const s = new Date(sVal);
-                const e = new Date(eVal);
-                data = data.filter(r => r.dateObj >= s && r.dateObj <= e);
+            
+            if (!sVal || !eVal) {
+                status.textContent = "⚠️ Date non valide o mancanti!";
+                status.style.color = "#ff3b30";
+                return;
             }
+            
+            const sParts = sVal.split('-');
+            const eParts = eVal.split('-');
+            
+            const s = new Date(sParts[0], sParts[1]-1, sParts[2]);
+            s.setHours(0,0,0,0);
+            
+            const e = new Date(eParts[0], eParts[1]-1, eParts[2]);
+            e.setHours(0,0,0,0);
+
+            data = data.filter(r => r.dateObj >= s && r.dateObj <= e);
             
             const txtInc = document.getElementById('filter_inc').value.trim();
             const txtExc = document.getElementById('filter_exc').value.trim();
@@ -618,7 +697,7 @@
                     styles: { fontSize: 8, cellPadding: 1, lineColor: 0 },
                     headStyles: { fillColor: 255, textColor: 0, fontStyle: 'normal', lineWidth: 0.1 },
                     columnStyles: { 3: {halign:'right'}, 4: {halign:'right'}, 5: {halign:'right'} },
-                    didParseCell: function(data) { if (data.row.index === body.length - 1) data.cell.styles.fontStyle = 'bold'; },
+                    didParseCell: function(data) { if (data.row.index === body.length - 1) data.cell.styles.fontStyle = 'normal'; },
                     didDrawPage: function (data) {
                         const pageNum = doc.internal.getCurrentPageInfo().pageNumber;
                         if (!pagesStamped.has(pageNum)) {
