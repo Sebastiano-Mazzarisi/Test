@@ -10,68 +10,97 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     
     <style>
-        /* Stile Base Mobile */
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
             background-color: #f2f2f7; 
             padding: 10px; 
-            max-width: 400px; /* Forza larghezza telefono */
+            max-width: 400px; 
             margin: 0 auto; 
             color: #1c1c1e; 
         }
         h1 { text-align: center; color: #000; font-size: 1.3rem; margin-bottom: 15px; margin-top: 5px; }
         
         .card { 
-            background: white; 
-            padding: 12px; 
-            border-radius: 10px; 
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
-            margin-bottom: 10px; 
+            background: white; padding: 12px; border-radius: 10px; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-bottom: 10px; 
         }
         
-        /* Input Data in linea (Label + Input) */
+        /* Stile Griglia Preset Anni */
+        .period-presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+            justify-content: space-between;
+        }
+        .period-presets label {
+            font-size: 0.95rem; 
+            display: flex;
+            align-items: center;
+            background: #f2f2f7;
+            padding: 8px 4px;
+            border-radius: 6px;
+            cursor: pointer;
+            flex: 1 0 30%;
+            justify-content: center;
+            border: 1px solid transparent;
+        }
+        .period-presets label:hover { background: #e5e5ea; }
+        .period-presets input { margin-right: 6px; transform: scale(1.1); accent-color: #007aff; }
+
         .date-row { display: flex; align-items: center; margin-bottom: 8px; }
         .date-row label { width: 30px; font-weight: 600; font-size: 0.95rem; }
         .date-row input[type="date"] { flex: 1; padding: 8px; border: 1px solid #d1d1d6; border-radius: 6px; font-size: 15px; background-color: #f9f9f9; }
 
-        /* Checkbox Tutto */
         .checkbox-wrapper { display: flex; align-items: center; margin-bottom: 10px; padding-left: 2px; }
         input[type="checkbox"] { transform: scale(1.2); margin-right: 8px; accent-color: #007aff; }
         .chk-label { font-size: 0.95rem; }
 
-        /* Input Testo (Ricerca) */
         input[type="text"] { width: 100%; padding: 10px; margin-bottom: 8px; border: 1px solid #d1d1d6; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
         input[type="text"]::placeholder { color: #8e8e93; }
 
-        /* Radio Buttons */
         .radio-group { display: flex; flex-direction: column; gap: 6px; margin: 5px 0; }
         .radio-group label { font-size: 0.95rem; display: flex; align-items: center; margin: 0; }
         .radio-group input { margin-right: 8px; transform: scale(1.1); accent-color: #007aff; }
 
-        /* Bottoni */
         .btn-group { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; }
-        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; color: white; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; color: white; margin-bottom: 10px; }
         .btn-cerca { background-color: #007aff; }
-        .btn-pdf { background-color: #ff3b30; }
+        .btn-pdf { background-color: #ff3b30; margin-bottom: 0; }
 
-        /* Riquadro Totali (Riga Singola) */
-        .summary-box { 
-            background-color: #eef9ff; border: 1px solid #bce0fd; 
-            padding: 10px; border-radius: 8px; margin: 15px 0;
-            text-align: center; font-size: 0.85rem; color: #333; line-height: 1.4;
-        }
+        .summary-box { background-color: #eef9ff; border: 1px solid #bce0fd; padding: 10px; border-radius: 8px; margin: 15px 0; text-align: center; font-size: 0.9rem; color: #333; line-height: 1.4; }
         .summary-box strong { color: #007aff; font-size: 1rem; }
 
-        /* Tabella */
         .table-container { border-radius: 8px; overflow: hidden; border: 1px solid #d1d1d6; background: white; }
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #e5e5ea; font-size: 0.85rem; }
         th { background-color: #f2f2f7; font-weight: 600; color: #636366; }
-        td.num { text-align: right; font-weight: bold; white-space: nowrap; }
+        td.num { text-align: right; font-weight: bold; white-space: nowrap; font-family: 'Segoe UI', sans-serif; }
         tr:last-child td { border-bottom: none; }
 
         .status { text-align: center; margin-top: 10px; font-weight: bold; font-size: 0.85rem; min-height: 20px; }
-        .hidden { display: none; }
+        .hidden { display: none !important; }
+
+        /* Modale */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: white; width: 90%; max-width: 350px;
+            border-radius: 12px; padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            max-height: 80vh; display: flex; flex-direction: column;
+        }
+        .modal-header { font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; text-align: center; }
+        .modal-list { overflow-y: auto; flex: 1; border: 1px solid #e5e5ea; border-radius: 6px; margin-bottom: 15px; padding: 5px; }
+        .modal-item { padding: 10px; border-bottom: 1px solid #f2f2f7; display: flex; align-items: center; cursor: pointer; font-size: 0.95rem; }
+        .modal-item:hover { background-color: #f5f5f5; }
+        .modal-item input { margin-right: 12px; transform: scale(1.3); accent-color: #007aff; }
+        .modal-footer { display: flex; gap: 10px; }
+        .btn-cancel { background-color: #8e8e93; font-size: 0.9rem; padding: 10px; }
+        .btn-confirm { background-color: #34c759; font-size: 0.9rem; padding: 10px; }
     </style>
 </head>
 <body>
@@ -79,46 +108,47 @@
     <h1>🖨️ JF Report</h1>
 
     <div class="card">
-        <div class="checkbox-wrapper">
-            <input type="checkbox" id="chk_tutto" checked onchange="toggleDates()">
-            <span class="chk-label">Tutto il periodo</span>
+        <div class="period-presets">
+            <label><input type="radio" name="periodo" value="ALL" onclick="applyPreset('ALL')" checked> Tutto</label>
+            <label><input type="radio" name="periodo" value="21-22" onclick="applyPreset('21-22')"> 2021-22</label>
+            <label><input type="radio" name="periodo" value="22-23" onclick="applyPreset('22-23')"> 2022-23</label>
+            <label><input type="radio" name="periodo" value="23-24" onclick="applyPreset('23-24')"> 2023-24</label>
+            <label><input type="radio" name="periodo" value="24-25" onclick="applyPreset('24-25')"> 2024-25</label>
+            <label><input type="radio" name="periodo" value="25-26" onclick="applyPreset('25-26')"> 2025-26</label>
         </div>
-        
+
         <div class="date-row">
             <label>Da:</label>
-            <input type="date" id="date_start" disabled>
+            <input type="date" id="date_start" onchange="resetView()">
         </div>
         <div class="date-row">
             <label>A:</label>
-            <input type="date" id="date_end" disabled>
+            <input type="date" id="date_end" onchange="resetView()">
         </div>
     </div>
 
     <div class="card">
+        <input type="text" id="filter_inc" placeholder="Cerca nominativi con..." onkeydown="checkEnter(event)" oninput="resetView()">
+        <input type="text" id="filter_exc" placeholder="Cerca nominativi senza..." onkeydown="checkEnter(event)" oninput="resetView()">
+    </div>
+
+    <button class="btn-cerca" onclick="avviaProcesso('CERCA')">🔍 CERCA</button>
+
+    <div class="card" style="margin-top: 5px; margin-bottom: 15px;">
         <div class="radio-group">
             <label><input type="radio" name="formato" value="SINT" checked> PDF Sintetico (3 colonne)</label>
             <label><input type="radio" name="formato" value="STD"> PDF Standard</label>
         </div>
     </div>
 
-    <div class="card">
-        <input type="text" id="filter_inc" placeholder="Cerca nominativi con...">
-        <input type="text" id="filter_exc" placeholder="Cerca nominativi senza...">
-    </div>
-
-    <div class="btn-group">
-        <button class="btn-cerca" onclick="avviaProcesso('CERCA')">🔍 CERCA</button>
-        <button class="btn-pdf" onclick="avviaProcesso('PDF')">⬇️ SCARICA PDF</button>
-    </div>
+    <button class="btn-pdf" onclick="avviaProcesso('PDF')">⬇️ SCARICA PDF</button>
     
     <div class="status" id="statusMsg"></div>
 
     <div id="resultsArea" class="hidden">
-        
         <div class="summary-box">
             <span id="txtTotale"></span>
         </div>
-
         <div class="table-container">
             <table>
                 <thead>
@@ -134,45 +164,138 @@
         <div style="height: 30px;"></div>
     </div>
 
-<script>
-    // =================================================================================
-    // LINK DIRETTO AL TUO REPOSITORY (Raw)
-    // =================================================================================
-    const CSV_URL = 'https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/JF-DB.csv'; 
-    // =================================================================================
+    <div id="modalSelect" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">Seleziona Nominativo</div>
+            <div class="modal-list" id="modalListContainer"></div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="chiudiModale()">Annulla</button>
+                <button class="btn-confirm" onclick="confermaSelezione()">Conferma</button>
+            </div>
+        </div>
+    </div>
 
-    function toggleDates() {
-        const isAll = document.getElementById('chk_tutto').checked;
-        document.getElementById('date_start').disabled = isAll;
-        document.getElementById('date_end').disabled = isAll;
+<script>
+    const CSV_URL = 'https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/JF-DB.csv'; 
+
+    let cachedData = [];
+    let displayedData = [];
+    let pendingAction = "";
+    let currentFooterLabel = ""; 
+    let maxDateInDB = new Date(); 
+
+    window.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const response = await fetch(CSV_URL);
+            if(response.ok) {
+                const txt = await response.text();
+                const parsed = Papa.parse(txt, { header: true, skipEmptyLines: true });
+                let maxTs = 0;
+                parsed.data.forEach(r => {
+                    if(r.Data) {
+                        const parts = r.Data.split('/'); 
+                        if(parts.length === 3) {
+                            const d = new Date(parts[2], parts[1]-1, parts[0]);
+                            if(d.getTime() > maxTs) maxTs = d.getTime();
+                        }
+                    }
+                });
+                if(maxTs > 0) maxDateInDB = new Date(maxTs);
+            }
+        } catch(e) { console.log("Init fetch failed"); }
+        applyPreset('ALL');
+    });
+
+    function applyPreset(type) {
+        const dStart = document.getElementById('date_start');
+        const dEnd = document.getElementById('date_end');
+        resetView();
+
+        let s = "", e = "";
+        switch(type) {
+            case 'ALL':
+                s = '2021-09-01';
+                e = maxDateInDB.toISOString().split('T')[0];
+                break;
+            case '21-22': s = '2021-09-01'; e = '2022-08-31'; break;
+            case '22-23': s = '2022-09-01'; e = '2023-08-31'; break;
+            case '23-24': s = '2023-09-01'; e = '2024-08-31'; break;
+            case '24-25': s = '2024-09-01'; e = '2025-08-31'; break;
+            case '25-26': s = '2025-09-01'; e = '2026-08-31'; break;
+        }
+        if(s && e) {
+            dStart.value = s;
+            dEnd.value = e;
+        }
+    }
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === "Escape") {
+            const modal = document.getElementById('modalSelect');
+            if (!modal.classList.contains('hidden')) chiudiModale();
+        }
+    });
+
+    function checkEnter(event) {
+        if (event.key === "Enter") {
+            event.target.blur();
+            avviaProcesso('CERCA');
+        }
+    }
+
+    function resetView() {
+        document.getElementById('resultsArea').classList.add('hidden');
+        displayedData = [];
+        document.getElementById('statusMsg').textContent = "";
+    }
+
+    function formatNumber(n) {
+        return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
 
     function formatEuro(n) {
-        return n.toLocaleString('it-IT', {minimumFractionDigits: 0, maximumFractionDigits: 2}) + " €";
+        if (n === null || n === undefined) return "0 €";
+        let num = Math.round(n);
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " €";
+    }
+
+    function gestisciClickCheckbox(tipo, el) {
+        const chkTutti = document.getElementById('chk_tutti_modale');
+        const chkSingoli = document.querySelectorAll('.chk_singolo');
+
+        if (tipo === 'TUTTI') {
+            if (chkTutti.checked) {
+                chkSingoli.forEach(c => c.checked = false);
+            }
+        } else {
+            if (el.checked) {
+                chkTutti.checked = false;
+            }
+        }
     }
 
     async function avviaProcesso(azione) {
         const status = document.getElementById('statusMsg');
-        const resultsArea = document.getElementById('resultsArea');
         
-        status.textContent = "Connessione al database...";
+        if (azione === 'PDF' && !document.getElementById('resultsArea').classList.contains('hidden') && displayedData.length > 0) {
+            generatePDF(displayedData);
+            status.textContent = "PDF Generato!";
+            status.style.color = "#34c759";
+            return;
+        }
+
+        document.getElementById('resultsArea').classList.add('hidden');
+        status.textContent = "Analisi dati...";
         status.style.color = "#007aff";
-        
-        if(azione === 'CERCA') resultsArea.classList.add('hidden');
+        pendingAction = azione;
 
         try {
             const response = await fetch(CSV_URL);
-            
-            if (!response.ok) {
-                if(response.status === 404) throw new Error("File CSV non trovato su GitHub.");
-                throw new Error(`Errore connessione: ${response.status}`);
-            }
-            
+            if (!response.ok) throw new Error("File CSV non trovato su GitHub.");
             const csvText = await response.text();
             const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
             let data = parsed.data;
 
-            // Pulizia e Normalizzazione Dati
             data.forEach(row => {
                 if (row.Data) {
                     const parts = row.Data.split('/');
@@ -184,32 +307,33 @@
                 });
                 
                 if (!row.Nominativo) row.Nominativo = "";
-                let n = row.Nominativo.trim().toLowerCase();
-                // Sostituzione Nomi
+                row.Nominativo = row.Nominativo.trim(); 
+
+                let n = row.Nominativo.toLowerCase();
                 if (n === 'marica') row.Nominativo = "Pricci Marica";
                 if (n === 'checco') row.Nominativo = "Di Stasio Checco";
+
+                if (!/^[A-Z]/.test(row.Nominativo)) {
+                    row.Nominativo = "[Altro]";
+                }
             });
 
-            // Escludi righe senza data valida
             data = data.filter(r => r.dateObj && !isNaN(r.dateObj));
+            data = data.filter(r => (r.Contanti + r.Pos) !== 0);
 
-            // Filtro Date
-            if (!document.getElementById('chk_tutto').checked) {
-                const sVal = document.getElementById('date_start').value;
-                const eVal = document.getElementById('date_end').value;
-                if (sVal && eVal) {
-                    const s = new Date(sVal);
-                    const e = new Date(eVal);
-                    data = data.filter(r => r.dateObj >= s && r.dateObj <= e);
-                }
+            const sVal = document.getElementById('date_start').value;
+            const eVal = document.getElementById('date_end').value;
+            if (sVal && eVal) {
+                const s = new Date(sVal);
+                const e = new Date(eVal);
+                data = data.filter(r => r.dateObj >= s && r.dateObj <= e);
             }
-
-            // Filtro Nomi
-            const inc = document.getElementById('filter_inc').value.toLowerCase().trim();
-            const exc = document.getElementById('filter_exc').value.toLowerCase().trim();
             
-            if (inc) inc.split(' ').forEach(t => { if(t) data = data.filter(r => r.Nominativo.toLowerCase().includes(t)); });
-            if (exc) exc.split(' ').forEach(t => { if(t) data = data.filter(r => !r.Nominativo.toLowerCase().includes(t)); });
+            const txtInc = document.getElementById('filter_inc').value.trim();
+            const txtExc = document.getElementById('filter_exc').value.trim();
+            
+            if (txtInc) txtInc.toLowerCase().split(' ').forEach(t => { if(t) data = data.filter(r => r.Nominativo.toLowerCase().includes(t)); });
+            if (txtExc) txtExc.toLowerCase().split(' ').forEach(t => { if(t) data = data.filter(r => !r.Nominativo.toLowerCase().includes(t)); });
 
             if (data.length === 0) {
                 status.textContent = "Nessun dato trovato.";
@@ -217,17 +341,18 @@
                 return;
             }
 
-            // Ordinamento
             data.sort((a, b) => (a.dateObj - b.dateObj) || a.Nominativo.localeCompare(b.Nominativo));
+            cachedData = data;
 
-            if (azione === 'CERCA') {
-                renderTable(data);
-                status.textContent = `Trovati: ${data.length} record`;
-                status.style.color = "#34c759";
+            const nomiUnici = [...new Set(data.map(item => item.Nominativo))];
+            
+            currentFooterLabel = `Ricerca: "${txtInc}" - Escluso: "${txtExc}"`;
+
+            if (nomiUnici.length === 1) {
+                currentFooterLabel = `Nominativo: ${nomiUnici[0]}`;
+                eseguiAzioneFinale(azione, data);
             } else {
-                generatePDF(data);
-                status.textContent = "PDF Pronto!";
-                status.style.color = "#34c759";
+                mostraPopupSelezione(data);
             }
 
         } catch (err) {
@@ -237,130 +362,277 @@
         }
     }
 
+    function eseguiAzioneFinale(azione, data) {
+        const status = document.getElementById('statusMsg');
+        displayedData = data; 
+        if (azione === 'CERCA') {
+            renderTable(data);
+            status.textContent = `Trovati: ${data.length}`;
+            status.style.color = "#34c759";
+        } else {
+            generatePDF(data);
+            status.textContent = "PDF Pronto!";
+            status.style.color = "#34c759";
+        }
+    }
+
+    function mostraPopupSelezione(data) {
+        const nomiUnici = [...new Set(data.map(item => item.Nominativo))].sort((a, b) => a.localeCompare(b));
+        const container = document.getElementById('modalListContainer');
+        container.innerHTML = "";
+        
+        const countFormatted = formatNumber(nomiUnici.length);
+        
+        container.innerHTML += `
+            <label class="modal-item" style="background-color: #eef9ff; font-weight:bold;">
+                <input type="checkbox" id="chk_tutti_modale" checked onclick="gestisciClickCheckbox('TUTTI', this)">
+                TUTTI I NOMINATIVI (${countFormatted})
+            </label>
+        `;
+        
+        nomiUnici.forEach(nom => {
+            container.innerHTML += `
+                <label class="modal-item">
+                    <input type="checkbox" class="chk_singolo" value="${nom}" onclick="gestisciClickCheckbox('SINGOLO', this)">
+                    ${nom}
+                </label>
+            `;
+        });
+        document.getElementById('modalSelect').classList.remove('hidden');
+        document.getElementById('statusMsg').textContent = "In attesa di selezione...";
+    }
+
+    function chiudiModale() {
+        document.getElementById('modalSelect').classList.add('hidden');
+        document.getElementById('statusMsg').textContent = "Operazione annullata.";
+        document.getElementById('statusMsg').style.color = "#8e8e93";
+    }
+
+    function confermaSelezione() {
+        const chkTutti = document.getElementById('chk_tutti_modale');
+        const chkSingoli = document.querySelectorAll('.chk_singolo:checked');
+        
+        let finalData = cachedData;
+
+        if (chkTutti.checked || chkSingoli.length === 0) {
+            // TUTTI
+        } else {
+            const nomiSelezionati = Array.from(chkSingoli).map(cb => cb.value);
+            finalData = cachedData.filter(r => nomiSelezionati.includes(r.Nominativo));
+            
+            if (nomiSelezionati.length === 1) {
+                currentFooterLabel = `Nominativo: ${nomiSelezionati[0]}`;
+            } else {
+                currentFooterLabel = `Selezione Multipla (${nomiSelezionati.length} nomi)`;
+            }
+        }
+
+        chiudiModale();
+        eseguiAzioneFinale(pendingAction, finalData);
+    }
+
     function renderTable(data) {
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = "";
-        
         let tC = 0, tP = 0;
-
         data.forEach(r => {
-            const totRow = r.Contanti + r.Pos;
-            if (totRow === 0 && r.Uscite === 0) return;
-
-            tC += r.Contanti;
-            tP += r.Pos;
-
+            tC += r.Contanti; tP += r.Pos;
             const tr = document.createElement('tr');
-            const dShort = r.dateObj.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
-            
-            tr.innerHTML = `
-                <td>${dShort}</td>
-                <td>${r.Nominativo}</td>
-                <td class="num" style="color:#007aff">${formatEuro(totRow)}</td>
-            `;
+            const dFull = r.dateObj.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const totRow = r.Contanti + r.Pos;
+            tr.innerHTML = `<td>${dFull}</td><td>${r.Nominativo}</td><td class="num" style="color:#007aff">${formatEuro(totRow)}</td>`;
             tbody.appendChild(tr);
         });
-
         const tTot = tC + tP;
-        // Totali su riga singola come richiesto
-        const txt = `<strong>Totale: ${formatEuro(tTot)}</strong><br>(Contanti: ${formatEuro(tC)} + Pos: ${formatEuro(tP)})`;
-        document.getElementById('txtTotale').innerHTML = txt;
-        
+        document.getElementById('txtTotale').innerHTML = `<strong>Totale: ${formatEuro(tTot)}</strong><br>(Contanti: ${formatEuro(tC)} + Pos: ${formatEuro(tP)})`;
         document.getElementById('resultsArea').classList.remove('hidden');
         document.getElementById('resultsArea').scrollIntoView({ behavior: 'smooth' });
     }
 
     function generatePDF(data) {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+        const doc = new jsPDF('p', 'mm', 'a4'); 
         const isSint = document.querySelector('input[name="formato"]:checked').value === "SINT";
 
-        let y = 15;
-        let grandTotC = 0, grandTotP = 0, grandTotU = 0;
+        let totalC = 0, totalP = 0;
+        let minTs = Infinity, maxTs = -Infinity;
 
-        // Raggruppa per data
+        // MAPPA RIEPILOGO
+        const summaryMap = {};
+
+        data.forEach(r => {
+            totalC += r.Contanti;
+            totalP += r.Pos;
+            const ts = r.dateObj.getTime();
+            if (ts < minTs) minTs = ts;
+            if (ts > maxTs) maxTs = ts;
+
+            if (!summaryMap[r.Nominativo]) summaryMap[r.Nominativo] = 0;
+            summaryMap[r.Nominativo] += (r.Contanti + r.Pos);
+        });
+
+        const dMin = (minTs !== Infinity) ? new Date(minTs).toLocaleDateString('it-IT') : "--/--/----";
+        const dMax = (maxTs !== -Infinity) ? new Date(maxTs).toLocaleDateString('it-IT') : "--/--/----";
+        
+        const footerStr = `Da: ${dMin} a ${dMax} - ${currentFooterLabel} - Totale: ${formatEuro(totalC+totalP)} - Contanti: ${formatEuro(totalC)} - Pos: ${formatEuro(totalP)}`;
+
+        // --- RIEPILOGO: 3 COLONNE, NUMERATO ---
+        const summaryNames = Object.keys(summaryMap).sort();
+        const summaryBody = [];
+        
+        for (let i = 0; i < summaryNames.length; i += 3) {
+            const row = [];
+            for (let j = 0; j < 3; j++) {
+                if (i + j < summaryNames.length) {
+                    const nm = summaryNames[i + j];
+                    const val = summaryMap[nm];
+                    const idx = i + j + 1;
+                    row.push(`${idx}. ${nm}: ${formatEuro(val)}`);
+                } else {
+                    row.push("");
+                }
+            }
+            summaryBody.push(row);
+        }
+
+        doc.setFontSize(14);
+        doc.text("Riepilogo Nominativi", 14, 15);
+        
+        doc.autoTable({
+            startY: 20,
+            head: [['Riepilogo', 'Riepilogo', 'Riepilogo']],
+            body: summaryBody,
+            theme: 'grid',
+            headStyles: { fillColor: [220, 220, 220], textColor: 0, fontStyle: 'bold', halign: 'center' },
+            styles: { fontSize: 9, cellPadding: 2, overflow: 'linebreak' },
+            columnStyles: { 0: { cellWidth: '33%' }, 1: { cellWidth: '33%' }, 2: { cellWidth: '33%' } },
+            showHead: 'firstPage'
+        });
+
+        // SALTO PAGINA OBBLIGATORIO
+        doc.addPage();
+        let currentY = 15; // Reset Y in cima alla nuova pagina
+
+        // --- REPORT GIORNALIERO ---
         const groups = {};
         data.forEach(r => {
             const k = r.dateObj.getTime();
             if (!groups[k]) groups[k] = [];
             groups[k].push(r);
         });
+        const groupKeys = Object.keys(groups).sort();
 
-        // Loop Gruppi
-        Object.keys(groups).sort().forEach(key => {
+        const pageHeight = 297; 
+        const marginTop = 15;
+        const marginBottom = 15;
+        const colWidth = 60; 
+        const colGap = 6;
+        const startX = 10;
+        
+        let currentX = startX;
+        let colIndex = 0;
+
+        const pagesStamped = new Set();
+
+        groupKeys.forEach(key => {
             const group = groups[key];
             group.sort((a,b) => a.Nominativo.localeCompare(b.Nominativo));
 
             let tc = 0, tp = 0, tu = 0;
             const income = [], expense = [];
-
             group.forEach(r => {
                 if (r.Uscite > 0) expense.push(r);
                 else income.push(r);
                 tc += r.Contanti; tp += r.Pos; tu += r.Uscite;
             });
 
-            if ((tc + tp) === 0 && tu === 0) return;
-
-            grandTotC += tc; grandTotP += tp; grandTotU += tu;
-
             const dObj = group[0].dateObj;
             const wdFull = dObj.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
             const wdShort = dObj.toLocaleDateString('it-IT', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
             const headerTot = formatEuro(tc + tp);
 
-            if (y > 270) { doc.addPage(); y = 15; }
-
             if (isSint) {
-                // Sintetico
-                doc.setFillColor(230, 230, 230); doc.setDrawColor(0); doc.rect(14, y, 182, 7, 'FD');
-                doc.setFont("helvetica", "normal"); doc.setFontSize(10);
-                doc.text(`${wdShort} - Totale: ${headerTot}`, 105, y + 5, { align: "center" });
-                y += 7;
+                const rowsCount = income.length + expense.length;
+                const neededHeight = 7 + (rowsCount * 5) + 5; 
+
+                if (currentY + neededHeight > (pageHeight - marginBottom)) {
+                    colIndex++;
+                    if (colIndex > 2) {
+                        doc.addPage();
+                        colIndex = 0;
+                        currentY = marginTop;
+                    }
+                    currentX = startX + (colIndex * (colWidth + colGap));
+                    if (colIndex > 0) currentY = marginTop; 
+                }
+
+                doc.setFillColor(230, 230, 230); doc.setDrawColor(0); 
+                doc.rect(currentX, currentY, colWidth, 7, 'FD');
+                doc.setFont("helvetica", "normal"); doc.setFontSize(9);
+                doc.text(`${wdShort} - Totale: ${headerTot}`, currentX + (colWidth/2), currentY + 5, { align: "center" });
+                currentY += 7;
 
                 const body = [];
                 income.forEach(r => body.push([r.Nominativo, formatEuro(r.Contanti), formatEuro(r.Pos)]));
                 expense.forEach(r => body.push([`${r.Nominativo} (${formatEuro(r.Uscite)})`, "", ""]));
 
                 doc.autoTable({
-                    startY: y, body: body, theme: 'grid', showHead: 'firstPage',
-                    styles: { fontSize: 8, cellPadding: 1, lineColor: 0, lineWidth: 0.1 },
-                    columnStyles: { 0: { cellWidth: 'auto' }, 1: { cellWidth: 20, halign: 'right' }, 2: { cellWidth: 20, halign: 'right' } }
+                    startY: currentY,
+                    body: body,
+                    theme: 'grid',
+                    showHead: 'firstPage',
+                    styles: { fontSize: 7, cellPadding: 1, lineColor: 0, lineWidth: 0.1 },
+                    columnStyles: { 0: { cellWidth: 28 }, 1: { cellWidth: 16, halign: 'right' }, 2: { cellWidth: 16, halign: 'right' } },
+                    margin: { left: currentX },
+                    tableWidth: colWidth,
+                    didDrawPage: function (data) {
+                        const pageNum = doc.internal.getCurrentPageInfo().pageNumber;
+                        if (!pagesStamped.has(pageNum)) {
+                            doc.setFont("helvetica", "normal");
+                            doc.setFontSize(10);
+                            doc.setTextColor(0, 0, 0);
+                            doc.text(footerStr, 105, 290, { align: 'center' });
+                            pagesStamped.add(pageNum);
+                        }
+                    }
                 });
-                y = doc.lastAutoTable.finalY + 3;
+                currentY = doc.lastAutoTable.finalY + 3;
+
             } else {
-                // Standard
-                doc.setFillColor(230, 230, 230); doc.rect(14, y, 182, 8, 'FD');
+                if (currentY > 270) { doc.addPage(); currentY = 15; }
+                
+                doc.setFillColor(230, 230, 230); doc.rect(14, currentY, 182, 8, 'FD');
                 doc.setFontSize(11);
-                doc.text(`${wdFull} - Totale ${headerTot}`, 105, y + 5.5, { align: "center" });
-                y += 8;
+                const headerDetailed = `${wdFull} - Totale ${headerTot} (Contanti: ${formatEuro(tc)} + Pos: ${formatEuro(tp)})`;
+                doc.text(headerDetailed, 105, currentY + 5.5, { align: "center" });
+                currentY += 8;
 
                 const head = [["Nominativo", "Attività", "Abbonamento", "Contanti", "Pos", "Uscite", "Operatore", "X", "Reg"]];
                 const body = [];
                 [...income, ...expense].forEach(r => {
                     body.push([r.Nominativo, r.Attività, r.Abbonamento, formatEuro(r.Contanti), formatEuro(r.Pos), formatEuro(r.Uscite), r.Operatore, r.CassaX, r.Registrato]);
                 });
-                body.push(["TOTALI", "", "", formatEuro(tc), formatEuro(tp), formatEuro(tu), "", "", ""]);
-
+                
                 doc.autoTable({
-                    startY: y, head: head, body: body, theme: 'grid',
+                    startY: currentY, head: head, body: body, theme: 'grid',
                     styles: { fontSize: 8, cellPadding: 1, lineColor: 0 },
                     headStyles: { fillColor: 255, textColor: 0, fontStyle: 'normal', lineWidth: 0.1 },
                     columnStyles: { 3: {halign:'right'}, 4: {halign:'right'}, 5: {halign:'right'} },
-                    didParseCell: function(data) { if (data.row.index === body.length - 1) data.cell.styles.fontStyle = 'bold'; }
+                    didParseCell: function(data) { if (data.row.index === body.length - 1) data.cell.styles.fontStyle = 'bold'; },
+                    didDrawPage: function (data) {
+                        const pageNum = doc.internal.getCurrentPageInfo().pageNumber;
+                        if (!pagesStamped.has(pageNum)) {
+                            doc.setFont("helvetica", "normal");
+                            doc.setFontSize(10);
+                            doc.setTextColor(0, 0, 0);
+                            doc.text(footerStr, 105, 290, { align: 'center' });
+                            pagesStamped.add(pageNum);
+                        }
+                    }
                 });
-                y = doc.lastAutoTable.finalY + 10;
+                currentY = doc.lastAutoTable.finalY + 10;
             }
         });
-
-        // Totali Finali PDF
-        if (y > 250) { doc.addPage(); y = 20; } else { y += 10; }
-        doc.setFont("helvetica", "normal"); doc.setFontSize(11);
-        const rX = 190;
-        doc.text(`TOTALE: ${formatEuro(grandTotC + grandTotP)}`, rX, y, { align: "right" }); y += 6;
-        doc.text(`Contanti: ${formatEuro(grandTotC)}`, rX, y, { align: "right" }); y += 6;
-        doc.text(`Pos: ${formatEuro(grandTotP)}`, rX, y, { align: "right" }); y += 10;
-        doc.text(`Uscite: ${formatEuro(grandTotU)}`, rX, y, { align: "right" });
 
         doc.save("JF-Stampa.pdf");
     }
