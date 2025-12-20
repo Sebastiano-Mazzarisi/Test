@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JF Report Manager</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; padding: 20px; max-width: 600px; margin: 0 auto; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h1 { text-align: center; color: #333; }
+        label { display: block; margin-top: 10px; font-weight: bold; color: #555; }
+        input[type="text"], input[type="date"] { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
+        .row { display: flex; gap: 10px; }
+        .col { flex: 1; }
+        button { width: 100%; padding: 15px; background-color: #e74c3c; color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        button:hover { background-color: #c0392b; }
+        .radio-group { margin-top: 5px; }
+        .radio-group label { display: inline-block; margin-right: 15px; font-weight: normal; }
+        .status { text-align: center; margin-top: 10px; font-weight: bold; color: #333; }
+    </style>
+</head>
+<body>
+
+    <h1>🖨️ JF Report Web</h1>
+
+    <div class="card">
+        <label>📅 Intervallo Date</label>
+        <div style="margin-top:5px; margin-bottom:10px;">
+            <input type="checkbox" id="chk_tutto" checked onchange="toggleDates()">
+            <label for="chk_tutto" style="display:inline; font-weight:normal;">Tutto il periodo</label>
+        </div>
+        <div class="row">
+            <div class="col"><input type="date" id="date_start" disabled></div>
+            <div class="col"><input type="date" id="date_end" disabled></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <label>📄 Formato Stampa</label>
+        <div class="radio-group">
+            <input type="radio" id="fmt_sint" name="formato" value="SINT" checked>
+            <label for="fmt_sint">Sintetico</label>
+            <input type="radio" id="fmt_std" name="formato" value="STD">
+            <label for="fmt_std">Standard</label>
+        </div>
+    </div>
+
+    <div class="card">
+        <label>🔍 Filtri Nominativo</label>
+        <input type="text" id="filter_inc" placeholder="Solo chi contiene (es. giulia)">
+        <input type="text" id="filter_exc" placeholder="Escludi chi contiene (es. rossi)">
+    </div>
+
+    <button onclick="generaReport()">SCARICA PDF</button>
+    <div class="status" id="statusMsg"></div>
+
+<script>
+    // URL DEL FILE CSV (Deve essere nella stessa cartella su GitHub)
+    const CSV_FILE = 'JF-DB.csv'; 
+
+    function toggleDates() {
+        const isAll = document.getElementById('chk_tutto').checked;
+        document.getElementById('date_start').disabled = isAll;
+        document.getElementById('date_end').disabled = isAll;
+    }
+
+    // Funzione principale
+    async function generaReport() {
+        const status = document.getElementById('statusMsg');
+        status.textContent = "Caricamento dati...";
+        status.style.color = "blue";
+
+        try {
+            // 1. Scarica il CSV
+            const response = await fetch(CSV_FILE);
+            if (!response.ok) throw new Error("Impossibile trovare JF-DB.csv");
+            const csvText = await response.text();
+
+            // 2. Parsea il CSV
+            const results = Papa.parse(csvText, { header: true, skipEmptyLines: true });
+            let data = results.data;
+
+            // 3. Pulisci e Prepara Dati
+            data.forEach(row => {
+                // Parsing data (DD/MM/YYYY)
+                const parts = row.Data.split('/');
+                if (parts.length === 3) {
+                    // Crea oggetto Date JS (Mese è 0-based in JS)
+                    row.dateObj = new Date(parts[2], parts[1] - 1, parts[0]); 
+                } else {
+                    row.dateObj = null; 
+                }
+
+                // Numeri
+                ['Contanti', 'Pos', 'Uscite'].forEach(k => {
+                    let val = row[k] ? row[k].toString().replace('.', '').replace(',', '.') : "0";
+                    row[k] = parseFloat(val) || 0;
+                });
+
+                // Normalizza nomi
+                if (!row.Nominativo) row.Nominativo = "";
+                let nom = row.Nominativo.trim().toLowerCase();
+                if (nom === 'marica') row.Nominativo = "Pricci Marica";
+                if (nom === 'checco') row.Nominativo = "Di Stasio Checco";
+            });
+
+            // Rimuovi date non valide
+            data = data.filter(r => r.dateObj);
+
+            // 4. Applica Filtri
+            // Date
+            if (!document.getElementById('chk_tutto').checked) {
+                const s = document.getElementById('date_start').valueAsDate;
+                const e = document.getElementById('date_end').valueAsDate;
+                if (s && e) {
+                    data = data.filter(r => r.dateObj >= s && r.dateObj <= e);
+                }
+            }
+            // Nomi
+            const inc = document.getElementById('filter_inc').value.toLowerCase().trim();
+            const exc = document.getElementById('filter_exc').value.toLowerCase().trim();
+            
+            if (inc) {
+                const terms = inc.split(' ');
+                data = data.filter(r => terms.some(t => r.Nominativo.toLowerCase().includes(t)));
+            }
+            if (exc) {
+                const terms = exc.split(' ');
+                data = data.filter(r => !terms.some(t => r.Nominativo.toLowerCase().includes(t)));
+            }
+
+            if (data.length === 0) {
+                status.textContent = "Nessun dato trovato.";
+                status.style.color = "red";
+                return;
+            }
+
+            // 5. Ordina: Data poi Nominativo
+            data.sort((a, b) => {
+                if (a.dateObj - b.dateObj !== 0) return a.dateObj - b.dateObj;
+                return a.Nominativo.localeCompare(b.Nominativo);
+            });
+
+            // 6. Genera PDF
+            createPdf(data);
+            status.textContent = "PDF Scaricato!";
+            status.style.color = "green";
+
+        } catch (err) {
+            console.error(err);
+            status.textContent = "Errore: " + err.message;
+            status.style.color = "red";
+        }
+    }
+
+    function createPdf(data) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const isSint = document.querySelector('input[name="formato"]:checked').value === "SINT";
+
+        let y = 15;
+        let grandTotC = 0, grandTotP = 0, grandTotU = 0;
+
+        // Raggruppa per data
+        const groups = {};
+        data.forEach(r => {
+            const dKey = r.Data; // Usa la stringa originale come chiave
+            if (!groups[dKey]) groups[dKey] = [];
+            groups[dKey].push(r);
+        });
+
+        // Configurazione Tabella
+        const formatEuro = (n) => n === 0 ? "" : n.toLocaleString('it-IT', {minimumFractionDigits: 0, maximumFractionDigits: 2}) + " €";
+
+        for (const dateKey in groups) {
+            const group = groups[dateKey];
+            
+            // Ordina gruppo per nome
+            group.sort((a, b) => a.Nominativo.localeCompare(b.Nominativo));
+
+            let tc = 0, tp = 0, tu = 0;
+            const rows = [];
+
+            // Separa entrate e uscite
+            const income = group.filter(r => r.Uscite === 0);
+            const expense = group.filter(r => r.Uscite > 0);
+
+            // Calcoli
+            group.forEach(r => { tc += r.Contanti; tp += r.Pos; tu += r.Uscite; });
+            
+            if ((tc + tp) === 0 && tu === 0) continue;
+
+            grandTotC += tc; grandTotP += tp; grandTotU += tu;
+
+            // Header Giorno
+            const wd = group[0].dateObj.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            const wdShort = group[0].dateObj.toLocaleDateString('it-IT', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+            
+            // Layout Sintetico
+            if (isSint) {
+                // Titolo Giorno
+                doc.setFillColor(230, 230, 230); // Grigio chiaro
+                doc.setDrawColor(0);
+                doc.rect(14, y, 182, 7, 'FD'); // Box
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(10);
+                doc.text(`${wdShort} - Totale: ${formatEuro(tc + tp)}`, 105, y + 5, { align: "center" });
+                y += 7;
+
+                // Righe
+                income.forEach(r => rows.push([r.Nominativo, formatEuro(r.Contanti), formatEuro(r.Pos)]));
+                expense.forEach(r => rows.push([`${r.Nominativo} (${formatEuro(r.Uscite)})`, "", ""]));
+
+                // Totale Uscite Giornaliero in coda se presente (Opzionale, come da script precedente)
+                if (tu > 0) {
+                    rows.push([`Totale uscite: ${formatEuro(tu)}`, "", ""]);
+                }
+
+                doc.autoTable({
+                    startY: y,
+                    body: rows,
+                    theme: 'plain',
+                    styles: { fontSize: 8, cellPadding: 1, lineColor: 0, lineWidth: 0.1 },
+                    columnStyles: { 
+                        0: { cellWidth: 'auto' }, 
+                        1: { cellWidth: 20, halign: 'right' }, 
+                        2: { cellWidth: 20, halign: 'right' }
+                    },
+                    // Disegna le linee verticali esterne manualmente tramite hook se necessario o usa grid
+                    // Usiamo 'grid' per semplicità in JS che fa le linee
+                    theme: 'grid',
+                    headStyles: { fillColor: false, textColor: 0, fontStyle: 'bold' },
+                    showHead: 'firstPage', // Nascondi header standard se non vogliamo "Nominativo, Cont, Pos"
+                    didParseCell: (data) => {
+                       // Rimuovi bordi interni se vuoi simulare lo stile python
+                    } 
+                });
+                
+                // Nota: jspdf-autotable gestisce lo spazio pagina. Aggiorniamo y
+                y = doc.lastAutoTable.finalY + 5;
+
+            } else {
+                // Layout Standard
+                doc.setFillColor(230, 230, 230);
+                doc.rect(14, y, 182, 8, 'FD');
+                doc.setFontSize(11);
+                doc.text(`${wd} - Totale ${formatEuro(tc + tp)}`, 105, y + 5.5, { align: "center" });
+                y += 8;
+
+                const headers = [["Nominativo", "Attività", "Abbonamento", "Contanti", "Pos", "Uscite", "Operatore", "X", "Reg"]];
+                
+                [...income, ...expense].forEach(r => {
+                    rows.push([
+                        r.Nominativo, r.Attività || "", r.Abbonamento || "",
+                        formatEuro(r.Contanti), formatEuro(r.Pos), formatEuro(r.Uscite),
+                        r.Operatore || "", r.CassaX || "", r.Registrato || ""
+                    ]);
+                });
+                // Totali riga
+                rows.push(["TOTALI", "", "", formatEuro(tc), formatEuro(tp), formatEuro(tu), "", "", ""]);
+
+                doc.autoTable({
+                    startY: y,
+                    head: headers,
+                    body: rows,
+                    theme: 'grid',
+                    styles: { fontSize: 8, cellPadding: 1, lineColor: 0 },
+                    headStyles: { fillColor: 255, textColor: 0, fontStyle: 'normal', lineWidth: 0.1 },
+                    columnStyles: { 3: {halign:'right'}, 4: {halign:'right'}, 5: {halign:'right'} },
+                    didParseCell: function(data) {
+                        if (data.row.index === rows.length - 1) {
+                            data.cell.styles.fontStyle = 'bold';
+                        }
+                    }
+                });
+                y = doc.lastAutoTable.finalY + 10;
+            }
+
+            // Check page break manuale approssimativo per il prossimo loop
+            if (y > 270) { doc.addPage(); y = 15; }
+        }
+
+        // Totali Finali
+        if (y > 250) { doc.addPage(); y = 20; } else { y += 5; }
+        
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(12);
+        const rightX = 190;
+        
+        doc.text(`TOTALE: ${formatEuro(grandTotC + grandTotP)}`, rightX, y, { align: "right" });
+        y += 6;
+        doc.text(`Contanti: ${formatEuro(grandTotC)}`, rightX, y, { align: "right" });
+        y += 6;
+        doc.text(`Pos: ${formatEuro(grandTotP)}`, rightX, y, { align: "right" });
+        y += 8; // Spazio extra
+        doc.text(`Uscite: ${formatEuro(grandTotU)}`, rightX, y, { align: "right" });
+
+        doc.save("JF-Stampa.pdf");
+    }
+</script>
+
+</body>
+</html>
