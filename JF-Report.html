@@ -6,284 +6,299 @@
     <title>Report Incassi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { 
-            background-color: #cfd8dc; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            font-size: 26px; 
-            margin: 0;
-            padding: 10px 0; 
-            color: #111827; 
-        }
+        body { background-color: #cfd8dc; font-family: -apple-system, sans-serif; font-size: 26px; padding: 10px 0; color: #111827; }
+        .main-wrapper { width: 96%; max-width: 600px; margin: 0 auto; }
+        .card-box { background: white; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); overflow: hidden; margin-bottom: 20px; }
         
-        .main-wrapper {
-            width: 96%; 
-            max-width: 600px; 
-            margin: 0 auto;
-        }
-
-        .card-box {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            overflow: hidden;
-            margin-bottom: 20px; 
-        }
-
-        /* Header e Totale */
-        .header-blue {
-            background-color: #1a3b5c;
-            color: white;
-            padding: 20px 10px;
-            text-align: center;
-        }
-        .header-title {
-            font-size: 2.6rem;
-            font-weight: 800;
-            margin: 0;
-            text-transform: uppercase;
-        }
-        .total-box {
-            background-color: #fff;
-            padding: 25px 10px;
-            text-align: center;
-            border-bottom: 1px solid #eee;
-        }
-        .total-amount {
-            font-size: 4.5rem; 
-            font-weight: 900;
-            color: #b91c1c;
-            line-height: 1;
-            margin: 10px 0;
-        }
-        .total-label {
-            font-size: 1.3rem;
-            color: #374151; 
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        /* Grafico */
-        .chart-section {
-            padding: 20px 15px;
-            background-color: #fff;
-        }
-        .bar-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-        }
-        .bar-label { 
-            width: 110px; 
-            font-weight: 700; 
-            color: #1f2937;
-            font-size: 1.3rem; 
-            text-align: left; 
-        }
-        .progress { flex-grow: 1; height: 24px; margin: 0 10px; border-radius: 8px; }
-        .bar-value { width: 110px; text-align: right; font-weight: 800; color: #111827; font-size: 1.3rem; }
-
-        /* Tabella */
-        .table-custom { margin-bottom: 0; width: 100%; border-collapse: collapse; }
+        .header-blue { background-color: #1a3b5c; color: white; padding: 15px 10px; display: flex; justify-content: space-between; align-items: center; height: 80px; }
+        .header-title { font-size: 2.6rem; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
         
-        .table-custom thead th {
-            background-color: #e5e7eb;
-            color: #1f2937;
-            text-align: center;
-            padding: 12px 2px;
-            font-size: 1.3rem;
-            font-weight: 700;
-            border-bottom: 2px solid #9ca3af;
-            border-right: 1px solid #d1d5db;
-            line-height: 1.1;
-        }
-        .table-custom thead th:last-child { border-right: none; }
+        .btn-print { color: white; font-size: 2.2rem; text-decoration: none; cursor: pointer; }
+        .btn-home { color: white; font-size: 2rem; text-decoration: none; cursor: pointer; }
+        .nav-arrow { color: white; font-size: 2.5rem; cursor: pointer; font-weight: bold; padding: 0 15px; user-select: none; }
+        .nav-arrow:active { color: #a5d8ff; }
         
-        .th-red { color: #b91c1c; font-weight: 800; background-color: #fee2e2 !important; }
-        .th-yel { color: #854d0e; font-weight: 800; background-color: #fef9c3 !important; }
+        .total-box { background: #fff; padding: 30px 20px; text-align: center; border-bottom: 1px solid #eee; }
+        .total-amount { font-size: 4.8rem; font-weight: 900; color: #b91c1c; line-height: 1; margin: 0; }
         
-        .table-custom tbody td {
-            padding: 8px 2px;
-            vertical-align: middle;
-            border-bottom: 1px solid #e5e7eb;
-            border-right: 1px solid #e5e7eb;
-            font-size: 2.1rem; /* Font Numeri Tabella (Grandi) */
-            font-weight: 600;
-            line-height: 1.2;
-        }
-        .table-custom tbody td:last-child { border-right: none; }
+        .chart-section { padding: 25px 20px; }
+        .bar-row { display: flex; align-items: center; margin-bottom: 18px; font-size: 1.2rem; }
+        .bar-label { width: 120px; font-weight: 700; color: #1f2937; font-size: 1.3rem; flex-shrink: 0; }
+        .progress { flex-grow: 1; height: 26px; margin: 0 15px; border-radius: 8px; width: 40%; }
+        .bar-value { width: 140px; text-align: right; font-weight: 800; color: #111827; font-size: 1.3rem; flex-shrink: 0; }
         
-        /* Footer */
-        .footer-note {
-            font-size: 1.2rem;
-            color: #111827;
-            text-align: center;
-            padding: 20px;
-            background-color: #f3f4f6;
-            font-weight: 700;
-            border-top: 1px solid #e5e7eb;
+        .table-custom { width: 100%; border-collapse: collapse; }
+        .table-custom th { background: #e5e7eb; color: #1f2937; padding: 12px; font-size: 1.3rem; border-bottom: 2px solid #9ca3af; border-right: 1px solid #d1d5db; }
+        .table-custom td { padding: 12px 8px; border-bottom: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; font-size: 1.9rem; font-weight: 600; text-align: right; }
+        .table-custom td:first-child { text-align: left; }
+        .table-custom tr.clickable-row { cursor: pointer; transition: background 0.1s; }
+        .table-custom tr.clickable-row:active { background-color: #dbeafe; }
+        
+        .bg-blue-light { background-color: #e3f2fd; color: #1f2937; }
+        .bg-red-light { background-color: #fff1f2; color: #b91c1c; }
+        .bg-yellow { background-color: #fef9c3; color: #000; }
+        .text-red-pct { color: #b91c1c; font-size: 1.4rem !important; font-weight: 700; }
+        .text-gray { color: #9ca3af; }
+        
+        .footer-note { font-size: 1.2rem; color: #111827; text-align: center; padding: 20px; background: #f3f4f6; font-weight: 700; }
+        
+        .col-giorno { width: 25%; text-align: left !important; }
+        .col-val { width: 37%; }
+        .th-detail { font-size: 1.5rem !important; font-weight: 800 !important; }
+        .row-total { font-weight: 900; background-color: #d1d5db; }
+        
+        /* CORNICE BIANCA PER RIGHE VUOTE E TOTALI */
+        .row-empty td, .row-total td, tfoot td {
+            border: 3px solid white !important; 
         }
-
-        /* MEDIA QUERIES */
+        .row-empty td { background-color: #e9ecef; }
+        
         @media (max-width: 480px) {
-            body { font-size: 20px; }
-            .header-title { font-size: 2rem; }
-            .total-amount { font-size: 3.5rem; }
-            .bar-label, .bar-value { width: 80px; font-size: 1rem; }
-            .table-custom thead th { font-size: 1rem; }
-            .table-custom tbody td { font-size: 1.5rem; padding: 6px 1px; }
-            .footer-note { font-size: 1rem; }
+            .total-amount { font-size: 3.8rem; }
+            .bar-label { width: 90px; font-size: 1.1rem; }
+            .bar-value { width: 110px; font-size: 1.2rem; }
+            .table-custom td { font-size: 1.6rem; }
+            .header-title { font-size: 2.2rem; }
         }
     </style>
 </head>
 <body>
 
 <div class="main-wrapper">
-    
-    <div class="card-box">
-        <div class="header-blue">
-            <h1 class="header-title">INCASSI</h1>
-        </div>
-        
-        <div class="total-box">
-            <div class="total-label">Totale Proiettato</div>
-            <div class="total-amount">334.843 €</div>
-        </div>
-
-        <div class="chart-section">
-            <div class="bar-row">
-                <span class="bar-label">2024-25</span>
-                <div class="progress">
-                    <div class="progress-bar bg-primary" role="progressbar" style="width: 89.52613612946963%"></div>
+    <div id="view-home">
+        <div class="card-box">
+            <div class="header-blue">
+                <div style="width:50px"></div>
+                <div style="flex-grow:1; text-align:center"><h1 class="header-title">INCASSI</h1></div>
+                <div style="width:50px; text-align:center">
+                    <a href="file:///C:/Dropbox/Prog/Monitor/JF-Calendari.pdf" target="_blank" class="btn-print" title="Apri PDF">&#128424;</a>
                 </div>
-                <span class="bar-value">299,772</span>
             </div>
-            
-            <div class="bar-row">
-                <span class="bar-label text-danger">2025-26</span>
-                <div class="progress">
-                    <div class="progress-bar bg-danger" role="progressbar" style="width: 42.14154096098769%"></div>
-                </div>
-                <span class="bar-value text-danger">141,108</span>
+            <div class="total-box">
+                <div class="total-amount">334.851 €</div>
             </div>
-            
-            <div class="bar-row">
-                <span class="bar-label" style="color:#b45309">Preventivo</span>
-                <div class="progress">
-                    <div class="progress-bar bg-warning" role="progressbar" style="width: 100.0%"></div>
+            <div class="chart-section">
+                <div class="bar-row">
+                    <span class="bar-label">2024-25</span>
+                    <div class="progress"><div class="progress-bar bg-primary" style="width: 89.52399724056372%"></div></div>
+                    <span class="bar-value">299.772 €</span>
                 </div>
-                <span class="bar-value" style="color:#b45309">334.843</span>
+                <div class="bar-row">
+                    <span class="bar-label text-danger">2025-26</span>
+                    <div class="progress"><div class="progress-bar bg-danger" style="width: 42.140534148024045%"></div></div>
+                    <span class="bar-value text-danger">141.108 €</span>
+                </div>
+                <div class="bar-row">
+                    <span class="bar-label" style="color:#b45309">Previsto</span>
+                    <div class="progress"><div class="progress-bar bg-warning" style="width: 100.0%"></div></div>
+                    <span class="bar-value" style="color:#b45309">334.851 €</span>
+                </div>
             </div>
         </div>
-    </div>
-
-    <div class="card-box">
-        <div class="table-responsive">
-            <table class="table table-custom">
+        <div class="card-box">
+            <table class="table-custom">
                 <thead>
                     <tr>
-                        <th style="text-align:left; padding-left:10px;">Mese</th>
+                        <th style="text-align:left">Mese</th>
                         <th>2024-25</th>
-                        <th class="th-red">2025-26</th>
-                        <th class="th-yel">Prev.</th>
+                        <th class="th-red" style="color:#b91c1c">2025-26</th>
+                        <th class="th-yel" style="color:#854d0e">Previsto</th>
                     </tr>
                 </thead>
-                <tbody>
-                    
-        <tr>
-            <td class="fw-bold ps-2 text-start" style="color: #111827;">Set</td>
-            <td class="text-end pe-2" style="background-color: #e3f2fd; color: #1f2937; font-weight: 600;">30.997</td>
-            <td class="text-end pe-2" style="background-color: #fff1f2; color: #b91c1c; font-weight: 800;">41.316</td>
-            <td class="text-end pe-2" style="color: #b91c1c; font-weight: 700; font-size: 1.3rem;">+33.3%</td>
-        </tr>
-        
-        <tr>
-            <td class="fw-bold ps-2 text-start" style="color: #111827;">Ott</td>
-            <td class="text-end pe-2" style="background-color: #e3f2fd; color: #1f2937; font-weight: 600;">33.138</td>
-            <td class="text-end pe-2" style="background-color: #fff1f2; color: #b91c1c; font-weight: 800;">41.202</td>
-            <td class="text-end pe-2" style="color: #b91c1c; font-weight: 700; font-size: 1.3rem;">+24.3%</td>
-        </tr>
-        
-        <tr>
-            <td class="fw-bold ps-2 text-start" style="color: #111827;">Nov</td>
-            <td class="text-end pe-2" style="background-color: #e3f2fd; color: #1f2937; font-weight: 600;">31.575</td>
-            <td class="text-end pe-2" style="background-color: #fff1f2; color: #b91c1c; font-weight: 800;">34.629</td>
-            <td class="text-end pe-2" style="color: #b91c1c; font-weight: 700; font-size: 1.3rem;">+9.7%</td>
-        </tr>
-        
-        <tr>
-            <td class="fw-bold ps-2 text-start" style="color: #111827;">Dic</td>
-            <td class="text-end pe-2" style="background-color: #e3f2fd; color: #1f2937; font-weight: 600;">23.376</td>
-            <td class="text-end pe-2" style="background-color: #fff1f2; color: #b91c1c; font-weight: 800;">23.961</td>
-            <td class="text-end pe-2" style="background-color: #fef9c3; color: #000; font-weight: 700;">8.641</td>
-        </tr>
-        
-        <tr>
-            <td class="fw-bold ps-2 text-start" style="color: #111827;">Gen</td>
-            <td class="text-end pe-2" style="background-color: #e3f2fd; color: #1f2937; font-weight: 600;">32.400</td>
-            <td class="text-end pe-2" style="color: #6b7280;"></td>
-            <td class="text-end pe-2" style="background-color: #fef9c3; color: #000; font-weight: 700;">27.618</td>
-        </tr>
-        
-        <tr>
-            <td class="fw-bold ps-2 text-start" style="color: #111827;">Feb</td>
-            <td class="text-end pe-2" style="background-color: #e3f2fd; color: #1f2937; font-weight: 600;">26.390</td>
-            <td class="text-end pe-2" style="color: #6b7280;"></td>
-            <td class="text-end pe-2" style="background-color: #fef9c3; color: #000; font-weight: 700;">28.986</td>
-        </tr>
-        
-        <tr>
-            <td class="fw-bold ps-2 text-start" style="color: #111827;">Mar</td>
-            <td class="text-end pe-2" style="background-color: #e3f2fd; color: #1f2937; font-weight: 600;">28.694</td>
-            <td class="text-end pe-2" style="color: #6b7280;"></td>
-            <td class="text-end pe-2" style="background-color: #fef9c3; color: #000; font-weight: 700;">31.956</td>
-        </tr>
-        
-        <tr>
-            <td class="fw-bold ps-2 text-start" style="color: #111827;">Apr</td>
-            <td class="text-end pe-2" style="background-color: #e3f2fd; color: #1f2937; font-weight: 600;">25.342</td>
-            <td class="text-end pe-2" style="color: #6b7280;"></td>
-            <td class="text-end pe-2" style="background-color: #fef9c3; color: #000; font-weight: 700;">30.040</td>
-        </tr>
-        
-        <tr>
-            <td class="fw-bold ps-2 text-start" style="color: #111827;">Mag</td>
-            <td class="text-end pe-2" style="background-color: #e3f2fd; color: #1f2937; font-weight: 600;">23.493</td>
-            <td class="text-end pe-2" style="color: #6b7280;"></td>
-            <td class="text-end pe-2" style="background-color: #fef9c3; color: #000; font-weight: 700;">28.160</td>
-        </tr>
-        
-        <tr>
-            <td class="fw-bold ps-2 text-start" style="color: #111827;">Giu</td>
-            <td class="text-end pe-2" style="background-color: #e3f2fd; color: #1f2937; font-weight: 600;">18.397</td>
-            <td class="text-end pe-2" style="color: #6b7280;"></td>
-            <td class="text-end pe-2" style="background-color: #fef9c3; color: #000; font-weight: 700;">14.808</td>
-        </tr>
-        
-        <tr>
-            <td class="fw-bold ps-2 text-start" style="color: #111827;">Lug</td>
-            <td class="text-end pe-2" style="background-color: #e3f2fd; color: #1f2937; font-weight: 600;">12.570</td>
-            <td class="text-end pe-2" style="color: #6b7280;"></td>
-            <td class="text-end pe-2" style="background-color: #fef9c3; color: #000; font-weight: 700;">15.672</td>
-        </tr>
-        
-        <tr>
-            <td class="fw-bold ps-2 text-start" style="color: #111827;">Ago</td>
-            <td class="text-end pe-2" style="background-color: #e3f2fd; color: #1f2937; font-weight: 600;">13.400</td>
-            <td class="text-end pe-2" style="color: #6b7280;"></td>
-            <td class="text-end pe-2" style="background-color: #fef9c3; color: #000; font-weight: 700;">7.854</td>
-        </tr>
-        
-                </tbody>
+                <tbody id="table-body-home"></tbody>
+                <tfoot>
+                    <tr class="row-total">
+                        <td>Totali</td>
+                        <td style="text-align:right">299.772</td>
+                        <td style="text-align:right; color:#b91c1c">141.108</td>
+                        <td style="text-align:right; color:#854d0e">193.743</td>
+                    </tr>
+                </tfoot>
             </table>
-        </div>
-        <div class="footer-note">
-            Dati al 20/12/2025<br>
-            <span style="font-size: 0.8em; color:#4b5563; font-weight:500;">Rosso: Consolidato - Giallo: Proiezione</span>
+            <div class="footer-note">Dati al 20/12/2025</div>
         </div>
     </div>
 
+    <div id="view-detail" style="display:none;">
+        <div class="card-box">
+            <div class="header-blue">
+                <div style="width:50px; text-align:center;">
+                    <a href="#" onclick="showHome(); return false;" class="btn-home" title="Home">🏠</a>
+                </div>
+                <div style="flex-grow:1; display:flex; justify-content:center; align-items:center;">
+                    <div class="nav-arrow" onclick="changeView(-1)">&#10094;</div>
+                    <h1 class="header-title" id="detail-title" style="margin:0 10px;">MESE</h1>
+                    <div class="nav-arrow" onclick="changeView(1)">&#10095;</div>
+                </div>
+                <div style="width:50px; text-align:center;">
+                    <a href="file:///C:/Dropbox/Prog/Monitor/JF-Calendari.pdf" target="_blank" class="btn-print" title="Apri PDF">&#128424;</a>
+                </div>
+            </div>
+            <div class="total-box">
+                <div class="total-amount" id="detail-total">0 €</div>
+            </div>
+            <div class="chart-section" id="detail-chart"></div>
+        </div>
+        <div class="card-box">
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th class="col-giorno th-detail">Giorno</th>
+                        <th class="col-val th-detail" style="color:#b91c1c">Consuntivo</th>
+                        <th class="col-val th-detail" style="color:#854d0e">Previsto</th>
+                    </tr>
+                </thead>
+                <tbody id="detail-table-body"></tbody>
+            </table>
+        </div>
+    </div>
 </div>
+
+<script>
+    // Dati iniettati da Python
+    const dati = {"SET": {"nome_esteso": "SET 2025", "tot_24_25": 30997.0, "tot_cons": 41316.0, "tot_prev": 0.0, "tot_full": 41316.0, "lista_giorni": [{"giorno": "01 Lu", "cons": 2503.0, "prev": 0.0}, {"giorno": "02 Ma", "cons": 3410.0, "prev": 0.0}, {"giorno": "03 Me", "cons": 1577.0, "prev": 0.0}, {"giorno": "04 Gi", "cons": 1565.0, "prev": 0.0}, {"giorno": "05 Ve", "cons": 1250.0, "prev": 0.0}, {"giorno": "06 Sa", "cons": 305.0, "prev": 0.0}, {"giorno": "07 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "08 Lu", "cons": 3136.0, "prev": 0.0}, {"giorno": "09 Ma", "cons": 1415.0, "prev": 0.0}, {"giorno": "10 Me", "cons": 585.0, "prev": 0.0}, {"giorno": "11 Gi", "cons": 1180.0, "prev": 0.0}, {"giorno": "12 Ve", "cons": 1531.0, "prev": 0.0}, {"giorno": "13 Sa", "cons": 163.0, "prev": 0.0}, {"giorno": "14 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "15 Lu", "cons": 1105.0, "prev": 0.0}, {"giorno": "16 Ma", "cons": 2410.0, "prev": 0.0}, {"giorno": "17 Me", "cons": 2187.0, "prev": 0.0}, {"giorno": "18 Gi", "cons": 1085.0, "prev": 0.0}, {"giorno": "19 Ve", "cons": 1564.0, "prev": 0.0}, {"giorno": "20 Sa", "cons": 60.0, "prev": 0.0}, {"giorno": "21 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "22 Lu", "cons": 3525.0, "prev": 0.0}, {"giorno": "23 Ma", "cons": 2161.0, "prev": 0.0}, {"giorno": "24 Me", "cons": 952.0, "prev": 0.0}, {"giorno": "25 Gi", "cons": 890.0, "prev": 0.0}, {"giorno": "26 Ve", "cons": 1139.0, "prev": 0.0}, {"giorno": "27 Sa", "cons": 50.0, "prev": 0.0}, {"giorno": "28 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "29 Lu", "cons": 3105.0, "prev": 0.0}, {"giorno": "30 Ma", "cons": 2463.0, "prev": 0.0}], "home_data": {"old": "30.997", "cons": "41.316", "prev_txt": "+33.3%", "prev_style": "text-red-pct"}}, "OTT": {"nome_esteso": "OTT 2025", "tot_24_25": 33138.0, "tot_cons": 41202.0, "tot_prev": 0.0, "tot_full": 41202.0, "lista_giorni": [{"giorno": "01 Me", "cons": 2053.0, "prev": 0.0}, {"giorno": "02 Gi", "cons": 4310.0, "prev": 0.0}, {"giorno": "03 Ve", "cons": 2645.0, "prev": 0.0}, {"giorno": "04 Sa", "cons": 0.0, "prev": 0.0}, {"giorno": "05 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "06 Lu", "cons": 3023.0, "prev": 0.0}, {"giorno": "07 Ma", "cons": 1540.0, "prev": 0.0}, {"giorno": "08 Me", "cons": 0.0, "prev": 0.0}, {"giorno": "09 Gi", "cons": 1480.0, "prev": 0.0}, {"giorno": "10 Ve", "cons": 1815.0, "prev": 0.0}, {"giorno": "11 Sa", "cons": 1225.0, "prev": 0.0}, {"giorno": "12 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "13 Lu", "cons": 2868.0, "prev": 0.0}, {"giorno": "14 Ma", "cons": 1425.0, "prev": 0.0}, {"giorno": "15 Me", "cons": 1290.0, "prev": 0.0}, {"giorno": "16 Gi", "cons": 1575.0, "prev": 0.0}, {"giorno": "17 Ve", "cons": 2218.0, "prev": 0.0}, {"giorno": "18 Sa", "cons": 770.0, "prev": 0.0}, {"giorno": "19 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "20 Lu", "cons": 890.0, "prev": 0.0}, {"giorno": "21 Ma", "cons": 1335.0, "prev": 0.0}, {"giorno": "22 Me", "cons": 565.0, "prev": 0.0}, {"giorno": "23 Gi", "cons": 1400.0, "prev": 0.0}, {"giorno": "24 Ve", "cons": 1080.0, "prev": 0.0}, {"giorno": "25 Sa", "cons": 115.0, "prev": 0.0}, {"giorno": "26 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "27 Lu", "cons": 1735.0, "prev": 0.0}, {"giorno": "28 Ma", "cons": 2375.0, "prev": 0.0}, {"giorno": "29 Me", "cons": 615.0, "prev": 0.0}, {"giorno": "30 Gi", "cons": 1305.0, "prev": 0.0}, {"giorno": "31 Ve", "cons": 1550.0, "prev": 0.0}], "home_data": {"old": "33.138", "cons": "41.202", "prev_txt": "+24.3%", "prev_style": "text-red-pct"}}, "NOV": {"nome_esteso": "NOV 2025", "tot_24_25": 31575.0, "tot_cons": 34629.0, "tot_prev": 0.0, "tot_full": 34629.0, "lista_giorni": [{"giorno": "01 Sa", "cons": 0.0, "prev": 0.0}, {"giorno": "02 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "03 Lu", "cons": 4465.0, "prev": 0.0}, {"giorno": "04 Ma", "cons": 3215.0, "prev": 0.0}, {"giorno": "05 Me", "cons": 870.0, "prev": 0.0}, {"giorno": "06 Gi", "cons": 1455.0, "prev": 0.0}, {"giorno": "07 Ve", "cons": 1970.0, "prev": 0.0}, {"giorno": "08 Sa", "cons": 737.0, "prev": 0.0}, {"giorno": "09 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "10 Lu", "cons": 2760.0, "prev": 0.0}, {"giorno": "11 Ma", "cons": 1880.0, "prev": 0.0}, {"giorno": "12 Me", "cons": 1256.0, "prev": 0.0}, {"giorno": "13 Gi", "cons": 1675.0, "prev": 0.0}, {"giorno": "14 Ve", "cons": 1625.0, "prev": 0.0}, {"giorno": "15 Sa", "cons": 265.0, "prev": 0.0}, {"giorno": "16 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "17 Lu", "cons": 1540.0, "prev": 0.0}, {"giorno": "18 Ma", "cons": 1435.0, "prev": 0.0}, {"giorno": "19 Me", "cons": 685.0, "prev": 0.0}, {"giorno": "20 Gi", "cons": 897.0, "prev": 0.0}, {"giorno": "21 Ve", "cons": 1944.0, "prev": 0.0}, {"giorno": "22 Sa", "cons": 155.0, "prev": 0.0}, {"giorno": "23 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "24 Lu", "cons": 1422.0, "prev": 0.0}, {"giorno": "25 Ma", "cons": 1394.0, "prev": 0.0}, {"giorno": "26 Me", "cons": 1130.0, "prev": 0.0}, {"giorno": "27 Gi", "cons": 0.0, "prev": 0.0}, {"giorno": "28 Ve", "cons": 1110.0, "prev": 0.0}, {"giorno": "29 Sa", "cons": 744.0, "prev": 0.0}, {"giorno": "30 Do", "cons": 0.0, "prev": 0.0}], "home_data": {"old": "31.575", "cons": "34.629", "prev_txt": "+9.7%", "prev_style": "text-red-pct"}}, "DIC": {"nome_esteso": "DIC 2025", "tot_24_25": 23376.0, "tot_cons": 23961.0, "tot_prev": 8641.0, "tot_full": 32602.0, "lista_giorni": [{"giorno": "01 Lu", "cons": 2915.0, "prev": 0.0}, {"giorno": "02 Ma", "cons": 2870.0, "prev": 0.0}, {"giorno": "03 Me", "cons": 946.0, "prev": 0.0}, {"giorno": "04 Gi", "cons": 1580.0, "prev": 0.0}, {"giorno": "05 Ve", "cons": 1740.0, "prev": 0.0}, {"giorno": "06 Sa", "cons": 677.0, "prev": 0.0}, {"giorno": "07 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "08 Lu", "cons": 0.0, "prev": 0.0}, {"giorno": "09 Ma", "cons": 1171.0, "prev": 0.0}, {"giorno": "10 Me", "cons": 605.0, "prev": 0.0}, {"giorno": "11 Gi", "cons": 2034.0, "prev": 0.0}, {"giorno": "12 Ve", "cons": 736.0, "prev": 0.0}, {"giorno": "13 Sa", "cons": 135.0, "prev": 0.0}, {"giorno": "14 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "15 Lu", "cons": 2043.0, "prev": 0.0}, {"giorno": "16 Ma", "cons": 1030.0, "prev": 0.0}, {"giorno": "17 Me", "cons": 1984.0, "prev": 0.0}, {"giorno": "18 Gi", "cons": 998.0, "prev": 0.0}, {"giorno": "19 Ve", "cons": 1670.0, "prev": 0.0}, {"giorno": "20 Sa", "cons": 827.0, "prev": 0.0}, {"giorno": "21 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "22 Lu", "cons": 0.0, "prev": 1919.0}, {"giorno": "23 Ma", "cons": 0.0, "prev": 1565.0}, {"giorno": "24 Me", "cons": 0.0, "prev": 898.0}, {"giorno": "25 Gi", "cons": 0.0, "prev": 0.0}, {"giorno": "26 Ve", "cons": 0.0, "prev": 0.0}, {"giorno": "27 Sa", "cons": 0.0, "prev": 0.0}, {"giorno": "28 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "29 Lu", "cons": 0.0, "prev": 1829.0}, {"giorno": "30 Ma", "cons": 0.0, "prev": 1569.0}, {"giorno": "31 Me", "cons": 0.0, "prev": 861.0}], "home_data": {"old": "23.376", "cons": "23.961", "prev_txt": "8.641", "prev_style": "bg-yellow"}}, "GEN": {"nome_esteso": "GEN 2026", "tot_24_25": 32400.0, "tot_cons": 0.0, "tot_prev": 27618.0, "tot_full": 27618.0, "lista_giorni": [{"giorno": "01 Gi", "cons": 0.0, "prev": 0.0}, {"giorno": "02 Ve", "cons": 0.0, "prev": 1327.0}, {"giorno": "03 Sa", "cons": 0.0, "prev": 320.0}, {"giorno": "04 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "05 Lu", "cons": 0.0, "prev": 2132.0}, {"giorno": "06 Ma", "cons": 0.0, "prev": 0.0}, {"giorno": "07 Me", "cons": 0.0, "prev": 999.0}, {"giorno": "08 Gi", "cons": 0.0, "prev": 1303.0}, {"giorno": "09 Ve", "cons": 0.0, "prev": 1445.0}, {"giorno": "10 Sa", "cons": 0.0, "prev": 321.0}, {"giorno": "11 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "12 Lu", "cons": 0.0, "prev": 1775.0}, {"giorno": "13 Ma", "cons": 0.0, "prev": 1549.0}, {"giorno": "14 Me", "cons": 0.0, "prev": 851.0}, {"giorno": "15 Gi", "cons": 0.0, "prev": 1146.0}, {"giorno": "16 Ve", "cons": 0.0, "prev": 1212.0}, {"giorno": "17 Sa", "cons": 0.0, "prev": 273.0}, {"giorno": "18 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "19 Lu", "cons": 0.0, "prev": 1867.0}, {"giorno": "20 Ma", "cons": 0.0, "prev": 1651.0}, {"giorno": "21 Me", "cons": 0.0, "prev": 767.0}, {"giorno": "22 Gi", "cons": 0.0, "prev": 1053.0}, {"giorno": "23 Ve", "cons": 0.0, "prev": 1062.0}, {"giorno": "24 Sa", "cons": 0.0, "prev": 231.0}, {"giorno": "25 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "26 Lu", "cons": 0.0, "prev": 1683.0}, {"giorno": "27 Ma", "cons": 0.0, "prev": 1474.0}, {"giorno": "28 Me", "cons": 0.0, "prev": 772.0}, {"giorno": "29 Gi", "cons": 0.0, "prev": 1059.0}, {"giorno": "30 Ve", "cons": 0.0, "prev": 1092.0}, {"giorno": "31 Sa", "cons": 0.0, "prev": 251.0}], "home_data": {"old": "32.400", "cons": "", "prev_txt": "27.618", "prev_style": "bg-yellow"}}, "FEB": {"nome_esteso": "FEB 2026", "tot_24_25": 26390.0, "tot_cons": 0.0, "tot_prev": 28986.0, "tot_full": 28986.0, "lista_giorni": [{"giorno": "01 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "02 Lu", "cons": 0.0, "prev": 2131.0}, {"giorno": "03 Ma", "cons": 0.0, "prev": 1856.0}, {"giorno": "04 Me", "cons": 0.0, "prev": 989.0}, {"giorno": "05 Gi", "cons": 0.0, "prev": 1380.0}, {"giorno": "06 Ve", "cons": 0.0, "prev": 1401.0}, {"giorno": "07 Sa", "cons": 0.0, "prev": 319.0}, {"giorno": "08 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "09 Lu", "cons": 0.0, "prev": 2189.0}, {"giorno": "10 Ma", "cons": 0.0, "prev": 1765.0}, {"giorno": "11 Me", "cons": 0.0, "prev": 883.0}, {"giorno": "12 Gi", "cons": 0.0, "prev": 1142.0}, {"giorno": "13 Ve", "cons": 0.0, "prev": 1226.0}, {"giorno": "14 Sa", "cons": 0.0, "prev": 262.0}, {"giorno": "15 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "16 Lu", "cons": 0.0, "prev": 1931.0}, {"giorno": "17 Ma", "cons": 0.0, "prev": 1623.0}, {"giorno": "18 Me", "cons": 0.0, "prev": 899.0}, {"giorno": "19 Gi", "cons": 0.0, "prev": 1216.0}, {"giorno": "20 Ve", "cons": 0.0, "prev": 1152.0}, {"giorno": "21 Sa", "cons": 0.0, "prev": 235.0}, {"giorno": "22 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "23 Lu", "cons": 0.0, "prev": 1707.0}, {"giorno": "24 Ma", "cons": 0.0, "prev": 1506.0}, {"giorno": "25 Me", "cons": 0.0, "prev": 786.0}, {"giorno": "26 Gi", "cons": 0.0, "prev": 1090.0}, {"giorno": "27 Ve", "cons": 0.0, "prev": 1055.0}, {"giorno": "28 Sa", "cons": 0.0, "prev": 242.0}], "home_data": {"old": "26.390", "cons": "", "prev_txt": "28.986", "prev_style": "bg-yellow"}}, "MAR": {"nome_esteso": "MAR 2026", "tot_24_25": 28694.0, "tot_cons": 0.0, "tot_prev": 31959.0, "tot_full": 31959.0, "lista_giorni": [{"giorno": "01 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "02 Lu", "cons": 0.0, "prev": 2118.0}, {"giorno": "03 Ma", "cons": 0.0, "prev": 1847.0}, {"giorno": "04 Me", "cons": 0.0, "prev": 1030.0}, {"giorno": "05 Gi", "cons": 0.0, "prev": 1307.0}, {"giorno": "06 Ve", "cons": 0.0, "prev": 1419.0}, {"giorno": "07 Sa", "cons": 0.0, "prev": 307.0}, {"giorno": "08 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "09 Lu", "cons": 0.0, "prev": 2049.0}, {"giorno": "10 Ma", "cons": 0.0, "prev": 1756.0}, {"giorno": "11 Me", "cons": 0.0, "prev": 909.0}, {"giorno": "12 Gi", "cons": 0.0, "prev": 1176.0}, {"giorno": "13 Ve", "cons": 0.0, "prev": 1192.0}, {"giorno": "14 Sa", "cons": 0.0, "prev": 276.0}, {"giorno": "15 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "16 Lu", "cons": 0.0, "prev": 1928.0}, {"giorno": "17 Ma", "cons": 0.0, "prev": 1601.0}, {"giorno": "18 Me", "cons": 0.0, "prev": 887.0}, {"giorno": "19 Gi", "cons": 0.0, "prev": 1232.0}, {"giorno": "20 Ve", "cons": 0.0, "prev": 1255.0}, {"giorno": "21 Sa", "cons": 0.0, "prev": 246.0}, {"giorno": "22 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "23 Lu", "cons": 0.0, "prev": 1767.0}, {"giorno": "24 Ma", "cons": 0.0, "prev": 1370.0}, {"giorno": "25 Me", "cons": 0.0, "prev": 817.0}, {"giorno": "26 Gi", "cons": 0.0, "prev": 1035.0}, {"giorno": "27 Ve", "cons": 0.0, "prev": 1114.0}, {"giorno": "28 Sa", "cons": 0.0, "prev": 245.0}, {"giorno": "29 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "30 Lu", "cons": 0.0, "prev": 1685.0}, {"giorno": "31 Ma", "cons": 0.0, "prev": 1391.0}], "home_data": {"old": "28.694", "cons": "", "prev_txt": "31.959", "prev_style": "bg-yellow"}}, "APR": {"nome_esteso": "APR 2026", "tot_24_25": 25342.0, "tot_cons": 0.0, "tot_prev": 30040.0, "tot_full": 30040.0, "lista_giorni": [{"giorno": "01 Me", "cons": 0.0, "prev": 1026.0}, {"giorno": "02 Gi", "cons": 0.0, "prev": 1314.0}, {"giorno": "03 Ve", "cons": 0.0, "prev": 1409.0}, {"giorno": "04 Sa", "cons": 0.0, "prev": 312.0}, {"giorno": "05 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "06 Lu", "cons": 0.0, "prev": 2211.0}, {"giorno": "07 Ma", "cons": 0.0, "prev": 1813.0}, {"giorno": "08 Me", "cons": 0.0, "prev": 1029.0}, {"giorno": "09 Gi", "cons": 0.0, "prev": 1373.0}, {"giorno": "10 Ve", "cons": 0.0, "prev": 1371.0}, {"giorno": "11 Sa", "cons": 0.0, "prev": 273.0}, {"giorno": "12 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "13 Lu", "cons": 0.0, "prev": 1778.0}, {"giorno": "14 Ma", "cons": 0.0, "prev": 1593.0}, {"giorno": "15 Me", "cons": 0.0, "prev": 866.0}, {"giorno": "16 Gi", "cons": 0.0, "prev": 1186.0}, {"giorno": "17 Ve", "cons": 0.0, "prev": 1188.0}, {"giorno": "18 Sa", "cons": 0.0, "prev": 250.0}, {"giorno": "19 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "20 Lu", "cons": 0.0, "prev": 1741.0}, {"giorno": "21 Ma", "cons": 0.0, "prev": 1475.0}, {"giorno": "22 Me", "cons": 0.0, "prev": 806.0}, {"giorno": "23 Gi", "cons": 0.0, "prev": 1002.0}, {"giorno": "24 Ve", "cons": 0.0, "prev": 1112.0}, {"giorno": "25 Sa", "cons": 0.0, "prev": 0.0}, {"giorno": "26 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "27 Lu", "cons": 0.0, "prev": 1630.0}, {"giorno": "28 Ma", "cons": 0.0, "prev": 1417.0}, {"giorno": "29 Me", "cons": 0.0, "prev": 814.0}, {"giorno": "30 Gi", "cons": 0.0, "prev": 1051.0}], "home_data": {"old": "25.342", "cons": "", "prev_txt": "30.040", "prev_style": "bg-yellow"}}, "MAG": {"nome_esteso": "MAG 2026", "tot_24_25": 23493.0, "tot_cons": 0.0, "tot_prev": 28163.0, "tot_full": 28163.0, "lista_giorni": [{"giorno": "01 Ve", "cons": 0.0, "prev": 0.0}, {"giorno": "02 Sa", "cons": 0.0, "prev": 0.0}, {"giorno": "03 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "04 Lu", "cons": 0.0, "prev": 2183.0}, {"giorno": "05 Ma", "cons": 0.0, "prev": 1876.0}, {"giorno": "06 Me", "cons": 0.0, "prev": 996.0}, {"giorno": "07 Gi", "cons": 0.0, "prev": 1386.0}, {"giorno": "08 Ve", "cons": 0.0, "prev": 1377.0}, {"giorno": "09 Sa", "cons": 0.0, "prev": 289.0}, {"giorno": "10 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "11 Lu", "cons": 0.0, "prev": 1851.0}, {"giorno": "12 Ma", "cons": 0.0, "prev": 1601.0}, {"giorno": "13 Me", "cons": 0.0, "prev": 841.0}, {"giorno": "14 Gi", "cons": 0.0, "prev": 1205.0}, {"giorno": "15 Ve", "cons": 0.0, "prev": 1216.0}, {"giorno": "16 Sa", "cons": 0.0, "prev": 266.0}, {"giorno": "17 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "18 Lu", "cons": 0.0, "prev": 1898.0}, {"giorno": "19 Ma", "cons": 0.0, "prev": 1591.0}, {"giorno": "20 Me", "cons": 0.0, "prev": 820.0}, {"giorno": "21 Gi", "cons": 0.0, "prev": 1032.0}, {"giorno": "22 Ve", "cons": 0.0, "prev": 1078.0}, {"giorno": "23 Sa", "cons": 0.0, "prev": 232.0}, {"giorno": "24 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "25 Lu", "cons": 0.0, "prev": 1742.0}, {"giorno": "26 Ma", "cons": 0.0, "prev": 1415.0}, {"giorno": "27 Me", "cons": 0.0, "prev": 795.0}, {"giorno": "28 Gi", "cons": 0.0, "prev": 1100.0}, {"giorno": "29 Ve", "cons": 0.0, "prev": 1124.0}, {"giorno": "30 Sa", "cons": 0.0, "prev": 249.0}, {"giorno": "31 Do", "cons": 0.0, "prev": 0.0}], "home_data": {"old": "23.493", "cons": "", "prev_txt": "28.163", "prev_style": "bg-yellow"}}, "GIU": {"nome_esteso": "GIU 2026", "tot_24_25": 18397.0, "tot_cons": 0.0, "tot_prev": 14810.0, "tot_full": 14810.0, "lista_giorni": [{"giorno": "01 Lu", "cons": 0.0, "prev": 1057.0}, {"giorno": "02 Ma", "cons": 0.0, "prev": 0.0}, {"giorno": "03 Me", "cons": 0.0, "prev": 481.0}, {"giorno": "04 Gi", "cons": 0.0, "prev": 670.0}, {"giorno": "05 Ve", "cons": 0.0, "prev": 662.0}, {"giorno": "06 Sa", "cons": 0.0, "prev": 145.0}, {"giorno": "07 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "08 Lu", "cons": 0.0, "prev": 1029.0}, {"giorno": "09 Ma", "cons": 0.0, "prev": 931.0}, {"giorno": "10 Me", "cons": 0.0, "prev": 480.0}, {"giorno": "11 Gi", "cons": 0.0, "prev": 549.0}, {"giorno": "12 Ve", "cons": 0.0, "prev": 590.0}, {"giorno": "13 Sa", "cons": 0.0, "prev": 128.0}, {"giorno": "14 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "15 Lu", "cons": 0.0, "prev": 936.0}, {"giorno": "16 Ma", "cons": 0.0, "prev": 764.0}, {"giorno": "17 Me", "cons": 0.0, "prev": 437.0}, {"giorno": "18 Gi", "cons": 0.0, "prev": 589.0}, {"giorno": "19 Ve", "cons": 0.0, "prev": 619.0}, {"giorno": "20 Sa", "cons": 0.0, "prev": 130.0}, {"giorno": "21 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "22 Lu", "cons": 0.0, "prev": 795.0}, {"giorno": "23 Ma", "cons": 0.0, "prev": 678.0}, {"giorno": "24 Me", "cons": 0.0, "prev": 406.0}, {"giorno": "25 Gi", "cons": 0.0, "prev": 511.0}, {"giorno": "26 Ve", "cons": 0.0, "prev": 557.0}, {"giorno": "27 Sa", "cons": 0.0, "prev": 125.0}, {"giorno": "28 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "29 Lu", "cons": 0.0, "prev": 822.0}, {"giorno": "30 Ma", "cons": 0.0, "prev": 719.0}], "home_data": {"old": "18.397", "cons": "", "prev_txt": "14.810", "prev_style": "bg-yellow"}}, "LUG": {"nome_esteso": "LUG 2026", "tot_24_25": 12570.0, "tot_cons": 0.0, "tot_prev": 15672.0, "tot_full": 15672.0, "lista_giorni": [{"giorno": "01 Me", "cons": 0.0, "prev": 513.0}, {"giorno": "02 Gi", "cons": 0.0, "prev": 688.0}, {"giorno": "03 Ve", "cons": 0.0, "prev": 714.0}, {"giorno": "04 Sa", "cons": 0.0, "prev": 156.0}, {"giorno": "05 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "06 Lu", "cons": 0.0, "prev": 1020.0}, {"giorno": "07 Ma", "cons": 0.0, "prev": 903.0}, {"giorno": "08 Me", "cons": 0.0, "prev": 488.0}, {"giorno": "09 Gi", "cons": 0.0, "prev": 697.0}, {"giorno": "10 Ve", "cons": 0.0, "prev": 696.0}, {"giorno": "11 Sa", "cons": 0.0, "prev": 128.0}, {"giorno": "12 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "13 Lu", "cons": 0.0, "prev": 932.0}, {"giorno": "14 Ma", "cons": 0.0, "prev": 812.0}, {"giorno": "15 Me", "cons": 0.0, "prev": 420.0}, {"giorno": "16 Gi", "cons": 0.0, "prev": 572.0}, {"giorno": "17 Ve", "cons": 0.0, "prev": 593.0}, {"giorno": "18 Sa", "cons": 0.0, "prev": 138.0}, {"giorno": "19 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "20 Lu", "cons": 0.0, "prev": 935.0}, {"giorno": "21 Ma", "cons": 0.0, "prev": 701.0}, {"giorno": "22 Me", "cons": 0.0, "prev": 384.0}, {"giorno": "23 Gi", "cons": 0.0, "prev": 531.0}, {"giorno": "24 Ve", "cons": 0.0, "prev": 532.0}, {"giorno": "25 Sa", "cons": 0.0, "prev": 115.0}, {"giorno": "26 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "27 Lu", "cons": 0.0, "prev": 864.0}, {"giorno": "28 Ma", "cons": 0.0, "prev": 717.0}, {"giorno": "29 Me", "cons": 0.0, "prev": 396.0}, {"giorno": "30 Gi", "cons": 0.0, "prev": 509.0}, {"giorno": "31 Ve", "cons": 0.0, "prev": 517.0}], "home_data": {"old": "12.570", "cons": "", "prev_txt": "15.672", "prev_style": "bg-yellow"}}, "AGO": {"nome_esteso": "AGO 2026", "tot_24_25": 13400.0, "tot_cons": 0.0, "tot_prev": 7854.0, "tot_full": 7854.0, "lista_giorni": [{"giorno": "01 Sa", "cons": 0.0, "prev": 158.0}, {"giorno": "02 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "03 Lu", "cons": 0.0, "prev": 1051.0}, {"giorno": "04 Ma", "cons": 0.0, "prev": 852.0}, {"giorno": "05 Me", "cons": 0.0, "prev": 493.0}, {"giorno": "06 Gi", "cons": 0.0, "prev": 677.0}, {"giorno": "07 Ve", "cons": 0.0, "prev": 704.0}, {"giorno": "08 Sa", "cons": 0.0, "prev": 0.0}, {"giorno": "09 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "10 Lu", "cons": 0.0, "prev": 0.0}, {"giorno": "11 Ma", "cons": 0.0, "prev": 0.0}, {"giorno": "12 Me", "cons": 0.0, "prev": 0.0}, {"giorno": "13 Gi", "cons": 0.0, "prev": 0.0}, {"giorno": "14 Ve", "cons": 0.0, "prev": 0.0}, {"giorno": "15 Sa", "cons": 0.0, "prev": 0.0}, {"giorno": "16 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "17 Lu", "cons": 0.0, "prev": 0.0}, {"giorno": "18 Ma", "cons": 0.0, "prev": 0.0}, {"giorno": "19 Me", "cons": 0.0, "prev": 0.0}, {"giorno": "20 Gi", "cons": 0.0, "prev": 0.0}, {"giorno": "21 Ve", "cons": 0.0, "prev": 0.0}, {"giorno": "22 Sa", "cons": 0.0, "prev": 0.0}, {"giorno": "23 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "24 Lu", "cons": 0.0, "prev": 848.0}, {"giorno": "25 Ma", "cons": 0.0, "prev": 709.0}, {"giorno": "26 Me", "cons": 0.0, "prev": 402.0}, {"giorno": "27 Gi", "cons": 0.0, "prev": 502.0}, {"giorno": "28 Ve", "cons": 0.0, "prev": 535.0}, {"giorno": "29 Sa", "cons": 0.0, "prev": 114.0}, {"giorno": "30 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "31 Lu", "cons": 0.0, "prev": 808.0}], "home_data": {"old": "13.400", "cons": "", "prev_txt": "7.854", "prev_style": "bg-yellow"}}};
+    const mesiOrdine = ["SET", "OTT", "NOV", "DIC", "GEN", "FEB", "MAR", "APR", "MAG", "GIU", "LUG", "AGO"];
+    
+    // Stato Navigazione: 0-11 = Mesi, 12 = Home
+    let viewIndex = 12; 
+
+    // Audio Beep (Oscillatore Web Audio API)
+    function playBeep() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = 220; // Hz
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.5);
+            setTimeout(() => osc.stop(), 500);
+        } catch(e) { console.log("Audio bloccato dal browser"); }
+    }
+
+    // Gestione Tastiera
+    document.addEventListener('keydown', function(event) {
+        // Solo se siamo nel dettaglio (o per navigare globalmente)
+        if (event.key === 'ArrowLeft') {
+            changeView(-1);
+        } else if (event.key === 'ArrowRight') {
+            changeView(1);
+        } else if (event.key === 'Escape') {
+            showHome();
+        }
+    });
+
+    // Helper Formattazione JS con punti
+    const fmt = (n) => n > 0 ? Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "";
+    const fmtFull = (n) => n >= 0 ? Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "0";
+
+    function initHome() {
+        const tbody = document.getElementById('table-body-home');
+        tbody.innerHTML = '';
+        mesiOrdine.forEach((mese, index) => {
+            const d = dati[mese];
+            const row = document.createElement('tr');
+            row.className = 'clickable-row';
+            row.onclick = () => { 
+                viewIndex = index; 
+                showDetail(mese); 
+            };
+            row.innerHTML = `
+                <td style="font-weight:bold">${mese}</td>
+                <td class="bg-blue-light">${d.home_data.old}</td>
+                <td class="${d.home_data.cons ? 'bg-red-light' : 'text-gray'}">${d.home_data.cons}</td>
+                <td class="${d.home_data.prev_style}">${d.home_data.prev_txt}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function changeView(direction) {
+        const totalStates = mesiOrdine.length + 1; // 12 mesi + 1 home
+        viewIndex = (viewIndex + direction + totalStates) % totalStates;
+
+        if (viewIndex === mesiOrdine.length) {
+            showHome();
+            playBeep();
+        } else {
+            showDetail(mesiOrdine[viewIndex]);
+        }
+    }
+
+    function showDetail(mese) {
+        viewIndex = mesiOrdine.indexOf(mese);
+        const d = dati[mese];
+        
+        document.getElementById('detail-title').innerText = d.nome_esteso.toUpperCase();
+        document.getElementById('detail-total').innerText = fmtFull(d.tot_full) + ' €';
+        
+        // Calcoli Grafico Mese
+        const maxVal = Math.max(d.tot_24_25, d.tot_full) || 1;
+        const pOld = (d.tot_24_25 / maxVal) * 100;
+        const pCons = (d.tot_cons / maxVal) * 100;
+        const pFull = (d.tot_full / maxVal) * 100;
+
+        document.getElementById('detail-chart').innerHTML = `
+            <div class="bar-row">
+                <span class="bar-label">2024-25</span>
+                <div class="progress"><div class="progress-bar bg-primary" style="width: ${pOld}%"></div></div>
+                <span class="bar-value">${fmtFull(d.tot_24_25)} €</span>
+            </div>
+            <div class="bar-row">
+                <span class="bar-label text-danger">2025-26</span>
+                <div class="progress"><div class="progress-bar bg-danger" style="width: ${pCons}%"></div></div>
+                <span class="bar-value text-danger">${fmtFull(d.tot_cons)} €</span>
+            </div>
+            <div class="bar-row">
+                <span class="bar-label" style="color:#b45309">Previsto</span>
+                <div class="progress"><div class="progress-bar bg-warning" style="width: ${pFull}%"></div></div>
+                <span class="bar-value" style="color:#b45309">${fmtFull(d.tot_full)} €</span>
+            </div>
+        `;
+
+        const tbody = document.getElementById('detail-table-body');
+        tbody.innerHTML = '';
+        if(d.lista_giorni.length > 0) {
+            d.lista_giorni.forEach(day => {
+                const r = document.createElement('tr');
+                // Se riga vuota (entrambi 0), applica stile
+                if (day.cons == 0 && day.prev == 0) {
+                    r.className = 'row-empty';
+                }
+                r.innerHTML = `
+                    <td class="col-giorno" style="font-weight:bold">${day.giorno}</td>
+                    <td class="col-val ${day.cons ? 'bg-red-light' : ''}">${fmt(day.cons)}</td>
+                    <td class="col-val ${day.prev ? 'bg-yellow' : ''}">${fmt(day.prev)}</td>
+                `;
+                tbody.appendChild(r);
+            });
+        }
+        
+        // Riga Totale Dettaglio
+        const tRow = document.createElement('tr');
+        tRow.className = 'row-total';
+        tRow.innerHTML = `
+            <td>TOT</td>
+            <td>${fmtFull(d.tot_cons)}</td>
+            <td>${fmtFull(d.tot_prev)}</td>
+        `;
+        tbody.appendChild(tRow);
+
+        document.getElementById('view-home').style.display = 'none';
+        document.getElementById('view-detail').style.display = 'block';
+        window.scrollTo(0,0);
+    }
+
+    function showHome() {
+        viewIndex = 12; 
+        document.getElementById('view-detail').style.display = 'none';
+        document.getElementById('view-home').style.display = 'block';
+    }
+
+    initHome();
+</script>
 
 </body>
 </html>
