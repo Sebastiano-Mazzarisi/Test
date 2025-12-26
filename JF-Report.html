@@ -4,116 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Report</title>
-    
     <meta name="apple-mobile-web-app-title" content="Report">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="icon" type="image/jpeg" href="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/JoyFit.jpg">
     <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/JoyFit.jpg">
-    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #cfd8dc; font-family: -apple-system, sans-serif; font-size: 26px; padding: 10px 0; color: #111827; }
-        
         .main-wrapper { width: 94%; max-width: 600px; margin: 0 auto; }
-        
         .card-box { 
-            background: white; 
-            border-radius: 16px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15); 
-            overflow: hidden; 
-            margin-bottom: 20px; 
-            border: 1px solid black; 
-            transform: translateZ(0); 
+            background: white; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); 
+            overflow: hidden; margin-bottom: 20px; border: 1px solid black; transform: translateZ(0); 
+            padding-bottom: 1px;
         }
-        
         .header-blue { background-color: #1a3b5c; color: white; padding: 15px 10px; display: flex; justify-content: space-between; align-items: center; height: 80px; }
         .header-title { font-size: 2.6rem; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
-        
         .btn-home { color: white; font-size: 2rem; text-decoration: none; cursor: pointer; margin-left: 10px; }
         .btn-audio { color: white; font-size: 2rem; text-decoration: none; cursor: pointer; margin-right: 10px; }
-        
         .nav-arrow { color: white; font-size: 2.5rem; cursor: pointer; font-weight: bold; padding: 0 15px; user-select: none; }
-        
         .total-box { background: #fff; padding: 30px 20px; text-align: center; border-bottom: 1px solid #eee; }
-        .total-amount { font-size: 4.8rem; font-weight: 900; color: #b91c1c; line-height: 1; margin: 0; }
-        
+        .total-amount { 
+            font-size: 4.8rem; font-weight: 900; color: #b91c1c; line-height: 1; margin: 0;
+            transition: opacity 1s ease-in-out; opacity: 1;
+        }
         .chart-section { padding: 25px 20px; }
         .bar-row { display: flex; align-items: center; margin-bottom: 18px; font-size: 1.2rem; }
         
-        .bar-label { width: 120px; font-weight: 700; color: #000 !important; font-size: 1.3rem; flex-shrink: 0; }
+        .bar-label-container { width: 120px; flex-shrink: 0; text-align: center; }
+        .bar-label-text {
+            font-weight: 700; color: #000 !important; font-size: 1.3rem; 
+            border: 4px solid transparent; border-radius: 4px; padding: 2px 5px; 
+            display: inline-block;
+        }
         .bar-value { width: 140px; text-align: right; font-weight: 800; color: #000 !important; font-size: 1.3rem; flex-shrink: 0; }
-        
         .progress { flex-grow: 1; height: 26px; margin: 0 15px; border-radius: 8px; width: 40%; }
         
-        /* STILI TABELLA */
-        .table-custom { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin: 0; 
-        }
-        
-        .table-custom th, .table-custom td {
-            border: 1px solid black !important; 
-        }
-        
+        .table-custom { width: 100%; border-collapse: collapse; margin: 0; }
+        .table-custom th, .table-custom td { border: 1px solid black !important; }
         .table-custom th { 
-            background: #e5e7eb; 
-            color: #000 !important; 
-            text-align: center !important; 
-            padding: 8px; 
-            font-size: 1.1rem;
-            font-weight: normal !important; 
+            background: #e5e7eb; color: #000 !important; text-align: center !important; 
+            padding: 8px; font-size: 1.1rem; font-weight: normal !important; 
         }
-        
         .table-custom td { 
-            padding: 8px; 
-            font-size: 1.6rem; 
-            font-weight: normal !important; 
-            text-align: center !important; 
-            line-height: 1.1;
+            padding: 8px; font-size: 1.6rem; font-weight: normal !important; 
+            text-align: center !important; line-height: 1.1;
         }
-        
         .table-custom tr.clickable-row { cursor: pointer; transition: background 0.1s; }
         .table-custom tr.clickable-row:active { background-color: #dbeafe; }
         
         .bg-blue-light { background-color: #e3f2fd; color: #1f2937; }
         .bg-red-light { background-color: #fff1f2; color: #b91c1c; }
         .bg-yellow { background-color: #fef9c3; color: #000; }
-        
-        .text-pct-small { 
-            color: #000 !important; 
-            font-size: 1rem !important; 
-            font-weight: normal !important; 
-        }
+        .text-pct-small { color: #000 !important; font-size: 1rem !important; font-weight: normal !important; }
         .text-gray { color: #9ca3af; }
         
-        .footer-note { 
-            font-size: 1rem; 
-            color: #111827; 
-            text-align: center; 
-            padding: 20px; 
-            background: #f3f4f6; 
-            font-weight: normal; 
-        }
-        
-        .row-empty td { 
-            background-color: #e9ecef; 
-        }
-        
-        /* Totali: Bordo inferiore esplicito */
-        .row-total td, tfoot td { 
-            background-color: #d1d5db; 
-            font-weight: 900 !important; 
-            border-bottom: 1px solid black !important;
-        }
-        
+        .footer-note { font-size: 1rem; color: #111827; text-align: center; padding: 20px; background: #f3f4f6; font-weight: normal; }
+        .row-empty td { background-color: #e9ecef; }
+        .row-total td, tfoot td { background-color: #d1d5db; font-weight: 900 !important; border-bottom: 1px solid black !important; }
         .bottom-spacer { height: 60px; width: 100%; }
         
         @media (max-width: 480px) {
             .table-custom td { padding: 8px 2px !important; font-size: 1.4rem; }
             .table-custom th { padding: 8px 2px !important; }
             .total-amount { font-size: 3.8rem; }
-            .bar-label { width: 90px; font-size: 1.1rem; }
+            .bar-label-text { font-size: 1.1rem; }
+            .bar-label-container { width: 90px; }
             .bar-value { width: 120px; font-size: 1.2rem; }
             .header-title { font-size: 2.2rem; }
             .text-pct-small { font-size: 0.9rem !important; }
@@ -121,7 +76,6 @@
     </style>
 </head>
 <body>
-
 <div class="main-wrapper">
     <div id="view-home">
         <div class="card-box">
@@ -133,25 +87,25 @@
                     <div class="nav-arrow" onclick="changeView(1)">&#10095;</div>
                 </div>
                 <div style="width:50px; text-align:center">
-                    <a href="https://sebastiano-mazzarisi.github.io/Test/Sintesi.mp3" target="_blank" class="btn-audio" title="Ascolta Sintesi">📢</a>
+                    <span onclick="toggleAudio()" class="btn-audio" title="Ascolta">📢</span>
                 </div>
             </div>
             <div class="total-box">
-                <div class="total-amount">334.851 €</div>
+                <div class="total-amount" id="home-total-display">334.851 €</div>
             </div>
             <div class="chart-section">
                 <div class="bar-row">
-                    <span class="bar-label">2024-25</span>
+                    <div class="bar-label-container"><span class="bar-label-text" id="label-h-0">2024-25</span></div>
                     <div class="progress"><div class="progress-bar bg-primary" style="width: 89.52399724056372%"></div></div>
                     <span class="bar-value">299.772 €</span>
                 </div>
                 <div class="bar-row">
-                    <span class="bar-label">2025-26</span>
+                    <div class="bar-label-container"><span class="bar-label-text" id="label-h-1">2025-26</span></div>
                     <div class="progress"><div class="progress-bar bg-danger" style="width: 42.140534148024045%"></div></div>
                     <span class="bar-value">141.108 €</span>
                 </div>
                 <div class="bar-row">
-                    <span class="bar-label">Previsto</span>
+                    <div class="bar-label-container"><span class="bar-label-text" id="label-h-2">Previsto</span></div>
                     <div class="progress"><div class="progress-bar bg-warning" style="width: 100.0%"></div></div>
                     <span class="bar-value">334.851 €</span>
                 </div>
@@ -193,11 +147,11 @@
                     <div class="nav-arrow" onclick="changeView(1)">&#10095;</div>
                 </div>
                 <div style="width:50px; text-align:center;">
-                    <a href="https://sebastiano-mazzarisi.github.io/Test/Sintesi.mp3" target="_blank" class="btn-audio" title="Ascolta Sintesi">📢</a>
+                    <span onclick="toggleAudio()" class="btn-audio" title="Ascolta">📢</span>
                 </div>
             </div>
             <div class="total-box">
-                <div class="total-amount" id="detail-total">0 €</div>
+                <div class="total-amount" id="detail-total-display">0 €</div>
             </div>
             <div class="chart-section" id="detail-chart"></div>
         </div>
@@ -215,34 +169,128 @@
             <div class="footer-note">Dati al 20/12/2025</div>
         </div>
     </div>
-    
     <div class="bottom-spacer"></div>
 </div>
-
 <script>
     const dati = {"SET": {"nome_esteso": "SET 2025", "tot_24_25": 30997.0, "tot_cons": 41316.0, "tot_prev": 0.0, "tot_full": 41316.0, "lista_giorni": [{"giorno": "01 Lu", "cons": 2503.0, "prev": 0.0}, {"giorno": "02 Ma", "cons": 3410.0, "prev": 0.0}, {"giorno": "03 Me", "cons": 1577.0, "prev": 0.0}, {"giorno": "04 Gi", "cons": 1565.0, "prev": 0.0}, {"giorno": "05 Ve", "cons": 1250.0, "prev": 0.0}, {"giorno": "06 Sa", "cons": 305.0, "prev": 0.0}, {"giorno": "07 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "08 Lu", "cons": 3136.0, "prev": 0.0}, {"giorno": "09 Ma", "cons": 1415.0, "prev": 0.0}, {"giorno": "10 Me", "cons": 585.0, "prev": 0.0}, {"giorno": "11 Gi", "cons": 1180.0, "prev": 0.0}, {"giorno": "12 Ve", "cons": 1531.0, "prev": 0.0}, {"giorno": "13 Sa", "cons": 163.0, "prev": 0.0}, {"giorno": "14 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "15 Lu", "cons": 1105.0, "prev": 0.0}, {"giorno": "16 Ma", "cons": 2410.0, "prev": 0.0}, {"giorno": "17 Me", "cons": 2187.0, "prev": 0.0}, {"giorno": "18 Gi", "cons": 1085.0, "prev": 0.0}, {"giorno": "19 Ve", "cons": 1564.0, "prev": 0.0}, {"giorno": "20 Sa", "cons": 60.0, "prev": 0.0}, {"giorno": "21 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "22 Lu", "cons": 3525.0, "prev": 0.0}, {"giorno": "23 Ma", "cons": 2161.0, "prev": 0.0}, {"giorno": "24 Me", "cons": 952.0, "prev": 0.0}, {"giorno": "25 Gi", "cons": 890.0, "prev": 0.0}, {"giorno": "26 Ve", "cons": 1139.0, "prev": 0.0}, {"giorno": "27 Sa", "cons": 50.0, "prev": 0.0}, {"giorno": "28 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "29 Lu", "cons": 3105.0, "prev": 0.0}, {"giorno": "30 Ma", "cons": 2463.0, "prev": 0.0}], "home_data": {"old": "30.997", "cons": "41.316", "prev_txt": "+33,3%", "prev_style": "text-pct-small"}}, "OTT": {"nome_esteso": "OTT 2025", "tot_24_25": 33138.0, "tot_cons": 41202.0, "tot_prev": 0.0, "tot_full": 41202.0, "lista_giorni": [{"giorno": "01 Me", "cons": 2053.0, "prev": 0.0}, {"giorno": "02 Gi", "cons": 4310.0, "prev": 0.0}, {"giorno": "03 Ve", "cons": 2645.0, "prev": 0.0}, {"giorno": "04 Sa", "cons": 0.0, "prev": 0.0}, {"giorno": "05 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "06 Lu", "cons": 3023.0, "prev": 0.0}, {"giorno": "07 Ma", "cons": 1540.0, "prev": 0.0}, {"giorno": "08 Me", "cons": 0.0, "prev": 0.0}, {"giorno": "09 Gi", "cons": 1480.0, "prev": 0.0}, {"giorno": "10 Ve", "cons": 1815.0, "prev": 0.0}, {"giorno": "11 Sa", "cons": 1225.0, "prev": 0.0}, {"giorno": "12 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "13 Lu", "cons": 2868.0, "prev": 0.0}, {"giorno": "14 Ma", "cons": 1425.0, "prev": 0.0}, {"giorno": "15 Me", "cons": 1290.0, "prev": 0.0}, {"giorno": "16 Gi", "cons": 1575.0, "prev": 0.0}, {"giorno": "17 Ve", "cons": 2218.0, "prev": 0.0}, {"giorno": "18 Sa", "cons": 770.0, "prev": 0.0}, {"giorno": "19 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "20 Lu", "cons": 890.0, "prev": 0.0}, {"giorno": "21 Ma", "cons": 1335.0, "prev": 0.0}, {"giorno": "22 Me", "cons": 565.0, "prev": 0.0}, {"giorno": "23 Gi", "cons": 1400.0, "prev": 0.0}, {"giorno": "24 Ve", "cons": 1080.0, "prev": 0.0}, {"giorno": "25 Sa", "cons": 115.0, "prev": 0.0}, {"giorno": "26 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "27 Lu", "cons": 1735.0, "prev": 0.0}, {"giorno": "28 Ma", "cons": 2375.0, "prev": 0.0}, {"giorno": "29 Me", "cons": 615.0, "prev": 0.0}, {"giorno": "30 Gi", "cons": 1305.0, "prev": 0.0}, {"giorno": "31 Ve", "cons": 1550.0, "prev": 0.0}], "home_data": {"old": "33.138", "cons": "41.202", "prev_txt": "+24,3%", "prev_style": "text-pct-small"}}, "NOV": {"nome_esteso": "NOV 2025", "tot_24_25": 31575.0, "tot_cons": 34629.0, "tot_prev": 0.0, "tot_full": 34629.0, "lista_giorni": [{"giorno": "01 Sa", "cons": 0.0, "prev": 0.0}, {"giorno": "02 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "03 Lu", "cons": 4465.0, "prev": 0.0}, {"giorno": "04 Ma", "cons": 3215.0, "prev": 0.0}, {"giorno": "05 Me", "cons": 870.0, "prev": 0.0}, {"giorno": "06 Gi", "cons": 1455.0, "prev": 0.0}, {"giorno": "07 Ve", "cons": 1970.0, "prev": 0.0}, {"giorno": "08 Sa", "cons": 737.0, "prev": 0.0}, {"giorno": "09 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "10 Lu", "cons": 2760.0, "prev": 0.0}, {"giorno": "11 Ma", "cons": 1880.0, "prev": 0.0}, {"giorno": "12 Me", "cons": 1256.0, "prev": 0.0}, {"giorno": "13 Gi", "cons": 1675.0, "prev": 0.0}, {"giorno": "14 Ve", "cons": 1625.0, "prev": 0.0}, {"giorno": "15 Sa", "cons": 265.0, "prev": 0.0}, {"giorno": "16 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "17 Lu", "cons": 1540.0, "prev": 0.0}, {"giorno": "18 Ma", "cons": 1435.0, "prev": 0.0}, {"giorno": "19 Me", "cons": 685.0, "prev": 0.0}, {"giorno": "20 Gi", "cons": 897.0, "prev": 0.0}, {"giorno": "21 Ve", "cons": 1944.0, "prev": 0.0}, {"giorno": "22 Sa", "cons": 155.0, "prev": 0.0}, {"giorno": "23 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "24 Lu", "cons": 1422.0, "prev": 0.0}, {"giorno": "25 Ma", "cons": 1394.0, "prev": 0.0}, {"giorno": "26 Me", "cons": 1130.0, "prev": 0.0}, {"giorno": "27 Gi", "cons": 0.0, "prev": 0.0}, {"giorno": "28 Ve", "cons": 1110.0, "prev": 0.0}, {"giorno": "29 Sa", "cons": 744.0, "prev": 0.0}, {"giorno": "30 Do", "cons": 0.0, "prev": 0.0}], "home_data": {"old": "31.575", "cons": "34.629", "prev_txt": "+9,7%", "prev_style": "text-pct-small"}}, "DIC": {"nome_esteso": "DIC 2025", "tot_24_25": 23376.0, "tot_cons": 23961.0, "tot_prev": 8641.0, "tot_full": 32602.0, "lista_giorni": [{"giorno": "01 Lu", "cons": 2915.0, "prev": 0.0}, {"giorno": "02 Ma", "cons": 2870.0, "prev": 0.0}, {"giorno": "03 Me", "cons": 946.0, "prev": 0.0}, {"giorno": "04 Gi", "cons": 1580.0, "prev": 0.0}, {"giorno": "05 Ve", "cons": 1740.0, "prev": 0.0}, {"giorno": "06 Sa", "cons": 677.0, "prev": 0.0}, {"giorno": "07 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "08 Lu", "cons": 0.0, "prev": 0.0}, {"giorno": "09 Ma", "cons": 1171.0, "prev": 0.0}, {"giorno": "10 Me", "cons": 605.0, "prev": 0.0}, {"giorno": "11 Gi", "cons": 2034.0, "prev": 0.0}, {"giorno": "12 Ve", "cons": 736.0, "prev": 0.0}, {"giorno": "13 Sa", "cons": 135.0, "prev": 0.0}, {"giorno": "14 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "15 Lu", "cons": 2043.0, "prev": 0.0}, {"giorno": "16 Ma", "cons": 1030.0, "prev": 0.0}, {"giorno": "17 Me", "cons": 1984.0, "prev": 0.0}, {"giorno": "18 Gi", "cons": 998.0, "prev": 0.0}, {"giorno": "19 Ve", "cons": 1670.0, "prev": 0.0}, {"giorno": "20 Sa", "cons": 827.0, "prev": 0.0}, {"giorno": "21 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "22 Lu", "cons": 0.0, "prev": 1919.0}, {"giorno": "23 Ma", "cons": 0.0, "prev": 1565.0}, {"giorno": "24 Me", "cons": 0.0, "prev": 898.0}, {"giorno": "25 Gi", "cons": 0.0, "prev": 0.0}, {"giorno": "26 Ve", "cons": 0.0, "prev": 0.0}, {"giorno": "27 Sa", "cons": 0.0, "prev": 0.0}, {"giorno": "28 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "29 Lu", "cons": 0.0, "prev": 1829.0}, {"giorno": "30 Ma", "cons": 0.0, "prev": 1569.0}, {"giorno": "31 Me", "cons": 0.0, "prev": 861.0}], "home_data": {"old": "23.376", "cons": "23.961", "prev_txt": "8.641", "prev_style": "bg-yellow"}}, "GEN": {"nome_esteso": "GEN 2026", "tot_24_25": 32400.0, "tot_cons": 0.0, "tot_prev": 27618.0, "tot_full": 27618.0, "lista_giorni": [{"giorno": "01 Gi", "cons": 0.0, "prev": 0.0}, {"giorno": "02 Ve", "cons": 0.0, "prev": 1327.0}, {"giorno": "03 Sa", "cons": 0.0, "prev": 320.0}, {"giorno": "04 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "05 Lu", "cons": 0.0, "prev": 2132.0}, {"giorno": "06 Ma", "cons": 0.0, "prev": 0.0}, {"giorno": "07 Me", "cons": 0.0, "prev": 999.0}, {"giorno": "08 Gi", "cons": 0.0, "prev": 1303.0}, {"giorno": "09 Ve", "cons": 0.0, "prev": 1445.0}, {"giorno": "10 Sa", "cons": 0.0, "prev": 321.0}, {"giorno": "11 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "12 Lu", "cons": 0.0, "prev": 1775.0}, {"giorno": "13 Ma", "cons": 0.0, "prev": 1549.0}, {"giorno": "14 Me", "cons": 0.0, "prev": 851.0}, {"giorno": "15 Gi", "cons": 0.0, "prev": 1146.0}, {"giorno": "16 Ve", "cons": 0.0, "prev": 1212.0}, {"giorno": "17 Sa", "cons": 0.0, "prev": 273.0}, {"giorno": "18 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "19 Lu", "cons": 0.0, "prev": 1867.0}, {"giorno": "20 Ma", "cons": 0.0, "prev": 1651.0}, {"giorno": "21 Me", "cons": 0.0, "prev": 767.0}, {"giorno": "22 Gi", "cons": 0.0, "prev": 1053.0}, {"giorno": "23 Ve", "cons": 0.0, "prev": 1062.0}, {"giorno": "24 Sa", "cons": 0.0, "prev": 231.0}, {"giorno": "25 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "26 Lu", "cons": 0.0, "prev": 1683.0}, {"giorno": "27 Ma", "cons": 0.0, "prev": 1474.0}, {"giorno": "28 Me", "cons": 0.0, "prev": 772.0}, {"giorno": "29 Gi", "cons": 0.0, "prev": 1059.0}, {"giorno": "30 Ve", "cons": 0.0, "prev": 1092.0}, {"giorno": "31 Sa", "cons": 0.0, "prev": 251.0}], "home_data": {"old": "32.400", "cons": "", "prev_txt": "27.618", "prev_style": "bg-yellow"}}, "FEB": {"nome_esteso": "FEB 2026", "tot_24_25": 26390.0, "tot_cons": 0.0, "tot_prev": 28986.0, "tot_full": 28986.0, "lista_giorni": [{"giorno": "01 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "02 Lu", "cons": 0.0, "prev": 2131.0}, {"giorno": "03 Ma", "cons": 0.0, "prev": 1856.0}, {"giorno": "04 Me", "cons": 0.0, "prev": 989.0}, {"giorno": "05 Gi", "cons": 0.0, "prev": 1380.0}, {"giorno": "06 Ve", "cons": 0.0, "prev": 1401.0}, {"giorno": "07 Sa", "cons": 0.0, "prev": 319.0}, {"giorno": "08 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "09 Lu", "cons": 0.0, "prev": 2189.0}, {"giorno": "10 Ma", "cons": 0.0, "prev": 1765.0}, {"giorno": "11 Me", "cons": 0.0, "prev": 883.0}, {"giorno": "12 Gi", "cons": 0.0, "prev": 1142.0}, {"giorno": "13 Ve", "cons": 0.0, "prev": 1226.0}, {"giorno": "14 Sa", "cons": 0.0, "prev": 262.0}, {"giorno": "15 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "16 Lu", "cons": 0.0, "prev": 1931.0}, {"giorno": "17 Ma", "cons": 0.0, "prev": 1623.0}, {"giorno": "18 Me", "cons": 0.0, "prev": 899.0}, {"giorno": "19 Gi", "cons": 0.0, "prev": 1216.0}, {"giorno": "20 Ve", "cons": 0.0, "prev": 1152.0}, {"giorno": "21 Sa", "cons": 0.0, "prev": 235.0}, {"giorno": "22 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "23 Lu", "cons": 0.0, "prev": 1707.0}, {"giorno": "24 Ma", "cons": 0.0, "prev": 1506.0}, {"giorno": "25 Me", "cons": 0.0, "prev": 786.0}, {"giorno": "26 Gi", "cons": 0.0, "prev": 1090.0}, {"giorno": "27 Ve", "cons": 0.0, "prev": 1055.0}, {"giorno": "28 Sa", "cons": 0.0, "prev": 242.0}], "home_data": {"old": "26.390", "cons": "", "prev_txt": "28.986", "prev_style": "bg-yellow"}}, "MAR": {"nome_esteso": "MAR 2026", "tot_24_25": 28694.0, "tot_cons": 0.0, "tot_prev": 31959.0, "tot_full": 31959.0, "lista_giorni": [{"giorno": "01 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "02 Lu", "cons": 0.0, "prev": 2118.0}, {"giorno": "03 Ma", "cons": 0.0, "prev": 1847.0}, {"giorno": "04 Me", "cons": 0.0, "prev": 1030.0}, {"giorno": "05 Gi", "cons": 0.0, "prev": 1307.0}, {"giorno": "06 Ve", "cons": 0.0, "prev": 1419.0}, {"giorno": "07 Sa", "cons": 0.0, "prev": 307.0}, {"giorno": "08 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "09 Lu", "cons": 0.0, "prev": 2049.0}, {"giorno": "10 Ma", "cons": 0.0, "prev": 1756.0}, {"giorno": "11 Me", "cons": 0.0, "prev": 909.0}, {"giorno": "12 Gi", "cons": 0.0, "prev": 1176.0}, {"giorno": "13 Ve", "cons": 0.0, "prev": 1192.0}, {"giorno": "14 Sa", "cons": 0.0, "prev": 276.0}, {"giorno": "15 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "16 Lu", "cons": 0.0, "prev": 1928.0}, {"giorno": "17 Ma", "cons": 0.0, "prev": 1601.0}, {"giorno": "18 Me", "cons": 0.0, "prev": 887.0}, {"giorno": "19 Gi", "cons": 0.0, "prev": 1232.0}, {"giorno": "20 Ve", "cons": 0.0, "prev": 1255.0}, {"giorno": "21 Sa", "cons": 0.0, "prev": 246.0}, {"giorno": "22 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "23 Lu", "cons": 0.0, "prev": 1767.0}, {"giorno": "24 Ma", "cons": 0.0, "prev": 1370.0}, {"giorno": "25 Me", "cons": 0.0, "prev": 817.0}, {"giorno": "26 Gi", "cons": 0.0, "prev": 1035.0}, {"giorno": "27 Ve", "cons": 0.0, "prev": 1114.0}, {"giorno": "28 Sa", "cons": 0.0, "prev": 245.0}, {"giorno": "29 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "30 Lu", "cons": 0.0, "prev": 1685.0}, {"giorno": "31 Ma", "cons": 0.0, "prev": 1391.0}], "home_data": {"old": "28.694", "cons": "", "prev_txt": "31.959", "prev_style": "bg-yellow"}}, "APR": {"nome_esteso": "APR 2026", "tot_24_25": 25342.0, "tot_cons": 0.0, "tot_prev": 30040.0, "tot_full": 30040.0, "lista_giorni": [{"giorno": "01 Me", "cons": 0.0, "prev": 1026.0}, {"giorno": "02 Gi", "cons": 0.0, "prev": 1314.0}, {"giorno": "03 Ve", "cons": 0.0, "prev": 1409.0}, {"giorno": "04 Sa", "cons": 0.0, "prev": 312.0}, {"giorno": "05 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "06 Lu", "cons": 0.0, "prev": 2211.0}, {"giorno": "07 Ma", "cons": 0.0, "prev": 1813.0}, {"giorno": "08 Me", "cons": 0.0, "prev": 1029.0}, {"giorno": "09 Gi", "cons": 0.0, "prev": 1373.0}, {"giorno": "10 Ve", "cons": 0.0, "prev": 1371.0}, {"giorno": "11 Sa", "cons": 0.0, "prev": 273.0}, {"giorno": "12 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "13 Lu", "cons": 0.0, "prev": 1778.0}, {"giorno": "14 Ma", "cons": 0.0, "prev": 1593.0}, {"giorno": "15 Me", "cons": 0.0, "prev": 866.0}, {"giorno": "16 Gi", "cons": 0.0, "prev": 1186.0}, {"giorno": "17 Ve", "cons": 0.0, "prev": 1188.0}, {"giorno": "18 Sa", "cons": 0.0, "prev": 250.0}, {"giorno": "19 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "20 Lu", "cons": 0.0, "prev": 1741.0}, {"giorno": "21 Ma", "cons": 0.0, "prev": 1475.0}, {"giorno": "22 Me", "cons": 0.0, "prev": 806.0}, {"giorno": "23 Gi", "cons": 0.0, "prev": 1002.0}, {"giorno": "24 Ve", "cons": 0.0, "prev": 1112.0}, {"giorno": "25 Sa", "cons": 0.0, "prev": 0.0}, {"giorno": "26 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "27 Lu", "cons": 0.0, "prev": 1630.0}, {"giorno": "28 Ma", "cons": 0.0, "prev": 1417.0}, {"giorno": "29 Me", "cons": 0.0, "prev": 814.0}, {"giorno": "30 Gi", "cons": 0.0, "prev": 1051.0}], "home_data": {"old": "25.342", "cons": "", "prev_txt": "30.040", "prev_style": "bg-yellow"}}, "MAG": {"nome_esteso": "MAG 2026", "tot_24_25": 23493.0, "tot_cons": 0.0, "tot_prev": 28163.0, "tot_full": 28163.0, "lista_giorni": [{"giorno": "01 Ve", "cons": 0.0, "prev": 0.0}, {"giorno": "02 Sa", "cons": 0.0, "prev": 0.0}, {"giorno": "03 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "04 Lu", "cons": 0.0, "prev": 2183.0}, {"giorno": "05 Ma", "cons": 0.0, "prev": 1876.0}, {"giorno": "06 Me", "cons": 0.0, "prev": 996.0}, {"giorno": "07 Gi", "cons": 0.0, "prev": 1386.0}, {"giorno": "08 Ve", "cons": 0.0, "prev": 1377.0}, {"giorno": "09 Sa", "cons": 0.0, "prev": 289.0}, {"giorno": "10 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "11 Lu", "cons": 0.0, "prev": 1851.0}, {"giorno": "12 Ma", "cons": 0.0, "prev": 1601.0}, {"giorno": "13 Me", "cons": 0.0, "prev": 841.0}, {"giorno": "14 Gi", "cons": 0.0, "prev": 1205.0}, {"giorno": "15 Ve", "cons": 0.0, "prev": 1216.0}, {"giorno": "16 Sa", "cons": 0.0, "prev": 266.0}, {"giorno": "17 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "18 Lu", "cons": 0.0, "prev": 1898.0}, {"giorno": "19 Ma", "cons": 0.0, "prev": 1591.0}, {"giorno": "20 Me", "cons": 0.0, "prev": 820.0}, {"giorno": "21 Gi", "cons": 0.0, "prev": 1032.0}, {"giorno": "22 Ve", "cons": 0.0, "prev": 1078.0}, {"giorno": "23 Sa", "cons": 0.0, "prev": 232.0}, {"giorno": "24 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "25 Lu", "cons": 0.0, "prev": 1742.0}, {"giorno": "26 Ma", "cons": 0.0, "prev": 1415.0}, {"giorno": "27 Me", "cons": 0.0, "prev": 795.0}, {"giorno": "28 Gi", "cons": 0.0, "prev": 1100.0}, {"giorno": "29 Ve", "cons": 0.0, "prev": 1124.0}, {"giorno": "30 Sa", "cons": 0.0, "prev": 249.0}, {"giorno": "31 Do", "cons": 0.0, "prev": 0.0}], "home_data": {"old": "23.493", "cons": "", "prev_txt": "28.163", "prev_style": "bg-yellow"}}, "GIU": {"nome_esteso": "GIU 2026", "tot_24_25": 18397.0, "tot_cons": 0.0, "tot_prev": 14810.0, "tot_full": 14810.0, "lista_giorni": [{"giorno": "01 Lu", "cons": 0.0, "prev": 1057.0}, {"giorno": "02 Ma", "cons": 0.0, "prev": 0.0}, {"giorno": "03 Me", "cons": 0.0, "prev": 481.0}, {"giorno": "04 Gi", "cons": 0.0, "prev": 670.0}, {"giorno": "05 Ve", "cons": 0.0, "prev": 662.0}, {"giorno": "06 Sa", "cons": 0.0, "prev": 145.0}, {"giorno": "07 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "08 Lu", "cons": 0.0, "prev": 1029.0}, {"giorno": "09 Ma", "cons": 0.0, "prev": 931.0}, {"giorno": "10 Me", "cons": 0.0, "prev": 480.0}, {"giorno": "11 Gi", "cons": 0.0, "prev": 549.0}, {"giorno": "12 Ve", "cons": 0.0, "prev": 590.0}, {"giorno": "13 Sa", "cons": 0.0, "prev": 128.0}, {"giorno": "14 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "15 Lu", "cons": 0.0, "prev": 936.0}, {"giorno": "16 Ma", "cons": 0.0, "prev": 764.0}, {"giorno": "17 Me", "cons": 0.0, "prev": 437.0}, {"giorno": "18 Gi", "cons": 0.0, "prev": 589.0}, {"giorno": "19 Ve", "cons": 0.0, "prev": 619.0}, {"giorno": "20 Sa", "cons": 0.0, "prev": 130.0}, {"giorno": "21 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "22 Lu", "cons": 0.0, "prev": 795.0}, {"giorno": "23 Ma", "cons": 0.0, "prev": 678.0}, {"giorno": "24 Me", "cons": 0.0, "prev": 406.0}, {"giorno": "25 Gi", "cons": 0.0, "prev": 511.0}, {"giorno": "26 Ve", "cons": 0.0, "prev": 557.0}, {"giorno": "27 Sa", "cons": 0.0, "prev": 125.0}, {"giorno": "28 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "29 Lu", "cons": 0.0, "prev": 822.0}, {"giorno": "30 Ma", "cons": 0.0, "prev": 719.0}], "home_data": {"old": "18.397", "cons": "", "prev_txt": "14.810", "prev_style": "bg-yellow"}}, "LUG": {"nome_esteso": "LUG 2026", "tot_24_25": 12570.0, "tot_cons": 0.0, "tot_prev": 15672.0, "tot_full": 15672.0, "lista_giorni": [{"giorno": "01 Me", "cons": 0.0, "prev": 513.0}, {"giorno": "02 Gi", "cons": 0.0, "prev": 688.0}, {"giorno": "03 Ve", "cons": 0.0, "prev": 714.0}, {"giorno": "04 Sa", "cons": 0.0, "prev": 156.0}, {"giorno": "05 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "06 Lu", "cons": 0.0, "prev": 1020.0}, {"giorno": "07 Ma", "cons": 0.0, "prev": 903.0}, {"giorno": "08 Me", "cons": 0.0, "prev": 488.0}, {"giorno": "09 Gi", "cons": 0.0, "prev": 697.0}, {"giorno": "10 Ve", "cons": 0.0, "prev": 696.0}, {"giorno": "11 Sa", "cons": 0.0, "prev": 128.0}, {"giorno": "12 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "13 Lu", "cons": 0.0, "prev": 932.0}, {"giorno": "14 Ma", "cons": 0.0, "prev": 812.0}, {"giorno": "15 Me", "cons": 0.0, "prev": 420.0}, {"giorno": "16 Gi", "cons": 0.0, "prev": 572.0}, {"giorno": "17 Ve", "cons": 0.0, "prev": 593.0}, {"giorno": "18 Sa", "cons": 0.0, "prev": 138.0}, {"giorno": "19 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "20 Lu", "cons": 0.0, "prev": 935.0}, {"giorno": "21 Ma", "cons": 0.0, "prev": 701.0}, {"giorno": "22 Me", "cons": 0.0, "prev": 384.0}, {"giorno": "23 Gi", "cons": 0.0, "prev": 531.0}, {"giorno": "24 Ve", "cons": 0.0, "prev": 532.0}, {"giorno": "25 Sa", "cons": 0.0, "prev": 115.0}, {"giorno": "26 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "27 Lu", "cons": 0.0, "prev": 864.0}, {"giorno": "28 Ma", "cons": 0.0, "prev": 717.0}, {"giorno": "29 Me", "cons": 0.0, "prev": 396.0}, {"giorno": "30 Gi", "cons": 0.0, "prev": 509.0}, {"giorno": "31 Ve", "cons": 0.0, "prev": 517.0}], "home_data": {"old": "12.570", "cons": "", "prev_txt": "15.672", "prev_style": "bg-yellow"}}, "AGO": {"nome_esteso": "AGO 2026", "tot_24_25": 13400.0, "tot_cons": 0.0, "tot_prev": 7854.0, "tot_full": 7854.0, "lista_giorni": [{"giorno": "01 Sa", "cons": 0.0, "prev": 158.0}, {"giorno": "02 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "03 Lu", "cons": 0.0, "prev": 1051.0}, {"giorno": "04 Ma", "cons": 0.0, "prev": 852.0}, {"giorno": "05 Me", "cons": 0.0, "prev": 493.0}, {"giorno": "06 Gi", "cons": 0.0, "prev": 677.0}, {"giorno": "07 Ve", "cons": 0.0, "prev": 704.0}, {"giorno": "08 Sa", "cons": 0.0, "prev": 0.0}, {"giorno": "09 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "10 Lu", "cons": 0.0, "prev": 0.0}, {"giorno": "11 Ma", "cons": 0.0, "prev": 0.0}, {"giorno": "12 Me", "cons": 0.0, "prev": 0.0}, {"giorno": "13 Gi", "cons": 0.0, "prev": 0.0}, {"giorno": "14 Ve", "cons": 0.0, "prev": 0.0}, {"giorno": "15 Sa", "cons": 0.0, "prev": 0.0}, {"giorno": "16 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "17 Lu", "cons": 0.0, "prev": 0.0}, {"giorno": "18 Ma", "cons": 0.0, "prev": 0.0}, {"giorno": "19 Me", "cons": 0.0, "prev": 0.0}, {"giorno": "20 Gi", "cons": 0.0, "prev": 0.0}, {"giorno": "21 Ve", "cons": 0.0, "prev": 0.0}, {"giorno": "22 Sa", "cons": 0.0, "prev": 0.0}, {"giorno": "23 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "24 Lu", "cons": 0.0, "prev": 848.0}, {"giorno": "25 Ma", "cons": 0.0, "prev": 709.0}, {"giorno": "26 Me", "cons": 0.0, "prev": 402.0}, {"giorno": "27 Gi", "cons": 0.0, "prev": 502.0}, {"giorno": "28 Ve", "cons": 0.0, "prev": 535.0}, {"giorno": "29 Sa", "cons": 0.0, "prev": 114.0}, {"giorno": "30 Do", "cons": 0.0, "prev": 0.0}, {"giorno": "31 Lu", "cons": 0.0, "prev": 808.0}], "home_data": {"old": "13.400", "cons": "", "prev_txt": "7.854", "prev_style": "bg-yellow"}}};
     const mesiOrdine = ["SET", "OTT", "NOV", "DIC", "GEN", "FEB", "MAR", "APR", "MAG", "GIU", "LUG", "AGO"];
     let viewIndex = 12; 
+    let currentAudio = null;
+    const audioUrl = "https://sebastiano-mazzarisi.github.io/Test/Sintesi.mp3";
 
-    // AUTO REFRESH SU MOBILE
-    document.addEventListener("visibilitychange", function() {
-        if (!document.hidden) window.location.reload();
-    });
+    // --- SCREENSAVER LOGIC ---
+    const homeValues = [
+        "299.772 €",
+        "141.108 €",
+        "334.851 €"
+    ];
+    let detailValues = ["0 €", "0 €", "0 €"];
+    const borderColors = ['#0d6efd', '#dc3545', '#ffc107']; 
+    
+    let valIndex = 2; 
+    let idleTimer;
+    let rotationInterval;
 
-    function playBeep() {
-        try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = 'sine';
-            osc.frequency.value = 220; 
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start();
-            gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.5);
-            setTimeout(() => osc.stop(), 500);
-        } catch(e) { }
+    function clearHighlights() {
+        ['label-h-0', 'label-h-1', 'label-h-2'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.style.borderColor = 'transparent';
+        });
+        ['label-d-0', 'label-d-1', 'label-d-2'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.style.borderColor = 'transparent';
+        });
     }
+
+    function applyHighlight(labelId, colorIndex) {
+        const el = document.getElementById(labelId);
+        if(el) {
+            el.style.border = "4px solid " + borderColors[colorIndex];
+        }
+    }
+
+    function showValue(index) {
+        clearHighlights();
+        const isHome = (document.getElementById('view-home').style.display !== 'none');
+        
+        if (isHome) {
+            applyHighlight('label-h-' + index, index);
+            const disp = document.getElementById('home-total-display');
+            if(disp) {
+                disp.style.opacity = 0;
+                setTimeout(() => {
+                    disp.innerText = homeValues[index];
+                    disp.style.opacity = 1;
+                }, 500);
+            }
+        } else {
+            applyHighlight('label-d-' + index, index);
+            const disp = document.getElementById('detail-total-display');
+            if(disp) {
+                disp.style.opacity = 0;
+                setTimeout(() => {
+                    disp.innerText = detailValues[index];
+                    disp.style.opacity = 1;
+                }, 500);
+            }
+        }
+    }
+
+    function nextScreen() {
+        valIndex = (valIndex + 1) % 3;
+        showValue(valIndex);
+    }
+
+    function startScreensaver() {
+        nextScreen();
+        rotationInterval = setInterval(nextScreen, 10000); 
+    }
+
+    function resetIdle() {
+        clearInterval(rotationInterval);
+        rotationInterval = null;
+        clearTimeout(idleTimer);
+        
+        // Reset to default state (Index 2 - Previsto)
+        valIndex = 2;
+        
+        // Applica stato default IMMEDIATAMENTE (fix richiesto)
+        clearHighlights();
+        const isHome = (document.getElementById('view-home').style.display !== 'none');
+        
+        if (isHome) {
+            applyHighlight('label-h-2', 2);
+            const d = document.getElementById('home-total-display');
+            if(d) { d.style.opacity = 1; d.innerText = homeValues[2]; }
+        } else {
+            applyHighlight('label-d-2', 2);
+            const d = document.getElementById('detail-total-display');
+            if(d) { d.style.opacity = 1; d.innerText = detailValues[2]; }
+        }
+        
+        idleTimer = setTimeout(startScreensaver, 10000);
+    }
+
+    // --- AUDIO ---
+    function toggleAudio() {
+        if (!currentAudio) {
+            currentAudio = new Audio(audioUrl);
+        }
+        if (!currentAudio.paused) {
+            currentAudio.pause();
+        } else {
+            if (currentAudio.currentTime > 0) {
+                currentAudio.currentTime = Math.max(0, currentAudio.currentTime - 1);
+            }
+            currentAudio.play();
+        }
+        resetIdle();
+    }
+
+    // EVENTS
+    ['mousemove', 'mousedown', 'touchstart', 'click', 'keydown', 'scroll'].forEach(evt => 
+        document.addEventListener(evt, resetIdle)
+    );
 
     document.addEventListener('keydown', function(event) {
         if (event.key === 'ArrowLeft') changeView(-1);
@@ -250,10 +298,8 @@
         else if (event.key === 'Escape') showHome();
     });
 
-    // GESTIONE TOUCH / SWIPE
     let touchStartX = 0;
     let touchStartY = 0;
-
     document.addEventListener('touchstart', function(e) {
         touchStartX = e.changedTouches[0].screenX;
         touchStartY = e.changedTouches[0].screenY;
@@ -268,20 +314,21 @@
     function handleGesture(sX, sY, eX, eY) {
         let xDiff = eX - sX;
         let yDiff = eY - sY;
-
         if (Math.abs(xDiff) > Math.abs(yDiff)) {
             if (Math.abs(xDiff) > 50) {
-                if (xDiff > 0) changeView(-1); // Destra -> Indietro
-                else changeView(1); // Sinistra -> Avanti
+                if (xDiff > 0) changeView(-1);
+                else changeView(1);
             }
         } else {
-            // Swipe Basso -> Refresh (solo se in cima)
-            if (yDiff > 100 && window.scrollY === 0) {
-                window.location.reload();
-            }
+            if (yDiff > 100 && window.scrollY === 0) window.location.reload();
         }
     }
 
+    document.addEventListener("visibilitychange", function() {
+        if (!document.hidden) window.location.reload();
+    });
+
+    // --- VIEW ---
     const fmt = (n) => n > 0 ? Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "";
     const fmtFull = (n) => n >= 0 ? Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "0";
 
@@ -293,7 +340,6 @@
             const row = document.createElement('tr');
             row.className = 'clickable-row';
             row.onclick = () => { viewIndex = index; showDetail(mese); };
-            
             row.innerHTML = `
                 <td>${mese}</td>
                 <td class="bg-blue-light">${d.home_data.old}</td>
@@ -302,6 +348,7 @@
             `;
             tbody.appendChild(row);
         });
+        resetIdle();
     }
 
     function changeView(direction) {
@@ -309,13 +356,21 @@
         viewIndex = (viewIndex + direction + totalStates) % totalStates;
         if (viewIndex === mesiOrdine.length) { showHome(); playBeep(); } 
         else { showDetail(mesiOrdine[viewIndex]); }
+        resetIdle();
     }
 
     function showDetail(mese) {
         viewIndex = mesiOrdine.indexOf(mese);
         const d = dati[mese];
         document.getElementById('detail-title').innerText = d.nome_esteso.toUpperCase();
-        document.getElementById('detail-total').innerText = fmtFull(d.tot_full) + ' €';
+        
+        detailValues = [
+            fmtFull(d.tot_24_25) + ' €',
+            fmtFull(d.tot_cons) + ' €',
+            fmtFull(d.tot_full) + ' €'
+        ];
+        
+        document.getElementById('detail-total-display').innerText = detailValues[2]; 
         
         const maxVal = Math.max(d.tot_24_25, d.tot_full) || 1;
         const pOld = (d.tot_24_25 / maxVal) * 100;
@@ -324,17 +379,17 @@
 
         document.getElementById('detail-chart').innerHTML = `
             <div class="bar-row">
-                <span class="bar-label">2024-25</span>
+                <div class="bar-label-container"><span class="bar-label-text" id="label-d-0">2024-25</span></div>
                 <div class="progress"><div class="progress-bar bg-primary" style="width: ${pOld}%"></div></div>
                 <span class="bar-value">${fmtFull(d.tot_24_25)} €</span>
             </div>
             <div class="bar-row">
-                <span class="bar-label">2025-26</span>
+                <div class="bar-label-container"><span class="bar-label-text" id="label-d-1">2025-26</span></div>
                 <div class="progress"><div class="progress-bar bg-danger" style="width: ${pCons}%"></div></div>
                 <span class="bar-value">${fmtFull(d.tot_cons)} €</span>
             </div>
             <div class="bar-row">
-                <span class="bar-label">Previsto</span>
+                <div class="bar-label-container"><span class="bar-label-text" id="label-d-2">Previsto</span></div>
                 <div class="progress"><div class="progress-bar bg-warning" style="width: ${pFull}%"></div></div>
                 <span class="bar-value">${fmtFull(d.tot_full)} €</span>
             </div>
@@ -367,6 +422,7 @@
         document.getElementById('view-home').style.display = 'none';
         document.getElementById('view-detail').style.display = 'block';
         window.scrollTo(0,0);
+        resetIdle();
     }
 
     function showHome() {
@@ -376,6 +432,5 @@
 
     initHome();
 </script>
-
 </body>
 </html>
