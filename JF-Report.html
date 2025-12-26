@@ -36,11 +36,9 @@
         .chart-section { padding: 25px 20px; }
         .bar-row { display: flex; align-items: center; margin-bottom: 18px; font-size: 1.2rem; }
         
-        /* STYLE FIX: Container per allineare, Text per bordo */
         .bar-label-container { width: 120px; flex-shrink: 0; text-align: center; }
         .bar-label-text {
             font-weight: 700; color: #000 !important; font-size: 1.3rem; 
-            /* Bordo default trasparente */
             border: 4px solid transparent; 
             border-radius: 4px; padding: 2px 5px; 
             display: inline-block;
@@ -188,19 +186,25 @@
     let currentAudio = null;
     const audioUrl = "https://sebastiano-mazzarisi.github.io/Test/Sintesi.mp3";
     
-    // --- TRACKING FUNZ ---
+    // --- TRACKING FUNZ (Admin Aware) ---
     const BASE_API = "https://countapi.mileshilliard.com/api/v1";
     const NAMESPACE = "joyfit-stats-v1";
+    
     function trackVisit(pageKey) {
+        // Controllo se l'URL contiene ?admin=1
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('admin') === '1') {
+            console.log("Admin mode: Tracking disabled for " + pageKey);
+            return;
+        }
+        
+        // Se NON è admin, invia il hit
         fetch(`${BASE_API}/hit/${NAMESPACE}_${pageKey}`, { mode: 'cors' })
         .then(r => console.log('Hit sent:', pageKey))
         .catch(e => console.log('Hit error:', e));
     }
 
     // --- SCREENSAVER LOGIC ---
-    // Ordine: Giallo (Previsto/Start) -> Blu (24-25) -> Rosso (25-26)
-    // Valori Index: 0=Previsto, 1=Old, 2=Cons
-    
     const homeValues = [
         "334.851 €", // 0: Previsto (Yellow)
         "299.772 €",      // 1: Old (Blue)
@@ -208,13 +212,11 @@
     ];
     let detailValues = ["0 €", "0 €", "0 €"];
     
-    // Mappa Index -> ID Label Element 
-    // Nel grafico: 0=24-25(Blu), 1=25-26(Rosso), 2=Previsto(Giallo)
-    // Rotazione (valIndex): 0(Prev/Giallo) -> 1(Old/Blu) -> 2(Cons/Rosso)
+    // 0=Giallo, 1=Blu, 2=Rosso
     const mapValIndexToLabelId = [2, 0, 1];
-    const textColors = ['#d97706', '#0d6efd', '#dc3545']; // Giallo, Blu, Rosso
+    const textColors = ['#d97706', '#0d6efd', '#dc3545']; 
     
-    let valIndex = 0; // Start at 0 (Yellow/Previsto)
+    let valIndex = 0; 
     let idleTimer;
     let rotationInterval;
 
@@ -233,7 +235,6 @@
         const labelId = 'label-' + labelSuffix + '-' + mapValIndexToLabelId[colorIndex];
         const el = document.getElementById(labelId);
         if(el) {
-            // Bordo semplice (solid) sul testo inline-block -> No spazio vuoto
             el.style.border = "4px solid " + textColors[colorIndex];
         }
     }
@@ -273,13 +274,12 @@
         rotationInterval = null;
         clearTimeout(idleTimer);
         
-        // Reset to default (Previsto = index 0)
         valIndex = 0;
         clearHighlights();
         
         const isHome = (document.getElementById('view-home').style.display !== 'none');
         const suffix = isHome ? 'h' : 'd';
-        applyHighlight(suffix, 0); // Evidenzia Giallo subito
+        applyHighlight(suffix, 0); 
         
         const targetId = isHome ? 'home-total-display' : 'detail-total-display';
         const disp = document.getElementById(targetId);
@@ -309,7 +309,6 @@
         resetIdle();
     }
 
-    // EVENTS
     ['mousemove', 'mousedown', 'touchstart', 'click', 'keydown', 'scroll'].forEach(evt => 
         document.addEventListener(evt, resetIdle)
     );
@@ -350,7 +349,6 @@
         if (!document.hidden) window.location.reload();
     });
 
-    // --- VIEW ---
     const fmt = (n) => n > 0 ? Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "";
     const fmtFull = (n) => n >= 0 ? Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "0";
 
