@@ -29,6 +29,9 @@
         .header-blue { background-color: #1a3b5c; color: white; padding: 15px 10px; display: flex; justify-content: space-between; align-items: center; height: 80px; }
         .header-title { font-size: 2.6rem; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
         
+        .btn-home { color: white; font-size: 2rem; text-decoration: none; cursor: pointer; margin-left: 10px; }
+        .btn-audio { color: white; font-size: 2rem; text-decoration: none; cursor: pointer; margin-right: 10px; }
+        
         .nav-arrow { color: white; font-size: 2.5rem; cursor: pointer; font-weight: bold; padding: 0 15px; user-select: none; }
         
         .total-box { background: #fff; padding: 30px 20px; text-align: center; border-bottom: 1px solid #eee; }
@@ -129,7 +132,9 @@
                     <h1 class="header-title" style="margin:0; text-align:center; flex-grow:1; white-space:nowrap;">INCASSI</h1>
                     <div class="nav-arrow" onclick="changeView(1)">&#10095;</div>
                 </div>
-                <div style="width:50px; text-align:center"></div>
+                <div style="width:50px; text-align:center">
+                    <a href="https://sebastiano-mazzarisi.github.io/Test/Sintesi.mp3" target="_blank" class="btn-audio" title="Ascolta Sintesi">📢</a>
+                </div>
             </div>
             <div class="total-box">
                 <div class="total-amount">334.851 €</div>
@@ -187,7 +192,9 @@
                     <h1 class="header-title" id="detail-title" style="margin:0; text-align:center; flex-grow:1; white-space:nowrap;">MESE</h1>
                     <div class="nav-arrow" onclick="changeView(1)">&#10095;</div>
                 </div>
-                <div style="width:50px; text-align:center;"></div>
+                <div style="width:50px; text-align:center;">
+                    <a href="https://sebastiano-mazzarisi.github.io/Test/Sintesi.mp3" target="_blank" class="btn-audio" title="Ascolta Sintesi">📢</a>
+                </div>
             </div>
             <div class="total-box">
                 <div class="total-amount" id="detail-total">0 €</div>
@@ -262,19 +269,13 @@
         let xDiff = eX - sX;
         let yDiff = eY - sY;
 
-        // Se lo spostamento orizzontale è maggiore di quello verticale e significativo (>50px)
         if (Math.abs(xDiff) > Math.abs(yDiff)) {
             if (Math.abs(xDiff) > 50) {
-                if (xDiff > 0) {
-                    // Swipe Destra -> Indietro
-                    changeView(-1);
-                } else {
-                    // Swipe Sinistra -> Avanti
-                    changeView(1);
-                }
+                if (xDiff > 0) changeView(-1); // Destra -> Indietro
+                else changeView(1); // Sinistra -> Avanti
             }
         } else {
-            // Gestione Swipe Verticale (Basso) per Refresh
+            // Swipe Basso -> Refresh (solo se in cima)
             if (yDiff > 100 && window.scrollY === 0) {
                 window.location.reload();
             }
