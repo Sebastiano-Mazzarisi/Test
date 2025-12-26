@@ -12,6 +12,7 @@
     <style>
         body { background-color: #cfd8dc; font-family: -apple-system, sans-serif; font-size: 26px; padding: 10px 0; color: #111827; }
         .main-wrapper { width: 94%; max-width: 600px; margin: 0 auto; }
+        
         .card-box { 
             background: white; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); 
             overflow: hidden; margin-bottom: 20px; border: 1px solid black; transform: translateZ(0); 
@@ -19,23 +20,33 @@
         }
         .header-blue { background-color: #1a3b5c; color: white; padding: 15px 10px; display: flex; justify-content: space-between; align-items: center; height: 80px; }
         .header-title { font-size: 2.6rem; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
+        
         .btn-home { color: white; font-size: 2rem; text-decoration: none; cursor: pointer; margin-left: 10px; }
         .btn-audio { color: white; font-size: 2rem; text-decoration: none; cursor: pointer; margin-right: 10px; }
         .nav-arrow { color: white; font-size: 2.5rem; cursor: pointer; font-weight: bold; padding: 0 15px; user-select: none; }
+        
         .total-box { background: #fff; padding: 30px 20px; text-align: center; border-bottom: 1px solid #eee; }
+        
+        /* Scritta grossa con animazione colore e fade */
         .total-amount { 
-            font-size: 4.8rem; font-weight: 900; color: #b91c1c; line-height: 1; margin: 0;
-            transition: opacity 1s ease-in-out; opacity: 1;
+            font-size: 4.8rem; font-weight: 900; 
+            /* Start color: Yellow (Previsto) */
+            color: #d97706; 
+            line-height: 1; margin: 0;
+            transition: opacity 1s ease-in-out, color 1s ease-in-out;
+            opacity: 1;
         }
+        
         .chart-section { padding: 25px 20px; }
         .bar-row { display: flex; align-items: center; margin-bottom: 18px; font-size: 1.2rem; }
         
-        .bar-label-container { width: 120px; flex-shrink: 0; text-align: center; }
-        .bar-label-text {
+        /* Etichetta grafico PULITA (No bordi) */
+        .bar-label { 
+            width: 120px; 
             font-weight: 700; color: #000 !important; font-size: 1.3rem; 
-            border: 4px solid transparent; border-radius: 4px; padding: 2px 5px; 
-            display: inline-block;
+            flex-shrink: 0; 
         }
+        
         .bar-value { width: 140px; text-align: right; font-weight: 800; color: #000 !important; font-size: 1.3rem; flex-shrink: 0; }
         .progress { flex-grow: 1; height: 26px; margin: 0 15px; border-radius: 8px; width: 40%; }
         
@@ -67,8 +78,7 @@
             .table-custom td { padding: 8px 2px !important; font-size: 1.4rem; }
             .table-custom th { padding: 8px 2px !important; }
             .total-amount { font-size: 3.8rem; }
-            .bar-label-text { font-size: 1.1rem; }
-            .bar-label-container { width: 90px; }
+            .bar-label { width: 90px; font-size: 1.1rem; }
             .bar-value { width: 120px; font-size: 1.2rem; }
             .header-title { font-size: 2.2rem; }
             .text-pct-small { font-size: 0.9rem !important; }
@@ -95,17 +105,17 @@
             </div>
             <div class="chart-section">
                 <div class="bar-row">
-                    <div class="bar-label-container"><span class="bar-label-text" id="label-h-0">2024-25</span></div>
+                    <span class="bar-label">2024-25</span>
                     <div class="progress"><div class="progress-bar bg-primary" style="width: 89.52399724056372%"></div></div>
                     <span class="bar-value">299.772 €</span>
                 </div>
                 <div class="bar-row">
-                    <div class="bar-label-container"><span class="bar-label-text" id="label-h-1">2025-26</span></div>
+                    <span class="bar-label">2025-26</span>
                     <div class="progress"><div class="progress-bar bg-danger" style="width: 42.140534148024045%"></div></div>
                     <span class="bar-value">141.108 €</span>
                 </div>
                 <div class="bar-row">
-                    <div class="bar-label-container"><span class="bar-label-text" id="label-h-2">Previsto</span></div>
+                    <span class="bar-label">Previsto</span>
                     <div class="progress"><div class="progress-bar bg-warning" style="width: 100.0%"></div></div>
                     <span class="bar-value">334.851 €</span>
                 </div>
@@ -179,60 +189,40 @@
     const audioUrl = "https://sebastiano-mazzarisi.github.io/Test/Sintesi.mp3";
 
     // --- SCREENSAVER LOGIC ---
-    const homeValues = [
-        "299.772 €",
-        "141.108 €",
-        "334.851 €"
-    ];
-    let detailValues = ["0 €", "0 €", "0 €"];
-    const borderColors = ['#0d6efd', '#dc3545', '#ffc107']; 
+    // Ordine Richiesto: Giallo (Previsto) -> Blu (24-25) -> Rosso (25-26)
     
-    let valIndex = 2; 
+    // HOME DATA
+    const homeValues = [
+        "334.851 €", // Index 0: Previsto
+        "299.772 €",      // Index 1: Old
+        "141.108 €"  // Index 2: Cons
+    ];
+    
+    // DETTAGLIO DATA (Placeholders)
+    let detailValues = ["0 €", "0 €", "0 €"];
+    
+    // COLORI TESTO: Giallo Scuro -> Blu -> Rosso
+    const textColors = ['#d97706', '#0d6efd', '#dc3545']; 
+    
+    let valIndex = 0; // Default: 0 (Previsto/Giallo)
     let idleTimer;
     let rotationInterval;
 
-    function clearHighlights() {
-        ['label-h-0', 'label-h-1', 'label-h-2'].forEach(id => {
-            const el = document.getElementById(id);
-            if(el) el.style.borderColor = 'transparent';
-        });
-        ['label-d-0', 'label-d-1', 'label-d-2'].forEach(id => {
-            const el = document.getElementById(id);
-            if(el) el.style.borderColor = 'transparent';
-        });
-    }
-
-    function applyHighlight(labelId, colorIndex) {
-        const el = document.getElementById(labelId);
-        if(el) {
-            el.style.border = "4px solid " + borderColors[colorIndex];
-        }
-    }
-
     function showValue(index) {
-        clearHighlights();
         const isHome = (document.getElementById('view-home').style.display !== 'none');
+        const targetId = isHome ? 'home-total-display' : 'detail-total-display';
+        const disp = document.getElementById(targetId);
         
-        if (isHome) {
-            applyHighlight('label-h-' + index, index);
-            const disp = document.getElementById('home-total-display');
-            if(disp) {
-                disp.style.opacity = 0;
-                setTimeout(() => {
-                    disp.innerText = homeValues[index];
-                    disp.style.opacity = 1;
-                }, 500);
-            }
-        } else {
-            applyHighlight('label-d-' + index, index);
-            const disp = document.getElementById('detail-total-display');
-            if(disp) {
-                disp.style.opacity = 0;
-                setTimeout(() => {
-                    disp.innerText = detailValues[index];
-                    disp.style.opacity = 1;
-                }, 500);
-            }
+        if(disp) {
+            // Fade Out
+            disp.style.opacity = 0;
+            setTimeout(() => {
+                // Change Content & Color
+                disp.innerText = isHome ? homeValues[index] : detailValues[index];
+                disp.style.color = textColors[index];
+                // Fade In
+                disp.style.opacity = 1;
+            }, 500);
         }
     }
 
@@ -243,7 +233,7 @@
 
     function startScreensaver() {
         nextScreen();
-        rotationInterval = setInterval(nextScreen, 10000); 
+        rotationInterval = setInterval(nextScreen, 10000); // 10s change
     }
 
     function resetIdle() {
@@ -251,24 +241,20 @@
         rotationInterval = null;
         clearTimeout(idleTimer);
         
-        // Reset to default state (Index 2 - Previsto)
-        valIndex = 2;
+        // Reset to default (Previsto = index 0)
+        valIndex = 0;
         
-        // Applica stato default IMMEDIATAMENTE (fix richiesto)
-        clearHighlights();
         const isHome = (document.getElementById('view-home').style.display !== 'none');
+        const targetId = isHome ? 'home-total-display' : 'detail-total-display';
+        const disp = document.getElementById(targetId);
         
-        if (isHome) {
-            applyHighlight('label-h-2', 2);
-            const d = document.getElementById('home-total-display');
-            if(d) { d.style.opacity = 1; d.innerText = homeValues[2]; }
-        } else {
-            applyHighlight('label-d-2', 2);
-            const d = document.getElementById('detail-total-display');
-            if(d) { d.style.opacity = 1; d.innerText = detailValues[2]; }
+        if(disp) {
+            disp.style.opacity = 1;
+            disp.innerText = isHome ? homeValues[0] : detailValues[0];
+            disp.style.color = textColors[0]; // Reset to Yellow
         }
         
-        idleTimer = setTimeout(startScreensaver, 10000);
+        idleTimer = setTimeout(startScreensaver, 10000); // 10s wait
     }
 
     // --- AUDIO ---
@@ -328,7 +314,7 @@
         if (!document.hidden) window.location.reload();
     });
 
-    // --- VIEW ---
+    // --- VIEW LOGIC ---
     const fmt = (n) => n > 0 ? Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "";
     const fmtFull = (n) => n >= 0 ? Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "0";
 
@@ -364,13 +350,16 @@
         const d = dati[mese];
         document.getElementById('detail-title').innerText = d.nome_esteso.toUpperCase();
         
+        // Ordine: Previsto (Yellow), Old (Blue), Cons (Red)
         detailValues = [
+            fmtFull(d.tot_full) + ' €',
             fmtFull(d.tot_24_25) + ' €',
-            fmtFull(d.tot_cons) + ' €',
-            fmtFull(d.tot_full) + ' €'
+            fmtFull(d.tot_cons) + ' €'
         ];
         
-        document.getElementById('detail-total-display').innerText = detailValues[2]; 
+        const disp = document.getElementById('detail-total-display');
+        disp.innerText = detailValues[0];
+        disp.style.color = textColors[0];
         
         const maxVal = Math.max(d.tot_24_25, d.tot_full) || 1;
         const pOld = (d.tot_24_25 / maxVal) * 100;
@@ -379,17 +368,17 @@
 
         document.getElementById('detail-chart').innerHTML = `
             <div class="bar-row">
-                <div class="bar-label-container"><span class="bar-label-text" id="label-d-0">2024-25</span></div>
+                <span class="bar-label">2024-25</span>
                 <div class="progress"><div class="progress-bar bg-primary" style="width: ${pOld}%"></div></div>
                 <span class="bar-value">${fmtFull(d.tot_24_25)} €</span>
             </div>
             <div class="bar-row">
-                <div class="bar-label-container"><span class="bar-label-text" id="label-d-1">2025-26</span></div>
+                <span class="bar-label">2025-26</span>
                 <div class="progress"><div class="progress-bar bg-danger" style="width: ${pCons}%"></div></div>
                 <span class="bar-value">${fmtFull(d.tot_cons)} €</span>
             </div>
             <div class="bar-row">
-                <div class="bar-label-container"><span class="bar-label-text" id="label-d-2">Previsto</span></div>
+                <span class="bar-label">Previsto</span>
                 <div class="progress"><div class="progress-bar bg-warning" style="width: ${pFull}%"></div></div>
                 <span class="bar-value">${fmtFull(d.tot_full)} €</span>
             </div>
