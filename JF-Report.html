@@ -20,31 +20,30 @@
         }
         .header-blue { background-color: #1a3b5c; color: white; padding: 15px 10px; display: flex; justify-content: space-between; align-items: center; height: 80px; }
         .header-title { font-size: 2.6rem; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
-        
         .btn-home { color: white; font-size: 2rem; text-decoration: none; cursor: pointer; margin-left: 10px; }
         .btn-audio { color: white; font-size: 2rem; text-decoration: none; cursor: pointer; margin-right: 10px; }
         .nav-arrow { color: white; font-size: 2.5rem; cursor: pointer; font-weight: bold; padding: 0 15px; user-select: none; }
-        
         .total-box { background: #fff; padding: 30px 20px; text-align: center; border-bottom: 1px solid #eee; }
         
-        /* Scritta grossa con animazione colore e fade */
         .total-amount { 
             font-size: 4.8rem; font-weight: 900; 
-            /* Start color: Yellow (Previsto) */
-            color: #d97706; 
+            color: #d97706; /* Giallo Start */
             line-height: 1; margin: 0;
-            transition: opacity 1s ease-in-out, color 1s ease-in-out;
+            transition: opacity 1s ease-in-out, color 1s ease-in-out; 
             opacity: 1;
         }
         
         .chart-section { padding: 25px 20px; }
         .bar-row { display: flex; align-items: center; margin-bottom: 18px; font-size: 1.2rem; }
         
-        /* Etichetta grafico PULITA (No bordi) */
-        .bar-label { 
-            width: 120px; 
+        /* STYLE FIX: Container per allineare, Text per bordo */
+        .bar-label-container { width: 120px; flex-shrink: 0; text-align: center; }
+        .bar-label-text {
             font-weight: 700; color: #000 !important; font-size: 1.3rem; 
-            flex-shrink: 0; 
+            /* Bordo default trasparente */
+            border: 4px solid transparent; 
+            border-radius: 4px; padding: 2px 5px; 
+            display: inline-block;
         }
         
         .bar-value { width: 140px; text-align: right; font-weight: 800; color: #000 !important; font-size: 1.3rem; flex-shrink: 0; }
@@ -78,7 +77,8 @@
             .table-custom td { padding: 8px 2px !important; font-size: 1.4rem; }
             .table-custom th { padding: 8px 2px !important; }
             .total-amount { font-size: 3.8rem; }
-            .bar-label { width: 90px; font-size: 1.1rem; }
+            .bar-label-container { width: 90px; }
+            .bar-label-text { font-size: 1.1rem; }
             .bar-value { width: 120px; font-size: 1.2rem; }
             .header-title { font-size: 2.2rem; }
             .text-pct-small { font-size: 0.9rem !important; }
@@ -105,17 +105,17 @@
             </div>
             <div class="chart-section">
                 <div class="bar-row">
-                    <span class="bar-label">2024-25</span>
+                    <div class="bar-label-container"><span class="bar-label-text" id="label-h-0">2024-25</span></div>
                     <div class="progress"><div class="progress-bar bg-primary" style="width: 89.52399724056372%"></div></div>
                     <span class="bar-value">299.772 €</span>
                 </div>
                 <div class="bar-row">
-                    <span class="bar-label">2025-26</span>
+                    <div class="bar-label-container"><span class="bar-label-text" id="label-h-1">2025-26</span></div>
                     <div class="progress"><div class="progress-bar bg-danger" style="width: 42.140534148024045%"></div></div>
                     <span class="bar-value">141.108 €</span>
                 </div>
                 <div class="bar-row">
-                    <span class="bar-label">Previsto</span>
+                    <div class="bar-label-container"><span class="bar-label-text" id="label-h-2">Previsto</span></div>
                     <div class="progress"><div class="progress-bar bg-warning" style="width: 100.0%"></div></div>
                     <span class="bar-value">334.851 €</span>
                 </div>
@@ -187,40 +187,72 @@
     let viewIndex = 12; 
     let currentAudio = null;
     const audioUrl = "https://sebastiano-mazzarisi.github.io/Test/Sintesi.mp3";
+    
+    // --- TRACKING FUNZ ---
+    const BASE_API = "https://countapi.mileshilliard.com/api/v1";
+    const NAMESPACE = "joyfit-stats-v1";
+    function trackVisit(pageKey) {
+        fetch(`${BASE_API}/hit/${NAMESPACE}_${pageKey}`, { mode: 'cors' })
+        .then(r => console.log('Hit sent:', pageKey))
+        .catch(e => console.log('Hit error:', e));
+    }
 
     // --- SCREENSAVER LOGIC ---
-    // Ordine Richiesto: Giallo (Previsto) -> Blu (24-25) -> Rosso (25-26)
+    // Ordine: Giallo (Previsto/Start) -> Blu (24-25) -> Rosso (25-26)
+    // Valori Index: 0=Previsto, 1=Old, 2=Cons
     
-    // HOME DATA
     const homeValues = [
-        "334.851 €", // Index 0: Previsto
-        "299.772 €",      // Index 1: Old
-        "141.108 €"  // Index 2: Cons
+        "334.851 €", // 0: Previsto (Yellow)
+        "299.772 €",      // 1: Old (Blue)
+        "141.108 €"  // 2: Cons (Red)
     ];
-    
-    // DETTAGLIO DATA (Placeholders)
     let detailValues = ["0 €", "0 €", "0 €"];
     
-    // COLORI TESTO: Giallo Scuro -> Blu -> Rosso
-    const textColors = ['#d97706', '#0d6efd', '#dc3545']; 
+    // Mappa Index -> ID Label Element 
+    // Nel grafico: 0=24-25(Blu), 1=25-26(Rosso), 2=Previsto(Giallo)
+    // Rotazione (valIndex): 0(Prev/Giallo) -> 1(Old/Blu) -> 2(Cons/Rosso)
+    const mapValIndexToLabelId = [2, 0, 1];
+    const textColors = ['#d97706', '#0d6efd', '#dc3545']; // Giallo, Blu, Rosso
     
-    let valIndex = 0; // Default: 0 (Previsto/Giallo)
+    let valIndex = 0; // Start at 0 (Yellow/Previsto)
     let idleTimer;
     let rotationInterval;
 
+    function clearHighlights() {
+        ['label-h-0', 'label-h-1', 'label-h-2'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.style.borderColor = 'transparent';
+        });
+        ['label-d-0', 'label-d-1', 'label-d-2'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.style.borderColor = 'transparent';
+        });
+    }
+
+    function applyHighlight(labelSuffix, colorIndex) {
+        const labelId = 'label-' + labelSuffix + '-' + mapValIndexToLabelId[colorIndex];
+        const el = document.getElementById(labelId);
+        if(el) {
+            // Bordo semplice (solid) sul testo inline-block -> No spazio vuoto
+            el.style.border = "4px solid " + textColors[colorIndex];
+        }
+    }
+
     function showValue(index) {
+        clearHighlights();
         const isHome = (document.getElementById('view-home').style.display !== 'none');
+        
+        const suffix = isHome ? 'h' : 'd';
+        applyHighlight(suffix, index);
+        
         const targetId = isHome ? 'home-total-display' : 'detail-total-display';
         const disp = document.getElementById(targetId);
         
         if(disp) {
-            // Fade Out
             disp.style.opacity = 0;
             setTimeout(() => {
-                // Change Content & Color
                 disp.innerText = isHome ? homeValues[index] : detailValues[index];
                 disp.style.color = textColors[index];
-                // Fade In
                 disp.style.opacity = 1;
             }, 500);
         }
@@ -233,7 +265,7 @@
 
     function startScreensaver() {
         nextScreen();
-        rotationInterval = setInterval(nextScreen, 10000); // 10s change
+        rotationInterval = setInterval(nextScreen, 10000); 
     }
 
     function resetIdle() {
@@ -243,18 +275,22 @@
         
         // Reset to default (Previsto = index 0)
         valIndex = 0;
+        clearHighlights();
         
         const isHome = (document.getElementById('view-home').style.display !== 'none');
+        const suffix = isHome ? 'h' : 'd';
+        applyHighlight(suffix, 0); // Evidenzia Giallo subito
+        
         const targetId = isHome ? 'home-total-display' : 'detail-total-display';
         const disp = document.getElementById(targetId);
         
         if(disp) {
             disp.style.opacity = 1;
             disp.innerText = isHome ? homeValues[0] : detailValues[0];
-            disp.style.color = textColors[0]; // Reset to Yellow
+            disp.style.color = textColors[0];
         }
         
-        idleTimer = setTimeout(startScreensaver, 10000); // 10s wait
+        idleTimer = setTimeout(startScreensaver, 10000); 
     }
 
     // --- AUDIO ---
@@ -314,7 +350,7 @@
         if (!document.hidden) window.location.reload();
     });
 
-    // --- VIEW LOGIC ---
+    // --- VIEW ---
     const fmt = (n) => n > 0 ? Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "";
     const fmtFull = (n) => n >= 0 ? Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "0";
 
@@ -334,6 +370,7 @@
             `;
             tbody.appendChild(row);
         });
+        trackVisit('report_home');
         resetIdle();
     }
 
@@ -350,7 +387,8 @@
         const d = dati[mese];
         document.getElementById('detail-title').innerText = d.nome_esteso.toUpperCase();
         
-        // Ordine: Previsto (Yellow), Old (Blue), Cons (Red)
+        trackVisit('report_' + mese);
+        
         detailValues = [
             fmtFull(d.tot_full) + ' €',
             fmtFull(d.tot_24_25) + ' €',
@@ -368,17 +406,17 @@
 
         document.getElementById('detail-chart').innerHTML = `
             <div class="bar-row">
-                <span class="bar-label">2024-25</span>
+                <div class="bar-label-container"><span class="bar-label-text" id="label-d-0">2024-25</span></div>
                 <div class="progress"><div class="progress-bar bg-primary" style="width: ${pOld}%"></div></div>
                 <span class="bar-value">${fmtFull(d.tot_24_25)} €</span>
             </div>
             <div class="bar-row">
-                <span class="bar-label">2025-26</span>
+                <div class="bar-label-container"><span class="bar-label-text" id="label-d-1">2025-26</span></div>
                 <div class="progress"><div class="progress-bar bg-danger" style="width: ${pCons}%"></div></div>
                 <span class="bar-value">${fmtFull(d.tot_cons)} €</span>
             </div>
             <div class="bar-row">
-                <span class="bar-label">Previsto</span>
+                <div class="bar-label-container"><span class="bar-label-text" id="label-d-2">Previsto</span></div>
                 <div class="progress"><div class="progress-bar bg-warning" style="width: ${pFull}%"></div></div>
                 <span class="bar-value">${fmtFull(d.tot_full)} €</span>
             </div>
