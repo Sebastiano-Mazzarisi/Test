@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+<title>Monitor Report</title>
+<style>
+  :root{ --ink: #0f172a; --bg: #e9edf5; --blue: #2563eb; --rad: 12px; --danger: #dc2626; }
+  * { box-sizing: border-box; }
+  body{ margin: 0; padding: 10px; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--ink); font-size: 24px; display: flex; justify-content: center; }
+  .box{ background: #fff; border-radius: var(--rad); padding: 15px; width: 100%; max-width: 800px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+  h1{ text-align: center; color: #1F497D; margin: 5px 0; font-size: 1.5em; text-transform: uppercase; }
+  table{ width: 100%; border-collapse: collapse; margin-top: 10px; }
+  th, td{ padding: 8px; border-bottom: 1px solid #f1f5f9; text-align: left; }
+  th{ background: #f8fafc; color: #64748b; font-size: 0.7em; text-transform: uppercase; }
+  .num{ font-weight: 700; color: var(--blue); float: right; }
+  .btn-reset{ background: #fff; border: 2px solid var(--danger); color: var(--danger); border-radius: 8px; cursor: pointer; padding: 2px 10px; font-weight: 700; font-size: 0.8em; float: right;}
+  .btn-reset:hover{ background: var(--danger); color: #fff; }
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>📊 Monitor Report</h1>
+  <table id="tbl">
+    <thead><tr><th>Pagina</th><th>Visite</th><th>Reset</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+<script>
+const NAMESPACE = "joyfit-stats-v1"; 
+const BASE_URL = "https://countapi.mileshilliard.com/api/v1";
+
+const PAGES = [
+  { id: 'report_home', name: "🏠 Home Report" },
+  { id: 'report_SET', name: "Settembre" },
+  { id: 'report_OTT', name: "Ottobre" },
+  { id: 'report_NOV', name: "Novembre" },
+  { id: 'report_DIC', name: "Dicembre" },
+  { id: 'report_GEN', name: "Gennaio" },
+  { id: 'report_FEB', name: "Febbraio" },
+  { id: 'report_MAR', name: "Marzo" },
+  { id: 'report_APR', name: "Aprile" },
+  { id: 'report_MAG', name: "Maggio" },
+  { id: 'report_GIU', name: "Giugno" },
+  { id: 'report_LUG', name: "Luglio" },
+  { id: 'report_AGO', name: "Agosto" }
+];
+
+async function loadCounts() {
+    const tbody = document.querySelector("#tbl tbody");
+    let html = "";
+    for(let p of PAGES) {
+        let val = 0;
+        try {
+            let res = await fetch(`${BASE_URL}/get/${NAMESPACE}_${p.id}`);
+            let data = await res.json();
+            val = data.value || 0;
+        } catch(e){}
+        
+        html += `<tr>
+            <td>${p.name}</td>
+            <td><span class="num">${val}</span></td>
+            <td><button class="btn-reset" onclick="resetCount('${p.id}')">X</button></td>
+        </tr>`;
+    }
+    tbody.innerHTML = html;
+}
+
+async function resetCount(id) {
+    if(!confirm("Azzerare?")) return;
+    await fetch(`${BASE_URL}/set/${NAMESPACE}_${id}?value=0`);
+    loadCounts();
+}
+
+loadCounts();
+setInterval(loadCounts, 5000);
+</script>
+</body>
+</html>
