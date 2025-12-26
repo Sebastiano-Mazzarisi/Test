@@ -8,9 +8,20 @@
     <style>
         body { background-color: #cfd8dc; font-family: -apple-system, sans-serif; font-size: 26px; padding: 10px 0; color: #111827; }
         
-        .main-wrapper { width: 99%; max-width: 600px; margin: 0 auto; }
+        /* Width 94% per margini laterali */
+        .main-wrapper { width: 94%; max-width: 600px; margin: 0 auto; }
         
-        .card-box { background: white; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); overflow: hidden; margin-bottom: 20px; }
+        /* CARD BOX: Bordo nero esterno che definisce la curva */
+        .card-box { 
+            background: white; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15); 
+            overflow: hidden; 
+            margin-bottom: 20px; 
+            border: 1px solid black; /* Cornice esterna nera */
+            transform: translateZ(0); /* Fix render */
+        }
+        
         .header-blue { background-color: #1a3b5c; color: white; padding: 15px 10px; display: flex; justify-content: space-between; align-items: center; height: 80px; }
         .header-title { font-size: 2.6rem; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
         .btn-print { color: white; font-size: 2.2rem; text-decoration: none; cursor: pointer; margin-right: 10px; }
@@ -28,9 +39,14 @@
         .progress { flex-grow: 1; height: 26px; margin: 0 15px; border-radius: 8px; width: 40%; }
         
         /* STILI TABELLA */
-        .table-custom { width: 100%; border-collapse: collapse; }
+        .table-custom { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin: 0; 
+            border-style: hidden; /* Nasconde il bordo quadrato esterno della tabella */
+        }
         
-        /* 1) Griglia nera sottile */
+        /* Griglia NERA sottile OVUNQUE */
         .table-custom th, .table-custom td {
             border: 1px solid black !important; 
         }
@@ -40,17 +56,19 @@
             background: #e5e7eb; 
             color: #000 !important; 
             text-align: center !important; 
-            padding: 12px; font-size: 1.3rem; 
+            padding: 8px; /* Padding richiesto */
+            font-size: 1.1rem;
+            font-weight: normal !important; 
         }
         
-        /* 2) Valori normali (no bold) */
+        /* Celle Dati */
         .table-custom td { 
-            padding: 12px 8px; 
-            font-size: 1.9rem; 
-            font-weight: normal; /* Normal weight */
-            text-align: right; 
+            padding: 8px; /* Padding richiesto */
+            font-size: 1.6rem; 
+            font-weight: normal !important; 
+            text-align: center !important; 
+            line-height: 1.1;
         }
-        .table-custom td:first-child { text-align: left; font-weight: 600; /* Lascio bold solo il nome mese/giorno per leggibilità */ }
         
         .table-custom tr.clickable-row { cursor: pointer; transition: background 0.1s; }
         .table-custom tr.clickable-row:active { background-color: #dbeafe; }
@@ -61,12 +79,11 @@
         
         .text-pct-small { 
             color: #000 !important; 
-            font-size: 1.2rem !important; 
-            font-weight: 700; 
+            font-size: 1rem !important; 
+            font-weight: normal !important; 
         }
         .text-gray { color: #9ca3af; }
         
-        /* 3) Footer Data: Piccolo, normale, centrato */
         .footer-note { 
             font-size: 1rem; 
             color: #111827; 
@@ -76,18 +93,30 @@
             font-weight: normal; 
         }
         
-        /* Stile Cornice per righe vuote e totali */
-        .row-empty td { background-color: #e9ecef; border: 1px solid black !important; }
-        .row-total td, tfoot td { background-color: #d1d5db; font-weight: 900 !important; border: 1px solid black !important; }
+        /* Righe Vuote: Sfondo Grigio, Griglia NERA (ereditata), Cornice BIANCA per distinzione */
+        .row-empty td { 
+            background-color: #e9ecef; 
+            border: 3px solid white !important; /* Mantenuta cornice bianca SOLO per vuoti */
+        }
+        
+        /* Totali: Sfondo Grigio scuro, Griglia NERA, Font Bold */
+        .row-total td, tfoot td { 
+            background-color: #d1d5db; 
+            font-weight: 900 !important; 
+            border: 1px solid black !important;
+        }
+        
+        /* Spacer Fondo Pagina */
+        .bottom-spacer { height: 60px; width: 100%; }
         
         @media (max-width: 480px) {
-            .table-custom td, .table-custom th { padding: 8px 1px !important; }
+            .table-custom td { padding: 8px 2px !important; font-size: 1.4rem; }
+            .table-custom th { padding: 8px 2px !important; }
             .total-amount { font-size: 3.8rem; }
             .bar-label { width: 90px; font-size: 1.1rem; }
             .bar-value { width: 120px; font-size: 1.2rem; }
-            .table-custom td { font-size: 1.5rem; }
             .header-title { font-size: 2.2rem; }
-            .text-pct-small { font-size: 1rem !important; }
+            .text-pct-small { font-size: 0.9rem !important; }
         }
     </style>
 </head>
@@ -138,9 +167,9 @@
                 <tfoot>
                     <tr class="row-total">
                         <td>Totali</td>
-                        <td style="text-align:right">299.772</td>
-                        <td style="text-align:right; color:#b91c1c">141.108</td>
-                        <td style="text-align:right; color:#854d0e">193.743</td>
+                        <td>299.772</td>
+                        <td style="color:#b91c1c">141.108</td>
+                        <td style="color:#854d0e">193.743</td>
                     </tr>
                 </tfoot>
             </table>
@@ -181,6 +210,8 @@
             </table>
         </div>
     </div>
+    
+    <div class="bottom-spacer"></div>
 </div>
 
 <script>
@@ -222,7 +253,7 @@
             row.onclick = () => { viewIndex = index; showDetail(mese); };
             
             row.innerHTML = `
-                <td style="font-weight:600">${mese}</td>
+                <td>${mese}</td>
                 <td class="bg-blue-light">${d.home_data.old}</td>
                 <td class="${d.home_data.cons ? 'bg-red-light' : 'text-gray'}">${d.home_data.cons}</td>
                 <td class="${d.home_data.prev_style}">${d.home_data.prev_txt}</td>
@@ -274,7 +305,7 @@
                 const r = document.createElement('tr');
                 if (day.cons == 0 && day.prev == 0) r.className = 'row-empty';
                 r.innerHTML = `
-                    <td class="col-giorno" style="font-weight:600">${day.giorno}</td>
+                    <td class="col-giorno">${day.giorno}</td>
                     <td class="col-val ${day.cons ? 'bg-red-light' : ''}">${fmt(day.cons)}</td>
                     <td class="col-val ${day.prev ? 'bg-yellow' : ''}">${fmt(day.prev)}</td>
                 `;
