@@ -5,250 +5,84 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
 <title>Monitor Report</title>
 <style>
-  :root{ 
-    --ink: #0f172a; 
-    --bg: #e9edf5; 
-    --blue: #2563eb; 
-    --rad: 12px; 
-    --danger: #dc2626; 
-    --danger-dark: #b91c1c;
-  }
-  
+  :root{ --ink: #0f172a; --bg: #e9edf5; --blue: #2563eb; --rad: 12px; --danger: #dc2626; --danger-dark: #b91c1c; }
   * { box-sizing: border-box; }
-
-  body{ 
-    margin: 0; 
-    padding: 10px; 
-    font-family: 'Segoe UI', sans-serif; 
-    background: var(--bg); 
-    color: var(--ink); 
-    font-size: 20px; 
-    display: flex; 
-    justify-content: center; 
-  }
-
-  .box{ 
-    background: #fff; 
-    border-radius: var(--rad); 
-    padding: 20px; 
-    width: 100%; 
-    max-width: 600px; 
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-  }
-
-  h1{ 
-    text-align: center; 
-    color: #1F497D; 
-    margin: 5px 0 20px 0; 
-    font-size: 1.5em; 
-    text-transform: uppercase; 
-  }
+  body{ margin: 0; padding: 10px; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--ink); font-size: 20px; display: flex; justify-content: center; }
+  .box{ background: #fff; border-radius: var(--rad); padding: 20px; width: 100%; max-width: 600px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+  h1{ text-align: center; color: #1F497D; margin: 5px 0 20px 0; font-size: 1.5em; text-transform: uppercase; }
   
-  /* STILE DEL PULSANTE "AZZERA TUTTO" */
-  .btn-reset-all { 
-      display: block; 
-      width: 100%; 
-      padding: 15px; 
-      margin-bottom: 20px;
-      background-color: var(--danger); 
-      color: white; 
-      border: none;
-      border-radius: 8px; 
-      cursor: pointer; 
-      font-weight: 800; 
-      font-size: 1rem;
-      text-transform: uppercase; 
-      letter-spacing: 1px;
-      box-shadow: 0 4px 6px rgba(220, 38, 38, 0.3);
-      transition: background 0.2s;
-  }
-  
-  .btn-reset-all:hover { 
-      background-color: var(--danger-dark); 
-  }
-  
-  .btn-reset-all:active {
-      transform: translateY(2px);
-  }
-  
-  .btn-reset-all:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-  }
+  .btn-reset-all { display: block; width: 100%; padding: 15px; margin-bottom: 20px; background-color: var(--danger); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 800; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 6px rgba(220, 38, 38, 0.3); transition: background 0.2s; }
+  .btn-reset-all:hover { background-color: var(--danger-dark); }
+  .btn-reset-all:active { transform: translateY(2px); }
 
-  table{ 
-    width: 100%; 
-    border-collapse: collapse; 
-  }
-
-  th, td{ 
-    padding: 12px 8px; 
-    border-bottom: 1px solid #f1f5f9; 
-    text-align: left; 
-  }
-
-  th{ 
-    background: #f8fafc; 
-    color: #64748b; 
-    font-size: 0.75em; 
-    text-transform: uppercase; 
-  }
+  table{ width: 100%; border-collapse: collapse; }
+  th, td{ padding: 12px 8px; border-bottom: 1px solid #f1f5f9; text-align: left; }
+  th{ background: #f8fafc; color: #64748b; font-size: 0.75em; text-transform: uppercase; }
   
-  .num{ 
-    font-weight: 800; 
-    color: var(--blue); 
-    float: right; 
-    font-size: 1.1em;
-  }
+  .num{ font-weight: 800; color: var(--blue); float: right; font-size: 1.1em; }
   
-  /* Pulsante Reset Singolo (X) */
-  .btn-reset { 
-      background: #fff; 
-      border: 2px solid #e2e8f0; 
-      color: #94a3b8; 
-      border-radius: 6px; 
-      cursor: pointer; 
-      padding: 4px 12px; 
-      font-weight: 700; 
-      font-size: 0.8em; 
-      float: right;
-      transition: all 0.2s;
-  }
-  
-  .btn-reset:hover { 
-      background: var(--danger); 
-      color: #fff; 
-      border-color: var(--danger); 
-  }
-
+  .btn-reset { background: #fff; border: 2px solid #e2e8f0; color: #94a3b8; border-radius: 6px; cursor: pointer; padding: 4px 12px; font-weight: 700; font-size: 0.8em; float: right; transition: all 0.2s; }
+  .btn-reset:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
 </style>
 </head>
 <body>
-
 <div class="box">
   <h1>📊 Monitor Report</h1>
-  
   <button class="btn-reset-all" onclick="resetAllCounts()">🗑️ AZZERA TUTTO</button>
-
   <table id="tbl">
-    <thead>
-        <tr>
-            <th width="50%">Pagina</th>
-            <th width="30%" style="text-align:right">Visite</th>
-            <th width="20%"></th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr><td colspan="3" style="text-align:center; padding:20px;">Caricamento...</td></tr>
-    </tbody>
+    <thead><tr><th width="50%">Pagina</th><th width="30%" style="text-align:right">Visite</th><th width="20%"></th></tr></thead>
+    <tbody><tr><td colspan="3" style="text-align:center; padding:20px;">Caricamento...</td></tr></tbody>
   </table>
 </div>
-
 <script>
-// CONFIGURAZIONE
 const NAMESPACE = "joyfit-stats-v1"; 
 const BASE_URL = "https://countapi.mileshilliard.com/api/v1";
-
-// Elenco Pagine (Deve corrispondere esattamente alle chiavi generate dallo script Python)
 const PAGES = [
   { id: 'report_home', name: "🏠 Home Report" },
-  { id: 'report_SET', name: "Settembre" },
-  { id: 'report_OTT', name: "Ottobre" },
-  { id: 'report_NOV', name: "Novembre" },
-  { id: 'report_DIC', name: "Dicembre" },
-  { id: 'report_GEN', name: "Gennaio" },
-  { id: 'report_FEB', name: "Febbraio" },
-  { id: 'report_MAR', name: "Marzo" },
-  { id: 'report_APR', name: "Aprile" },
-  { id: 'report_MAG', name: "Maggio" },
-  { id: 'report_GIU', name: "Giugno" },
-  { id: 'report_LUG', name: "Luglio" },
-  { id: 'report_AGO', name: "Agosto" }
+  { id: 'report_SET', name: "Settembre" }, { id: 'report_OTT', name: "Ottobre" }, { id: 'report_NOV', name: "Novembre" },
+  { id: 'report_DIC', name: "Dicembre" }, { id: 'report_GEN', name: "Gennaio" }, { id: 'report_FEB', name: "Febbraio" },
+  { id: 'report_MAR', name: "Marzo" }, { id: 'report_APR', name: "Aprile" }, { id: 'report_MAG', name: "Maggio" },
+  { id: 'report_GIU', name: "Giugno" }, { id: 'report_LUG', name: "Luglio" }, { id: 'report_AGO', name: "Agosto" }
 ];
 
-// Caricamento Dati
 async function loadCounts() {
     const tbody = document.querySelector("#tbl tbody");
     let html = "";
-    
-    // Recupera dati in parallelo per velocità
     const promises = PAGES.map(async p => {
         let val = 0;
         try {
             let res = await fetch(`${BASE_URL}/get/${NAMESPACE}_${p.id}`);
             let data = await res.json();
             val = data.value || 0;
-        } catch(e){ 
-            // Se la chiave non esiste (errore 404), il valore è 0
-            val = 0; 
-        }
+        } catch(e){}
         return { ...p, val };
     });
-
     const results = await Promise.all(promises);
-
     for(let item of results) {
-        // Evidenzia visivamente le righe che hanno visite (>0)
         const rowStyle = item.val > 0 ? "background-color:#f0f9ff;" : "";
         const numStyle = item.val > 0 ? "color:#0d6efd;" : "color:#ccc;";
         const btnStyle = item.val > 0 ? "border-color:#dc2626; color:#dc2626;" : "";
-        
-        html += `<tr style="${rowStyle}">
-            <td>${item.name}</td>
-            <td><span class="num" style="${numStyle}">${item.val}</span></td>
-            <td><button class="btn-reset" style="${btnStyle}" onclick="resetCount('${item.id}')" title="Azzera">X</button></td>
-        </tr>`;
+        html += `<tr style="${rowStyle}"><td>${item.name}</td><td><span class="num" style="${numStyle}">${item.val}</span></td><td><button class="btn-reset" style="${btnStyle}" onclick="resetCount('${item.id}')">X</button></td></tr>`;
     }
     tbody.innerHTML = html;
 }
 
-// Reset Singolo
 async function resetCount(id) {
     if(!confirm("Vuoi azzerare questo contatore?")) return;
-    try {
-        await fetch(`${BASE_URL}/set/${NAMESPACE}_${id}?value=0`);
-        loadCounts();
-    } catch(e) { alert("Errore connessione"); }
+    try { await fetch(`${BASE_URL}/set/${NAMESPACE}_${id}?value=0`); loadCounts(); } catch(e) { alert("Errore connessione"); }
 }
 
-// *** FUNZIONE DI RESET TOTALE ***
 async function resetAllCounts() {
     if(!confirm("ATTENZIONE: Stai per cancellare TUTTI i dati delle visite.\n\nSei sicuro?")) return;
-    
-    // Feedback visivo immediato per l'utente
     const btn = document.querySelector(".btn-reset-all");
     const originalText = btn.innerText;
-    btn.innerText = "⏳ CANCELLAZIONE IN CORSO...";
+    btn.innerText = "⏳ CANCELLAZIONE...";
     btn.disabled = true;
-    
-    // Crea array di promesse per azzerare ogni chiave in parallelo
-    const promises = PAGES.map(p => 
-        fetch(`${BASE_URL}/set/${NAMESPACE}_${p.id}?value=0`).catch(e => e)
-    );
-    
-    try {
-        // Attende che TUTTE le richieste siano finite
-        await Promise.all(promises);
-        
-        // Ricarica la tabella
-        await loadCounts();
-        
-    } catch (e) { 
-        alert("Qualcosa è andato storto. Controlla la connessione."); 
-        loadCounts(); 
-    } finally {
-        // Ripristina bottone
-        btn.innerText = originalText;
-        btn.disabled = false;
-    }
+    const promises = PAGES.map(p => fetch(`${BASE_URL}/set/${NAMESPACE}_${p.id}?value=0`).catch(e => e));
+    try { await Promise.all(promises); await loadCounts(); } catch (e) { alert("Errore"); loadCounts(); } finally { btn.innerText = originalText; btn.disabled = false; }
 }
-
-// Avvio iniziale
 loadCounts();
-
-// Refresh automatico ogni 5 secondi per vedere i dati entrare
 setInterval(loadCounts, 5000);
-
 </script>
 </body>
 </html>
