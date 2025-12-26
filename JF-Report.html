@@ -29,7 +29,6 @@
         .header-blue { background-color: #1a3b5c; color: white; padding: 15px 10px; display: flex; justify-content: space-between; align-items: center; height: 80px; }
         .header-title { font-size: 2.6rem; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
         
-        .btn-home { color: white; font-size: 2rem; text-decoration: none; cursor: pointer; margin-left: 10px; }
         .nav-arrow { color: white; font-size: 2.5rem; cursor: pointer; font-weight: bold; padding: 0 15px; user-select: none; }
         
         .total-box { background: #fff; padding: 30px 20px; text-align: center; border-bottom: 1px solid #eee; }
@@ -48,10 +47,8 @@
             width: 100%; 
             border-collapse: collapse; 
             margin: 0; 
-            /* border-style: hidden; <--- RIMOSSO per permettere al bordo inferiore di vedersi */
         }
         
-        /* 1) Griglia NERA sottile (1px) OVUNQUE */
         .table-custom th, .table-custom td {
             border: 1px solid black !important; 
         }
@@ -96,16 +93,14 @@
             font-weight: normal; 
         }
         
-        /* Righe Vuote: Sfondo Grigio, Bordo Nero ereditato */
         .row-empty td { 
             background-color: #e9ecef; 
         }
         
-        /* Totali: Sfondo Grigio scuro, Bordo Nero ereditato, Font Bold */
-        /* FIX: Aggiunto border-bottom esplicito per l'ultima riga */
+        /* Totali: Bordo inferiore esplicito */
         .row-total td, tfoot td { 
             background-color: #d1d5db; 
-            font-weight: 900 !important;
+            font-weight: 900 !important; 
             border-bottom: 1px solid black !important;
         }
         
@@ -129,7 +124,11 @@
         <div class="card-box">
             <div class="header-blue">
                 <div style="width:50px"></div>
-                <div style="flex-grow:1; text-align:center"><h1 class="header-title">INCASSI</h1></div>
+                <div style="flex-grow:1; display:flex; justify-content:space-between; align-items:center; padding: 0 5px;">
+                    <div class="nav-arrow" onclick="changeView(-1)">&#10094;</div>
+                    <h1 class="header-title" style="margin:0; text-align:center; flex-grow:1; white-space:nowrap;">INCASSI</h1>
+                    <div class="nav-arrow" onclick="changeView(1)">&#10095;</div>
+                </div>
                 <div style="width:50px; text-align:center"></div>
             </div>
             <div class="total-box">
@@ -183,9 +182,9 @@
                 <div style="width:50px; text-align:center;">
                     <a href="#" onclick="showHome(); return false;" class="btn-home" title="Home">🏠</a>
                 </div>
-                <div style="flex-grow:1; display:flex; justify-content:center; align-items:center;">
+                <div style="flex-grow:1; display:flex; justify-content:space-between; align-items:center; padding: 0 5px;">
                     <div class="nav-arrow" onclick="changeView(-1)">&#10094;</div>
-                    <h1 class="header-title" id="detail-title" style="margin:0 10px;">MESE</h1>
+                    <h1 class="header-title" id="detail-title" style="margin:0; text-align:center; flex-grow:1; white-space:nowrap;">MESE</h1>
                     <div class="nav-arrow" onclick="changeView(1)">&#10095;</div>
                 </div>
                 <div style="width:50px; text-align:center;"></div>
@@ -243,6 +242,44 @@
         else if (event.key === 'ArrowRight') changeView(1);
         else if (event.key === 'Escape') showHome();
     });
+
+    // GESTIONE TOUCH / SWIPE
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    document.addEventListener('touchstart', function(e) {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+    }, {passive: false});
+
+    document.addEventListener('touchend', function(e) {
+        let touchEndX = e.changedTouches[0].screenX;
+        let touchEndY = e.changedTouches[0].screenY;
+        handleGesture(touchStartX, touchStartY, touchEndX, touchEndY);
+    }, {passive: false});
+
+    function handleGesture(sX, sY, eX, eY) {
+        let xDiff = eX - sX;
+        let yDiff = eY - sY;
+
+        // Se lo spostamento orizzontale è maggiore di quello verticale e significativo (>50px)
+        if (Math.abs(xDiff) > Math.abs(yDiff)) {
+            if (Math.abs(xDiff) > 50) {
+                if (xDiff > 0) {
+                    // Swipe Destra -> Indietro
+                    changeView(-1);
+                } else {
+                    // Swipe Sinistra -> Avanti
+                    changeView(1);
+                }
+            }
+        } else {
+            // Gestione Swipe Verticale (Basso) per Refresh
+            if (yDiff > 100 && window.scrollY === 0) {
+                window.location.reload();
+            }
+        }
+    }
 
     const fmt = (n) => n > 0 ? Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "";
     const fmtFull = (n) => n >= 0 ? Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "0";
