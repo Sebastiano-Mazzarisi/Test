@@ -11,16 +11,16 @@
     <style>
         body { background-color: #cfd8dc; font-family: -apple-system, sans-serif; font-size: 26px; padding: 10px 0; color: #111827; }
         
-        /* STILE MAIN-WRAPPER CON CORNICE NERA */
+        /* CORNICE BLU */
         .main-wrapper { 
             width: 94%; 
             max-width: 600px; 
             margin: 0 auto;
-            border: 6px solid #000;  /* CORNICE NERA */
-            border-radius: 20px;     /* Angoli cornice */
-            padding: 10px;           /* Spazio interno cornice */
+            border: 6px solid #0d6efd; /* BLU DECISO */
+            border-radius: 20px;
+            padding: 10px;
             background-color: #cfd8dc; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5); /* Ombra per stacco */
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
         
         .card-box { background: white; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); overflow: hidden; margin-bottom: 20px; border: 1px solid black; transform: translateZ(0); padding-bottom: 1px; }
@@ -67,7 +67,6 @@
         .row-total td, tfoot td { background-color: #d1d5db; font-weight: 900 !important; border-bottom: 1px solid black !important; }
         .bottom-spacer { height: 60px; width: 100%; }
         
-        /* STILI VISTA GIORNO & GLOBAL */
         .day-header { display: flex; justify-content: space-between; align-items: center; width: 100%; }
         .day-stats-row { display: flex; justify-content: space-between; padding: 10px 20px; font-size: 1.2rem; border-bottom: 1px solid #ddd; }
         .day-stats-label { font-weight: bold; color: #555; }
@@ -77,14 +76,21 @@
         .col-nom { text-align: left !important; padding-left: 10px !important; font-size: 1.3rem !important; font-weight: normal !important; }
         .col-imp { text-align: right !important; padding-right: 10px !important; color: #b91c1c !important; font-weight: normal !important; }
         .col-data { font-size: 0.9rem !important; color: #555; width: 110px; }
-        
         .col-att { text-align: left !important; padding-left: 10px !important; font-size: 1.1rem !important; color: #555; font-weight: normal !important; }
+        
+        /* CENTRATURA FORZATA PER TUTTE LE TABELLE (ANAGRAFICA, CLIENTI E GIORNO) */
+        #view-global .col-nom, #view-global .col-imp, #view-global .col-data,
+        #view-customer .col-att, #view-customer .col-imp, #view-customer .col-data,
+        #view-day .col-nom, #view-day .col-imp {
+            text-align: center !important;
+            padding-left: 5px !important;
+            padding-right: 5px !important;
+        }
         
         .row-month-change td { border-top: 3px solid #94a3b8 !important; background-color: #f3f4f6 !important; }
         .th-sortable { cursor: pointer; user-select: none; }
         .sort-icon { color: red; margin-right: 5px; font-size: 0.8em; display: none; }
         
-        /* SEARCH BOX */
         .search-container { padding: 15px; display: flex; align-items: center; justify-content: center; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
         .search-wrapper { position: relative; width: 100%; max-width: 400px; }
         .search-input { width: 100%; padding: 10px 15px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 1.1rem; padding-right: 40px; outline: none; transition: border-color 0.2s; }
@@ -94,7 +100,6 @@
 
         .name-link { cursor: pointer; color: #1a3b5c; text-decoration: underline; }
         
-        /* STYLE PER DUPLICATI */
         .dupe-box { margin: 15px 20px; padding: 15px; background: #fff7ed; border: 1px solid #ffedd5; border-radius: 8px; }
         .dupe-title { font-size: 1rem; font-weight: bold; color: #c2410c; margin-bottom: 8px; text-transform: uppercase; }
         .dupe-item { display: inline-block; background: white; padding: 5px 10px; margin: 3px; border-radius: 15px; border: 1px solid #fdba74; color: #9a3412; font-size: 0.95rem; cursor: pointer; }
@@ -115,10 +120,9 @@
             .col-nom { font-size: 1.1rem !important; }
             .col-imp { font-size: 0.9rem !important; }
             .col-data { width: 75px; font-size: 0.8rem !important; }
-            /* Mobile Activity Column */
             .col-att { font-size: 0.85rem !important; white-space: normal !important; line-height: 1.2; padding: 4px 2px !important; }
             
-            .main-wrapper { width: 98%; padding: 5px; border-width: 4px; } /* Cornice leggermente ridotta su mobile */
+            .main-wrapper { width: 98%; padding: 5px; border-width: 4px; }
         }
     </style>
 </head>
@@ -233,9 +237,9 @@
                 <tbody id="day-table-body"></tbody>
             </table>
             <div style="background:#fff; padding:10px 0;">
-                <div class="day-stats-row"><span class="day-stats-label">Totale cons. giorno:</span> <span class="day-stats-val" id="stats-day">0</span></div>
-                <div class="day-stats-row"><span class="day-stats-label">Totale cons. mese:</span> <span class="day-stats-val" id="stats-month">0</span></div>
-                <div class="day-stats-row"><span class="day-stats-label">Totale cons. anno:</span> <span class="day-stats-val" id="stats-year">0</span></div>
+                <div class="day-stats-row"><span class="day-stats-label">Totale consuntivo giorno:</span> <span class="day-stats-val" id="stats-day">0</span></div>
+                <div class="day-stats-row"><span class="day-stats-label">Totale consuntivo mese:</span> <span class="day-stats-val" id="stats-month">0</span></div>
+                <div class="day-stats-row"><span class="day-stats-label">Totale consuntivo anno:</span> <span class="day-stats-val" id="stats-year">0</span></div>
             </div>
         </div>
     </div>
@@ -347,7 +351,7 @@
     
     // NAVIGATION HISTORY & SCROLL STATE
     let lastView = 'view-home'; 
-    let globalScrollPos = 0; // VARIABILE PER MEMORIZZARE SCROLL ANAGRAFICA
+    let globalScrollPos = 0; 
 
     // STATI ORDINAMENTO
     let sortCol = 'nom'; let sortDir = 'asc'; 
@@ -455,11 +459,15 @@
 
     let touchStartX=0, touchStartY=0;
     document.addEventListener('touchstart', e => { touchStartX=e.changedTouches[0].screenX; touchStartY=e.changedTouches[0].screenY; }, {passive:false});
+    
+    // SWIPE SENZA RELOAD
     document.addEventListener('touchend', e => {
         let xDiff = e.changedTouches[0].screenX - touchStartX;
         let yDiff = e.changedTouches[0].screenY - touchStartY;
-        if (Math.abs(xDiff) > Math.abs(yDiff)) { if (Math.abs(xDiff)>50) changeView(xDiff>0 ? -1 : 1); }
-        else { if (yDiff > 100 && window.scrollY === 0) window.location.reload(); }
+        // Solo swipe orizzontale
+        if (Math.abs(xDiff) > Math.abs(yDiff)) { 
+            if (Math.abs(xDiff)>50) changeView(xDiff>0 ? -1 : 1); 
+        }
     }, {passive:false});
 
     function initHome() {
