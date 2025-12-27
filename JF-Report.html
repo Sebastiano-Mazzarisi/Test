@@ -18,7 +18,7 @@
             padding: 10px 0; 
             color: #111827; 
             overscroll-behavior-y: none; /* DISABILITA REFRESH/RIMBALZO NATIVO */
-            touch-action: pan-x; /* DISABILITA GESTURE VERTICALI (SWAP) */
+            /* SCROLL OK */
         }
         
         /* CORNICE RIMOSSA (FLAT DESIGN) */
@@ -394,17 +394,32 @@
     let idleTimer;
     let rotationInterval;
 
-    // --- FUNZIONE GENERAZIONE PDF GENERICO (Fit to Page) ---
+    // --- FUNZIONE GENERAZIONE PDF (Fit to Page, Auto Open, 50 LIMIT) ---
     async function printCurrentView() {
+        // CONTROLLO LIMITE ANAGRAFICA (50)
+        const views = ['view-home', 'view-detail', 'view-day', 'view-global', 'view-customer'];
+        let targetId = views.find(id => document.getElementById(id).style.display !== 'none');
+        
+        if (targetId === 'view-global') {
+            const searchTerm = document.getElementById('global-search').value.toLowerCase();
+            let filteredCount = 0;
+            if (searchTerm) {
+                filteredCount = dati.GLOBAL_LIST.filter(item => item.nome.toLowerCase().includes(searchTerm)).length;
+            } else {
+                filteredCount = dati.GLOBAL_LIST.length;
+            }
+            
+            if (filteredCount > 50) {
+                alert("Impossibile stampare: l'elenco contiene " + filteredCount + " nominativi (limite max: 50).\n\nFiltra l'elenco per proseguire.");
+                return;
+            }
+        }
+
         const { jsPDF } = window.jspdf;
         // Crea PDF A4 Verticale
         const doc = new jsPDF('p', 'mm', 'a4');
         
-        // Determina quale vista è attiva
-        const views = ['view-home', 'view-detail', 'view-day', 'view-global', 'view-customer'];
-        let targetId = views.find(id => document.getElementById(id).style.display !== 'none');
-        
-        if (!targetId) return; // Fallback
+        if (!targetId) return; 
         
         const element = document.getElementById(targetId);
         
@@ -412,10 +427,10 @@
         const canvas = await html2canvas(element, { scale: 2, useCORS: true });
         const imgData = canvas.toDataURL('image/png');
         
-        // Dimensioni A4 e Margini Rigorosi
+        // Dimensioni A4 e Margini Rigorosi (1.5cm = 15mm)
         const pageWidth = 210;
         const pageHeight = 297;
-        const margin = 15; // 1.5 cm = 15mm
+        const margin = 15; 
         const maxW = pageWidth - (margin * 2);  // 180mm
         const maxH = pageHeight - (margin * 2); // 267mm
         
@@ -423,28 +438,19 @@
         let pdfWidth = maxW;
         let pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
         
-        // Se l'altezza supera il foglio (meno i margini), ridimensiona tutto (Zoom Out)
+        // Zoom Out se necessario
         if (pdfHeight > maxH) {
             const scale = maxH / pdfHeight;
             pdfWidth = pdfWidth * scale;
             pdfHeight = pdfHeight * scale;
         }
         
-        // Centratura Orizzontale nel margine disponibile
+        // Centratura Orizzontale
         const xPos = margin + (maxW - pdfWidth) / 2;
-        const yPos = margin; // Margine superiore fisso 1.5cm
+        const yPos = margin; 
         
         doc.addImage(imgData, 'PNG', xPos, yPos, pdfWidth, pdfHeight);
         
-        // Nome File Dinamico
-        let filename = "Report.pdf";
-        if(targetId === 'view-home') filename = "Incassi_Home.pdf";
-        else if(targetId === 'view-detail') filename = "Dettaglio_Mese.pdf";
-        else if(targetId === 'view-day') filename = "Dettaglio_Giorno.pdf";
-        else if(targetId === 'view-global') filename = "Anagrafica.pdf";
-        else if(targetId === 'view-customer') filename = "Scheda_Cliente.pdf";
-
-        // Apri PDF in nuova scheda (blob) invece di forzare download
         const blob = doc.output('blob');
         window.open(URL.createObjectURL(blob), '_blank');
     }
@@ -510,7 +516,7 @@
     }
 
     ['mousemove', 'mousedown', 'touchstart', 'click', 'keydown', 'scroll'].forEach(evt => document.addEventListener(evt, resetIdle));
-    document.addEventListener("visibilitychange", function() { if (!document.hidden) window.location.reload(); });
+    
     document.addEventListener('keydown', function(event) {
         if (event.key === 'ArrowLeft') changeView(-1);
         else if (event.key === 'ArrowRight') changeView(1);
@@ -641,12 +647,10 @@
         activeIcon.innerHTML = (sortCol === 'nom') ? (sortDir === 'asc' ? '&#9660;' : '&#9650;') : (sortDir === 'desc' ? '&#9660;' : '&#9650;');
 
         transSorted.forEach((t, i) => {
-            // DUPLICATI IN BLU ANCHE QUI
             const isDupe = dati.DUPLICATES_MAP[t.nome] && dati.DUPLICATES_MAP[t.nome].length > 0;
             const colorStyle = isDupe ? "color: #0044cc !important; font-weight:bold;" : ""; 
 
             const r = document.createElement('tr');
-            // onclick su nome cliente -> Apre scheda cliente
             r.innerHTML = `<td class="col-idx">${i+1}</td><td class="col-nom name-link" style="${colorStyle}" onclick="showCustomer('${t.nome}')">${t.nome}</td><td class="col-imp">${fmt(t.imp)}</td>`;
             tbody.appendChild(r);
         });
@@ -685,10 +689,6 @@
         document.querySelectorAll('.main-wrapper > div').forEach(d => d.style.display = 'none');
         document.getElementById('view-global').style.display = 'block';
         lastView = 'view-global';
-        
-        // RESETTA SCROLL QUANDO SI ENTRA "DA ZERO" (es. dalla Home), 
-        window.scrollTo(0,0);
-
         gSortCol = 'nom'; gSortDir = 'asc'; globalSearchTerm = "";
         document.getElementById('global-search').value = "";
         renderGlobal();
@@ -745,13 +745,11 @@
             if (i > 0 && currentMonth !== lastMonth) rowClass = "row-month-change";
             lastMonth = currentMonth;
 
-            // --- CONTROLLO DUPLICATI ---
             const isDupe = dati.DUPLICATES_MAP[t.nome] && dati.DUPLICATES_MAP[t.nome].length > 0;
             const colorStyle = isDupe ? "color: #0044cc !important; font-weight:bold;" : ""; 
 
             const r = document.createElement('tr');
             if(rowClass) r.className = rowClass;
-            // onclick su nome cliente -> Apre scheda cliente
             r.innerHTML = `<td class="col-idx">${i+1}</td><td class="col-data">${t.last_date}</td><td class="col-nom name-link" style="${colorStyle}" onclick="showCustomer('${t.nome}')">${t.nome}</td><td class="col-imp">${fmt(t.imp)}</td>`;
             tbody.appendChild(r);
         });
@@ -794,18 +792,20 @@
         // RECUPERA TRANSAZIONI
         let transactions = dati.ALL_TRANSACTIONS.filter(t => t.nome === name);
         
-        // SORTING
+        // SORTING (FIXED ALGORITHM)
         transactions.sort((a, b) => {
             if (custSortCol === 'data') {
                 return (custSortDir === 'asc') ? (a.ts - b.ts) : (b.ts - a.ts);
             } else if (custSortCol === 'imp') {
                 return (custSortDir === 'asc') ? (a.imp - b.imp) : (b.imp - a.imp);
             } else if (custSortCol === 'att') {
-                let va = (a.att || "").toLowerCase(), vb = (b.att || "").toLowerCase();
-                if (va < vb) return (custSortDir === 'asc' ? -1 : 1);
-                if (va > vb) return (custSortDir === 'asc' ? 1 : -1);
+                const sA = (a.att || "").toString().toLowerCase();
+                const sB = (b.att || "").toString().toLowerCase();
+                if (sA < sB) return (custSortDir === 'asc' ? -1 : 1);
+                if (sA > sB) return (custSortDir === 'asc' ? 1 : -1);
                 return 0;
             }
+            return 0;
         });
         
         // ICONS
@@ -814,8 +814,8 @@
         activeIcon.style.display = 'inline';
         
         let arrow = '';
-        if (custSortCol === 'att') arrow = (custSortDir === 'asc') ? '&#9660;' : '&#9650;';
-        else arrow = (custSortDir === 'asc') ? '&#9650;' : '&#9660;';
+        if (custSortCol === 'att') arrow = (custSortDir === 'asc') ? '&#9660;' : '&#9650;'; // A-Z down
+        else arrow = (custSortDir === 'asc') ? '&#9650;' : '&#9660;'; // Numbers Asc Up
         activeIcon.innerHTML = arrow;
         
         const tbody = document.getElementById('cust-table-body');
@@ -837,17 +837,23 @@
         trackVisit('report_cust_detail');
     }
 
+    function changeCustSort(col) {
+        if (custSortCol === col) {
+             custSortDir = (custSortDir === 'asc') ? 'desc' : 'asc';
+        } else {
+            custSortCol = col;
+            custSortDir = 'asc'; 
+        }
+        showCustomer(currentCustName);
+    }
+
     function closeCustomer() {
         document.getElementById('view-customer').style.display = 'none';
         if(lastView && document.getElementById(lastView)) {
             document.getElementById(lastView).style.display = 'block';
             
-            // SE STIAMO TORNANDO ALLA VISTA GLOBAL, RIPRISTINIAMO LO SCROLL
             if (lastView === 'view-global') {
                  window.scrollTo(0, globalScrollPos);
-            } else {
-                 // Altrimenti scroll normale
-                 // (potremmo volerlo gestire anche per view-day, ma la richiesta specificava Anagrafica)
             }
             
         } else {
