@@ -10,17 +10,13 @@
   body{ margin: 0; padding: 10px; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--ink); font-size: 20px; display: flex; justify-content: center; }
   .box{ background: #fff; border-radius: var(--rad); padding: 20px; width: 100%; max-width: 600px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
   h1{ text-align: center; color: #1F497D; margin: 5px 0 20px 0; font-size: 1.5em; text-transform: uppercase; }
-  
   .btn-reset-all { display: block; width: 100%; padding: 15px; margin-bottom: 20px; background-color: var(--danger); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 800; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 6px rgba(220, 38, 38, 0.3); transition: background 0.2s; }
   .btn-reset-all:hover { background-color: var(--danger-dark); }
   .btn-reset-all:active { transform: translateY(2px); }
-
   table{ width: 100%; border-collapse: collapse; }
   th, td{ padding: 12px 8px; border-bottom: 1px solid #f1f5f9; text-align: left; }
   th{ background: #f8fafc; color: #64748b; font-size: 0.75em; text-transform: uppercase; }
-  
   .num{ font-weight: 800; color: var(--blue); float: right; font-size: 1.1em; }
-  
   .btn-reset { background: #fff; border: 2px solid #e2e8f0; color: #94a3b8; border-radius: 6px; cursor: pointer; padding: 4px 12px; font-weight: 700; font-size: 0.8em; float: right; transition: all 0.2s; }
   .btn-reset:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
 </style>
@@ -42,19 +38,16 @@ const PAGES = [
   { id: 'report_SET', name: "Settembre" }, { id: 'report_OTT', name: "Ottobre" }, { id: 'report_NOV', name: "Novembre" },
   { id: 'report_DIC', name: "Dicembre" }, { id: 'report_GEN', name: "Gennaio" }, { id: 'report_FEB', name: "Febbraio" },
   { id: 'report_MAR', name: "Marzo" }, { id: 'report_APR', name: "Aprile" }, { id: 'report_MAG', name: "Maggio" },
-  { id: 'report_GIU', name: "Giugno" }, { id: 'report_LUG', name: "Luglio" }, { id: 'report_AGO', name: "Agosto" }
+  { id: 'report_GIU', name: "Giugno" }, { id: 'report_LUG', name: "Luglio" }, { id: 'report_AGO', name: "Agosto" },
+  { id: 'report_global_list', name: "👤 Anagrafica" },
+  { id: 'report_cust_detail', name: "📋 Scheda Cliente" }
 ];
-
 async function loadCounts() {
     const tbody = document.querySelector("#tbl tbody");
     let html = "";
     const promises = PAGES.map(async p => {
         let val = 0;
-        try {
-            let res = await fetch(`${BASE_URL}/get/${NAMESPACE}_${p.id}`);
-            let data = await res.json();
-            val = data.value || 0;
-        } catch(e){}
+        try { let res = await fetch(`${BASE_URL}/get/${NAMESPACE}_${p.id}`); let data = await res.json(); val = data.value || 0; } catch(e){}
         return { ...p, val };
     });
     const results = await Promise.all(promises);
@@ -66,12 +59,10 @@ async function loadCounts() {
     }
     tbody.innerHTML = html;
 }
-
 async function resetCount(id) {
     if(!confirm("Vuoi azzerare questo contatore?")) return;
     try { await fetch(`${BASE_URL}/set/${NAMESPACE}_${id}?value=0`); loadCounts(); } catch(e) { alert("Errore connessione"); }
 }
-
 async function resetAllCounts() {
     if(!confirm("ATTENZIONE: Stai per cancellare TUTTI i dati delle visite.\n\nSei sicuro?")) return;
     const btn = document.querySelector(".btn-reset-all");
