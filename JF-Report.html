@@ -473,8 +473,14 @@
                 }
                 
                 doc.addImage(imgData, 'JPEG', margin + (maxW - pdfWidth) / 2, margin, pdfWidth, pdfHeight);
+                
+                // --- AZIONE DOPPIA ---
+                // 1. Salva con nome corretto (scarica)
                 doc.save(filename); 
-                window.open(doc.output('bloburl'), '_blank');
+                
+                // 2. Apre in nuova scheda per visualizzazione immediata (nome blob casuale)
+                const blobUrl = doc.output('bloburl');
+                window.open(blobUrl, '_blank');
 
             } catch (e) {
                 alert("Errore stampa: " + e);
@@ -782,6 +788,11 @@
     }
 
     function showCustomer(name) {
+        // FIX SCROLL: Se vengo dall'anagrafica, salvo la posizione attuale
+        if (document.getElementById('view-global').style.display !== 'none') {
+            globalScrollPos = window.scrollY;
+        }
+
         currentCustName = name;
         document.getElementById('cust-title').innerText = name;
         if(document.getElementById('view-customer').style.display === 'none') { custSortCol = 'data'; custSortDir = 'asc'; }
@@ -854,7 +865,8 @@
         if(lastView && document.getElementById(lastView)) {
             document.getElementById(lastView).style.display = 'block';
             if (lastView === 'view-global') {
-                 window.scrollTo(0, globalScrollPos);
+                 // FIX SCROLL: Ripristina la posizione dopo un breve ritardo per il rendering
+                 setTimeout(() => window.scrollTo(0, globalScrollPos), 10);
             }
         } else {
             showHome();
