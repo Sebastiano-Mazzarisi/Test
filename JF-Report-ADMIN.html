@@ -26,6 +26,16 @@
             display: none; flex-direction: column; justify-content: center; align-items: center;
             color: white; font-size: 2rem; font-weight: bold; text-align: center;
         }
+
+        #copy-toast {
+            position: fixed;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background-color: #e5e7eb; color: black;
+            padding: 15px 25px; border-radius: 8px;
+            font-weight: bold; font-size: 1.2rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            z-index: 20000; display: none;
+        }
         
         .popup-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -195,6 +205,8 @@
 <div id="loading-overlay">
     <div>Preparazione<br>PDF in corso</div>
 </div>
+
+<div id="copy-toast">Copiato!</div>
 
 <div id="info-popup" class="popup-overlay" onclick="if(event.target===this) closePopup()">
     <div class="popup-content">
@@ -381,8 +393,9 @@
     <div id="view-customer" style="display:none;">
         <div class="card-box">
             <div class="header-blue">
-                <div style="width:80px; text-align:center;">
+                <div style="width:100px; display:flex; justify-content:space-between; align-items:center; padding-right:10px;">
                     <div class="nav-arrow" onclick="closeCustomer()" title="Indietro">&#10094;</div>
+                    <span onclick="copyCustomerData()" class="btn-styled" title="Copia Appunti" style="font-size:1.5rem; padding:2px 8px; cursor:pointer;">📋</span>
                 </div>
                 <div style="flex-grow:1; text-align:center;">
                     <h1 class="header-title" id="cust-title" style="margin:0; font-size:1.8rem; white-space:normal;">CLIENTE</h1>
@@ -442,8 +455,11 @@
     let sortCol = 'nom'; let sortDir = 'asc'; 
     let gSortCol = 'nom'; let gSortDir = 'asc';
     let globalSearchTerm = "";
-    let custSortCol = 'data'; let custSortDir = 'asc'; 
+    
+    // CUSTOMER SORT VARS
+    let custSortCol = 'data'; let custSortDir = 'desc'; 
     let currentCustName = "";
+    let currentCustTransactions = []; 
     let monthSortCol = 'day'; let monthSortDir = 'asc'; 
 
     const BASE_API = "https://countapi.mileshilliard.com/api/v1";
@@ -789,7 +805,7 @@
         ['day', 'cons', 'prev'].forEach(k => document.getElementById('m-icon-'+k).style.display = 'none');
         const activeIcon = document.getElementById('m-icon-' + monthSortCol);
         activeIcon.style.display = 'inline';
-        activeIcon.innerHTML = (monthSortDir === 'asc') ? '&#9650;' : '&#9660;';
+        activeIcon.innerHTML = (monthSortDir === 'asc') ? '&#9660;' : '&#9650;';
 
         if(list.length > 0) {
             list.forEach(day => {
@@ -942,6 +958,21 @@
         });
     }
 
+    function changeCustSort(col) {
+        if (custSortCol === col) {
+            custSortDir = (custSortDir === 'asc') ? 'desc' : 'asc';
+        } else {
+            custSortCol = col;
+            // Default sort direction logic: 
+            // - Date: DESC (Newest first)
+            // - Imp: DESC (Highest first)
+            // - Att: ASC (A-Z)
+            if (col === 'data' || col === 'imp') custSortDir = 'desc';
+            else custSortDir = 'asc';
+        }
+        showCustomer(currentCustName);
+    }
+
     function showCustomer(name) {
         if (document.getElementById('view-global').style.display !== 'none') {
             globalScrollPos = window.scrollY;
@@ -949,7 +980,13 @@
 
         currentCustName = name;
         document.getElementById('cust-title').innerText = name;
-        if(document.getElementById('view-customer').style.display === 'none') { custSortCol = 'data'; custSortDir = 'asc'; }
+        
+        // Reset sort only if view was closed (actually standardizing on global vars is better)
+        if(document.getElementById('view-customer').style.display === 'none') { 
+            custSortCol = 'data'; 
+            custSortDir = 'desc'; 
+        }
+        
         const dupeList = dati.DUPLICATES_MAP[name];
         const dupeContainer = document.getElementById('cust-duplicates');
         const dupeListEl = document.getElementById('dupe-list');
@@ -966,7 +1003,9 @@
         } else {
             dupeContainer.style.display = 'none';
         }
+        
         let transactions = dati.ALL_TRANSACTIONS.filter(t => t.nome === name);
+        
         transactions.sort((a, b) => {
             if (custSortCol === 'data') {
                 return (custSortDir === 'asc') ? (a.ts - b.ts) : (b.ts - a.ts);
@@ -981,13 +1020,28 @@
             }
             return 0;
         });
+        
+        currentCustTransactions = transactions; 
+        
         ['data', 'att', 'imp'].forEach(k => document.getElementById('c-icon-'+k).style.display = 'none');
         const activeIcon = document.getElementById('c-icon-' + custSortCol);
-        activeIcon.style.display = 'inline';
-        let arrow = '';
-        if (custSortCol === 'att') arrow = (custSortDir === 'asc') ? '&#9660;' : '&#9650;'; 
-        else arrow = (custSortDir === 'asc') ? '&#9650;' : '&#9660;'; 
-        activeIcon.innerHTML = arrow;
+        if(activeIcon) {
+            activeIcon.style.display = 'inline';
+            let arrow = '';
+            // Visual feedback: usually up arrow = ascending (A-Z, 0-9), down = descending
+            if (custSortDir === 'asc') arrow = '&#9660;'; // Down (A at top, Z at bottom) - wait, conventional is small-to-large
+            else arrow = '&#9650;'; 
+            
+            // Actually, let's use standard convention:
+            // ASC (Small -> Large) = Up Triangle? Or Down?
+            // Let's stick to what we used in Global: 
+            // nom (ASC) = Down Arrow (A top, Z bottom)
+            if (custSortDir === 'asc') arrow = '&#9660;'; 
+            else arrow = '&#9650;'; 
+            
+            activeIcon.innerHTML = arrow;
+        }
+
         const tbody = document.getElementById('cust-table-body');
         tbody.innerHTML = '';
         let total = 0;
@@ -1002,6 +1056,36 @@
         document.getElementById('view-customer').style.display = 'block';
         window.scrollTo(0,0);
         trackVisit('report_cust_detail');
+    }
+    
+    function copyCustomerData() {
+        if (!currentCustTransactions || currentCustTransactions.length === 0) return;
+        
+        let totalVal = currentCustTransactions.reduce((acc, t) => acc + t.imp, 0);
+        let totalStr = fmt(totalVal);
+        
+        let text = currentCustName.toUpperCase() + " (" + totalStr + " €)\n";
+        text += "-----\n";
+        
+        currentCustTransactions.forEach(t => {
+            let attStr = t.att ? t.att : "...";
+            let impStr = fmt(t.imp);
+            text += `${t.date_str} ${attStr} (${impStr} €)\n`;
+        });
+        
+        text += "-----\n\n"; // DOUBLE NEWLINE AT END
+        
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById('copy-toast');
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 1000);
+            }).catch(err => {
+                alert("Errore copia.");
+            });
+        } else {
+            alert("Copia non supportata su questo browser.");
+        }
     }
 
     function closeCustomer() {
