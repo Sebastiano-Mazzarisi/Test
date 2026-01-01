@@ -33,6 +33,11 @@ tr.click:hover { background: #e0f2fe; }
 .note { color: #64748b; margin-top: 20px; text-align: center; }
 .num { text-align: right; }
 
+/* MODIFICA: Interlinea doppia per la prima tabella (#main) */
+#main table tr td, #main table tr th {
+    line-height: 2.2; /* Interlinea doppia */
+}
+
 /* Desktop: Tabelle compatte */
 #main table { width: 40%; margin: 0 auto; }
 #detail table { width: 55%; margin: 0 auto; }
@@ -93,7 +98,6 @@ const input = document.getElementById("periodo");
 input.value = "2025-12";
 let currentInstructor = null;
 
-// MODIFICA QUI: Se valore (v) esiste (>0) formatta, altrimenti stringa vuota
 const euro = (v) => v ? "€ " + v.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "";
 
 const MONTHS = ["", "gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
@@ -138,15 +142,20 @@ function renderDetail(nome) {
   currentInstructor = nome;
   const d = DATA[key].istruttori[nome];
   
+  // MODIFICA: Header "G" invece di "Data"
   let h = `<table>
       <tr class="row-yellow"><td colspan="5">${nome}</td></tr>
-      <tr><th>Data</th><th>Abbonamento</th><th class="num">Contanti</th><th class="num">POS</th><th class="num">Totale</th></tr>`;
+      <tr><th>G</th><th>Abbonamento</th><th class="num">Contanti</th><th class="num">POS</th><th class="num">Totale</th></tr>`;
 
   d.dettagli.forEach(r => {
     const abbClean = r.abbonamento.split('(')[0].trim();
+    
+    // MODIFICA: Estrazione solo giorno (elimina zeri iniziali)
+    // Es: "03/02/2025" -> "03" -> 3
+    const dayOnly = parseInt(r.data.split('/')[0], 10);
 
     h += `<tr>
-        <td>${r.data}</td>
+        <td style="text-align:center">${dayOnly}</td>
         <td>${abbClean}</td>
         <td class="num">${euro(r.contanti)}</td><td class="num">${euro(r.pos)}</td><td class="num">${euro(r.totale)}</td>
       </tr>`;
@@ -182,7 +191,7 @@ function genPDF(mode) {
   function addTable(nome) {
     const d = DATA[key].istruttori[nome];
     
-    // PDF: Attività presente, Abbonamento completo
+    // PDF: Mantiene data completa e altri dati
     const body = d.dettagli.map(r => [
        r.data, r.attivita, r.abbonamento, 
        euro(r.contanti), euro(r.pos), euro(r.totale)
