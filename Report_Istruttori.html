@@ -33,9 +33,9 @@ tr.click:hover { background: #e0f2fe; }
 .note { color: #64748b; margin-top: 20px; text-align: center; }
 .num { text-align: right; }
 
-/* MODIFICA: Interlinea doppia per la prima tabella (#main) */
+/* Interlinea doppia per la prima tabella (#main) */
 #main table tr td, #main table tr th {
-    line-height: 2.2; /* Interlinea doppia */
+    line-height: 2.2;
 }
 
 /* Desktop: Tabelle compatte */
@@ -142,16 +142,13 @@ function renderDetail(nome) {
   currentInstructor = nome;
   const d = DATA[key].istruttori[nome];
   
-  // MODIFICA: Header "G" invece di "Data"
+  // MODIFICA: Header "Cont." invece di "Contanti" (solo video)
   let h = `<table>
       <tr class="row-yellow"><td colspan="5">${nome}</td></tr>
-      <tr><th>G</th><th>Abbonamento</th><th class="num">Contanti</th><th class="num">POS</th><th class="num">Totale</th></tr>`;
+      <tr><th>G</th><th>Abbonamento</th><th class="num">Cont.</th><th class="num">POS</th><th class="num">Totale</th></tr>`;
 
   d.dettagli.forEach(r => {
     const abbClean = r.abbonamento.split('(')[0].trim();
-    
-    // MODIFICA: Estrazione solo giorno (elimina zeri iniziali)
-    // Es: "03/02/2025" -> "03" -> 3
     const dayOnly = parseInt(r.data.split('/')[0], 10);
 
     h += `<tr>
@@ -191,7 +188,7 @@ function genPDF(mode) {
   function addTable(nome) {
     const d = DATA[key].istruttori[nome];
     
-    // PDF: Mantiene data completa e altri dati
+    // PDF: Header originale "Contanti"
     const body = d.dettagli.map(r => [
        r.data, r.attivita, r.abbonamento, 
        euro(r.contanti), euro(r.pos), euro(r.totale)
