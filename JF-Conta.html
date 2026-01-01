@@ -4,9 +4,16 @@
 <body><div class="box"><h1>📊 Monitor</h1><button class="btn" onclick="resetAll()">AZZERA TUTTO</button><table id="t"></table></div>
 <script>
 const API="https://countapi.mileshilliard.com/api/v1", NS="joyfit-stats-v1";
-const PGS=[{id:'report_home',n:"Home"},{id:'report_global_list',n:"Anagrafica"},{id:'report_cust_detail',n:"Cliente"},...["SET","OTT","NOV","DIC","GEN","FEB","MAR","APR","MAG","GIU","LUG","AGO"].map(m=>({id:`report_${m}`,n:m}))];
+const PGS=[
+    {id:'report_home',n:"Home Incassi"},
+    {id:'report_global_list',n:"Anagrafica"},
+    {id:'report_cust_detail',n:"Cliente"},
+    {id:'report_attivita',n:"Attività 🧘"},
+    {id:'report_istruttori',n:"Istruttori 💪"},
+    ...["SET","OTT","NOV","DIC","GEN","FEB","MAR","APR","MAG","GIU","LUG","AGO"].map(m=>({id:`report_${m}`,n:m}))
+];
 const get=async u=>(await(await fetch(u)).json()).value||0; const set=async(i,v)=>fetch(`${API}/set/${NS}_${i}?value=${v}`);
-async function load(){let h=""; for(let p of PGS){try{let v=await get(`${API}/get/${NS}_${p.id}`); h+=`<tr style="${v>0?'background:#f0f9ff':''}"><td>${p.n}</td><td><span class="num">${v}</span></td><td onclick="set('${p.id}',0);load()">❌</td></tr>`;}catch{}} document.getElementById('t').innerHTML=h;}
-async function resetAll(){if(confirm("Sicuro?")) {await Promise.all(PGS.map(p=>set(p.id,0))); load();}}
-load(); setInterval(load,5000);
+async function load(){let h=""; for(let p of PGS){try{let v=await get(`${API}/get/${NS}_${p.id}`); h+=`<tr style="${v>0?'background:#f0f9ff':''}"><td>${p.n}</td><td><span class="num">${v}</span></td><td onclick="set('${p.id}',0);load();" class="btn-x">X</td></tr>`;}catch(e){}} document.getElementById("t").innerHTML=h;}
+function resetAll(){if(confirm("Azzerare tutto?")){PGS.forEach(p=>set(p.id,0)); setTimeout(load,1000);}}
+load(); setInterval(load,10000);
 </script></body></html>

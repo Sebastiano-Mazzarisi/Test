@@ -10,16 +10,16 @@
 body { font-family: system-ui, sans-serif; background: #eef2f7; padding: 12px; }
 .card { max-width: 1100px; margin: auto; background: white; border-radius: 14px; box-shadow: 0 8px 20px rgba(0,0,0,.15); padding: 20px; display: flex; flex-direction: column; align-items: center; }
 
-.input-area { margin-bottom: 20px; text-align: center; width: 100%; }
-input[type="month"] { 
-    font-size: 1.5rem; 
-    padding: 10px 15px; 
-    border-radius: 8px; 
-    border: 1px solid #ccc; 
-    cursor: pointer;
-    background: #f9fafb;
-    max-width: 100%;
-}
+#periodo { display: none; }
+
+.nav-table { margin-bottom: 20px; border-collapse: separate; border-spacing: 0; }
+.nav-table td { border: none; background: transparent; text-align: center; vertical-align: middle; padding: 5px; }
+.nav-arrow { font-size: 2rem; color: #3b82f6; cursor: pointer; user-select: none; font-weight: bold; transition: transform 0.1s; }
+.nav-arrow:hover { color: #2563eb; transform: scale(1.1); }
+.nav-arrow:active { transform: scale(0.9); }
+
+.nav-label { font-size: 1.5rem; font-weight: bold; color: #1e293b; text-transform: uppercase; min-width: 200px; cursor: pointer; user-select: none; }
+.nav-label:hover { color: #3b82f6; }
 
 #main, #detail { width: 100%; margin-bottom: 25px; }
 
@@ -33,58 +33,39 @@ tr.click:hover { background: #e0f2fe; }
 .note { color: #64748b; margin-top: 20px; text-align: center; }
 .num { text-align: right; }
 
-/* Interlinea doppia per la prima tabella (#main) */
-#main table tr td, #main table tr th {
-    line-height: 2.2;
-}
+#main table tr td, #main table tr th { line-height: 2.2; }
 
-/* Desktop: Tabelle compatte */
-#main table { width: 40%; margin: 0 auto; }
+#nav-container table, #main table { width: 40%; margin: 0 auto; }
 #detail table { width: 55%; margin: 0 auto; }
 
-/* Mobile: Tabelle larghe */
 @media (max-width: 768px) {
-    #main table { width: 96%; }
+    #nav-container table, #main table { width: 96%; }
     #detail table { width: 100%; }
     .card { padding: 10px; }
     th, td { font-size: 0.85rem; padding: 4px; }
     .btns button { width: 100%; margin-bottom: 10px; margin-left: 0; }
-    input[type="month"] { font-size: 1.2rem; width: 100%; box-sizing: border-box; }
+    .nav-label { font-size: 1.2rem; min-width: auto; }
 }
 
-.btns { 
-    display: flex; 
-    gap: 15px; 
-    justify-content: center; 
-    flex-wrap: wrap; 
-    margin-top: auto; 
-    padding-top: 10px;
-    border-top: 1px solid #eee;
-    width: 100%;
-}
-.btns button { 
-    padding: 8px 16px;
-    font-size: 0.85rem;
-    cursor: pointer; 
-    background: #3b82f6; 
-    color: white; 
-    border: none; 
-    border-radius: 6px; 
-    font-weight: bold; 
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
+.btns { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: auto; padding-top: 10px; border-top: 1px solid #eee; width: 100%; }
+.btns button { padding: 8px 16px; font-size: 0.85rem; cursor: pointer; background: #3b82f6; color: white; border: none; border-radius: 6px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 .btns button:hover { background: #2563eb; transform: translateY(-1px); }
 </style>
 </head>
 <body>
 <div class="card">
-  <div class="input-area">
-    <input type="month" id="periodo" min="2021-09" max="2025-12">
+  <input type="month" id="periodo" min="2021-09" max="2025-12">
+  <div id="nav-container" style="width:100%">
+    <table class="nav-table">
+        <tr>
+            <td style="width:15%"><div class="nav-arrow" onclick="changeMonth(-1)">&#10094;</div></td>
+            <td style="width:70%"><div id="nav-label" class="nav-label" onclick="resetToMax()" title="Torna all'ultimo mese"></div></td>
+            <td style="width:15%"><div class="nav-arrow" onclick="changeMonth(1)">&#10095;</div></td>
+        </tr>
+    </table>
   </div>
-
   <div id="main"></div>
   <div id="detail"></div>
-
   <div class="btns">
       <button onclick="genPDF('sintetico')">PDF Sintetico</button>
       <button onclick="genPDF('completo')">PDF Completo</button>
@@ -98,20 +79,47 @@ const input = document.getElementById("periodo");
 input.value = "2025-12";
 let currentInstructor = null;
 
-const euro = (v) => v ? "€ " + v.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "";
+// --- CONTATORE VISITE ---
+fetch("https://countapi.mileshilliard.com/api/v1/hit/joyfit-stats-v1_report_istruttori").catch(e=>console.log(e));
 
-const MONTHS = ["", "gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
+const euro = (v) => v ? "€ " + v.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "";
+const MONTHS = ["", "GENNAIO", "FEBBRAIO", "MARZO", "APRILE", "MAGGIO", "GIUGNO", "LUGLIO", "AGOSTO", "SETTEMBRE", "OTTOBRE", "NOVEMBRE", "DICEMBRE"];
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'ArrowLeft') changeMonth(-1);
+    else if (event.key === 'ArrowRight') changeMonth(1);
+});
+
+function updateNavLabel() {
+    const val = input.value; 
+    if(!val) return;
+    const parts = val.split('-');
+    document.getElementById('nav-label').innerText = `${MONTHS[parseInt(parts[1], 10)]} ${parts[0]}`;
+}
+
+function resetToMax() { input.value = input.max; renderHome(); }
+
+function changeMonth(delta) {
+    const currentVal = input.value;
+    const d = new Date(currentVal + "-01");
+    d.setMonth(d.getMonth() + delta);
+    const newVal = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    if (newVal < input.min || newVal > input.max) return;
+    input.value = newVal;
+    renderHome();
+}
 
 function getNiceTitle(isoDate) {
     if (!isoDate) return "";
     const parts = isoDate.split('-');
-    const y = parts[0];
     const m = parseInt(parts[1], 10);
-    return `Report ${MONTHS[m]} ${y}`;
+    const monthsPdf = ["", "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
+    return `Report ${monthsPdf[m]} ${parts[0]}`;
 }
 
 function renderHome() {
   const key = input.value;
+  updateNavLabel(); 
   const main = document.getElementById("main");
   document.getElementById("detail").innerHTML = "";
   currentInstructor = null;
@@ -124,16 +132,10 @@ function renderHome() {
   Object.keys(DATA[key].istruttori).sort().forEach(nome => {
     const t = DATA[key].istruttori[nome].totale;
     grandTotal += t;
-    h += `<tr class="click" onclick="renderDetail('${nome}')">
-            <td>${nome}</td><td class="num">${euro(t)}</td>
-          </tr>`;
+    h += `<tr class="click" onclick="renderDetail('${nome}')"><td>${nome}</td><td class="num">${euro(t)}</td></tr>`;
   });
 
-  h += `<tr class="row-gray">
-          <td>TOTALE</td>
-          <td class="num">${euro(grandTotal)}</td>
-        </tr>`;
-
+  h += `<tr class="row-gray"><td>TOTALE</td><td class="num">${euro(grandTotal)}</td></tr>`;
   main.innerHTML = h + "</table>";
 }
 
@@ -142,28 +144,15 @@ function renderDetail(nome) {
   currentInstructor = nome;
   const d = DATA[key].istruttori[nome];
   
-  // MODIFICA: Header "Cont." invece di "Contanti" (solo video)
-  let h = `<table>
-      <tr class="row-yellow"><td colspan="5">${nome}</td></tr>
+  let h = `<table><tr class="row-yellow"><td colspan="5">${nome}</td></tr>
       <tr><th>G</th><th>Abbonamento</th><th class="num">Cont.</th><th class="num">POS</th><th class="num">Totale</th></tr>`;
 
   d.dettagli.forEach(r => {
-    const abbClean = r.abbonamento.split('(')[0].trim();
-    const dayOnly = parseInt(r.data.split('/')[0], 10);
-
-    h += `<tr>
-        <td style="text-align:center">${dayOnly}</td>
-        <td>${abbClean}</td>
-        <td class="num">${euro(r.contanti)}</td><td class="num">${euro(r.pos)}</td><td class="num">${euro(r.totale)}</td>
-      </tr>`;
+    h += `<tr><td style="text-align:center">${parseInt(r.data.split('/')[0], 10)}</td><td>${r.abbonamento.split('(')[0].trim()}</td>
+        <td class="num">${euro(r.contanti)}</td><td class="num">${euro(r.pos)}</td><td class="num">${euro(r.totale)}</td></tr>`;
   });
 
-  h += `<tr class="row-gray">
-        <td colspan="2">TOTALE</td>
-        <td class="num">${euro(d.contanti)}</td>
-        <td class="num">${euro(d.pos)}</td>
-        <td class="num">${euro(d.totale)}</td>
-      </tr></table>
+  h += `<tr class="row-gray"><td colspan="2">TOTALE</td><td class="num">${euro(d.contanti)}</td><td class="num">${euro(d.pos)}</td><td class="num">${euro(d.totale)}</td></tr></table>
       <div style="margin-top:10px; cursor:pointer; color:blue; text-align:center;" onclick="renderHome()">⬅ Torna all'elenco</div>`;
 
   document.getElementById("detail").innerHTML = h;
@@ -176,7 +165,6 @@ function genPDF(mode) {
   
   const doc = new jsPDF('p', 'mm', 'a4');
   let y = 15;
-  const niceTitle = getNiceTitle(key);
   
   const styles = { fontSize: 8, cellPadding: 1, lineHeight: 0.9, valign: 'middle' };
   const headStyles = { fillColor: [229, 231, 235], textColor: 0, fontStyle: 'bold', halign: 'center' };
@@ -187,42 +175,18 @@ function genPDF(mode) {
 
   function addTable(nome) {
     const d = DATA[key].istruttori[nome];
-    
-    // PDF: Header originale "Contanti"
-    const body = d.dettagli.map(r => [
-       r.data, r.attivita, r.abbonamento, 
-       euro(r.contanti), euro(r.pos), euro(r.totale)
-    ]);
-    
-    body.push([
-        { content:'TOTALE', colSpan:3, styles: totalStyle }, 
-        { content:euro(d.contanti), styles: { ...totalStyle, halign:'right' } },
-        { content:euro(d.pos), styles: { ...totalStyle, halign:'right' } },
-        { content:euro(d.totale), styles: { ...totalStyle, halign:'right' } }
-    ]);
+    const body = d.dettagli.map(r => [r.data, r.attivita, r.abbonamento, euro(r.contanti), euro(r.pos), euro(r.totale)]);
+    body.push([{ content:'TOTALE', colSpan:3, styles: totalStyle }, { content:euro(d.contanti), styles: { ...totalStyle, halign:'right' } }, { content:euro(d.pos), styles: { ...totalStyle, halign:'right' } }, { content:euro(d.totale), styles: { ...totalStyle, halign:'right' } }]);
 
     checkPage(20);
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.text(nome, 51, y);
-    
-    doc.autoTable({
-      startY: y + 3,
-      head: [["Data","Attività","Abbonamento","Contanti","POS","Totale"]],
-      body: body,
-      styles: styles,
-      headStyles: headStyles,
-      tableWidth: 108,
-      margin: { left: 51 },
-      columnStyles: { 3: numStyle, 4: numStyle, 5: numStyle }
-    });
+    doc.setFontSize(10); doc.setFont("helvetica", "bold"); doc.text(nome, 51, y);
+    doc.autoTable({ startY: y + 3, head: [["Data","Attività","Abbonamento","Contanti","POS","Totale"]], body: body, styles: styles, headStyles: headStyles, tableWidth: 108, margin: { left: 51 }, columnStyles: { 3: numStyle, 4: numStyle, 5: numStyle } });
     y = doc.lastAutoTable.finalY + 10;
   }
 
   if (mode === 'sintetico') {
-    if (currentInstructor) {
-       addTable(currentInstructor);
-    } else {
+    if (currentInstructor) addTable(currentInstructor);
+    else {
        const rows = [];
        let sc=0, sp=0, st=0;
        Object.keys(DATA[key].istruttori).sort().forEach(n => {
@@ -230,64 +194,25 @@ function genPDF(mode) {
            rows.push([n, euro(i.contanti), euro(i.pos), euro(i.totale)]);
            sc+=i.contanti; sp+=i.pos; st+=i.totale;
        });
+       rows.push([{ content:'TOTALE', styles: totalStyle }, { content:euro(sc), styles: { ...totalStyle, halign:'right' } }, { content:euro(sp), styles: { ...totalStyle, halign:'right' } }, { content:euro(st), styles: { ...totalStyle, halign:'right' } }]);
        
-       rows.push([
-           { content:'TOTALE', styles: totalStyle },
-           { content:euro(sc), styles: { ...totalStyle, halign:'right' } },
-           { content:euro(sp), styles: { ...totalStyle, halign:'right' } },
-           { content:euro(st), styles: { ...totalStyle, halign:'right' } }
-       ]);
-       
-       doc.setFontSize(14);
-       doc.text(niceTitle, 105, y, {align: 'center'});
-       
-       doc.autoTable({
-           startY: y + 8,
-           head: [["Istruttore","Contanti","POS","Totale"]],
-           body: rows,
-           styles: styles,
-           headStyles: headStyles,
-           tableWidth: 80,
-           margin: {left: 65},
-           columnStyles: { 1: numStyle, 2: numStyle, 3: numStyle }
-       });
+       doc.setFontSize(14); doc.text(getNiceTitle(key), 105, y, {align: 'center'});
+       doc.autoTable({ startY: y + 8, head: [["Istruttore","Contanti","POS","Totale"]], body: rows, styles: styles, headStyles: headStyles, tableWidth: 80, margin: {left: 65}, columnStyles: { 1: numStyle, 2: numStyle, 3: numStyle } });
     }
-  }
-  else if (mode === 'completo') {
-      let rows = [];
-      let sc=0, sp=0, st=0;
+  } else {
+      let rows = []; let sc=0, sp=0, st=0;
       Object.keys(DATA[key].istruttori).sort().forEach(n => {
            const i = DATA[key].istruttori[n];
            rows.push([n, euro(i.contanti), euro(i.pos), euro(i.totale)]);
            sc+=i.contanti; sp+=i.pos; st+=i.totale;
       });
+      rows.push([{ content:'TOTALE', styles: totalStyle }, { content:euro(sc), styles: { ...totalStyle, halign:'right' } }, { content:euro(sp), styles: { ...totalStyle, halign:'right' } }, { content:euro(st), styles: { ...totalStyle, halign:'right' } }]);
       
-      rows.push([
-           { content:'TOTALE', styles: totalStyle },
-           { content:euro(sc), styles: { ...totalStyle, halign:'right' } },
-           { content:euro(sp), styles: { ...totalStyle, halign:'right' } },
-           { content:euro(st), styles: { ...totalStyle, halign:'right' } }
-       ]);
-      
-      doc.setFontSize(14);
-      doc.text(niceTitle, 105, y, {align: 'center'});
-      
-      doc.autoTable({
-           startY: y + 8,
-           head: [["Istruttore","Contanti","POS","Totale"]],
-           body: rows,
-           styles: styles,
-           headStyles: headStyles,
-           tableWidth: 80,
-           margin: {left: 65},
-           columnStyles: { 1: numStyle, 2: numStyle, 3: numStyle }
-      });
+      doc.setFontSize(14); doc.text(getNiceTitle(key), 105, y, {align: 'center'});
+      doc.autoTable({ startY: y + 8, head: [["Istruttore","Contanti","POS","Totale"]], body: rows, styles: styles, headStyles: headStyles, tableWidth: 80, margin: {left: 65}, columnStyles: { 1: numStyle, 2: numStyle, 3: numStyle } });
       y = doc.lastAutoTable.finalY + 15;
-
-      const names = Object.keys(DATA[key].istruttori).sort();
-      names.forEach(n => addTable(n));
+      Object.keys(DATA[key].istruttori).sort().forEach(n => addTable(n));
   }
-
   window.open(doc.output('bloburl'));
 }
 
