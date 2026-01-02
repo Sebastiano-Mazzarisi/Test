@@ -166,7 +166,12 @@ function genPDF(mode) {
   const doc = new jsPDF('p', 'mm', 'a4');
   let y = 15;
   
-  const styles = { fontSize: 8, cellPadding: 1, lineHeight: 0.9, valign: 'middle' };
+  // CONFIGURAZIONE GRAFICA PDF
+  const TABLE_WIDTH = 150; // Larghezza aumentata (prima 80/108)
+  const LEFT_MARGIN = 30;  // Centrato (210 - 150) / 2
+  const FONT_SIZE = 11;    // Font aumentato (prima 8)
+
+  const styles = { fontSize: FONT_SIZE, cellPadding: 1.5, lineHeight: 1.1, valign: 'middle' };
   const headStyles = { fillColor: [229, 231, 235], textColor: 0, fontStyle: 'bold', halign: 'center' };
   const totalStyle = { fontStyle: 'bold', fillColor: [220, 220, 220] };
   const numStyle = { halign: 'right' };
@@ -179,8 +184,19 @@ function genPDF(mode) {
     body.push([{ content:'TOTALE', colSpan:3, styles: totalStyle }, { content:euro(d.contanti), styles: { ...totalStyle, halign:'right' } }, { content:euro(d.pos), styles: { ...totalStyle, halign:'right' } }, { content:euro(d.totale), styles: { ...totalStyle, halign:'right' } }]);
 
     checkPage(20);
-    doc.setFontSize(10); doc.setFont("helvetica", "bold"); doc.text(nome, 51, y);
-    doc.autoTable({ startY: y + 3, head: [["Data","Attività","Abbonamento","Contanti","POS","Totale"]], body: body, styles: styles, headStyles: headStyles, tableWidth: 108, margin: { left: 51 }, columnStyles: { 3: numStyle, 4: numStyle, 5: numStyle } });
+    // Titolo istruttore (allineato col margine tabella)
+    doc.setFontSize(FONT_SIZE + 2); doc.setFont("helvetica", "bold"); doc.text(nome, LEFT_MARGIN, y);
+    
+    doc.autoTable({ 
+        startY: y + 3, 
+        head: [["Data","Attività","Abbonamento","Contanti","POS","Totale"]], 
+        body: body, 
+        styles: styles, 
+        headStyles: headStyles, 
+        tableWidth: TABLE_WIDTH, 
+        margin: { left: LEFT_MARGIN }, 
+        columnStyles: { 3: numStyle, 4: numStyle, 5: numStyle } 
+    });
     y = doc.lastAutoTable.finalY + 10;
   }
 
@@ -196,10 +212,21 @@ function genPDF(mode) {
        });
        rows.push([{ content:'TOTALE', styles: totalStyle }, { content:euro(sc), styles: { ...totalStyle, halign:'right' } }, { content:euro(sp), styles: { ...totalStyle, halign:'right' } }, { content:euro(st), styles: { ...totalStyle, halign:'right' } }]);
        
-       doc.setFontSize(14); doc.text(getNiceTitle(key), 105, y, {align: 'center'});
-       doc.autoTable({ startY: y + 8, head: [["Istruttore","Contanti","POS","Totale"]], body: rows, styles: styles, headStyles: headStyles, tableWidth: 80, margin: {left: 65}, columnStyles: { 1: numStyle, 2: numStyle, 3: numStyle } });
+       doc.setFontSize(16); doc.text(getNiceTitle(key), 105, y, {align: 'center'});
+       
+       doc.autoTable({ 
+           startY: y + 10, 
+           head: [["Istruttore","Contanti","POS","Totale"]], 
+           body: rows, 
+           styles: styles, 
+           headStyles: headStyles, 
+           tableWidth: TABLE_WIDTH, 
+           margin: { left: LEFT_MARGIN }, 
+           columnStyles: { 1: numStyle, 2: numStyle, 3: numStyle } 
+       });
     }
   } else {
+      // REPORT COMPLETO
       let rows = []; let sc=0, sp=0, st=0;
       Object.keys(DATA[key].istruttori).sort().forEach(n => {
            const i = DATA[key].istruttori[n];
@@ -208,9 +235,22 @@ function genPDF(mode) {
       });
       rows.push([{ content:'TOTALE', styles: totalStyle }, { content:euro(sc), styles: { ...totalStyle, halign:'right' } }, { content:euro(sp), styles: { ...totalStyle, halign:'right' } }, { content:euro(st), styles: { ...totalStyle, halign:'right' } }]);
       
-      doc.setFontSize(14); doc.text(getNiceTitle(key), 105, y, {align: 'center'});
-      doc.autoTable({ startY: y + 8, head: [["Istruttore","Contanti","POS","Totale"]], body: rows, styles: styles, headStyles: headStyles, tableWidth: 80, margin: {left: 65}, columnStyles: { 1: numStyle, 2: numStyle, 3: numStyle } });
+      doc.setFontSize(16); doc.text(getNiceTitle(key), 105, y, {align: 'center'});
+      
+      // Tabella Riepilogo (STESSA LARGHEZZA)
+      doc.autoTable({ 
+          startY: y + 10, 
+          head: [["Istruttore","Contanti","POS","Totale"]], 
+          body: rows, 
+          styles: styles, 
+          headStyles: headStyles, 
+          tableWidth: TABLE_WIDTH, 
+          margin: { left: LEFT_MARGIN }, 
+          columnStyles: { 1: numStyle, 2: numStyle, 3: numStyle } 
+      });
       y = doc.lastAutoTable.finalY + 15;
+      
+      // Tabelle Dettaglio (STESSA LARGHEZZA)
       Object.keys(DATA[key].istruttori).sort().forEach(n => addTable(n));
   }
   window.open(doc.output('bloburl'));
