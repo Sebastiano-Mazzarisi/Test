@@ -85,8 +85,8 @@
                 </div>
                 <div class="header-row-2">
                     <span onclick="showGlobalList()" class="btn-user btn-styled" title="Anagrafica">🧔🏻</span>
-                    <span onclick="window.open('Report_Istruttori.html', '_blank')" class="btn-styled" title="Report Istruttori">💪🏻</span>
-                    <span onclick="window.open('JF-Attivita.html', '_blank')" class="btn-styled" title="Analisi Attività">🧘</span>
+                    <span onclick="openUrl('Report_Istruttori.html')" class="btn-styled" title="Report Istruttori">💪🏻</span>
+                    <span onclick="openUrl('JF-Attivita.html')" class="btn-styled" title="Analisi Attività">🧘</span>
                     <span onclick="printCurrentView()" class="btn-styled" title="Stampa">🖨️</span>
                 </div>
             </div>
@@ -251,6 +251,12 @@
     const el = id => document.getElementById(id);
     const track = page => { if(!isAdmin) fetch(`${BASE_API}/hit/${NAMESPACE}_${page}`, {mode:'cors'}).catch(()=>{}); };
 
+    function openUrl(page) {
+        let url = page;
+        if(isAdmin) url += (url.includes('?') ? '&' : '?') + 'ADMIN=1';
+        window.open(url, '_blank');
+    }
+
     function switchView(id) {
         document.querySelectorAll('.main-wrapper > div').forEach(d => d.style.display = 'none');
         el(id).style.display = 'block';
@@ -271,6 +277,12 @@
         initHomeTable();
         switchView('view-home');
         track('report_home');
+        
+        // APPLICAZIONE FRECCE GIALLE SE ADMIN
+        if(isAdmin) {
+            document.querySelectorAll('.nav-arrow').forEach(el => el.style.color = '#ffeb3b');
+            document.querySelectorAll('.nav-arrow-up').forEach(el => el.style.color = '#ffeb3b');
+        }
     }
 
     function showDetail(mese) {
@@ -284,7 +296,6 @@
         const sign = diffVal > 0 ? "+" : "";
         const color = diffVal >= 0 ? "#b91c1c" : "#000"; 
         
-        // MODIFICA: Inserito font-weight:bold nello SPAN dei valori
         const recap = `<div style="text-align:center; padding-top:10px; font-size:1rem; font-weight:normal; border-top:1px solid #ddd; margin-top:10px;">
             Rispetto al periodo 2024:<br><span style="color:${color}; font-weight:bold;">${sign}${fmtFull(diffVal)} € (${sign}${diffPct.toFixed(1).replace('.',',')}%)</span>
         </div>`;
