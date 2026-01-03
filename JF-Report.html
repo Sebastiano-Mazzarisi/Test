@@ -258,6 +258,9 @@
     const BASE_API = "https://countapi.mileshilliard.com/api/v1";
     const NAMESPACE = "joyfit-stats-v1";
     
+    // SUONO OTTERATORE FOTOCAMERA (BASE64)
+    const SHUTTER_SOUND = "data:audio/mp3;base64,//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq";
+
     let state = {
         view: 'view-home', month: null, dayNum: 0, custName: '', custTrans: [],
         scrollPos: 0, lastView: 'view-home',
@@ -647,52 +650,48 @@
     }
 
     async function shareCurrentView() {
+        // SUONO IMMEDIATO
+        try { new Audio(SHUTTER_SOUND).play(); } catch(e){}
+        
         el('loading-overlay').style.display = 'flex';
-        // Cambio temporaneo del testo del toast
         const toast = el('copy-toast');
         const originalText = toast.innerText;
-        toast.innerText = "Immagine pronta! Allega su WhatsApp.";
+        
+        // TESTO E TIMING MODIFICATI
+        toast.innerText = "Foto memorizzata!";
         
         setTimeout(async () => {
             try {
-                // 1. Identifica il target originale (il div attualmente visibile)
                 const originalTarget = document.querySelector('.main-wrapper > div[style*="block"]');
                 if(!originalTarget) return;
 
-                // 2. CLONA il nodo: così possiamo manipolarlo senza rompere la pagina che l'utente vede
                 const clone = originalTarget.cloneNode(true);
 
-                // 3. Crea un WRAPPER temporaneo (il "foglio bianco" sotto)
                 const wrapper = document.createElement('div');
                 wrapper.style.position = 'absolute';
-                wrapper.style.top = '-9999px'; // Fuori dallo schermo
+                wrapper.style.top = '-9999px'; 
                 wrapper.style.left = '-9999px';
-                wrapper.style.width = '600px'; // Larghezza fissa per coerenza
-                wrapper.style.backgroundColor = '#ffffff'; // SFONDO BIANCO (il margine)
-                wrapper.style.padding = '40px'; // SPESSORE DEL MARGINE BIANCO
+                wrapper.style.width = '600px'; 
+                wrapper.style.backgroundColor = '#ffffff'; 
+                wrapper.style.padding = '40px'; 
                 wrapper.style.boxSizing = 'border-box';
                 
-                // Assicuriamoci che il clone si veda e riempia il wrapper
                 clone.style.display = 'block';
                 clone.style.margin = '0';
                 clone.style.width = '100%';
                 
-                // Aggiungiamo il clone al wrapper, e il wrapper al body
                 wrapper.appendChild(clone);
                 document.body.appendChild(wrapper);
 
-                // 4. Genera PNG dal WRAPPER (così prende il padding bianco e le cornici interne)
                 const canvas = await html2canvas(wrapper, {
                     scale: 2, 
                     useCORS: true,
-                    backgroundColor: '#ffffff' // Forza sfondo bianco anche nel canvas
+                    backgroundColor: '#ffffff'
                 });
                 const imgData = canvas.toDataURL('image/png');
 
-                // 5. Rimuovi il wrapper temporaneo
                 document.body.removeChild(wrapper);
 
-                // 6. Crea un link temporaneo per il download
                 const link = document.createElement('a');
                 link.href = imgData;
                 link.download = '2025-2026.png';
@@ -700,12 +699,12 @@
                 link.click();
                 document.body.removeChild(link);
 
-                // Mostra notifica
+                // MOSTRA TOAST PER 2 SECONDI
                 toast.style.display = 'block';
                 setTimeout(() => { 
                     toast.style.display = 'none';
                     toast.innerText = originalText;
-                }, 3000);
+                }, 2000);
 
             } catch(e) { alert("Errore generazione immagine: " + e); }
             el('loading-overlay').style.display = 'none';
