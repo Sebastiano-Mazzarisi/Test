@@ -526,6 +526,7 @@
         txt += "-----\n\n";
         if (navigator.clipboard) {
             navigator.clipboard.writeText(txt).then(() => {
+                el('copy-toast').innerText = 'Copiato!';
                 el('copy-toast').style.display = 'block';
                 setTimeout(() => el('copy-toast').style.display = 'none', 1000);
             }).catch(alert);
@@ -617,6 +618,7 @@
 
         if (navigator.clipboard) {
             navigator.clipboard.writeText(txt).then(() => {
+                el('copy-toast').innerText = 'Copiato!';
                 el('copy-toast').style.display = 'block';
                 setTimeout(() => el('copy-toast').style.display = 'none', 1000);
             }).catch(err => alert("Err: " + err));
@@ -655,10 +657,9 @@
         
         el('loading-overlay').style.display = 'flex';
         const toast = el('copy-toast');
-        const originalText = toast.innerText;
         
-        // TESTO E TIMING MODIFICATI
-        toast.innerText = "Foto memorizzata!";
+        // TESTO UNICO
+        toast.innerText = "Foto generata!";
         
         setTimeout(async () => {
             try {
@@ -703,7 +704,6 @@
                 toast.style.display = 'block';
                 setTimeout(() => { 
                     toast.style.display = 'none';
-                    toast.innerText = originalText;
                 }, 2000);
 
             } catch(e) { alert("Errore generazione immagine: " + e); }
