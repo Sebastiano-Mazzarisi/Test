@@ -9,35 +9,66 @@
 
 <style>
 body { font-family: system-ui, sans-serif; background: #eef2f7; padding: 12px; }
-.card { max-width: 1100px; margin: auto; background: white; border-radius: 14px; box-shadow: 0 8px 20px rgba(0,0,0,.15); padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 500px; }
+.card { max-width: 1100px; margin: auto; background: white; border-radius: 14px; box-shadow: 0 8px 20px rgba(0,0,0,.15); padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 500px; position: relative; }
 
 #periodo { display: none; }
 
-/* === LAYOUT E LARGHEZZE === */
-#nav-container table, #main table { width: 45%; margin: 0 auto; }
-.soci-wrapper { width: 45%; margin: 0 auto; }
-.soci-wrapper table { width: 100%; } 
-#detail table { width: 50%; margin: 0 auto; }
+/* === LAYOUT CONTAINER === */
+/* Unificazione larghezza contenitori al 45% */
+.soci-container, #main, #detail { width: 45%; margin: 0 auto; }
 
-.nav-table { margin-bottom: 20px; border-collapse: separate; border-spacing: 0; }
-.nav-table td { border: none; background: transparent; text-align: center; vertical-align: middle; padding: 5px; }
-.nav-arrow { font-size: 2rem; color: #3b82f6; cursor: pointer; user-select: none; font-weight: bold; transition: transform 0.1s; }
+#main table, #detail table, .data-table { width: 100%; border-collapse: collapse; margin: 0; }
+
+/* === HEADER BOX === */
+.header-box {
+    width: 100%;
+    background: #e2e8f0;
+    border-radius: 15px 15px 0 0;
+    border: 1px solid #cbd5e1;
+    border-bottom: 1px solid #94a3b8;
+    padding: 8px 0;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+}
+
+#nav-container { width: 100%; display: flex; justify-content: center; } 
+
+.nav-table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
+.nav-table td { border: none; background: transparent; text-align: center; vertical-align: middle; padding: 2px; }
+
+#homeTable { table-layout: fixed; }
+#homeTable th, #homeTable td { width: 33.33%; box-sizing: border-box; }
+
+.nav-arrow { font-size: 2rem; color: #3b82f6; cursor: pointer; user-select: none; font-weight: bold; transition: transform 0.1s; display: inline-block; }
 .nav-arrow:hover { color: #2563eb; transform: scale(1.1); }
 .nav-arrow:active { transform: scale(0.9); }
+.nav-arrow.disabled { color: #ccc; cursor: default; }
 
-.nav-label { font-size: 1.5rem; font-weight: bold; color: #1e293b; text-transform: uppercase; min-width: 200px; cursor: pointer; user-select: none; border-bottom: 2px solid transparent; }
-.nav-label:hover { color: #3b82f6; border-bottom: 2px solid transparent; }
+.icon-btn { cursor: pointer; width: 26px; height: 26px; stroke: #64748b; fill: none; stroke-width: 2; transition: all 0.2s; vertical-align: middle; }
+.icon-btn:hover { stroke: #3b82f6; transform: scale(1.1); }
+
+.nav-label { font-size: 1.5rem; font-weight: bold; color: #1e293b; text-transform: uppercase; cursor: default; user-select: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 #main, #detail, #sociDiv { width: 100%; margin-bottom: 25px; }
 
-table { border-collapse: collapse; margin-top: 8px; width: 100%; }
-th, td { border: 1px solid #000; padding: 6px; font-size: 1rem; line-height: 1.1; }
+/* GRIGLIA A VIDEO */
+th, td { border: 1px solid #cbd5e1; padding: 6px; font-size: 1rem; line-height: 1.1; }
 th { background: #e5e7eb; } 
 
 .bg-checco { background-color: #f7fee7; color: #365314; }
-.bg-mimmo { background-color: #eff6ff; color: #1e3a8a; }
+.bg-mimmo { background-color: #eff6ff; color: #1e3a8a; } 
+.bg-light-red { background-color: #fef2f2; color: #991b1b; } 
 
-.row-total td { background-color: #d1d5db; font-weight: 900; text-align: center; }
+/* Totale Soci: Sfondo grigio come Header e bordi visibili */
+.row-total td { 
+    background-color: #e5e7eb; /* Stesso colore TH */
+    border: 1px solid #cbd5e1; /* Bordo visibile */
+    font-weight: 900; 
+    text-align: center; 
+}
+
+/* Legenda allineata nella tabella */
+.legend-row td { border: none; background: transparent; padding-top: 15px; text-align: left; vertical-align: top; }
 
 th.sortable { cursor: pointer; position: relative; padding-right: 15px; user-select: none; }
 th.sortable:hover { background: #d1d5db; }
@@ -53,26 +84,9 @@ tr.click:hover { background: #e0f2fe; }
 .note { color: #64748b; margin-top: 20px; text-align: center; }
 .num { text-align: right; }
 
-/* Stili Header Soci (Titolo + Frecce) */
-.soci-title-container {
-    text-align: center;
-    font-size: 1.3rem;
-    font-weight: bold;
-    margin-bottom: 10px;
-    color: #000;
-}
-.soci-arrow {
-    cursor: pointer;
-    color: #3b82f6;
-    margin: 0 15px;
-    user-select: none;
-}
-.soci-arrow:hover { transform: scale(1.2); color: #2563eb; }
-.soci-arrow.disabled { color: #ccc; cursor: default; }
-
 .chart-box {
-    width: 100%; 
-    margin-top: 30px; 
+    width: 45%; 
+    margin: 30px auto 0 auto;
     background: #fff; 
     border: 2px solid #cbd5e1; 
     border-radius: 8px;
@@ -101,44 +115,62 @@ tr.click:hover { background: #e0f2fe; }
 .bar-segment-checco { background-color: #4ade80; height: 100%; }
 .bar-segment-mimmo { background-color: #60a5fa; height: 100%; }
 
+/* === MODAL POPUP === */
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
+.modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 300px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); text-align: center; }
+.close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+.close:hover, .close:focus { color: black; text-decoration: none; cursor: pointer; }
+.modal-title { margin-bottom: 20px; font-size: 1.2rem; font-weight: bold; color: #333; }
+
+.modal-btns { display: flex; flex-direction: column; gap: 10px; }
+.modal-btns button { padding: 12px; font-size: 1rem; cursor: pointer; background: #3b82f6; color: white; border: none; border-radius: 6px; font-weight: bold; width: 100%; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.modal-btns button:hover { opacity: 0.9; transform: translateY(-1px); }
+
 @media (max-width: 768px) {
-    #nav-container table, #main table, .soci-wrapper { width: 98%; }
-    #detail table { width: 100%; }
+    .soci-container, #main, #detail, .chart-box { width: 98%; }
     .card { padding: 10px; }
     th, td { font-size: 0.9rem; padding: 4px; }
-    .btns button { width: 100%; margin-bottom: 10px; margin-left: 0; }
     .nav-label { font-size: 1.2rem; min-width: auto; }
 }
-
-.btns { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: auto; padding-top: 10px; border-top: 1px solid #eee; width: 100%; }
-.btns button { padding: 8px 16px; font-size: 0.85rem; cursor: pointer; background: #3b82f6; color: white; border: none; border-radius: 6px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-.btns button:hover { background: #2563eb; transform: translateY(-1px); }
 </style>
 
 </head>
 <body>
 <div class="card">
   <input type="month" id="periodo" min="2021-09" max="2025-12">
-  <div id="nav-container" style="width:100%">
-    <table class="nav-table">
-        <tr>
-            <td style="width:15%"><div id="arrow-prev" class="nav-arrow" onclick="changeMonth(-1)">&#10094;</div></td>
-            <td style="width:70%"><div id="nav-label" class="nav-label" onclick="toggleSociView()" title="Clicca per vedere i Soci"></div></td>
-            <td style="width:15%"><div id="arrow-next" class="nav-arrow" onclick="changeMonth(1)">&#10095;</div></td>
-        </tr>
-    </table>
+  
+  <div id="nav-container">
+    <div class="soci-container">
+        <div class="header-box">
+            <table class="nav-table">
+                <tr>
+                    <td style="width:5%"><div id="arrow-prev" class="nav-arrow" onclick="changeMonth(-1)">&#10094;</div></td>
+                    <td style="width:5%"><svg class="icon-btn" onclick="toggleSociView()" viewBox="0 0 24 24" title="Cerca / Cambia Vista"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></td>
+                    <td style="width:80%"><div id="nav-label" class="nav-label"></div></td>
+                    <td style="width:5%"><svg class="icon-btn" onclick="handlePrintClick()" viewBox="0 0 24 24" title="Genera PDF"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg></td>
+                    <td style="width:5%"><div id="arrow-next" class="nav-arrow" onclick="changeMonth(1)">&#10095;</div></td>
+                </tr>
+            </table>
+        </div>
+    </div>
   </div>
   
   <div id="main"></div>
   <div id="detail" style="display:none;"></div>
-  
   <div id="sociDiv" style="display:none;"></div>
 
-  <div class="btns" id="btns-container">
-      <button onclick="genPDF('sintetico')">PDF Sintetico</button>
-      <button onclick="genPDF('completo')">PDF Completo</button>
-      <button onclick="genPDF('compatto')" style="background-color:#10b981;">PDF Compatto</button>
+  <div id="pdfModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <div class="modal-title">Genera PDF Report</div>
+      <div class="modal-btns">
+          <button onclick="genPDF('sintetico')" style="background-color:#16a34a;">PDF Sintetico</button>
+          <button onclick="genPDF('completo')" style="background-color:#3b82f6;">PDF Completo</button>
+          <button onclick="genPDF('compatto')" style="background-color:#c2410c;">PDF Compatto</button>
+      </div>
+    </div>
   </div>
+
 </div>
 
 <script>
@@ -157,9 +189,7 @@ let detailSortState = { col: 0, dir: 'asc' };
 
 fetch("https://countapi.mileshilliard.com/api/v1/hit/joyfit-stats-v1_report_istruttori").catch(e=>console.log(e));
 
-// Funzione formattazione numeri
 const formatNumber = (num) => {
-    // Regex per separatore migliaia. Nota: doppia graffa per evitare conflitto f-string
     return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 };
 
@@ -170,6 +200,18 @@ const euro = (v) => {
 
 const MONTHS = ["", "GENNAIO", "FEBBRAIO", "MARZO", "APRILE", "MAGGIO", "GIUGNO", "LUGLIO", "AGOSTO", "SETTEMBRE", "OTTOBRE", "NOVEMBRE", "DICEMBRE"];
 
+const modal = document.getElementById("pdfModal");
+function closeModal() { modal.style.display = "none"; }
+window.onclick = function(event) { if (event.target == modal) closeModal(); }
+
+function handlePrintClick() {
+    if (isSociView) {
+        genPDFSoci(); 
+    } else {
+        modal.style.display = "block";
+    }
+}
+
 document.addEventListener('keydown', function(event) {
     if (event.key === 'ArrowLeft') {
         if(isSociView) changeSociYear(-1);
@@ -178,6 +220,9 @@ document.addEventListener('keydown', function(event) {
     else if (event.key === 'ArrowRight') {
         if(isSociView) changeSociYear(1);
         else changeMonth(1);
+    }
+    else if (event.key === 'Escape') {
+        closeModal();
     }
 });
 
@@ -193,22 +238,14 @@ function toggleSociView() {
     if(isSociView) {
         document.getElementById('main').style.display = 'none';
         document.getElementById('detail').style.display = 'none';
+        document.getElementById('nav-container').style.display = 'none';
         document.getElementById('sociDiv').style.display = 'block';
-        
-        document.getElementById('nav-label').style.display = 'none'; 
-        document.getElementById('arrow-prev').style.visibility = 'hidden';
-        document.getElementById('arrow-next').style.visibility = 'hidden';
-        document.getElementById('btns-container').style.display = 'none';
-        
         if (!currentSociYear && sociYears.length > 0) currentSociYear = sociYears[sociYears.length - 1];
         renderSociTable();
     } else {
         document.getElementById('sociDiv').style.display = 'none';
-        document.getElementById('nav-label').style.display = 'block'; 
+        document.getElementById('nav-container').style.display = 'block';
         document.getElementById('nav-label').style.color = "#1e293b";
-        document.getElementById('arrow-prev').style.visibility = 'visible';
-        document.getElementById('arrow-next').style.visibility = 'visible';
-        document.getElementById('btns-container').style.display = 'flex';
         updateNavLabel();
         renderHome();
     }
@@ -239,14 +276,29 @@ function renderSociTable() {
     const hasPrev = idx > 0;
     const hasNext = idx < sociYears.length - 1;
 
-    let h = `<div class="soci-wrapper">
-        <div class="soci-title-container">
-            <span class="soci-arrow ${hasPrev ? '' : 'disabled'}" onclick="changeSociYear(-1)">&#10094;</span>
-            <span style="cursor:pointer; text-decoration:none;" onclick="toggleSociView()" title="Clicca per tornare ai mesi">SOCI ${currentSociYear}</span>
-            <span class="soci-arrow ${hasNext ? '' : 'disabled'}" onclick="changeSociYear(1)">&#10095;</span>
+    const iSearch = `<svg class="icon-btn" onclick="toggleSociView()" viewBox="0 0 24 24" title="Cerca / Cambia Vista"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`;
+    const iPrint = `<svg class="icon-btn" onclick="handlePrintClick()" viewBox="0 0 24 24" title="Genera PDF"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>`;
+
+    let h = `<div class="soci-container">
+        <div class="header-box">
+            <table class="nav-table">
+                <tr>
+                    <td style="width:5%">
+                        <div class="nav-arrow ${hasPrev ? '' : 'disabled'}" onclick="changeSociYear(-1)">&#10094;</div>
+                    </td>
+                    <td style="width:5%">${iSearch}</td>
+                    <td style="width:80%">
+                        <div class="nav-label" style="color:black;">SOCI ${currentSociYear}</div>
+                    </td>
+                    <td style="width:5%">${iPrint}</td>
+                    <td style="width:5%">
+                        <div class="nav-arrow ${hasNext ? '' : 'disabled'}" onclick="changeSociYear(1)">&#10095;</div>
+                    </td>
+                </tr>
+            </table>
         </div>
         
-        <table>
+        <table class="data-table">
         <thead>
             <tr>
                 <th>Mese</th>
@@ -269,7 +321,7 @@ function renderSociTable() {
             <td style="text-align:center">${row.mese}</td>
             <td class="num bg-checco">${euro(row.checco)}</td>
             <td class="num bg-mimmo">${euro(row.mimmo)}</td>
-            <td class="num">${euro(row.tot)}</td>
+            <td class="num bg-light-red" style="font-weight:bold">${euro(row.tot)}</td>
         </tr>`;
     });
     
@@ -281,16 +333,23 @@ function renderSociTable() {
                 <td class="num">${euro(totM)}</td>
                 <td class="num">${euro(totC+totM)}</td>
             </tr>
+            <tr class="legend-row">
+                <td></td>
+                <td colspan="3">
+                    <div style="margin-bottom: 8px;">
+                        <span style="background-color:#4ade80; color:white; padding:0 6px; border-radius:3px; font-weight:bold;">Checco</span> 60% Personal
+                    </div>
+                    <div>
+                        <span style="background-color:#60a5fa; color:white; padding:0 6px; border-radius:3px; font-weight:bold;">Mimmo</span> 60% Personal + 10% Ried.Funz.
+                    </div>
+                </td>
+            </tr>
         </tfoot>
     </table>
-    
-    <div style="margin-top:20px; font-size:0.9rem; color:#555; text-align:center;">
-        <span style="background-color:#4ade80; color:white; padding:0 6px; border-radius:3px; font-weight:bold;">Checco</span>: 60% Personal (Checco)<br>
-        <span style="background-color:#60a5fa; color:white; padding:0 6px; border-radius:3px; font-weight:bold;">Mimmo</span>: 10% Ried.Funz. + 60% Personal (Mimmo)
     </div>
     
     <div class="chart-box">
-        <div class="chart-header">Andamento Mensile</div>
+        <div class="chart-header">${currentSociYear}</div>
     `;
     
     currentData.forEach(row => {
@@ -467,7 +526,7 @@ function renderHome() {
                 <tr>
                     <th class="${th0Class}" onclick="sortTable('homeTable', 0)">Istruttore</th>
                     <th class="${th1Class} num" onclick="sortTable('homeTable', 1)">Totale Mese</th>
-                    <th class="${th2Class} num" onclick="sortTable('homeTable', 2)">Istr.</th>
+                    <th class="${th2Class} num" onclick="sortTable('homeTable', 2)">Totale</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -477,10 +536,13 @@ function renderHome() {
     const s = getShareVal(nome, t);
     grandTotal += t;
     grandShare += s;
+    
+    let displayNome = nome.replace(/ \(/, '<br>(');
+    
     h += `<tr class="click" data-istruttore="${nome}" onclick="renderDetail('${nome}')">
-            <td>${nome}</td>
-            <td class="num">${euro(t)}</td>
-            <td class="num">${euro(s)}</td>
+            <td>${displayNome}</td>
+            <td class="num bg-mimmo">${euro(t)}</td>
+            <td class="num bg-light-red" style="font-weight:bold">${euro(s)}</td>
           </tr>`;
   });
   h += `</tbody>
@@ -543,7 +605,141 @@ function renderDetail(nome) {
   detailDiv.style.display = 'block';
 }
 
+function genPDFSoci() {
+    const currentData = SOCI_DATA[currentSociYear];
+    if(!currentData) return;
+    
+    const doc = new jsPDF('p', 'mm', 'a4');
+    
+    // Titolo PDF
+    doc.setFontSize(16); doc.setFont("helvetica", "bold");
+    doc.text(`SOCI ${currentSociYear}`, 105, 15, {align:'center'});
+    
+    let body = [];
+    let tc=0, tm=0;
+    let maxVal = 0;
+    
+    currentData.forEach(r => {
+        tc+=r.checco; tm+=r.mimmo;
+        if(r.tot > maxVal) maxVal = r.tot;
+        body.push([r.mese, euro(r.checco), euro(r.mimmo), euro(r.tot)]);
+    });
+    
+    body.push([{content:'TOT.', styles:{fontStyle:'bold', fillColor:[229, 231, 235]}}, 
+               {content:euro(tc), styles:{fontStyle:'bold', halign:'right', fillColor:[229, 231, 235]}}, 
+               {content:euro(tm), styles:{fontStyle:'bold', halign:'right', fillColor:[229, 231, 235]}}, 
+               {content:euro(tc+tm), styles:{fontStyle:'bold', halign:'right', fillColor:[229, 231, 235]}}]);
+
+    // TABELLA PDF SOCI: Griglia GRIGIO CHIARO SOTTILISSIMA
+    doc.autoTable({
+        startY: 25,
+        head: [["Mese", "Checco", "Mimmo", "Totale"]],
+        body: body,
+        theme: 'grid',
+        tableLineWidth: 0.05,
+        tableLineColor: [230, 230, 230],
+        styles: { fontSize: 10, cellPadding: 1, valign: 'middle', lineColor: [230,230,230], lineWidth: 0.05 },
+        headStyles: { fillColor: [229, 231, 235], textColor: 0, fontStyle: 'bold', halign: 'center', lineColor: [230,230,230], lineWidth: 0.05 },
+        columnStyles: { 0: {halign:'center'}, 1: {halign:'right', fillColor:[247, 254, 231]}, 2: {halign:'right', fillColor:[239, 246, 255]}, 3: {halign:'right', fontStyle:'bold', fillColor:[254, 242, 242]} },
+        tableWidth: 150,
+        margin: { left: 30 }
+    });
+    
+    let finalY = doc.lastAutoTable.finalY + 10;
+    
+    // Legenda (Senza due punti)
+    doc.setFontSize(9);
+    doc.setTextColor(50,50,50);
+    
+    doc.setFillColor(74, 222, 128); 
+    doc.rect(30, finalY-3, 3, 3, 'F');
+    doc.setFont("helvetica", "bold"); doc.text("Checco", 35, finalY);
+    doc.setFont("helvetica", "normal"); doc.text(" 60% Personal", 48, finalY);
+    
+    finalY += 5;
+    doc.setFillColor(96, 165, 250); 
+    doc.rect(30, finalY-3, 3, 3, 'F');
+    doc.setFont("helvetica", "bold"); doc.text("Mimmo", 35, finalY);
+    doc.setFont("helvetica", "normal"); doc.text(" 60% Personal + 10% Ried.Funz.", 48, finalY);
+    
+    // Grafico "A Video": Card style
+    finalY += 15;
+    
+    const barH = 5;
+    const gap = 3;
+    const labelW = 10;
+    const maxBarW = 110; 
+    const startX = 35; 
+    const chartStartY = finalY;
+    const graphHeight = (barH + gap) * currentData.length;
+    const headerHeight = 8;
+    
+    // 1. Box Container (Bordo Grigio) e Sfondo Header
+    doc.setDrawColor(203, 213, 225); // #cbd5e1 (Grigio Card)
+    doc.setLineWidth(0.3);
+    doc.setFillColor(255, 255, 255); // Sfondo bianco
+    
+    // Disegna rettangolo intero grafico
+    doc.roundedRect(startX, finalY, maxBarW + labelW + 20, graphHeight + headerHeight + 5, 2, 2, 'FD');
+    
+    // 2. Header Sfondo
+    doc.setFillColor(226, 232, 240); // #e2e8f0 (Grigio Header)
+    // Disegna header (rettangolo sopra)
+    doc.rect(startX, finalY, maxBarW + labelW + 20, headerHeight, 'F');
+    
+    // Linea separatrice header
+    doc.line(startX, finalY + headerHeight, startX + maxBarW + labelW + 20, finalY + headerHeight);
+    
+    // Testo Header - DINAMICO
+    doc.setFontSize(10); doc.setFont("helvetica", "bold"); doc.setTextColor(51, 65, 85);
+    doc.text(currentSociYear, startX + (maxBarW + labelW + 20)/2, finalY + 5.5, {align:'center'});
+    
+    // Sposta cursore per il contenuto
+    finalY += headerHeight + 2; 
+    
+    // Impostazioni linee orizzontali (Grigio chiaro come HTML)
+    doc.setDrawColor(226, 232, 240); 
+    doc.setLineWidth(0.1);
+
+    currentData.forEach((row, i) => {
+       let rowY = finalY + 4;
+       
+       // Etichetta Mese
+       doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(100,100,100);
+       doc.text(row.mese, startX + 2, rowY);
+       
+       if(row.tot > 0) {
+           const totW = (row.tot / maxVal) * maxBarW;
+           const checcoW = (row.checco / row.tot) * totW;
+           const mimmoW = (row.mimmo / row.tot) * totW;
+           
+           // Barre
+           doc.setFillColor(74, 222, 128);
+           doc.rect(startX + labelW, finalY, checcoW, barH, 'F');
+           
+           doc.setFillColor(96, 165, 250);
+           doc.rect(startX + labelW + checcoW, finalY, mimmoW, barH, 'F');
+           
+           // Valore
+           doc.setTextColor(15, 23, 42); // Scuro
+           doc.text(euro(row.tot), startX + labelW + maxBarW + 18, rowY, {align:'right'});
+       } else {
+           doc.text("-", startX + labelW + maxBarW + 18, rowY, {align:'right'});
+       }
+       
+       // Linea orizzontale separatrice (tranne ultima)
+       if (i < currentData.length - 1) {
+           doc.line(startX, finalY + barH + 1.5, startX + maxBarW + labelW + 20, finalY + barH + 1.5);
+       }
+       
+       finalY += (barH + gap);
+    });
+    
+    window.open(doc.output('bloburl'));
+}
+
 function genPDF(mode) {
+  closeModal(); 
   const key = input.value;
   if (!DATA[key]) return alert("Nessun dato.");
   
@@ -617,7 +813,9 @@ function genPDF(mode) {
               head: [["G", "Abbonamento", "Tot"]],
               body: t.rows,
               theme: 'grid',
-              styles: styles,
+              tableLineColor: [230, 230, 230],
+              tableLineWidth: 0.05,
+              styles: { ...styles, lineColor: [230, 230, 230], lineWidth: 0.05 },
               headStyles: headStyles,
               tableWidth: COL_WIDTH,
               margin: { left: colX[minCol] },
@@ -656,7 +854,20 @@ function genPDF(mode) {
         const share = getShareVal(nome, d.totale);
         const title = `${nome}: € ${formatNumber(Math.round(share))}`;
         doc.setFontSize(FONT_SIZE + 2); doc.setFont("helvetica", "bold"); doc.text(title, LEFT_MARGIN, y);
-        doc.autoTable({ startY: y + 3, head: [["Data","Attività","Abbonamento","Contanti","POS","Totale"]], body: body, styles: styles, headStyles: headStyles, tableWidth: TABLE_WIDTH, margin: { left: LEFT_MARGIN }, columnStyles: { 3: numStyle, 4: numStyle, 5: numStyle } });
+        
+        doc.autoTable({ 
+            startY: y + 3, 
+            head: [["Data","Attività","Abbonamento","Contanti","POS","Totale"]], 
+            body: body, 
+            theme: 'grid',
+            tableLineColor: [230, 230, 230],
+            tableLineWidth: 0.05,
+            styles: { ...styles, lineColor: [230, 230, 230], lineWidth: 0.05 }, 
+            headStyles: headStyles, 
+            tableWidth: TABLE_WIDTH, 
+            margin: { left: LEFT_MARGIN }, 
+            columnStyles: { 3: numStyle, 4: numStyle, 5: numStyle } 
+        });
         y = doc.lastAutoTable.finalY + 10;
       }
 
@@ -683,12 +894,16 @@ function genPDF(mode) {
            ]);
            doc.setFontSize(16); doc.text(getNiceTitle(key), 105, y, {align: 'center'});
            
+           // Griglia GRIGIO CHIARO SOTTILISSIMA
            doc.autoTable({ 
                startY: y + 10, 
                head: [["Istruttore","Contanti","POS","Totale", "Istr."]], 
                body: rows, 
-               styles: styles, 
-               headStyles: headStyles, 
+               theme: 'grid',
+               tableLineColor: [230, 230, 230],
+               tableLineWidth: 0.05,
+               styles: { fontSize: 11, cellPadding: 0.8, lineHeight: 1.0, valign: 'middle', lineColor: [230, 230, 230], lineWidth: 0.05 },
+               headStyles: { fillColor: [229, 231, 235], textColor: 0, fontStyle: 'bold', halign: 'center' },
                tableWidth: TABLE_WIDTH, 
                margin: { left: LEFT_MARGIN }, 
                columnStyles: { 1: numStyle, 2: numStyle, 3: numStyle, 4: numStyle } 
@@ -714,15 +929,19 @@ function genPDF(mode) {
           
           doc.setFontSize(16); doc.text(getNiceTitle(key), 105, y, {align: 'center'});
           
+          // Griglia GRIGIO CHIARO SOTTILISSIMA
           doc.autoTable({ 
-              startY: y + 10, 
-              head: [["Istruttore","Contanti","POS","Totale", "Istr."]], 
-              body: rows, 
-              styles: styles, 
-              headStyles: headStyles, 
-              tableWidth: TABLE_WIDTH, 
-              margin: { left: LEFT_MARGIN }, 
-              columnStyles: { 1: numStyle, 2: numStyle, 3: numStyle, 4: numStyle } 
+               startY: y + 10, 
+               head: [["Istruttore","Contanti","POS","Totale", "Istr."]], 
+               body: rows, 
+               theme: 'grid',
+               tableLineColor: [230, 230, 230],
+               tableLineWidth: 0.05,
+               styles: { fontSize: 11, cellPadding: 0.8, lineHeight: 1.0, valign: 'middle', lineColor: [230, 230, 230], lineWidth: 0.05 },
+               headStyles: { fillColor: [229, 231, 235], textColor: 0, fontStyle: 'bold', halign: 'center' },
+               tableWidth: TABLE_WIDTH, 
+               margin: { left: LEFT_MARGIN }, 
+               columnStyles: { 1: numStyle, 2: numStyle, 3: numStyle, 4: numStyle } 
           });
           y = doc.lastAutoTable.finalY + 15;
           
