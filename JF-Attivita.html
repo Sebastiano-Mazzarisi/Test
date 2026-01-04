@@ -16,15 +16,33 @@ h1 { color: #1e293b; margin: 0 0 5px 0; font-size: 1.8rem; text-align: center; }
 #container { width: 100%; margin-bottom: 25px; }
 
 table { border-collapse: collapse; margin-top: 8px; width: 100%; }
-th, td { border: 1px solid #000; padding: 6px 8px; font-size: 0.95rem; line-height: 1.1; }
 
-/* STILE COLONNE */
-th { 
-    background: #e5e7eb; color: #334155; font-weight: bold; 
-    cursor: pointer; user-select: none; white-space: nowrap; 
+/* CELLE DATI STANDARD */
+td { 
+    border: 1px solid #000; 
+    padding: 6px 8px;   /* Padding standard per i dati */
+    font-size: 0.95rem; 
+    line-height: 1.1; 
 }
+
+/* STILE COLONNE (Intestazioni) */
+th { 
+    border: 1px solid #000;
+    background: #e5e7eb; 
+    color: #334155; 
+    font-weight: bold; 
+    cursor: pointer; 
+    user-select: none; 
+    white-space: nowrap;
+    
+    /* MODIFICA RICHIESTA: Altezza doppia e font più grande */
+    padding-top: 16px;      /* Molto più spazio sopra */
+    padding-bottom: 16px;   /* Molto più spazio sotto */
+    font-size: 1.15rem;     /* Font più grande */
+}
+
 th:hover { background: #d1d5db; }
-th::after { content: ' ⇅'; font-size: 0.8em; color: #666; opacity: 0.5; }
+th::after { content: ' ⇅'; font-size: 0.7em; color: #666; opacity: 0.5; margin-left: 5px; vertical-align: middle; }
 th.asc::after { content: ' ▲'; opacity: 1; color: black; }
 th.desc::after { content: ' ▼'; opacity: 1; color: black; }
 
@@ -35,10 +53,9 @@ tr.click:hover { background: #e0f2fe; }
 .row-gray { font-weight: bold; background: #e5e7eb; }
 .row-header { font-weight: bold; background: #e5e7eb; } 
 
-.num { text-align: right; font-family: monospace, sans-serif; font-size: 1.05rem; }
+.num { text-align: right; font-family: monospace, sans-serif; }
 .center { text-align: center; }
 
-.tbl-home tr td, .tbl-home tr th { line-height: 2.2; }
 .tbl-home { width: 40% !important; margin: 0 auto; }
 .tbl-detail { width: 55% !important; margin: 0 auto; }
 
@@ -46,6 +63,7 @@ tr.click:hover { background: #e0f2fe; }
     .tbl-home, .tbl-detail { width: 96% !important; }
     .card { padding: 10px; }
     th, td { font-size: 0.9rem; padding: 4px; }
+    th { padding-top: 10px; padding-bottom: 10px; } /* Ridotto leggermente su mobile */
 }
 
 .btn-back {
@@ -167,13 +185,12 @@ function renderActivity(actName) {
         <table class="tbl-detail">
             <tbody id="act-body">
             <tr class="row-yellow">
-                <td colspan="4" class="center">
+                <td colspan="3" class="center">
                     ${actName} <span style="font-weight:normal">(${d.count} utenti)</span>
                 </td>
             </tr>
             <tr class="row-header">
                 <th onclick="sortHTML(this, 'num')" class="center" style="width:40px">#</th>
-                <th onclick="sortHTML(this, 'date')" class="center">Ultima Data</th>
                 <th onclick="sortHTML(this, 'str')" style="text-align:left">Nominativo</th>
                 <th onclick="sortHTML(this, 'num')" class="num">Totale</th>
             </tr>
@@ -182,14 +199,13 @@ function renderActivity(actName) {
     d.utenti.forEach((u, i) => {
         h += `<tr class="click" onclick="renderUser(${i})">
                 <td class="center" style="color:#64748b">${i + 1}</td>
-                <td class="center">${u.last_date}</td>
                 <td style="font-weight:500">${u.nome}</td>
                 <td class="num">${euro(u.tot)}</td>
               </tr>`;
     });
     
     h += `<tr class="row-gray">
-            <td colspan="3">TOTALE</td>
+            <td colspan="2">TOTALE</td>
             <td class="num">${euro(d.totale)}</td>
           </tr>`;
 
@@ -210,11 +226,10 @@ function renderUser(idx) {
         <table class="tbl-detail">
             <tbody id="user-body">
             <tr class="row-yellow">
-                <td colspan="3" class="center">${u.nome} - ${currentAct}</td>
+                <td colspan="2" class="center">${u.nome} - ${currentAct}</td>
             </tr>
             <tr class="row-header">
                 <th onclick="sortHTML(this, 'date')" class="center">Data</th>
-                <th onclick="sortHTML(this, 'str')" style="text-align:left">Attività Originale</th>
                 <th onclick="sortHTML(this, 'num')" class="num">Importo</th>
             </tr>
     `;
@@ -222,13 +237,12 @@ function renderUser(idx) {
     u.transazioni.forEach(m => {
         h += `<tr>
                 <td class="center">${m.data}</td>
-                <td>${m.raw}</td>
                 <td class="num">${euro(m.imp)}</td>
               </tr>`;
     });
 
     h += `<tr class="row-gray">
-            <td colspan="2">TOTALE</td>
+            <td>TOTALE</td>
             <td class="num">${euro(u.tot)}</td>
           </tr>`;
 
