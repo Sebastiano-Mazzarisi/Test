@@ -330,7 +330,7 @@ function renderSociTable() {
     const iSearch = `<svg class="icon-btn" onclick="toggleSociView()" viewBox="0 0 24 24" title="Cerca / Cambia Vista"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`;
     const iPrint = `<svg class="icon-btn" onclick="handlePrintClick()" viewBox="0 0 24 24" title="Genera PDF"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>`;
 
-    // NUOVO HEADER A 2 RIGHE ANCHE PER VISTA SOCI
+    // === TABELLA MENSILE DELL'ANNO SELEZIONATO ===
     let h = `<div class="soci-container">
         <div class="header-box">
             <table class="header-row-1">
@@ -380,7 +380,6 @@ function renderSociTable() {
         </tr>`;
     });
     
-    // Legenda: Colspan 4 per prendere tutta la larghezza, padding-left 0 e allineamento per partire dalla colonna 1
     h += `</tbody>
         <tfoot>
             <tr class="row-total">
@@ -432,7 +431,54 @@ function renderSociTable() {
         }
     });
 
-    h += `</div></div>`; 
+    h += `</div>`; 
+
+    // === NUOVA TABELLA RIEPILOGO ANNI (HTML) ===
+    h += `<div class="soci-container" style="margin-top:30px;">
+            <div class="chart-header" style="border-radius:8px 8px 0 0; background:#e2e8f0; border:1px solid #cbd5e1; border-bottom:none;">RIEPILOGO ANNI</div>
+            <table class="data-table" style="margin-bottom:40px;">
+                <thead>
+                    <tr>
+                        <th>Anno</th>
+                        <th>Checco</th>
+                        <th>Mimmo</th>
+                        <th>Totale</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+    
+    let yearsDesc = [...sociYears].reverse();
+    let gtC = 0, gtM = 0;
+
+    yearsDesc.forEach(year => {
+        let yData = SOCI_DATA[year];
+        let yC = 0, yM = 0, yT = 0;
+        yData.forEach(m => {
+            yC += m.checco;
+            yM += m.mimmo;
+            yT += m.tot;
+        });
+        gtC += yC; gtM += yM;
+
+        h += `<tr>
+                <td style="text-align:center">${year}</td>
+                <td class="num bg-checco">${euro(yC)}</td>
+                <td class="num bg-mimmo">${euro(yM)}</td>
+                <td class="num bg-light-red" style="font-weight:bold">${euro(yT)}</td>
+              </tr>`;
+    });
+
+    h += `</tbody>
+          <tfoot>
+              <tr class="row-total">
+                  <td style="text-align:left; padding-left:10px;">TOTALE</td>
+                  <td class="num">${euro(gtC)}</td>
+                  <td class="num">${euro(gtM)}</td>
+                  <td class="num">${euro(gtC + gtM)}</td>
+              </tr>
+          </tfoot>
+          </table>
+          </div>`;
     
     div.innerHTML = h;
 }
@@ -667,8 +713,9 @@ function genPDFSoci() {
     const doc = new jsPDF('p', 'mm', 'a4');
     
     doc.setFontSize(16); doc.setFont("helvetica", "bold");
-    doc.text(`SOCI ${currentSociYear}`, 105, 15, {align:'center'});
+    doc.text(`SOCI ${currentSociYear}`, 105, 10, {align:'center'});
     
+    // === 1. TABELLA MENSILE ===
     let body = [];
     let tc=0, tm=0;
     let maxVal = 0;
@@ -685,7 +732,7 @@ function genPDFSoci() {
                {content:euro(tc+tm), styles:{fontStyle:'bold', halign:'right', fillColor:[229, 231, 235]}}]);
 
     doc.autoTable({
-        startY: 25,
+        startY: 15,
         head: [["Mese", "Checco", "Mimmo", "Totale"]],
         body: body,
         theme: 'grid',
@@ -698,51 +745,43 @@ function genPDFSoci() {
         margin: { left: 30 }
     });
     
-    // Disegno i bordi neri DOPO aver completato la tabella
+    // Bordi Neri Tabella Mensile
     let finalTableY = doc.lastAutoTable.finalY;
     let marginL = 30;
     let tableW = 150;
-    
-    doc.setDrawColor(0, 0, 0); 
-    doc.setLineWidth(0.3);
-    
-    // 1. Perimetro esterno
-    doc.rect(marginL, 25, tableW, finalTableY - 25);
-    
-    // 2. Bordo Header
+    doc.setDrawColor(0, 0, 0); doc.setLineWidth(0.3);
+    doc.rect(marginL, 15, tableW, finalTableY - 15);
     let headH = doc.lastAutoTable.head[0].height;
-    doc.rect(marginL, 25, tableW, headH);
-    
-    // 3. Bordo Footer (Ultima riga)
+    doc.rect(marginL, 15, tableW, headH);
     let bodyRows = doc.lastAutoTable.body;
     let lastRowH = bodyRows[bodyRows.length - 1].height;
     doc.rect(marginL, finalTableY - lastRowH, tableW, lastRowH);
     
-    let finalY = finalTableY + 10;
-    
-    doc.setFontSize(9);
-    doc.setTextColor(50,50,50);
+    // === 2. LEGENDA ===
+    let finalY = finalTableY + 5; // Reduced margin
+    doc.setFontSize(9); doc.setTextColor(50,50,50);
     
     doc.setFillColor(74, 222, 128); 
     doc.rect(30, finalY-3, 3, 3, 'F');
     doc.setFont("helvetica", "bold"); doc.text("Checco", 35, finalY);
     doc.setFont("helvetica", "normal"); doc.text(" 60% Personal", 48, finalY);
     
-    finalY += 5;
+    finalY += 4; // Reduced margin
     doc.setFillColor(96, 165, 250); 
     doc.rect(30, finalY-3, 3, 3, 'F');
     doc.setFont("helvetica", "bold"); doc.text("Mimmo", 35, finalY);
     doc.setFont("helvetica", "normal"); doc.text(" 60% Personal + 10% Ried.Funz.", 48, finalY);
     
-    finalY += 15;
+    // === 3. GRAFICO (COMPATTATO) ===
+    finalY += 8; // Reduced margin
     
-    const barH = 5;
-    const gap = 3;
+    const barH = 4; // Reduced height
+    const gap = 2;  // Reduced gap
     const labelW = 10;
     const maxBarW = 110; 
     const startX = 35; 
     const graphHeight = (barH + gap) * currentData.length;
-    const headerHeight = 8;
+    const headerHeight = 6;
     
     doc.setDrawColor(0, 0, 0); 
     doc.setLineWidth(0.3);
@@ -754,18 +793,15 @@ function genPDFSoci() {
     doc.setDrawColor(0, 0, 0); 
     doc.rect(startX, finalY, maxBarW + labelW + 20, headerHeight, 'FD'); 
     
-    doc.setFontSize(10); doc.setFont("helvetica", "bold"); doc.setTextColor(51, 65, 85);
-    doc.text(currentSociYear, startX + (maxBarW + labelW + 20)/2, finalY + 5.5, {align:'center'});
+    doc.setFontSize(9); doc.setFont("helvetica", "bold"); doc.setTextColor(51, 65, 85);
+    doc.text(currentSociYear, startX + (maxBarW + labelW + 20)/2, finalY + 4, {align:'center'});
     
     finalY += headerHeight + 2; 
-    
-    doc.setDrawColor(226, 232, 240); 
-    doc.setLineWidth(0.1);
+    doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.1);
 
     currentData.forEach((row, i) => {
-       let rowY = finalY + 4;
-       
-       doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(100,100,100);
+       let rowY = finalY + 3;
+       doc.setFontSize(7); doc.setFont("helvetica", "bold"); doc.setTextColor(100,100,100);
        doc.text(row.mese, startX + 2, rowY);
        
        if(row.tot > 0) {
@@ -786,12 +822,70 @@ function genPDFSoci() {
        }
        
        if (i < currentData.length - 1) {
-           doc.line(startX, finalY + barH + 1.5, startX + maxBarW + labelW + 20, finalY + barH + 1.5);
+           doc.line(startX, finalY + barH + 1, startX + maxBarW + labelW + 20, finalY + barH + 1);
        }
        
        finalY += (barH + gap);
     });
     
+    // === 4. TABELLA ANNI (SENZA TITOLO RIEPILOGO) ===
+    let yearsY = finalY + 8; // Spazio dopo il grafico
+    
+    // Check page break
+    if (yearsY > 250) {
+        doc.addPage();
+        yearsY = 15;
+    }
+    
+    let yearsBody = [];
+    let yearsDesc = sociYears.slice().reverse();
+    let gtC = 0, gtM = 0;
+    
+    yearsDesc.forEach(year => {
+        let yData = SOCI_DATA[year];
+        let yC = 0, yM = 0;
+        yData.forEach(m => { yC += m.checco; yM += m.mimmo; });
+        gtC += yC; gtM += yM;
+        yearsBody.push([year, euro(yC), euro(yM), euro(yC+yM)]);
+    });
+    
+    yearsBody.push([{content:'TOTALE', styles:{fontStyle:'bold', fillColor:[229, 231, 235]}}, 
+                   {content:euro(gtC), styles:{fontStyle:'bold', halign:'right', fillColor:[229, 231, 235]}}, 
+                   {content:euro(gtM), styles:{fontStyle:'bold', halign:'right', fillColor:[229, 231, 235]}}, 
+                   {content:euro(gtC+gtM), styles:{fontStyle:'bold', halign:'right', fillColor:[229, 231, 235]}}]);
+
+    doc.autoTable({
+        startY: yearsY,
+        head: [["Anno", "Checco", "Mimmo", "Totale"]],
+        body: yearsBody,
+        theme: 'grid',
+        tableLineWidth: 0.01,
+        tableLineColor: [230, 230, 230],
+        styles: { fontSize: 10, cellPadding: 1, valign: 'middle', lineColor: [230,230,230], lineWidth: 0.01 },
+        headStyles: { fillColor: [229, 231, 235], textColor: 0, fontStyle: 'bold', halign: 'center', lineColor: [230,230,230], lineWidth: 0.01 },
+        columnStyles: { 0: {halign:'center'}, 1: {halign:'right', fillColor:[247, 254, 231]}, 2: {halign:'right', fillColor:[239, 246, 255]}, 3: {halign:'right', fontStyle:'bold', fillColor:[254, 242, 242]} },
+        tableWidth: 150,
+        margin: { left: 30 }
+    });
+
+    // Bordi Neri Tabella Anni
+    let finalYearsY = doc.lastAutoTable.finalY;
+    let yearsStartY = yearsY; 
+    
+    doc.setDrawColor(0, 0, 0); doc.setLineWidth(0.3);
+    
+    // Box Esterno
+    doc.rect(marginL, yearsStartY, tableW, finalYearsY - yearsStartY);
+    
+    // Header
+    let yHeadH = doc.lastAutoTable.head[0].height;
+    doc.rect(marginL, yearsStartY, tableW, yHeadH);
+    
+    // Footer
+    let yBodyRows = doc.lastAutoTable.body;
+    let yLastRowH = yBodyRows[yBodyRows.length - 1].height;
+    doc.rect(marginL, finalYearsY - yLastRowH, tableW, yLastRowH);
+
     window.open(doc.output('bloburl'));
 }
 
@@ -880,8 +974,6 @@ function genPDF(mode) {
           });
           colY[minCol] = doc.lastAutoTable.finalY + 6;
       });
-      
-      // Footer eliminato come richiesto
       
   } else {
       const TABLE_WIDTH = 150; 
@@ -990,7 +1082,7 @@ function genPDF(mode) {
                tableWidth: TABLE_WIDTH, 
                margin: { left: LEFT_MARGIN }, 
                columnStyles: { 1: numStyle, 2: numStyle, 3: numStyle, 4: numStyle } 
-          });
+           });
           y = doc.lastAutoTable.finalY + 15;
           
           sortedInstructors.forEach(n => {
