@@ -14,12 +14,19 @@ body { font-family: system-ui, sans-serif; background: #eef2f7; padding: 12px; }
 #periodo { display: none; }
 
 /* === LAYOUT CONTAINER === */
-/* Unificazione larghezza contenitori al 45% */
-.soci-container, #main, #detail { width: 45%; margin: 0 auto; }
+.soci-container, #main, #detail { 
+    width: 45%; 
+    margin: 0 auto; 
+    box-sizing: border-box; 
+    margin-bottom: 0; 
+}
 
-#main table, #detail table, .data-table { width: 100%; border-collapse: collapse; margin: 0; }
+/* Wrapper generico */
+#sociDiv { width: 100%; margin: 0; }
 
-/* === HEADER BOX === */
+#main table, #detail table, .data-table { width: 100%; border-collapse: collapse; margin: 0; table-layout: fixed; }
+
+/* === HEADER BOX (Nuovo layout 2 righe) === */
 .header-box {
     width: 100%;
     background: #e2e8f0;
@@ -27,14 +34,31 @@ body { font-family: system-ui, sans-serif; background: #eef2f7; padding: 12px; }
     border: 1px solid #cbd5e1;
     border-bottom: 1px solid #94a3b8;
     padding: 8px 0;
-    margin-bottom: 20px;
+    margin-bottom: 0; 
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
+
+/* SPAZIATORE UNIFICATO */
+.spacer-box { height: 20px; width: 100%; clear: both; }
 
 #nav-container { width: 100%; display: flex; justify-content: center; } 
 
-.nav-table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
-.nav-table td { border: none; background: transparent; text-align: center; vertical-align: middle; padding: 2px; }
+/* Tabella per la Prima Riga (Frecce e Titolo) */
+.header-row-1 { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.header-row-1 td { border: none; background: transparent; vertical-align: middle; padding: 0 15px; }
+
+/* Container per la Seconda Riga (Icone) */
+.header-row-2 { 
+    width: 100%; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    gap: 40px; /* Distanza tra le icone */
+    padding-bottom: 5px;
+}
 
 #homeTable { table-layout: fixed; }
 #homeTable th, #homeTable td { width: 33.33%; box-sizing: border-box; }
@@ -47,9 +71,18 @@ body { font-family: system-ui, sans-serif; background: #eef2f7; padding: 12px; }
 .icon-btn { cursor: pointer; width: 26px; height: 26px; stroke: #64748b; fill: none; stroke-width: 2; transition: all 0.2s; vertical-align: middle; }
 .icon-btn:hover { stroke: #3b82f6; transform: scale(1.1); }
 
-.nav-label { font-size: 1.5rem; font-weight: bold; color: #1e293b; text-transform: uppercase; cursor: default; user-select: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-#main, #detail, #sociDiv { width: 100%; margin-bottom: 25px; }
+/* TITOLI NAVIGAZIONE RIDOTTI */
+.nav-label { 
+    font-size: 1.1rem; 
+    font-weight: bold; 
+    color: #334155; 
+    text-transform: uppercase; 
+    cursor: default; 
+    user-select: none; 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+}
 
 /* GRIGLIA A VIDEO */
 th, td { border: 1px solid #cbd5e1; padding: 6px; font-size: 1rem; line-height: 1.1; }
@@ -59,16 +92,24 @@ th { background: #e5e7eb; }
 .bg-mimmo { background-color: #eff6ff; color: #1e3a8a; } 
 .bg-light-red { background-color: #fef2f2; color: #991b1b; } 
 
-/* Totale Soci: Sfondo grigio come Header e bordi visibili */
+/* Totale Soci: Allineati a DESTRA */
 .row-total td { 
-    background-color: #e5e7eb; /* Stesso colore TH */
-    border: 1px solid #cbd5e1; /* Bordo visibile */
+    background-color: #e5e7eb; 
+    border: 1px solid #cbd5e1; 
     font-weight: 900; 
-    text-align: center; 
+    text-align: right; 
 }
+.row-total td:first-child { text-align: left; padding-left: 10px; }
 
-/* Legenda allineata nella tabella */
-.legend-row td { border: none; background: transparent; padding-top: 15px; text-align: left; vertical-align: top; }
+/* Legenda allineata a SINISTRA COLONNA 1 */
+.legend-row td { 
+    border: none; 
+    background: transparent; 
+    padding-top: 15px; 
+    padding-left: 0; 
+    text-align: left; 
+    vertical-align: top; 
+}
 
 th.sortable { cursor: pointer; position: relative; padding-right: 15px; user-select: none; }
 th.sortable:hover { background: #d1d5db; }
@@ -100,6 +141,7 @@ tr.click:hover { background: #e0f2fe; }
     font-weight: bold; 
     color: #334155; 
     border-bottom: 2px solid #cbd5e1;
+    font-size: 1.1rem; 
 }
 .bar-row { 
     display: flex; 
@@ -130,7 +172,7 @@ tr.click:hover { background: #e0f2fe; }
     .soci-container, #main, #detail, .chart-box { width: 98%; }
     .card { padding: 10px; }
     th, td { font-size: 0.9rem; padding: 4px; }
-    .nav-label { font-size: 1.2rem; min-width: auto; }
+    .nav-label { font-size: 1rem; min-width: auto; }
 }
 </style>
 
@@ -142,16 +184,25 @@ tr.click:hover { background: #e0f2fe; }
   <div id="nav-container">
     <div class="soci-container">
         <div class="header-box">
-            <table class="nav-table">
+            <table class="header-row-1">
                 <tr>
-                    <td style="width:5%"><div id="arrow-prev" class="nav-arrow" onclick="changeMonth(-1)">&#10094;</div></td>
-                    <td style="width:5%"><svg class="icon-btn" onclick="toggleSociView()" viewBox="0 0 24 24" title="Cerca / Cambia Vista"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></td>
-                    <td style="width:80%"><div id="nav-label" class="nav-label"></div></td>
-                    <td style="width:5%"><svg class="icon-btn" onclick="handlePrintClick()" viewBox="0 0 24 24" title="Genera PDF"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg></td>
-                    <td style="width:5%"><div id="arrow-next" class="nav-arrow" onclick="changeMonth(1)">&#10095;</div></td>
+                    <td style="width:20%; text-align:left;">
+                        <div id="arrow-prev" class="nav-arrow" onclick="changeMonth(-1)">&#10094;</div>
+                    </td>
+                    <td style="width:60%; text-align:center;">
+                        <div id="nav-label" class="nav-label"></div>
+                    </td>
+                    <td style="width:20%; text-align:right;">
+                        <div id="arrow-next" class="nav-arrow" onclick="changeMonth(1)">&#10095;</div>
+                    </td>
                 </tr>
             </table>
+            <div class="header-row-2">
+                <svg class="icon-btn" onclick="toggleSociView()" viewBox="0 0 24 24" title="Cerca / Cambia Vista"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <svg class="icon-btn" onclick="handlePrintClick()" viewBox="0 0 24 24" title="Genera PDF"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            </div>
         </div>
+        <div class="spacer-box"></div>
     </div>
   </div>
   
@@ -245,7 +296,7 @@ function toggleSociView() {
     } else {
         document.getElementById('sociDiv').style.display = 'none';
         document.getElementById('nav-container').style.display = 'block';
-        document.getElementById('nav-label').style.color = "#1e293b";
+        document.getElementById('nav-label').style.color = "#334155";
         updateNavLabel();
         renderHome();
     }
@@ -279,24 +330,28 @@ function renderSociTable() {
     const iSearch = `<svg class="icon-btn" onclick="toggleSociView()" viewBox="0 0 24 24" title="Cerca / Cambia Vista"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`;
     const iPrint = `<svg class="icon-btn" onclick="handlePrintClick()" viewBox="0 0 24 24" title="Genera PDF"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>`;
 
+    // NUOVO HEADER A 2 RIGHE ANCHE PER VISTA SOCI
     let h = `<div class="soci-container">
         <div class="header-box">
-            <table class="nav-table">
+            <table class="header-row-1">
                 <tr>
-                    <td style="width:5%">
+                    <td style="width:20%; text-align:left;">
                         <div class="nav-arrow ${hasPrev ? '' : 'disabled'}" onclick="changeSociYear(-1)">&#10094;</div>
                     </td>
-                    <td style="width:5%">${iSearch}</td>
-                    <td style="width:80%">
-                        <div class="nav-label" style="color:black;">SOCI ${currentSociYear}</div>
+                    <td style="width:60%; text-align:center;">
+                        <div class="nav-label" style="color:#334155;">SOCI ${currentSociYear}</div>
                     </td>
-                    <td style="width:5%">${iPrint}</td>
-                    <td style="width:5%">
+                    <td style="width:20%; text-align:right;">
                         <div class="nav-arrow ${hasNext ? '' : 'disabled'}" onclick="changeSociYear(1)">&#10095;</div>
                     </td>
                 </tr>
             </table>
+            <div class="header-row-2">
+                ${iSearch}
+                ${iPrint}
+            </div>
         </div>
+        <div class="spacer-box"></div>
         
         <table class="data-table">
         <thead>
@@ -325,17 +380,17 @@ function renderSociTable() {
         </tr>`;
     });
     
+    // Legenda: Colspan 4 per prendere tutta la larghezza, padding-left 0 e allineamento per partire dalla colonna 1
     h += `</tbody>
         <tfoot>
             <tr class="row-total">
-                <td>TOT.</td>
+                <td style="text-align:left; padding-left:10px;">TOT.</td>
                 <td class="num">${euro(totC)}</td>
                 <td class="num">${euro(totM)}</td>
                 <td class="num">${euro(totC+totM)}</td>
             </tr>
             <tr class="legend-row">
-                <td></td>
-                <td colspan="3">
+                <td colspan="4">
                     <div style="margin-bottom: 8px;">
                         <span style="background-color:#4ade80; color:white; padding:0 6px; border-radius:3px; font-weight:bold;">Checco</span> 60% Personal
                     </div>
@@ -611,7 +666,6 @@ function genPDFSoci() {
     
     const doc = new jsPDF('p', 'mm', 'a4');
     
-    // Titolo PDF
     doc.setFontSize(16); doc.setFont("helvetica", "bold");
     doc.text(`SOCI ${currentSociYear}`, 105, 15, {align:'center'});
     
@@ -630,24 +684,42 @@ function genPDFSoci() {
                {content:euro(tm), styles:{fontStyle:'bold', halign:'right', fillColor:[229, 231, 235]}}, 
                {content:euro(tc+tm), styles:{fontStyle:'bold', halign:'right', fillColor:[229, 231, 235]}}]);
 
-    // TABELLA PDF SOCI: Griglia GRIGIO CHIARO SOTTILISSIMA
     doc.autoTable({
         startY: 25,
         head: [["Mese", "Checco", "Mimmo", "Totale"]],
         body: body,
         theme: 'grid',
-        tableLineWidth: 0.05,
+        tableLineWidth: 0.01,
         tableLineColor: [230, 230, 230],
-        styles: { fontSize: 10, cellPadding: 1, valign: 'middle', lineColor: [230,230,230], lineWidth: 0.05 },
-        headStyles: { fillColor: [229, 231, 235], textColor: 0, fontStyle: 'bold', halign: 'center', lineColor: [230,230,230], lineWidth: 0.05 },
+        styles: { fontSize: 10, cellPadding: 1, valign: 'middle', lineColor: [230,230,230], lineWidth: 0.01 },
+        headStyles: { fillColor: [229, 231, 235], textColor: 0, fontStyle: 'bold', halign: 'center', lineColor: [230,230,230], lineWidth: 0.01 },
         columnStyles: { 0: {halign:'center'}, 1: {halign:'right', fillColor:[247, 254, 231]}, 2: {halign:'right', fillColor:[239, 246, 255]}, 3: {halign:'right', fontStyle:'bold', fillColor:[254, 242, 242]} },
         tableWidth: 150,
         margin: { left: 30 }
     });
     
-    let finalY = doc.lastAutoTable.finalY + 10;
+    // Disegno i bordi neri DOPO aver completato la tabella
+    let finalTableY = doc.lastAutoTable.finalY;
+    let marginL = 30;
+    let tableW = 150;
     
-    // Legenda (Senza due punti)
+    doc.setDrawColor(0, 0, 0); 
+    doc.setLineWidth(0.3);
+    
+    // 1. Perimetro esterno
+    doc.rect(marginL, 25, tableW, finalTableY - 25);
+    
+    // 2. Bordo Header
+    let headH = doc.lastAutoTable.head[0].height;
+    doc.rect(marginL, 25, tableW, headH);
+    
+    // 3. Bordo Footer (Ultima riga)
+    let bodyRows = doc.lastAutoTable.body;
+    let lastRowH = bodyRows[bodyRows.length - 1].height;
+    doc.rect(marginL, finalTableY - lastRowH, tableW, lastRowH);
+    
+    let finalY = finalTableY + 10;
+    
     doc.setFontSize(9);
     doc.setTextColor(50,50,50);
     
@@ -662,7 +734,6 @@ function genPDFSoci() {
     doc.setFont("helvetica", "bold"); doc.text("Mimmo", 35, finalY);
     doc.setFont("helvetica", "normal"); doc.text(" 60% Personal + 10% Ried.Funz.", 48, finalY);
     
-    // Grafico "A Video": Card style
     finalY += 15;
     
     const barH = 5;
@@ -670,41 +741,30 @@ function genPDFSoci() {
     const labelW = 10;
     const maxBarW = 110; 
     const startX = 35; 
-    const chartStartY = finalY;
     const graphHeight = (barH + gap) * currentData.length;
     const headerHeight = 8;
     
-    // 1. Box Container (Bordo Grigio) e Sfondo Header
-    doc.setDrawColor(203, 213, 225); // #cbd5e1 (Grigio Card)
+    doc.setDrawColor(0, 0, 0); 
     doc.setLineWidth(0.3);
-    doc.setFillColor(255, 255, 255); // Sfondo bianco
+    doc.setFillColor(255, 255, 255); 
     
-    // Disegna rettangolo intero grafico
     doc.roundedRect(startX, finalY, maxBarW + labelW + 20, graphHeight + headerHeight + 5, 2, 2, 'FD');
     
-    // 2. Header Sfondo
-    doc.setFillColor(226, 232, 240); // #e2e8f0 (Grigio Header)
-    // Disegna header (rettangolo sopra)
-    doc.rect(startX, finalY, maxBarW + labelW + 20, headerHeight, 'F');
+    doc.setFillColor(226, 232, 240); 
+    doc.setDrawColor(0, 0, 0); 
+    doc.rect(startX, finalY, maxBarW + labelW + 20, headerHeight, 'FD'); 
     
-    // Linea separatrice header
-    doc.line(startX, finalY + headerHeight, startX + maxBarW + labelW + 20, finalY + headerHeight);
-    
-    // Testo Header - DINAMICO
     doc.setFontSize(10); doc.setFont("helvetica", "bold"); doc.setTextColor(51, 65, 85);
     doc.text(currentSociYear, startX + (maxBarW + labelW + 20)/2, finalY + 5.5, {align:'center'});
     
-    // Sposta cursore per il contenuto
     finalY += headerHeight + 2; 
     
-    // Impostazioni linee orizzontali (Grigio chiaro come HTML)
     doc.setDrawColor(226, 232, 240); 
     doc.setLineWidth(0.1);
 
     currentData.forEach((row, i) => {
        let rowY = finalY + 4;
        
-       // Etichetta Mese
        doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(100,100,100);
        doc.text(row.mese, startX + 2, rowY);
        
@@ -713,21 +773,18 @@ function genPDFSoci() {
            const checcoW = (row.checco / row.tot) * totW;
            const mimmoW = (row.mimmo / row.tot) * totW;
            
-           // Barre
            doc.setFillColor(74, 222, 128);
            doc.rect(startX + labelW, finalY, checcoW, barH, 'F');
            
            doc.setFillColor(96, 165, 250);
            doc.rect(startX + labelW + checcoW, finalY, mimmoW, barH, 'F');
            
-           // Valore
-           doc.setTextColor(15, 23, 42); // Scuro
+           doc.setTextColor(15, 23, 42); 
            doc.text(euro(row.tot), startX + labelW + maxBarW + 18, rowY, {align:'right'});
        } else {
            doc.text("-", startX + labelW + maxBarW + 18, rowY, {align:'right'});
        }
        
-       // Linea orizzontale separatrice (tranne ultima)
        if (i < currentData.length - 1) {
            doc.line(startX, finalY + barH + 1.5, startX + maxBarW + labelW + 20, finalY + barH + 1.5);
        }
@@ -814,8 +871,8 @@ function genPDF(mode) {
               body: t.rows,
               theme: 'grid',
               tableLineColor: [230, 230, 230],
-              tableLineWidth: 0.05,
-              styles: { ...styles, lineColor: [230, 230, 230], lineWidth: 0.05 },
+              tableLineWidth: 0.01,
+              styles: { ...styles, lineColor: [230, 230, 230], lineWidth: 0.01 },
               headStyles: headStyles,
               tableWidth: COL_WIDTH,
               margin: { left: colX[minCol] },
@@ -824,14 +881,7 @@ function genPDF(mode) {
           colY[minCol] = doc.lastAutoTable.finalY + 6;
       });
       
-      const pageCount = doc.internal.getNumberOfPages();
-      doc.setFontSize(10); doc.setFont("helvetica", "normal"); doc.setTextColor(0,0,0);
-      const footerTxt = `Checco: € ${formatNumber(Math.round(payChecco))} --- Mimmo: € ${formatNumber(Math.round(payMimmo))}`;
-      
-      for (let i = 1; i <= pageCount; i++) {
-          doc.setPage(i);
-          doc.text(footerTxt, 105, 292, {align: 'center'});
-      }
+      // Footer eliminato come richiesto
       
   } else {
       const TABLE_WIDTH = 150; 
@@ -861,8 +911,8 @@ function genPDF(mode) {
             body: body, 
             theme: 'grid',
             tableLineColor: [230, 230, 230],
-            tableLineWidth: 0.05,
-            styles: { ...styles, lineColor: [230, 230, 230], lineWidth: 0.05 }, 
+            tableLineWidth: 0.01,
+            styles: { ...styles, lineColor: [230, 230, 230], lineWidth: 0.01 }, 
             headStyles: headStyles, 
             tableWidth: TABLE_WIDTH, 
             margin: { left: LEFT_MARGIN }, 
@@ -894,15 +944,14 @@ function genPDF(mode) {
            ]);
            doc.setFontSize(16); doc.text(getNiceTitle(key), 105, y, {align: 'center'});
            
-           // Griglia GRIGIO CHIARO SOTTILISSIMA
            doc.autoTable({ 
                startY: y + 10, 
                head: [["Istruttore","Contanti","POS","Totale", "Istr."]], 
                body: rows, 
                theme: 'grid',
                tableLineColor: [230, 230, 230],
-               tableLineWidth: 0.05,
-               styles: { fontSize: 11, cellPadding: 0.8, lineHeight: 1.0, valign: 'middle', lineColor: [230, 230, 230], lineWidth: 0.05 },
+               tableLineWidth: 0.01,
+               styles: { fontSize: 11, cellPadding: 0.8, lineHeight: 1.0, valign: 'middle', lineColor: [230, 230, 230], lineWidth: 0.01 },
                headStyles: { fillColor: [229, 231, 235], textColor: 0, fontStyle: 'bold', halign: 'center' },
                tableWidth: TABLE_WIDTH, 
                margin: { left: LEFT_MARGIN }, 
@@ -929,15 +978,14 @@ function genPDF(mode) {
           
           doc.setFontSize(16); doc.text(getNiceTitle(key), 105, y, {align: 'center'});
           
-          // Griglia GRIGIO CHIARO SOTTILISSIMA
           doc.autoTable({ 
                startY: y + 10, 
                head: [["Istruttore","Contanti","POS","Totale", "Istr."]], 
                body: rows, 
                theme: 'grid',
                tableLineColor: [230, 230, 230],
-               tableLineWidth: 0.05,
-               styles: { fontSize: 11, cellPadding: 0.8, lineHeight: 1.0, valign: 'middle', lineColor: [230, 230, 230], lineWidth: 0.05 },
+               tableLineWidth: 0.01,
+               styles: { fontSize: 11, cellPadding: 0.8, lineHeight: 1.0, valign: 'middle', lineColor: [230, 230, 230], lineWidth: 0.01 },
                headStyles: { fillColor: [229, 231, 235], textColor: 0, fontStyle: 'bold', halign: 'center' },
                tableWidth: TABLE_WIDTH, 
                margin: { left: LEFT_MARGIN }, 
