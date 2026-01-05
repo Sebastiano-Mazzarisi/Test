@@ -48,11 +48,16 @@
     
     /* MODIFICATO: Font valori grafico ridotti */
     .bar-row { display:flex; align-items:center; margin-bottom:5px; font-size:1.0rem; cursor:pointer; }
-    .bar-label-container { width:135px; flex-shrink:0; text-align:center; margin-right:5px; }
+    
+    /* CSS UPDATE: Etichette allineate a SX (start 5px grazie a padding span) e margin-right 0 (gap gestito da progress) */
+    .bar-label-container { width:135px; flex-shrink:0; text-align:left; margin-right:0px; }
+    
     .bar-label-text { font-weight:700; color:#000; font-size:1.0rem; border:4px solid transparent; padding:2px 5px; border-radius:4px; }
     .bar-value { width:130px; text-align:right; font-weight:800; color:#000; flex-shrink:0; }
     
-    .progress { flex-grow:1; height:24px; margin:0 10px; border-radius:8px; width:40%; background:#e9ecef; }
+    /* CSS UPDATE: margin 0 5px = Top/Bottom 0, Left/Right 5. Left gap 5px (da label), Right gap 5px (da value) */
+    .progress { flex-grow:1; height:24px; margin:0 5px; border-radius:8px; width:40%; background:#e9ecef; }
+    
     .progress-bar { height:100%; border-radius:8px; }
     
     .table-custom { width:100%; border-collapse:collapse; }
@@ -126,8 +131,8 @@
                 </div>
                 <div class="header-row-2">
                     <span onclick="showGlobalList()" class="btn-user btn-styled" title="Anagrafica">🧔🏻</span>
-                    <span onclick="openExternal('JF-Istruttori.html')" class="btn-styled" title="Report Istruttori">💪🏻</span>
-                    <span onclick="openExternal('JF-Attivita.html')" class="btn-styled" title="Analisi Attività">🧘</span>
+                    <span onclick="openExternal('JF-Istruttori.html', 'report_istruttori')" class="btn-styled" title="Report Istruttori">💪🏻</span>
+                    <span onclick="openExternal('JF-Attivita.html', 'report_attivita')" class="btn-styled" title="Analisi Attività">🧘</span>
                     <span onclick="shareCurrentView()" class="btn-styled" title="Condividi Immagine (WhatsApp)">📤</span>
                     <span onclick="printCurrentView()" class="btn-styled" title="Stampa PDF">🖨️</span>
                 </div>
@@ -317,7 +322,8 @@
     const el = id => document.getElementById(id);
     const track = page => { if(!isAdmin) fetch(`${BASE_API}/hit/${NAMESPACE}_${page}`, {mode:'cors'}).catch(()=>{}); };
 
-    function openExternal(url) {
+    function openExternal(url, trackKey) {
+        if(trackKey) track(trackKey);
         el('external-frame').src = url;
         el('external-overlay').style.display = 'flex';
     }
