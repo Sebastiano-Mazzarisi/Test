@@ -17,19 +17,18 @@
             --primary-light: #eff6ff;
             --text-main: #1e293b;
             --text-muted: #64748b;
-            --bg-body: #f1f5f9;
+            --bg-body: #f1f5f9;      /* Grigio chiaro standard */
+            --bg-yellowish: #fffbeb; /* Giallo appena accennato */
             --bg-card: #ffffff;
             --past-event-bg: rgba(16, 185, 129, 0.05); 
             --past-event-text: #059669;
             --border-color: #cbd5e1;
         }
         
-        /* --- GESTIONE DIMENSIONI RESPONSIVE --- */
-        
-        /* 1. Default per CELLULARI: Testo normale (16px) */
+        /* Default mobile: testo normale */
         html { font-size: 16px; } 
 
-        /* 2. Solo su PC/TABLET (schermi più larghi di 768px): Testo grande (20px) */
+        /* PC/Tablet: testo grande */
         @media (min-width: 768px) {
             html { font-size: 20px; }
         }
@@ -38,21 +37,28 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-body);
+            background-color: var(--bg-body); /* Colore di sfondo base */
             color: var(--text-main);
             display: flex;
             justify-content: center;
             min-height: 100vh;
+            overscroll-behavior-y: contain; /* Aiuta il pull-to-refresh */
         }
 
         .app-container {
             width: 100%;
             max-width: 600px;
-            background-color: var(--bg-card);
+            background-color: var(--bg-body); /* Default grigio */
             min-height: 100vh;
             position: relative;
             padding-bottom: 100px; 
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            transition: background-color 0.3s ease; /* Transizione colore fluida */
+        }
+
+        /* Classe per attivare lo sfondo giallo */
+        .app-container.bg-yellow-mode {
+            background-color: var(--bg-yellowish) !important;
         }
 
         /* --- HEADER --- */
@@ -68,7 +74,7 @@
         }
         
         .header h1 { 
-            font-size: 1.6rem; /* Leggermente ridotto per stare su una riga in mobile */
+            font-size: 1.6rem; 
             font-weight: 800; 
             margin: 0;
             letter-spacing: 0.5px;
@@ -139,14 +145,14 @@
             font-weight: 800;
             text-transform: uppercase;
             position: sticky;
-            top: 90px; /* Adattato per header mobile */
+            top: 90px;
             z-index: 40;
             border-bottom: 1px solid var(--border-color);
             border-top: 1px solid var(--border-color);
         }
 
         @media (min-width: 768px) {
-            .month-header { top: 100px; } /* Correzione offset per PC */
+            .month-header { top: 100px; }
         }
 
         /* --- RICERCA AVANZATA --- */
@@ -260,11 +266,31 @@
         .badge-bday { background: #dbeafe; color: #1e40af; }
         .badge-name { background: #fce7f3; color: #9d174d; }
 
+        /* Indicatore di ricaricamento (nascosto di default) */
+        #refresh-indicator {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            z-index: 200;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        #refresh-indicator.show { opacity: 1; }
+
     </style>
 </head>
 <body>
+    
+    <div id="refresh-indicator">Rilascia per aggiornare...</div>
 
-    <div class="app-container">
+    <div class="app-container" id="app-container">
         
         <div class="header">
             <h1>EVENTI E FESTE</h1>
@@ -286,7 +312,6 @@
                     <div id="count-val">0</div>
                 </div>
             </div>
-
             <div id="rubrica-list"></div>
         </div>
 
@@ -373,7 +398,7 @@
             };
         }).filter(e => e !== null);
 
-        // --- RENDER HOME ---
+        // --- RENDER FUNCTIONS (HOME, CAL, RUBRICA, STATS) ---
         function renderHome() {
             const container = document.getElementById('upcoming-list');
             const upcoming = events
@@ -409,7 +434,6 @@
             }).join('');
         }
 
-        // --- RENDER CALENDARIO ---
         function renderCalendar() {
             const container = document.getElementById('calendar-list');
             const sorted = [...events].sort((a, b) => {
@@ -454,7 +478,6 @@
             return firstFutureId;
         }
 
-        // --- RENDER RUBRICA ---
         function renderRubrica(filterText = '') {
             const container = document.getElementById('rubrica-list');
             const countEl = document.getElementById('count-val');
@@ -508,7 +531,6 @@
             filterRubrica('');
         }
 
-        // --- RENDER STATS ---
         function renderStats() {
             const mCount = new Array(12).fill(0);
             events.forEach(e => mCount[e.pDate.month-1]++);
@@ -544,7 +566,7 @@
             }).join('');
         }
 
-        // --- NAVIGAZIONE ---
+        // --- NAVIGAZIONE E GESTIONE COLORE SFONDO ---
         let calendarScrollId = null;
 
         function switchTab(tabId) {
@@ -553,6 +575,14 @@
             
             document.getElementById('tab-' + tabId).classList.add('active');
             document.querySelector(`button[onclick="switchTab('${tabId}')"]`).classList.add('active');
+
+            // GESTIONE SFONDO GIALLO (Solo Home e Stats)
+            const appContainer = document.getElementById('app-container');
+            if (tabId === 'home' || tabId === 'stats') {
+                appContainer.classList.add('bg-yellow-mode');
+            } else {
+                appContainer.classList.remove('bg-yellow-mode');
+            }
 
             if (tabId === 'calendario' && calendarScrollId) {
                 setTimeout(() => {
@@ -568,11 +598,40 @@
             renderRubrica(document.getElementById('search-input').value);
         }
 
+        // --- PULL TO REFRESH LOGIC ---
+        let touchStartY = 0;
+        let touchEndY = 0;
+        const indicator = document.getElementById('refresh-indicator');
+
+        document.addEventListener('touchstart', e => {
+            touchStartY = e.touches[0].clientY;
+        }, {passive: true});
+
+        document.addEventListener('touchmove', e => {
+            touchEndY = e.touches[0].clientY;
+            // Mostra indicatore se stiamo tirando giù e siamo in cima
+            if (window.scrollY === 0 && touchEndY > touchStartY + 50) {
+                indicator.classList.add('show');
+            }
+        }, {passive: true});
+
+        document.addEventListener('touchend', e => {
+            indicator.classList.remove('show');
+            // Se siamo in cima alla pagina e lo swipe è verso il basso (> 150px)
+            if (window.scrollY === 0 && touchEndY > touchStartY + 150) {
+                window.location.reload();
+            }
+        });
+
+        // INIT
         document.addEventListener('DOMContentLoaded', () => {
             renderHome();
             renderRubrica();
             calendarScrollId = renderCalendar(); 
             renderStats();
+            
+            // Imposta lo sfondo iniziale (Home è attiva di default)
+            document.getElementById('app-container').classList.add('bg-yellow-mode');
         });
 
     </script>
