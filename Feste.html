@@ -19,13 +19,20 @@
             --text-muted: #64748b;
             --bg-body: #f1f5f9;
             --bg-card: #ffffff;
-            /* Verde molto leggero (5% opacità) per eventi passati */
             --past-event-bg: rgba(16, 185, 129, 0.05); 
             --past-event-text: #059669;
             --border-color: #cbd5e1;
         }
         
-        html { font-size: 20px; } 
+        /* --- GESTIONE DIMENSIONI RESPONSIVE --- */
+        
+        /* 1. Default per CELLULARI: Testo normale (16px) */
+        html { font-size: 16px; } 
+
+        /* 2. Solo su PC/TABLET (schermi più larghi di 768px): Testo grande (20px) */
+        @media (min-width: 768px) {
+            html { font-size: 20px; }
+        }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
@@ -61,14 +68,14 @@
         }
         
         .header h1 { 
-            font-size: 1.8rem; 
+            font-size: 1.6rem; /* Leggermente ridotto per stare su una riga in mobile */
             font-weight: 800; 
             margin: 0;
             letter-spacing: 0.5px;
             text-transform: uppercase;
         }
         .header p { 
-            font-size: 1rem; 
+            font-size: 0.95rem; 
             opacity: 0.9; 
             margin-top: 5px; 
             font-weight: 400;
@@ -88,8 +95,8 @@
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 16px;
-            padding: 1.2rem;
-            margin-bottom: 1.2rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
             box-shadow: 0 3px 6px rgba(0,0,0,0.05);
         }
 
@@ -97,7 +104,7 @@
         .calendar-item {
             display: flex;
             align-items: center;
-            padding: 16px; 
+            padding: 14px; 
             background: white;
             border-bottom: 1px solid var(--border-color);
         }
@@ -106,44 +113,47 @@
         .is-past {
             background-color: var(--past-event-bg) !important;
         }
-        /* Opacità ridotta solo leggermente per mantenere leggibilità */
         .is-past .cal-date { opacity: 0.8; } 
         .is-past .cal-name { color: var(--text-muted); opacity: 0.9; }
 
         .cal-date {
-            width: 65px;
+            width: 60px;
             text-align: center;
             font-weight: 800;
-            font-size: 1.4rem; 
+            font-size: 1.3rem; 
             color: var(--primary);
             line-height: 1.1;
-            margin-right: 18px;
+            margin-right: 15px;
         }
-        .cal-date small { display: block; font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); }
+        .cal-date small { display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); }
         
         .cal-info { flex: 1; }
-        .cal-name { font-weight: 700; font-size: 1.2rem; margin-bottom: 4px; }
-        .cal-type { font-size: 0.95rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+        .cal-name { font-weight: 700; font-size: 1.1rem; margin-bottom: 3px; }
+        .cal-type { font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
 
         .month-header {
             background: #f1f5f9;
             color: var(--text-main);
-            padding: 12px 16px;
-            font-size: 1.1rem;
+            padding: 10px 16px;
+            font-size: 1rem;
             font-weight: 800;
             text-transform: uppercase;
             position: sticky;
-            top: 98px; 
+            top: 90px; /* Adattato per header mobile */
             z-index: 40;
             border-bottom: 1px solid var(--border-color);
             border-top: 1px solid var(--border-color);
+        }
+
+        @media (min-width: 768px) {
+            .month-header { top: 100px; } /* Correzione offset per PC */
         }
 
         /* --- RICERCA AVANZATA --- */
         .search-wrapper {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             margin-bottom: 1.5rem;
         }
 
@@ -154,10 +164,10 @@
 
         .search-box {
             width: 100%;
-            padding: 14px 45px 14px 16px; 
+            padding: 12px 40px 12px 14px; 
             border: 2px solid var(--border-color);
             border-radius: 12px;
-            font-size: 1.2rem; 
+            font-size: 1.1rem; 
             outline: none;
             transition: border-color 0.2s;
         }
@@ -171,10 +181,10 @@
             background: #e2e8f0;
             border: none;
             color: #64748b;
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
-            font-size: 18px;
+            font-size: 14px;
             font-weight: bold;
             cursor: pointer;
             display: none; 
@@ -183,19 +193,18 @@
             padding-bottom: 2px;
         }
         
-        /* Contatore risultati - Solo numero */
         .result-count {
             background: var(--primary);
             color: white;
-            min-width: 55px;
-            height: 55px;
+            min-width: 50px;
+            height: 50px;
             border-radius: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             font-weight: 800;
-            font-size: 1.5rem; /* Numero più grande */
+            font-size: 1.4rem;
             line-height: 1;
             flex-shrink: 0;
             box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
@@ -205,11 +214,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 18px 0;
+            padding: 16px 0;
             border-bottom: 1px solid var(--border-color);
         }
-        .rubrica-name { font-weight: 700; font-size: 1.3rem; color: var(--text-main); }
-        .rubrica-details { font-size: 1rem; color: var(--text-muted); margin-top: 4px; }
+        .rubrica-name { font-weight: 700; font-size: 1.15rem; color: var(--text-main); }
+        .rubrica-details { font-size: 0.9rem; color: var(--text-muted); margin-top: 4px; }
 
         /* --- NAVBAR --- */
         .nav-bar {
@@ -222,10 +231,10 @@
             background: white;
             display: flex;
             justify-content: space-around;
-            padding: 12px 0;
+            padding: 10px 0;
             border-top: 1px solid var(--border-color);
             z-index: 100;
-            padding-bottom: max(15px, env(safe-area-inset-bottom));
+            padding-bottom: max(10px, env(safe-area-inset-bottom));
             box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
         }
 
@@ -235,19 +244,19 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
             color: var(--text-muted);
-            font-size: 0.85rem; 
+            font-size: 0.75rem; 
             font-weight: 600;
             cursor: pointer;
             width: 25%;
         }
 
         .nav-item.active { color: var(--primary); }
-        .nav-item svg { width: 28px; height: 28px; stroke-width: 2.5px; }
+        .nav-item svg { width: 24px; height: 24px; stroke-width: 2.5px; }
 
         /* --- UTILITY --- */
-        .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.9rem; font-weight: 700; margin-left: auto; }
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; margin-left: auto; }
         .badge-bday { background: #dbeafe; color: #1e40af; }
         .badge-name { background: #fce7f3; color: #9d174d; }
 
@@ -263,7 +272,7 @@
         </div>
 
         <div id="tab-home" class="tab-content active">
-            <h3 style="margin: 1rem 0 1rem; color: var(--text-muted); font-size: 1.1rem;">IN ARRIVO</h3>
+            <h3 style="margin: 0.5rem 0 1rem; color: var(--text-muted); font-size: 1rem; text-transform: uppercase;">In Arrivo</h3>
             <div id="upcoming-list"></div>
         </div>
 
@@ -287,11 +296,11 @@
 
         <div id="tab-stats" class="tab-content">
             <div class="card">
-                <h3 style="margin-bottom: 20px; font-size: 1.4rem;">Statistiche Mesi</h3>
+                <h3 style="margin-bottom: 20px; font-size: 1.2rem;">Statistiche Mesi</h3>
                 <div id="stats-months"></div>
             </div>
             <div class="card">
-                <h3 style="margin-bottom: 20px; font-size: 1.4rem;">Tipologia</h3>
+                <h3 style="margin-bottom: 20px; font-size: 1.2rem;">Tipologia</h3>
                 <div id="stats-types"></div>
             </div>
         </div>
@@ -372,28 +381,27 @@
                 .sort((a, b) => a.daysUntil - b.daysUntil);
 
             if (upcoming.length === 0) {
-                container.innerHTML = '<div style="text-align:center; padding:2rem; font-size:1.2rem; color:var(--text-muted)">Nessun evento imminente</div>';
+                container.innerHTML = '<div style="text-align:center; padding:2rem; font-size:1rem; color:var(--text-muted)">Nessun evento imminente</div>';
                 return;
             }
 
             container.innerHTML = upcoming.map(e => {
                 const icon = e.tipoDisplay === 'Compleanno' ? '🎂' : (e.tipoDisplay === 'Onomastico' ? '🌟' : '🥂');
-                const badgeClass = e.tipoDisplay === 'Compleanno' ? 'badge-bday' : 'badge-name';
                 
                 let dayLabel = `Tra ${e.daysUntil} gg`;
                 if (e.daysUntil === 0) dayLabel = "OGGI!";
                 if (e.daysUntil === 1) dayLabel = "Domani";
 
                 return `
-                <div class="card" style="display:flex; align-items:center; gap:18px; border-left: 5px solid var(--primary);">
-                    <div style="text-align:center; min-width:60px;">
-                        <div style="font-weight:800; color:var(--primary); font-size:1.6rem; line-height:1;">${e.pDate.day}</div>
-                        <div style="font-size:0.8rem; text-transform:uppercase; font-weight:600;">${shortMonths[e.pDate.month-1]}</div>
+                <div class="card" style="display:flex; align-items:center; gap:15px; border-left: 5px solid var(--primary);">
+                    <div style="text-align:center; min-width:55px;">
+                        <div style="font-weight:800; color:var(--primary); font-size:1.5rem; line-height:1;">${e.pDate.day}</div>
+                        <div style="font-size:0.75rem; text-transform:uppercase; font-weight:600;">${shortMonths[e.pDate.month-1]}</div>
                     </div>
                     <div style="flex:1;">
-                        <div style="font-weight:700; font-size:1.3rem;">${e.Nome} ${e.Cognome}</div>
-                        <div style="display:flex; align-items:center; margin-top:5px;">
-                            <span style="font-size:1rem; color:var(--text-muted);">${icon} ${e.tipoDisplay}</span>
+                        <div style="font-weight:700; font-size:1.15rem;">${e.Nome} ${e.Cognome}</div>
+                        <div style="display:flex; align-items:center; margin-top:4px;">
+                            <span style="font-size:0.9rem; color:var(--text-muted);">${icon} ${e.tipoDisplay}</span>
                             <span class="badge" style="background:var(--primary-light); color:var(--primary);">${dayLabel}</span>
                         </div>
                     </div>
@@ -438,7 +446,7 @@
                             <span>${icon} ${e.tipoDisplay}</span>
                         </div>
                     </div>
-                    ${!e.isPastThisYear && rowId === firstFutureId ? '<span style="font-size:0.8rem; color:var(--primary); font-weight:bold;">PROSSIMO</span>' : ''}
+                    ${!e.isPastThisYear && rowId === firstFutureId ? '<span style="font-size:0.75rem; color:var(--primary); font-weight:bold;">PROSSIMO</span>' : ''}
                 </div>`;
             });
 
@@ -473,14 +481,14 @@
             countEl.innerText = filtered.length;
 
             if (filtered.length === 0) {
-                container.innerHTML = '<p style="text-align:center; padding:2rem; color:var(--text-muted); font-size:1.2rem;">Nessun risultato</p>';
+                container.innerHTML = '<p style="text-align:center; padding:2rem; color:var(--text-muted); font-size:1rem;">Nessun risultato</p>';
                 return;
             }
 
             container.innerHTML = filtered.map(p => {
                 const itemsHtml = p.items.map(i => {
                     const icon = i.tipoDisplay === 'Compleanno' ? '🎂' : (i.tipoDisplay === 'Onomastico' ? '🌟' : '🥂');
-                    return `<span style="margin-right:15px; font-size:1rem; color:var(--text-muted); display:inline-block;">${icon} ${i.pDate.day}/${i.pDate.month}</span>`;
+                    return `<span style="margin-right:12px; font-size:0.9rem; color:var(--text-muted); display:inline-block;">${icon} ${i.pDate.day}/${i.pDate.month}</span>`;
                 }).join('');
 
                 return `
@@ -508,9 +516,9 @@
             document.getElementById('stats-months').innerHTML = months.map((m, i) => {
                 if (mCount[i] === 0) return '';
                 const w = (mCount[i]/maxM)*100;
-                return `<div style="display:flex;align-items:center;margin-bottom:12px;font-size:1rem;">
-                            <div style="width:110px;">${m}</div>
-                            <div style="flex:1;height:12px;background:#f1f5f9;border-radius:6px;margin:0 10px;">
+                return `<div style="display:flex;align-items:center;margin-bottom:10px;font-size:0.9rem;">
+                            <div style="width:100px;">${m}</div>
+                            <div style="flex:1;height:10px;background:#f1f5f9;border-radius:6px;margin:0 10px;">
                                 <div style="height:100%;width:${w}%;background:var(--primary);border-radius:6px;"></div>
                             </div>
                             <div style="font-weight:bold;">${mCount[i]}</div>
@@ -526,9 +534,9 @@
             document.getElementById('stats-types').innerHTML = Object.entries(tCount).map(([k, v]) => {
                 if (v === 0) return '';
                 const w = (v/maxT)*100;
-                return `<div style="display:flex;align-items:center;margin-bottom:12px;font-size:1rem;">
-                            <div style="width:110px;">${k}</div>
-                            <div style="flex:1;height:12px;background:#f1f5f9;border-radius:6px;margin:0 10px;">
+                return `<div style="display:flex;align-items:center;margin-bottom:10px;font-size:0.9rem;">
+                            <div style="width:100px;">${k}</div>
+                            <div style="flex:1;height:10px;background:#f1f5f9;border-radius:6px;margin:0 10px;">
                                 <div style="height:100%;width:${w}%;background:#ec4899;border-radius:6px;"></div>
                             </div>
                             <div style="font-weight:bold;">${v}</div>
