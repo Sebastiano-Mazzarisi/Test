@@ -4,12 +4,13 @@ import os
 import sys
 import webbrowser
 from datetime import datetime
+from itertools import groupby
 
 # Nome: Feste.py
 # Data ultima modifica: 12/01/2026
-# Descrizione: Versione DEFINITIVA.
-#              - HTML/JS: Completo (PDF avanzati, Anniversari uniti, Ricerca vocale).
-#              - SIRI: Generazione testo naturale (es. "Tra 5 giorni...").
+# Descrizione: Versione DEFINITIVA OTTIMIZZATA PER SIRI.
+#              - Raggruppamento eventi per data (non ripete "Tra X giorni").
+#              - Usa "E ancora" per separare i gruppi di date.
 # File di input: Feste-elenco.csv
 # File di output: Feste.html, Feste.txt
 
@@ -19,7 +20,6 @@ BACKUP_FILE = 'Feste-backup.csv'
 OUTPUT_FILE = 'Feste.html'
 OUTPUT_TXT = 'Feste.txt'
 
-# Link diretto all'immagine su GitHub Pages
 ICON_URL = "https://sebastiano-mazzarisi.github.io/Test/Feste.png?v=11"
 
 def leggi_e_processa_dati(nome_file):
@@ -57,7 +57,6 @@ def leggi_e_processa_dati(nome_file):
                 
                 dati.append(clean_row)
 
-        # Ordinamento alfabetico base
         dati.sort(key=lambda x: (x.get('Cognome', '').lower(), x.get('Nome', '').lower()))
         
         print(f"✅ Letti e ordinati {len(dati)} record validi.")
@@ -79,10 +78,13 @@ def leggi_e_processa_dati(nome_file):
 
 def genera_txt_siri_discorsivo(dati):
     """
-    Genera Feste.txt ottimizzato per la lettura naturale di Siri.
-    Esempio: "Domani, il 15 gennaio, Mario festeggia il compleanno."
+    Genera Feste.txt raggruppando gli eventi per data.
+    Esempio output:
+    "Tra 2 giorni, il 13 gennaio:
+     Mario festeggia...
+     Luigi festeggia..."
     """
-    print("🗣️ Generazione testo naturale per Siri...")
+    print("🗣️ Generazione testo naturale raggruppato per Siri...")
     
     mesi_nomi = ["", "gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", 
                  "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"]
@@ -98,11 +100,10 @@ def genera_txt_siri_discorsivo(dati):
             day, month = int(parts[0]), int(parts[1])
             year_str = parts[2] if len(parts) > 2 and parts[2] else None
             
-            # Calcolo prossima data
             try:
                 next_event = datetime(today.year, month, day)
             except ValueError:
-                continue # Gestione bisestile grezza
+                continue 
                 
             if next_event < today:
                 next_event = next_event.replace(year=today.year + 1)
@@ -112,7 +113,6 @@ def genera_txt_siri_discorsivo(dati):
             years_turning = None
             if year_str:
                 origin_year = int(year_str)
-                # Se l'evento è quest'anno
                 years_turning = next_event.year - origin_year
 
             tipo = item.get('Festa', 'Anniversario')
@@ -130,9 +130,9 @@ def genera_txt_siri_discorsivo(dati):
         except:
             continue
 
+    # Ordina per data per poter raggruppare
     processed_events.sort(key=lambda x: x['DaysUntil'])
 
-    # Creazione del testo
     lines = []
     lines.append("Ecco il riepilogo delle feste.\n")
 
@@ -140,8 +140,12 @@ def genera_txt_siri_discorsivo(dati):
     events_today = [e for e in processed_events if e['DaysUntil'] == 0]
     if events_today:
         lines.append("Attenzione, oggi c'è una festa!")
+        # Raggruppa anche per oggi se ce ne sono più di uno
+        today_date_str = f"Oggi, {events_today[0]['Day']} {events_today[0]['MonthName']},"
+        lines.append(today_date_str)
+        
         for e in events_today:
-            phrase = f"Oggi, {e['Day']} {e['MonthName']}, è il {e['Tipo']} di {e['Nome']} {e['Cognome']}."
+            phrase = f"{e['Tipo']} di {e['Nome']} {e['Cognome']}."
             if e['Years']:
                 if e['Tipo'] == 'Compleanno':
                     phrase += f" Compie {e['Years']} anni."
@@ -153,43 +157,63 @@ def genera_txt_siri_discorsivo(dati):
 
     lines.append("\n") 
 
-    # --- PROSSIMI ---
-    upcoming = [e for e in processed_events if e['DaysUntil'] > 0][:5]
+    # --- PROSSIMI (Raggruppati) ---
+    # Prendiamo i prossimi 6 eventi per sicurezza, poi raggruppiamo
+    upcoming = [e for e in processed_events if e['DaysUntil'] > 0][:6]
+    
     if upcoming:
         lines.append("Nei prossimi giorni:")
-        for e in upcoming:
-            if e['DaysUntil'] == 1:
-                tempo = "Domani"
-            else:
-                tempo = f"Tra {e['DaysUntil']} giorni"
-
-            phrase = f"{tempo}, il {e['Day']} {e['MonthName']}, "
+        
+        # Raggruppa per giorni mancanti (DaysUntil)
+        groups = []
+        for k, g in groupby(upcoming, key=lambda x: x['DaysUntil']):
+            groups.append(list(g))
             
-            if e['Tipo'] == 'Compleanno':
-                phrase += f"{e['Nome']} {e['Cognome']} festeggia il compleanno"
-                if e['Years']: phrase += f" e compie {e['Years']} anni"
-            elif e['Tipo'] == 'Onomastico':
-                 phrase += f"è l'onomastico di {e['Nome']} {e['Cognome']}"
-            else:
-                phrase += f"è l'anniversario di {e['Nome']} {e['Cognome']}"
-                if e['Years']: phrase += f" di {e['Years']} anni"
+        for i, group in enumerate(groups):
+            first = group[0]
             
-            phrase += "." 
-            lines.append(phrase)
+            # Separatore "E ancora" dalla seconda data in poi
+            if i == 1:
+                lines.append("\nE ancora:")
+            elif i > 1:
+                lines.append("") # Spazio vuoto semplice
+            
+            # Intestazione Data
+            if first['DaysUntil'] == 1:
+                header = f"Domani, il {first['Day']} {first['MonthName']},"
+            else:
+                header = f"Tra {first['DaysUntil']} giorni, il {first['Day']} {first['MonthName']},"
+            
+            lines.append(header)
+            
+            # Elenco persone in quella data
+            for e in group:
+                phrase = ""
+                if e['Tipo'] == 'Compleanno':
+                    phrase = f"{e['Nome']} {e['Cognome']} festeggia il compleanno"
+                    if e['Years']: phrase += f" e compie {e['Years']} anni"
+                elif e['Tipo'] == 'Onomastico':
+                    phrase = f"È l'onomastico di {e['Nome']} {e['Cognome']}"
+                else:
+                    phrase = f"Anniversario di {e['Nome']} {e['Cognome']}"
+                    if e['Years']: phrase += f" ({e['Years']} anni)"
+                
+                phrase += "."
+                lines.append(phrase)
+                
     else:
         lines.append("Non ci sono altri eventi imminenti.")
 
     try:
         with open(OUTPUT_TXT, 'w', encoding='utf-8') as f:
             f.write("\n".join(lines))
-        print(f"📄 File Siri DISCORSIVO generato: {OUTPUT_TXT}")
+        print(f"📄 File Siri RAGGRUPPATO generato: {OUTPUT_TXT}")
     except Exception as e:
         print(f"⚠️ Errore scrittura file Siri: {e}")
 
 def genera_html(dati):
     json_dati = json.dumps(dati, ensure_ascii=False)
     
-    # HTML COMPLETO ORIGINALE
     html_content = f"""<!DOCTYPE html>
 <html lang="it">
 <head>
@@ -636,7 +660,7 @@ def genera_html(dati):
 
         <nav class="nav-bar">
             <button class="nav-item active" onclick="switchTab('home')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                 Home
             </button>
             <button class="nav-item" onclick="switchTab('rubrica')">
