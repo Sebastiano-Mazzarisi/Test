@@ -174,12 +174,41 @@
             color: var(--primary);
             line-height: 1.1;
             margin-right: 15px;
+            /* Flex per centrare verticalmente se il box a destra cresce */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
-        .cal-date small { display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); }
+        .cal-date small { display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-top: 2px; }
         
         .cal-info { flex: 1; }
-        .cal-name { font-weight: 700; font-size: 1.1rem; margin-bottom: 3px; }
-        .cal-type { font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+        
+        /* Stili per singolo evento dentro il box */
+        .event-row {
+            margin-bottom: 12px;
+            position: relative; /* Per posizionamento badge */
+        }
+        .event-row:last-child { margin-bottom: 0; }
+        
+        /* Padding a destra per non sovrapporsi al badge */
+        .cal-name { font-weight: 700; font-size: 1.1rem; margin-bottom: 2px; line-height: 1.2; padding-right: 60px; }
+        .cal-type { font-size: 0.9rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+
+        /* Badge riposizionato a destra */
+        .home-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        /* Grassetto per i numeri tra parentesi */
+        .bold-number { font-weight: 900; color: var(--text-main); }
 
         .month-header {
             background: #f1f5f9;
@@ -370,7 +399,7 @@
             <div class="header-content">
                 <h1>EVENTI E FESTE</h1>
                 <p>Compleanni e Anniversari</p>
-                <button class="print-btn" onclick="generatePDF()" title="Stampa PDF Elenco">
+                <button class="print-btn" onclick="generatePDF()" title="Stampa PDF">
                     🖨️
                 </button>
             </div>
@@ -415,7 +444,7 @@
 
         <nav class="nav-bar">
             <button class="nav-item active" onclick="switchTab('home')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                 Home
             </button>
             <button class="nav-item" onclick="switchTab('rubrica')">
@@ -435,9 +464,10 @@
     </div>
 
     <script>
-        const rawData = [{"Cognome": "Albano", "Nome": "Anna", "Genere": "F", "Data": "26/07", "Festa": "Onomastico"}, {"Cognome": "Albano", "Nome": "Anna", "Genere": "F", "Data": "16/12/1967", "Festa": "Compleanno"}, {"Cognome": "Bianco", "Nome": "Rosa", "Genere": "F", "Data": "02/09/1971", "Festa": "Compleanno"}, {"Cognome": "Bianco", "Nome": "Rosa", "Genere": "F", "Data": "23/08", "Festa": "Onomastico"}, {"Cognome": "Bianco", "Nome": "Rosa", "Genere": "F", "Data": "29/12/2004", "Festa": "Anniversario"}, {"Cognome": "Boscia", "Nome": "Celeste", "Genere": "F", "Data": "14/10", "Festa": "Onomastico"}, {"Cognome": "Boscia", "Nome": "Celeste", "Genere": "F", "Data": "27/03/1964", "Festa": "Compleanno"}, {"Cognome": "Calò", "Nome": "Aldo", "Genere": "M", "Data": "10/01", "Festa": "Onomastico"}, {"Cognome": "Calò", "Nome": "Aldo", "Genere": "M", "Data": "05/11/1951", "Festa": "Compleanno"}, {"Cognome": "Campanella", "Nome": "Sabina", "Genere": "F", "Data": "28/04/1976", "Festa": "Compleanno"}, {"Cognome": "Campanella", "Nome": "Sabina", "Genere": "F", "Data": "29/08", "Festa": "Onomastico"}, {"Cognome": "Campanella", "Nome": "Sabina", "Genere": "F", "Data": "01/08/2009", "Festa": "Anniversario"}, {"Cognome": "Cannone", "Nome": "Giovanni", "Genere": "M", "Data": "19/10/1956", "Festa": "Compleanno"}, {"Cognome": "Cannone", "Nome": "Giovanni", "Genere": "M", "Data": "24/06", "Festa": "Onomastico"}, {"Cognome": "Castiglia", "Nome": "Enzo (Lorenzo)", "Genere": "M", "Data": "10/08", "Festa": "Onomastico"}, {"Cognome": "Castiglia", "Nome": "Enzo (Lorenzo)", "Genere": "M", "Data": "01/01/1958", "Festa": "Compleanno"}, {"Cognome": "Chiarappa", "Nome": "Cristiano", "Genere": "M", "Data": "07/04", "Festa": "Onomastico"}, {"Cognome": "Chiarappa", "Nome": "Cristiano", "Genere": "M", "Data": "20/06/2001", "Festa": "Compleanno"}, {"Cognome": "Chiarappa", "Nome": "Martino", "Genere": "M", "Data": "11/11", "Festa": "Onomastico"}, {"Cognome": "Chiarappa", "Nome": "Martino", "Genere": "M", "Data": "24/05/1997", "Festa": "Compleanno"}, {"Cognome": "Chiarappa", "Nome": "Saverio", "Genere": "M", "Data": "03/12", "Festa": "Onomastico"}, {"Cognome": "Chiarappa", "Nome": "Saverio", "Genere": "M", "Data": "09/09/2000", "Festa": "Anniversario"}, {"Cognome": "Chiarappa", "Nome": "Saverio", "Genere": "M", "Data": "26/11/1951", "Festa": "Compleanno"}, {"Cognome": "Console", "Nome": "Giampiero", "Genere": "M", "Data": "21/01/1952", "Festa": "Compleanno"}, {"Cognome": "Console", "Nome": "Giampiero", "Genere": "M", "Data": "24/06", "Festa": "Onomastico"}, {"Cognome": "Dalena", "Nome": "Riccardo", "Genere": "M", "Data": "03/04", "Festa": "Onomastico"}, {"Cognome": "Dalena", "Nome": "Riccardo", "Genere": "M", "Data": "04/10/2002", "Festa": "Anniversario"}, {"Cognome": "Dalena", "Nome": "Riccardo", "Genere": "M", "Data": "11/04/1973", "Festa": "Compleanno"}, {"Cognome": "De Nobili", "Nome": "Antonella", "Genere": "F", "Data": "06/05/1959", "Festa": "Compleanno"}, {"Cognome": "De Nobili", "Nome": "Antonella", "Genere": "F", "Data": "13/06", "Festa": "Onomastico"}, {"Cognome": "Detomaso", "Nome": "Paolo", "Genere": "M", "Data": "25/01", "Festa": "Onomastico"}, {"Cognome": "Detomaso", "Nome": "Paolo", "Genere": "M", "Data": "28/04/1961", "Festa": "Compleanno"}, {"Cognome": "Di Stasio", "Nome": "Checco", "Genere": "M", "Data": "12/12/1975", "Festa": "Compleanno"}, {"Cognome": "Di Stasio", "Nome": "Checco", "Genere": "M", "Data": "04/10", "Festa": "Onomastico"}, {"Cognome": "Di Stasio", "Nome": "Checco", "Genere": "M", "Data": "01/08/2009", "Festa": "Anniversario"}, {"Cognome": "Fanigliuolo", "Nome": "Paolo", "Genere": "M", "Data": "11/01/1954", "Festa": "Compleanno"}, {"Cognome": "Fanigliuolo", "Nome": "Paolo", "Genere": "M", "Data": "29/06", "Festa": "Onomastico"}, {"Cognome": "Furio", "Nome": "Pino", "Genere": "M", "Data": "19/03", "Festa": "Onomastico"}, {"Cognome": "Furio", "Nome": "Pino", "Genere": "M", "Data": "31/08/1956", "Festa": "Compleanno"}, {"Cognome": "Galluzzi", "Nome": "Marco", "Genere": "M", "Data": "20/05/1958", "Festa": "Compleanno"}, {"Cognome": "Galluzzi", "Nome": "Marco", "Genere": "M", "Data": "25/04", "Festa": "Onomastico"}, {"Cognome": "Gentile", "Nome": "Anna Maria", "Genere": "F", "Data": "10/05/1967", "Festa": "Compleanno"}, {"Cognome": "Gentile", "Nome": "Anna Maria", "Genere": "F", "Data": "26/07", "Festa": "Onomastico"}, {"Cognome": "Grilletti", "Nome": "Teresa", "Genere": "F", "Data": "03/12/1956", "Festa": "Anniversario"}, {"Cognome": "Grilletti", "Nome": "Teresa", "Genere": "F", "Data": "05/03/1937", "Festa": "Compleanno"}, {"Cognome": "Grilletti", "Nome": "Teresa", "Genere": "F", "Data": "15/10", "Festa": "Onomastico"}, {"Cognome": "Guazzaroni", "Nome": "Giulia", "Genere": "F", "Data": "10/12/1957", "Festa": "Compleanno"}, {"Cognome": "Guazzaroni", "Nome": "Giulia", "Genere": "F", "Data": "22/05", "Festa": "Onomastico"}, {"Cognome": "Iurilli", "Nome": "Anna Maria", "Genere": "F", "Data": "20/02/1971", "Festa": "Compleanno"}, {"Cognome": "Iurilli", "Nome": "Anna Maria", "Genere": "F", "Data": "26/07", "Festa": "Onomastico"}, {"Cognome": "Iurilli", "Nome": "Anna Maria", "Genere": "F", "Data": "04/10/2001", "Festa": "Anniversario"}, {"Cognome": "La Gala", "Nome": "Giuliana", "Genere": "F", "Data": "13/01/1965", "Festa": "Compleanno"}, {"Cognome": "La Gala", "Nome": "Giuliana", "Genere": "F", "Data": "16/02", "Festa": "Onomastico"}, {"Cognome": "Ladisa", "Nome": "Enza", "Genere": "F", "Data": "10/08", "Festa": "Onomastico"}, {"Cognome": "Ladisa", "Nome": "Enza", "Genere": "F", "Data": "19/03/1959", "Festa": "Compleanno"}, {"Cognome": "Lefemine", "Nome": "Domenico", "Genere": "M", "Data": "04/08", "Festa": "Onomastico"}, {"Cognome": "Lefemine", "Nome": "Domenico", "Genere": "M", "Data": "06/02/1957", "Festa": "Compleanno"}, {"Cognome": "Lefemine", "Nome": "Domenico", "Genere": "M", "Data": "28/08/1991", "Festa": "Anniversario"}, {"Cognome": "Lefemine", "Nome": "Flavia", "Genere": "F", "Data": "07/05", "Festa": "Onomastico"}, {"Cognome": "Lefemine", "Nome": "Flavia", "Genere": "F", "Data": "16/11/1996", "Festa": "Compleanno"}, {"Cognome": "Lefemine", "Nome": "Francesco", "Genere": "M", "Data": "04/10", "Festa": "Onomastico"}, {"Cognome": "Lefemine", "Nome": "Francesco", "Genere": "M", "Data": "20/03/2000", "Festa": "Compleanno"}, {"Cognome": "Leone", "Nome": "Gianni (Giacobbe)", "Genere": "M", "Data": "06/10/1957", "Festa": "Compleanno"}, {"Cognome": "Leone", "Nome": "Gianni (Giacobbe)", "Genere": "M", "Data": "24/06", "Festa": "Onomastico"}, {"Cognome": "Loiacono", "Nome": "Rossella", "Genere": "F", "Data": "04/09", "Festa": "Onomastico"}, {"Cognome": "Loiacono", "Nome": "Rossella", "Genere": "F", "Data": "20/04/1953", "Festa": "Compleanno"}, {"Cognome": "Lorusso", "Nome": "Alessandro", "Genere": "M", "Data": "17/07/2010", "Festa": "Compleanno"}, {"Cognome": "Lorusso", "Nome": "Alessandro", "Genere": "M", "Data": "26/08", "Festa": "Onomastico"}, {"Cognome": "Lorusso", "Nome": "Alice", "Genere": "F", "Data": "13/06", "Festa": "Onomastico"}, {"Cognome": "Lorusso", "Nome": "Alice", "Genere": "F", "Data": "20/07/2013", "Festa": "Compleanno"}, {"Cognome": "Lorusso", "Nome": "Benny", "Genere": "M", "Data": "17/11/1975", "Festa": "Compleanno"}, {"Cognome": "Lorusso", "Nome": "Benny", "Genere": "M", "Data": "21/03", "Festa": "Onomastico"}, {"Cognome": "Lorusso", "Nome": "Benny", "Genere": "M", "Data": "26/07/2008", "Festa": "Anniversario"}, {"Cognome": "Lorusso", "Nome": "Cinzia", "Genere": "F", "Data": "06/04/1980", "Festa": "Compleanno"}, {"Cognome": "Lorusso", "Nome": "Cinzia", "Genere": "F", "Data": "13/09/2014", "Festa": "Anniversario"}, {"Cognome": "Lorusso", "Nome": "Mimmo", "Genere": "M", "Data": "01/07/1955", "Festa": "Compleanno"}, {"Cognome": "Lorusso", "Nome": "Mimmo", "Genere": "M", "Data": "04/08", "Festa": "Onomastico"}, {"Cognome": "Lorusso", "Nome": "Nina", "Genere": "F", "Data": "15/12", "Festa": "Onomastico"}, {"Cognome": "Lorusso", "Nome": "Nina", "Genere": "F", "Data": "29/11/2015", "Festa": "Compleanno"}, {"Cognome": "Lorusso", "Nome": "Onofrio", "Genere": "M", "Data": "05/08/1951", "Festa": "Compleanno"}, {"Cognome": "Lorusso", "Nome": "Onofrio", "Genere": "M", "Data": "09/08/1975", "Festa": "Anniversario"}, {"Cognome": "Lorusso", "Nome": "Onofrio", "Genere": "M", "Data": "12/06", "Festa": "Onomastico"}, {"Cognome": "Losito", "Nome": "Francesco", "Genere": "M", "Data": "04/10", "Festa": "Onomastico"}, {"Cognome": "Losito", "Nome": "Francesco", "Genere": "M", "Data": "23/07/1955", "Festa": "Compleanno"}, {"Cognome": "Mancino", "Nome": "Carlo", "Genere": "M", "Data": "04/11", "Festa": "Onomastico"}, {"Cognome": "Mancino", "Nome": "Carlo", "Genere": "M", "Data": "26/07/1979", "Festa": "Compleanno"}, {"Cognome": "Mangini", "Nome": "Rina", "Genere": "F", "Data": "01/12/1960", "Festa": "Compleanno"}, {"Cognome": "Mangini", "Nome": "Rina", "Genere": "F", "Data": "25/11", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Alessandra", "Genere": "F", "Data": "11/10/1988", "Festa": "Compleanno"}, {"Cognome": "Mazzarisi", "Nome": "Alessandra", "Genere": "F", "Data": "20/03", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Andrea", "Genere": "M", "Data": "08/11/1993", "Festa": "Compleanno"}, {"Cognome": "Mazzarisi", "Nome": "Andrea", "Genere": "M", "Data": "30/11", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Daniele", "Genere": "M", "Data": "09/10/1988", "Festa": "Compleanno"}, {"Cognome": "Mazzarisi", "Nome": "Daniele", "Genere": "M", "Data": "10/10", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Domenico", "Genere": "M", "Data": "08/08", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Domenico", "Genere": "M", "Data": "24/02/1964", "Festa": "Compleanno"}, {"Cognome": "Mazzarisi", "Nome": "Francesco", "Genere": "M", "Data": "04/10", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Francesco", "Genere": "M", "Data": "05/07/1961", "Festa": "Compleanno"}, {"Cognome": "Mazzarisi", "Nome": "Marco", "Genere": "M", "Data": "25/04", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Marco", "Genere": "M", "Data": "28/04/1987", "Festa": "Compleanno"}, {"Cognome": "Mazzarisi", "Nome": "Maria Grazia", "Genere": "F", "Data": "12/09", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Maria Grazia", "Genere": "F", "Data": "21/01/1989", "Festa": "Compleanno"}, {"Cognome": "Mazzarisi", "Nome": "Mariella", "Genere": "F", "Data": "05/07/1961", "Festa": "Compleanno"}, {"Cognome": "Mazzarisi", "Nome": "Mariella", "Genere": "F", "Data": "12/09", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Marilù", "Genere": "F", "Data": "12/09", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Marilù", "Genere": "F", "Data": "28/12/1999", "Festa": "Compleanno"}, {"Cognome": "Mazzarisi", "Nome": "Nino (Sebastiano)", "Genere": "M", "Data": "04/07/1987", "Festa": "Anniversario"}, {"Cognome": "Mazzarisi", "Nome": "Nino (Sebastiano)", "Genere": "M", "Data": "07/05/1957", "Festa": "Compleanno"}, {"Cognome": "Mazzarisi", "Nome": "Nino (Sebastiano)", "Genere": "M", "Data": "20/01", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Onofrio", "Genere": "M", "Data": "05/06/1992", "Festa": "Compleanno"}, {"Cognome": "Mazzarisi", "Nome": "Onofrio", "Genere": "M", "Data": "12/06", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Teresa", "Genere": "F", "Data": "01/04/1994", "Festa": "Compleanno"}, {"Cognome": "Mazzarisi", "Nome": "Teresa", "Genere": "F", "Data": "15/10", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Vito", "Genere": "M", "Data": "15/06", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Vito", "Genere": "M", "Data": "22/08/1958", "Festa": "Compleanno"}, {"Cognome": "Mazzeo", "Nome": "Rosa", "Genere": "F", "Data": "23/08", "Festa": "Onomastico"}, {"Cognome": "Mazzeo", "Nome": "Rosa", "Genere": "F", "Data": "30/10/1966", "Festa": "Compleanno"}, {"Cognome": "Meduso", "Nome": "Agostino", "Genere": "M", "Data": "15/02/1957", "Festa": "Compleanno"}, {"Cognome": "Meduso", "Nome": "Agostino", "Genere": "M", "Data": "28/08", "Festa": "Onomastico"}, {"Cognome": "Mele", "Nome": "Nicola", "Genere": "M", "Data": "06/12", "Festa": "Onomastico"}, {"Cognome": "Mele", "Nome": "Nicola", "Genere": "M", "Data": "08/06/1952", "Festa": "Compleanno"}, {"Cognome": "Mele", "Nome": "Nicola", "Genere": "M", "Data": "28/07/1975", "Festa": "Anniversario"}, {"Cognome": "Minerva", "Nome": "Nicola", "Genere": "M", "Data": "06/12", "Festa": "Onomastico"}, {"Cognome": "Minerva", "Nome": "Nicola", "Genere": "M", "Data": "09/09/1987", "Festa": "Compleanno"}, {"Cognome": "Montagna", "Nome": "Cosimo", "Genere": "M", "Data": "13/01/1958", "Festa": "Compleanno"}, {"Cognome": "Montagna", "Nome": "Cosimo", "Genere": "M", "Data": "26/09", "Festa": "Onomastico"}, {"Cognome": "Nitti", "Nome": "Enza", "Genere": "F", "Data": "10/08", "Festa": "Onomastico"}, {"Cognome": "Nitti", "Nome": "Enza", "Genere": "F", "Data": "25/11/1953", "Festa": "Compleanno"}, {"Cognome": "Pacello", "Nome": "Stefano", "Genere": "M", "Data": "10/09/1957", "Festa": "Compleanno"}, {"Cognome": "Pacello", "Nome": "Stefano", "Genere": "M", "Data": "26/12", "Festa": "Onomastico"}, {"Cognome": "Pedone", "Nome": "Leonardo", "Genere": "M", "Data": "07/03/1968", "Festa": "Compleanno"}, {"Cognome": "Pedone", "Nome": "Leonardo", "Genere": "M", "Data": "06/11", "Festa": "Onomastico"}, {"Cognome": "Pedone", "Nome": "Leonardo", "Genere": "M", "Data": "04/10/2001", "Festa": "Anniversario"}, {"Cognome": "Perez Almodovar", "Nome": "Giulia", "Genere": "F", "Data": "22/05", "Festa": "Onomastico"}, {"Cognome": "Perez Almodovar", "Nome": "Giulia", "Genere": "F", "Data": "13/09/1995", "Festa": "Compleanno"}, {"Cognome": "Perniola", "Nome": "Michele", "Genere": "M", "Data": "29/09", "Festa": "Onomastico"}, {"Cognome": "Perniola", "Nome": "Michele", "Genere": "M", "Data": "25/11/1961", "Festa": "Compleanno"}, {"Cognome": "Petrera", "Nome": "Leo", "Genere": "M", "Data": "16/02", "Festa": "Onomastico"}, {"Cognome": "Petrera", "Nome": "Leo", "Genere": "M", "Data": "26/07/1960", "Festa": "Compleanno"}, {"Cognome": "Pinto", "Nome": "Lucio Gregorio", "Genere": "M", "Data": "16/04/1964", "Festa": "Compleanno"}, {"Cognome": "Pinto", "Nome": "Lucio Gregorio", "Genere": "M", "Data": "03/09", "Festa": "Onomastico"}, {"Cognome": "Pompilio", "Nome": "Vincenzo", "Genere": "M", "Data": "27/09", "Festa": "Onomastico"}, {"Cognome": "Pompilio", "Nome": "Vincenzo", "Genere": "M", "Data": "27/01/1956", "Festa": "Compleanno"}, {"Cognome": "Pontrandolfo", "Nome": "Anna", "Genere": "F", "Data": "26/07", "Festa": "Onomastico"}, {"Cognome": "Pontrandolfo", "Nome": "Anna", "Genere": "F", "Data": "22/06/1951", "Festa": "Compleanno"}, {"Cognome": "Pontrandolfo", "Nome": "Anna", "Genere": "F", "Data": "28/07/1975", "Festa": "Anniversario"}, {"Cognome": "Pricci", "Nome": "Angela", "Genere": "F", "Data": "02/08", "Festa": "Onomastico"}, {"Cognome": "Pricci", "Nome": "Angela", "Genere": "F", "Data": "09/08/1975", "Festa": "Anniversario"}, {"Cognome": "Pricci", "Nome": "Angela", "Genere": "F", "Data": "13/01/1957", "Festa": "Compleanno"}, {"Cognome": "Pricci", "Nome": "Asia", "Genere": "F", "Data": "07/06/2006", "Festa": "Compleanno"}, {"Cognome": "Pricci", "Nome": "Asia", "Genere": "F", "Data": "19/02", "Festa": "Onomastico"}, {"Cognome": "Pricci", "Nome": "Gilda", "Genere": "F", "Data": "13/02", "Festa": "Onomastico"}, {"Cognome": "Pricci", "Nome": "Gilda", "Genere": "F", "Data": "29/06/2004", "Festa": "Compleanno"}, {"Cognome": "Pricci", "Nome": "Giovanni", "Genere": "M", "Data": "24/06", "Festa": "Onomastico"}, {"Cognome": "Pricci", "Nome": "Giovanni", "Genere": "M", "Data": "24/10/1964", "Festa": "Compleanno"}, {"Cognome": "Pricci", "Nome": "Giovanni", "Genere": "M", "Data": "29/12/2004", "Festa": "Anniversario"}, {"Cognome": "Pricci", "Nome": "Giuseppe", "Genere": "M", "Data": "09/07/1997", "Festa": "Anniversario"}, {"Cognome": "Pricci", "Nome": "Giuseppe", "Genere": "M", "Data": "12/08/1968", "Festa": "Compleanno"}, {"Cognome": "Pricci", "Nome": "Giuseppe", "Genere": "M", "Data": "19/03", "Festa": "Onomastico"}, {"Cognome": "Pricci", "Nome": "Luigi", "Genere": "M", "Data": "03/12/1956", "Festa": "Anniversario"}, {"Cognome": "Pricci", "Nome": "Luigi", "Genere": "M", "Data": "16/11/1933", "Festa": "Compleanno"}, {"Cognome": "Pricci", "Nome": "Luigi", "Genere": "M", "Data": "21/06", "Festa": "Onomastico"}, {"Cognome": "Pricci", "Nome": "Maria Antonietta", "Genere": "F", "Data": "09/09/2000", "Festa": "Anniversario"}, {"Cognome": "Pricci", "Nome": "Maria Antonietta", "Genere": "F", "Data": "13/06", "Festa": "Onomastico"}, {"Cognome": "Pricci", "Nome": "Maria Antonietta", "Genere": "F", "Data": "21/05/1958", "Festa": "Compleanno"}, {"Cognome": "Pricci", "Nome": "Marica", "Genere": "F", "Data": "04/07/1987", "Festa": "Anniversario"}, {"Cognome": "Pricci", "Nome": "Marica", "Genere": "F", "Data": "12/04/1961", "Festa": "Compleanno"}, {"Cognome": "Pricci", "Nome": "Marica", "Genere": "F", "Data": "12/09", "Festa": "Onomastico"}, {"Cognome": "Pricci", "Nome": "Tiziana", "Genere": "F", "Data": "03/03", "Festa": "Onomastico"}, {"Cognome": "Pricci", "Nome": "Tiziana", "Genere": "F", "Data": "04/10/2002", "Festa": "Anniversario"}, {"Cognome": "Pricci", "Nome": "Tiziana", "Genere": "F", "Data": "27/06/1972", "Festa": "Compleanno"}, {"Cognome": "Pricci", "Nome": "Vanna", "Genere": "F", "Data": "11/09/1963", "Festa": "Compleanno"}, {"Cognome": "Pricci", "Nome": "Vanna", "Genere": "F", "Data": "24/06", "Festa": "Onomastico"}, {"Cognome": "Pricci", "Nome": "Vanna", "Genere": "F", "Data": "28/08/1991", "Festa": "Anniversario"}, {"Cognome": "Procino", "Nome": "Vanni", "Genere": "M", "Data": "01/01/1957", "Festa": "Compleanno"}, {"Cognome": "Procino", "Nome": "Vanni", "Genere": "M", "Data": "24/06", "Festa": "Onomastico"}, {"Cognome": "Quaranta", "Nome": "Mario", "Genere": "M", "Data": "08/01/1956", "Festa": "Compleanno"}, {"Cognome": "Quaranta", "Nome": "Mario", "Genere": "M", "Data": "19/01", "Festa": "Onomastico"}, {"Cognome": "Romano", "Nome": "Lucio", "Genere": "M", "Data": "06/09/1963", "Festa": "Compleanno"}, {"Cognome": "Romano", "Nome": "Lucio", "Genere": "M", "Data": "13/12", "Festa": "Onomastico"}, {"Cognome": "Romano", "Nome": "Maria", "Genere": "F", "Data": "12/09", "Festa": "Onomastico"}, {"Cognome": "Romano", "Nome": "Maria", "Genere": "F", "Data": "26/10/1966", "Festa": "Compleanno"}, {"Cognome": "Rotolo", "Nome": "Giuseppe", "Genere": "M", "Data": "07/02/1958", "Festa": "Compleanno"}, {"Cognome": "Rotolo", "Nome": "Giuseppe", "Genere": "M", "Data": "19/03", "Festa": "Onomastico"}, {"Cognome": "Rotolo", "Nome": "Vito", "Genere": "M", "Data": "06/02/1957", "Festa": "Compleanno"}, {"Cognome": "Rotolo", "Nome": "Vito", "Genere": "M", "Data": "15/06", "Festa": "Onomastico"}, {"Cognome": "Rotondi", "Nome": "Gianni", "Genere": "M", "Data": "08/03/1974", "Festa": "Compleanno"}, {"Cognome": "Rotondi", "Nome": "Gianni", "Genere": "M", "Data": "13/09/2014", "Festa": "Anniversario"}, {"Cognome": "Rotondi", "Nome": "Gianni", "Genere": "M", "Data": "24/06", "Festa": "Onomastico"}, {"Cognome": "Rotondi", "Nome": "Nicoletta", "Genere": "F", "Data": "06/12", "Festa": "Onomastico"}, {"Cognome": "Rotondi", "Nome": "Nicoletta", "Genere": "F", "Data": "12/02/2019", "Festa": "Compleanno"}, {"Cognome": "Rubino", "Nome": "Rory", "Genere": "M", "Data": "12/09", "Festa": "Onomastico"}, {"Cognome": "Rubino", "Nome": "Rory", "Genere": "M", "Data": "27/05/1960", "Festa": "Compleanno"}, {"Cognome": "Sabatelli", "Nome": "Anna", "Genere": "F", "Data": "02/01/1969", "Festa": "Compleanno"}, {"Cognome": "Sabatelli", "Nome": "Anna", "Genere": "F", "Data": "26/07", "Festa": "Onomastico"}, {"Cognome": "Sabato", "Nome": "Enzo (Vincenzo)", "Genere": "M", "Data": "05/04", "Festa": "Onomastico"}, {"Cognome": "Sabato", "Nome": "Enzo (Vincenzo)", "Genere": "M", "Data": "21/07/1951", "Festa": "Compleanno"}, {"Cognome": "Sampietro", "Nome": "Giuseppe", "Genere": "M", "Data": "16/09/1957", "Festa": "Compleanno"}, {"Cognome": "Sampietro", "Nome": "Giuseppe", "Genere": "M", "Data": "19/03", "Festa": "Onomastico"}, {"Cognome": "Santamaria", "Nome": "Leonardo", "Genere": "M", "Data": "06/11", "Festa": "Onomastico"}, {"Cognome": "Santamaria", "Nome": "Leonardo", "Genere": "M", "Data": "15/02/1957", "Festa": "Compleanno"}, {"Cognome": "Sbiroli", "Nome": "Rosilde", "Genere": "F", "Data": "15/10/1961", "Festa": "Compleanno"}, {"Cognome": "Sbiroli", "Nome": "Rosilde", "Genere": "F", "Data": "23/08", "Festa": "Onomastico"}, {"Cognome": "Schirone", "Nome": "Anna", "Genere": "F", "Data": "26/07", "Festa": "Onomastico"}, {"Cognome": "Schirone", "Nome": "Anna", "Genere": "F", "Data": "05/03/1952", "Festa": "Compleanno"}, {"Cognome": "Scisci", "Nome": "Vito Antonio", "Genere": "M", "Data": "13/06", "Festa": "Onomastico"}, {"Cognome": "Scisci", "Nome": "Vito Antonio", "Genere": "M", "Data": "22/04/1957", "Festa": "Compleanno"}, {"Cognome": "Soriano", "Nome": "Michele", "Genere": "M", "Data": "22/09/1956", "Festa": "Compleanno"}, {"Cognome": "Soriano", "Nome": "Michele", "Genere": "M", "Data": "29/09", "Festa": "Onomastico"}, {"Cognome": "Sozio", "Nome": "Donato", "Genere": "M", "Data": "22/02/1957", "Festa": "Compleanno"}, {"Cognome": "Sozio", "Nome": "Donato", "Genere": "M", "Data": "22/10", "Festa": "Onomastico"}, {"Cognome": "Surico", "Nome": "Germana", "Genere": "F", "Data": "15/06", "Festa": "Onomastico"}, {"Cognome": "Surico", "Nome": "Germana", "Genere": "F", "Data": "31/01/1967", "Festa": "Compleanno"}, {"Cognome": "Susca", "Nome": "Lorenzo", "Genere": "M", "Data": "10/05/1957", "Festa": "Compleanno"}, {"Cognome": "Susca", "Nome": "Lorenzo", "Genere": "M", "Data": "10/08", "Festa": "Onomastico"}, {"Cognome": "Tansella", "Nome": "Beppe", "Genere": "M", "Data": "19/03", "Festa": "Onomastico"}, {"Cognome": "Tansella", "Nome": "Beppe", "Genere": "M", "Data": "19/10/1957", "Festa": "Compleanno"}, {"Cognome": "Tauro", "Nome": "Nico", "Genere": "M", "Data": "06/12", "Festa": "Onomastico"}, {"Cognome": "Tauro", "Nome": "Nico", "Genere": "M", "Data": "17/01/1958", "Festa": "Compleanno"}, {"Cognome": "Trivisani", "Nome": "Anna", "Genere": "F", "Data": "09/07/1997", "Festa": "Anniversario"}, {"Cognome": "Trivisani", "Nome": "Anna", "Genere": "F", "Data": "12/07/1969", "Festa": "Compleanno"}, {"Cognome": "Trivisani", "Nome": "Anna", "Genere": "F", "Data": "26/07", "Festa": "Onomastico"}, {"Cognome": "Vittorione", "Nome": "Betta (Elisabetta)", "Genere": "F", "Data": "19/11", "Festa": "Onomastico"}, {"Cognome": "Vittorione", "Nome": "Betta (Elisabetta)", "Genere": "F", "Data": "25/04/1957", "Festa": "Compleanno"}, {"Cognome": "Volpe", "Nome": "Rino (Onofrio)", "Genere": "M", "Data": "12/06", "Festa": "Onomastico"}, {"Cognome": "Volpe", "Nome": "Rino (Onofrio)", "Genere": "M", "Data": "04/10/1951", "Festa": "Compleanno"}];
+        const rawData = [{"Cognome": "Albano", "Nome": "Anna", "Genere": "F", "Data": "26/07", "Festa": "Onomastico"}, {"Cognome": "Albano", "Nome": "Anna", "Genere": "F", "Data": "16/12/1967", "Festa": "Compleanno"}, {"Cognome": "Barletta", "Nome": "Loredana", "Genere": "F", "Data": "15/04/1963", "Festa": "Compleanno"}, {"Cognome": "Barletta", "Nome": "Loredana", "Genere": "F", "Data": "10/12", "Festa": "Onomastico"}, {"Cognome": "Bianco", "Nome": "Rosa", "Genere": "F", "Data": "02/09/1971", "Festa": "Compleanno"}, {"Cognome": "Bianco", "Nome": "Rosa", "Genere": "F", "Data": "23/08", "Festa": "Onomastico"}, {"Cognome": "Bianco", "Nome": "Rosa", "Genere": "F", "Data": "29/12/2004", "Festa": "Anniversario"}, {"Cognome": "Boscia", "Nome": "Celeste", "Genere": "F", "Data": "14/10", "Festa": "Onomastico"}, {"Cognome": "Boscia", "Nome": "Celeste", "Genere": "F", "Data": "27/03/1964", "Festa": "Compleanno"}, {"Cognome": "Calò", "Nome": "Aldo", "Genere": "M", "Data": "10/01", "Festa": "Onomastico"}, {"Cognome": "Calò", "Nome": "Aldo", "Genere": "M", "Data": "05/11/1951", "Festa": "Compleanno"}, {"Cognome": "Campanella", "Nome": "Sabina", "Genere": "F", "Data": "28/04/1976", "Festa": "Compleanno"}, {"Cognome": "Campanella", "Nome": "Sabina", "Genere": "F", "Data": "29/08", "Festa": "Onomastico"}, {"Cognome": "Campanella", "Nome": "Sabina", "Genere": "F", "Data": "01/08/2009", "Festa": "Anniversario"}, {"Cognome": "Cannone", "Nome": "Giovanni", "Genere": "M", "Data": "19/10/1956", "Festa": "Compleanno"}, {"Cognome": "Cannone", "Nome": "Giovanni", "Genere": "M", "Data": "24/06", "Festa": "Onomastico"}, {"Cognome": "Castiglia", "Nome": "Enzo (Lorenzo)", "Genere": "M", "Data": "10/08", "Festa": "Onomastico"}, {"Cognome": "Castiglia", "Nome": "Enzo (Lorenzo)", "Genere": "M", "Data": "01/01/1958", "Festa": "Compleanno"}, {"Cognome": "Chiarappa", "Nome": "Cristiano", "Genere": "M", "Data": "07/04", "Festa": "Onomastico"}, {"Cognome": "Chiarappa", "Nome": "Cristiano", "Genere": "M", "Data": "20/06/2001", "Festa": "Compleanno"}, {"Cognome": "Chiarappa", "Nome": "Martino", "Genere": "M", "Data": "11/11", "Festa": "Onomastico"}, {"Cognome": "Chiarappa", "Nome": "Martino", "Genere": "M", "Data": "24/05/1997", "Festa": "Compleanno"}, {"Cognome": "Chiarappa", "Nome": "Saverio", "Genere": "M", "Data": "03/12", "Festa": "Onomastico"}, {"Cognome": "Chiarappa", "Nome": "Saverio", "Genere": "M", "Data": "09/09/2000", "Festa": "Anniversario"}, {"Cognome": "Chiarappa", "Nome": "Saverio", "Genere": "M", "Data": "26/11/1951", "Festa": "Compleanno"}, {"Cognome": "Cocozza", "Nome": "Umberto", "Genere": "M", "Data": "16/11/1958", "Festa": "Compleanno"}, {"Cognome": "Cocozza", "Nome": "Umberto", "Genere": "M", "Data": "06/09", "Festa": "Onomastico"}, {"Cognome": "Console", "Nome": "Giampiero", "Genere": "M", "Data": "21/01/1952", "Festa": "Compleanno"}, {"Cognome": "Console", "Nome": "Giampiero", "Genere": "M", "Data": "24/06", "Festa": "Onomastico"}, {"Cognome": "Dalena", "Nome": "Riccardo", "Genere": "M", "Data": "03/04", "Festa": "Onomastico"}, {"Cognome": "Dalena", "Nome": "Riccardo", "Genere": "M", "Data": "04/10/2002", "Festa": "Anniversario"}, {"Cognome": "Dalena", "Nome": "Riccardo", "Genere": "M", "Data": "11/04/1973", "Festa": "Compleanno"}, {"Cognome": "De Nobili", "Nome": "Antonella", "Genere": "F", "Data": "06/05/1959", "Festa": "Compleanno"}, {"Cognome": "De Nobili", "Nome": "Antonella", "Genere": "F", "Data": "13/06", "Festa": "Onomastico"}, {"Cognome": "De Nobili", "Nome": "Antonella", "Genere": "F", "Data": "03/12/86", "Festa": "Anniversario"}, {"Cognome": "Detomaso", "Nome": "Paolo", "Genere": "M", "Data": "25/01", "Festa": "Onomastico"}, {"Cognome": "Detomaso", "Nome": "Paolo", "Genere": "M", "Data": "28/04/1961", "Festa": "Compleanno"}, {"Cognome": "Di Stasio", "Nome": "Checco", "Genere": "M", "Data": "12/12/1975", "Festa": "Compleanno"}, {"Cognome": "Di Stasio", "Nome": "Checco", "Genere": "M", "Data": "04/10", "Festa": "Onomastico"}, {"Cognome": "Di Stasio", "Nome": "Checco", "Genere": "M", "Data": "01/08/2009", "Festa": "Anniversario"}, {"Cognome": "Fanigliuolo", "Nome": "Paolo", "Genere": "M", "Data": "11/01/1954", "Festa": "Compleanno"}, {"Cognome": "Fanigliuolo", "Nome": "Paolo", "Genere": "M", "Data": "29/06", "Festa": "Onomastico"}, {"Cognome": "Fanigliuolo", "Nome": "Paolo", "Genere": "M", "Data": "09/04/1983", "Festa": "Anniversario"}, {"Cognome": "Furio", "Nome": "Pino", "Genere": "M", "Data": "19/03", "Festa": "Onomastico"}, {"Cognome": "Furio", "Nome": "Pino", "Genere": "M", "Data": "31/08/1956", "Festa": "Compleanno"}, {"Cognome": "Galluzzi", "Nome": "Marco", "Genere": "M", "Data": "20/05/1958", "Festa": "Compleanno"}, {"Cognome": "Galluzzi", "Nome": "Marco", "Genere": "M", "Data": "25/04", "Festa": "Onomastico"}, {"Cognome": "Gentile", "Nome": "Anna Maria", "Genere": "F", "Data": "10/05/1967", "Festa": "Compleanno"}, {"Cognome": "Gentile", "Nome": "Anna Maria", "Genere": "F", "Data": "26/07", "Festa": "Onomastico"}, {"Cognome": "Grilletti", "Nome": "Teresa", "Genere": "F", "Data": "03/12/1956", "Festa": "Anniversario"}, {"Cognome": "Grilletti", "Nome": "Teresa", "Genere": "F", "Data": "05/03/1937", "Festa": "Compleanno"}, {"Cognome": "Grilletti", "Nome": "Teresa", "Genere": "F", "Data": "15/10", "Festa": "Onomastico"}, {"Cognome": "Guazzaroni", "Nome": "Giulia", "Genere": "F", "Data": "10/12/1957", "Festa": "Compleanno"}, {"Cognome": "Guazzaroni", "Nome": "Giulia", "Genere": "F", "Data": "22/05", "Festa": "Onomastico"}, {"Cognome": "Guazzaroni", "Nome": "Giulia", "Genere": "F", "Data": "12/12/1987", "Festa": "Anniversario"}, {"Cognome": "Iurilli", "Nome": "Anna Maria", "Genere": "F", "Data": "20/02/1971", "Festa": "Compleanno"}, {"Cognome": "Iurilli", "Nome": "Anna Maria", "Genere": "F", "Data": "26/07", "Festa": "Onomastico"}, {"Cognome": "Iurilli", "Nome": "Anna Maria", "Genere": "F", "Data": "04/10/2001", "Festa": "Anniversario"}, {"Cognome": "La Gala", "Nome": "Giuliana", "Genere": "F", "Data": "13/01/1965", "Festa": "Compleanno"}, {"Cognome": "La Gala", "Nome": "Giuliana", "Genere": "F", "Data": "16/02", "Festa": "Onomastico"}, {"Cognome": "Ladisa", "Nome": "Enza", "Genere": "F", "Data": "10/08", "Festa": "Onomastico"}, {"Cognome": "Ladisa", "Nome": "Enza", "Genere": "F", "Data": "19/03/1959", "Festa": "Compleanno"}, {"Cognome": "Lefemine", "Nome": "Domenico", "Genere": "M", "Data": "04/08", "Festa": "Onomastico"}, {"Cognome": "Lefemine", "Nome": "Domenico", "Genere": "M", "Data": "06/02/1957", "Festa": "Compleanno"}, {"Cognome": "Lefemine", "Nome": "Domenico", "Genere": "M", "Data": "28/08/1991", "Festa": "Anniversario"}, {"Cognome": "Lefemine", "Nome": "Flavia", "Genere": "F", "Data": "07/05", "Festa": "Onomastico"}, {"Cognome": "Lefemine", "Nome": "Flavia", "Genere": "F", "Data": "16/11/1996", "Festa": "Compleanno"}, {"Cognome": "Lefemine", "Nome": "Francesco", "Genere": "M", "Data": "04/10", "Festa": "Onomastico"}, {"Cognome": "Lefemine", "Nome": "Francesco", "Genere": "M", "Data": "20/03/2000", "Festa": "Compleanno"}, {"Cognome": "Leone", "Nome": "Gianni (Giacobbe)", "Genere": "M", "Data": "06/10/1957", "Festa": "Compleanno"}, {"Cognome": "Leone", "Nome": "Gianni (Giacobbe)", "Genere": "M", "Data": "24/06", "Festa": "Onomastico"}, {"Cognome": "Lippolis", "Nome": "Tonio", "Genere": "M", "Data": "17/06/1958", "Festa": "Compleanno"}, {"Cognome": "Lippolis", "Nome": "Tonio", "Genere": "M", "Data": "13/06", "Festa": "Onomastico"}, {"Cognome": "Loiacono", "Nome": "Rossella", "Genere": "F", "Data": "04/09", "Festa": "Onomastico"}, {"Cognome": "Loiacono", "Nome": "Rossella", "Genere": "F", "Data": "20/04/1953", "Festa": "Compleanno"}, {"Cognome": "Lorusso", "Nome": "Alessandro", "Genere": "M", "Data": "17/07/2010", "Festa": "Compleanno"}, {"Cognome": "Lorusso", "Nome": "Alessandro", "Genere": "M", "Data": "26/08", "Festa": "Onomastico"}, {"Cognome": "Lorusso", "Nome": "Alice", "Genere": "F", "Data": "13/06", "Festa": "Onomastico"}, {"Cognome": "Lorusso", "Nome": "Alice", "Genere": "F", "Data": "20/07/2013", "Festa": "Compleanno"}, {"Cognome": "Lorusso", "Nome": "Benny", "Genere": "M", "Data": "17/11/1975", "Festa": "Compleanno"}, {"Cognome": "Lorusso", "Nome": "Benny", "Genere": "M", "Data": "21/03", "Festa": "Onomastico"}, {"Cognome": "Lorusso", "Nome": "Benny", "Genere": "M", "Data": "26/07/2008", "Festa": "Anniversario"}, {"Cognome": "Lorusso", "Nome": "Cinzia", "Genere": "F", "Data": "06/04/1980", "Festa": "Compleanno"}, {"Cognome": "Lorusso", "Nome": "Cinzia", "Genere": "F", "Data": "13/09/2014", "Festa": "Anniversario"}, {"Cognome": "Lorusso", "Nome": "Mimmo", "Genere": "M", "Data": "01/07/1955", "Festa": "Compleanno"}, {"Cognome": "Lorusso", "Nome": "Mimmo", "Genere": "M", "Data": "04/08", "Festa": "Onomastico"}, {"Cognome": "Lorusso", "Nome": "Nina", "Genere": "F", "Data": "15/12", "Festa": "Onomastico"}, {"Cognome": "Lorusso", "Nome": "Nina", "Genere": "F", "Data": "29/11/2015", "Festa": "Compleanno"}, {"Cognome": "Lorusso", "Nome": "Onofrio", "Genere": "M", "Data": "05/08/1951", "Festa": "Compleanno"}, {"Cognome": "Lorusso", "Nome": "Onofrio", "Genere": "M", "Data": "09/08/1975", "Festa": "Anniversario"}, {"Cognome": "Lorusso", "Nome": "Onofrio", "Genere": "M", "Data": "12/06", "Festa": "Onomastico"}, {"Cognome": "Losito", "Nome": "Francesco", "Genere": "M", "Data": "04/10", "Festa": "Onomastico"}, {"Cognome": "Losito", "Nome": "Francesco", "Genere": "M", "Data": "23/07/1955", "Festa": "Compleanno"}, {"Cognome": "Mancino", "Nome": "Carlo", "Genere": "M", "Data": "04/11", "Festa": "Onomastico"}, {"Cognome": "Mancino", "Nome": "Carlo", "Genere": "M", "Data": "26/07/1979", "Festa": "Compleanno"}, {"Cognome": "Mangini", "Nome": "Rina", "Genere": "F", "Data": "01/12/1960", "Festa": "Compleanno"}, {"Cognome": "Mangini", "Nome": "Rina", "Genere": "F", "Data": "25/11", "Festa": "Onomastico"}, {"Cognome": "Mangini", "Nome": "Rina", "Genere": "F", "Data": "09/04/1983", "Festa": "Anniversario"}, {"Cognome": "Mazzarisi", "Nome": "Alessandra", "Genere": "F", "Data": "11/10/1988", "Festa": "Compleanno"}, {"Cognome": "Mazzarisi", "Nome": "Alessandra", "Genere": "F", "Data": "20/03", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Andrea", "Genere": "M", "Data": "08/11/1993", "Festa": "Compleanno"}, {"Cognome": "Mazzarisi", "Nome": "Andrea", "Genere": "M", "Data": "30/11", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Daniele", "Genere": "M", "Data": "09/10/1988", "Festa": "Compleanno"}, {"Cognome": "Mazzarisi", "Nome": "Daniele", "Genere": "M", "Data": "10/10", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Domenico", "Genere": "M", "Data": "08/08", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Domenico", "Genere": "M", "Data": "24/02/1964", "Festa": "Compleanno"}, {"Cognome": "Mazzarisi", "Nome": "Domenico", "Genere": "M", "Data": "21/07/1997", "Festa": "Anniversario"}, {"Cognome": "Mazzarisi", "Nome": "Francesco", "Genere": "M", "Data": "04/10", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Francesco", "Genere": "M", "Data": "05/07/1961", "Festa": "Compleanno"}, {"Cognome": "Mazzarisi", "Nome": "Francesco", "Genere": "M", "Data": "12/12/1987", "Festa": "Anniversario"}, {"Cognome": "Mazzarisi", "Nome": "Marco", "Genere": "M", "Data": "25/04", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Marco", "Genere": "M", "Data": "28/04/1987", "Festa": "Compleanno"}, {"Cognome": "Mazzarisi", "Nome": "Maria Grazia", "Genere": "F", "Data": "12/09", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Maria Grazia", "Genere": "F", "Data": "21/01/1989", "Festa": "Compleanno"}, {"Cognome": "Mazzarisi", "Nome": "Mariella", "Genere": "F", "Data": "05/07/1961", "Festa": "Compleanno"}, {"Cognome": "Mazzarisi", "Nome": "Mariella", "Genere": "F", "Data": "12/09", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Mariella", "Genere": "F", "Data": "22/10/2005", "Festa": "Anniversario"}, {"Cognome": "Mazzarisi", "Nome": "Marilù", "Genere": "F", "Data": "12/09", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Marilù", "Genere": "F", "Data": "28/12/1999", "Festa": "Compleanno"}, {"Cognome": "Mazzarisi", "Nome": "Nino (Sebastiano)", "Genere": "M", "Data": "04/07/1987", "Festa": "Anniversario"}, {"Cognome": "Mazzarisi", "Nome": "Nino (Sebastiano)", "Genere": "M", "Data": "07/05/1957", "Festa": "Compleanno"}, {"Cognome": "Mazzarisi", "Nome": "Nino (Sebastiano)", "Genere": "M", "Data": "20/01", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Onofrio", "Genere": "M", "Data": "05/06/1992", "Festa": "Compleanno"}, {"Cognome": "Mazzarisi", "Nome": "Onofrio", "Genere": "M", "Data": "12/06", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Teresa", "Genere": "F", "Data": "01/04/1994", "Festa": "Compleanno"}, {"Cognome": "Mazzarisi", "Nome": "Teresa", "Genere": "F", "Data": "15/10", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Vito", "Genere": "M", "Data": "15/06", "Festa": "Onomastico"}, {"Cognome": "Mazzarisi", "Nome": "Vito", "Genere": "M", "Data": "22/08/1958", "Festa": "Compleanno"}, {"Cognome": "Mazzeo", "Nome": "Rosa", "Genere": "F", "Data": "23/08", "Festa": "Onomastico"}, {"Cognome": "Mazzeo", "Nome": "Rosa", "Genere": "F", "Data": "30/10/1966", "Festa": "Compleanno"}, {"Cognome": "Meduso", "Nome": "Agostino", "Genere": "M", "Data": "15/02/1957", "Festa": "Compleanno"}, {"Cognome": "Meduso", "Nome": "Agostino", "Genere": "M", "Data": "28/08", "Festa": "Onomastico"}, {"Cognome": "Mele", "Nome": "Nicola", "Genere": "M", "Data": "06/12", "Festa": "Onomastico"}, {"Cognome": "Mele", "Nome": "Nicola", "Genere": "M", "Data": "08/06/1952", "Festa": "Compleanno"}, {"Cognome": "Mele", "Nome": "Nicola", "Genere": "M", "Data": "28/07/1975", "Festa": "Anniversario"}, {"Cognome": "Minerva", "Nome": "Nicola", "Genere": "M", "Data": "06/12", "Festa": "Onomastico"}, {"Cognome": "Minerva", "Nome": "Nicola", "Genere": "M", "Data": "09/09/1987", "Festa": "Compleanno"}, {"Cognome": "Mirizzi", "Nome": "Francesco", "Genere": "M", "Data": "23/06/1964", "Festa": "Compleanno"}, {"Cognome": "Mirizzi", "Nome": "Francesco", "Genere": "M", "Data": "04/10", "Festa": "Onomastico"}, {"Cognome": "Montagna", "Nome": "Cosimo", "Genere": "M", "Data": "13/01/1958", "Festa": "Compleanno"}, {"Cognome": "Montagna", "Nome": "Cosimo", "Genere": "M", "Data": "26/09", "Festa": "Onomastico"}, {"Cognome": "Montagna", "Nome": "Cosimo", "Genere": "M", "Data": "03/12/1986", "Festa": "Anniversario"}, {"Cognome": "Nitti", "Nome": "Enza", "Genere": "F", "Data": "10/08", "Festa": "Onomastico"}, {"Cognome": "Nitti", "Nome": "Enza", "Genere": "F", "Data": "25/11/1953", "Festa": "Compleanno"}, {"Cognome": "Pacello", "Nome": "Stefano", "Genere": "M", "Data": "10/09/1957", "Festa": "Compleanno"}, {"Cognome": "Pacello", "Nome": "Stefano", "Genere": "M", "Data": "26/12", "Festa": "Onomastico"}, {"Cognome": "Pacello", "Nome": "Stefano", "Genere": "M", "Data": "22/10/2005", "Festa": "Anniversario"}, {"Cognome": "Pedone", "Nome": "Leonardo", "Genere": "M", "Data": "07/03/1968", "Festa": "Compleanno"}, {"Cognome": "Pedone", "Nome": "Leonardo", "Genere": "M", "Data": "06/11", "Festa": "Onomastico"}, {"Cognome": "Pedone", "Nome": "Leonardo", "Genere": "M", "Data": "04/10/2001", "Festa": "Anniversario"}, {"Cognome": "Perez Almodovar", "Nome": "Giulia", "Genere": "F", "Data": "22/05", "Festa": "Onomastico"}, {"Cognome": "Perez Almodovar", "Nome": "Giulia", "Genere": "F", "Data": "13/09/1995", "Festa": "Compleanno"}, {"Cognome": "Perniola", "Nome": "Michele", "Genere": "M", "Data": "29/09", "Festa": "Onomastico"}, {"Cognome": "Perniola", "Nome": "Michele", "Genere": "M", "Data": "25/11/1961", "Festa": "Compleanno"}, {"Cognome": "Petrera", "Nome": "Leo", "Genere": "M", "Data": "16/02", "Festa": "Onomastico"}, {"Cognome": "Petrera", "Nome": "Leo", "Genere": "M", "Data": "26/07/1960", "Festa": "Compleanno"}, {"Cognome": "Pinto", "Nome": "Lucio Gregorio", "Genere": "M", "Data": "16/04/1964", "Festa": "Compleanno"}, {"Cognome": "Pinto", "Nome": "Lucio Gregorio", "Genere": "M", "Data": "03/09", "Festa": "Onomastico"}, {"Cognome": "Pompilio", "Nome": "Vincenzo", "Genere": "M", "Data": "27/09", "Festa": "Onomastico"}, {"Cognome": "Pompilio", "Nome": "Vincenzo", "Genere": "M", "Data": "27/01/1956", "Festa": "Compleanno"}, {"Cognome": "Pontrandolfo", "Nome": "Anna", "Genere": "F", "Data": "26/07", "Festa": "Onomastico"}, {"Cognome": "Pontrandolfo", "Nome": "Anna", "Genere": "F", "Data": "22/06/1951", "Festa": "Compleanno"}, {"Cognome": "Pontrandolfo", "Nome": "Anna", "Genere": "F", "Data": "28/07/1975", "Festa": "Anniversario"}, {"Cognome": "Pricci", "Nome": "Angela", "Genere": "F", "Data": "02/08", "Festa": "Onomastico"}, {"Cognome": "Pricci", "Nome": "Angela", "Genere": "F", "Data": "09/08/1975", "Festa": "Anniversario"}, {"Cognome": "Pricci", "Nome": "Angela", "Genere": "F", "Data": "13/01/1957", "Festa": "Compleanno"}, {"Cognome": "Pricci", "Nome": "Asia", "Genere": "F", "Data": "07/06/2006", "Festa": "Compleanno"}, {"Cognome": "Pricci", "Nome": "Asia", "Genere": "F", "Data": "19/02", "Festa": "Onomastico"}, {"Cognome": "Pricci", "Nome": "Gilda", "Genere": "F", "Data": "13/02", "Festa": "Onomastico"}, {"Cognome": "Pricci", "Nome": "Gilda", "Genere": "F", "Data": "29/06/2004", "Festa": "Compleanno"}, {"Cognome": "Pricci", "Nome": "Giovanni", "Genere": "M", "Data": "24/06", "Festa": "Onomastico"}, {"Cognome": "Pricci", "Nome": "Giovanni", "Genere": "M", "Data": "24/10/1964", "Festa": "Compleanno"}, {"Cognome": "Pricci", "Nome": "Giovanni", "Genere": "M", "Data": "29/12/2004", "Festa": "Anniversario"}, {"Cognome": "Pricci", "Nome": "Giuseppe", "Genere": "M", "Data": "09/07/1997", "Festa": "Anniversario"}, {"Cognome": "Pricci", "Nome": "Giuseppe", "Genere": "M", "Data": "12/08/1968", "Festa": "Compleanno"}, {"Cognome": "Pricci", "Nome": "Giuseppe", "Genere": "M", "Data": "19/03", "Festa": "Onomastico"}, {"Cognome": "Pricci", "Nome": "Luigi", "Genere": "M", "Data": "03/12/1956", "Festa": "Anniversario"}, {"Cognome": "Pricci", "Nome": "Luigi", "Genere": "M", "Data": "16/11/1933", "Festa": "Compleanno"}, {"Cognome": "Pricci", "Nome": "Luigi", "Genere": "M", "Data": "21/06", "Festa": "Onomastico"}, {"Cognome": "Pricci", "Nome": "Maria Antonietta", "Genere": "F", "Data": "09/09/2000", "Festa": "Anniversario"}, {"Cognome": "Pricci", "Nome": "Maria Antonietta", "Genere": "F", "Data": "13/06", "Festa": "Onomastico"}, {"Cognome": "Pricci", "Nome": "Maria Antonietta", "Genere": "F", "Data": "21/05/1958", "Festa": "Compleanno"}, {"Cognome": "Pricci", "Nome": "Marica", "Genere": "F", "Data": "04/07/1987", "Festa": "Anniversario"}, {"Cognome": "Pricci", "Nome": "Marica", "Genere": "F", "Data": "12/04/1961", "Festa": "Compleanno"}, {"Cognome": "Pricci", "Nome": "Marica", "Genere": "F", "Data": "12/09", "Festa": "Onomastico"}, {"Cognome": "Pricci", "Nome": "Tiziana", "Genere": "F", "Data": "03/03", "Festa": "Onomastico"}, {"Cognome": "Pricci", "Nome": "Tiziana", "Genere": "F", "Data": "04/10/2002", "Festa": "Anniversario"}, {"Cognome": "Pricci", "Nome": "Tiziana", "Genere": "F", "Data": "27/06/1972", "Festa": "Compleanno"}, {"Cognome": "Pricci", "Nome": "Vanna", "Genere": "F", "Data": "11/09/1963", "Festa": "Compleanno"}, {"Cognome": "Pricci", "Nome": "Vanna", "Genere": "F", "Data": "24/06", "Festa": "Onomastico"}, {"Cognome": "Pricci", "Nome": "Vanna", "Genere": "F", "Data": "28/08/1991", "Festa": "Anniversario"}, {"Cognome": "Procino", "Nome": "Vanni", "Genere": "M", "Data": "01/01/1957", "Festa": "Compleanno"}, {"Cognome": "Procino", "Nome": "Vanni", "Genere": "M", "Data": "24/06", "Festa": "Onomastico"}, {"Cognome": "Quaranta", "Nome": "Mario", "Genere": "M", "Data": "08/01/1956", "Festa": "Compleanno"}, {"Cognome": "Quaranta", "Nome": "Mario", "Genere": "M", "Data": "19/01", "Festa": "Onomastico"}, {"Cognome": "Romano", "Nome": "Lucio", "Genere": "M", "Data": "06/09/1963", "Festa": "Compleanno"}, {"Cognome": "Romano", "Nome": "Lucio", "Genere": "M", "Data": "13/12", "Festa": "Onomastico"}, {"Cognome": "Romano", "Nome": "Maria", "Genere": "F", "Data": "12/09", "Festa": "Onomastico"}, {"Cognome": "Romano", "Nome": "Maria", "Genere": "F", "Data": "26/10/1966", "Festa": "Compleanno"}, {"Cognome": "Rotolo", "Nome": "Giuseppe", "Genere": "M", "Data": "07/02/1958", "Festa": "Compleanno"}, {"Cognome": "Rotolo", "Nome": "Giuseppe", "Genere": "M", "Data": "19/03", "Festa": "Onomastico"}, {"Cognome": "Rotolo", "Nome": "Vito", "Genere": "M", "Data": "06/02/1957", "Festa": "Compleanno"}, {"Cognome": "Rotolo", "Nome": "Vito", "Genere": "M", "Data": "15/06", "Festa": "Onomastico"}, {"Cognome": "Rotondi", "Nome": "Gianni", "Genere": "M", "Data": "08/03/1974", "Festa": "Compleanno"}, {"Cognome": "Rotondi", "Nome": "Gianni", "Genere": "M", "Data": "13/09/2014", "Festa": "Anniversario"}, {"Cognome": "Rotondi", "Nome": "Gianni", "Genere": "M", "Data": "24/06", "Festa": "Onomastico"}, {"Cognome": "Rotondi", "Nome": "Nicoletta", "Genere": "F", "Data": "06/12", "Festa": "Onomastico"}, {"Cognome": "Rotondi", "Nome": "Nicoletta", "Genere": "F", "Data": "12/02/2019", "Festa": "Compleanno"}, {"Cognome": "Rubino", "Nome": "Rory", "Genere": "M", "Data": "12/09", "Festa": "Onomastico"}, {"Cognome": "Rubino", "Nome": "Rory", "Genere": "M", "Data": "27/05/1960", "Festa": "Compleanno"}, {"Cognome": "Sabatelli", "Nome": "Anna", "Genere": "F", "Data": "02/01/1969", "Festa": "Compleanno"}, {"Cognome": "Sabatelli", "Nome": "Anna", "Genere": "F", "Data": "26/07", "Festa": "Onomastico"}, {"Cognome": "Sabatelli", "Nome": "Anna", "Genere": "F", "Data": "21/07/1997", "Festa": "Anniversario"}, {"Cognome": "Sabato", "Nome": "Enzo (Vincenzo)", "Genere": "M", "Data": "05/04", "Festa": "Onomastico"}, {"Cognome": "Sabato", "Nome": "Enzo (Vincenzo)", "Genere": "M", "Data": "21/07/1951", "Festa": "Compleanno"}, {"Cognome": "Sampietro", "Nome": "Giuseppe", "Genere": "M", "Data": "16/09/1957", "Festa": "Compleanno"}, {"Cognome": "Sampietro", "Nome": "Giuseppe", "Genere": "M", "Data": "19/03", "Festa": "Onomastico"}, {"Cognome": "Santamaria", "Nome": "Leonardo", "Genere": "M", "Data": "06/11", "Festa": "Onomastico"}, {"Cognome": "Santamaria", "Nome": "Leonardo", "Genere": "M", "Data": "15/02/1957", "Festa": "Compleanno"}, {"Cognome": "Sbiroli", "Nome": "Rosilde", "Genere": "F", "Data": "15/10/1961", "Festa": "Compleanno"}, {"Cognome": "Sbiroli", "Nome": "Rosilde", "Genere": "F", "Data": "23/08", "Festa": "Onomastico"}, {"Cognome": "Schirone", "Nome": "Anna", "Genere": "F", "Data": "26/07", "Festa": "Onomastico"}, {"Cognome": "Schirone", "Nome": "Anna", "Genere": "F", "Data": "05/03/1952", "Festa": "Compleanno"}, {"Cognome": "Scisci", "Nome": "Vito Antonio", "Genere": "M", "Data": "13/06", "Festa": "Onomastico"}, {"Cognome": "Scisci", "Nome": "Vito Antonio", "Genere": "M", "Data": "22/04/1957", "Festa": "Compleanno"}, {"Cognome": "Soriano", "Nome": "Michele", "Genere": "M", "Data": "22/09/1956", "Festa": "Compleanno"}, {"Cognome": "Soriano", "Nome": "Michele", "Genere": "M", "Data": "29/09", "Festa": "Onomastico"}, {"Cognome": "Sozio", "Nome": "Donato", "Genere": "M", "Data": "22/02/1957", "Festa": "Compleanno"}, {"Cognome": "Sozio", "Nome": "Donato", "Genere": "M", "Data": "22/10", "Festa": "Onomastico"}, {"Cognome": "Surico", "Nome": "Germana", "Genere": "F", "Data": "15/06", "Festa": "Onomastico"}, {"Cognome": "Surico", "Nome": "Germana", "Genere": "F", "Data": "31/01/1967", "Festa": "Compleanno"}, {"Cognome": "Susca", "Nome": "Lorenzo", "Genere": "M", "Data": "10/05/1957", "Festa": "Compleanno"}, {"Cognome": "Susca", "Nome": "Lorenzo", "Genere": "M", "Data": "10/08", "Festa": "Onomastico"}, {"Cognome": "Tansella", "Nome": "Beppe", "Genere": "M", "Data": "19/03", "Festa": "Onomastico"}, {"Cognome": "Tansella", "Nome": "Beppe", "Genere": "M", "Data": "19/10/1957", "Festa": "Compleanno"}, {"Cognome": "Tauro", "Nome": "Nico", "Genere": "M", "Data": "06/12", "Festa": "Onomastico"}, {"Cognome": "Tauro", "Nome": "Nico", "Genere": "M", "Data": "17/01/1958", "Festa": "Compleanno"}, {"Cognome": "Totaro", "Nome": "Imma", "Genere": "F", "Data": "08/12/1964", "Festa": "Compleanno"}, {"Cognome": "Totaro", "Nome": "Imma", "Genere": "F", "Data": "08/12", "Festa": "Onomastico"}, {"Cognome": "Totaro", "Nome": "Mariolina", "Genere": "F", "Data": "08/10/1960", "Festa": "Compleanno"}, {"Cognome": "Totaro", "Nome": "Mariolina", "Genere": "F", "Data": "12/09", "Festa": "Onomastico"}, {"Cognome": "Trivisani", "Nome": "Anna", "Genere": "F", "Data": "09/07/1997", "Festa": "Anniversario"}, {"Cognome": "Trivisani", "Nome": "Anna", "Genere": "F", "Data": "12/07/1969", "Festa": "Compleanno"}, {"Cognome": "Trivisani", "Nome": "Anna", "Genere": "F", "Data": "26/07", "Festa": "Onomastico"}, {"Cognome": "Vittorione", "Nome": "Betta (Elisabetta)", "Genere": "F", "Data": "19/11", "Festa": "Onomastico"}, {"Cognome": "Vittorione", "Nome": "Betta (Elisabetta)", "Genere": "F", "Data": "25/04/1957", "Festa": "Compleanno"}, {"Cognome": "Volpe", "Nome": "Rino (Onofrio)", "Genere": "M", "Data": "12/06", "Festa": "Onomastico"}, {"Cognome": "Volpe", "Nome": "Rino (Onofrio)", "Genere": "M", "Data": "04/10/1951", "Festa": "Compleanno"}];
         const months = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
         const shortMonths = ['GEN', 'FEB', 'MAR', 'APR', 'MAG', 'GIU', 'LUG', 'AGO', 'SET', 'OTT', 'NOV', 'DIC'];
+        let activeTabId = 'home'; // Tracking della scheda attiva
 
         function parseDate(dateStr) {
             if (!dateStr) return null;
@@ -488,9 +518,95 @@
                 tipoDisplay: tipo,
                 yearsTurning: yearsTurning,
                 currentAge: currentAge,
-                Genere: item.Genere
+                Genere: item.Genere,
+                Cognome: item.Cognome,
+                Nome: item.Nome
             };
         }).filter(e => e !== null);
+
+        // --- HELPER PER RAGGRUPPARE EVENTI DI UN GIORNO ---
+        function processDayEvents(dayEvents) {
+            const mergedList = [];
+            const skipIndices = new Set();
+            
+            for (let i = 0; i < dayEvents.length; i++) {
+                if (skipIndices.has(i)) continue;
+                
+                const e1 = dayEvents[i];
+                let merged = null;
+                
+                // Logica Anniversari
+                if (e1.tipoDisplay === 'Anniversario') {
+                    let matchIdx = -1;
+                    for (let j = i + 1; j < dayEvents.length; j++) {
+                        if (skipIndices.has(j)) continue;
+                        const e2 = dayEvents[j];
+                        
+                        if (e2.tipoDisplay === 'Anniversario' && e2.pDate.year === e1.pDate.year) {
+                            const g1 = e1.Genere ? e1.Genere.toUpperCase().trim() : '';
+                            const g2 = e2.Genere ? e2.Genere.toUpperCase().trim() : '';
+                            if (g1 !== g2) {
+                                matchIdx = j;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (matchIdx !== -1) {
+                        const e2 = dayEvents[matchIdx];
+                        skipIndices.add(matchIdx);
+                        
+                        let fEvent = e1; 
+                        let mEvent = e2;
+                        if (e1.Genere && e1.Genere.toUpperCase().trim() === 'M') {
+                            fEvent = e2;
+                            mEvent = e1;
+                        } 
+                        
+                        merged = {
+                            isMerged: true,
+                            line1: `${fEvent.Nome} ${fEvent.Cognome}`,
+                            line2: `${mEvent.Nome} ${mEvent.Cognome}`,
+                            label: `Anniversario${e1.yearsTurning !== null ? ' (' + e1.yearsTurning + ')' : ''}`,
+                            type: 'Anniversario',
+                            // Per home badge
+                            daysUntil: e1.daysUntil,
+                            isPastThisYear: e1.isPastThisYear
+                        };
+                    }
+                }
+                
+                if (merged) {
+                    mergedList.push(merged);
+                } else {
+                    mergedList.push({
+                        isMerged: false,
+                        line1: `${e1.Nome} ${e1.Cognome}`,
+                        label: e1.tipoDisplay + (e1.yearsTurning !== null ? ` (${e1.yearsTurning})` : ''),
+                        type: e1.tipoDisplay,
+                        // Dati extra per render
+                        daysUntil: e1.daysUntil,
+                        isPastThisYear: e1.isPastThisYear
+                    });
+                }
+            }
+            
+            // Ordinamento: Compleanni > Anniversari > Onomastici
+            const priority = { 'Compleanno': 1, 'Anniversario': 2, 'Onomastico': 3 };
+            mergedList.sort((a, b) => {
+                const pA = priority[a.type] || 99;
+                const pB = priority[b.type] || 99;
+                return pA - pB;
+            });
+            
+            return mergedList;
+        }
+        
+        // --- UTILS PER HTML ---
+        function formatLabelHTML(label) {
+            // Trasforma "Testo (123)" in "Testo <span class='bold-number'>(123)</span>"
+            return label.replace(/(\(\d+\))/, '<span class="bold-number">$1</span>');
+        }
 
         // --- RENDER FUNCTIONS ---
 
@@ -504,37 +620,76 @@
                 container.innerHTML = '<div style="text-align:center; padding:2rem; font-size:1rem; color:var(--text-muted)">Nessun evento imminente</div>';
                 return;
             }
-
-            container.innerHTML = upcoming.map(e => {
-                const icon = e.tipoDisplay === 'Compleanno' ? '🎂' : (e.tipoDisplay === 'Onomastico' ? '🌟' : '💍');
+            
+            // Raggruppa per data (YYYY-MM-DD) per unire eventi stesso giorno
+            const groupedByDate = {};
+            const uniqueDates = [];
+            
+            upcoming.forEach(e => {
+                // Usiamo una chiave unica per la data (ignora anno evento, usa anno corrente)
+                const dateKey = `${e.pDate.month}-${e.pDate.day}`;
+                if (!groupedByDate[dateKey]) {
+                    groupedByDate[dateKey] = [];
+                    uniqueDates.push(e); // Teniamo un riferimento per l'ordinamento
+                }
+                groupedByDate[dateKey].push(e);
+            });
+            
+            // uniqueDates è già ordinato per daysUntil
+            // Iteriamo sulle date uniche
+            container.innerHTML = uniqueDates.map(refEvent => {
+                const dateKey = `${refEvent.pDate.month}-${refEvent.pDate.day}`;
+                const dayEvents = groupedByDate[dateKey];
+                const processed = processDayEvents(dayEvents);
                 
-                let dayLabel = `Tra ${e.daysUntil} gg`;
+                let dayLabel = `Tra ${refEvent.daysUntil} gg`;
                 let cardClass = 'card';
-                if (e.daysUntil === 0) {
+                let borderStyle = 'border-left: 5px solid var(--primary);';
+                
+                if (refEvent.daysUntil === 0) {
                     dayLabel = "OGGI!";
                     cardClass += ' is-today';
+                } else if (refEvent.daysUntil === 1) {
+                    dayLabel = "Domani";
                 }
-                if (e.daysUntil === 1) dayLabel = "Domani";
+                
+                // Genera badge HTML una sola volta
+                const badgeHtml = `<div class="home-badge">${dayLabel}</div>`;
+                
+                const eventsHtml = processed.map(item => {
+                    const icon = item.type === 'Compleanno' ? '🎂' : (item.type === 'Onomastico' ? '🌟' : '💍');
+                    const labelHtml = formatLabelHTML(item.label);
+                    
+                    if (item.isMerged) {
+                        return `
+                        <div class="event-row">
+                            <div class="cal-name">${item.line1}</div>
+                            <div class="cal-name">${item.line2}</div>
+                            <div class="cal-type">
+                                <span>${icon} ${labelHtml}</span>
+                            </div>
+                        </div>`;
+                    } else {
+                        return `
+                        <div class="event-row">
+                            <div class="cal-name">${item.line1}</div>
+                            <div class="cal-type">
+                                <span>${icon} ${labelHtml}</span>
+                            </div>
+                        </div>`;
+                    }
+                }).join('');
 
-                let ageSpan = '';
-                if (e.yearsTurning !== null && (e.tipoDisplay === 'Compleanno' || e.tipoDisplay === 'Anniversario')) {
-                    const ageColor = e.tipoDisplay === 'Compleanno' ? 'var(--age-color-bday)' : 'var(--age-color-anniv)';
-                    ageSpan = `<span style="color:${ageColor}; font-weight:800; font-size:1rem; margin-left:4px;">(${e.yearsTurning})</span>`;
-                }
-
+                // Inseriamo il badge come primo elemento del contenitore destro, che è relative
                 return `
-                <div class="${cardClass}" style="display:flex; align-items:center; gap:15px; border-left: 5px solid var(--primary);">
-                    <div style="text-align:center; min-width:55px;">
-                        <div style="font-weight:800; color:var(--primary); font-size:1.5rem; line-height:1;">${e.pDate.day}</div>
-                        <div style="font-size:0.75rem; text-transform:uppercase; font-weight:600;">${shortMonths[e.pDate.month-1]}</div>
+                <div class="${cardClass}" style="display:flex; gap:15px; ${borderStyle} align-items:stretch;">
+                    <div class="cal-date">
+                        <div style="font-weight:800; color:var(--primary); font-size:1.5rem; line-height:1;">${refEvent.pDate.day}</div>
+                        <div style="font-size:0.75rem; text-transform:uppercase; font-weight:600;">${shortMonths[refEvent.pDate.month-1]}</div>
                     </div>
-                    <div style="flex:1;">
-                        <div style="font-weight:700; font-size:1.15rem;">${e.Nome} ${e.Cognome}</div>
-                        <div style="display:flex; align-items:center; margin-top:4px;">
-                            <span style="font-size:0.9rem; color:var(--text-muted);">${icon} ${e.tipoDisplay}</span>
-                            ${ageSpan}
-                            <span class="badge days-label" style="background:var(--primary-light); color:var(--primary);">${dayLabel}</span>
-                        </div>
+                    <div style="flex:1; display:flex; flex-direction:column; justify-content:center; position: relative;">
+                        ${badgeHtml}
+                        ${eventsHtml}
                     </div>
                 </div>`;
             }).join('');
@@ -548,58 +703,72 @@
             });
 
             let lastMonth = -1;
-            let firstFutureId = null;
             let html = '';
-
-            sorted.forEach((e, index) => {
-                if (e.pDate.month !== lastMonth) {
-                    html += `<div class="month-header">${months[e.pDate.month - 1]}</div>`;
-                    lastMonth = e.pDate.month;
+            
+            // Raggruppa per mese e giorno
+            const grouped = {};
+            const monthOrder = []; // tiene traccia dell'ordine
+            
+            sorted.forEach(e => {
+                const key = `${e.pDate.month}-${e.pDate.day}`;
+                if (!grouped[key]) {
+                    grouped[key] = [];
+                    monthOrder.push(e); // Solo per sapere che mesi disegnare
                 }
-
+                grouped[key].push(e);
+            });
+            
+            let currentMonth = -1;
+            
+            monthOrder.forEach(refEvent => {
+                if (refEvent.pDate.month !== currentMonth) {
+                    html += `<div class="month-header">${months[refEvent.pDate.month - 1]}</div>`;
+                    currentMonth = refEvent.pDate.month;
+                }
+                
+                const key = `${refEvent.pDate.month}-${refEvent.pDate.day}`;
+                const dayEvents = grouped[key];
+                const processed = processDayEvents(dayEvents);
+                
                 let rowClass = 'calendar-item';
-                if (e.isPastThisYear) rowClass += ' is-past';
-                if (e.daysUntil === 0) rowClass += ' is-today';
-
-                const icon = e.tipoDisplay === 'Compleanno' ? '🎂' : (e.tipoDisplay === 'Onomastico' ? '🌟' : '💍');
-                let rowId = `evt-${index}`;
+                // Se TUTTI sono passati, metti stile past
+                if (dayEvents.every(e => e.isPastThisYear)) rowClass += ' is-past';
+                // Se ALMENO UNO è oggi
+                if (dayEvents.some(e => e.daysUntil === 0)) rowClass += ' is-today';
                 
-                if (!e.isPastThisYear && firstFutureId === null) {
-                    firstFutureId = rowId;
-                }
-
-                let ageSpan = '';
-                if (e.yearsTurning !== null && (e.tipoDisplay === 'Compleanno' || e.tipoDisplay === 'Anniversario')) {
-                    const ageColor = e.tipoDisplay === 'Compleanno' ? 'var(--age-color-bday)' : 'var(--age-color-anniv)';
-                    ageSpan = `<span style="color:${ageColor}; font-weight:800; font-size:0.9rem; margin-left:4px;">(${e.yearsTurning})</span>`;
-                }
-                
-                let labelHtml = '';
-                if (!e.isPastThisYear && rowId === firstFutureId) {
-                    const labelText = (e.daysUntil === 0) ? 'OGGI!' : 'PROSSIMO';
-                    const color = (e.daysUntil === 0) ? '#ef4444' : 'var(--primary)';
-                    labelHtml = `<span style="font-size:0.75rem; color:${color}; font-weight:bold;">${labelText}</span>`;
-                }
+                const eventsHtml = processed.map(item => {
+                    const icon = item.type === 'Compleanno' ? '🎂' : (item.type === 'Onomastico' ? '🌟' : '💍');
+                    const labelHtml = formatLabelHTML(item.label);
+                    
+                    if (item.isMerged) {
+                        return `
+                        <div class="event-row">
+                            <div class="cal-name">${item.line1}</div>
+                            <div class="cal-name">${item.line2}</div>
+                            <div class="cal-type"><span>${icon} ${labelHtml}</span></div>
+                        </div>`;
+                    } else {
+                        return `
+                        <div class="event-row">
+                            <div class="cal-name">${item.line1}</div>
+                            <div class="cal-type"><span>${icon} ${labelHtml}</span></div>
+                        </div>`;
+                    }
+                }).join('');
 
                 html += `
-                <div id="${rowId}" class="${rowClass}">
+                <div class="${rowClass}">
                     <div class="cal-date">
-                        ${e.pDate.day}
-                        <small>${shortMonths[e.pDate.month-1]}</small>
+                        ${refEvent.pDate.day}
+                        <small>${shortMonths[refEvent.pDate.month-1]}</small>
                     </div>
                     <div class="cal-info">
-                        <div class="cal-name">${e.Nome} ${e.Cognome}</div>
-                        <div class="cal-type">
-                            <span>${icon} ${e.tipoDisplay}</span>
-                            ${ageSpan}
-                        </div>
+                        ${eventsHtml}
                     </div>
-                    ${labelHtml}
                 </div>`;
             });
 
             container.innerHTML = html;
-            return firstFutureId;
         }
 
         function renderRubrica(filterText = '') {
@@ -651,6 +820,9 @@
                     if (i.currentAge !== null && (i.tipoDisplay === 'Compleanno' || i.tipoDisplay === 'Anniversario')) {
                          displayLabel += ` (${i.currentAge})`;
                     }
+                    
+                    // Formattazione grassetto anche qui
+                    displayLabel = formatLabelHTML(displayLabel);
 
                     return `
                     <div class="${rowClass}">
@@ -690,9 +862,17 @@
         // --- PDF GENERATION ---
         
         function generatePDF() {
+            if (activeTabId === 'rubrica') {
+                generateRubricaPDF();
+            } else {
+                generateCalendarPDF();
+            }
+        }
+
+        // 1. PDF PER RUBRICA (Elenco Alfabetico con Box ogni 10)
+        function generateRubricaPDF() {
             const { jsPDF } = window.jspdf;
             
-            // Creazione documento A4 verticale (mm)
             const doc = new jsPDF({
                 orientation: 'portrait',
                 unit: 'mm',
@@ -701,29 +881,24 @@
             
             const pageWidth = doc.internal.pageSize.width;
             const pageHeight = doc.internal.pageSize.height;
-            
-            // MARGINI E SPAZI
-            const marginX = 12; // Sinistro/Destro
-            const marginY = 10; // Superiore/Inferiore
-            
+            const marginX = 12; 
+            const marginY = 15; 
             const colGap = 10;
             const colWidth = (pageWidth - (marginX * 2) - colGap) / 2;
-            
             const nameWidth = 43; 
             
-            let cursorY = 10; // Inizio dal margine superiore
-            let currentColumn = 0; // 0 = sx, 1 = dx
+            let cursorY = 15; 
+            let currentColumn = 0; 
             let countInColumn = 0; 
             
-            // Titolo
+            // Intestazione
             doc.setFont("helvetica", "bold");
             doc.setFontSize(16);
             doc.text("Festività parenti e amici", pageWidth / 2, cursorY, { align: "center" });
             
-            cursorY += 8; // Spazio dimezzato
-            const listStartY = cursorY; // Salva la Y di inizio elenco (18mm)
+            cursorY += 8; 
+            const listStartY = cursorY; 
             
-            // Preparazione Dati
             const people = getGroupedPeople();
             const sortedList = Object.values(people).sort((a, b) => {
                 if (a.cognome !== b.cognome) return a.cognome.localeCompare(b.cognome);
@@ -732,9 +907,16 @@
             
             doc.setFontSize(9);
             
+            // Parametri per il box e il testo
+            const rowHeight = 5; 
+            const boxPaddingTop = 4; // Spazio sopra la baseline della prima riga per il box
+            const boxPaddingBottom = 1; // Spazio sotto la baseline
+            
+            // StartY del gruppo corrente per disegnare il box
+            let boxStartY = cursorY - boxPaddingTop; 
+
             sortedList.forEach((p, index) => {
-                // Estrazione dati per formattazione: 
-                
+                // Preparazione stringhe date
                 let bDayStr = '';
                 let nameDayStr = '';
                 let annivStr = '';
@@ -758,60 +940,233 @@
                 if (bDayStr) datesArr.push(bDayStr);
                 if (nameDayStr) datesArr.push(nameDayStr);
                 if (annivStr) datesArr.push(annivStr);
-                
-                const datesText = datesArr.join('   '); // 3 spazi
-                
-                // Controllo Spazio Pagina
+                const datesText = datesArr.join('   '); 
+
+                // Controllo cambio pagina/colonna
                 if (cursorY > pageHeight - marginY) {
+                    
+                    // Se stavamo disegnando un box (il gruppo non è finito), chiudiamolo nella colonna vecchia
+                    if (countInColumn % 10 !== 0) {
+                        const xBaseOld = marginX + (currentColumn * (colWidth + colGap));
+                        let boxBottom = cursorY - rowHeight + boxPaddingBottom;
+                        
+                        // Disegna box parziale
+                        doc.setDrawColor(180, 180, 180);
+                        doc.setLineWidth(0.1);
+                        doc.rect(xBaseOld - 1, boxStartY, colWidth + 2, boxBottom - boxStartY);
+                        doc.setDrawColor(0);
+                    }
+
+                    // Cambio Colonna / Pagina
                     if (currentColumn === 0) {
                         currentColumn = 1;
-                        cursorY = listStartY; // Ritorna su, allineato con l'inizio della prima colonna (18mm)
-                        countInColumn = 0;
+                        cursorY = listStartY; 
                     } else {
                         doc.addPage();
                         currentColumn = 0;
-                        cursorY = 10; // Nuova pagina, inizio dal margine superiore (10mm)
-                        countInColumn = 0;
+                        cursorY = 15; // Reset margine alto nuova pagina
                     }
+                    
+                    // Reset inizio box per la nuova colonna
+                    boxStartY = cursorY - boxPaddingTop;
                 }
                 
-                // Calcolo coordinate X
                 const xBase = marginX + (currentColumn * (colWidth + colGap));
-                const xDate = xBase + nameWidth; // Parte date
+                const xDate = xBase + nameWidth; 
                 
-                // Stampa riga
+                // Disegno Testo
                 doc.setFont("helvetica", "normal");
-                
-                // 1. Cognome Nome
                 const nameStr = `${p.cognome} ${p.nome}`;
                 doc.text(nameStr, xBase, cursorY);
                 
-                // 2. Linea Punteggiata (Leader line)
+                // Linea tratteggiata
                 const textWidth = doc.getTextWidth(nameStr);
-                const lineStart = xBase + textWidth + 1; // Start 1mm dopo il nome
-                const lineEnd = xDate - 1; // End 1mm prima delle date
+                const lineStart = xBase + textWidth + 1; 
+                const lineEnd = xDate - 1; 
                 
                 if (lineEnd > lineStart) {
-                    doc.setDrawColor(180, 180, 180); // Grigio chiaro
-                    doc.setLineWidth(0.1);           // Sottilissima
-                    doc.setLineDash([0.5, 0.5], 0);  // Punteggiata fitta
+                    doc.setDrawColor(180, 180, 180);
+                    doc.setLineWidth(0.1); 
+                    doc.setLineDash([0.5, 0.5], 0); 
                     doc.line(lineStart, cursorY, lineEnd, cursorY);
-                    
                     doc.setDrawColor(0);
                     doc.setLineDash([]);
                 }
                 
-                // 3. Date allineate
                 doc.text(datesText, xDate, cursorY);
                 
-                cursorY += 5; // Interlinea standard
+                // Avanzamento cursore
+                cursorY += rowHeight;
                 countInColumn++;
                 
-                // --- MODIFICATO: Rimosso blocco separatore ---
-                // Il blocco if (countInColumn % 10 === 0) è stato rimosso per avere un elenco continuo.
+                // Logica Chiusura Box (ogni 10 oppure fine lista)
+                if (countInColumn > 0 && (countInColumn % 10 === 0 || index === sortedList.length - 1)) {
+                    // Altezza box = (cursore corrente, che è già sceso) - startY - correzione
+                    // Cursore è alla riga successiva libera. L'ultima riga scritta era a cursorY - rowHeight.
+                    // Il fondo del box deve essere sotto l'ultima riga scritta.
+                    
+                    let boxBottom = cursorY - rowHeight + boxPaddingBottom;
+                    let h = boxBottom - boxStartY;
+                    
+                    doc.setDrawColor(180, 180, 180); // Grigio
+                    doc.setLineWidth(0.1);
+                    doc.rect(xBase - 1, boxStartY, colWidth + 2, h); 
+                    doc.setDrawColor(0);
+                    
+                    // Aggiungi spazio tra un box e l'altro
+                    cursorY += 3;
+                    
+                    // Setta il punto di inizio per il prossimo eventuale box
+                    boxStartY = cursorY - boxPaddingTop;
+                }
             });
             
             window.open(doc.output('bloburl'), '_blank');
+        }
+
+        // 2. PDF PER CALENDARIO (Mese per pagina, Anniversari Accorpati)
+        function generateCalendarPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            
+            const year = new Date().getFullYear();
+            const pageWidth = doc.internal.pageSize.width;
+            const pageHeight = doc.internal.pageSize.height;
+            const margin = 20; 
+            const colGap = 10;
+            const colWidth = (pageWidth - (margin * 2) - colGap) / 2;
+            
+            for (let m = 0; m < 12; m++) {
+                if (m > 0) doc.addPage();
+                
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(20);
+                doc.text(`${months[m]} ${year}`, pageWidth/2, 15, {align: "center"});
+                
+                const monthlyEvents = events.filter(e => e.pDate.month === (m + 1));
+                
+                const eventsByDay = {};
+                monthlyEvents.forEach(e => {
+                    if (!eventsByDay[e.pDate.day]) eventsByDay[e.pDate.day] = [];
+                    eventsByDay[e.pDate.day].push(e);
+                });
+                
+                const sortedDays = Object.keys(eventsByDay).map(Number).sort((a,b) => a-b);
+                
+                let cursorY = 25;
+                let col = 0; 
+                let startY = cursorY;
+                
+                sortedDays.forEach(day => {
+                    const dayEvents = eventsByDay[day];
+                    const mergedList = processDayEvents(dayEvents); // Riutilizza la logica JS
+                    
+                    let totalBoxHeight = 0;
+                    const itemSpacing = 2; 
+                    
+                    mergedList.forEach((item, idx) => {
+                        const h = item.isMerged ? 16 : 11;
+                        totalBoxHeight += h;
+                        if (idx < mergedList.length - 1) totalBoxHeight += itemSpacing;
+                    });
+                    
+                    totalBoxHeight += 6; 
+                    
+                    if (cursorY + totalBoxHeight > pageHeight - margin) {
+                        if (col === 0) {
+                            col = 1;
+                            cursorY = startY; 
+                        } else {
+                            doc.addPage();
+                            doc.text(`${months[m]} ${year} (cont.)`, pageWidth/2, 15, {align: "center"});
+                            col = 0;
+                            cursorY = 25;
+                            startY = 25;
+                        }
+                    }
+                    
+                    const xBase = margin + (col * (colWidth + colGap));
+                    
+                    doc.setFillColor(230, 230, 230);
+                    doc.rect(xBase + 1, cursorY + 1, colWidth, totalBoxHeight, 'F'); 
+                    doc.setFillColor(255, 255, 255);
+                    doc.setDrawColor(200, 200, 200);
+                    doc.rect(xBase, cursorY, colWidth, totalBoxHeight, 'FD'); 
+                    doc.setDrawColor(0);
+                    
+                    const dateBoxWidth = 14;
+                    const dayCenterY = cursorY + (totalBoxHeight / 2);
+                    
+                    const eventDateObj = new Date(year, m, day);
+                    const dayName = eventDateObj.toLocaleDateString('it-IT', { weekday: 'short' }).toUpperCase().substring(0,3);
+                    
+                    doc.setFontSize(8);
+                    doc.setFont("helvetica", "normal");
+                    doc.setTextColor(100, 100, 100);
+                    doc.text(dayName, xBase + (dateBoxWidth/2), dayCenterY - 3, {align: "center"});
+                    
+                    doc.setFontSize(14);
+                    doc.setFont("helvetica", "bold");
+                    doc.setTextColor(0, 0, 0); 
+                    doc.text(String(day), xBase + (dateBoxWidth/2), dayCenterY + 3, {align: "center"});
+                    
+                    doc.setDrawColor(220, 220, 220);
+                    doc.line(xBase + dateBoxWidth, cursorY + 2, xBase + dateBoxWidth, cursorY + totalBoxHeight - 2);
+                    
+                    let currentTextY = cursorY + 3; 
+                    const textX = xBase + dateBoxWidth + 3;
+                    
+                    mergedList.forEach(item => {
+                        if (item.isMerged) {
+                            doc.setFontSize(10);
+                            doc.setFont("helvetica", "bold");
+                            doc.setTextColor(0);
+                            doc.text(item.line1, textX, currentTextY + 4);
+                            doc.text(item.line2, textX, currentTextY + 8.5); 
+                            
+                            drawLabelWithBoldNumber(doc, item.label, textX, currentTextY + 13);
+                            
+                            currentTextY += 16 + itemSpacing;
+                        } else {
+                            doc.setFontSize(10);
+                            doc.setFont("helvetica", "bold");
+                            doc.setTextColor(0);
+                            doc.text(item.line1, textX, currentTextY + 4);
+                            
+                            drawLabelWithBoldNumber(doc, item.label, textX, currentTextY + 8.5);
+                            
+                            currentTextY += 11 + itemSpacing;
+                        }
+                    });
+                    
+                    cursorY += totalBoxHeight + 3; 
+                });
+            }
+            
+            window.open(doc.output('bloburl'), '_blank');
+        }
+        
+        function drawLabelWithBoldNumber(doc, text, x, y) {
+            const regex = /(.*)(\(\d+\))(.*)/; 
+            const match = text.match(regex);
+            
+            doc.setFontSize(9);
+            doc.setTextColor(80, 80, 80);
+            
+            if (match) {
+                const prefix = match[1];
+                const numberPart = match[2]; 
+                
+                doc.setFont("helvetica", "normal");
+                doc.text(prefix, x, y);
+                const w1 = doc.getTextWidth(prefix);
+                
+                doc.setFont("helvetica", "bold");
+                doc.text(numberPart, x + w1, y);
+            } else {
+                doc.setFont("helvetica", "normal");
+                doc.text(text, x, y);
+            }
         }
 
         function renderStats() {
@@ -880,6 +1235,7 @@
         let calendarScrollId = null;
 
         function switchTab(tabId) {
+            activeTabId = tabId; // Aggiorna stato
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             
