@@ -1,0 +1,36 @@
+name: Aggiorna Feste Siri
+
+on:
+  schedule:
+    # 02:00 UTC corrisponde alle 03:00 Italiane (inverno) o 04:00 (estate)
+    - cron: '0 2 * * *'
+  # Questo permette di lanciarlo anche a mano dal tab "Actions" per fare prove
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del codice
+        uses: actions/checkout@v4
+
+      - name: Imposta Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Esegui Feste.py
+        run: python Feste.py
+
+      - name: Salva i risultati (Commit & Push)
+        run: |
+          git config --global user.name "GitHub Action Bot"
+          git config --global user.email "actions@github.com"
+          git add Feste.txt Feste.html
+          # Il comando sotto salva solo se ci sono cambiamenti, altrimenti non fa nulla
+          git commit -m "Aggiornamento automatico Feste Siri" || echo "Nessuna modifica da salvare"
+          git push
