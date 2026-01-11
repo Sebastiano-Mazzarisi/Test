@@ -8,9 +8,10 @@ from itertools import groupby
 
 # Nome: Feste.py
 # Data ultima modifica: 12/01/2026
-# Descrizione: Versione DEFINITIVA OTTIMIZZATA PER SIRI.
-#              - Raggruppamento eventi per data (non ripete "Tra X giorni").
-#              - Usa "E ancora" per separare i gruppi di date.
+# Descrizione: Versione DEFINITIVA OTTIMIZZATA PER SIRI + COPPIE.
+#              - Anniversari accorpati in Feste.txt ("Tizio e Caio").
+#              - Time Travel (parametro data).
+#              - HTML completo.
 # File di input: Feste-elenco.csv
 # File di output: Feste.html, Feste.txt
 
@@ -76,20 +77,76 @@ def leggi_e_processa_dati(nome_file):
         print(f"❌ Errore durante la lettura del CSV: {e}")
         return []
 
-def genera_txt_siri_discorsivo(dati):
+def formatta_eventi_gruppo(gruppo_eventi):
     """
-    Genera Feste.txt raggruppando gli eventi per data.
-    Esempio output:
-    "Tra 2 giorni, il 13 gennaio:
-     Mario festeggia...
-     Luigi festeggia..."
+    Funzione helper per trasformare una lista di eventi (dello stesso giorno)
+    in una lista di frasi, accorpando gli anniversari.
     """
-    print("🗣️ Generazione testo naturale raggruppato per Siri...")
+    lines = []
+    skip_indices = set()
     
+    # Ordiniamo per tipo per raggruppare visivamente
+    # (ma l'ordine originale alfabetico è preservato se il tipo è uguale)
+    
+    for i, e in enumerate(gruppo_eventi):
+        if i in skip_indices:
+            continue
+            
+        phrase = ""
+        
+        # Logica Accorpamento Anniversari
+        if e['Tipo'] == 'Anniversario':
+            match_index = -1
+            # Cerca un partner nello stesso gruppo (stessi anni)
+            for j in range(i + 1, len(gruppo_eventi)):
+                other = gruppo_eventi[j]
+                if j not in skip_indices and other['Tipo'] == 'Anniversario' and other['Years'] == e['Years']:
+                    match_index = j
+                    break
+            
+            if match_index != -1:
+                # Trovato accoppiamento!
+                partner = gruppo_eventi[match_index]
+                skip_indices.add(match_index)
+                
+                # Ordine alfabetico per nome nella frase
+                nomi = sorted([f"{e['Nome']} {e['Cognome']}", f"{partner['Nome']} {partner['Cognome']}"])
+                phrase = f"Anniversario di {nomi[0]} e {nomi[1]}"
+                if e['Years']:
+                    phrase += f" ({e['Years']} anni)"
+            else:
+                # Anniversario singolo
+                phrase = f"Anniversario di {e['Nome']} {e['Cognome']}"
+                if e['Years']:
+                    phrase += f" ({e['Years']} anni)"
+        
+        # Logica Compleanni / Onomastici
+        elif e['Tipo'] == 'Compleanno':
+            phrase = f"{e['Nome']} {e['Cognome']} festeggia il compleanno"
+            if e['Years']: phrase += f" e compie {e['Years']} anni"
+            
+        elif e['Tipo'] == 'Onomastico':
+            phrase = f"È l'onomastico di {e['Nome']} {e['Cognome']}"
+            
+        phrase += "."
+        lines.append(phrase)
+        
+    return lines
+
+def genera_txt_siri_discorsivo(dati, fake_today=None):
+    """
+    Genera Feste.txt raggruppando date e unendo le coppie di anniversari.
+    """
+    if fake_today:
+        today = fake_today.replace(hour=0, minute=0, second=0, microsecond=0)
+        print(f"🗣️ Generazione Siri simulando data: {today.strftime('%d/%m/%Y')}")
+    else:
+        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        print("🗣️ Generazione Siri con data odierna reale.")
+
     mesi_nomi = ["", "gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", 
                  "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"]
     
-    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     processed_events = []
 
     for item in dati:
@@ -104,7 +161,7 @@ def genera_txt_siri_discorsivo(dati):
                 next_event = datetime(today.year, month, day)
             except ValueError:
                 continue 
-                
+            
             if next_event < today:
                 next_event = next_event.replace(year=today.year + 1)
             
@@ -130,41 +187,35 @@ def genera_txt_siri_discorsivo(dati):
         except:
             continue
 
-    # Ordina per data per poter raggruppare
     processed_events.sort(key=lambda x: x['DaysUntil'])
 
     lines = []
-    lines.append("Ecco il riepilogo delle feste.\n")
+    if fake_today:
+        lines.append(f"Riepilogo feste (Simulazione al {today.strftime('%d/%m/%Y')}).\n")
+    else:
+        lines.append("Ecco il riepilogo delle feste.\n")
 
     # --- OGGI ---
     events_today = [e for e in processed_events if e['DaysUntil'] == 0]
     if events_today:
         lines.append("Attenzione, oggi c'è una festa!")
-        # Raggruppa anche per oggi se ce ne sono più di uno
         today_date_str = f"Oggi, {events_today[0]['Day']} {events_today[0]['MonthName']},"
         lines.append(today_date_str)
         
-        for e in events_today:
-            phrase = f"{e['Tipo']} di {e['Nome']} {e['Cognome']}."
-            if e['Years']:
-                if e['Tipo'] == 'Compleanno':
-                    phrase += f" Compie {e['Years']} anni."
-                elif e['Tipo'] == 'Anniversario':
-                    phrase += f" Sono {e['Years']} anni."
-            lines.append(phrase)
+        # Usa la funzione helper per formattare (unisce le coppie)
+        frasi_oggi = formatta_eventi_gruppo(events_today)
+        lines.extend(frasi_oggi)
     else:
         lines.append("Oggi, nessun evento in programma.")
 
     lines.append("\n") 
 
-    # --- PROSSIMI (Raggruppati) ---
-    # Prendiamo i prossimi 6 eventi per sicurezza, poi raggruppiamo
-    upcoming = [e for e in processed_events if e['DaysUntil'] > 0][:6]
+    # --- PROSSIMI ---
+    upcoming = [e for e in processed_events if e['DaysUntil'] > 0][:8] # Aumentato leggermente il buffer per catturare coppie
     
     if upcoming:
         lines.append("Nei prossimi giorni:")
         
-        # Raggruppa per giorni mancanti (DaysUntil)
         groups = []
         for k, g in groupby(upcoming, key=lambda x: x['DaysUntil']):
             groups.append(list(g))
@@ -172,13 +223,11 @@ def genera_txt_siri_discorsivo(dati):
         for i, group in enumerate(groups):
             first = group[0]
             
-            # Separatore "E ancora" dalla seconda data in poi
             if i == 1:
                 lines.append("\nE ancora:")
             elif i > 1:
-                lines.append("") # Spazio vuoto semplice
+                lines.append("") 
             
-            # Intestazione Data
             if first['DaysUntil'] == 1:
                 header = f"Domani, il {first['Day']} {first['MonthName']},"
             else:
@@ -186,20 +235,9 @@ def genera_txt_siri_discorsivo(dati):
             
             lines.append(header)
             
-            # Elenco persone in quella data
-            for e in group:
-                phrase = ""
-                if e['Tipo'] == 'Compleanno':
-                    phrase = f"{e['Nome']} {e['Cognome']} festeggia il compleanno"
-                    if e['Years']: phrase += f" e compie {e['Years']} anni"
-                elif e['Tipo'] == 'Onomastico':
-                    phrase = f"È l'onomastico di {e['Nome']} {e['Cognome']}"
-                else:
-                    phrase = f"Anniversario di {e['Nome']} {e['Cognome']}"
-                    if e['Years']: phrase += f" ({e['Years']} anni)"
-                
-                phrase += "."
-                lines.append(phrase)
+            # Usa la funzione helper per formattare (unisce le coppie)
+            frasi_gruppo = formatta_eventi_gruppo(group)
+            lines.extend(frasi_gruppo)
                 
     else:
         lines.append("Non ci sono altri eventi imminenti.")
@@ -207,12 +245,18 @@ def genera_txt_siri_discorsivo(dati):
     try:
         with open(OUTPUT_TXT, 'w', encoding='utf-8') as f:
             f.write("\n".join(lines))
-        print(f"📄 File Siri RAGGRUPPATO generato: {OUTPUT_TXT}")
+        print(f"📄 File Siri ACCORPATO generato: {OUTPUT_TXT}")
     except Exception as e:
         print(f"⚠️ Errore scrittura file Siri: {e}")
 
-def genera_html(dati):
+def genera_html(dati, fake_today=None):
     json_dati = json.dumps(dati, ensure_ascii=False)
+    
+    if fake_today:
+        js_date_code = f"new Date({fake_today.year}, {fake_today.month - 1}, {fake_today.day})"
+        print(f"🌐 Generazione HTML con data fissa: {fake_today.strftime('%d/%m/%Y')}")
+    else:
+        js_date_code = "new Date()"
     
     html_content = f"""<!DOCTYPE html>
 <html lang="it">
@@ -693,8 +737,10 @@ def genera_html(dati):
         }}
 
         function getEventInfo(parsedDate) {{
-            const today = new Date();
+            // INIETTO LA DATA FINTA O VERA QUI
+            const today = {js_date_code};
             today.setHours(0,0,0,0);
+            
             let eventDate = new Date(today.getFullYear(), parsedDate.month - 1, parsedDate.day);
             let isPast = false;
             
@@ -705,7 +751,9 @@ def genera_html(dati):
             
             const diffTime = eventDate - today;
             const daysUntil = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            const currentYearDate = new Date(new Date().getFullYear(), parsedDate.month - 1, parsedDate.day);
+            
+            // Verifico se era passato quest'anno rispetto alla data simulata
+            const currentYearDate = new Date(today.getFullYear(), parsedDate.month - 1, parsedDate.day);
             const actuallyPastThisYear = currentYearDate.getTime() < today.getTime();
 
             return {{ daysUntil, actuallyPastThisYear }};
@@ -720,7 +768,8 @@ def genera_html(dati):
             
             let yearsTurning = null;
             if (pDate.year) {{
-                const currentYear = new Date().getFullYear();
+                const today = {js_date_code}; // Anche qui uso la data simulata per calcolo età
+                const currentYear = today.getFullYear();
                 yearsTurning = currentYear - parseInt(pDate.year);
             }}
 
@@ -1526,7 +1575,17 @@ def genera_html(dati):
         print(f"⚠️ Impossibile aprire il browser automaticamente: {e}")
 
 if __name__ == "__main__":
+    target_date = None
+    # Verifica se c'è un argomento nel formato data GG-MM-AAAA
+    if len(sys.argv) > 1:
+        arg = sys.argv[1]
+        try:
+            target_date = datetime.strptime(arg, "%d-%m-%Y")
+            print(f"🕒 MODALITÀ VIAGGIO NEL TEMPO ATTIVA: {target_date.strftime('%d/%m/%Y')}")
+        except ValueError:
+            print("⚠️ Formato data non valido (Usa GG-MM-AAAA). Uso data odierna.")
+    
     dati_csv = leggi_e_processa_dati(INPUT_FILE)
     if dati_csv:
-        genera_html(dati_csv)
-        genera_txt_siri_discorsivo(dati_csv)
+        genera_html(dati_csv, target_date)
+        genera_txt_siri_discorsivo(dati_csv, target_date)
