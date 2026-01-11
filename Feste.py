@@ -6,16 +6,12 @@ import webbrowser
 from datetime import datetime
 
 # Nome: Feste.py
-# Data e ora: 11/01/2026 22:15
-# Descrizione: Script per generare un calendario feste HTML da file CSV.
-#              Include generazione PDF Dinamica, Visualizzazione HTML Avanzata e SUPPORTO SIRI.
-#              Funzionalità:
-#              - HTML: Home, Calendario, Rubrica, Stats.
-#              - PDF: Rubrica a box e Calendario unificato.
-#              - SIRI: Genera Feste.txt con riepilogo "Oggi" e "Prossimi 5 eventi".
+# Data ultima modifica: 12/01/2026
+# Descrizione: Versione DEFINITIVA.
+#              - HTML/JS: Completo (PDF avanzati, Anniversari uniti, Ricerca vocale).
+#              - SIRI: Generazione testo naturale (es. "Tra 5 giorni...").
 # File di input: Feste-elenco.csv
 # File di output: Feste.html, Feste.txt
-# File di backup: Feste-backup.csv
 
 # Configurazione dei file
 INPUT_FILE = 'Feste-elenco.csv'
@@ -81,49 +77,46 @@ def leggi_e_processa_dati(nome_file):
         print(f"❌ Errore durante la lettura del CSV: {e}")
         return []
 
-def genera_txt_siri(dati):
+def genera_txt_siri_discorsivo(dati):
     """
-    Genera un file di testo (Feste.txt) per Siri/CarPlay.
-    Replica la logica di calcolo date che nell'HTML è fatta in JS.
+    Genera Feste.txt ottimizzato per la lettura naturale di Siri.
+    Esempio: "Domani, il 15 gennaio, Mario festeggia il compleanno."
     """
-    print("🤖 Elaborazione dati per Siri/CarPlay...")
+    print("🗣️ Generazione testo naturale per Siri...")
+    
+    mesi_nomi = ["", "gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", 
+                 "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"]
+    
     today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     processed_events = []
 
     for item in dati:
         try:
-            data_str = item.get('Data', '')
-            parts = data_str.split('/')
-            if len(parts) < 2:
-                continue
+            parts = item.get('Data', '').split('/')
+            if len(parts) < 2: continue
             
-            day = int(parts[0])
-            month = int(parts[1])
-            year_str = parts[2] if len(parts) > 2 else None
+            day, month = int(parts[0]), int(parts[1])
+            year_str = parts[2] if len(parts) > 2 and parts[2] else None
             
-            # Determina la prossima occorrenza
+            # Calcolo prossima data
             try:
                 next_event = datetime(today.year, month, day)
             except ValueError:
-                # Gestione bisestile (es. 29 feb in anno non bisestile)
-                continue
-
+                continue # Gestione bisestile grezza
+                
             if next_event < today:
                 next_event = next_event.replace(year=today.year + 1)
             
             days_until = (next_event - today).days
             
-            # Calcolo Età/Anni ricorrenza
             years_turning = None
             if year_str:
                 origin_year = int(year_str)
-                # Se l'evento è quest'anno, l'età è year_now - origin. 
-                # Se è l'anno prossimo, è year_now + 1 - origin.
+                # Se l'evento è quest'anno
                 years_turning = next_event.year - origin_year
 
             tipo = item.get('Festa', 'Anniversario')
-            if tipo not in ['Compleanno', 'Onomastico']:
-                tipo = 'Anniversario'
+            if tipo not in ['Compleanno', 'Onomastico']: tipo = 'Anniversario'
 
             processed_events.append({
                 'Nome': item.get('Nome', ''),
@@ -131,53 +124,72 @@ def genera_txt_siri(dati):
                 'Tipo': tipo,
                 'DaysUntil': days_until,
                 'Years': years_turning,
-                'DateStr': f"{day}/{month}"
+                'Day': day,
+                'MonthName': mesi_nomi[month]
             })
-            
-        except Exception as e:
+        except:
             continue
 
-    # Ordina per giorni mancanti
     processed_events.sort(key=lambda x: x['DaysUntil'])
 
-    # Creazione contenuto file
+    # Creazione del testo
     lines = []
-    lines.append("RIEPILOGO FESTE")
-    lines.append(f"Aggiornato al: {datetime.now().strftime('%d/%m/%Y %H:%M')}\n")
+    lines.append("Ecco il riepilogo delle feste.\n")
 
-    # Eventi di OGGI
+    # --- OGGI ---
     events_today = [e for e in processed_events if e['DaysUntil'] == 0]
-    lines.append("--- OGGI ---")
     if events_today:
+        lines.append("Attenzione, oggi c'è una festa!")
         for e in events_today:
-            eta_str = f" ({e['Years']} anni)" if e['Years'] else ""
-            lines.append(f"Oggi è il {e['Tipo']} di {e['Nome']} {e['Cognome']}{eta_str}")
+            phrase = f"Oggi, {e['Day']} {e['MonthName']}, è il {e['Tipo']} di {e['Nome']} {e['Cognome']}."
+            if e['Years']:
+                if e['Tipo'] == 'Compleanno':
+                    phrase += f" Compie {e['Years']} anni."
+                elif e['Tipo'] == 'Anniversario':
+                    phrase += f" Sono {e['Years']} anni."
+            lines.append(phrase)
     else:
-        lines.append("Nessun evento per oggi.")
+        lines.append("Oggi, nessun evento in programma.")
 
-    # Prossimi 5 Eventi (escluso oggi)
-    lines.append("\n--- PROSSIMI ---")
+    lines.append("\n") 
+
+    # --- PROSSIMI ---
     upcoming = [e for e in processed_events if e['DaysUntil'] > 0][:5]
-    
     if upcoming:
+        lines.append("Nei prossimi giorni:")
         for e in upcoming:
-            tag_giorni = "domani" if e['DaysUntil'] == 1 else f"tra {e['DaysUntil']} gg"
-            eta_str = f" ({e['Years']} anni)" if e['Years'] else ""
-            # Formato: 15/08: Nome Cognome (Compleanno) - tra 5 gg
-            lines.append(f"{e['DateStr']}: {e['Nome']} {e['Cognome']} ({e['Tipo']}{eta_str}) - {tag_giorni}")
+            if e['DaysUntil'] == 1:
+                tempo = "Domani"
+            else:
+                tempo = f"Tra {e['DaysUntil']} giorni"
+
+            phrase = f"{tempo}, il {e['Day']} {e['MonthName']}, "
+            
+            if e['Tipo'] == 'Compleanno':
+                phrase += f"{e['Nome']} {e['Cognome']} festeggia il compleanno"
+                if e['Years']: phrase += f" e compie {e['Years']} anni"
+            elif e['Tipo'] == 'Onomastico':
+                 phrase += f"è l'onomastico di {e['Nome']} {e['Cognome']}"
+            else:
+                phrase += f"è l'anniversario di {e['Nome']} {e['Cognome']}"
+                if e['Years']: phrase += f" di {e['Years']} anni"
+            
+            phrase += "." 
+            lines.append(phrase)
     else:
-        lines.append("Nessun evento imminente.")
+        lines.append("Non ci sono altri eventi imminenti.")
 
     try:
         with open(OUTPUT_TXT, 'w', encoding='utf-8') as f:
             f.write("\n".join(lines))
-        print(f"📄 File Siri generato con successo: {OUTPUT_TXT}")
+        print(f"📄 File Siri DISCORSIVO generato: {OUTPUT_TXT}")
     except Exception as e:
         print(f"⚠️ Errore scrittura file Siri: {e}")
 
 def genera_html(dati):
     json_dati = json.dumps(dati, ensure_ascii=False)
     
+    # HTML COMPLETO ORIGINALE
     html_content = f"""<!DOCTYPE html>
 <html lang="it">
 <head>
@@ -624,7 +636,7 @@ def genera_html(dati):
 
         <nav class="nav-bar">
             <button class="nav-item active" onclick="switchTab('home')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                 Home
             </button>
             <button class="nav-item" onclick="switchTab('rubrica')">
@@ -1480,7 +1492,7 @@ def genera_html(dati):
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
         f.write(html_content)
     
-    print(f"🎉 Successo! File HTML generato: {OUTPUT_FILE}")
+    print(f"🎉 Successo! File generato: {OUTPUT_FILE}")
     
     try:
         file_path = os.path.abspath(OUTPUT_FILE)
@@ -1493,4 +1505,4 @@ if __name__ == "__main__":
     dati_csv = leggi_e_processa_dati(INPUT_FILE)
     if dati_csv:
         genera_html(dati_csv)
-        genera_txt_siri(dati_csv)
+        genera_txt_siri_discorsivo(dati_csv)
