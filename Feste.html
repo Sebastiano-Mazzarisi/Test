@@ -477,8 +477,10 @@
         }
 
         function getEventInfo(parsedDate) {
+            // INIETTO LA DATA FINTA O VERA QUI
             const today = new Date();
             today.setHours(0,0,0,0);
+            
             let eventDate = new Date(today.getFullYear(), parsedDate.month - 1, parsedDate.day);
             let isPast = false;
             
@@ -489,7 +491,9 @@
             
             const diffTime = eventDate - today;
             const daysUntil = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            const currentYearDate = new Date(new Date().getFullYear(), parsedDate.month - 1, parsedDate.day);
+            
+            // Verifico se era passato quest'anno rispetto alla data simulata
+            const currentYearDate = new Date(today.getFullYear(), parsedDate.month - 1, parsedDate.day);
             const actuallyPastThisYear = currentYearDate.getTime() < today.getTime();
 
             return { daysUntil, actuallyPastThisYear };
@@ -504,7 +508,8 @@
             
             let yearsTurning = null;
             if (pDate.year) {
-                const currentYear = new Date().getFullYear();
+                const today = new Date(); // Anche qui uso la data simulata per calcolo età
+                const currentYear = today.getFullYear();
                 yearsTurning = currentYear - parseInt(pDate.year);
             }
 
