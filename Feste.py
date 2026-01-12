@@ -8,7 +8,9 @@ from itertools import groupby
 
 # Nome: Feste.py
 # Data ultima modifica: 12/01/2026
-# Descrizione: Versione DEFINITIVA OTTIMIZZATA PER SIRI + COPPIE.
+# Descrizione: Versione DEFINITIVA OTTIMIZZATA PER SIRI + COPPIE + COLORI.
+#              - "Tra n gg" diventato "- n".
+#              - Nomi colorati (Blu Compleanni, Verde Onomastici, Porpora Anniversari).
 #              - Anniversari accorpati in Feste.txt ("Tizio e Caio").
 #              - Time Travel (parametro data).
 #              - HTML completo.
@@ -85,9 +87,6 @@ def formatta_eventi_gruppo(gruppo_eventi):
     lines = []
     skip_indices = set()
     
-    # Ordiniamo per tipo per raggruppare visivamente
-    # (ma l'ordine originale alfabetico è preservato se il tipo è uguale)
-    
     for i, e in enumerate(gruppo_eventi):
         if i in skip_indices:
             continue
@@ -136,6 +135,8 @@ def formatta_eventi_gruppo(gruppo_eventi):
 def genera_txt_siri_discorsivo(dati, fake_today=None):
     """
     Genera Feste.txt raggruppando date e unendo le coppie di anniversari.
+    Nota: Per Siri manteniamo un linguaggio naturale ("Tra X giorni"), 
+    la modifica "- X" è applicata alla parte visiva (HTML/PDF).
     """
     if fake_today:
         today = fake_today.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -202,7 +203,6 @@ def genera_txt_siri_discorsivo(dati, fake_today=None):
         today_date_str = f"Oggi, {events_today[0]['Day']} {events_today[0]['MonthName']},"
         lines.append(today_date_str)
         
-        # Usa la funzione helper per formattare (unisce le coppie)
         frasi_oggi = formatta_eventi_gruppo(events_today)
         lines.extend(frasi_oggi)
     else:
@@ -211,7 +211,7 @@ def genera_txt_siri_discorsivo(dati, fake_today=None):
     lines.append("\n") 
 
     # --- PROSSIMI ---
-    upcoming = [e for e in processed_events if e['DaysUntil'] > 0][:8] # Aumentato leggermente il buffer per catturare coppie
+    upcoming = [e for e in processed_events if e['DaysUntil'] > 0][:8] 
     
     if upcoming:
         lines.append("Nei prossimi giorni:")
@@ -235,7 +235,6 @@ def genera_txt_siri_discorsivo(dati, fake_today=None):
             
             lines.append(header)
             
-            # Usa la funzione helper per formattare (unisce le coppie)
             frasi_gruppo = formatta_eventi_gruppo(group)
             lines.extend(frasi_gruppo)
                 
@@ -288,9 +287,11 @@ def genera_html(dati, fake_today=None):
             --today-bg: #fef2f2;
             --today-border: #ef4444;
             --border-color: #cbd5e1;
-            
-            --age-color-bday: #2563eb;
-            --age-color-anniv: #d97706;
+
+            /* Nuovi colori richiesti */
+            --color-compleanno: #003366; /* Blu scuro */
+            --color-onomastico: #006400; /* Verde scuro */
+            --color-anniversario: #990033; /* Rosso porpora / Cremisi */
         }}
         
         html {{ font-size: 16px; }} 
@@ -403,7 +404,7 @@ def genera_html(dati, fake_today=None):
             background-color: var(--past-event-bg) !important;
         }}
         .is-past .cal-date {{ opacity: 0.7; }} 
-        .is-past .cal-name {{ color: var(--text-muted); opacity: 0.9; }}
+        .is-past .cal-name {{ opacity: 0.9; }}
         
         .rubrica-row.is-past-row .rubrica-type, 
         .rubrica-row.is-past-row .rubrica-date {{
@@ -434,7 +435,6 @@ def genera_html(dati, fake_today=None):
             color: var(--primary);
             line-height: 1.1;
             margin-right: 15px;
-            /* Flex per centrare verticalmente se il box a destra cresce */
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -443,18 +443,27 @@ def genera_html(dati, fake_today=None):
         
         .cal-info {{ flex: 1; }}
         
-        /* Stili per singolo evento dentro il box */
         .event-row {{
             margin-bottom: 12px;
-            position: relative; /* Per posizionamento badge */
+            position: relative; 
         }}
         .event-row:last-child {{ margin-bottom: 0; }}
         
-        /* Padding a destra per non sovrapporsi al badge */
-        .cal-name {{ font-weight: 700; font-size: 1.1rem; margin-bottom: 2px; line-height: 1.2; padding-right: 60px; }}
+        .cal-name {{ 
+            font-weight: 700; 
+            font-size: 1.1rem; 
+            margin-bottom: 2px; 
+            line-height: 1.2; 
+            padding-right: 60px; 
+        }}
+
+        /* Classi specifiche per colore nome */
+        .name-compleanno {{ color: var(--color-compleanno); }}
+        .name-onomastico {{ color: var(--color-onomastico); }}
+        .name-anniversario {{ color: var(--color-anniversario); }}
+
         .cal-type {{ font-size: 0.9rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }}
 
-        /* Badge riposizionato a destra */
         .home-badge {{
             position: absolute;
             top: 0;
@@ -467,7 +476,6 @@ def genera_html(dati, fake_today=None):
             font-weight: 700;
         }}
 
-        /* Grassetto per i numeri tra parentesi */
         .bold-number {{ font-weight: 900; color: var(--text-main); }}
 
         .month-header {{
@@ -873,6 +881,13 @@ def genera_html(dati, fake_today=None):
             return label.replace(/(\\(\\d+\\))/, '<span class="bold-number">$1</span>');
         }}
 
+        function getColorClass(type) {{
+            if (type === 'Compleanno') return 'name-compleanno';
+            if (type === 'Onomastico') return 'name-onomastico';
+            if (type === 'Anniversario') return 'name-anniversario';
+            return '';
+        }}
+
         // --- RENDER FUNCTIONS ---
 
         function renderHome() {{
@@ -886,28 +901,25 @@ def genera_html(dati, fake_today=None):
                 return;
             }}
             
-            // Raggruppa per data (YYYY-MM-DD) per unire eventi stesso giorno
             const groupedByDate = {{}};
             const uniqueDates = [];
             
             upcoming.forEach(e => {{
-                // Usiamo una chiave unica per la data (ignora anno evento, usa anno corrente)
                 const dateKey = `${{e.pDate.month}}-${{e.pDate.day}}`;
                 if (!groupedByDate[dateKey]) {{
                     groupedByDate[dateKey] = [];
-                    uniqueDates.push(e); // Teniamo un riferimento per l'ordinamento
+                    uniqueDates.push(e); 
                 }}
                 groupedByDate[dateKey].push(e);
             }});
             
-            // uniqueDates è già ordinato per daysUntil
-            // Iteriamo sulle date uniche
             container.innerHTML = uniqueDates.map(refEvent => {{
                 const dateKey = `${{refEvent.pDate.month}}-${{refEvent.pDate.day}}`;
                 const dayEvents = groupedByDate[dateKey];
                 const processed = processDayEvents(dayEvents);
                 
-                let dayLabel = `Tra ${{refEvent.daysUntil}} gg`;
+                // MODIFICA RICHIESTA: "- N" invece di "Tra N gg"
+                let dayLabel = `- ${{refEvent.daysUntil}}`;
                 let cardClass = 'card';
                 let borderStyle = 'border-left: 5px solid var(--primary);';
                 
@@ -918,18 +930,18 @@ def genera_html(dati, fake_today=None):
                     dayLabel = "Domani";
                 }}
                 
-                // Genera badge HTML una sola volta
                 const badgeHtml = `<div class="home-badge">${{dayLabel}}</div>`;
                 
                 const eventsHtml = processed.map(item => {{
                     const icon = item.type === 'Compleanno' ? '🎂' : (item.type === 'Onomastico' ? '🌟' : '💍');
                     const labelHtml = formatLabelHTML(item.label);
+                    const colorClass = getColorClass(item.type);
                     
                     if (item.isMerged) {{
                         return `
                         <div class="event-row">
-                            <div class="cal-name">${{item.line1}}</div>
-                            <div class="cal-name">${{item.line2}}</div>
+                            <div class="cal-name ${{colorClass}}">${{item.line1}}</div>
+                            <div class="cal-name ${{colorClass}}">${{item.line2}}</div>
                             <div class="cal-type">
                                 <span>${{icon}} ${{labelHtml}}</span>
                             </div>
@@ -937,7 +949,7 @@ def genera_html(dati, fake_today=None):
                     }} else {{
                         return `
                         <div class="event-row">
-                            <div class="cal-name">${{item.line1}}</div>
+                            <div class="cal-name ${{colorClass}}">${{item.line1}}</div>
                             <div class="cal-type">
                                 <span>${{icon}} ${{labelHtml}}</span>
                             </div>
@@ -945,7 +957,6 @@ def genera_html(dati, fake_today=None):
                     }}
                 }}).join('');
 
-                // Inseriamo il badge come primo elemento del contenitore destro, che è relative
                 return `
                 <div class="${{cardClass}}" style="display:flex; gap:15px; ${{borderStyle}} align-items:stretch;">
                     <div class="cal-date">
@@ -970,15 +981,14 @@ def genera_html(dati, fake_today=None):
             let lastMonth = -1;
             let html = '';
             
-            // Raggruppa per mese e giorno
             const grouped = {{}};
-            const monthOrder = []; // tiene traccia dell'ordine
+            const monthOrder = []; 
             
             sorted.forEach(e => {{
                 const key = `${{e.pDate.month}}-${{e.pDate.day}}`;
                 if (!grouped[key]) {{
                     grouped[key] = [];
-                    monthOrder.push(e); // Solo per sapere che mesi disegnare
+                    monthOrder.push(e); 
                 }}
                 grouped[key].push(e);
             }});
@@ -996,26 +1006,25 @@ def genera_html(dati, fake_today=None):
                 const processed = processDayEvents(dayEvents);
                 
                 let rowClass = 'calendar-item';
-                // Se TUTTI sono passati, metti stile past
                 if (dayEvents.every(e => e.isPastThisYear)) rowClass += ' is-past';
-                // Se ALMENO UNO è oggi
                 if (dayEvents.some(e => e.daysUntil === 0)) rowClass += ' is-today';
                 
                 const eventsHtml = processed.map(item => {{
                     const icon = item.type === 'Compleanno' ? '🎂' : (item.type === 'Onomastico' ? '🌟' : '💍');
                     const labelHtml = formatLabelHTML(item.label);
+                    const colorClass = getColorClass(item.type);
                     
                     if (item.isMerged) {{
                         return `
                         <div class="event-row">
-                            <div class="cal-name">${{item.line1}}</div>
-                            <div class="cal-name">${{item.line2}}</div>
+                            <div class="cal-name ${{colorClass}}">${{item.line1}}</div>
+                            <div class="cal-name ${{colorClass}}">${{item.line2}}</div>
                             <div class="cal-type"><span>${{icon}} ${{labelHtml}}</span></div>
                         </div>`;
                     }} else {{
                         return `
                         <div class="event-row">
-                            <div class="cal-name">${{item.line1}}</div>
+                            <div class="cal-name ${{colorClass}}">${{item.line1}}</div>
                             <div class="cal-type"><span>${{icon}} ${{labelHtml}}</span></div>
                         </div>`;
                     }}
@@ -1086,7 +1095,6 @@ def genera_html(dati, fake_today=None):
                          displayLabel += ` (${{i.currentAge}})`;
                     }}
                     
-                    // Formattazione grassetto anche qui
                     displayLabel = formatLabelHTML(displayLabel);
 
                     return `
@@ -1134,7 +1142,6 @@ def genera_html(dati, fake_today=None):
             }}
         }}
 
-        // 1. PDF PER RUBRICA (Elenco Alfabetico con Box ogni 10)
         function generateRubricaPDF() {{
             const {{ jsPDF }} = window.jspdf;
             
@@ -1156,7 +1163,6 @@ def genera_html(dati, fake_today=None):
             let currentColumn = 0; 
             let countInColumn = 0; 
             
-            // Intestazione
             doc.setFont("helvetica", "bold");
             doc.setFontSize(16);
             doc.text("Festività parenti e amici", pageWidth / 2, cursorY, {{ align: "center" }});
@@ -1172,16 +1178,13 @@ def genera_html(dati, fake_today=None):
             
             doc.setFontSize(9);
             
-            // Parametri per il box e il testo
             const rowHeight = 5; 
-            const boxPaddingTop = 4; // Spazio sopra la baseline della prima riga per il box
-            const boxPaddingBottom = 1; // Spazio sotto la baseline
+            const boxPaddingTop = 4; 
+            const boxPaddingBottom = 1; 
             
-            // StartY del gruppo corrente per disegnare il box
             let boxStartY = cursorY - boxPaddingTop; 
 
             sortedList.forEach((p, index) => {{
-                // Preparazione stringhe date
                 let bDayStr = '';
                 let nameDayStr = '';
                 let annivStr = '';
@@ -1207,44 +1210,36 @@ def genera_html(dati, fake_today=None):
                 if (annivStr) datesArr.push(annivStr);
                 const datesText = datesArr.join('   '); 
 
-                // Controllo cambio pagina/colonna
                 if (cursorY > pageHeight - marginY) {{
-                    
-                    // Se stavamo disegnando un box (il gruppo non è finito), chiudiamolo nella colonna vecchia
                     if (countInColumn % 10 !== 0) {{
                         const xBaseOld = marginX + (currentColumn * (colWidth + colGap));
                         let boxBottom = cursorY - rowHeight + boxPaddingBottom;
                         
-                        // Disegna box parziale
                         doc.setDrawColor(180, 180, 180);
                         doc.setLineWidth(0.1);
                         doc.rect(xBaseOld - 1, boxStartY, colWidth + 2, boxBottom - boxStartY);
                         doc.setDrawColor(0);
                     }}
 
-                    // Cambio Colonna / Pagina
                     if (currentColumn === 0) {{
                         currentColumn = 1;
                         cursorY = listStartY; 
                     }} else {{
                         doc.addPage();
                         currentColumn = 0;
-                        cursorY = 15; // Reset margine alto nuova pagina
+                        cursorY = 15; 
                     }}
                     
-                    // Reset inizio box per la nuova colonna
                     boxStartY = cursorY - boxPaddingTop;
                 }}
                 
                 const xBase = marginX + (currentColumn * (colWidth + colGap));
                 const xDate = xBase + nameWidth; 
                 
-                // Disegno Testo
                 doc.setFont("helvetica", "normal");
                 const nameStr = `${{p.cognome}} ${{p.nome}}`;
                 doc.text(nameStr, xBase, cursorY);
                 
-                // Linea tratteggiata
                 const textWidth = doc.getTextWidth(nameStr);
                 const lineStart = xBase + textWidth + 1; 
                 const lineEnd = xDate - 1; 
@@ -1260,28 +1255,19 @@ def genera_html(dati, fake_today=None):
                 
                 doc.text(datesText, xDate, cursorY);
                 
-                // Avanzamento cursore
                 cursorY += rowHeight;
                 countInColumn++;
                 
-                // Logica Chiusura Box (ogni 10 oppure fine lista)
                 if (countInColumn > 0 && (countInColumn % 10 === 0 || index === sortedList.length - 1)) {{
-                    // Altezza box = (cursore corrente, che è già sceso) - startY - correzione
-                    // Cursore è alla riga successiva libera. L'ultima riga scritta era a cursorY - rowHeight.
-                    // Il fondo del box deve essere sotto l'ultima riga scritta.
-                    
                     let boxBottom = cursorY - rowHeight + boxPaddingBottom;
                     let h = boxBottom - boxStartY;
                     
-                    doc.setDrawColor(180, 180, 180); // Grigio
+                    doc.setDrawColor(180, 180, 180); 
                     doc.setLineWidth(0.1);
                     doc.rect(xBase - 1, boxStartY, colWidth + 2, h); 
                     doc.setDrawColor(0);
                     
-                    // Aggiungi spazio tra un box e l'altro
                     cursorY += 3;
-                    
-                    // Setta il punto di inizio per il prossimo eventuale box
                     boxStartY = cursorY - boxPaddingTop;
                 }}
             }});
@@ -1289,7 +1275,6 @@ def genera_html(dati, fake_today=None):
             window.open(doc.output('bloburl'), '_blank');
         }}
 
-        // 2. PDF PER CALENDARIO (Mese per pagina, Anniversari Accorpati)
         function generateCalendarPDF() {{
             const {{ jsPDF }} = window.jspdf;
             const doc = new jsPDF({{ orientation: 'portrait', unit: 'mm', format: 'a4' }});
@@ -1306,6 +1291,7 @@ def genera_html(dati, fake_today=None):
                 
                 doc.setFont("helvetica", "bold");
                 doc.setFontSize(20);
+                doc.setTextColor(0,0,0);
                 doc.text(`${{months[m]}} ${{year}}`, pageWidth/2, 15, {{align: "center"}});
                 
                 const monthlyEvents = events.filter(e => e.pDate.month === (m + 1));
@@ -1324,7 +1310,7 @@ def genera_html(dati, fake_today=None):
                 
                 sortedDays.forEach(day => {{
                     const dayEvents = eventsByDay[day];
-                    const mergedList = processDayEvents(dayEvents); // Riutilizza la logica JS
+                    const mergedList = processDayEvents(dayEvents); 
                     
                     let totalBoxHeight = 0;
                     const itemSpacing = 2; 
@@ -1382,22 +1368,30 @@ def genera_html(dati, fake_today=None):
                     const textX = xBase + dateBoxWidth + 3;
                     
                     mergedList.forEach(item => {{
+                        
+                        // SET COLOR BASED ON TYPE
+                        if (item.type === 'Compleanno') doc.setTextColor(0, 51, 102); // Dark Blue
+                        else if (item.type === 'Onomastico') doc.setTextColor(0, 100, 0); // Dark Green
+                        else if (item.type === 'Anniversario') doc.setTextColor(153, 0, 51); // Porpora/Crimson
+                        else doc.setTextColor(0,0,0);
+
+                        doc.setFontSize(10);
+                        doc.setFont("helvetica", "bold");
+                        
                         if (item.isMerged) {{
-                            doc.setFontSize(10);
-                            doc.setFont("helvetica", "bold");
-                            doc.setTextColor(0);
                             doc.text(item.line1, textX, currentTextY + 4);
                             doc.text(item.line2, textX, currentTextY + 8.5); 
                             
+                            // Reset to gray for label
+                            doc.setTextColor(80, 80, 80);
                             drawLabelWithBoldNumber(doc, item.label, textX, currentTextY + 13);
                             
                             currentTextY += 16 + itemSpacing;
                         }} else {{
-                            doc.setFontSize(10);
-                            doc.setFont("helvetica", "bold");
-                            doc.setTextColor(0);
                             doc.text(item.line1, textX, currentTextY + 4);
                             
+                            // Reset to gray for label
+                            doc.setTextColor(80, 80, 80);
                             drawLabelWithBoldNumber(doc, item.label, textX, currentTextY + 8.5);
                             
                             currentTextY += 11 + itemSpacing;
@@ -1416,7 +1410,7 @@ def genera_html(dati, fake_today=None):
             const match = text.match(regex);
             
             doc.setFontSize(9);
-            doc.setTextColor(80, 80, 80);
+            // Color is already set to grey before calling this
             
             if (match) {{
                 const prefix = match[1];
@@ -1427,6 +1421,7 @@ def genera_html(dati, fake_today=None):
                 const w1 = doc.getTextWidth(prefix);
                 
                 doc.setFont("helvetica", "bold");
+                doc.setTextColor(0,0,0); // Number in black
                 doc.text(numberPart, x + w1, y);
             }} else {{
                 doc.setFont("helvetica", "normal");
