@@ -8,10 +8,10 @@ from itertools import groupby
 
 # Nome: Feste.py
 # Data ultima modifica: 13/01/2026
-# Descrizione: Versione "PAPER SAVER" v4.
-#              - Aggiunto conteggio eventi (N) accanto ai titoli.
-#              - Aggiunto piè di pagina con Gruppi selezionati e numero pagina "pag. X/Y".
-#              - Font footer: 10 pt.
+# Descrizione: Versione "PAPER SAVER" v5 (Anno Parametrico).
+#              - L'anno nei PDF (titoli e calcolo giorni) segue la data parametro (es. 1961).
+#              - Titoli con conteggio eventi: "Calendario 1961 (N)".
+#              - Footer con gruppi e paginazione.
 
 # Configurazione dei file
 INPUT_FILE = 'Feste-elenco.csv'
@@ -222,8 +222,10 @@ def genera_txt_siri_discorsivo(dati, fake_today=None):
 def genera_html(dati, fake_today=None):
     json_dati = json.dumps(dati, ensure_ascii=False)
     
+    # Determina il codice JS per la data di riferimento
     if fake_today:
         js_date_code = f"new Date({fake_today.year}, {fake_today.month - 1}, {fake_today.day})"
+        print(f"🗓️ HTML Configurato con Anno: {fake_today.year}")
     else:
         js_date_code = "new Date()"
     
@@ -589,6 +591,7 @@ def genera_html(dati, fake_today=None):
 
     <script>
         const rawData = {json_dati};
+        const REF_DATE = {js_date_code}; // DATA DI RIFERIMENTO GLOBALE
         const months = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
         const shortMonths = ['GEN', 'FEB', 'MAR', 'APR', 'MAG', 'GIU', 'LUG', 'AGO', 'SET', 'OTT', 'NOV', 'DIC'];
         let activeTabId = 'home';
@@ -669,7 +672,7 @@ def genera_html(dati, fake_today=None):
         }}
 
         function getEventInfo(parsedDate) {{
-            const today = {js_date_code};
+            const today = new Date(REF_DATE); // Usa la data di riferimento globale
             today.setHours(0,0,0,0);
             let eventDate = new Date(today.getFullYear(), parsedDate.month - 1, parsedDate.day);
             let isPast = false;
@@ -694,7 +697,7 @@ def genera_html(dati, fake_today=None):
                 if (tipo !== 'Compleanno' && tipo !== 'Onomastico') tipo = 'Anniversario';
                 let yearsTurning = null;
                 if (pDate.year) {{
-                    const today = {js_date_code}; 
+                    const today = new Date(REF_DATE); 
                     const currentYear = today.getFullYear();
                     yearsTurning = currentYear - parseInt(pDate.year);
                 }}
@@ -873,7 +876,6 @@ def genera_html(dati, fake_today=None):
             const people = getGroupedPeople();
             const sortedList = Object.values(people).sort((a, b) => {{ if (a.cognome !== b.cognome) return a.cognome.localeCompare(b.cognome); return a.nome.localeCompare(b.nome); }});
             
-            // Conta totale eventi
             let totalEvents = 0;
             sortedList.forEach(p => totalEvents += p.items.length);
 
@@ -900,7 +902,7 @@ def genera_html(dati, fake_today=None):
                 if (bDayStr) datesArr.push(bDayStr); if (nameDayStr) datesArr.push(nameDayStr); if (annivStr) datesArr.push(annivStr);
                 const datesText = datesArr.join('   '); 
 
-                if (cursorY > pageHeight - marginY - 15) {{ // -15 per spazio footer
+                if (cursorY > pageHeight - marginY - 15) {{ 
                     if (countInColumn % 10 !== 0) {{
                         const xBaseOld = marginX + (currentColumn * (colWidth + colGap));
                         let boxBottom = cursorY - rowHeight + boxPaddingBottom;
@@ -941,7 +943,10 @@ def genera_html(dati, fake_today=None):
             closePrintModal();
             const {{ jsPDF }} = window.jspdf;
             const doc = new jsPDF({{ orientation: 'portrait', unit: 'mm', format: 'a4' }});
-            const year = new Date().getFullYear();
+            
+            // USA ANNO DALLA DATA DI RIFERIMENTO GLOBALE
+            const year = REF_DATE.getFullYear();
+            
             const pageWidth = doc.internal.pageSize.width;
             const pageHeight = doc.internal.pageSize.height;
             const margin = 20; const colGap = 10;
@@ -970,7 +975,7 @@ def genera_html(dati, fake_today=None):
                         if (idx < mergedList.length - 1) totalBoxHeight += itemSpacing;
                     }});
                     totalBoxHeight += 6; 
-                    if (cursorY + totalBoxHeight > pageHeight - margin - 15) {{ // -15 per footer
+                    if (cursorY + totalBoxHeight > pageHeight - margin - 15) {{ 
                         if (col === 0) {{ col = 1; cursorY = startY; }} 
                         else {{ doc.addPage(); doc.text(`${{months[m]}} ${{year}} (cont.)`, pageWidth/2, 15, {{align: "center"}}); col = 0; cursorY = 25; startY = 25; }}
                     }}
@@ -1019,7 +1024,10 @@ def genera_html(dati, fake_today=None):
             closePrintModal();
             const {{ jsPDF }} = window.jspdf;
             const doc = new jsPDF({{ orientation: 'portrait', unit: 'mm', format: 'a4' }});
-            const year = new Date().getFullYear();
+            
+            // USA ANNO DALLA DATA DI RIFERIMENTO GLOBALE
+            const year = REF_DATE.getFullYear();
+            
             const pageWidth = doc.internal.pageSize.width;
             const pageHeight = doc.internal.pageSize.height;
             const margin = 10; 
@@ -1076,7 +1084,7 @@ def genera_html(dati, fake_today=None):
                     }}
                 }}
 
-                if (cursorY + checkHeight > pageHeight - margin - 15) {{ // -15 per footer
+                if (cursorY + checkHeight > pageHeight - margin - 15) {{ 
                     currentColumn++;
                     cursorY = startY; 
                     if (currentColumn > 2) {{
