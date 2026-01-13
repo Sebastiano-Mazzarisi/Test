@@ -7,15 +7,11 @@ from datetime import datetime
 from itertools import groupby
 
 # Nome: Feste.py
-# Data ultima modifica: 12/01/2026
-# Descrizione: Versione DEFINITIVA OTTIMIZZATA PER SIRI + COPPIE + COLORI.
-#              - "Tra n gg" diventato "- n".
-#              - Nomi colorati (Blu Compleanni, Verde Onomastici, Porpora Anniversari).
-#              - Anniversari accorpati in Feste.txt ("Tizio e Caio").
-#              - Time Travel (parametro data).
-#              - HTML completo.
-# File di input: Feste-elenco.csv
-# File di output: Feste.html, Feste.txt
+# Data ultima modifica: 14/01/2026
+# Descrizione: Versione DEFINITIVA + GRUPPO FAMIGLIA AGGIUNTO.
+#              - Aggiunto checkbox e logica per gruppo "Famiglia" (codice 'F').
+#              - Grafici interattivi con conteggio persone uniche.
+#              - Pop-up Mesi con titolo corretto.
 
 # Configurazione dei file
 INPUT_FILE = 'Feste-elenco.csv'
@@ -135,8 +131,7 @@ def formatta_eventi_gruppo(gruppo_eventi):
 def genera_txt_siri_discorsivo(dati, fake_today=None):
     """
     Genera Feste.txt raggruppando date e unendo le coppie di anniversari.
-    Nota: Per Siri manteniamo un linguaggio naturale ("Tra X giorni"), 
-    la modifica "- X" è applicata alla parte visiva (HTML/PDF).
+    Nota: Siri legge tutto (non applica i filtri visivi dell'HTML).
     """
     if fake_today:
         today = fake_today.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -288,10 +283,9 @@ def genera_html(dati, fake_today=None):
             --today-border: #ef4444;
             --border-color: #cbd5e1;
 
-            /* Nuovi colori richiesti */
-            --color-compleanno: #003366; /* Blu scuro */
-            --color-onomastico: #006400; /* Verde scuro */
-            --color-anniversario: #990033; /* Rosso porpora / Cremisi */
+            --color-compleanno: #003366; 
+            --color-onomastico: #006400; 
+            --color-anniversario: #990033; 
         }}
         
         html {{ font-size: 16px; }} 
@@ -358,16 +352,15 @@ def genera_html(dati, fake_today=None):
             font-weight: 400;
         }}
         
-        /* Bottone Stampante */
-        .print-btn {{
+        /* Bottone Stampante (Destra) */
+        .header-btn {{
             position: absolute;
-            right: 0;
             top: 50%;
             transform: translateY(-50%);
             background: white; 
             border: none;
             color: var(--primary); 
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             cursor: pointer;
             width: 40px;
             height: 40px;
@@ -378,7 +371,117 @@ def genera_html(dati, fake_today=None):
             transition: background 0.2s, transform 0.2s;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }}
-        .print-btn:hover {{ background: #f8fafc; transform: translateY(-50%) scale(1.05); }}
+        .header-btn:hover {{ background: #f8fafc; transform: translateY(-50%) scale(1.05); }}
+        
+        .print-btn {{ right: 0; }}
+        .filter-btn {{ left: 0; }}
+
+        /* --- MODAL FILTRI --- */
+        .modal-overlay {{
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }}
+        .modal-overlay.open {{ display: flex; opacity: 1; }}
+
+        .modal-box {{
+            background: white;
+            width: 90%;
+            max-width: 320px;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }}
+        .modal-overlay.open .modal-box {{ transform: scale(1); }}
+
+        .modal-title {{
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: var(--primary);
+            text-align: center;
+            text-transform: uppercase;
+        }}
+
+        .stats-scroll-box {{
+            max-height: 50vh;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px;
+        }}
+        
+        .stat-entry {{
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }}
+        .stat-entry:last-child {{ border-bottom: none; }}
+        
+        .clickable-stat {{
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }}
+        .clickable-stat:hover {{
+            opacity: 0.7;
+        }}
+
+        .checkbox-container {{
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }}
+
+        .checkbox-item {{
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+            color: var(--text-main);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }}
+        .checkbox-item:hover {{ background: var(--bg-body); }}
+
+        .checkbox-item input[type="checkbox"] {{
+            width: 22px;
+            height: 22px;
+            margin-right: 15px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }}
+
+        .modal-actions {{
+            display: flex;
+            justify-content: center;
+        }}
+        .modal-btn {{
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 30px;
+            cursor: pointer;
+            width: 100%;
+        }}
 
         /* --- TABS --- */
         .tab-content {{ 
@@ -661,13 +764,55 @@ def genera_html(dati, fake_today=None):
     
     <div id="refresh-indicator">Rilascia per aggiornare...</div>
 
+    <div id="filter-modal" class="modal-overlay" onclick="closeFilterModal(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-title">Filtra Gruppi</div>
+            <div class="checkbox-container">
+                <label class="checkbox-item">
+                    <input type="checkbox" id="chk-amici" value="A" checked onchange="updateFilters()">
+                    <span>Amici</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" id="chk-mazzarisi" value="M" checked onchange="updateFilters()">
+                    <span>Mazzarisi</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" id="chk-pricci" value="P" checked onchange="updateFilters()">
+                    <span>Pricci</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" id="chk-famiglia" value="F" checked onchange="updateFilters()">
+                    <span>Famiglia</span>
+                </label>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn" onclick="closeFilterModal(event)">Chiudi</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="stats-modal" class="modal-overlay" onclick="closeStatsModal(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-title" id="stats-title">Dettagli</div>
+            <div id="stats-list" class="stats-scroll-box"></div>
+            <div class="modal-actions">
+                <button class="modal-btn" onclick="closeStatsModal(event)">Chiudi</button>
+            </div>
+        </div>
+    </div>
+
     <div class="app-container" id="app-container">
         
         <div class="header">
             <div class="header-content">
+                <button class="header-btn filter-btn" onclick="openFilterModal()" title="Elenco da spuntare">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                </button>
+
                 <h1>EVENTI E FESTE</h1>
                 <p>Compleanni e Anniversari</p>
-                <button class="print-btn" onclick="generatePDF()" title="Stampa PDF">
+                
+                <button class="header-btn print-btn" onclick="generatePDF()" title="Stampa PDF">
                     🖨️
                 </button>
             </div>
@@ -708,6 +853,10 @@ def genera_html(dati, fake_today=None):
                 <h3 style="margin-bottom: 20px; font-size: 1.2rem;">Genere</h3>
                 <div id="stats-gender"></div>
             </div>
+            <div class="card">
+                <h3 style="margin-bottom: 20px; font-size: 1.2rem;">Gruppi</h3>
+                <div id="stats-groups"></div>
+            </div>
         </div>
 
         <nav class="nav-bar">
@@ -736,7 +885,115 @@ def genera_html(dati, fake_today=None):
         const months = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
         const shortMonths = ['GEN', 'FEB', 'MAR', 'APR', 'MAG', 'GIU', 'LUG', 'AGO', 'SET', 'OTT', 'NOV', 'DIC'];
         let activeTabId = 'home'; // Tracking della scheda attiva
+        let events = []; // Will be populated based on filters
 
+        // --- FILTRI ---
+        function openFilterModal() {{
+            document.getElementById('filter-modal').classList.add('open');
+        }}
+
+        function closeFilterModal(e) {{
+            if(e) e.preventDefault();
+            document.getElementById('filter-modal').classList.remove('open');
+        }}
+
+        // --- STATS MODAL ---
+        function openStatsModal(type, value, title) {{
+            const listEl = document.getElementById('stats-list');
+            
+            // Titolo personalizzato per Mesi (solo nome mese)
+            let displayTitle = title;
+            if (type === 'month') {{
+                displayTitle = months[value];
+            }}
+            document.getElementById('stats-title').innerText = displayTitle;
+            listEl.innerHTML = '';
+            
+            // Filtra in base al criterio cliccato
+            let filteredList = [];
+            
+            if (type === 'month') {{
+                // value is 0-11
+                filteredList = events.filter(e => e.pDate.month === (value + 1));
+            }} 
+            else if (type === 'type') {{
+                // value is string like 'Compleanno'
+                filteredList = events.filter(e => e.tipoDisplay === value);
+            }} 
+            else if (type === 'gender') {{
+                // value is 'M' or 'F'
+                filteredList = events.filter(e => {{
+                    const g = e.Genere ? e.Genere.toUpperCase().trim() : 'M';
+                    return g === value;
+                }});
+            }}
+            else if (type === 'group') {{
+                // value is char 'A', 'M', 'P', 'F'
+                filteredList = events.filter(e => {{
+                    const g = (e.Gruppo || '').toUpperCase();
+                    return g.includes(value);
+                }});
+            }}
+            
+            // Rimuovi duplicati (Persone uniche)
+            const uniqueSet = new Set();
+            const uniqueArr = [];
+            filteredList.forEach(e => {{
+                const k = e.Cognome + '|' + e.Nome;
+                if(!uniqueSet.has(k)) {{
+                    uniqueSet.add(k);
+                    uniqueArr.push(e);
+                }}
+            }});
+            filteredList = uniqueArr;
+            
+            // Ordina Alfabeticamente
+            filteredList.sort((a,b) => {{
+                if (a.Cognome.toLowerCase() !== b.Cognome.toLowerCase()) 
+                    return a.Cognome.localeCompare(b.Cognome);
+                return a.Nome.localeCompare(b.Nome);
+            }});
+            
+            if (filteredList.length === 0) {{
+                listEl.innerHTML = '<div style="text-align:center;color:#666;padding:20px;">Nessun risultato</div>';
+            }} else {{
+                filteredList.forEach((e, index) => {{
+                    const div = document.createElement('div');
+                    div.className = 'stat-entry';
+                    const label = `${{e.Cognome}} ${{e.Nome}}`;
+                    div.innerHTML = `<div>${{index + 1}}) ${{label}}</div>`;
+                    listEl.appendChild(div);
+                }});
+            }}
+            
+            document.getElementById('stats-modal').classList.add('open');
+        }}
+
+        function closeStatsModal(e) {{
+            if(e) e.preventDefault();
+            document.getElementById('stats-modal').classList.remove('open');
+        }}
+
+        function updateFilters() {{
+            // Recalculate events based on checkboxes
+            calculateEvents();
+            // Re-render everything
+            renderHome();
+            renderRubrica(document.getElementById('search-input').value);
+            renderCalendar();
+            renderStats();
+        }}
+
+        function getSelectedGroups() {{
+            const selected = [];
+            if(document.getElementById('chk-amici').checked) selected.push('A');
+            if(document.getElementById('chk-mazzarisi').checked) selected.push('M');
+            if(document.getElementById('chk-pricci').checked) selected.push('P');
+            if(document.getElementById('chk-famiglia').checked) selected.push('F');
+            return selected;
+        }}
+
+        // --- DATE PARSING ---
         function parseDate(dateStr) {{
             if (!dateStr) return null;
             const parts = dateStr.split('/');
@@ -745,7 +1002,6 @@ def genera_html(dati, fake_today=None):
         }}
 
         function getEventInfo(parsedDate) {{
-            // INIETTO LA DATA FINTA O VERA QUI
             const today = {js_date_code};
             today.setHours(0,0,0,0);
             
@@ -760,42 +1016,54 @@ def genera_html(dati, fake_today=None):
             const diffTime = eventDate - today;
             const daysUntil = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             
-            // Verifico se era passato quest'anno rispetto alla data simulata
             const currentYearDate = new Date(today.getFullYear(), parsedDate.month - 1, parsedDate.day);
             const actuallyPastThisYear = currentYearDate.getTime() < today.getTime();
 
             return {{ daysUntil, actuallyPastThisYear }};
         }}
 
-        let events = rawData.map(item => {{
-            const pDate = parseDate(item.Data);
-            if (!pDate) return null;
-            const info = getEventInfo(pDate);
-            let tipo = item.Festa;
-            if (tipo !== 'Compleanno' && tipo !== 'Onomastico') tipo = 'Anniversario';
-            
-            let yearsTurning = null;
-            if (pDate.year) {{
-                const today = {js_date_code}; // Anche qui uso la data simulata per calcolo età
-                const currentYear = today.getFullYear();
-                yearsTurning = currentYear - parseInt(pDate.year);
-            }}
+        function calculateEvents() {{
+            const allowedGroups = getSelectedGroups();
 
-            let currentAge = yearsTurning;
+            events = rawData.filter(item => {{
+                // Logica Filtro
+                const grp = (item.Gruppo || '').trim().toUpperCase();
+                
+                // RICHIESTA UTENTE: "MP" deve apparire se si seleziona M oppure P
+                // Verifica se ALMENO UNO dei gruppi selezionati è contenuto nella stringa del gruppo della persona
+                return allowedGroups.some(selected => grp.includes(selected));
+                
+            }}).map(item => {{
+                const pDate = parseDate(item.Data);
+                if (!pDate) return null;
+                const info = getEventInfo(pDate);
+                let tipo = item.Festa;
+                if (tipo !== 'Compleanno' && tipo !== 'Onomastico') tipo = 'Anniversario';
+                
+                let yearsTurning = null;
+                if (pDate.year) {{
+                    const today = {js_date_code}; 
+                    const currentYear = today.getFullYear();
+                    yearsTurning = currentYear - parseInt(pDate.year);
+                }}
 
-            return {{
-                ...item,
-                pDate,
-                daysUntil: info.daysUntil,
-                isPastThisYear: info.actuallyPastThisYear,
-                tipoDisplay: tipo,
-                yearsTurning: yearsTurning,
-                currentAge: currentAge,
-                Genere: item.Genere,
-                Cognome: item.Cognome,
-                Nome: item.Nome
-            }};
-        }}).filter(e => e !== null);
+                let currentAge = yearsTurning;
+
+                return {{
+                    ...item,
+                    pDate,
+                    daysUntil: info.daysUntil,
+                    isPastThisYear: info.actuallyPastThisYear,
+                    tipoDisplay: tipo,
+                    yearsTurning: yearsTurning,
+                    currentAge: currentAge,
+                    Genere: item.Genere,
+                    Cognome: item.Cognome,
+                    Nome: item.Nome,
+                    Gruppo: item.Gruppo
+                }};
+            }}).filter(e => e !== null);
+        }}
 
         // --- HELPER PER RAGGRUPPARE EVENTI DI UN GIORNO ---
         function processDayEvents(dayEvents) {{
@@ -842,7 +1110,6 @@ def genera_html(dati, fake_today=None):
                             line2: `${{mEvent.Nome}} ${{mEvent.Cognome}}`,
                             label: `Anniversario${{e1.yearsTurning !== null ? ' (' + e1.yearsTurning + ')' : ''}}`,
                             type: 'Anniversario',
-                            // Per home badge
                             daysUntil: e1.daysUntil,
                             isPastThisYear: e1.isPastThisYear
                         }};
@@ -857,14 +1124,12 @@ def genera_html(dati, fake_today=None):
                         line1: `${{e1.Nome}} ${{e1.Cognome}}`,
                         label: e1.tipoDisplay + (e1.yearsTurning !== null ? ` (${{e1.yearsTurning}})` : ''),
                         type: e1.tipoDisplay,
-                        // Dati extra per render
                         daysUntil: e1.daysUntil,
                         isPastThisYear: e1.isPastThisYear
                     }});
                 }}
             }}
             
-            // Ordinamento: Compleanni > Anniversari > Onomastici
             const priority = {{ 'Compleanno': 1, 'Anniversario': 2, 'Onomastico': 3 }};
             mergedList.sort((a, b) => {{
                 const pA = priority[a.type] || 99;
@@ -877,7 +1142,6 @@ def genera_html(dati, fake_today=None):
         
         // --- UTILS PER HTML ---
         function formatLabelHTML(label) {{
-            // Trasforma "Testo (123)" in "Testo <span class='bold-number'>(123)</span>"
             return label.replace(/(\\(\\d+\\))/, '<span class="bold-number">$1</span>');
         }}
 
@@ -897,7 +1161,7 @@ def genera_html(dati, fake_today=None):
                 .sort((a, b) => a.daysUntil - b.daysUntil);
 
             if (upcoming.length === 0) {{
-                container.innerHTML = '<div style="text-align:center; padding:2rem; font-size:1rem; color:var(--text-muted)">Nessun evento imminente</div>';
+                container.innerHTML = '<div style="text-align:center; padding:2rem; font-size:1rem; color:var(--text-muted)">Nessun evento per i gruppi selezionati</div>';
                 return;
             }}
             
@@ -918,7 +1182,6 @@ def genera_html(dati, fake_today=None):
                 const dayEvents = groupedByDate[dateKey];
                 const processed = processDayEvents(dayEvents);
                 
-                // MODIFICA RICHIESTA: "- N" invece di "Tra N gg"
                 let dayLabel = `- ${{refEvent.daysUntil}}`;
                 let cardClass = 'card';
                 let borderStyle = 'border-left: 5px solid var(--primary);';
@@ -973,6 +1236,11 @@ def genera_html(dati, fake_today=None):
 
         function renderCalendar() {{
             const container = document.getElementById('calendar-list');
+            if(events.length === 0) {{
+                container.innerHTML = '<div style="text-align:center; padding:2rem; font-size:1rem; color:var(--text-muted)">Nessun evento da mostrare</div>';
+                return;
+            }}
+
             const sorted = [...events].sort((a, b) => {{
                 if (a.pDate.month !== b.pDate.month) return a.pDate.month - b.pDate.month;
                 return a.pDate.day - b.pDate.day;
@@ -1410,7 +1678,6 @@ def genera_html(dati, fake_today=None):
             const match = text.match(regex);
             
             doc.setFontSize(9);
-            // Color is already set to grey before calling this
             
             if (match) {{
                 const prefix = match[1];
@@ -1430,13 +1697,19 @@ def genera_html(dati, fake_today=None):
         }}
 
         function renderStats() {{
-            const mCount = new Array(12).fill(0);
-            events.forEach(e => mCount[e.pDate.month-1]++);
-            const maxM = Math.max(...mCount);
+            // --- CONTEGGIO PERSONE UNICHE PER MESE ---
+            const mSets = Array.from({{length: 12}}, () => new Set());
+            events.forEach(e => {{
+                const k = e.Cognome + '|' + e.Nome;
+                mSets[e.pDate.month - 1].add(k);
+            }});
+            const mCount = mSets.map(s => s.size);
+            const maxM = Math.max(...mCount) || 1;
+
             document.getElementById('stats-months').innerHTML = months.map((m, i) => {{
                 if (mCount[i] === 0) return '';
                 const w = (mCount[i]/maxM)*100;
-                return `<div style="display:flex;align-items:center;margin-bottom:10px;font-size:0.9rem;">
+                return `<div class="clickable-stat" onclick="openStatsModal('month', ${{i}}, 'Nati a ${{m}}')" style="display:flex;align-items:center;margin-bottom:10px;font-size:0.9rem;">
                             <div style="width:100px;">${{m}}</div>
                             <div style="flex:1;height:10px;background:#f1f5f9;border-radius:6px;margin:0 10px;">
                                 <div style="height:100%;width:${{w}}%;background:var(--primary);border-radius:6px;"></div>
@@ -1445,16 +1718,21 @@ def genera_html(dati, fake_today=None):
                         </div>`;
             }}).join('');
 
-            const tCount = {{ 'Compleanno': 0, 'Onomastico': 0, 'Anniversario': 0 }};
+            // --- CONTEGGIO PERSONE UNICHE PER TIPO ---
+            const tSets = {{ 'Compleanno': new Set(), 'Onomastico': new Set(), 'Anniversario': new Set() }};
             events.forEach(e => {{
-                if (tCount[e.tipoDisplay] !== undefined) tCount[e.tipoDisplay]++;
-                else tCount['Anniversario']++;
+                const k = e.Cognome + '|' + e.Nome;
+                if (tSets[e.tipoDisplay]) tSets[e.tipoDisplay].add(k);
+                else tSets['Anniversario'].add(k);
             }});
-            const maxT = Math.max(...Object.values(tCount));
+            const tCount = {{}};
+            for(let key in tSets) tCount[key] = tSets[key].size;
+
+            const maxT = Math.max(...Object.values(tCount)) || 1;
             document.getElementById('stats-types').innerHTML = Object.entries(tCount).map(([k, v]) => {{
                 if (v === 0) return '';
                 const w = (v/maxT)*100;
-                return `<div style="display:flex;align-items:center;margin-bottom:10px;font-size:0.9rem;">
+                return `<div class="clickable-stat" onclick="openStatsModal('type', '${{k}}', '${{k}}')" style="display:flex;align-items:center;margin-bottom:10px;font-size:0.9rem;">
                             <div style="width:100px;">${{k}}</div>
                             <div style="flex:1;height:10px;background:#f1f5f9;border-radius:6px;margin:0 10px;">
                                 <div style="height:100%;width:${{w}}%;background:#ec4899;border-radius:6px;"></div>
@@ -1463,24 +1741,25 @@ def genera_html(dati, fake_today=None):
                         </div>`;
             }}).join('');
 
-            const peopleGender = {{ 'M': 0, 'F': 0 }};
-            const uniqueKeys = new Set();
+            // --- CONTEGGIO PERSONE UNICHE PER GENERE ---
+            const gSets = {{ 'M': new Set(), 'F': new Set() }};
             events.forEach(e => {{
                 const k = e.Cognome + '|' + e.Nome;
-                if (!uniqueKeys.has(k)) {{
-                    uniqueKeys.add(k);
-                    let g = e.Genere ? e.Genere.toUpperCase().trim() : 'M';
-                    if (peopleGender[g] !== undefined) peopleGender[g]++;
-                }}
+                let g = e.Genere ? e.Genere.toUpperCase().trim() : 'M';
+                if (!gSets[g]) g = 'M'; // Fallback
+                gSets[g].add(k);
             }});
-        
+            
+            const peopleGender = {{ 'M': gSets['M'].size, 'F': gSets['F'].size }};
             const maxG = Math.max(peopleGender['M'], peopleGender['F']) || 1;
+            
             const genderHtml = [
-                {{ label: 'Maschile', count: peopleGender['M'], color: 'var(--primary)' }},
-                {{ label: 'Femminile', count: peopleGender['F'], color: '#ec4899' }}
+                {{ label: 'Maschile', code: 'M', count: peopleGender['M'], color: 'var(--primary)' }},
+                {{ label: 'Femminile', code: 'F', count: peopleGender['F'], color: '#ec4899' }}
             ].map(item => {{
+                if (item.count === 0) return '';
                 const w = (item.count / maxG) * 100;
-                return `<div style="display:flex;align-items:center;margin-bottom:10px;font-size:0.9rem;">
+                return `<div class="clickable-stat" onclick="openStatsModal('gender', '${{item.code}}', 'Genere ${{item.label}}')" style="display:flex;align-items:center;margin-bottom:10px;font-size:0.9rem;">
                             <div style="width:100px;">${{item.label}}</div>
                             <div style="flex:1;height:10px;background:#f1f5f9;border-radius:6px;margin:0 10px;">
                                 <div style="height:100%;width:${{w}}%;background:${{item.color}};border-radius:6px;"></div>
@@ -1490,6 +1769,45 @@ def genera_html(dati, fake_today=None):
             }}).join('');
             
             document.getElementById('stats-gender').innerHTML = genderHtml;
+
+            // --- CONTEGGIO PERSONE UNICHE PER GRUPPO ---
+            const grSets = {{ 'Amici': new Set(), 'Mazzarisi': new Set(), 'Pricci': new Set(), 'Famiglia': new Set() }};
+            const groupCodes = {{ 'Amici': 'A', 'Mazzarisi': 'M', 'Pricci': 'P', 'Famiglia': 'F' }};
+            
+            events.forEach(e => {{
+                const k = e.Cognome + '|' + e.Nome;
+                const gStr = (e.Gruppo || '').toUpperCase();
+                if (gStr.includes('A')) grSets['Amici'].add(k);
+                if (gStr.includes('M')) grSets['Mazzarisi'].add(k);
+                if (gStr.includes('P')) grSets['Pricci'].add(k);
+                if (gStr.includes('F')) grSets['Famiglia'].add(k);
+            }});
+
+            const groupCounts = {{ 
+                'Amici': grSets['Amici'].size, 
+                'Mazzarisi': grSets['Mazzarisi'].size, 
+                'Pricci': grSets['Pricci'].size,
+                'Famiglia': grSets['Famiglia'].size
+            }};
+
+            const maxG2 = Math.max(...Object.values(groupCounts)) || 1;
+            const groupColors = {{ 'Amici': '#f59e0b', 'Mazzarisi': '#3b82f6', 'Pricci': '#10b981', 'Famiglia': '#8b5cf6' }};
+
+            const groupsHtml = Object.entries(groupCounts).map(([label, count]) => {{
+                 if (count === 0) return '';
+                 const w = (count / maxG2) * 100;
+                 const color = groupColors[label] || 'var(--primary)';
+                 const code = groupCodes[label];
+                 return `<div class="clickable-stat" onclick="openStatsModal('group', '${{code}}', 'Gruppo ${{label}}')" style="display:flex;align-items:center;margin-bottom:10px;font-size:0.9rem;">
+                            <div style="width:100px;">${{label}}</div>
+                            <div style="flex:1;height:10px;background:#f1f5f9;border-radius:6px;margin:0 10px;">
+                                <div style="height:100%;width:${{w}}%;background:${{color}};border-radius:6px;"></div>
+                            </div>
+                            <div style="font-weight:bold;">${{count}}</div>
+                        </div>`;
+            }}).join('');
+            
+            document.getElementById('stats-groups').innerHTML = groupsHtml;
         }}
 
         let calendarScrollId = null;
@@ -1546,6 +1864,7 @@ def genera_html(dati, fake_today=None):
         }});
 
         document.addEventListener('DOMContentLoaded', () => {{
+            calculateEvents(); // Initial calculation with all defaults
             renderHome();
             renderRubrica();
             calendarScrollId = renderCalendar(); 
@@ -1571,7 +1890,6 @@ def genera_html(dati, fake_today=None):
 
 if __name__ == "__main__":
     target_date = None
-    # Verifica se c'è un argomento nel formato data GG-MM-AAAA
     if len(sys.argv) > 1:
         arg = sys.argv[1]
         try:
