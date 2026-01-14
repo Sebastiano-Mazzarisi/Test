@@ -193,8 +193,8 @@
         .event-row:last-child { margin-bottom: 0; }
         .cal-name { font-weight: 700; font-size: 1.1rem; margin-bottom: 2px; line-height: 1.2; padding-right: 60px; }
         
-        /* MODIFICATO: Nomi compleanno ora usano il blu primary come la home */
-        .name-compleanno { color: var(--primary); } 
+        /* AGGIORNATO: ORA I COMPLEANNI USANO IL BLU ELETTRICO (var(--primary)) */
+        .name-compleanno { color: var(--primary) !important; } 
         .name-onomastico { color: var(--color-onomastico); }
         .name-anniversario { color: var(--color-anniversario); }
 
@@ -226,6 +226,9 @@
         .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; margin-left: auto; }
         #refresh-indicator { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; z-index: 200; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
         #refresh-indicator.show { opacity: 1; }
+
+        /* FIX SCROLL: Doppie graffe per evitare errori in python f-string */
+        #cal-focus-target { scroll-margin-top: 180px; }
 
     </style>
 </head>
@@ -343,7 +346,7 @@
 
         <nav class="nav-bar">
             <button class="nav-item active" onclick="switchTab('home')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                 Home
             </button>
             <button class="nav-item" onclick="switchTab('rubrica')">
@@ -574,8 +577,9 @@
                 // Determina se questa è la riga a cui scrollare
                 let rowId = '';
                 // Se non abbiamo ancora settato l'ancora e troviamo un evento "oggi" o "futuro"
+                // Aggiungiamo anche uno stile inline per il margine di scroll, che aiuta la proprietà CSS
                 if (!scrollAnchorSet && dayEvents.some(e => e.daysUntil >= 0)) {
-                    rowId = 'id="cal-focus-target"';
+                    rowId = 'id="cal-focus-target" style="scroll-margin-top: 180px;"';
                     scrollAnchorSet = true;
                 }
 
