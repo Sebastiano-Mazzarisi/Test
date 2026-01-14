@@ -1052,14 +1052,20 @@
             if (tabId === 'home' || tabId === 'stats') { appContainer.classList.add('bg-yellow-mode'); } 
             else { appContainer.classList.remove('bg-yellow-mode'); }
             
-            // Logica di scroll per il calendario
+            // --- FIX SCROLL CALENDARIO ---
             if (tabId === 'calendario') { 
                 setTimeout(() => { 
                     const el = document.getElementById('cal-focus-target'); 
                     if (el) {
-                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        // Piccola correzione per l'header sticky (se necessario)
-                        window.scrollBy(0, -140);
+                        // Calcoliamo la posizione assoluta dell'elemento
+                        const headerOffset = 180; // Header Blu + Header Mese + Spaziatura
+                        const elementPosition = el.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: "smooth"
+                        });
                     }
                 }, 100); 
             } 
