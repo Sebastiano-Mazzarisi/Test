@@ -372,8 +372,11 @@
         const TXT_URL_SOURCE = "https://sebastiano-mazzarisi.github.io/Test/Feste.txt";
         const months = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
         const shortMonths = ['GEN', 'FEB', 'MAR', 'APR', 'MAG', 'GIU', 'LUG', 'AGO', 'SET', 'OTT', 'NOV', 'DIC'];
+        
         let activeTabId = 'home';
         let events = [];
+        let calendarVisited = false; // Flag per prima visita calendario
+        let calendarScrollPos = 0;   // Memoria posizione calendario
 
         const groupMap = { 'A': 'Amici', 'M': 'Mazzarisi', 'P': 'Pricci', 'F': 'Famiglia', 'G': 'Geometri', 'S': 'Febbre del sabato' };
 
@@ -576,8 +579,6 @@
                 
                 // Determina se questa è la riga a cui scrollare
                 let rowId = '';
-                // Se non abbiamo ancora settato l'ancora e troviamo un evento "oggi" o "futuro"
-                // Assegniamo SOLO l'ID per il CSS
                 if (!scrollAnchorSet && dayEvents.some(e => e.daysUntil >= 0)) {
                     rowId = 'id="cal-focus-target"';
                     scrollAnchorSet = true;
@@ -1047,6 +1048,11 @@
         }
 
         function switchTab(tabId) {
+            // 1. SALVA LO STATO SE STIAMO USCENDO DAL CALENDARIO
+            if (activeTabId === 'calendario') {
+                calendarScrollPos = window.scrollY;
+            }
+
             activeTabId = tabId; 
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -1057,21 +1063,30 @@
             if (tabId === 'home' || tabId === 'stats') { appContainer.classList.add('bg-yellow-mode'); } 
             else { appContainer.classList.remove('bg-yellow-mode'); }
             
-            // --- FIX SCROLL CALENDARIO INFALLIBILE ---
+            // 2. GESTIONE SCROLL
             if (tabId === 'calendario') { 
                 setTimeout(() => { 
-                    const el = document.getElementById('cal-focus-target'); 
-                    if (el) {
-                        const headerHeight = 160; 
-                        const elementPosition = el.getBoundingClientRect().top;
-                        const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
-                        
-                        // Usiamo scrollTo con 'auto' (istantaneo) per evitare conflitti di animazione
-                        window.scrollTo({ top: offsetPosition, behavior: "auto" });
+                    if (!calendarVisited) {
+                        // PRIMA VOLTA: CENTRA VERTICALMENTE
+                        const el = document.getElementById('cal-focus-target'); 
+                        if (el) {
+                            const elementRect = el.getBoundingClientRect();
+                            const absoluteElementTop = elementRect.top + window.pageYOffset;
+                            // Calcolo: Top Elemento - Metà Finestra + Metà Altezza Elemento
+                            const centerPos = absoluteElementTop - (window.innerHeight / 2) + (elementRect.height / 2);
+                            window.scrollTo({ top: centerPos, behavior: "auto" });
+                        }
+                        calendarVisited = true;
+                    } else {
+                        // VISITE SUCCESSIVE: RIPRISTINA POSIZIONE
+                        window.scrollTo({ top: calendarScrollPos, behavior: "auto" });
                     }
                 }, 50); 
             } 
-            else { window.scrollTo(0,0); }
+            else { 
+                // PER LE ALTRE TAB, TORNA IN CIMA
+                window.scrollTo(0,0); 
+            }
         }
 
         function filterRubrica() { renderRubrica(document.getElementById('search-input').value); }
