@@ -193,7 +193,8 @@
         .event-row:last-child { margin-bottom: 0; }
         .cal-name { font-weight: 700; font-size: 1.1rem; margin-bottom: 2px; line-height: 1.2; padding-right: 60px; }
         
-        .name-compleanno { color: var(--color-compleanno); }
+        /* AGGIORNATO COLORE NOME COMPLEANNO PER MATCHARE LA HOME */
+        .name-compleanno { color: var(--primary); } 
         .name-onomastico { color: var(--color-onomastico); }
         .name-anniversario { color: var(--color-anniversario); }
 
@@ -342,7 +343,7 @@
 
         <nav class="nav-bar">
             <button class="nav-item active" onclick="switchTab('home')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                 Home
             </button>
             <button class="nav-item" onclick="switchTab('rubrica')">
@@ -1054,20 +1055,20 @@
             
             // --- FIX SCROLL CALENDARIO ---
             if (tabId === 'calendario') { 
+                // Usiamo un piccolo delay per dare tempo al browser di rendere visibile la tab
                 setTimeout(() => { 
                     const el = document.getElementById('cal-focus-target'); 
                     if (el) {
-                        // Calcoliamo la posizione assoluta dell'elemento
-                        const headerOffset = 180; // Header Blu + Header Mese + Spaziatura
+                        const headerHeight = 160; // Altezza approssimativa Header + Sticky Month
                         const elementPosition = el.getBoundingClientRect().top;
-                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
 
                         window.scrollTo({
                             top: offsetPosition,
-                            behavior: "smooth"
+                            behavior: "auto" // Auto è più sicuro di smooth su mobile per i salti lunghi
                         });
                     }
-                }, 100); 
+                }, 50); 
             } 
             else { window.scrollTo(0,0); }
         }
