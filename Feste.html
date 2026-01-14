@@ -193,7 +193,7 @@
         .event-row:last-child { margin-bottom: 0; }
         .cal-name { font-weight: 700; font-size: 1.1rem; margin-bottom: 2px; line-height: 1.2; padding-right: 60px; }
         
-        /* AGGIORNATO COLORE NOME COMPLEANNO PER MATCHARE LA HOME */
+        /* MODIFICATO: Nomi compleanno ora usano il blu primary come la home */
         .name-compleanno { color: var(--primary); } 
         .name-onomastico { color: var(--color-onomastico); }
         .name-anniversario { color: var(--color-anniversario); }
@@ -1053,20 +1053,17 @@
             if (tabId === 'home' || tabId === 'stats') { appContainer.classList.add('bg-yellow-mode'); } 
             else { appContainer.classList.remove('bg-yellow-mode'); }
             
-            // --- FIX SCROLL CALENDARIO ---
+            // --- FIX SCROLL CALENDARIO INFALLIBILE ---
             if (tabId === 'calendario') { 
-                // Usiamo un piccolo delay per dare tempo al browser di rendere visibile la tab
                 setTimeout(() => { 
                     const el = document.getElementById('cal-focus-target'); 
                     if (el) {
-                        const headerHeight = 160; // Altezza approssimativa Header + Sticky Month
+                        const headerHeight = 160; 
                         const elementPosition = el.getBoundingClientRect().top;
                         const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
-
-                        window.scrollTo({
-                            top: offsetPosition,
-                            behavior: "auto" // Auto è più sicuro di smooth su mobile per i salti lunghi
-                        });
+                        
+                        // Usiamo scrollTo con 'auto' (istantaneo) per evitare conflitti di animazione
+                        window.scrollTo({ top: offsetPosition, behavior: "auto" });
                     }
                 }, 50); 
             } 
