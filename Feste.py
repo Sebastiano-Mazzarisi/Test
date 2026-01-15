@@ -13,7 +13,7 @@ load_dotenv()
 
 # Nome: Feste.py
 # Data ultima modifica: 15/01/2026 
-# UPDATE: Implementato Hard Refresh (Anti-Cache) con Timestamp e Meta Tags.
+# FIX: Risolto bug tasto filtro non cliccabile (Z-Index) + Anti-Cache.
 
 # Configurazione dei file
 INPUT_FILE = 'Feste-elenco.csv'
@@ -364,6 +364,8 @@ def genera_html(dati, fake_today=None):
             justify-content: center;
             transition: background 0.2s, transform 0.2s;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            /* FIX CRUCIALE: Z-INDEX ALTO PER STARE SOPRA IL TESTO CENTRALE */
+            z-index: 100;
         }}
         .header-btn:hover {{ background: #f8fafc; transform: translateY(-50%) scale(1.05); }}
         .print-btn {{ right: 0; }}
