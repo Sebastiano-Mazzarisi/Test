@@ -13,7 +13,7 @@ load_dotenv()
 
 # Nome: Feste.py
 # Data ultima modifica: 15/01/2026 
-# UPDATE: Sottotitolo con Timestamp e pausa prima dell'apertura browser.
+# UPDATE: Implementato Hard Refresh (Anti-Cache) con Timestamp e Meta Tags.
 
 # Configurazione dei file
 INPUT_FILE = 'Feste-elenco.csv'
@@ -263,14 +263,16 @@ def genera_html(dati, fake_today=None):
         timestamp_str = datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + " (Simulato)"
     else:
         js_date_code = "new Date()"
-        # DATA E ORA GENERAZIONE
         timestamp_str = datetime.now().strftime("%d/%m/%Y - %H:%M:%S")
     
-    # NOTA: Uso la variabile html_content per evitare NameError alla fine
     html_content = f"""<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Feste</title>
     
@@ -292,8 +294,7 @@ def genera_html(dati, fake_today=None):
             --bg-yellowish: #fffbeb; 
             --bg-card: #ffffff;
             
-            /* COLORI RICHIESTI */
-            --bg-past-green: #dcfce7; /* Verde tenue per eventi passati */
+            --bg-past-green: #dcfce7;
             --border-past-green: #86efac;
             --text-past-green: #14532d;
             
@@ -541,6 +542,9 @@ def genera_html(dati, fake_today=None):
 
                 <h1>EVENTI E FESTE</h1>
                 <p>{timestamp_str}</p>
+                <button onclick="forceReload()" style="background:transparent; border:1px solid rgba(255,255,255,0.5); color:white; border-radius:20px; padding:4px 12px; font-size:0.8rem; margin-top:5px; cursor:pointer;">
+                    ↻ Aggiorna ora
+                </button>
                 
                 <button class="header-btn print-btn" onclick="openPrintModal()" title="Stampa PDF">
                     🖨️
@@ -1308,9 +1312,24 @@ def genera_html(dati, fake_today=None):
 
         let touchStartY = 0; let touchEndY = 0;
         const indicator = document.getElementById('refresh-indicator');
+        
+        // --- FUNZIONE PER FORZARE IL RICARICAMENTO DAL SERVER ---
+        function forceReload() {{
+            const url = new URL(window.location.href);
+            url.searchParams.set('t', new Date().getTime()); // Aggiunge timestamp unico
+            window.location.href = url.toString();
+        }}
+
         document.addEventListener('touchstart', e => {{ touchStartY = e.touches[0].clientY; }}, {{passive: true}});
         document.addEventListener('touchmove', e => {{ touchEndY = e.touches[0].clientY; if (window.scrollY === 0 && touchEndY > touchStartY + 50) {{ indicator.classList.add('show'); }} }}, {{passive: true}});
-        document.addEventListener('touchend', e => {{ indicator.classList.remove('show'); if (window.scrollY === 0 && touchEndY > touchStartY + 150) {{ window.location.reload(); }} }});
+        
+        document.addEventListener('touchend', e => {{ 
+            indicator.classList.remove('show'); 
+            // Se l'utente trascina verso il basso (Pull-to-refresh)
+            if (window.scrollY === 0 && touchEndY > touchStartY + 150) {{ 
+                forceReload(); // Chiamiamo la funzione che bypassa la cache
+            }} 
+        }});
 
         document.addEventListener('DOMContentLoaded', () => {{
             calculateEvents(); renderHome(); renderRubrica(); renderStats();
