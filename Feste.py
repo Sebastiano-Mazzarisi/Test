@@ -13,7 +13,7 @@ load_dotenv()
 
 # Nome: Feste.py
 # Data ultima modifica: 15/01/2026 
-# UPDATE: Aggiunto upload su GitHub anche per il file CSV e lo script Python stesso.
+# UPDATE: Sottotitolo con Timestamp e pausa prima dell'apertura browser.
 
 # Configurazione dei file
 INPUT_FILE = 'Feste-elenco.csv'
@@ -35,28 +35,22 @@ TXT_URL = "https://sebastiano-mazzarisi.github.io/Test/Feste.txt"
 
 def aggiorna_github():
     """
-    Funzione aggiornata per caricare:
-    1. Feste.html (Output visuale)
-    2. Feste.txt (Testo Siri)
-    3. Feste-elenco.csv (Input dati)
-    4. Feste.py (Questo script)
+    Funzione per caricare HTML, TXT, CSV e Script su GitHub.
     """
     if not GITHUB_TOKEN:
         print("❌ Impossibile aggiornare GitHub: Token mancante (controlla il file .env).")
         return
 
-    print("☁️ Tentativo di aggiornamento GitHub...")
+    print("\n☁️  Inizio aggiornamento GitHub...")
     g = Github(GITHUB_TOKEN)
     repo = g.get_repo(REPO_NAME)
 
-    # MODIFICA: Aggiunti INPUT_FILE e "Feste.py" alla lista
     files_to_upload = [OUTPUT_FILE, OUTPUT_TXT, INPUT_FILE, "Feste.py"]
 
     for filename in files_to_upload:
         try:
             print(f"   ⬆️ Sto caricando {filename}...")
             
-            # Controllo esistenza file locale
             if not os.path.exists(filename):
                 print(f"   ⚠️ File {filename} non trovato in locale, salto l'upload.")
                 continue
@@ -66,16 +60,16 @@ def aggiorna_github():
             
             try:
                 contents = repo.get_contents(filename)
-                # Aggiorna se esiste
                 repo.update_file(contents.path, f"Aggiornamento {datetime.now()}", contenuto, contents.sha)
                 print(f"   ✅ {filename} aggiornato con successo!")
             except:
-                # Crea se non esiste
                 repo.create_file(filename, f"Creazione iniziale {filename}", contenuto)
                 print(f"   ✅ {filename} creato con successo!")
                 
         except Exception as e:
             print(f"   ❌ Errore upload {filename}: {e}")
+    
+    print("☁️  Operazioni GitHub terminate.\n")
 
 
 def leggi_e_processa_dati(nome_file):
@@ -266,8 +260,11 @@ def genera_html(dati, fake_today=None):
     
     if fake_today:
         js_date_code = f"new Date({fake_today.year}, {fake_today.month - 1}, {fake_today.day})"
+        timestamp_str = datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + " (Simulato)"
     else:
         js_date_code = "new Date()"
+        # DATA E ORA GENERAZIONE
+        timestamp_str = datetime.now().strftime("%d/%m/%Y - %H:%M:%S")
     
     # NOTA: Uso la variabile html_content per evitare NameError alla fine
     html_content = f"""<!DOCTYPE html>
@@ -543,7 +540,7 @@ def genera_html(dati, fake_today=None):
                 </button>
 
                 <h1>EVENTI E FESTE</h1>
-                <p>Compleanni e Anniversari</p>
+                <p>{timestamp_str}</p>
                 
                 <button class="header-btn print-btn" onclick="openPrintModal()" title="Stampa PDF">
                     🖨️
@@ -1331,13 +1328,6 @@ def genera_html(dati, fake_today=None):
         f.write(html_content)
     
     print(f"🎉 Successo! File generato: {OUTPUT_FILE}")
-    
-    try:
-        file_path = os.path.abspath(OUTPUT_FILE)
-        webbrowser.open(f'file://{file_path}')
-        print(f"🚀 Apertura file nel browser...")
-    except Exception as e:
-        print(f"⚠️ Impossibile aprire il browser automaticamente: {e}")
 
 if __name__ == "__main__":
     target_date = None
@@ -1353,4 +1343,19 @@ if __name__ == "__main__":
     if dati_csv:
         genera_txt_siri_discorsivo(dati_csv, target_date)
         genera_html(dati_csv, target_date)
+        
+        # Carica su GitHub
         aggiorna_github()
+
+        print("--------------------------------------------------")
+        print("✅ Elaborazione completata e file caricati su GitHub.")
+        
+        # Aspetta l'input dell'utente prima di aprire il file
+        input("⌨️  Premi INVIO per aprire il calendario nel browser e terminare...")
+
+        try:
+            file_path = os.path.abspath(OUTPUT_FILE)
+            webbrowser.open(f'file://{file_path}')
+            print(f"🚀 Apertura file nel browser...")
+        except Exception as e:
+            print(f"⚠️ Impossibile aprire il browser automaticamente: {e}")
