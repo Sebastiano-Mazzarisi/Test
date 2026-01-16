@@ -12,8 +12,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Nome: Feste.py
-# Data ultima modifica: 15/01/2026 
-# FIX: Risolto bug tasto filtro non cliccabile (Z-Index) + Anti-Cache.
+# Data ultima modifica: 16/01/2026 
+# FIX: Risolto errore EOF su GitHub Actions (rimosso input bloccante sul server)
 
 # Configurazione dei file
 INPUT_FILE = 'Feste-elenco.csv'
@@ -26,7 +26,7 @@ GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 REPO_NAME = "Sebastiano-Mazzarisi/Test"
 
 if not GITHUB_TOKEN:
-    print("⚠️ ATTENZIONE: Token GitHub non trovato! Assicurati di aver creato il file .env")
+    print("⚠️ ATTENZIONE: Token GitHub non trovato! Assicurati di aver creato il file .env o configurato i Secrets.")
 # -----------------------------------------------------
 
 ICON_URL = "https://sebastiano-mazzarisi.github.io/Test/Feste.png?v=12"
@@ -42,34 +42,37 @@ def aggiorna_github():
         return
 
     print("\n☁️  Inizio aggiornamento GitHub...")
-    g = Github(GITHUB_TOKEN)
-    repo = g.get_repo(REPO_NAME)
+    try:
+        g = Github(GITHUB_TOKEN)
+        repo = g.get_repo(REPO_NAME)
 
-    files_to_upload = [OUTPUT_FILE, OUTPUT_TXT, INPUT_FILE, "Feste.py"]
+        files_to_upload = [OUTPUT_FILE, OUTPUT_TXT, INPUT_FILE, "Feste.py"]
 
-    for filename in files_to_upload:
-        try:
-            print(f"   ⬆️ Sto caricando {filename}...")
-            
-            if not os.path.exists(filename):
-                print(f"   ⚠️ File {filename} non trovato in locale, salto l'upload.")
-                continue
-
-            with open(filename, 'r', encoding='utf-8') as f:
-                contenuto = f.read()
-            
+        for filename in files_to_upload:
             try:
-                contents = repo.get_contents(filename)
-                repo.update_file(contents.path, f"Aggiornamento {datetime.now()}", contenuto, contents.sha)
-                print(f"   ✅ {filename} aggiornato con successo!")
-            except:
-                repo.create_file(filename, f"Creazione iniziale {filename}", contenuto)
-                print(f"   ✅ {filename} creato con successo!")
+                print(f"   ⬆️ Sto caricando {filename}...")
                 
-        except Exception as e:
-            print(f"   ❌ Errore upload {filename}: {e}")
-    
-    print("☁️  Operazioni GitHub terminate.\n")
+                if not os.path.exists(filename):
+                    print(f"   ⚠️ File {filename} non trovato in locale, salto l'upload.")
+                    continue
+
+                with open(filename, 'r', encoding='utf-8') as f:
+                    contenuto = f.read()
+                
+                try:
+                    contents = repo.get_contents(filename)
+                    repo.update_file(contents.path, f"Aggiornamento {datetime.now()}", contenuto, contents.sha)
+                    print(f"   ✅ {filename} aggiornato con successo!")
+                except:
+                    repo.create_file(filename, f"Creazione iniziale {filename}", contenuto)
+                    print(f"   ✅ {filename} creato con successo!")
+                    
+            except Exception as e:
+                print(f"   ❌ Errore upload {filename}: {e}")
+        
+        print("☁️  Operazioni GitHub terminate.\n")
+    except Exception as e:
+        print(f"❌ Errore generale connessione GitHub: {e}")
 
 
 def leggi_e_processa_dati(nome_file):
@@ -544,7 +547,7 @@ def genera_html(dati, fake_today=None):
 
                 <h1>EVENTI E FESTE</h1>
                 <p>{timestamp_str}</p>
-                <button onclick="forceReload()" style="background:transparent; border:1px solid rgba(255,255,255,0.5); color:white; border-radius:20px; padding:4px 12px; font-size:0.8rem; margin-top:5px; cursor:pointer;">
+                <button id="btn-update" onclick="forceReload()" style="background:transparent; border:1px solid rgba(255,255,255,0.5); color:white; border-radius:20px; padding:4px 12px; font-size:0.8rem; margin-top:5px; cursor:pointer;">
                     ↻ Aggiorna ora
                 </button>
                 
@@ -1371,12 +1374,16 @@ if __name__ == "__main__":
         print("--------------------------------------------------")
         print("✅ Elaborazione completata e file caricati su GitHub.")
         
-        # Aspetta l'input dell'utente prima di aprire il file
-        input("⌨️  Premi INVIO per aprire il calendario nel browser e terminare...")
+        # --- FIX: EVITA INPUT BLOCCANTE SU GITHUB ACTIONS ---
+        if os.getenv("GITHUB_ACTIONS") == "true":
+             print("🤖 Esecuzione su GitHub rilevata: Salto apertura browser e input manuale.")
+        else:
+            # Aspetta l'input dell'utente prima di aprire il file
+            input("⌨️  Premi INVIO per aprire il calendario nel browser e terminare...")
 
-        try:
-            file_path = os.path.abspath(OUTPUT_FILE)
-            webbrowser.open(f'file://{file_path}')
-            print(f"🚀 Apertura file nel browser...")
-        except Exception as e:
-            print(f"⚠️ Impossibile aprire il browser automaticamente: {e}")
+            try:
+                file_path = os.path.abspath(OUTPUT_FILE)
+                webbrowser.open(f'file://{file_path}')
+                print(f"🚀 Apertura file nel browser...")
+            except Exception as e:
+                print(f"⚠️ Impossibile aprire il browser automaticamente: {e}")
