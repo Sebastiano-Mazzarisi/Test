@@ -1,0 +1,418 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Investimento Finale</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #0f2c45;
+            --accent: #d4af37;
+            --green: #27ae60;
+            --bg: #e9ebee;
+            --white: #ffffff;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: var(--bg); 
+            color: #333; 
+            margin: 0; 
+            padding: 20px; 
+            display: flex;
+            justify-content: center; 
+        }
+        
+        /* LAYOUT FISSO A4 */
+        .main-wrapper { 
+            width: 210mm; 
+            display: flex; 
+            gap: 20px; 
+            flex-direction: column; 
+        }
+
+        /* CARD INPUT */
+        .input-card { 
+            background: var(--white); 
+            padding: 15mm; 
+            border-radius: 2px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            box-sizing: border-box; 
+        }
+
+        .header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--accent); padding-bottom: 15px; margin-bottom: 25px; }
+        .header-title h1 { color: var(--primary); margin: 0; font-size: 1.8em; text-transform: uppercase; }
+        
+        .icon-btn { font-size: 1.4em; color: var(--primary); background: none; border: none; cursor: pointer; transition: 0.3s; }
+        .icon-btn:hover { color: var(--accent); transform: scale(1.1); }
+
+        .grid-form { display: grid; grid-template-columns: 1fr; gap: 15px; } /* Gap ridotto leggermente */
+        .form-group { padding: 10px; border-bottom: 1px solid #eee; }
+        
+        /* STILI TESTO DOMANDE/RISPOSTE */
+        label.question-title { display: block; font-weight: 700; color: var(--primary); margin-bottom: 8px; font-size: 1em; }
+        .radio-opt { display: block; margin-bottom: 5px; font-size: 0.9em; font-weight: 400; color: #444; cursor: pointer; padding-left: 5px; line-height: 1.3; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 1em; }
+
+        #btn-genera {
+            width: 100%; padding: 15px; margin-top: 20px; background-color: var(--green); color: white;
+            font-size: 1.1em; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; text-transform: uppercase;
+        }
+
+        /* ANTEPRIMA */
+        #preview-container { display: none; flex-direction: column; margin-top: 20px; }
+        
+        .a4-sheet {
+            width: 210mm; 
+            /* Rimosso min-height fisso eccessivo per evitare pagina bianca, gestito dal contenuto */
+            background: white; 
+            padding: 10mm 15mm;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2); 
+            position: relative; 
+            box-sizing: border-box;
+        }
+
+        /* PDF STYLING */
+        .pdf-header { text-align: center; border-bottom: 2px solid var(--primary); padding-bottom: 8px; margin-bottom: 10px; }
+        .pdf-header h2 { margin: 0; color: var(--primary); font-size: 20pt; text-transform: uppercase; }
+        .pdf-header p { margin: 4px 0 0 0; color: #666; font-size: 9pt; }
+
+        .pdf-section { margin-bottom: 12px; }
+        .pdf-title { background: var(--primary); color: white; padding: 4px 8px; font-size: 10pt; font-weight: bold; margin-bottom: 6px; }
+
+        /* TABELLA DATI COMPATTA */
+        .data-table { width: 100%; border-collapse: collapse; font-size: 9pt; table-layout: fixed; }
+        .data-table td { padding: 4px 2px; border-bottom: 1px solid #eee; vertical-align: top; }
+        
+        .lbl { font-weight: bold; color: var(--primary); width: 18%; white-space: nowrap; } 
+        .val { width: 32%; text-align: left; padding-left: 5px; color: #333; }
+
+        /* BADGE BOX */
+        .badge-box { 
+            display: flex; justify-content: space-between; align-items: flex-start; 
+            background: #f4f4f4; padding: 10px 15px; border-radius: 5px; border: 1px solid #ddd; margin-bottom: 5px;
+        }
+        
+        .badge-col-left { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
+        .badge-label-text { font-size: 0.85em; color: #666; display: block; margin-bottom: 2px; }
+        
+        .badge { 
+            display: inline-block; padding: 5px 12px; color: white; font-weight: bold; 
+            border-radius: 4px; font-size: 10pt; text-transform: uppercase; line-height: 1.2;
+        }
+        
+        /* GRAFICO RIDOTTO PER STARE IN PAGINA */
+        .chart-box { width: 100%; height: 220px; margin: 10px 0; }
+        
+        .asset-table { width: 100%; border-collapse: collapse; font-size: 8.5pt; margin-top: 5px; }
+        .asset-table th { background-color: var(--primary); color: white; padding: 5px; text-align: left; }
+        .asset-table td { border-bottom: 1px solid #ddd; padding: 5px; }
+        .center { text-align: center; }
+        
+        .disclaimer { font-size: 7.5pt; color: #888; text-align: justify; margin-top: 15px; border-top: 1px solid #eee; padding-top: 5px; line-height: 1.2; }
+
+        #btn-download { display: none; width: 100%; padding: 15px; background: var(--primary); color: white; font-size: 1.2em; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="main-wrapper">
+    
+    <div class="input-card" id="input-screen">
+        <div class="header-row">
+            <button class="icon-btn" onclick="randomizza()"><i class="fas fa-recycle"></i></button>
+            <div class="header-title"><h1>Profilazione Mifid</h1></div>
+            <i class="fas fa-clipboard-list" style="font-size: 1.5em; color: var(--accent);"></i>
+        </div>
+
+        <div class="grid-form">
+            <div class="form-group">
+                <label class="question-title">Nome e Cognome del Cliente</label>
+                <input type="text" id="nome" placeholder="Inserisci il nominativo completo...">
+            </div>
+            <div class="form-group">
+                <label class="question-title">Importo da Investire (€)</label>
+                <input type="number" id="importo" placeholder="Es. 50000">
+            </div>
+
+            <div class="form-group">
+                <label class="question-title">1. Qual è il tuo orizzonte temporale ideale?</label>
+                <label class="radio-opt"><input type="radio" name="q1" value="1"> Breve termine: Ho bisogno del capitale entro 3 anni.</label>
+                <label class="radio-opt"><input type="radio" name="q1" value="4"> Medio termine: Posso mantenere l'investimento tra i 3 e i 7 anni.</label>
+                <label class="radio-opt"><input type="radio" name="q1" value="8"> Lungo termine: Non ho bisogno di questi soldi per 7-12 anni.</label>
+                <label class="radio-opt"><input type="radio" name="q1" value="10"> Futuro lontano: Investo per la pensione o per i figli (oltre 12 anni).</label>
+            </div>
+            <div class="form-group">
+                <label class="question-title">2. Qual è l'obiettivo primario?</label>
+                <label class="radio-opt"><input type="radio" name="q2" value="SICUREZZA"> Protezione: Priorità assoluta è non perdere capitale.</label>
+                <label class="radio-opt"><input type="radio" name="q2" value="CRESCITA"> Crescita Moderata: Equilibrio rischio/rendimento per battere inflazione.</label>
+                <label class="radio-opt"><input type="radio" name="q2" value="SPECULAZIONE"> Massimizzazione: Cerco il massimo rendimento, accetto oscillazioni.</label>
+            </div>
+            <div class="form-group">
+                <label class="question-title">3. Reazione a una perdita del 20%:</label>
+                <label class="radio-opt"><input type="radio" name="q3" value="1"> Vendo tutto: L'ansia è troppa, esco per evitare peggioramenti.</label>
+                <label class="radio-opt"><input type="radio" name="q3" value="4"> Attendo preoccupato: Non vendo, ma sono a disagio.</label>
+                <label class="radio-opt"><input type="radio" name="q3" value="7"> Mantengo la rotta: Capisco i mercati e aspetto il recupero.</label>
+                <label class="radio-opt"><input type="radio" name="q3" value="10"> Investo ancora: Approfitto dei prezzi bassi per comprare.</label>
+            </div>
+            <div class="form-group">
+                <label class="question-title">4. Necessità di liquidità imprevista?</label>
+                <label class="radio-opt"><input type="radio" name="q4" value="ALTA"> Alta Probabilità: Potrei aver bisogno dei soldi a breve.</label>
+                <label class="radio-opt"><input type="radio" name="q4" value="MEDIA"> Forse: Non previsto, ma ho poche altre riserve.</label>
+                <label class="radio-opt"><input type="radio" name="q4" value="BASSA"> Nessuna: Ho un fondo di emergenza separato.</label>
+            </div>
+            <div class="form-group">
+                <label class="question-title">5. Conoscenza finanziaria?</label>
+                <label class="radio-opt"><input type="radio" name="q5" value="BASSA"> Base: Non ho esperienza, mi affido al consulente.</label>
+                <label class="radio-opt"><input type="radio" name="q5" value="MEDIA"> Media: Conosco la differenza tra azioni e obbligazioni.</label>
+                <label class="radio-opt"><input type="radio" name="q5" value="ALTA"> Avanzata: Opero in autonomia, capisco strumenti complessi.</label>
+            </div>
+            <div class="form-group">
+                <label class="question-title">6. Stabilità del reddito?</label>
+                <label class="radio-opt"><input type="radio" name="q6" value="VARIABILE"> Incerta: Libero professionista o entrate discontinue.</label>
+                <label class="radio-opt"><input type="radio" name="q6" value="STABILE"> Stabile: Reddito fisso che copre le spese.</label>
+                <label class="radio-opt"><input type="radio" name="q6" value="ELEVATA"> In surplus: Elevata capacità di risparmio mensile.</label>
+            </div>
+            <div class="form-group">
+                <label class="question-title">7. Peso sul patrimonio totale?</label>
+                <label class="radio-opt"><input type="radio" name="q7" value="ALL_IN"> Moltissimo: Oltre il 75% del mio patrimonio.</label>
+                <label class="radio-opt"><input type="radio" name="q7" value="MEDIO"> Significativo: Circa la metà del patrimonio finanziario.</label>
+                <label class="radio-opt"><input type="radio" name="q7" value="BASSO"> Marginale: Una piccola parte (< 25%).</label>
+            </div>
+        </div>
+
+        <button id="btn-genera" onclick="generaReport()">CALCOLA PROFILO E GENERA REPORT</button>
+    </div>
+
+    <div id="preview-container">
+        <div>
+            <div id="report-sheet" class="a4-sheet">
+                
+                <div class="pdf-header">
+                    <h2>Report di Investimento</h2>
+                    <p>Analisi di Adeguatezza e Asset Allocation - Data: <span id="r-data"></span></p>
+                </div>
+
+                <div class="pdf-section">
+                    <div class="pdf-title">1. Profilo Investitore Rilevato</div>
+                    <table class="data-table">
+                        <tr>
+                            <td class="lbl">Nominativo:</td><td class="val" id="r-nome"></td>
+                            <td class="lbl">Orizzonte:</td><td class="val" id="r-time"></td>
+                        </tr>
+                        <tr>
+                            <td class="lbl">Importo:</td><td class="val" id="r-imp"></td>
+                            <td class="lbl">Toll. Rischio:</td><td class="val" id="r-risk"></td>
+                        </tr>
+                        <tr>
+                            <td class="lbl">Obiettivo:</td><td class="val" id="r-obj"></td>
+                            <td class="lbl">Competenza:</td><td class="val" id="r-know"></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="pdf-section">
+                    <div class="pdf-title">2. Proiezioni (5 Anni)</div>
+                    
+                    <div class="badge-box">
+                        <div class="badge-col-left">
+                            <span class="badge-label-text">Profilo Assegnato:</span>
+                            <div id="r-badge" class="badge"></div>
+                        </div>
+                        
+                        <div style="text-align:right;">
+                            <span style="font-size:0.85em; color:#666;">Stima Capitale Finale:</span><br>
+                            <strong id="r-future" style="font-size:1.3em; color:#333;"></strong>
+                            <span id="r-perc" style="font-size:0.9em; font-weight:bold; color:#27ae60;"></span>
+                        </div>
+                    </div>
+                    
+                    <div id="r-alert" style="display:none; margin-top:5px; font-size:8pt; color:#d35400; background:#fff5e6; padding:4px; border:1px solid #f39c12;"></div>
+
+                    <div class="chart-box">
+                        <canvas id="mainChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="pdf-section">
+                    <div class="pdf-title">3. Asset Allocation Strategica</div>
+                    <table class="asset-table">
+                        <thead>
+                            <tr>
+                                <th width="30%">Asset Class</th>
+                                <th width="15%">Ticker</th>
+                                <th width="10%" class="center">Peso</th>
+                                <th width="15%" class="center">Volatilità</th>
+                                <th width="30%">Ruolo nel Portafoglio</th>
+                            </tr>
+                        </thead>
+                        <tbody id="r-table"></tbody>
+                    </table>
+                </div>
+
+                <div class="disclaimer">
+                    <strong>Disclaimer Legale:</strong> Il presente documento è generato automaticamente a scopo puramente didattico e non costituisce sollecitazione al pubblico risparmio o consulenza finanziaria personalizzata.
+                </div>
+
+            </div> 
+            
+            <button id="btn-download" onclick="creaPDF()">APRI PDF (A4)</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const VOL = { "URTH":"17.1%", "AGG":"4.4%", "EZU":"18.0%", "MCHI":"25.5%", "EUFN":"20.4%", "MILN":"22.1%", "GLD":"14.2%", "BOT":"0.5%" };
+
+    function randomizza() {
+        document.getElementById('nome').value = "Mario Rossi";
+        document.getElementById('importo').value = 100000;
+        ['q1','q2','q3','q4','q5','q6','q7'].forEach(n => {
+            const els = document.getElementsByName(n);
+            els[Math.floor(Math.random()*els.length)].checked = true;
+        });
+        document.getElementById('preview-container').style.display = 'none';
+    }
+
+    let myChart = null;
+
+    function generaReport() {
+        const nome = document.getElementById('nome').value;
+        const impVal = document.getElementById('importo').value;
+        const getV = (n) => { let e=document.querySelector('input[name="'+n+'"]:checked'); return e?e.value:null; };
+        
+        const q1=getV('q1'), q2=getV('q2'), q3=getV('q3'), q4=getV('q4');
+        const q5=getV('q5'), q6=getV('q6'), q7=getV('q7');
+
+        if(!nome || !impVal || !q1 || !q2 || !q3 || !q4 || !q5 || !q6 || !q7) {
+            alert("Per favore, rispondi a tutte le domande."); return;
+        }
+
+        const cap = parseFloat(impVal);
+        let score = parseInt(q1)+parseInt(q3);
+        if(q6==='STABILE') score+=2; if(q6==='ELEVATA') score+=4;
+        if(q5==='ALTA') score+=3; if(q5==='BASSA') score-=2;
+
+        let prof="PRUDENTE", col="#27ae60", rate=0.025, note="";
+        if(score>18) { prof="DINAMICO"; col="#c0392b"; rate=0.07; }
+        else if(score>10) { prof="BILANCIATO"; col="#e67e22"; rate=0.045; }
+
+        if(q4==='ALTA') { prof="PRUDENTE"; col="#27ae60"; rate=0.025; note="⚠️ Override: Alta necessità di liquidità."; }
+        else if(prof==='DINAMICO' && ['BASSA','MEDIA'].includes(q5)) { prof="BILANCIATO"; col="#e67e22"; rate=0.045; note="ℹ️ Adeguatezza: Rischio ridotto per competenza."; }
+        else if(q2==='SICUREZZA' && prof!=='PRUDENTE') { prof="PRUDENTE"; col="#27ae60"; rate=0.025; note="⚠️ Coerenza: Obiettivo Sicurezza."; }
+        else if(q7==='ALL_IN' && prof==='DINAMICO') { prof="BILANCIATO"; col="#e67e22"; rate=0.045; note="ℹ️ Capacity: Esposizione totale patrimonio."; }
+
+        let alloc=[];
+        if(prof==="PRUDENTE") alloc=[
+            {a:"Titoli di Stato",t:"BOT",w:"30%",v:VOL.BOT,r:"Sicurezza"},
+            {a:"Bond Globali",t:"AGG",w:"50%",v:VOL.AGG,r:"Reddito"},
+            {a:"Azioni Mondo",t:"URTH",w:"15%",v:VOL.URTH,r:"Crescita"},
+            {a:"Oro",t:"GLD",w:"5%",v:VOL.GLD,r:"Difesa"}
+        ];
+        else if(prof==="BILANCIATO") alloc=[
+            {a:"Bond Globali",t:"AGG",w:"40%",v:VOL.AGG,r:"Stabilità"},
+            {a:"Azioni Mondo",t:"URTH",w:"35%",v:VOL.URTH,r:"Core"},
+            {a:"Azioni EU",t:"EZU",w:"15%",v:VOL.EZU,r:"Geo"},
+            {a:"Megatrend",t:"MILN",w:"10%",v:VOL.MILN,r:"Boost"}
+        ];
+        else alloc=[
+            {a:"Azioni Mondo",t:"URTH",w:"50%",v:VOL.URTH,r:"Core"},
+            {a:"Emergenti",t:"MCHI",w:"15%",v:VOL.MCHI,r:"Alpha"},
+            {a:"Megatrend",t:"MILN",w:"15%",v:VOL.MILN,r:"Growth"},
+            {a:"Finanziari EU",t:"EUFN",w:"10%",v:VOL.EUFN,r:"Ciclico"},
+            {a:"Bond",t:"AGG",w:"10%",v:VOL.AGG,r:"Buffer"}
+        ];
+
+        document.getElementById('r-data').innerText = new Date().toLocaleDateString();
+        document.getElementById('r-nome').innerText = nome;
+        document.getElementById('r-imp').innerText = "€ " + cap.toLocaleString();
+        
+        const timeM={1:"Breve",4:"Medio",8:"Lungo",10:"Pensione"};
+        document.getElementById('r-time').innerText = timeM[q1] || "N/A";
+        document.getElementById('r-obj').innerText = q2;
+        document.getElementById('r-risk').innerText = (q3==1?"Bassa":(q3==10?"Alta":"Media"));
+        document.getElementById('r-know').innerText = q5;
+
+        const b=document.getElementById('r-badge'); b.innerText=prof; b.style.backgroundColor=col;
+        const al=document.getElementById('r-alert'); if(note){al.innerText=note;al.style.display='block';}else{al.style.display='none';}
+
+        const tb=document.getElementById('r-table'); tb.innerHTML="";
+        alloc.forEach(x=>{
+            tb.innerHTML += `<tr><td>${x.a}</td><td><b>${x.t}</b></td><td class='center'>${x.w}</td><td class='center'>${x.v}</td><td>${x.r}</td></tr>`;
+        });
+
+        const fut = Math.round(cap*Math.pow(1+rate,5));
+        const perc = ((fut-cap)/cap)*100;
+        document.getElementById('r-future').innerText = "€ " + fut.toLocaleString();
+        document.getElementById('r-perc').innerText = "(+"+perc.toFixed(1)+"%)";
+
+        document.getElementById('preview-container').style.display = 'flex';
+        document.getElementById('btn-download').style.display = 'block';
+        
+        setTimeout(() => { document.getElementById('preview-container').scrollIntoView({behavior:'smooth'}); }, 100);
+        drawChart(cap, rate, col);
+    }
+
+    function drawChart(cap, rate, col) {
+        const ctx = document.getElementById('mainChart').getContext('2d');
+        if(myChart) myChart.destroy();
+        
+        const dataY = [];
+        for(let i=5;i>0;i--) dataY.push(cap/Math.pow(1+rate,i));
+        dataY.push(cap);
+        for(let i=1;i<=5;i++) dataY.push(cap*Math.pow(1+rate,i));
+
+        myChart = new Chart(ctx, {
+            type: 'line',
+            plugins: [ChartDataLabels],
+            data: {
+                labels: ['-5y','-4y','-3y','-2y','-1y','OGGI','+1y','+2y','+3y','+4y','+5y'],
+                datasets: [{
+                    label: 'Stima', data: dataY, borderColor: col, borderWidth: 3, pointBackgroundColor: "#fff", pointBorderColor: col, pointRadius: 4, tension: 0.4, fill: false
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, animation: {duration: 800},
+                layout: {padding:{top:30, right:20, bottom:0, left:10}},
+                plugins: {
+                    legend:{display:false},
+                    datalabels: {
+                        align: 'top', color: '#555', font:{weight:'bold', size:10},
+                        formatter: (v, ctx) => (ctx.dataIndex===0 || ctx.dataIndex===5 || ctx.dataIndex===10) ? '€'+(v/1000).toFixed(0)+'k' : ''
+                    }
+                },
+                scales: { y:{display:false, min: Math.min(...dataY)*0.85}, x:{grid:{display:false}, ticks:{font:{size:9}}} }
+            }
+        });
+    }
+
+    function creaPDF() {
+        const element = document.getElementById('report-sheet');
+        const nomeClean = document.getElementById('nome').value.replace(/[^a-zA-Z0-9]/g, '_');
+        
+        const opt = { 
+            margin: 0, 
+            filename: 'Report_'+nomeClean+'.pdf', 
+            image: { type: 'jpeg', quality: 0.98 }, 
+            html2canvas: { scale: 2, useCORS: true, scrollY: 0 }, 
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+        };
+
+        // Usa Blob URL per aprire IMMEDIATAMENTE in una nuova scheda
+        html2pdf().set(opt).from(element).toPdf().get('pdf').then(function (pdf) {
+            window.open(pdf.output('bloburl'), '_blank');
+        });
+    }
+</script>
+
+</body>
+</html>
+    
