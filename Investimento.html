@@ -1,0 +1,501 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profilazione Investitore</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #777; /* Grigio medio/scuro per testo leggibile e risparmio toner */
+            --accent: #d4af37;
+            --green: #27ae60;
+            --blue: #2980b9;
+            --bg: #e9ebee;
+            --white: #ffffff;
+            --text-grey: #555;
+        }
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: #333; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        
+        .main-wrapper { width: 210mm; display: flex; gap: 20px; flex-direction: column; }
+
+        /* INPUT CARD */
+        .input-card { background: var(--white); padding: 15mm; border-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); box-sizing: border-box; }
+        
+        .header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--accent); padding-bottom: 15px; margin-bottom: 25px; }
+        .header-title h1 { color: var(--primary); margin: 0; font-size: 1.8em; text-transform: uppercase; letter-spacing: 1px; }
+        .icon-btn { font-size: 1.4em; color: var(--primary); background: none; border: none; cursor: pointer; transition: 0.3s; }
+        .icon-btn:hover { color: var(--accent); transform: scale(1.1); }
+
+        .grid-form { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        .form-group { padding: 12px; border: 1px solid #ccc; border-radius: 4px; background-color: #f9f9f9; }
+        label.question-title { display: block; font-weight: 700; color: var(--primary); margin-bottom: 8px; font-size: 1.05em; }
+        .radio-opt { display: flex; align-items: flex-start; margin-bottom: 5px; font-size: 0.95em; color: #555; cursor: pointer; line-height: 1.3; }
+        .radio-opt input { margin-top: 4px; margin-right: 8px; flex-shrink: 0; }
+        .radio-opt b { color: #000; font-weight: 600; margin-right: 4px; }
+
+        .input-row-simple { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 10px; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
+
+        .button-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; }
+        .action-btn { width: 100%; padding: 15px; color: white; font-size: 1.1em; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; text-transform: uppercase; transition: opacity 0.3s; box-shadow: 0 3px 5px rgba(0,0,0,0.1); }
+        .action-btn:hover { opacity: 0.9; }
+        #btn-pdf-quest { background-color: var(--blue); }
+        #btn-genera { background-color: var(--green); }
+
+        /* PREVIEW CONTAINER */
+        #preview-container { display: none; flex-direction: column; margin-top: 30px; }
+        
+        .a4-sheet { 
+            width: 210mm; 
+            min-height: 297mm; 
+            background: white; 
+            padding: 10mm; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.25); 
+            position: relative; 
+            box-sizing: border-box; 
+            margin-bottom: 30px; 
+            color: #000; 
+            overflow: hidden; 
+        }
+
+        /* --- STILI PDF QUESTIONARIO --- */
+        #quest-sheet { padding: 10mm 12mm; }
+        #quest-sheet .q-header { text-align: center; border-bottom: 2px solid #555; padding-bottom: 5px; margin-bottom: 15px; }
+        #quest-sheet h2 { font-size: 18pt; margin: 0; text-transform: uppercase; color: #333; }
+        #quest-sheet .q-meta { font-size: 9pt; color: #555; }
+
+        .anagrafica-print { 
+            border: 1px solid #ccc; padding: 10px; margin-bottom: 15px; font-size: 10pt; 
+            display: flex; justify-content: space-between; background: #fdfdfd;
+        }
+        .field-label { font-weight: bold; margin-right: 5px; }
+        .field-value { font-weight: bold; color: #000; min-width: 50px; display: inline-block; }
+
+        .q-list-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 9pt; }
+        .q-item { border: 1px solid #eee; padding: 6px; border-radius: 4px; break-inside: avoid; }
+        .q-title { font-weight: bold; display: block; margin-bottom: 4px; font-size: 9.5pt; color: #000; background: #f4f4f4; padding: 2px 5px; }
+        
+        .print-opt { display: flex; align-items: top; margin-bottom: 2px; color: #333; line-height: 1.2; }
+        .check-circle { width: 10px; height: 10px; border: 1px solid #000; border-radius: 50%; display: inline-block; margin-right: 6px; margin-top: 1px; flex-shrink: 0; }
+        .selected .check-circle { background-color: #000; }
+        .selected { font-weight: bold; color: #000; }
+
+        .q-analysis-box { margin-top: 20px; border: 2px solid #555; padding: 10px; border-radius: 4px; background: #fafafa; }
+        .q-analysis-header { font-weight: bold; font-size: 10pt; text-transform: uppercase; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 5px; }
+        .q-analysis-content { font-size: 9pt; line-height: 1.3; margin: 0; padding-left: 20px; }
+        .q-analysis-content li { margin-bottom: 3px; }
+
+        /* --- STILI REPORT --- */
+        #report-sheet .pdf-header { text-align: center; border-bottom: 2px solid #555; padding-bottom: 5px; margin-bottom: 10px; }
+        #report-sheet h2 { font-size: 18pt; margin: 0; color: #333; }
+        #report-sheet .data-table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+        #report-sheet td { padding: 3px; border-bottom: 1px solid #eee; }
+        #report-sheet .lbl { font-weight: bold; width: 25%; color: #333; }
+        #report-sheet .pdf-section { margin-bottom: 10px; }
+        #report-sheet .pdf-title { background: #555; color: #fff; padding: 2px 5px; font-size: 10pt; font-weight: bold; margin-bottom: 5px; }
+        #report-sheet .chart-box { height: 180px; width: 100%; margin: 5px 0; }
+        #report-sheet .asset-table { width: 100%; font-size: 8.5pt; border-collapse: collapse; }
+        #report-sheet .asset-table th { background: #555; color: #fff; padding: 3px; text-align: left; }
+        #report-sheet .asset-table td { padding: 3px; border-bottom: 1px solid #ddd; }
+        
+        #report-sheet .badge { background: #333; color: #fff; padding: 2px 8px; font-size: 9pt; font-weight: bold; border-radius: 3px; }
+        
+        #report-sheet .badge-box { 
+            display: flex; justify-content: space-between; align-items: center; 
+            background: #f8f9fa; padding: 10px 15px; border-radius: 6px; border: 1px solid #ddd; margin-bottom: 15px; 
+        }
+        #report-sheet .badge-col-left { display: flex; flex-direction: column; align-items: flex-start; gap: 15px; }
+
+        #btn-download { display: none; width: 100%; padding: 15px; background: var(--primary); color: white; font-size: 1.2em; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="main-wrapper">
+    
+    <div class="input-card" id="input-screen">
+        <div class="header-row">
+            <button class="icon-btn" onclick="randomizza()"><i class="fas fa-recycle"></i></button>
+            <div class="header-title"><h1>Profilazione Mifid</h1></div>
+            <i class="fas fa-edit" style="font-size: 1.5em; color: var(--accent);"></i>
+        </div>
+
+        <div class="input-row-simple">
+            <div><label class="question-title">Nome e Cognome</label><input type="text" id="nome" placeholder="Lascia vuoto per modulo in bianco"></div>
+            <div><label class="question-title">Importo (€)</label><input type="number" id="importo" placeholder="Es. 50000"></div>
+        </div>
+
+        <div class="grid-form">
+            <div class="form-group">
+                <label class="question-title">1. Orizzonte Temporale</label>
+                <label class="radio-opt"><input type="radio" name="q1" value="1"> <span><b>Breve (&lt; 3 Anni):</b> Spese importanti a breve.</span></label>
+                <label class="radio-opt"><input type="radio" name="q1" value="4"> <span><b>Medio (3-7 Anni):</b> Progetti futuri, nessuna fretta.</span></label>
+                <label class="radio-opt"><input type="radio" name="q1" value="8"> <span><b>Lungo (7-12 Anni):</b> Costruzione capitale.</span></label>
+                <label class="radio-opt"><input type="radio" name="q1" value="10"> <span><b>Lunghissimo (&gt; 12 Anni):</b> Pensione o eredità.</span></label>
+            </div>
+            <div class="form-group">
+                <label class="question-title">2. Scopo Investimento</label>
+                <label class="radio-opt"><input type="radio" name="q2" value="SICUREZZA"> <span><b>Protezione:</b> Priorità non perdere soldi.</span></label>
+                <label class="radio-opt"><input type="radio" name="q2" value="CRESCITA"> <span><b>Crescita Reale:</b> Battere l'inflazione.</span></label>
+                <label class="radio-opt"><input type="radio" name="q2" value="SPECULAZIONE"> <span><b>Massimizzazione:</b> Alto rischio per alto rendimento.</span></label>
+            </div>
+            <div class="form-group">
+                <label class="question-title">3. Reazione ai Crolli (-20%)</label>
+                <label class="radio-opt"><input type="radio" name="q3" value="1"> <span><b>Ansia e Vendita:</b> Vendo tutto per paura.</span></label>
+                <label class="radio-opt"><input type="radio" name="q3" value="4"> <span><b>Preoccupazione:</b> Agitato, chiedo rassicurazioni.</span></label>
+                <label class="radio-opt"><input type="radio" name="q3" value="7"> <span><b>Calma (Hold):</b> Aspetto che passi.</span></label>
+                <label class="radio-opt"><input type="radio" name="q3" value="10"> <span><b>Opportunità (Buy):</b> Compro a prezzi bassi.</span></label>
+            </div>
+            <div class="form-group">
+                <label class="question-title">4. Riserve Liquidità</label>
+                <label class="radio-opt"><input type="radio" name="q4" value="ALTA"> <span><b>Tesa:</b> Nessuna riserva extra.</span></label>
+                <label class="radio-opt"><input type="radio" name="q4" value="MEDIA"> <span><b>Nella Media:</b> Piccole riserve sul conto.</span></label>
+                <label class="radio-opt"><input type="radio" name="q4" value="BASSA"> <span><b>Coperta:</b> Ho un fondo di emergenza.</span></label>
+            </div>
+            <div class="form-group">
+                <label class="question-title">5. Competenza Finanziaria</label>
+                <label class="radio-opt"><input type="radio" name="q5" value="BASSA"> <span><b>Principiante:</b> Mi affido agli esperti.</span></label>
+                <label class="radio-opt"><input type="radio" name="q5" value="MEDIA"> <span><b>Informato:</b> Capisco le basi.</span></label>
+                <label class="radio-opt"><input type="radio" name="q5" value="ALTA"> <span><b>Esperto:</b> Gestisco autonomamente.</span></label>
+            </div>
+            <div class="form-group">
+                <label class="question-title">6. Stabilità Reddito</label>
+                <label class="radio-opt"><input type="radio" name="q6" value="VARIABILE"> <span><b>Incerta:</b> Entrate variabili.</span></label>
+                <label class="radio-opt"><input type="radio" name="q6" value="STABILE"> <span><b>Sicura:</b> Posto fisso o pensione.</span></label>
+                <label class="radio-opt"><input type="radio" name="q6" value="ELEVATA"> <span><b>In Surplus:</b> Risparmio regolare.</span></label>
+            </div>
+            <div class="form-group">
+                <label class="question-title">7. Peso su Patrimonio</label>
+                <label class="radio-opt"><input type="radio" name="q7" value="ALL_IN"> <span><b>Totale (> 75%):</b> Quasi tutto.</span></label>
+                <label class="radio-opt"><input type="radio" name="q7" value="MEDIO"> <span><b>Significativo (50%):</b> Metà patrimonio.</span></label>
+                <label class="radio-opt"><input type="radio" name="q7" value="BASSO"> <span><b>Marginale (< 25%):</b> Piccola parte.</span></label>
+            </div>
+        </div>
+
+        <div class="button-row">
+            <button id="btn-pdf-quest" class="action-btn" onclick="generaPDFQuestionario()">PDF QUESTIONARIO</button>
+            <button id="btn-genera" class="action-btn" onclick="generaReport()">GENERA REPORT</button>
+        </div>
+    </div>
+
+    <div id="preview-container">
+        
+        <div id="quest-sheet" class="a4-sheet" style="display:none;">
+            <div class="q-header">
+                <h2>Scheda Raccolta Informazioni</h2>
+                <div class="q-meta">Mifid II - Analisi di Adeguatezza by Studio VZ - Data: <span id="q-date"></span></div>
+            </div>
+
+            <div class="anagrafica-print">
+                <div><span class="field-label">Nominativo:</span><span id="q-nome" class="field-value"></span></div>
+                <div style="margin-right: 3cm;">
+                    <span class="field-label">Importo:</span><span id="q-imp" class="field-value"></span>
+                </div>
+            </div>
+
+            <div class="q-list-grid">
+                <div id="q-container-dynamic" style="display:contents;"></div>
+            </div>
+
+            <div id="q-consistency-wrapper" class="q-analysis-box" style="display:none;">
+                <div class="q-analysis-header">Esito Preliminare di Coerenza</div>
+                <ul id="q-consistency-result" class="q-analysis-content"></ul>
+            </div>
+        </div>
+
+        <div id="report-sheet" class="a4-sheet" style="display:none;">
+            <div class="pdf-header">
+                <h2>Report Investimento</h2>
+                <p>Analisi di Adeguatezza by Studio VZ - <span id="r-data"></span></p>
+            </div>
+            
+            <div class="pdf-section">
+                <div class="pdf-title">1. Sintesi</div>
+                <table class="data-table">
+                    <tr><td class="lbl">Nome:</td><td class="val" id="r-nome"></td><td class="lbl">Orizzonte:</td><td class="val" id="r-time"></td></tr>
+                    <tr><td class="lbl">Importo:</td><td class="val" id="r-imp"></td><td class="lbl">Rischio:</td><td class="val" id="r-risk"></td></tr>
+                    <tr><td class="lbl">Obiettivo:</td><td class="val" id="r-obj"></td><td class="lbl">Competenza:</td><td class="val" id="r-know"></td></tr>
+                </table>
+            </div>
+
+            <div class="pdf-section">
+                <div class="pdf-title">2. Coerenza</div>
+                <div id="coerenza-container" class="consistency-box">
+                    <div id="coerenza-title" class="consistency-title"></div>
+                    <ul id="coerenza-list" class="consistency-list"></ul>
+                </div>
+            </div>
+
+            <div class="pdf-section">
+                <div class="pdf-title">3. Asset Allocation & Proiezione</div>
+                <div class="badge-box" style="padding: 5px 10px; font-size: 9pt;">
+                    <div class="badge-col-left">
+                        <span class="badge-label-text">Profilo Elaborato:</span>
+                        <div id="r-badge" class="badge"></div>
+                    </div>
+                    <div style="text-align:right;">
+                        <span style="font-size:0.85em; color:#666;">Stima Capitale:</span><br>
+                        <strong id="r-future" style="font-size:1.4em; color:#333;"></strong> <span id="r-perc" style="font-size:1em; font-weight:bold; color:#27ae60;"></span>
+                    </div>
+                </div>
+                <div class="chart-box"><canvas id="mainChart"></canvas></div>
+                <table class="asset-table">
+                    <thead><tr><th>Asset</th><th>Ticker</th><th class="center">Peso</th><th class="center">Vol.</th><th>Ruolo</th></tr></thead>
+                    <tbody id="r-table"></tbody>
+                </table>
+            </div>
+            <div style="font-size:7pt; color:#999; margin-top:10px;">Disclaimer: Documento simulativo generato automaticamente.</div>
+        </div>
+        
+        <button id="btn-download" onclick="creaPDF()">SCARICA PDF</button>
+    </div>
+</div>
+
+<script>
+    const QUESTIONS_DATA = [
+        { id: "q1", title: "1. Orizzonte Temporale", opts: [{val:"1", txt:"Breve (< 3 Anni)"}, {val:"4", txt:"Medio (3-7 Anni)"}, {val:"8", txt:"Lungo (7-12 Anni)"}, {val:"10", txt:"Lunghissimo (> 12 Anni)"}] },
+        { id: "q2", title: "2. Scopo Investimento", opts: [{val:"SICUREZZA", txt:"Protezione"}, {val:"CRESCITA", txt:"Crescita Reale"}, {val:"SPECULAZIONE", txt:"Massimizzazione"}] },
+        { id: "q3", title: "3. Reazione ai Crolli (-20%)", opts: [{val:"1", txt:"Ansia: Vendo tutto"}, {val:"4", txt:"Preoccupazione: Agitato"}, {val:"7", txt:"Calma: Aspetto"}, {val:"10", txt:"Opportunità: Compro"}] },
+        { id: "q4", title: "4. Riserve Liquidità", opts: [{val:"ALTA", txt:"Tesa: Nessuna riserva"}, {val:"MEDIA", txt:"Media: Piccole riserve"}, {val:"BASSA", txt:"Coperta: Fondo emergenza"}] },
+        { id: "q5", title: "5. Competenza", opts: [{val:"BASSA", txt:"Base: Mi affido ad altri"}, {val:"MEDIA", txt:"Informato: Capisco le basi"}, {val:"ALTA", txt:"Esperto: Faccio da solo"}] },
+        { id: "q6", title: "6. Stabilità Reddito", opts: [{val:"VARIABILE", txt:"Incerta / Variabile"}, {val:"STABILE", txt:"Sicura / Posto fisso"}, {val:"ELEVATA", txt:"Surplus / Risparmio"}] },
+        { id: "q7", title: "7. Peso su Patrimonio", opts: [{val:"ALL_IN", txt:"Totale (> 75%)"}, {val:"MEDIO", txt:"Significativo (50%)"}, {val:"BASSO", txt:"Marginale (< 25%)"}] }
+    ];
+
+    const VOL = { "URTH":"17.1%", "AGG":"4.4%", "EZU":"18.0%", "MCHI":"25.5%", "EUFN":"20.4%", "MILN":"22.1%", "GLD":"14.2%", "BOT":"0.5%" };
+
+    function randomizza() {
+        document.getElementById('nome').value = "Mario Rossi";
+        document.getElementById('importo').value = 100000;
+        QUESTIONS_DATA.forEach(q => {
+            const inputs = document.getElementsByName(q.id);
+            inputs[Math.floor(Math.random()*inputs.length)].checked = true;
+        });
+        resetPreview();
+    }
+
+    function resetPreview() {
+        document.getElementById('preview-container').style.display = 'none';
+        document.getElementById('quest-sheet').style.display = 'none';
+        document.getElementById('report-sheet').style.display = 'none';
+        document.getElementById('btn-download').style.display = 'none';
+    }
+
+    function generaPDFQuestionario() {
+        resetPreview();
+        const btn = document.getElementById('btn-pdf-quest');
+        const originalTxt = btn.innerText;
+        btn.innerText = "Attendere...";
+
+        const nomeRaw = document.getElementById('nome').value;
+        const impRaw = document.getElementById('importo').value;
+        const nome = nomeRaw ? nomeRaw : "";
+        const imp = impRaw ? "€ " + parseFloat(impRaw).toLocaleString() : "";
+
+        document.getElementById('q-nome').innerText = nome;
+        document.getElementById('q-imp').innerText = imp;
+        document.getElementById('q-date').innerText = new Date().toLocaleDateString();
+
+        const container = document.getElementById('q-container-dynamic');
+        container.innerHTML = "";
+
+        const allChecked = QUESTIONS_DATA.every(q => document.querySelector(`input[name="${q.id}"]:checked`));
+        const hasData = (nomeRaw && impRaw && allChecked);
+
+        QUESTIONS_DATA.forEach(q => {
+            const selectedVal = (document.querySelector(`input[name="${q.id}"]:checked`) || {}).value;
+            let html = `<div class="q-item"><span class="q-title">${q.title}</span>`;
+            q.opts.forEach(opt => {
+                const isSel = (opt.val === selectedVal);
+                const circle = isSel ? '<span class="check-circle" style="background:#000;"></span>' : '<span class="check-circle"></span>';
+                const cls = isSel ? 'print-opt selected' : 'print-opt';
+                html += `<div class="${cls}">${circle} ${opt.txt}</div>`;
+            });
+            html += `</div>`;
+            container.innerHTML += html;
+        });
+
+        const consBox = document.getElementById('q-consistency-wrapper');
+        const consRes = document.getElementById('q-consistency-result');
+        consRes.innerHTML = "";
+
+        if(hasData) {
+            const getV = (n) => document.querySelector(`input[name="${n}"]:checked`).value;
+            const res = analizzaCoerenza(getV('q1'), getV('q2'), getV('q3'), getV('q4'), getV('q5'), getV('q7'));
+            
+            if(res.alerts.length === 0) {
+                consRes.innerHTML = "<li><b>Nessuna incongruenza rilevata.</b> Le risposte appaiono coerenti.</li>";
+            } else {
+                res.alerts.forEach(a => consRes.innerHTML += `<li>${a}</li>`);
+            }
+            consBox.style.display = 'block';
+        } else {
+            consBox.style.display = 'none'; 
+        }
+
+        document.getElementById('preview-container').style.display = 'flex';
+        const sheet = document.getElementById('quest-sheet');
+        sheet.style.display = 'block';
+        sheet.scrollIntoView({behavior: 'instant', block: 'start'});
+
+        setTimeout(() => {
+            html2pdf().set({
+                margin:0, filename:'Questionario_Completo.pdf',
+                image:{type:'jpeg',quality:0.98},
+                html2canvas:{scale:2, useCORS:true, scrollY:0},
+                jsPDF:{unit:'mm', format:'a4', orientation:'portrait'}
+            }).from(sheet).save().then(() => {
+                btn.innerText = originalTxt;
+            });
+        }, 800);
+    }
+
+    function analizzaCoerenza(q1, q2, q3, q4, q5, q7) {
+        let alerts = [];
+        let status = "OK"; 
+        if (q1 == 1 && (q2 === 'SPECULAZIONE' || q3 >= 7)) { alerts.push("Incongruenza Temporale: Orizzonte breve vs Rischio Alto."); status = "CRIT"; }
+        if (q2 === 'SICUREZZA' && q3 >= 7) { alerts.push("Disallineamento: Obiettivo Sicurezza vs Comportamento Aggressivo."); status = "CRIT"; }
+        if (q2 === 'SPECULAZIONE' && q3 == 1) { alerts.push("Panic Selling: Obiettivo Speculazione ma vende sui ribassi."); status = "CRIT"; }
+        if (q2 === 'SPECULAZIONE' && q5 === 'BASSA') { alerts.push("Appropriatezza: Speculazione con conoscenza base."); status = "WARN"; }
+        if (q7 === 'ALL_IN' && (q2 === 'SPECULAZIONE' || q3 >= 7)) { alerts.push("Capacity: Tutto il patrimonio a rischio."); status = "CRIT"; }
+        if (q4 === 'ALTA' && q1 >= 8) { alerts.push("Liquidità: Riserve scarse vs Lungo termine."); status = "WARN"; }
+        return { alerts, status };
+    }
+
+    let myChart = null;
+
+    function generaReport() {
+        const nome = document.getElementById('nome').value;
+        const impVal = document.getElementById('importo').value;
+        const allChecked = QUESTIONS_DATA.every(q => document.querySelector(`input[name="${q.id}"]:checked`));
+
+        if(!nome || !impVal || !allChecked) { alert("Compila tutti i campi!"); return; }
+
+        resetPreview();
+        const btn = document.getElementById('btn-genera');
+        btn.innerText = "Elaborazione...";
+
+        setTimeout(() => {
+            calcolaReport(nome, impVal);
+            const sheet = document.getElementById('report-sheet');
+            document.getElementById('preview-container').style.display = 'flex';
+            sheet.style.display = 'block';
+            document.getElementById('btn-download').style.display = 'block';
+            btn.innerText = "GENERA REPORT";
+            sheet.scrollIntoView({behavior:'smooth'});
+        }, 500);
+    }
+
+    function calcolaReport(nome, impVal) {
+        const getV = (n) => document.querySelector(`input[name="${n}"]:checked`).value;
+        const q1=getV('q1'), q2=getV('q2'), q3=getV('q3'), q4=getV('q4'), q5=getV('q5'), q6=getV('q6'), q7=getV('q7');
+        const cap = parseFloat(impVal);
+
+        const res = analizzaCoerenza(q1, q2, q3, q4, q5, q7);
+        const box = document.getElementById('coerenza-container');
+        const list = document.getElementById('coerenza-list');
+        list.innerHTML = "";
+        
+        if(res.alerts.length === 0) list.innerHTML = "<li>Nessuna criticità rilevata.</li>";
+        else res.alerts.forEach(a => list.innerHTML += `<li>${a}</li>`);
+
+        let score = parseInt(q1)+parseInt(q3);
+        if(q6==='STABILE') score+=2; if(q6==='ELEVATA') score+=4;
+        if(q5==='ALTA') score+=3; if(q5==='BASSA') score-=2;
+
+        let prof="PRUDENTE", col="#27ae60", rate=0.025;
+        if(score>18) { prof="DINAMICO"; col="#c0392b"; rate=0.07; }
+        else if(score>10) { prof="BILANCIATO"; col="#e67e22"; rate=0.045; }
+        if(res.status === "CRIT") { prof="BILANCIATO"; col="#e67e22"; rate=0.045; }
+        if(q4==='ALTA') { prof="PRUDENTE"; col="#27ae60"; rate=0.025; }
+
+        let alloc=[];
+        if(prof==="PRUDENTE") alloc=[
+            {a:"Titoli Stato",t:"BOT",w:"30%",v:VOL.BOT, r:"Protezione Capitale"},
+            {a:"Bond Global",t:"AGG",w:"50%",v:VOL.AGG, r:"Flusso Cedolare"},
+            {a:"Azioni World",t:"URTH",w:"15%",v:VOL.URTH, r:"Crescita L.P."},
+            {a:"Oro",t:"GLD",w:"5%",v:VOL.GLD, r:"Difesa/Decorrelazione"}
+        ];
+        else if(prof==="BILANCIATO") alloc=[
+            {a:"Bond Global",t:"AGG",w:"40%",v:VOL.AGG, r:"Stabilità"},
+            {a:"Azioni World",t:"URTH",w:"35%",v:VOL.URTH, r:"Motore Crescita"},
+            {a:"Azioni EU",t:"EZU",w:"15%",v:VOL.EZU, r:"Diversificaz. Geo"},
+            {a:"Megatrend",t:"MILN",w:"10%",v:VOL.MILN, r:"Boost Rendimento"}
+        ];
+        else alloc=[
+            {a:"Azioni World",t:"URTH",w:"50%",v:VOL.URTH, r:"Core Portfolio"},
+            {a:"Emergenti",t:"MCHI",w:"15%",v:VOL.MCHI, r:"Ricerca Alpha"},
+            {a:"Megatrend",t:"MILN",w:"15%",v:VOL.MILN, r:"Crescita Aggressiva"},
+            {a:"Azioni EU",t:"EUFN",w:"10%",v:VOL.EUFN, r:"Tattico/Ciclico"},
+            {a:"Bond",t:"AGG",w:"10%",v:VOL.AGG, r:"Riserva Liquidità"}
+        ];
+
+        document.getElementById('r-data').innerText = new Date().toLocaleDateString();
+        document.getElementById('r-nome').innerText = nome;
+        document.getElementById('r-imp').innerText = "€ " + cap.toLocaleString();
+        document.getElementById('r-risk').innerText = (q3==1?"Basso":(q3==10?"Alto":"Medio"));
+        document.getElementById('r-obj').innerText = q2;
+        document.getElementById('r-time').innerText = (q1==1?"Breve":"Lungo");
+        document.getElementById('r-know').innerText = q5;
+
+        const b=document.getElementById('r-badge'); b.innerText=prof; b.style.backgroundColor=col;
+        const tb=document.getElementById('r-table'); tb.innerHTML="";
+        alloc.forEach(x=>{ 
+            tb.innerHTML += `<tr>
+                <td>${x.a}</td>
+                <td><b>${x.t}</b></td>
+                <td class='center'>${x.w}</td>
+                <td class='center'>${x.v}</td>
+                <td>${x.r}</td>
+            </tr>`; 
+        });
+
+        const fut = Math.round(cap*Math.pow(1+rate,5));
+        const perc = ((fut-cap)/cap)*100;
+        document.getElementById('r-future').innerText = "€ " + fut.toLocaleString();
+        document.getElementById('r-perc').innerText = "(+"+perc.toFixed(1)+"%)";
+
+        drawChart(cap, rate, col);
+    }
+
+    function drawChart(cap, rate, col) {
+        const ctx = document.getElementById('mainChart').getContext('2d');
+        if(myChart) myChart.destroy();
+        const dataY = [];
+        for(let i=5;i>0;i--) dataY.push(cap/Math.pow(1+rate,i));
+        dataY.push(cap);
+        for(let i=1;i<=5;i++) dataY.push(cap*Math.pow(1+rate,i));
+        
+        myChart = new Chart(ctx, {
+            type: 'line',
+            plugins: [ChartDataLabels],
+            data: { labels: ['-5','-4','-3','-2','-1','OGGI','+1','+2','+3','+4','+5'],
+                datasets: [{ data: dataY, borderColor: col, borderWidth: 2, pointBackgroundColor: col, pointRadius: 2, fill: false, tension:0.3 }]
+            },
+            options: { 
+                responsive: true, maintainAspectRatio: false, animation: false,
+                layout: {padding:{top:15, right:10, bottom:0, left:0}},
+                plugins: { legend:{display:false}, datalabels: { align: 'top', color: '#333', font:{size:8}, formatter: (v,ctx)=>(ctx.dataIndex%2===0 || ctx.dataIndex===5)?'€'+(v/1000).toFixed(0)+'k':'' } },
+                scales: { y:{display:false, min: Math.min(...dataY)*0.9}, x:{grid:{display:false}, ticks:{font:{size:8}}} }
+            }
+        });
+    }
+
+    function creaPDF() {
+        const element = document.getElementById('report-sheet');
+        const opt = { margin: 0, filename: 'Investimento.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, scrollY: 0 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+        html2pdf().set(opt).from(element).save();
+    }
+</script>
+
+</body>
+</html>
+    
