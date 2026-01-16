@@ -3,7 +3,7 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Profilazione Investitore</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -13,36 +13,62 @@
 
     <style>
         :root {
-            --primary: #777; /* Grigio medio/scuro per testo leggibile e risparmio toner */
+            --primary: #777; 
             --accent: #d4af37;
             --green: #27ae60;
             --blue: #2980b9;
             --bg: #e9ebee;
             --white: #ffffff;
-            --text-grey: #555;
+            --header-bg: #e0e0e0; 
+            --header-text: #000000;
         }
 
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: #333; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: var(--bg); 
+            color: #333; 
+            margin: 0; 
+            padding: 20px; 
+            display: flex; 
+            justify-content: center; 
+        }
         
-        .main-wrapper { width: 210mm; display: flex; gap: 20px; flex-direction: column; }
+        /* Layout fluido che si ferma alla larghezza A4 su desktop */
+        .main-wrapper { 
+            width: 100%; 
+            max-width: 210mm; 
+            display: flex; 
+            gap: 20px; 
+            flex-direction: column; 
+        }
 
         /* INPUT CARD */
-        .input-card { background: var(--white); padding: 15mm; border-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); box-sizing: border-box; }
+        .input-card { 
+            background: var(--white); 
+            padding: 15mm; 
+            border-radius: 4px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+            box-sizing: border-box; 
+        }
         
         .header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--accent); padding-bottom: 15px; margin-bottom: 25px; }
         .header-title h1 { color: var(--primary); margin: 0; font-size: 1.8em; text-transform: uppercase; letter-spacing: 1px; }
+        
+        /* STILE ICONA AGGIORNATO */
         .icon-btn { font-size: 1.4em; color: var(--primary); background: none; border: none; cursor: pointer; transition: 0.3s; }
-        .icon-btn:hover { color: var(--accent); transform: scale(1.1); }
+        .icon-btn:hover { color: var(--accent); transform: rotate(180deg); } /* Animazione rotazione */
 
         .grid-form { display: grid; grid-template-columns: 1fr; gap: 20px; }
         .form-group { padding: 12px; border: 1px solid #ccc; border-radius: 4px; background-color: #f9f9f9; }
         label.question-title { display: block; font-weight: 700; color: var(--primary); margin-bottom: 8px; font-size: 1.05em; }
-        .radio-opt { display: flex; align-items: flex-start; margin-bottom: 5px; font-size: 0.95em; color: #555; cursor: pointer; line-height: 1.3; }
-        .radio-opt input { margin-top: 4px; margin-right: 8px; flex-shrink: 0; }
+        
+        /* Radio button migliorati per il touch */
+        .radio-opt { display: flex; align-items: flex-start; margin-bottom: 8px; font-size: 0.95em; color: #555; cursor: pointer; line-height: 1.3; padding: 5px 0; }
+        .radio-opt input { margin-top: 4px; margin-right: 10px; flex-shrink: 0; transform: scale(1.2); }
         .radio-opt b { color: #000; font-weight: 600; margin-right: 4px; }
 
         .input-row-simple { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 10px; }
-        input[type="text"], input[type="number"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; box-sizing: border-box; }
 
         .button-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; }
         .action-btn { width: 100%; padding: 15px; color: white; font-size: 1.1em; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; text-transform: uppercase; transition: opacity 0.3s; box-shadow: 0 3px 5px rgba(0,0,0,0.1); }
@@ -51,11 +77,18 @@
         #btn-genera { background-color: var(--green); }
 
         /* PREVIEW CONTAINER */
-        #preview-container { display: none; flex-direction: column; margin-top: 30px; }
+        #preview-container { 
+            display: none; 
+            flex-direction: column; 
+            margin-top: 30px; 
+            align-items: center; /* Centra il foglio su desktop */
+        }
         
+        /* A4 SHEET STYLES */
         .a4-sheet { 
             width: 210mm; 
-            min-height: 297mm; 
+            height: 296mm; 
+            min-width: 210mm; /* Forza la larghezza anche su mobile per PDF corretto */
             background: white; 
             padding: 10mm; 
             box-shadow: 0 0 20px rgba(0,0,0,0.25); 
@@ -66,7 +99,33 @@
             overflow: hidden; 
         }
 
-        /* --- STILI PDF QUESTIONARIO --- */
+        /* --- MEDIA QUERY PER MOBILE (Responsive) --- */
+        @media screen and (max-width: 768px) {
+            body { padding: 10px; }
+            .input-card { padding: 20px; }
+            
+            /* Titolo più piccolo su mobile */
+            .header-title h1 { font-size: 1.4em; }
+            
+            /* Input uno sotto l'altro invece che affiancati */
+            .input-row-simple { grid-template-columns: 1fr; gap: 15px; }
+            
+            /* Pulsanti uno sotto l'altro */
+            .button-row { grid-template-columns: 1fr; gap: 15px; }
+            
+            /* Container anteprima con scroll orizzontale */
+            #preview-container { 
+                width: 100%; 
+                align-items: flex-start; /* Allinea a sinistra per lo scroll */
+                overflow-x: auto; /* Permette di scorrere il foglio A4 */
+                padding-bottom: 20px;
+            }
+            
+            /* Il foglio A4 mantiene le dimensioni reali per il PDF, ma l'utente scorre */
+            .a4-sheet { margin-bottom: 10px; transform-origin: top left; }
+        }
+
+        /* --- STILI PDF (Invariati) --- */
         #quest-sheet { padding: 10mm 12mm; }
         #quest-sheet .q-header { text-align: center; border-bottom: 2px solid #555; padding-bottom: 5px; margin-bottom: 15px; }
         #quest-sheet h2 { font-size: 18pt; margin: 0; text-transform: uppercase; color: #333; }
@@ -81,7 +140,12 @@
 
         .q-list-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 9pt; }
         .q-item { border: 1px solid #eee; padding: 6px; border-radius: 4px; break-inside: avoid; }
-        .q-title { font-weight: bold; display: block; margin-bottom: 4px; font-size: 9.5pt; color: #000; background: #f4f4f4; padding: 2px 5px; }
+        
+        .q-title { 
+            font-weight: bold; display: block; margin-bottom: 4px; font-size: 9.5pt; 
+            color: var(--header-text); background: var(--header-bg); 
+            padding: 2px 5px; border: 1px solid #ccc;
+        }
         
         .print-opt { display: flex; align-items: top; margin-bottom: 2px; color: #333; line-height: 1.2; }
         .check-circle { width: 10px; height: 10px; border: 1px solid #000; border-radius: 50%; display: inline-block; margin-right: 6px; margin-top: 1px; flex-shrink: 0; }
@@ -93,20 +157,35 @@
         .q-analysis-content { font-size: 9pt; line-height: 1.3; margin: 0; padding-left: 20px; }
         .q-analysis-content li { margin-bottom: 3px; }
 
-        /* --- STILI REPORT --- */
         #report-sheet .pdf-header { text-align: center; border-bottom: 2px solid #555; padding-bottom: 5px; margin-bottom: 10px; }
         #report-sheet h2 { font-size: 18pt; margin: 0; color: #333; }
         #report-sheet .data-table { width: 100%; border-collapse: collapse; font-size: 9pt; }
         #report-sheet td { padding: 3px; border-bottom: 1px solid #eee; }
         #report-sheet .lbl { font-weight: bold; width: 25%; color: #333; }
         #report-sheet .pdf-section { margin-bottom: 10px; }
-        #report-sheet .pdf-title { background: #555; color: #fff; padding: 2px 5px; font-size: 10pt; font-weight: bold; margin-bottom: 5px; }
+        
+        #report-sheet .pdf-title { 
+            background: var(--header-bg); 
+            color: var(--header-text); 
+            padding: 2px 5px; font-size: 10pt; font-weight: bold; margin-bottom: 5px; border: 1px solid #ccc;
+        }
+        
         #report-sheet .chart-box { height: 180px; width: 100%; margin: 5px 0; }
         #report-sheet .asset-table { width: 100%; font-size: 8.5pt; border-collapse: collapse; }
-        #report-sheet .asset-table th { background: #555; color: #fff; padding: 3px; text-align: left; }
+        
+        #report-sheet .asset-table th { 
+            background: var(--header-bg); 
+            color: var(--header-text); 
+            padding: 3px; text-align: left; 
+            border-bottom: 1px solid #999;
+        }
         #report-sheet .asset-table td { padding: 3px; border-bottom: 1px solid #ddd; }
         
-        #report-sheet .badge { background: #333; color: #fff; padding: 2px 8px; font-size: 9pt; font-weight: bold; border-radius: 3px; }
+        #report-sheet .badge { 
+            background: var(--header-bg); 
+            color: var(--header-text); 
+            padding: 2px 8px; font-size: 9pt; font-weight: bold; border-radius: 3px; border: 1px solid #ccc;
+        }
         
         #report-sheet .badge-box { 
             display: flex; justify-content: space-between; align-items: center; 
@@ -123,7 +202,7 @@
     
     <div class="input-card" id="input-screen">
         <div class="header-row">
-            <button class="icon-btn" onclick="randomizza()"><i class="fas fa-recycle"></i></button>
+            <button class="icon-btn" onclick="randomizza()"><i class="fas fa-sync-alt"></i></button>
             <div class="header-title"><h1>Profilazione Mifid</h1></div>
             <i class="fas fa-edit" style="font-size: 1.5em; color: var(--accent);"></i>
         </div>
@@ -289,6 +368,16 @@
         document.getElementById('btn-download').style.display = 'none';
     }
 
+    // --- FUNZIONE PER CANCELLARE PAGINE EXTRA ---
+    function deleteExtraPages(pdf) {
+        const totalPages = pdf.internal.getNumberOfPages();
+        if (totalPages > 1) {
+            for (let i = totalPages; i > 1; i--) {
+                pdf.deletePage(i);
+            }
+        }
+    }
+
     function generaPDFQuestionario() {
         resetPreview();
         const btn = document.getElementById('btn-pdf-quest');
@@ -346,13 +435,26 @@
         sheet.style.display = 'block';
         sheet.scrollIntoView({behavior: 'instant', block: 'start'});
 
+        const oldShadow = sheet.style.boxShadow;
+        sheet.style.boxShadow = 'none';
+
         setTimeout(() => {
             html2pdf().set({
-                margin:0, filename:'Questionario_Completo.pdf',
+                margin: 0, 
+                filename:'Questionario_Completo.pdf',
                 image:{type:'jpeg',quality:0.98},
                 html2canvas:{scale:2, useCORS:true, scrollY:0},
                 jsPDF:{unit:'mm', format:'a4', orientation:'portrait'}
-            }).from(sheet).save().then(() => {
+            })
+            .from(sheet)
+            .toPdf()
+            .get('pdf')
+            .then((pdf) => {
+                deleteExtraPages(pdf);
+            })
+            .save()
+            .then(() => {
+                sheet.style.boxShadow = oldShadow;
                 btn.innerText = originalTxt;
             });
         }, 800);
@@ -446,7 +548,12 @@
         document.getElementById('r-time').innerText = (q1==1?"Breve":"Lungo");
         document.getElementById('r-know').innerText = q5;
 
-        const b=document.getElementById('r-badge'); b.innerText=prof; b.style.backgroundColor=col;
+        const b=document.getElementById('r-badge'); 
+        b.innerText=prof; 
+        b.style.borderColor = col; 
+        b.style.color = "#000";
+        b.style.backgroundColor = "#e0e0e0";
+
         const tb=document.getElementById('r-table'); tb.innerHTML="";
         alloc.forEach(x=>{ 
             tb.innerHTML += `<tr>
@@ -491,8 +598,21 @@
 
     function creaPDF() {
         const element = document.getElementById('report-sheet');
+        const oldShadow = element.style.boxShadow;
+        element.style.boxShadow = 'none';
+
         const opt = { margin: 0, filename: 'Investimento.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, scrollY: 0 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
-        html2pdf().set(opt).from(element).save();
+        
+        html2pdf().set(opt).from(element)
+        .toPdf()
+        .get('pdf')
+        .then((pdf) => {
+            deleteExtraPages(pdf);
+        })
+        .save()
+        .then(() => {
+             element.style.boxShadow = oldShadow;
+        });
     }
 </script>
 
