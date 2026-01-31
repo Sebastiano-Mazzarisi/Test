@@ -1,0 +1,413 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questionari AVIS</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0; padding: 10px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 600px; 
+            margin: 0 auto;
+            background: #fff; 
+            min-height: 90vh;
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex; flex-direction: column;
+            position: relative;
+        }
+        
+        @media (min-width: 768px) {
+            .container { max-width: 95%; }
+            .q-details-content {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+                gap: 15px 30px;
+            }
+            .qa-row {
+                border-bottom: 1px solid #eee;
+                margin-bottom: 0; padding: 10px;
+                background: #fff; border-radius: 4px;
+                height: 100%;
+            }
+        }
+
+        /* HEADER */
+        .header {
+            background-color: #e30613; color: white;
+            padding: 10px 15px; 
+            border-radius: 8px 8px 0 0;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .header h1 { margin: 0; font-size: 1.2rem; flex: 1; text-align: center; }
+        
+        .header-btn {
+            background: transparent; border: none; color: white;
+            font-size: 24px; font-weight: bold; cursor: pointer;
+            padding: 0 15px; user-select: none;
+        }
+        .header-btn:hover { color: #ffcccc; }
+
+        /* RICERCA */
+        .search-area {
+            padding: 15px; background: #fafafa; border-bottom: 1px solid #eee;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .search-wrapper { position: relative; flex: 1; }
+        .search-box {
+            width: 100%; padding: 10px 35px 10px 15px; font-size: 16px;
+            border: 1px solid #ccc; border-radius: 20px;
+            box-sizing: border-box; outline: none;
+        }
+        .clear-btn {
+            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            color: #999; cursor: pointer; font-weight: bold; font-size: 18px;
+            display: none;
+        }
+        .results-count {
+            color: #e30613; font-weight: bold; font-size: 0.95rem; white-space: nowrap;
+        }
+
+        /* LISTA ITEM */
+        .list-viewport { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 10px; }
+        .questionnaire-list { list-style: none; padding: 0; margin: 0; }
+        
+        /* Stile Riquadro (CHIUSO) - Verde Chiaro */
+        .q-item { 
+            margin-bottom: 10px; 
+            border-radius: 8px; 
+            border: 1px solid #c3e6cb; 
+            overflow: hidden; 
+            background: white;
+            transition: all 0.2s ease;
+        }
+        
+        .q-header {
+            padding: 12px 15px; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+            font-weight: 600;
+            background-color: #d4edda; color: #155724;
+        }
+        .q-header:hover { background-color: #c3e6cb; }
+
+        /* TRIANGOLO MOLTO PIÙ GRANDE */
+        .toggle-icon {
+            font-size: 28px; /* Dimensione aumentata */
+            line-height: 1;
+            display: inline-block;
+        }
+
+        /* Stile Riquadro (APERTO) - Header Rosso Tenue */
+        .q-item.open { border-color: #ffcccc; box-shadow: 0 0 8px rgba(227, 6, 19, 0.1); }
+        .q-item.open .q-header { 
+            color: #b00000; background: #ffe5e5; border-bottom: 1px solid #ffcccc;
+        }
+        .q-details { display: none; padding: 15px; background-color: #ffffff; }
+        .q-item.open .q-details { display: block; }
+
+        /* DOMANDE */
+        .qa-row {
+            display: flex; flex-direction: row;
+            justify-content: space-between; align-items: flex-start;
+            margin-bottom: 8px; padding-bottom: 6px; 
+            cursor: pointer; border-bottom: 1px dotted #e0e0e0; 
+        }
+        .qa-row:hover { background-color: #f0f0f0; } 
+
+        .question { color: #555; font-size: 0.95rem; margin-right: 15px; flex: 1; }
+        .answer { font-weight: bold; color: #000; font-size: 0.95rem; text-align: right; max-width: 50%; }
+
+        /* MODAL POPUP */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: white; padding: 20px; border-radius: 8px;
+            width: 90%; max-width: 500px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: flex; flex-direction: column;
+            max-height: 85vh;
+        }
+        .modal-body { overflow-y: auto; flex: 1; margin-bottom: 20px; }
+        
+        .modal-question { 
+            font-weight: bold; margin-bottom: 15px; color: #000000; 
+            font-size: 1.1em; background-color: #e3f2fd; 
+            padding: 15px; border-radius: 6px; border-bottom: 2px solid #90caf9; 
+        }
+        
+        .modal-options { list-style: none; padding: 0; }
+        .modal-option { 
+            padding: 12px 10px; border-bottom: 1px solid #eee; 
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .modal-option.selected {
+            background-color: #d4edda; color: #155724; font-weight: bold;
+            border-left: 5px solid #28a745;
+        }
+        .perc-badge { 
+            color: #555; font-size: 0.85em; font-weight: normal; 
+            background: #eee; padding: 2px 6px; border-radius: 10px;
+        }
+
+        .modal-footer {
+            display: flex; justify-content: center; align-items: center; gap: 20px;
+            border-top: 1px solid #eee; padding-top: 15px;
+        }
+        .close-modal {
+            padding: 12px 30px; background-color: #d0d0d0;
+            border: none; cursor: pointer; font-weight: bold;
+            border-radius: 4px; font-size: 14px; color: #333;
+        }
+        .btn-round-nav {
+            width: 45px; height: 45px; border-radius: 50%;
+            background-color: #d0d0d0; color: #333; 
+            font-weight: bold; font-size: 20px;
+            border: none; cursor: pointer;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <button class="header-btn" onclick="navigate(-1)">&#8592;</button>
+        <h1 id="mainTitle">Questionari AVIS</h1>
+        <button class="header-btn" onclick="navigate(1)">&#8594;</button>
+    </div>
+
+    <div class="search-area">
+        <div class="search-wrapper">
+            <input type="text" id="searchInput" class="search-box" placeholder="Cerca nome..." onkeyup="filterList()">
+            <span id="clearSearch" class="clear-btn" onclick="clearSearch()">&#10005;</span>
+        </div>
+        <span id="resultsCount" class="results-count"></span>
+    </div>
+    
+    <div class="list-viewport" id="swipeArea">
+        <ul id="qList" class="questionnaire-list"></ul>
+    </div>
+</div>
+
+<div id="modalOverlay" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-body">
+            <div id="modalTitle" class="modal-question"></div>
+            <ul id="modalList" class="modal-options"></ul>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-round-nav" onclick="navModalQuestion(-1)">&#8592;</button>
+            <button class="close-modal" onclick="closeModal()">Chiudi</button>
+            <button class="btn-round-nav" onclick="navModalQuestion(1)">&#8594;</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const allData = [{"id": "CA-GINEVRA", "sex_label": "(Femmina)", "answers": [{"key": "Q1", "q": "1. Hai mai sentito parlare di sistema trasfusionale?", "a_html": "No", "raw_val": "N"}, {"key": "Q2", "q": "2. Hai mai sentito parlare dei gruppi sanguigni?", "a_html": "No", "raw_val": "N"}, {"key": "Q3", "q": "3. Sai che gruppo sanguigno hai tu?", "a_html": "No", "raw_val": "N"}, {"key": "Q4", "q": "4. Cosa pensi significhi 'donazione di sangue'?", "a_html": "Dare il proprio sangue a una persona che ne ha bisogno", "raw_val": "B"}, {"key": "Q5", "q": "5. Cosa pensi significhi 'trasfusione di sangue'?", "a_html": "Trasferire del sangue in una persona", "raw_val": "T"}, {"key": "Q6", "q": "6. Hai parlato di recente della donazione di sangue con qualcuno?", "a_html": "Sì", "raw_val": "S"}, {"key": "Q7", "q": "7. Conosci qualcuno che ha donato Sangue?", "a_html": "Nessuno", "raw_val": "N"}, {"key": "Q8", "q": "8. Conosci qualcuno che ha donato Plasma?", "a_html": "Non so cos’è il plasma", "raw_val": "Q"}, {"key": "Q9", "q": "9. Secondo te quanto è importante donare sangue?", "a_html": "È molto importante", "raw_val": "S"}, {"key": "Q10", "q": "10. Che cosa pensi della donazione di sangue?", "a_html": "È una cosa bella", "raw_val": "B"}, {"key": "Q11", "q": "11. Quando pensi alla donazione di sangue, come ti senti?", "a_html": "Felice", "raw_val": "F"}, {"key": "Q12", "q": "12. Quando pensi a qualcuno che dona, come ti senti?", "a_html": "Felice", "raw_val": "F"}, {"key": "Q13", "q": "13. Immaginando te da grande, cosa faresti?", "a_html": "Vorrei donare il sangue", "raw_val": "S"}, {"key": "Q14", "q": "14. Consiglieresti ad un adulto di donare sangue o plasma?", "a_html": "Sì", "raw_val": "S"}, {"key": "Q15", "q": "15. Quanto spesso giochi ai giochi da tavolo o di carte?", "a_html": "Almeno una volta a settimana", "raw_val": "S"}, {"key": "Q16", "q": "16. Quanto spesso giochi su cellulare, tablet, computer o console?", "a_html": "Tutti i giorni", "raw_val": "T"}, {"key": "Q17", "q": "17. Giochi più spesso a:", "a_html": "Giochi in cui devi muoverti", "raw_val": "M"}, {"key": "Q18", "q": "18. Preferisci:", "a_html": "Giochi in cui devi muoverti", "raw_val": "M"}, {"key": "Q19", "q": "19. Preferisci giochi in cui:", "a_html": "Devi scoprire cose, Devi risolvere enigmi", "raw_val": "CE"}, {"key": "Q20_1", "q": "20. Gioco preferito 1", "a_html": "JUST DANCE", "raw_val": "JUST DANCE"}, {"key": "Q20_2", "q": "20. Gioco preferito 2", "a_html": "MARIO KART", "raw_val": "MARIO KART"}, {"key": "Q20_3", "q": "20. Gioco preferito 3", "a_html": "ANIMAL CROSSING", "raw_val": "ANIMAL CROSSING"}, {"key": "Q21", "q": "21. Cosa nel sangue è giallo, liquido e ricco di nutrienti?", "a_html": "Globulo bianco", "raw_val": "B"}, {"key": "Q22", "q": "22. Quali sono i gruppi sanguigni?", "a_html": "Plasma, sangue e globuli rossi", "raw_val": "P"}, {"key": "Q23", "q": "23. Chi tra queste persone può donare sangue?", "a_html": "Giovanna di 45 anni", "raw_val": "G"}, {"key": "Q24", "q": "24. Quale gruppo sanguigno può donare sangue a più gruppi?", "a_html": "AB", "raw_val": "A"}, {"key": "Q25", "q": "25. Cosa è AVIS?", "a_html": "Associazione Volontari Italiani Sangue", "raw_val": "S"}, {"key": "Q26", "q": "26. Chi sono i donatori di sangue?", "a_html": "Persone comuni che vogliono dare il proprio sangue volontariamente", "raw_val": "C"}, {"key": "Q27", "q": "27. Quando è utilizzato il sangue donato?", "a_html": "In caso di emergenza, operazioni chirurgiche, nella cura di malattie di sangue e in altre terapie", "raw_val": "T"}, {"key": "Q28", "q": "28. In questi ultimi giorni, quanto sei felice?", "a_html": "😄 Molto felice", "raw_val": "D"}, {"key": "Q29", "q": "29. Quanto sei soddisfatta/o della tua vita a scuola?", "a_html": "🙂 Abbastanza soddisfatta/o", "raw_val": "C"}, {"key": "Q30", "q": "30. Quanto sei contenta/o della tua vita a casa?", "a_html": "😄 Molto contenta/o", "raw_val": "D"}, {"key": "Q31", "q": "31. Biglietti regalo (0-10)", "a_html": "10", "raw_val": "10"}]}, {"id": "GI-MATTEO", "sex_label": "(Maschio)", "answers": [{"key": "Q1", "q": "1. Hai mai sentito parlare di sistema trasfusionale?", "a_html": "No", "raw_val": "N"}, {"key": "Q2", "q": "2. Hai mai sentito parlare dei gruppi sanguigni?", "a_html": "Sì", "raw_val": "S"}, {"key": "Q3", "q": "3. Sai che gruppo sanguigno hai tu?", "a_html": "No", "raw_val": "N"}, {"key": "Q4", "q": "4. Cosa pensi significhi 'donazione di sangue'?", "a_html": "Dare il proprio sangue a una persona che ne ha bisogno", "raw_val": "B"}, {"key": "Q5", "q": "5. Cosa pensi significhi 'trasfusione di sangue'?", "a_html": "Non ne sono sicuro/a", "raw_val": "Q"}, {"key": "Q6", "q": "6. Hai parlato di recente della donazione di sangue con qualcuno?", "a_html": "No", "raw_val": "N"}, {"key": "Q7", "q": "7. Conosci qualcuno che ha donato Sangue?", "a_html": "Nessuno", "raw_val": "N"}, {"key": "Q8", "q": "8. Conosci qualcuno che ha donato Plasma?", "a_html": "Non so cos’è il plasma", "raw_val": "Q"}, {"key": "Q9", "q": "9. Secondo te quanto è importante donare sangue?", "a_html": "È molto importante", "raw_val": "S"}, {"key": "Q10", "q": "10. Che cosa pensi della donazione di sangue?", "a_html": "È una cosa bella", "raw_val": "B"}, {"key": "Q11", "q": "11. Quando pensi alla donazione di sangue, come ti senti?", "a_html": "Felice", "raw_val": "F"}, {"key": "Q12", "q": "12. Quando pensi a qualcuno che dona, come ti senti?", "a_html": "Felice", "raw_val": "F"}, {"key": "Q13", "q": "13. Immaginando te da grande, cosa faresti?", "a_html": "Vorrei donare il sangue", "raw_val": "S"}, {"key": "Q14", "q": "14. Consiglieresti ad un adulto di donare sangue o plasma?", "a_html": "Non ne sono sicuro/a", "raw_val": "Q"}, {"key": "Q15", "q": "15. Quanto spesso giochi ai giochi da tavolo o di carte?", "a_html": "Tutti i giorni", "raw_val": "T"}, {"key": "Q16", "q": "16. Quanto spesso giochi su cellulare, tablet, computer o console?", "a_html": "Tutti i giorni", "raw_val": "T"}, {"key": "Q17", "q": "17. Giochi più spesso a:", "a_html": "Giochi in cui devi muoverti", "raw_val": "M"}, {"key": "Q18", "q": "18. Preferisci:", "a_html": "Giochi in cui devi muoverti", "raw_val": "M"}, {"key": "Q19", "q": "19. Preferisci giochi in cui:", "a_html": "Devi sconfiggere gli altri", "raw_val": "X"}, {"key": "Q20_1", "q": "20. Gioco preferito 1", "a_html": "UNO", "raw_val": "UNO"}, {"key": "Q20_2", "q": "20. Gioco preferito 2", "a_html": "MONOPOLY", "raw_val": "MONOPOLY"}, {"key": "Q20_3", "q": "20. Gioco preferito 3", "a_html": "ROBLOX", "raw_val": "ROBLOX"}, {"key": "Q21", "q": "21. Cosa nel sangue è giallo, liquido e ricco di nutrienti?", "a_html": "Plasma", "raw_val": "M"}, {"key": "Q22", "q": "22. Quali sono i gruppi sanguigni?", "a_html": "A, B, C, D", "raw_val": "D"}, {"key": "Q23", "q": "23. Chi tra queste persone può donare sangue?", "a_html": "Simone di 16 anni", "raw_val": "S"}, {"key": "Q24", "q": "24. Quale gruppo sanguigno può donare sangue a più gruppi?", "a_html": "AB", "raw_val": "A"}, {"key": "Q25", "q": "25. Cosa è AVIS?", "a_html": "Associazione Vaccinati Italiani Sanitari", "raw_val": "A"}, {"key": "Q26", "q": "26. Chi sono i donatori di sangue?", "a_html": "Persone comuni che vogliono dare il proprio sangue volontariamente", "raw_val": "C"}, {"key": "Q27", "q": "27. Quando è utilizzato il sangue donato?", "a_html": "Solo in caso di emergenze al pronto soccorso", "raw_val": "E"}, {"key": "Q28", "q": "28. In questi ultimi giorni, quanto sei felice?", "a_html": "🙂 Abbastanza felice", "raw_val": "C"}, {"key": "Q29", "q": "29. Quanto sei soddisfatta/o della tua vita a scuola?", "a_html": "🙂 Abbastanza soddisfatta/o", "raw_val": "C"}, {"key": "Q30", "q": "30. Quanto sei contenta/o della tua vita a casa?", "a_html": "😄 Molto contenta/o", "raw_val": "D"}, {"key": "Q31", "q": "31. Biglietti regalo (0-10)", "a_html": "10", "raw_val": "10"}]}, {"id": "MO-CHIARA", "sex_label": "(Femmina)", "answers": [{"key": "Q1", "q": "1. Hai mai sentito parlare di sistema trasfusionale?", "a_html": "No", "raw_val": "N"}, {"key": "Q2", "q": "2. Hai mai sentito parlare dei gruppi sanguigni?", "a_html": "No", "raw_val": "N"}, {"key": "Q3", "q": "3. Sai che gruppo sanguigno hai tu?", "a_html": "No", "raw_val": "N"}, {"key": "Q4", "q": "4. Cosa pensi significhi 'donazione di sangue'?", "a_html": "Dare il proprio sangue a una persona che ne ha bisogno", "raw_val": "B"}, {"key": "Q5", "q": "5. Cosa pensi significhi 'trasfusione di sangue'?", "a_html": "Trasferire del sangue in una persona", "raw_val": "T"}, {"key": "Q6", "q": "6. Hai parlato di recente della donazione di sangue con qualcuno?", "a_html": "Sì", "raw_val": "S"}, {"key": "Q7", "q": "7. Conosci qualcuno che ha donato Sangue?", "a_html": "Sì, una sola persona", "raw_val": "U"}, {"key": "Q8", "q": "8. Conosci qualcuno che ha donato Plasma?", "a_html": "Non so cos’è il plasma", "raw_val": "Q"}, {"key": "Q9", "q": "9. Secondo te quanto è importante donare sangue?", "a_html": "È molto importante", "raw_val": "S"}, {"key": "Q10", "q": "10. Che cosa pensi della donazione di sangue?", "a_html": "È una cosa bella", "raw_val": "B"}, {"key": "Q11", "q": "11. Quando pensi alla donazione di sangue, come ti senti?", "a_html": "Felice", "raw_val": "F"}, {"key": "Q12", "q": "12. Quando pensi a qualcuno che dona, come ti senti?", "a_html": "Felice", "raw_val": "F"}, {"key": "Q13", "q": "13. Immaginando te da grande, cosa faresti?", "a_html": "Vorrei donare il sangue", "raw_val": "S"}, {"key": "Q14", "q": "14. Consiglieresti ad un adulto di donare sangue o plasma?", "a_html": "Non ne sono sicuro/a", "raw_val": "Q"}, {"key": "Q15", "q": "15. Quanto spesso giochi ai giochi da tavolo o di carte?", "a_html": "Quasi mai", "raw_val": "Q"}, {"key": "Q16", "q": "16. Quanto spesso giochi su cellulare, tablet, computer o console?", "a_html": "Almeno una volta a settimana", "raw_val": "S"}, {"key": "Q17", "q": "17. Giochi più spesso a:", "a_html": "Giochi in cui devi muoverti", "raw_val": "M"}, {"key": "Q18", "q": "18. Preferisci:", "a_html": "Giochi in cui devi muoverti", "raw_val": "M"}, {"key": "Q19", "q": "19. Preferisci giochi in cui:", "a_html": "Devi scoprire cose", "raw_val": "C"}, {"key": "Q20_1", "q": "20. Gioco preferito 1", "a_html": "AVATAR DARTGRD", "raw_val": "AVATAR DARTGRD"}, {"key": "Q20_2", "q": "20. Gioco preferito 2", "a_html": "JUST DANCE", "raw_val": "JUST DANCE"}, {"key": "Q20_3", "q": "20. Gioco preferito 3", "a_html": "WARIO WARE", "raw_val": "WARIO WARE"}, {"key": "Q21", "q": "21. Cosa nel sangue è giallo, liquido e ricco di nutrienti?", "a_html": "Piastrina", "raw_val": "P"}, {"key": "Q22", "q": "22. Quali sono i gruppi sanguigni?", "a_html": "Plasma, sangue e globuli rossi", "raw_val": "P"}, {"key": "Q23", "q": "23. Chi tra queste persone può donare sangue?", "a_html": "Giovanna di 45 anni", "raw_val": "G"}, {"key": "Q24", "q": "24. Quale gruppo sanguigno può donare sangue a più gruppi?", "a_html": "AB", "raw_val": "A"}, {"key": "Q25", "q": "25. Cosa è AVIS?", "a_html": "Associazione Vaccinati Italiani Sanitari", "raw_val": "A"}, {"key": "Q26", "q": "26. Chi sono i donatori di sangue?", "a_html": "Persone comuni che vogliono dare il proprio sangue volontariamente", "raw_val": "C"}, {"key": "Q27", "q": "27. Quando è utilizzato il sangue donato?", "a_html": "Solo se sono presenti delle malattie del sangue", "raw_val": "M"}, {"key": "Q28", "q": "28. In questi ultimi giorni, quanto sei felice?", "a_html": "😄 Molto felice", "raw_val": "D"}, {"key": "Q29", "q": "29. Quanto sei soddisfatta/o della tua vita a scuola?", "a_html": "🙂 Abbastanza soddisfatta/o", "raw_val": "C"}, {"key": "Q30", "q": "30. Quanto sei contenta/o della tua vita a casa?", "a_html": "🙂 Abbastanza contenta/o", "raw_val": "C"}, {"key": "Q31", "q": "31. Biglietti regalo (0-10)", "a_html": "Sì", "raw_val": "Sì"}]}, {"id": "NO-GIULIO", "sex_label": "(Maschio)", "answers": [{"key": "Q1", "q": "1. Hai mai sentito parlare di sistema trasfusionale?", "a_html": "Sì", "raw_val": "S"}, {"key": "Q2", "q": "2. Hai mai sentito parlare dei gruppi sanguigni?", "a_html": "Sì", "raw_val": "S"}, {"key": "Q3", "q": "3. Sai che gruppo sanguigno hai tu?", "a_html": "No", "raw_val": "N"}, {"key": "Q4", "q": "4. Cosa pensi significhi 'donazione di sangue'?", "a_html": "Dare il proprio sangue a una persona che ne ha bisogno", "raw_val": "B"}, {"key": "Q5", "q": "5. Cosa pensi significhi 'trasfusione di sangue'?", "a_html": "Non ne sono sicuro/a", "raw_val": "Q"}, {"key": "Q6", "q": "6. Hai parlato di recente della donazione di sangue con qualcuno?", "a_html": "Sì", "raw_val": "S"}, {"key": "Q7", "q": "7. Conosci qualcuno che ha donato Sangue?", "a_html": "Sì, più di una persona", "raw_val": "P"}, {"key": "Q8", "q": "8. Conosci qualcuno che ha donato Plasma?", "a_html": "No", "raw_val": "N"}, {"key": "Q9", "q": "9. Secondo te quanto è importante donare sangue?", "a_html": "Non è importante", "raw_val": "N"}, {"key": "Q10", "q": "10. Che cosa pensi della donazione di sangue?", "a_html": "È una cosa bella", "raw_val": "B"}, {"key": "Q11", "q": "11. Quando pensi alla donazione di sangue, come ti senti?", "a_html": "Non lo so", "raw_val": "N"}, {"key": "Q12", "q": "12. Quando pensi a qualcuno che dona, come ti senti?", "a_html": "Felice", "raw_val": "F"}, {"key": "Q13", "q": "13. Immaginando te da grande, cosa faresti?", "a_html": "Non vorrei donare il sangue", "raw_val": "N"}, {"key": "Q14", "q": "14. Consiglieresti ad un adulto di donare sangue o plasma?", "a_html": "Sì", "raw_val": "S"}, {"key": "Q15", "q": "15. Quanto spesso giochi ai giochi da tavolo o di carte?", "a_html": "Tutti i giorni", "raw_val": "T"}, {"key": "Q16", "q": "16. Quanto spesso giochi su cellulare, tablet, computer o console?", "a_html": "Tutti i giorni", "raw_val": "T"}, {"key": "Q17", "q": "17. Giochi più spesso a:", "a_html": "Giochi in cui devi muoverti", "raw_val": "M"}, {"key": "Q18", "q": "18. Preferisci:", "a_html": "Giochi in cui devi muoverti", "raw_val": "M"}, {"key": "Q19", "q": "19. Preferisci giochi in cui:", "a_html": "Devi collezionare premi", "raw_val": "P"}, {"key": "Q20_1", "q": "20. Gioco preferito 1", "a_html": "FIFA", "raw_val": "FIFA"}, {"key": "Q20_2", "q": "20. Gioco preferito 2", "a_html": "GIOCO DELL'OCA", "raw_val": "GIOCO DELL'OCA"}, {"key": "Q20_3", "q": "20. Gioco preferito 3", "a_html": "FORZA 4", "raw_val": "FORZA 4"}, {"key": "Q21", "q": "21. Cosa nel sangue è giallo, liquido e ricco di nutrienti?", "a_html": "Globulo rosso", "raw_val": "R"}, {"key": "Q22", "q": "22. Quali sono i gruppi sanguigni?", "a_html": "A, B, C, D", "raw_val": "D"}, {"key": "Q23", "q": "23. Chi tra queste persone può donare sangue?", "a_html": "Giovanna di 45 anni", "raw_val": "G"}, {"key": "Q24", "q": "24. Quale gruppo sanguigno può donare sangue a più gruppi?", "a_html": "XY", "raw_val": "X"}, {"key": "Q25", "q": "25. Cosa è AVIS?", "a_html": "Associazione Volontari Italiani Sangue", "raw_val": "S"}, {"key": "Q26", "q": "26. Chi sono i donatori di sangue?", "a_html": "Persone comuni che sono pagate per dare il proprio sangue", "raw_val": "D"}, {"key": "Q27", "q": "27. Quando è utilizzato il sangue donato?", "a_html": "Solo in caso di emergenze al pronto soccorso", "raw_val": "E"}, {"key": "Q28", "q": "28. In questi ultimi giorni, quanto sei felice?", "a_html": "😄 Molto felice", "raw_val": "D"}, {"key": "Q29", "q": "29. Quanto sei soddisfatta/o della tua vita a scuola?", "a_html": "🙂 Abbastanza soddisfatta/o", "raw_val": "C"}, {"key": "Q30", "q": "30. Quanto sei contenta/o della tua vita a casa?", "a_html": "😄 Molto contenta/o", "raw_val": "D"}, {"key": "Q31", "q": "31. Biglietti regalo (0-10)", "a_html": "5", "raw_val": "5"}]}, {"id": "PE-GINEVRA", "sex_label": "(Femmina)", "answers": [{"key": "Q1", "q": "1. Hai mai sentito parlare di sistema trasfusionale?", "a_html": "No", "raw_val": "N"}, {"key": "Q2", "q": "2. Hai mai sentito parlare dei gruppi sanguigni?", "a_html": "No", "raw_val": "N"}, {"key": "Q3", "q": "3. Sai che gruppo sanguigno hai tu?", "a_html": "No", "raw_val": "N"}, {"key": "Q4", "q": "4. Cosa pensi significhi 'donazione di sangue'?", "a_html": "Dare il proprio sangue a una persona che ne ha bisogno", "raw_val": "B"}, {"key": "Q5", "q": "5. Cosa pensi significhi 'trasfusione di sangue'?", "a_html": "Trasferire del sangue in una persona", "raw_val": "T"}, {"key": "Q6", "q": "6. Hai parlato di recente della donazione di sangue con qualcuno?", "a_html": "No", "raw_val": "N"}, {"key": "Q7", "q": "7. Conosci qualcuno che ha donato Sangue?", "a_html": "Nessuno", "raw_val": "N"}, {"key": "Q8", "q": "8. Conosci qualcuno che ha donato Plasma?", "a_html": "No", "raw_val": "N"}, {"key": "Q9", "q": "9. Secondo te quanto è importante donare sangue?", "a_html": "Non è importante", "raw_val": "N"}, {"key": "Q10", "q": "10. Che cosa pensi della donazione di sangue?", "a_html": "Non ne sono sicuro/a", "raw_val": "Q"}, {"key": "Q11", "q": "11. Quando pensi alla donazione di sangue, come ti senti?", "a_html": "Non lo so", "raw_val": "N"}, {"key": "Q12", "q": "12. Quando pensi a qualcuno che dona, come ti senti?", "a_html": "Non lo so", "raw_val": "N"}, {"key": "Q13", "q": "13. Immaginando te da grande, cosa faresti?", "a_html": "Non ne sono sicuro/a", "raw_val": "Q"}, {"key": "Q14", "q": "14. Consiglieresti ad un adulto di donare sangue o plasma?", "a_html": "Non ne sono sicuro/a", "raw_val": "Q"}, {"key": "Q15", "q": "15. Quanto spesso giochi ai giochi da tavolo o di carte?", "a_html": "Almeno una volta a settimana", "raw_val": "S"}, {"key": "Q16", "q": "16. Quanto spesso giochi su cellulare, tablet, computer o console?", "a_html": "Almeno una volta a settimana", "raw_val": "S"}, {"key": "Q17", "q": "17. Giochi più spesso a:", "a_html": "Giochi in cui devi pensare", "raw_val": "P"}, {"key": "Q18", "q": "18. Preferisci:", "a_html": "Giochi in cui devi pensare", "raw_val": "P"}, {"key": "Q19", "q": "19. Preferisci giochi in cui:", "a_html": "Devi risolvere enigmi, Devi scoprire cose, Devi aiutare gli altri", "raw_val": "ECA"}, {"key": "Q20_1", "q": "20. Gioco preferito 1", "a_html": "NASCONDINO", "raw_val": "NASCONDINO"}, {"key": "Q20_2", "q": "20. Gioco preferito 2", "a_html": "ACCHIAPPARELLA", "raw_val": "ACCHIAPPARELLA"}, {"key": "Q20_3", "q": "20. Gioco preferito 3", "a_html": "PALESTRA", "raw_val": "PALESTRA"}, {"key": "Q21", "q": "21. Cosa nel sangue è giallo, liquido e ricco di nutrienti?", "a_html": "Plasma", "raw_val": "M"}, {"key": "Q22", "q": "22. Quali sono i gruppi sanguigni?", "a_html": "Plasma, sangue e globuli rossi", "raw_val": "P"}, {"key": "Q23", "q": "23. Chi tra queste persone può donare sangue?", "a_html": "Cristiano di 75 anni", "raw_val": "C"}, {"key": "Q24", "q": "24. Quale gruppo sanguigno può donare sangue a più gruppi?", "a_html": "XY", "raw_val": "X"}, {"key": "Q25", "q": "25. Cosa è AVIS?", "a_html": "Associazione Volontari Italiani Sangue", "raw_val": "S"}, {"key": "Q26", "q": "26. Chi sono i donatori di sangue?", "a_html": "Persone comuni che sono pagate per dare il proprio sangue", "raw_val": "D"}, {"key": "Q27", "q": "27. Quando è utilizzato il sangue donato?", "a_html": "In caso di emergenza, operazioni chirurgiche, nella cura di malattie di sangue e in altre terapie", "raw_val": "T"}, {"key": "Q28", "q": "28. In questi ultimi giorni, quanto sei felice?", "a_html": "😄 Molto felice", "raw_val": "D"}, {"key": "Q29", "q": "29. Quanto sei soddisfatta/o della tua vita a scuola?", "a_html": "🙂 Abbastanza soddisfatta/o", "raw_val": "C"}, {"key": "Q30", "q": "30. Quanto sei contenta/o della tua vita a casa?", "a_html": "😄 Molto contenta/o", "raw_val": "D"}, {"key": "Q31", "q": "31. Biglietti regalo (0-10)", "a_html": "6", "raw_val": "6"}]}];
+    const decodingMap = {"Sesso": {"text": "Sesso", "options": {"F": "Femmina", "M": "Maschio"}}, "Q1": {"text": "1. Hai mai sentito parlare di sistema trasfusionale?", "options": {"S": "Sì", "N": "No"}}, "Q2": {"text": "2. Hai mai sentito parlare dei gruppi sanguigni?", "options": {"S": "Sì", "N": "No"}}, "Q3": {"text": "3. Sai che gruppo sanguigno hai tu?", "options": {"S": "Sì", "N": "No"}}, "Q4": {"text": "4. Cosa pensi significhi 'donazione di sangue'?", "options": {"B": "Dare il proprio sangue a una persona che ne ha bisogno", "N": "Dare il proprio sangue in cambio di denaro", "Q": "Non ne sono sicuro/a"}}, "Q5": {"text": "5. Cosa pensi significhi 'trasfusione di sangue'?", "options": {"M": "Modificare il sangue di una persona", "T": "Trasferire del sangue in una persona", "Q": "Non ne sono sicuro/a"}}, "Q6": {"text": "6. Hai parlato di recente della donazione di sangue con qualcuno?", "options": {"S": "Sì", "N": "No"}}, "Q7": {"text": "7. Conosci qualcuno che ha donato Sangue?", "options": {"P": "Sì, più di una persona", "U": "Sì, una sola persona", "N": "Nessuno"}}, "Q8": {"text": "8. Conosci qualcuno che ha donato Plasma?", "options": {"S": "Sì", "N": "No", "Q": "Non so cos’è il plasma"}}, "Q9": {"text": "9. Secondo te quanto è importante donare sangue?", "options": {"S": "È molto importante", "B": "È abbastanza importante", "N": "Non è importante", "Q": "Non è importante"}}, "Q10": {"text": "10. Che cosa pensi della donazione di sangue?", "options": {"B": "È una cosa bella", "R": "È una cosa brutta", "Q": "Non ne sono sicuro/a"}}, "Q11": {"text": "11. Quando pensi alla donazione di sangue, come ti senti?", "options": {"F": "Felice", "T": "Triste", "N": "Non lo so"}}, "Q12": {"text": "12. Quando pensi a qualcuno che dona, come ti senti?", "options": {"F": "Felice", "T": "Triste", "N": "Non lo so"}}, "Q13": {"text": "13. Immaginando te da grande, cosa faresti?", "options": {"S": "Vorrei donare il sangue", "N": "Non vorrei donare il sangue", "Q": "Non ne sono sicuro/a"}}, "Q14": {"text": "14. Consiglieresti ad un adulto di donare sangue o plasma?", "options": {"S": "Sì", "N": "No", "Q": "Non ne sono sicuro/a"}}, "Q15": {"text": "15. Quanto spesso giochi ai giochi da tavolo o di carte?", "options": {"T": "Tutti i giorni", "S": "Almeno una volta a settimana", "M": "Almeno una volta al mese", "Q": "Quasi mai", "X": "Mai"}}, "Q16": {"text": "16. Quanto spesso giochi su cellulare, tablet, computer o console?", "options": {"T": "Tutti i giorni", "S": "Almeno una volta a settimana", "M": "Almeno una volta al mese", "Q": "Quasi mai", "X": "Mai"}}, "Q17": {"text": "17. Giochi più spesso a:", "options": {"M": "Giochi in cui devi muoverti", "P": "Giochi in cui devi pensare"}}, "Q18": {"text": "18. Preferisci:", "options": {"M": "Giochi in cui devi muoverti", "P": "Giochi in cui devi pensare"}}, "Q19": {"text": "19. Preferisci giochi in cui:", "options": {"E": "Devi risolvere enigmi", "C": "Devi scoprire cose", "A": "Devi aiutare gli altri", "P": "Devi collezionare premi", "X": "Devi sconfiggere gli altri"}}, "Q20_1": {"text": "20. Gioco preferito 1", "type": "text"}, "Q20_2": {"text": "20. Gioco preferito 2", "type": "text"}, "Q20_3": {"text": "20. Gioco preferito 3", "type": "text"}, "Q21": {"text": "21. Cosa nel sangue è giallo, liquido e ricco di nutrienti?", "options": {"P": "Piastrina", "R": "Globulo rosso", "B": "Globulo bianco", "M": "Plasma"}}, "Q22": {"text": "22. Quali sono i gruppi sanguigni?", "options": {"A": "A, B, AB, 0", "D": "A, B, C, D", "P": "Plasma, sangue e globuli rossi", "X": "X, Y, XY, XX"}}, "Q23": {"text": "23. Chi tra queste persone può donare sangue?", "options": {"L": "Luisa di 10 anni", "C": "Cristiano di 75 anni", "G": "Giovanna di 45 anni", "S": "Simone di 16 anni"}}, "Q24": {"text": "24. Quale gruppo sanguigno può donare sangue a più gruppi?", "options": {"A": "AB", "0": "0 (Zero)", "C": "C", "X": "XY"}}, "Q25": {"text": "25. Cosa è AVIS?", "options": {"A": "Associazione Vaccinati Italiani Sanitari", "V": "Assistenza Volontari Individuali Sangue", "S": "Associazione Volontari Italiani Sangue", "O": "Assemblea Veri Ispiratori Solidali"}}, "Q26": {"text": "26. Chi sono i donatori di sangue?", "options": {"P": "Persone scelte dagli ospedali per donare periodicamente", "M": "Medici e infermieri che curano le persone", "C": "Persone comuni che vogliono dare il proprio sangue volontariamente", "D": "Persone comuni che sono pagate per dare il proprio sangue"}}, "Q27": {"text": "27. Quando è utilizzato il sangue donato?", "options": {"C": "Solo in caso di operazioni chirurgiche molto difficili", "M": "Solo se sono presenti delle malattie del sangue", "E": "Solo in caso di emergenze al pronto soccorso", "T": "In caso di emergenza, operazioni chirurgiche, nella cura di malattie di sangue e in altre terapie"}}, "Q28": {"text": "28. In questi ultimi giorni, quanto sei felice?", "options": {"A": "☹️ Per niente felice", "B": "😐 Poco felice", "C": "🙂 Abbastanza felice", "D": "😄 Molto felice"}}, "Q29": {"text": "29. Quanto sei soddisfatta/o della tua vita a scuola?", "options": {"A": "☹️ Per niente soddisfatta/o", "B": "😐 Poco soddisfatta/o", "C": "🙂 Abbastanza soddisfatta/o", "D": "😄 Molto soddisfatta/o"}}, "Q30": {"text": "30. Quanto sei contenta/o della tua vita a casa?", "options": {"A": "☹️ Per niente contenta/o", "B": "😐 Poco contenta/o", "C": "🙂 Abbastanza contenta/o", "D": "😄 Molto contenta/o"}}, "Q31": {"text": "31. Biglietti regalo (0-10)", "type": "text"}};
+    const statsData = {"Sesso": {"F": "60,0%", "M": "40,0%"}, "Q1": {"S": "20,0%", "N": "80,0%"}, "Q2": {"S": "40,0%", "N": "60,0%"}, "Q3": {"S": "0%", "N": "100%"}, "Q4": {"B": "100%", "N": "0%", "Q": "0%"}, "Q5": {"M": "0%", "T": "60,0%", "Q": "40,0%"}, "Q6": {"S": "60,0%", "N": "40,0%"}, "Q7": {"P": "20,0%", "U": "20,0%", "N": "60,0%"}, "Q8": {"S": "0%", "N": "40,0%", "Q": "60,0%"}, "Q9": {"S": "60,0%", "B": "0%", "N": "40,0%", "Q": "0%"}, "Q10": {"B": "80,0%", "R": "0%", "Q": "20,0%"}, "Q11": {"F": "60,0%", "T": "0%", "N": "40,0%"}, "Q12": {"F": "80,0%", "T": "0%", "N": "20,0%"}, "Q13": {"S": "60,0%", "N": "20,0%", "Q": "20,0%"}, "Q14": {"S": "40,0%", "N": "0%", "Q": "60,0%"}, "Q15": {"T": "40,0%", "S": "40,0%", "M": "0%", "Q": "20,0%", "X": "0%"}, "Q16": {"T": "60,0%", "S": "40,0%", "M": "0%", "Q": "0%", "X": "0%"}, "Q17": {"M": "80,0%", "P": "20,0%"}, "Q18": {"M": "80,0%", "P": "20,0%"}, "Q19": {"E": "40,0%", "C": "60,0%", "A": "20,0%", "P": "20,0%", "X": "20,0%"}, "Q20_1": {"UNO": "20,0%", "JUST DANCE": "20,0%", "AVATAR DARTGRD": "20,0%", "FIFA": "20,0%", "NASCONDINO": "20,0%"}, "Q20_2": {"MONOPOLY": "20,0%", "MARIO KART": "20,0%", "JUST DANCE": "20,0%", "GIOCO DELL'OCA": "20,0%", "ACCHIAPPARELLA": "20,0%"}, "Q20_3": {"ROBLOX": "20,0%", "ANIMAL CROSSING": "20,0%", "WARIO WARE": "20,0%", "FORZA 4": "20,0%", "PALESTRA": "20,0%"}, "Q21": {"P": "20,0%", "R": "20,0%", "B": "20,0%", "M": "40,0%"}, "Q22": {"A": "0%", "D": "40,0%", "P": "60,0%", "X": "0%"}, "Q23": {"L": "0%", "C": "20,0%", "G": "60,0%", "S": "20,0%"}, "Q24": {"A": "60,0%", "0": "0%", "C": "0%", "X": "40,0%"}, "Q25": {"A": "40,0%", "V": "0%", "S": "60,0%", "O": "0%"}, "Q26": {"P": "0%", "M": "0%", "C": "60,0%", "D": "40,0%"}, "Q27": {"C": "0%", "M": "20,0%", "E": "40,0%", "T": "40,0%"}, "Q28": {"A": "0%", "B": "0%", "C": "20,0%", "D": "80,0%"}, "Q29": {"A": "0%", "B": "0%", "C": "100%", "D": "0%"}, "Q30": {"A": "0%", "B": "0%", "C": "20,0%", "D": "80,0%"}, "Q31": {"10": "40,0%", "Sì": "20,0%", "5": "20,0%", "6": "20,0%"}};
+    
+    let filteredData = allData;
+    let openQuestionnaireIndex = -1; 
+    let currentModalQuestionIndex = -1;
+
+    updateResultsCount();
+    renderList();
+
+    function updateResultsCount() {
+        const count = filteredData.length;
+        const label = count === 1 ? 'questionario' : 'questionari';
+        document.getElementById('resultsCount').innerText = `${count} ${label}`;
+        const input = document.getElementById('searchInput');
+        document.getElementById('clearSearch').style.display = input.value ? 'block' : 'none';
+    }
+
+    function clearSearch() {
+        document.getElementById('searchInput').value = '';
+        filterList();
+    }
+
+    function renderList() {
+        const listEl = document.getElementById('qList');
+        listEl.innerHTML = '';
+        
+        filteredData.forEach((item, index) => {
+            const li = document.createElement('li');
+            li.className = 'q-item';
+            if (index === openQuestionnaireIndex) li.classList.add('open');
+            
+            let answersHtml = '';
+            item.answers.forEach((ans, i) => {
+                answersHtml += `
+                    <div class="qa-row" onclick="openQuestionModal(${index}, ${i})">
+                        <span class="question">${ans.q}</span>
+                        <span class="answer">${ans.a_html}</span>
+                    </div>
+                `;
+            });
+
+            li.innerHTML = `
+                <div class="q-header" onclick="toggleItem(${index})">
+                    <div>
+                        <span class="id-text">${item.id}</span>
+                        <span class="sex-text">${item.sex_label}</span>
+                    </div>
+                    <span class="toggle-icon">${index === openQuestionnaireIndex ? '&#9652;' : '&#9662;'}</span>
+                </div>
+                <div class="q-details">
+                    <div class="q-details-content">
+                        ${answersHtml}
+                    </div>
+                </div>
+            `;
+            listEl.appendChild(li);
+        });
+    }
+
+    function toggleItem(index) {
+        openQuestionnaireIndex = (openQuestionnaireIndex === index) ? -1 : index;
+        renderList();
+        if(openQuestionnaireIndex !== -1) scrollToItem(openQuestionnaireIndex);
+    }
+
+    function scrollToItem(index) {
+        setTimeout(() => {
+            const items = document.querySelectorAll('.q-item');
+            if(items[index]) {
+                items[index].scrollIntoView({behavior: 'smooth', block: 'start'});
+            }
+        }, 50);
+    }
+
+    function navigate(direction) {
+        const max = filteredData.length - 1;
+        if (max < 0) return;
+
+        let newIndex = openQuestionnaireIndex + direction;
+        
+        if (openQuestionnaireIndex === -1) {
+            newIndex = direction > 0 ? 0 : max;
+        } else {
+            if (newIndex < 0) newIndex = 0;
+            if (newIndex > max) newIndex = max;
+        }
+
+        openQuestionnaireIndex = newIndex;
+        renderList();
+        scrollToItem(newIndex);
+    }
+
+    function filterList() {
+        const query = document.getElementById('searchInput').value.toUpperCase();
+        filteredData = (!query) ? allData : allData.filter(item => item.id.includes(query));
+        openQuestionnaireIndex = -1;
+        updateResultsCount();
+        renderList();
+    }
+
+    function openQuestionModal(qIndex, answerIndex) {
+        openQuestionnaireIndex = qIndex;
+        currentModalQuestionIndex = answerIndex;
+        updateModalContent();
+        document.getElementById('modalOverlay').style.display = 'flex';
+    }
+
+    function updateModalContent() {
+        if (openQuestionnaireIndex === -1 || currentModalQuestionIndex === -1) return;
+        const currentPerson = filteredData[openQuestionnaireIndex];
+        const currentAnswer = currentPerson.answers[currentModalQuestionIndex];
+        const key = currentAnswer.key;
+        const userVal = currentAnswer.raw_val;
+        const def = decodingMap[key];
+        const stats = statsData[key] || {};
+
+        const titleEl = document.getElementById('modalTitle');
+        const listEl = document.getElementById('modalList');
+        titleEl.innerText = (def ? def.text : currentAnswer.q);
+        listEl.innerHTML = '';
+
+        if (def && def.options) {
+            for (const [optKey, optText] of Object.entries(def.options)) {
+                const li = document.createElement('li');
+                li.className = 'modal-option';
+                const perc = stats[optKey] || "0%";
+                if (userVal === optKey || (key === 'Q19' && userVal.includes(optKey))) {
+                    li.classList.add('selected');
+                }
+                li.innerHTML = `<span>${optText}</span> <span class="perc-badge">${perc}</span>`;
+                listEl.appendChild(li);
+            }
+        } else {
+            const li = document.createElement('li');
+            li.className = 'modal-option selected';
+            li.innerText = "Risposta utente: " + (userVal || "Nessuna");
+            listEl.appendChild(li);
+        }
+    }
+
+    function navModalQuestion(direction) {
+        if (openQuestionnaireIndex === -1) return;
+        const currentPerson = filteredData[openQuestionnaireIndex];
+        const maxIndex = currentPerson.answers.length - 1;
+        let newIndex = currentModalQuestionIndex + direction;
+        if (newIndex < 0) newIndex = 0;
+        if (newIndex > maxIndex) newIndex = maxIndex;
+        currentModalQuestionIndex = newIndex;
+        updateModalContent();
+    }
+
+    function closeModal(e) {
+        if (!e || e.target.id === 'modalOverlay' || e.target.classList.contains('close-modal')) {
+            document.getElementById('modalOverlay').style.display = 'none';
+            currentModalQuestionIndex = -1;
+        }
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (document.getElementById('modalOverlay').style.display === 'flex') {
+            if (e.key === 'ArrowRight') navModalQuestion(1);
+            if (e.key === 'ArrowLeft') navModalQuestion(-1);
+            if (e.key === 'Escape') closeModal();
+        } else {
+            if (e.key === 'ArrowRight') navigate(1);
+            if (e.key === 'ArrowLeft') navigate(-1);
+        }
+    });
+
+    let touchStartX = 0;
+    document.body.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+    document.body.addEventListener('touchend', e => {
+        const touchEndX = e.changedTouches[0].screenX;
+        const diff = touchEndX - touchStartX;
+        if (Math.abs(diff) > 50) {
+            const direction = diff < 0 ? 1 : -1;
+            if (document.getElementById('modalOverlay').style.display === 'flex') {
+                navModalQuestion(direction);
+            } else {
+                navigate(direction);
+            }
+        }
+    });
+</script>
+</body>
+</html>
+    
