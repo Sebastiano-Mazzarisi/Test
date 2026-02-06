@@ -5,15 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Questionari AVIS</title>
 <meta name="theme-color" content="#667eea">
-
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { 
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
     background: #f5f5f5; color: #333; 
     height: 100vh;
-    display: flex;
-    flex-direction: column;
+    display: flex; flex-direction: column;
     overflow: hidden; 
 }
 body.modal-open { overflow: hidden; }
@@ -22,28 +20,25 @@ body.modal-open { overflow: hidden; }
 .header-content { max-width: 100%; margin: 0 auto; display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding: 0 1rem; }
 .header h1 { font-size: 1.2rem; font-weight: 600; }
 .header-buttons { display: flex; gap: 0.5rem; }
+
+@media (max-width: 768px) {
+    .header-content.detail-mode { flex-direction: column; gap: 0.5rem; align-items: center; }
+    .header-content.detail-mode h1 { font-size: 1rem; text-align: center; }
+    .header-content.detail-mode .header-buttons { justify-content: center; width: 100%; }
+}
+
 .btn { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 0.4rem; border-radius: 6px; cursor: pointer; font-size: 1.1rem; transition: all 0.2s; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
 .btn:hover { background: rgba(255,255,255,0.3); }
 
-/* MAIN CONTAINER STRUCTURE */
+/* CONTAINER WITH SCROLL */
 .container { 
-    flex-grow: 1; 
-    width: 100%; 
-    padding: 0.5rem; 
-    overflow-y: auto; 
-    display: flex;
-    flex-direction: column;
+    flex-grow: 1; width: 100%; padding: 0.5rem; 
+    overflow-y: auto; display: flex; flex-direction: column;
 }
 
-/* MENU STYLE INJECTED DYNAMICALLY */
+/* MENU STYLE */
 
-        .menu { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 10px; 
-            max-width: 800px; 
-            margin: 0 auto; 
-        }
+        .menu { display: flex; flex-direction: column; gap: 10px; max-width: 800px; margin: 0 auto; }
         
 
 .menu-item { background: white; padding: 1rem; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: all 0.2s; }
@@ -53,75 +48,84 @@ body.modal-open { overflow: hidden; }
 .menu-item-sex { font-size: 0.85rem; color: #666; background: #f0f0f0; padding: 0.2rem 0.5rem; border-radius: 4px; }
 .opt-badge { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 0.3rem 0.7rem; border-radius: 20px; font-size: 0.9rem; font-weight: 500; }
 
-/* DETAIL LAYOUT (MAIN 4-COLUMN LOGIC) */
-.detail { display: none; height: 100%; }
-.detail.active { display: flex; flex-direction: column; }
+/* DETAIL LAYOUT */
+.detail { display: none; width: 100%; }
+.detail.active { display: block; }
 
-/* DEFAULT MOBILE STYLE (Stacked) */
+/* MOBILE DEFAULT (1 Column) */
 .layout-columns {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    padding-bottom: 2rem;
+    padding-bottom: 100px; /* Spazio per scroll su mobile */
 }
 .col-group {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
+
+/* TABLET LAYOUT (2 Columns) - Min 600px, Max 1023px */
+@media (min-width: 600px) and (max-width: 1023px) {
+    .layout-columns {
+        flex-direction: row;
+        flex-wrap: wrap; /* Permette a col-group di andare a capo */
+        gap: 10px;
+        padding-bottom: 50px;
+    }
+    .col-group {
+        flex: 1 1 48%; /* Prende il 48% della larghezza (2 per riga) */
+        min-width: 48%;
+    }
+}
+
+/* DESKTOP LAYOUT (4 Columns) - Min 1024px */
+@media (min-width: 1024px) {
+    /* Rimuovi overflow:hidden su container per permettere lo scroll se il contenuto è lungo */
+    .container { overflow-y: auto; } 
+    
+    .layout-columns {
+        flex-direction: row;
+        flex-wrap: nowrap; /* Forza una riga sola */
+        height: auto; /* Lascia che l'altezza cresca */
+        min-height: 100%;
+        gap: 15px;
+        padding-bottom: 20px;
+    }
+    .col-group {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start; /* Non forzare space-between che sparpaglia troppo se poche domande */
+        gap: 8px; 
+    }
+    .qa-item {
+        flex-grow: 0; /* Non forzare crescita eccessiva */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 8px 10px; 
+        margin-bottom: 0;
+        min-height: 0; 
+    }
+    .qa-question {
+        font-size: 0.8rem; 
+        margin-bottom: 4px;
+        white-space: normal; /* Permetti a capo */
+    }
+    .qa-answer {
+        font-size: 0.85rem;
+        padding-left: 8px;
+        border-left-width: 2px;
+    }
+}
+
 .qa-item { 
     background: white; padding: 10px; border-radius: 6px; 
     box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #e0e0e0; cursor: pointer; 
 }
 .qa-question { font-weight: 600; color: #667eea; margin-bottom: 3px; font-size: 0.9rem; line-height: 1.2; }
 .qa-answer { color: #333; font-size: 0.9rem; line-height: 1.2; padding-left: 8px; border-left: 3px solid #667eea; }
-
-/* DESKTOP STYLE (>1024px) - NO SCROLL, 4 COLS */
-@media (min-width: 1024px) {
-    body { overflow: hidden; }
-    .container { padding: 0.5rem; overflow: hidden; } 
-    .menu { overflow-y: auto; height: 100%; padding-bottom: 20px; } 
-    
-    .layout-columns {
-        flex-direction: row;
-        height: 100%;
-        gap: 8px;
-        padding-bottom: 0;
-    }
-    .col-group {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between; 
-        height: 100%;
-        gap: 4px; 
-    }
-    .qa-item {
-        flex-grow: 1; 
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        padding: 6px 8px; 
-        margin-bottom: 0;
-        border-radius: 4px;
-        min-height: 0; 
-    }
-    .qa-question {
-        font-size: 0.75rem; 
-        margin-bottom: 2px;
-        white-space: nowrap; 
-        overflow: hidden; 
-        text-overflow: ellipsis; 
-    }
-    .qa-question:hover { white-space: normal; } 
-    
-    .qa-answer {
-        font-size: 0.8rem;
-        padding-left: 6px;
-        border-left-width: 2px;
-    }
-}
-
 .qa-item.no-answer, .qa-item.multiple-answers, .qa-item.logic-error { background: #fff0f0; border-color: #ffcccc; }
 .qa-item.no-answer .qa-answer, .qa-item.multiple-answers .qa-answer, .qa-item.logic-error .qa-answer { border-left-color: #d32f2f; color: #d32f2f; }
 
@@ -144,24 +148,34 @@ body.modal-open { overflow: hidden; }
 .spinner { width: 50px; height: 50px; border: 5px solid #ccc; border-top-color: #667eea; border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* SERENITY BREAKDOWN MODAL */
+/* SERENITY TABLE */
 .serenity-breakdown-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
 .serenity-breakdown-table th { background: #667eea; color: white; padding: 10px; text-align: left; font-weight: 600; }
-.serenity-breakdown-table td { padding: 10px; border-bottom: 1px solid #e0e0e0; }
+.serenity-breakdown-table td { padding: 10px; border-bottom: 1px solid #e0e0e0; vertical-align: top; }
 .serenity-breakdown-table tr:hover { background: #f5f5f5; }
-.breakdown-question { font-weight: 600; color: #667eea; }
-.breakdown-points { text-align: right; font-weight: 600; color: #28a745; }
+.breakdown-question { font-weight: 600; color: #667eea; margin-bottom: 5px; }
+.breakdown-answer { color: #555; font-size: 0.9rem; }
+.breakdown-points { text-align: right; font-weight: 600; color: #28a745; vertical-align: middle; }
 .breakdown-total { background: linear-gradient(135deg, #667eea, #764ba2); color: white; font-weight: bold; font-size: 1.2rem; padding: 15px; text-align: center; border-radius: 8px; margin-top: 15px; }
+
+/* GAMES MODAL */
+.games-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px; }
+.games-column { background: #f9f9f9; padding: 15px; border-radius: 8px; }
+.games-column h3 { color: #667eea; font-size: 1.1rem; margin-bottom: 15px; text-align: center; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+.games-column ul { list-style: none; padding: 0; margin: 0; max-height: 400px; overflow-y: auto; }
+.games-column li { padding: 8px 12px; margin-bottom: 5px; background: white; border-radius: 6px; border-left: 3px solid #667eea; display: flex; justify-content: space-between; align-items: center; }
+.games-column li:hover { background: #f0f0f0; }
+.game-name { font-weight: 500; color: #333; }
+.game-count { font-weight: bold; color: #667eea; background: #e8ecff; padding: 2px 8px; border-radius: 12px; font-size: 0.9rem; }
+@media (max-width: 768px) { .games-columns { grid-template-columns: 1fr; } }
+
 .opt-badge { cursor: pointer; transition: transform 0.2s; }
 .opt-badge:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); }
 </style>
 </head>
 <body>
 
-<div id="loadingOverlay">
-    <div class="spinner"></div>
-    <p style="margin-top: 20px; color: #667eea; font-weight: bold;">🔄 Ricaricamento...</p>
-</div>
+<div id="loadingOverlay"><div class="spinner"></div><p style="margin-top: 20px; color: #667eea; font-weight: bold;">🔄 Ricaricamento...</p></div>
 
 <div class="header">
     <div class="header-content">
@@ -183,203 +197,105 @@ body.modal-open { overflow: hidden; }
 
 <div id="questionModal" class="modal-overlay" onclick="closeModal('questionModal')">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <div class="modal-header">
-            <div id="qModalTitle" class="modal-title"></div>
-            <button class="modal-close" onclick="closeModal('questionModal')">&times;</button>
-        </div>
+        <div class="modal-header"><div id="qModalTitle" class="modal-title"></div><button class="modal-close" onclick="closeModal('questionModal')">&times;</button></div>
         <div id="qModalContent"></div>
     </div>
 </div>
 
 <div id="serenityModal" class="modal-overlay" onclick="closeModal('serenityModal')">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <div class="modal-header">
-            <div class="modal-title">📊 Dettaglio Calcolo Indice di Serenità</div>
-            <button class="modal-close" onclick="closeModal('serenityModal')">&times;</button>
-        </div>
+        <div class="modal-header"><div class="modal-title">📊 Dettaglio Calcolo Indice di Serenità</div><button class="modal-close" onclick="closeModal('serenityModal')">&times;</button></div>
         <div id="serenityModalContent"></div>
     </div>
 </div>
 
 <script>
-const allData = [{"id": "MA-ONOFRIO", "sex": "Maschio", "opt": "😄 100%", "answers": [{"q": "1. Hai mai sentito parlare di sistema trasfusionale?", "key_id": "Q01", "raw": "B", "options": {"A": "Sì", "B": "No"}, "is_text": false, "error": null, "a": "No", "a_html": "No"}, {"q": "2. Hai mai sentito parlare dei gruppi sanguigni?", "key_id": "Q02", "raw": "A", "options": {"A": "Sì", "B": "No"}, "is_text": false, "error": null, "a": "Sì", "a_html": "Sì"}, {"q": "3. Sai che gruppo sanguigno hai tu?", "key_id": "Q03", "raw": "B", "options": {"A": "Sì", "B": "No"}, "is_text": false, "error": null, "a": "No", "a_html": "No"}, {"q": "3b. Se hai risposto sì, sapresti dire quale?", "key_id": "Q03-T", "raw": "NO", "options": null, "is_text": true, "error": "logic-error", "a": "NO", "a_html": "<strong>NO</strong>"}, {"q": "4. Cosa pensi significhi 'donazione di sangue'?", "key_id": "Q04", "raw": "A", "options": {"A": "Dare sangue a chi ne ha bisogno", "B": "Dare sangue in cambio di denaro", "C": "Non ne sono sicuro/a"}, "is_text": false, "error": null, "a": "Dare sangue a chi ne ha bisogno", "a_html": "Dare sangue a chi ne ha bisogno"}, {"q": "5. Cosa pensi significhi 'trasfusione di sangue'?", "key_id": "Q05", "raw": "C", "options": {"A": "Modificare il sangue di una persona", "B": "Trasferire sangue in una persona", "C": "Non ne sono sicuro/a"}, "is_text": false, "error": null, "a": "Non ne sono sicuro/a", "a_html": "Non ne sono sicuro/a"}, {"q": "6. Hai parlato di recente della donazione di sangue con qualcuno?", "key_id": "Q06", "raw": "B", "options": {"A": "Sì", "B": "No"}, "is_text": false, "error": null, "a": "No", "a_html": "No"}, {"q": "7. Conosci qualcuno che ha donato Sangue?", "key_id": "Q07", "raw": "C", "options": {"A": "Sì, più di una persona", "B": "Sì, una sola persona", "C": "Nessuno"}, "is_text": false, "error": null, "a": "Nessuno", "a_html": "Nessuno"}, {"q": "8. Conosci qualcuno che ha donato Plasma?", "key_id": "Q08", "raw": "C", "options": {"A": "Sì", "B": "No", "C": "Non so cos'è il plasma"}, "is_text": false, "error": null, "a": "Non so cos'è il plasma", "a_html": "Non so cos'è il plasma"}, {"q": "9. Secondo te quanto è importante donare sangue?", "key_id": "Q09", "raw": "A", "options": {"A": "È molto importante", "B": "È abbastanza importante", "C": "Non è importante"}, "is_text": false, "error": null, "a": "È molto importante", "a_html": "È molto importante"}, {"q": "10. Che cosa pensi della donazione di sangue?", "key_id": "Q10", "raw": "A", "options": {"A": "È una cosa bella", "B": "È una cosa brutta", "C": "Non ne sono sicuro/a"}, "is_text": false, "error": null, "a": "È una cosa bella", "a_html": "È una cosa bella"}, {"q": "11. Quando pensi alla donazione di sangue, come ti senti?", "key_id": "Q11", "raw": "A", "options": {"A": "Felice", "B": "Triste", "C": "Non lo so"}, "is_text": false, "error": null, "a": "Felice", "a_html": "Felice"}, {"q": "12. Quando pensi a qualcuno che dona, come ti senti?", "key_id": "Q12", "raw": "C", "options": {"A": "Felice", "B": "Triste", "C": "Non lo so"}, "is_text": false, "error": null, "a": "Non lo so", "a_html": "Non lo so"}, {"q": "13. Immaginando te da grande, cosa faresti?", "key_id": "Q13", "raw": "C", "options": {"A": "Vorrei donare il sangue", "B": "Non vorrei donare il sangue", "C": "Non ne sono sicuro/a"}, "is_text": false, "error": null, "a": "Non ne sono sicuro/a", "a_html": "Non ne sono sicuro/a"}, {"q": "14. Consiglieresti ad un adulto di donare sangue o plasma?", "key_id": "Q14", "raw": "C", "options": {"A": "Sì", "B": "No", "C": "Non ne sono sicuro/a"}, "is_text": false, "error": null, "a": "Non ne sono sicuro/a", "a_html": "Non ne sono sicuro/a"}, {"q": "15. Quanto spesso giochi ai giochi da tavolo o di carte?", "key_id": "Q15", "raw": "D", "options": {"A": "Tutti i giorni", "B": "Almeno una volta a settimana", "C": "Almeno una volta al mese", "D": "Quasi mai", "E": "Mai"}, "is_text": false, "error": null, "a": "Quasi mai", "a_html": "Quasi mai"}, {"q": "16. Quanto spesso giochi su cellulare, tablet, computer o console?", "key_id": "Q16", "raw": "B", "options": {"A": "Tutti i giorni", "B": "Almeno una volta a settimana", "C": "Almeno una volta al mese", "D": "Quasi mai", "E": "Mai"}, "is_text": false, "error": null, "a": "Almeno una volta a settimana", "a_html": "Almeno una volta a settimana"}, {"q": "17. Giochi più spesso a:", "key_id": "Q17", "raw": "A", "options": {"A": "Giochi in cui devi muoverti", "B": "Giochi in cui devi pensare"}, "is_text": false, "error": null, "a": "Giochi in cui devi muoverti", "a_html": "Giochi in cui devi muoverti"}, {"q": "18. Preferisci:", "key_id": "Q18", "raw": "A", "options": {"A": "Giochi in cui devi muoverti", "B": "Giochi in cui devi pensare"}, "is_text": false, "error": null, "a": "Giochi in cui devi muoverti", "a_html": "Giochi in cui devi muoverti"}, {"q": "19. Preferisci giochi in cui:", "key_id": "Q19", "raw": "AB", "options": {"A": "Risolvere enigmi", "B": "Scoprire cose", "C": "Aiutare gli altri", "D": "Collezionare premi/obiettivi", "E": "Sconfiggere gli altri"}, "is_text": false, "error": null, "a": "Risolvere enigmi, Scoprire cose", "a_html": "Risolvere enigmi, Scoprire cose"}, {"q": "20. Scrivi il nome dei 3 giochi a cui giochi più spesso", "key_id": "Q20", "a": "JUST DANCE, MARIO KART, ANIMAL CROSSING", "a_html": "<strong>JUST DANCE, MARIO KART, ANIMAL CROSSING</strong>", "raw": "JUST DANCE, MARIO KART, ANIMAL CROSSING", "options": null, "is_text": true, "error": null}, {"q": "21. Cosa nel sangue è giallo, liquido e ricco di nutrienti?", "key_id": "Q21", "raw": "C", "options": {"A": "Piastrina", "B": "Globulo rosso", "C": "Globulo bianco", "D": "Plasma"}, "is_text": false, "error": null, "a": "Globulo bianco", "a_html": "Globulo bianco"}, {"q": "22. Quali sono i gruppi sanguigni?", "key_id": "Q22", "raw": "C", "options": {"A": "A, B, AB, 0", "B": "A, B, C, D", "C": "Plasma, sangue e globuli rossi", "D": "X, Y, XY, XX"}, "is_text": false, "error": null, "a": "Plasma, sangue e globuli rossi", "a_html": "Plasma, sangue e globuli rossi"}, {"q": "23. Chi tra queste persone può donare sangue?", "key_id": "Q23", "raw": "D", "options": {"A": "Luisa di 10 anni", "B": "Cristiano di 75 anni", "C": "Giovanna di 45 anni", "D": "Simone di 16 anni"}, "is_text": false, "error": null, "a": "Simone di 16 anni", "a_html": "Simone di 16 anni"}, {"q": "24. Quale gruppo sanguigno può donare sangue a più gruppi?", "key_id": "Q24", "raw": "A", "options": {"A": "AB", "B": "0 (Zero)", "C": "C", "D": "XY"}, "is_text": false, "error": null, "a": "AB", "a_html": "AB"}, {"q": "25. Cosa è AVIS?", "key_id": "Q25", "raw": "B", "options": {"A": "Assoc. Vaccinati Italiani Sanitari", "B": "Assistenza Volontari Sangue", "C": "Assoc. Volontari Italiani Sangue", "D": "Assemblea Veri Ispiratori"}, "is_text": false, "error": null, "a": "Assistenza Volontari Sangue", "a_html": "Assistenza Volontari Sangue"}, {"q": "26. Chi sono i donatori di sangue?", "key_id": "Q26", "raw": "C", "options": {"A": "Scelte dagli ospedali periodicamente", "B": "Medici e infermieri curanti", "C": "Persone comuni volontarie", "D": "Persone comuni pagate"}, "is_text": false, "error": null, "a": "Persone comuni volontarie", "a_html": "Persone comuni volontarie"}, {"q": "27. Quando è utilizzato il sangue donato?", "key_id": "Q27", "raw": "D", "options": {"A": "Solo operazioni molto difficili", "B": "Solo malattie del sangue", "C": "Solo emergenze al pronto soccorso", "D": "Emergenze, operazioni e terapie"}, "is_text": false, "error": null, "a": "Emergenze, operazioni e terapie", "a_html": "Emergenze, operazioni e terapie"}, {"q": "28. In questi ultimi giorni, quanto sei felice?", "key_id": "Q28", "raw": "D", "options": {"A": "☹️ Per niente felice", "B": "😐 Poco felice", "C": "🙂 Abbastanza felice", "D": "😄 Molto felice"}, "is_text": false, "error": null, "a": "😄 Molto felice", "a_html": "😄 Molto felice"}, {"q": "29. Quanto sei soddisfatta/o della tua vita a scuola?", "key_id": "Q29", "raw": "D", "options": {"A": "☹️ Per niente soddisfatta/o", "B": "😐 Poco soddisfatta/o", "C": "🙂 Abbastanza soddisfatta/o", "D": "😄 Molto soddisfatta/o"}, "is_text": false, "error": null, "a": "😄 Molto soddisfatta/o", "a_html": "😄 Molto soddisfatta/o"}, {"q": "30. Quanto sei contenta/o della tua vita a casa?", "key_id": "Q30", "raw": "D", "options": {"A": "☹️ Per niente contenta/o", "B": "😐 Poco contenta/o", "C": "🙂 Abbastanza contenta/o", "D": "😄 Molto contenta/o"}, "is_text": false, "error": null, "a": "😄 Molto contenta/o", "a_html": "😄 Molto contenta/o"}, {"q": "31. Biglietti regalo (0-10)", "key_id": "Q31", "raw": "10", "options": null, "is_text": true, "error": null, "a": "10", "a_html": "<strong>10</strong>"}], "page_num": 2, "serenity_raw_data": {"Q10": "A", "Q11": "A", "Q28": "D", "Q29": "D", "Q30": "D", "Q31": "10"}, "pdf_data": "JVBERi0xLjQKJZOMi54gUmVwb3J0TGFiIEdlbmVyYXRlZCBQREYgZG9jdW1lbnQgaHR0cDovL3d3dy5yZXBvcnRsYWIuY29tCjEgMCBvYmoKPDwKL0YxIDIgMCBSIC9GMiAzIDAgUiAvRjMgNCAwIFIgL0Y0IDUgMCBSCj4+CmVuZG9iagoyIDAgb2JqCjw8Ci9CYXNlRm9udCAvSGVsdmV0aWNhIC9FbmNvZGluZyAvV2luQW5zaUVuY29kaW5nIC9OYW1lIC9GMSAvU3VidHlwZSAvVHlwZTEgL1R5cGUgL0ZvbnQKPj4KZW5kb2JqCjMgMCBvYmoKPDwKL0Jhc2VGb250IC9IZWx2ZXRpY2EtQm9sZCAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjIgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iago0IDAgb2JqCjw8Ci9CYXNlRm9udCAvWmFwZkRpbmdiYXRzIC9OYW1lIC9GMyAvU3VidHlwZSAvVHlwZTEgL1R5cGUgL0ZvbnQKPj4KZW5kb2JqCjUgMCBvYmoKPDwKL0Jhc2VGb250IC9IZWx2ZXRpY2EtT2JsaXF1ZSAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjQgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iago2IDAgb2JqCjw8Ci9Db250ZW50cyAxMCAwIFIgL01lZGlhQm94IFsgMCAwIDU5NS4yNzU2IDg0MS44ODk4IF0gL1BhcmVudCA5IDAgUiAvUmVzb3VyY2VzIDw8Ci9Gb250IDEgMCBSIC9Qcm9jU2V0IFsgL1BERiAvVGV4dCAvSW1hZ2VCIC9JbWFnZUMgL0ltYWdlSSBdCj4+IC9Sb3RhdGUgMCAvVHJhbnMgPDwKCj4+IAogIC9UeXBlIC9QYWdlCj4+CmVuZG9iago3IDAgb2JqCjw8Ci9QYWdlTW9kZSAvVXNlTm9uZSAvUGFnZXMgOSAwIFIgL1R5cGUgL0NhdGFsb2cKPj4KZW5kb2JqCjggMCBvYmoKPDwKL0F1dGhvciAoXChhbm9ueW1vdXNcKSkgL0NyZWF0aW9uRGF0ZSAoRDoyMDI2MDIwNjIwMjM0MyswMScwMCcpIC9DcmVhdG9yIChcKHVuc3BlY2lmaWVkXCkpIC9LZXl3b3JkcyAoKSAvTW9kRGF0ZSAoRDoyMDI2MDIwNjIwMjM0MyswMScwMCcpIC9Qcm9kdWNlciAoUmVwb3J0TGFiIFBERiBMaWJyYXJ5IC0gd3d3LnJlcG9ydGxhYi5jb20pIAogIC9TdWJqZWN0IChcKHVuc3BlY2lmaWVkXCkpIC9UaXRsZSAoXChhbm9ueW1vdXNcKSkgL1RyYXBwZWQgL0ZhbHNlCj4+CmVuZG9iago5IDAgb2JqCjw8Ci9Db3VudCAxIC9LaWRzIFsgNiAwIFIgXSAvVHlwZSAvUGFnZXMKPj4KZW5kb2JqCjEwIDAgb2JqCjw8Ci9GaWx0ZXIgWyAvQVNDSUk4NURlY29kZSAvRmxhdGVEZWNvZGUgXSAvTGVuZ3RoIDI2MjcKPj4Kc3RyZWFtCkdhdWBWPj5sS10mcTkiRm9MbT1QS3VaOixoOUYrbFJGaSFAISNvcUtVbUdMbU0paHNbR3FWcFhJc2xXVFYtVyFiMShMVnMnTSpjPGwxcW9ncXM0JkcraTclP14xU2ItZ007JypTY1dKQl1gb3NCSkV1K05oPV0xWSxDRSpPLk9cI0FVYmwqckwxWUwraVckbFIsVyZMTWFBYGNmOSpKMypRKlFXQFBKZDZQLElFNXVwaEZINCFUaFY8LFxnczRJbnQ5S1lfNnRoS1Mia3QrcEgjUlFNPThSZDZBWFFobyMtZSVUa2RzMysnPjRdWFc/PUZhISJVRjhhIW8kK21JbF1mJShWczAiISNDTSctT15bZ3AqRFIyRSciMD8vVSIiYSRqWT11RmIsNU1udTsiV1NXMiRmTlcmT04jQyctSVRXKS0oWUtpSjgqUUlscC0iU0ZAR0g9MjVITlwuPGleXEFzWV5aQz9YVjQrSkJNLFNhL1gkJz5mcUgwazdvV1InPkVlPE9vaixFKEkqUUVYZ0xMKEFRcDJuSCVVcEtfKGljPUZOMVgiTS9yVUpEYSVkQygvSU5iSnAsUCFsVFhARF5bMEdoLS5danFlczxNNCJwYyhjXnVGLj1uLCFKSixfJD5oYm8xPk1UdTMnQl4tXEFfSmFpMjA9Z3FmNnFHRDp1cVklaTg3clIscFNYREQhKXQkJjZvWGVwbTwwXmJnWElmZzEqOFgnLkZVLzdnKTFSaUtrZFBgLzNFXmkxaWZkTFdaIzVKTE8+Sms7YEhLQSxoZEFJKV1oPExIcUBtSzZWOUFlK0RCSHJeZzFcaEo9XCVLPTNwPSZKSD43P0VVZFAqX1N0STxiM1E9IWFJI1tNXUElbyEuXStsOSpAPmdiNk4iUCZfbjttbi4vZ25KWyYrUFhoT0B1YiVSVVMoKHFzLCInQUJvZCx1TU9oXVRlSF9tMiNhW1ZkZ3I+RlMsMU0iSi1cWzFBMCVrNGUmcVlDJWE3NjhWUjohZ2csbjgtXm5mPEspdTczJSNidUlIZSdaLU9SS0JDZ11hRl4nYUhXITgpbj1DIypPVmsjSDEpMW1XcypfJSRkVERRdTZQYD1iPTVET11ZXS5oQWpxVT9vblomPU5LXFheXTJyVFlZcVNmdDtoU2UoL2QhSSU0VnUxUjYwISQjQzUiOWJKM2MnKFguODleVkNUQGovKF9hJipiUGIjQi9UW2AxKVNSXUxHbTJxbDpTOGc5XyJaTlZJPFNxdS5yW0ssNiI1STxqOlpyNUw+WjAhMVk5cUdKbEtxNVMhMWBTSWVPT19sJktrIj5KWkcqPiUrc1R1VEUvNEhtcSVsVXJAUzVnQCFZVG10aixsKC9rU1Y4MyhmWVhJKTsrITZITDlPPTVLNzohT1M4Y1k3TzQ3XiMhazdmZ1lTamgjYmQnMXBqPzFSRiw/K2VfVWFwY2A7M3U7Z0pbb1YqTWltT2E/VUhRX0UqPD5YKm9cPTU2PWQhZihuOmJMKlRWR0I0TD9sVGBjYVUrTyEhVjFeRT9lRCUzJFwxREtzVENxLzlPOXJEOllaIilZKSQkc09ALmljJ0UpTUdjLDM8ISUyImhIUjpqUHA6aDgtITZIby9OY2ErZCpzWSpfLjUxXXNEOXRtKD8tRkg2O2NeOV5xQlJVJUpvb149JVhQMnFCSyQjOGUlbTNaSENYQmhHPVtLKCsuWyQlMFVrYThAJEBmMXVCckplNC8sRkxxazIsN1o4ZSxcQzs4THI5LCYwVVlHYjFGcyFiNSspZSkpM11hRitLVjNAYTNbJWUhJmIrNCIqR2NDVEo/ZkdbbHBCTFZXbEtKKSxFaHVwaFY0SjsrMmFvNXRGMyQiTz4uZkRiUiFPTCZZMmtWU08/WlJjP3RIQ0goOExpI1FlPzJ1WFdYNFxaUzZWNDxQJWRvWzVQaik6YWYjQyNyKF9FZkdBTzo+T3JKVDVYTTA0dDNcMF9vW2FUUHEqaGlxTC8oXEdxMywkaF1PM04rJVJFU1MrJF1QVS05PEAnRWBlMSMlaGBTPEdkJUsrTkpdTEtcNSxIKyhmIkNZNSQuY0ZsMnBtQE44S2wxQztcbFthc2ZWT1BsLyljTUpaK188dDc1QzF0bj4/NmVyRUNadUZEbFxNQ1QwdSg5O2ppJ2ViX3JtcjBgI1ZzKTAxYm9oQlxeOXImNygkXFgnSmVdPWBeIi9mdTxqRC82bjVcQ2ZaR1lvckNIOzNYKTQjZzg4XzBmazo3WE5lQiZQZS1FRipmOlBgPCwmZjRKSzlTTVszaWleXmspOXUmPGEudW5YL2IpVWpyJSMmLylIK1tEaiIrXjJxLmpPUytuY0omMTBsZjNlKkdvL0lEQiZydVQsb01qJjBSLEFiaVgnc3NocjM9QXFIIjFlS0lOJTxeblVVMltoYSlPLkEwMFFBWjYpb1BVP1IpanBKa2tZW2glVSU3Qi5raiJVbFIiK2c5K2UxYWZOT2w+OiNXIyVWNz87dWF0LUgvdSRSSVJzOEFIUW1AMjBwbCg/SkJDYztXdFknL2xhayRoKjJraUhOUGdaUi9iW1E7P2lJW01MN100dFZzZEM9SHVYOlAkLDgqcVkickdGRUhdKGslOE8pWlFjbF5uJW1FYjUsKDMyWiIlbHAmLTNrLVViKThGU0Y+bE4qSz5WXFchZXBJKilrN2pmQk09XlAySDk/VEEiSz0+LT03aUVANSJaXDc9RVcwLStibkNiJ11AXipgWyReKyZFXF5fZ0deVkpUbFUlTidAKE87QCI1RUA4SFNHT2ksMWlEa08pYWV0WHREVWs7RDgiNnM5XS0/K2pNVmViWHEiSEkoU0QiRk8zMmFaOEpgPi8hWCc6bGNELiJhKkdcXCI/KiQ/VDtESjNUKSEyVkFWP0pSTz1YUj1GLz4lPlc8TkZ0cldGRT8jZmpNRlVWSThtbVJkKm07ZVBKUEc4LzhtbEhnImhXMyRocipTdUIwYF87ZENPTzo8RjdXXU5gMS9QbCxOKCMyXC9GQCZcb2FqITxrMFNMMENwYW5xNi9WKG5XbmlhZSsrK2Y+aDBqX19KZCxOMUZiaW45bl06OCw0KGpMSyh1aTRDMTdhJ15uK15SJzBsIWkrUFU6MUJiVD8hJE5ZbEdAZldJMF8rYEpXM1BZSi0sTycpbUk5ciYtT19lZj9eKEc9aVlSYkQzMy5jXENTMz1BO2BhJ3U8JmFzSG9aLmVcSz0rV0NIbTAvIXJdNTg3ajgrJmtqa2UuZGtbKCVfT0xjNiRWXm83M2V0MVcjZSNtaUZrcjg5MUlJKTdoP2QqSmlRMV06aU11bDVTKGY5ZkJeams6MU5ydV1vQCRDUD4hWjZ0PmAjdXJRTV4tYGYhK2BcNkpqNXEnMjhERjpqZyJZRSlWQVJiVEVgRFVhRjNCLVFgZFo1Wi5gbF0sJDJoNENEcz1ocFhuYig8M0pmWSRvRTo7KlpZK2IoTFJnNX4+ZW5kc3RyZWFtCmVuZG9iagp4cmVmCjAgMTEKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDczIDAwMDAwIG4gCjAwMDAwMDAxMzQgMDAwMDAgbiAKMDAwMDAwMDI0MSAwMDAwMCBuIAowMDAwMDAwMzUzIDAwMDAwIG4gCjAwMDAwMDA0MzYgMDAwMDAgbiAKMDAwMDAwMDU1MSAwMDAwMCBuIAowMDAwMDAwNzU1IDAwMDAwIG4gCjAwMDAwMDA4MjMgMDAwMDAgbiAKMDAwMDAwMTEwNiAwMDAwMCBuIAowMDAwMDAxMTY1IDAwMDAwIG4gCnRyYWlsZXIKPDwKL0lEIApbPDdjNzkzYjQxMzQ5MjMzY2EwYTkxOWI5MWE3YjI0N2U3Pjw3Yzc5M2I0MTM0OTIzM2NhMGE5MTliOTFhN2IyNDdlNz5dCiUgUmVwb3J0TGFiIGdlbmVyYXRlZCBQREYgZG9jdW1lbnQgLS0gZGlnZXN0IChodHRwOi8vd3d3LnJlcG9ydGxhYi5jb20pCgovSW5mbyA4IDAgUgovUm9vdCA3IDAgUgovU2l6ZSAxMQo+PgpzdGFydHhyZWYKMzg4NAolJUVPRgo="}, {"id": "MA-TERESA", "sex": "Femmina", "opt": "😐 53%", "answers": [{"q": "1. Hai mai sentito parlare di sistema trasfusionale?", "key_id": "Q01", "raw": "B", "options": {"A": "Sì", "B": "No"}, "is_text": false, "error": null, "a": "No", "a_html": "No"}, {"q": "2. Hai mai sentito parlare dei gruppi sanguigni?", "key_id": "Q02", "raw": "B", "options": {"A": "Sì", "B": "No"}, "is_text": false, "error": null, "a": "No", "a_html": "No"}, {"q": "3. Sai che gruppo sanguigno hai tu?", "key_id": "Q03", "raw": "B", "options": {"A": "Sì", "B": "No"}, "is_text": false, "error": null, "a": "No", "a_html": "No"}, {"q": "3b. Se hai risposto sì, sapresti dire quale?", "key_id": "Q03-T", "raw": "", "options": null, "is_text": true, "error": null, "a": "(nessuna risposta)", "a_html": "<span style=\"color:#999; font-style:italic;\">(nessuna risposta)</span>"}, {"q": "4. Cosa pensi significhi 'donazione di sangue'?", "key_id": "Q04", "raw": "A", "options": {"A": "Dare sangue a chi ne ha bisogno", "B": "Dare sangue in cambio di denaro", "C": "Non ne sono sicuro/a"}, "is_text": false, "error": null, "a": "Dare sangue a chi ne ha bisogno", "a_html": "Dare sangue a chi ne ha bisogno"}, {"q": "5. Cosa pensi significhi 'trasfusione di sangue'?", "key_id": "Q05", "raw": "B", "options": {"A": "Modificare il sangue di una persona", "B": "Trasferire sangue in una persona", "C": "Non ne sono sicuro/a"}, "is_text": false, "error": null, "a": "Trasferire sangue in una persona", "a_html": "Trasferire sangue in una persona"}, {"q": "6. Hai parlato di recente della donazione di sangue con qualcuno?", "key_id": "Q06", "raw": "A", "options": {"A": "Sì", "B": "No"}, "is_text": false, "error": null, "a": "Sì", "a_html": "Sì"}, {"q": "7. Conosci qualcuno che ha donato Sangue?", "key_id": "Q07", "raw": "C", "options": {"A": "Sì, più di una persona", "B": "Sì, una sola persona", "C": "Nessuno"}, "is_text": false, "error": null, "a": "Nessuno", "a_html": "Nessuno"}, {"q": "8. Conosci qualcuno che ha donato Plasma?", "key_id": "Q08", "raw": "C", "options": {"A": "Sì", "B": "No", "C": "Non so cos'è il plasma"}, "is_text": false, "error": null, "a": "Non so cos'è il plasma", "a_html": "Non so cos'è il plasma"}, {"q": "9. Secondo te quanto è importante donare sangue?", "key_id": "Q09", "raw": "A", "options": {"A": "È molto importante", "B": "È abbastanza importante", "C": "Non è importante"}, "is_text": false, "error": null, "a": "È molto importante", "a_html": "È molto importante"}, {"q": "10. Che cosa pensi della donazione di sangue?", "key_id": "Q10", "raw": "B", "options": {"A": "È una cosa bella", "B": "È una cosa brutta", "C": "Non ne sono sicuro/a"}, "is_text": false, "error": null, "a": "È una cosa brutta", "a_html": "È una cosa brutta"}, {"q": "11. Quando pensi alla donazione di sangue, come ti senti?", "key_id": "Q11", "raw": "B", "options": {"A": "Felice", "B": "Triste", "C": "Non lo so"}, "is_text": false, "error": null, "a": "Triste", "a_html": "Triste"}, {"q": "12. Quando pensi a qualcuno che dona, come ti senti?", "key_id": "Q12", "raw": "A", "options": {"A": "Felice", "B": "Triste", "C": "Non lo so"}, "is_text": false, "error": null, "a": "Felice", "a_html": "Felice"}, {"q": "13. Immaginando te da grande, cosa faresti?", "key_id": "Q13", "raw": "C", "options": {"A": "Vorrei donare il sangue", "B": "Non vorrei donare il sangue", "C": "Non ne sono sicuro/a"}, "is_text": false, "error": null, "a": "Non ne sono sicuro/a", "a_html": "Non ne sono sicuro/a"}, {"q": "14. Consiglieresti ad un adulto di donare sangue o plasma?", "key_id": "Q14", "raw": "A", "options": {"A": "Sì", "B": "No", "C": "Non ne sono sicuro/a"}, "is_text": false, "error": null, "a": "Sì", "a_html": "Sì"}, {"q": "15. Quanto spesso giochi ai giochi da tavolo o di carte?", "key_id": "Q15", "raw": "C", "options": {"A": "Tutti i giorni", "B": "Almeno una volta a settimana", "C": "Almeno una volta al mese", "D": "Quasi mai", "E": "Mai"}, "is_text": false, "error": null, "a": "Almeno una volta al mese", "a_html": "Almeno una volta al mese"}, {"q": "16. Quanto spesso giochi su cellulare, tablet, computer o console?", "key_id": "Q16", "raw": "B", "options": {"A": "Tutti i giorni", "B": "Almeno una volta a settimana", "C": "Almeno una volta al mese", "D": "Quasi mai", "E": "Mai"}, "is_text": false, "error": null, "a": "Almeno una volta a settimana", "a_html": "Almeno una volta a settimana"}, {"q": "17. Giochi più spesso a:", "key_id": "Q17", "raw": "A", "options": {"A": "Giochi in cui devi muoverti", "B": "Giochi in cui devi pensare"}, "is_text": false, "error": null, "a": "Giochi in cui devi muoverti", "a_html": "Giochi in cui devi muoverti"}, {"q": "18. Preferisci:", "key_id": "Q18", "raw": "B", "options": {"A": "Giochi in cui devi muoverti", "B": "Giochi in cui devi pensare"}, "is_text": false, "error": null, "a": "Giochi in cui devi pensare", "a_html": "Giochi in cui devi pensare"}, {"q": "19. Preferisci giochi in cui:", "key_id": "Q19", "raw": "B", "options": {"A": "Risolvere enigmi", "B": "Scoprire cose", "C": "Aiutare gli altri", "D": "Collezionare premi/obiettivi", "E": "Sconfiggere gli altri"}, "is_text": false, "error": null, "a": "Scoprire cose", "a_html": "Scoprire cose"}, {"q": "20. Scrivi il nome dei 3 giochi a cui giochi più spesso", "key_id": "Q20", "a": "UNO, MONOPOLY, ROBLOX", "a_html": "<strong>UNO, MONOPOLY, ROBLOX</strong>", "raw": "UNO, MONOPOLY, ROBLOX", "options": null, "is_text": true, "error": null}, {"q": "21. Cosa nel sangue è giallo, liquido e ricco di nutrienti?", "key_id": "Q21", "raw": "C", "options": {"A": "Piastrina", "B": "Globulo rosso", "C": "Globulo bianco", "D": "Plasma"}, "is_text": false, "error": null, "a": "Globulo bianco", "a_html": "Globulo bianco"}, {"q": "22. Quali sono i gruppi sanguigni?", "key_id": "Q22", "raw": "B", "options": {"A": "A, B, AB, 0", "B": "A, B, C, D", "C": "Plasma, sangue e globuli rossi", "D": "X, Y, XY, XX"}, "is_text": false, "error": null, "a": "A, B, C, D", "a_html": "A, B, C, D"}, {"q": "23. Chi tra queste persone può donare sangue?", "key_id": "Q23", "raw": "D", "options": {"A": "Luisa di 10 anni", "B": "Cristiano di 75 anni", "C": "Giovanna di 45 anni", "D": "Simone di 16 anni"}, "is_text": false, "error": null, "a": "Simone di 16 anni", "a_html": "Simone di 16 anni"}, {"q": "24. Quale gruppo sanguigno può donare sangue a più gruppi?", "key_id": "Q24", "raw": "C", "options": {"A": "AB", "B": "0 (Zero)", "C": "C", "D": "XY"}, "is_text": false, "error": null, "a": "C", "a_html": "C"}, {"q": "25. Cosa è AVIS?", "key_id": "Q25", "raw": "A", "options": {"A": "Assoc. Vaccinati Italiani Sanitari", "B": "Assistenza Volontari Sangue", "C": "Assoc. Volontari Italiani Sangue", "D": "Assemblea Veri Ispiratori"}, "is_text": false, "error": null, "a": "Assoc. Vaccinati Italiani Sanitari", "a_html": "Assoc. Vaccinati Italiani Sanitari"}, {"q": "26. Chi sono i donatori di sangue?", "key_id": "Q26", "raw": "C", "options": {"A": "Scelte dagli ospedali periodicamente", "B": "Medici e infermieri curanti", "C": "Persone comuni volontarie", "D": "Persone comuni pagate"}, "is_text": false, "error": null, "a": "Persone comuni volontarie", "a_html": "Persone comuni volontarie"}, {"q": "27. Quando è utilizzato il sangue donato?", "key_id": "Q27", "raw": "C", "options": {"A": "Solo operazioni molto difficili", "B": "Solo malattie del sangue", "C": "Solo emergenze al pronto soccorso", "D": "Emergenze, operazioni e terapie"}, "is_text": false, "error": null, "a": "Solo emergenze al pronto soccorso", "a_html": "Solo emergenze al pronto soccorso"}, {"q": "28. In questi ultimi giorni, quanto sei felice?", "key_id": "Q28", "raw": "0", "options": {"A": "☹️ Per niente felice", "B": "😐 Poco felice", "C": "🙂 Abbastanza felice", "D": "😄 Molto felice"}, "is_text": false, "error": "no-answer", "a": "(nessuna risposta)", "a_html": "(nessuna risposta)"}, {"q": "29. Quanto sei soddisfatta/o della tua vita a scuola?", "key_id": "Q29", "raw": "D", "options": {"A": "☹️ Per niente soddisfatta/o", "B": "😐 Poco soddisfatta/o", "C": "🙂 Abbastanza soddisfatta/o", "D": "😄 Molto soddisfatta/o"}, "is_text": false, "error": null, "a": "😄 Molto soddisfatta/o", "a_html": "😄 Molto soddisfatta/o"}, {"q": "30. Quanto sei contenta/o della tua vita a casa?", "key_id": "Q30", "raw": "D", "options": {"A": "☹️ Per niente contenta/o", "B": "😐 Poco contenta/o", "C": "🙂 Abbastanza contenta/o", "D": "😄 Molto contenta/o"}, "is_text": false, "error": null, "a": "😄 Molto contenta/o", "a_html": "😄 Molto contenta/o"}, {"q": "31. Biglietti regalo (0-10)", "key_id": "Q31", "raw": "10", "options": null, "is_text": true, "error": null, "a": "10", "a_html": "<strong>10</strong>"}], "page_num": 1, "serenity_raw_data": {"Q10": "B", "Q11": "B", "Q28": "0", "Q29": "D", "Q30": "D", "Q31": "10"}, "pdf_data": "JVBERi0xLjQKJZOMi54gUmVwb3J0TGFiIEdlbmVyYXRlZCBQREYgZG9jdW1lbnQgaHR0cDovL3d3dy5yZXBvcnRsYWIuY29tCjEgMCBvYmoKPDwKL0YxIDIgMCBSIC9GMiAzIDAgUiAvRjMgNCAwIFIgL0Y0IDUgMCBSCj4+CmVuZG9iagoyIDAgb2JqCjw8Ci9CYXNlRm9udCAvSGVsdmV0aWNhIC9FbmNvZGluZyAvV2luQW5zaUVuY29kaW5nIC9OYW1lIC9GMSAvU3VidHlwZSAvVHlwZTEgL1R5cGUgL0ZvbnQKPj4KZW5kb2JqCjMgMCBvYmoKPDwKL0Jhc2VGb250IC9IZWx2ZXRpY2EtQm9sZCAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjIgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iago0IDAgb2JqCjw8Ci9CYXNlRm9udCAvWmFwZkRpbmdiYXRzIC9OYW1lIC9GMyAvU3VidHlwZSAvVHlwZTEgL1R5cGUgL0ZvbnQKPj4KZW5kb2JqCjUgMCBvYmoKPDwKL0Jhc2VGb250IC9IZWx2ZXRpY2EtT2JsaXF1ZSAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjQgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iago2IDAgb2JqCjw8Ci9Db250ZW50cyAxMCAwIFIgL01lZGlhQm94IFsgMCAwIDU5NS4yNzU2IDg0MS44ODk4IF0gL1BhcmVudCA5IDAgUiAvUmVzb3VyY2VzIDw8Ci9Gb250IDEgMCBSIC9Qcm9jU2V0IFsgL1BERiAvVGV4dCAvSW1hZ2VCIC9JbWFnZUMgL0ltYWdlSSBdCj4+IC9Sb3RhdGUgMCAvVHJhbnMgPDwKCj4+IAogIC9UeXBlIC9QYWdlCj4+CmVuZG9iago3IDAgb2JqCjw8Ci9QYWdlTW9kZSAvVXNlTm9uZSAvUGFnZXMgOSAwIFIgL1R5cGUgL0NhdGFsb2cKPj4KZW5kb2JqCjggMCBvYmoKPDwKL0F1dGhvciAoXChhbm9ueW1vdXNcKSkgL0NyZWF0aW9uRGF0ZSAoRDoyMDI2MDIwNjIwMjM0MyswMScwMCcpIC9DcmVhdG9yIChcKHVuc3BlY2lmaWVkXCkpIC9LZXl3b3JkcyAoKSAvTW9kRGF0ZSAoRDoyMDI2MDIwNjIwMjM0MyswMScwMCcpIC9Qcm9kdWNlciAoUmVwb3J0TGFiIFBERiBMaWJyYXJ5IC0gd3d3LnJlcG9ydGxhYi5jb20pIAogIC9TdWJqZWN0IChcKHVuc3BlY2lmaWVkXCkpIC9UaXRsZSAoXChhbm9ueW1vdXNcKSkgL1RyYXBwZWQgL0ZhbHNlCj4+CmVuZG9iago5IDAgb2JqCjw8Ci9Db3VudCAxIC9LaWRzIFsgNiAwIFIgXSAvVHlwZSAvUGFnZXMKPj4KZW5kb2JqCjEwIDAgb2JqCjw8Ci9GaWx0ZXIgWyAvQVNDSUk4NURlY29kZSAvRmxhdGVEZWNvZGUgXSAvTGVuZ3RoIDI2MjkKPj4Kc3RyZWFtCkdhdUhOZ0pUIk8mcS9wbm5uI19fNnNEOUxYKGtzITBPb0dtQDJtdEc6PFosdU1eVXR0KWcsbEhgPXE0NmhpdC4/IWlCQzpVRztzbyItJk8rUkVAWFtWXlduZDhjQUNYIWRLLyhjWCdNQiUqbCYsJDZuRislRDRZYnFMIXJsTTkjanMpM0NBYzh1MGdPTykiVS0xbTxVVC5MMkE3X0dbP3UuXF5zTDtlUVZGckhzOmFpP3VAbllLaFo9XlViXCpeSDJAY21MPFNCaUJkaFMpPEY2bk5cQE8oVEQ0dCwzaipzYW9EXWg1bTI0ZEthal1odCsoKSpGcihHPWJoWEJDSlEyP21wLGxASlk2RGZHK1BodC1ocG5hcj4+QUpgdTlpSFNNQmhgSUElMlssPiEwW0JKYFlPNSNMQTJsYHJYIltGa0RVbmNxISpZSiQlTGROV2dfPihJVE9CKT03SUFPcFtLLmIkSGVuP0QqPENpVl4qJ00icldPMGNbImY6bjZuIlZEanNxPltYalkiP2EhblU9OjI2KkQtR2FTVFNMN1xGRGhPbVJDWT05OkBuU0M1LTZEbThsTTBGV1sqXVg8Pls+QC5OVUY1Oj03JE0yZSFhUGg/RGQ0QG5QWkRnLVVMIypVW2RsUltuPWhORj9tYl5UcS1gLkxnZyxdO3FXSDdqdVdzRHFUP2U2SEtNMCQvOFpUJypLLS0xLUs2KiUxQlE0Pm5hSDc4O1dRS15JQT8zOiNXUStQLDRUKVxEYHVLTi8tKz87I3NVY2kmMEtnS0NmJWlsZjBjam8vJFsybGlHJWFLbCZwPEc1KkZqRFszblZEJFxrYDNbSUp0MFhNS15RcVlGckJXSSkjSWAhXVEhR3RTPk5DWGtYYl9VJ2sra3NkW3InTltPITNCL2YnIU00MSElVD9MTV9NW1leayoyUTJGZGZDIVlJPTNiTFVqS1ZTZFpIMkkpK1MsLyVidGlrbkhBXz5TV2JiOGdyVSYnXkA4MCFPI0dqIzRyY2wrLW5yYTUvX2ZxJ2o1YDopJyMwYFNhTilIa2RcTCFyUlljQyIkZUtSQ1tKOClEZkJ1L08hPF5FZiVwNy5xXC0mT2g3OEY6QktJQFI7ck8qQSZTNUkvdWFoN0sqR3NnbTMyXWRDdElTSyRvKkpLYztfNjotYTczRTROZ2g4OldSbEcwaXVcPm9uQzFKVC1lZ2w/XnMyJjlQXDolZkdgUGlmVTkxYzpeT0NdUChbSENAYTdOKzVpUnA/Ym8nSiM0S11VJ1hLU15tT1YlNjsnVFFGLE9ZJzM4I0FzYlw5bXIjPFotLTFlOmNBRF0maWgxXV9BSCRPXT5QU2tBIVc6QmRcUnE3aklicGBpWS5CYSdyZWVbRmpoJ0BYcypKV3BzXEYuRk5yTmwrK2dnbTgxbDNKO01CTyUjZm83dC1tQjs8KjdlNS0mZ2E4a3E8VDMuSVVEQkNkTk1ePzNQa1xNJnFSNls2VkVtOSQmM1gqW1kxM1wsSyghXlAkQldabFprcitwNCNxYUlJOz1rVk5BdCpISSRiTCJGTj1OWzs0SyZxckhlK18hO0NLaSE2RWgpPFo4WkM7OGEmQSg/ZldlbmUzPiQoTitbPUgpV1csPlghNlU5SyZeS10pS2RiTilTRl4sT2wnVFstTWZHPFpIJ3BaVDU4bFlYN0lMVj07LyExWWJmZFg4O3BKRThlYiwpT19TOmVLWEpMLThqbiZVSmo5bmdoWU8xPTVKL2h1SDlPOVRrWTFuKjo7WjdZS1BuLEBqU0JXLWJmYW9KLl4xaz5BZWpiM2hUR10panI+SGpBcScmNCdsbDxvQmYnRCVWQFxjVWsjL0BaNnBWNzNuJ28oZEkqYj88PEVLZzAzc29yaFk/ZE1hLXRSYSpXOTNJMFVfbkcvPWpFMV5faVknYy9NQ2RYKDkhRCkmRUJaW2M6Sm84SDNoKFpZNkhRJVtRVyl1OUhLJzBdLXAnP04ma0snLldXKysrYFxARD1DcikoLHBqJnAjWFIrM0tgRGhsPTw4bGo6Ym9RR2ZvcyEmQkZwbGoqKi5sMz8zVllyYjMyLVtDa0ZpVi08M1JFJiRNRyJBVlBmXDQ+Zl4iQGAiVEFjQClvcDtPbF5xNj5mRCcpWicuNzdGJ1pSQnFxVW9ZIV0iXXAwI09CdUYySyQmMDlxMiIjMkYicENwVVxjNi5MZT9lTHFtYEw+RjUoLDlGOTw1dUsqRjhHP0QwOzE5JTNaYFlUJW87X1VKZjIsQ2YqTFlWQkZAL3NwOjlPa2tYSVdwYWYkNmZvIz0mVlc+XVowUXVWTSljazBgYmlQOHBzblNrU19aOSlDW1dZTDkwZTJtR19FVWE0cHBobiZbbUYnRSNlXDNLa2I7OFInc0kpTC8+YUwpb1YwJEgnL2c8VTJmaVhDbDcsWmBfRjFPMD44T2lIMVFqP2VIKG1UNGk5bzBAKWskY2YiP0giOFcyXmk2LCQpVGowOnJvTy9RRWZNZTsuLVM0TENdOmdRVzZSYiFOS0FSUmBURmpYQk8sJFJEJGFMaS9wcSxEP15QXGdyLFFbZCQ2OyR0bnFkSC8uM2M7c0gubStwQGxaVCFCOmk4YE1eMmVSVm5SJztEMTI2Uyohb1lNInIlZjokPz9CW3VHbElmP1dIQ0dZNnBARFtzLHIhXiJVQD5nbipyPUdPZ2ouL1E1IjVYZFJ0U3JIQFIwTCxAPEdrL0tZZk0wZj1aUSNvbyJmWERlWzZ1az9ISS1hZSJsT2Y/IkFrWU1hTCteUDsqZUxwZjFFKyZVZTBPRlU5Ui5YZ1VlJGVTbVVda2lAX19oS1pXM25UdClNXldHRUQ3LHVoOyRGUDZuIyVpdVtVMkdHUmIqViJBUlZHLzsxQEZUJSM8M002ODMkT006SVpyLC8+XUBWNiYtcmglbC1YazJkaTE9Ujk1SW9pXi5iS2UhO05Maz0uYFFMVFJCbiUnb2BYYTpHWkhWQWR0W1NCJm5dbCFxKElOXjpZPzliME1gUkw4cHAzRCk5WT9EbCNeN1hlTC10OW1JVmBYNzUjNmBrQjFNVlxrITY4PjhgMSM4PC46VFEoKUM1Mk4rKnEvRllAIWlEQklCWjUzWztFQDEiRT40KV4oUWtacy1JWTIvW3JOQ0UjTSZCVFFXMCtYRDdULSM2Z09VNjozNSY3M3N1WipjOU1dcmFFK0RlbHRyKClLJkNzJlhaUCpvYCs0PiNyWEAraFxFVVcrKChjYSNOVUZbb003Zz9rRnUrPiFKbU1gVVw7O0FtPytfXVg2TFttWCtvNmZoNzUkVF0oZUxMSzI9P1BSa2sjWlxdOTpYTEROWF1rKD8mIUsyYjtvRDAlZi9ZOmJnNiVRS2NnU11aNi4hLTcuSW1jUzxLUlltMEAvIjYuWGEwbCRkTUJrLXBVU21TcVZKby5DOScpZEROOXBZMV5VX1hOdFNlZU4iXWxGQjBTQlA1PnBKTEpjfj5lbmRzdHJlYW0KZW5kb2JqCnhyZWYKMCAxMQowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwNzMgMDAwMDAgbiAKMDAwMDAwMDEzNCAwMDAwMCBuIAowMDAwMDAwMjQxIDAwMDAwIG4gCjAwMDAwMDAzNTMgMDAwMDAgbiAKMDAwMDAwMDQzNiAwMDAwMCBuIAowMDAwMDAwNTUxIDAwMDAwIG4gCjAwMDAwMDA3NTUgMDAwMDAgbiAKMDAwMDAwMDgyMyAwMDAwMCBuIAowMDAwMDAxMTA2IDAwMDAwIG4gCjAwMDAwMDExNjUgMDAwMDAgbiAKdHJhaWxlcgo8PAovSUQgCls8ZTVlNzI4NTQwNDk4NTZjMWQ2OGU5OTc0ZTQ3NWVjOWE+PGU1ZTcyODU0MDQ5ODU2YzFkNjhlOTk3NGU0NzVlYzlhPl0KJSBSZXBvcnRMYWIgZ2VuZXJhdGVkIFBERiBkb2N1bWVudCAtLSBkaWdlc3QgKGh0dHA6Ly93d3cucmVwb3J0bGFiLmNvbSkKCi9JbmZvIDggMCBSCi9Sb290IDcgMCBSCi9TaXplIDExCj4+CnN0YXJ0eHJlZgozODg2CiUlRU9GCg=="}];
+const allData = [{"id": "MA-ONOFRIO", "sex": "Maschio", "opt": "😄 100%", "answers": [{"q": "1. Hai mai sentito parlare di sistema trasfusionale?", "key_id": "Q01", "raw": "B", "options": {"A": "Sì", "B": "No"}, "is_text": false, "error": null, "a": "No", "a_html": "No"}, {"q": "2. Hai mai sentito parlare dei gruppi sanguigni?", "key_id": "Q02", "raw": "A", "options": {"A": "Sì", "B": "No"}, "is_text": false, "error": null, "a": "Sì", "a_html": "Sì"}, {"q": "3. Sai che gruppo sanguigno hai tu?", "key_id": "Q03", "raw": "B", "options": {"A": "Sì", "B": "No"}, "is_text": false, "error": null, "a": "No", "a_html": "No"}, {"q": "3b. Se hai risposto sì, sapresti dire quale?", "key_id": "Q03-T", "raw": "NO", "options": null, "is_text": true, "error": "logic-error", "a": "NO", "a_html": "<strong>NO</strong>"}, {"q": "4. Cosa pensi significhi 'donazione di sangue'?", "key_id": "Q04", "raw": "A", "options": {"A": "Dare sangue a chi ne ha bisogno", "B": "Dare sangue in cambio di denaro", "C": "Non ne sono sicuro/a"}, "is_text": false, "error": null, "a": "Dare sangue a chi ne ha bisogno", "a_html": "Dare sangue a chi ne ha bisogno"}, {"q": "5. Cosa pensi significhi 'trasfusione di sangue'?", "key_id": "Q05", "raw": "C", "options": {"A": "Modificare il sangue di una persona", "B": "Trasferire sangue in una persona", "C": "Non ne sono sicuro/a"}, "is_text": false, "error": null, "a": "Non ne sono sicuro/a", "a_html": "Non ne sono sicuro/a"}, {"q": "6. Hai parlato di recente della donazione di sangue con qualcuno?", "key_id": "Q06", "raw": "B", "options": {"A": "Sì", "B": "No"}, "is_text": false, "error": null, "a": "No", "a_html": "No"}, {"q": "7. Conosci qualcuno che ha donato Sangue?", "key_id": "Q07", "raw": "C", "options": {"A": "Sì, più di una persona", "B": "Sì, una sola persona", "C": "Nessuno"}, "is_text": false, "error": null, "a": "Nessuno", "a_html": "Nessuno"}, {"q": "8. Conosci qualcuno che ha donato Plasma?", "key_id": "Q08", "raw": "C", "options": {"A": "Sì", "B": "No", "C": "Non so cos'è il plasma"}, "is_text": false, "error": null, "a": "Non so cos'è il plasma", "a_html": "Non so cos'è il plasma"}, {"q": "9. Secondo te quanto è importante donare sangue?", "key_id": "Q09", "raw": "A", "options": {"A": "È molto importante", "B": "È abbastanza importante", "C": "Non è importante"}, "is_text": false, "error": null, "a": "È molto importante", "a_html": "È molto importante"}, {"q": "10. Che cosa pensi della donazione di sangue?", "key_id": "Q10", "raw": "A", "options": {"A": "È una cosa bella", "B": "È una cosa brutta", "C": "Non ne sono sicuro/a"}, "is_text": false, "error": null, "a": "È una cosa bella", "a_html": "È una cosa bella"}, {"q": "11. Quando pensi alla donazione di sangue, come ti senti?", "key_id": "Q11", "raw": "A", "options": {"A": "Felice", "B": "Triste", "C": "Non lo so"}, "is_text": false, "error": null, "a": "Felice", "a_html": "Felice"}, {"q": "12. Quando pensi a qualcuno che dona, come ti senti?", "key_id": "Q12", "raw": "C", "options": {"A": "Felice", "B": "Triste", "C": "Non lo so"}, "is_text": false, "error": null, "a": "Non lo so", "a_html": "Non lo so"}, {"q": "13. Immaginando te da grande, cosa faresti?", "key_id": "Q13", "raw": "C", "options": {"A": "Vorrei donare il sangue", "B": "Non vorrei donare il sangue", "C": "Non ne sono sicuro/a"}, "is_text": false, "error": null, "a": "Non ne sono sicuro/a", "a_html": "Non ne sono sicuro/a"}, {"q": "14. Consiglieresti ad un adulto di donare sangue o plasma?", "key_id": "Q14", "raw": "C", "options": {"A": "Sì", "B": "No", "C": "Non ne sono sicuro/a"}, "is_text": false, "error": null, "a": "Non ne sono sicuro/a", "a_html": "Non ne sono sicuro/a"}, {"q": "15. Quanto spesso giochi ai giochi da tavolo o di carte?", "key_id": "Q15", "raw": "D", "options": {"A": "Tutti i giorni", "B": "Almeno una volta a settimana", "C": "Almeno una volta al mese", "D": "Quasi mai", "E": "Mai"}, "is_text": false, "error": null, "a": "Quasi mai", "a_html": "Quasi mai"}, {"q": "16. Quanto spesso giochi su cellulare, tablet, computer o console?", "key_id": "Q16", "raw": "B", "options": {"A": "Tutti i giorni", "B": "Almeno una volta a settimana", "C": "Almeno una volta al mese", "D": "Quasi mai", "E": "Mai"}, "is_text": false, "error": null, "a": "Almeno una volta a settimana", "a_html": "Almeno una volta a settimana"}, {"q": "17. Giochi più spesso a:", "key_id": "Q17", "raw": "A", "options": {"A": "Giochi in cui devi muoverti", "B": "Giochi in cui devi pensare"}, "is_text": false, "error": null, "a": "Giochi in cui devi muoverti", "a_html": "Giochi in cui devi muoverti"}, {"q": "18. Preferisci:", "key_id": "Q18", "raw": "A", "options": {"A": "Giochi in cui devi muoverti", "B": "Giochi in cui devi pensare"}, "is_text": false, "error": null, "a": "Giochi in cui devi muoverti", "a_html": "Giochi in cui devi muoverti"}, {"q": "19. Preferisci giochi in cui:", "key_id": "Q19", "raw": "AB", "options": {"A": "Risolvere enigmi", "B": "Scoprire cose", "C": "Aiutare gli altri", "D": "Collezionare premi/obiettivi", "E": "Sconfiggere gli altri"}, "is_text": false, "error": null, "a": "Risolvere enigmi, Scoprire cose", "a_html": "Risolvere enigmi, Scoprire cose"}, {"q": "20. Scrivi il nome dei 3 giochi a cui giochi più spesso", "key_id": "Q20", "a": "JUST DANCE, MARIO KART, ANIMAL CROSSING", "a_html": "<strong>JUST DANCE, MARIO KART, ANIMAL CROSSING</strong>", "raw": "JUST DANCE, MARIO KART, ANIMAL CROSSING", "options": null, "is_text": true, "error": null}, {"q": "21. Cosa nel sangue è giallo, liquido e ricco di nutrienti?", "key_id": "Q21", "raw": "C", "options": {"A": "Piastrina", "B": "Globulo rosso", "C": "Globulo bianco", "D": "Plasma"}, "is_text": false, "error": null, "a": "Globulo bianco", "a_html": "Globulo bianco"}, {"q": "22. Quali sono i gruppi sanguigni?", "key_id": "Q22", "raw": "C", "options": {"A": "A, B, AB, 0", "B": "A, B, C, D", "C": "Plasma, sangue e globuli rossi", "D": "X, Y, XY, XX"}, "is_text": false, "error": null, "a": "Plasma, sangue e globuli rossi", "a_html": "Plasma, sangue e globuli rossi"}, {"q": "23. Chi tra queste persone può donare sangue?", "key_id": "Q23", "raw": "D", "options": {"A": "Luisa di 10 anni", "B": "Cristiano di 75 anni", "C": "Giovanna di 45 anni", "D": "Simone di 16 anni"}, "is_text": false, "error": null, "a": "Simone di 16 anni", "a_html": "Simone di 16 anni"}, {"q": "24. Quale gruppo sanguigno può donare sangue a più gruppi?", "key_id": "Q24", "raw": "A", "options": {"A": "AB", "B": "0 (Zero)", "C": "C", "D": "XY"}, "is_text": false, "error": null, "a": "AB", "a_html": "AB"}, {"q": "25. Cosa è AVIS?", "key_id": "Q25", "raw": "B", "options": {"A": "Assoc. Vaccinati Italiani Sanitari", "B": "Assistenza Volontari Sangue", "C": "Assoc. Volontari Italiani Sangue", "D": "Assemblea Veri Ispiratori"}, "is_text": false, "error": null, "a": "Assistenza Volontari Sangue", "a_html": "Assistenza Volontari Sangue"}, {"q": "26. Chi sono i donatori di sangue?", "key_id": "Q26", "raw": "C", "options": {"A": "Scelte dagli ospedali periodicamente", "B": "Medici e infermieri curanti", "C": "Persone comuni volontarie", "D": "Persone comuni pagate"}, "is_text": false, "error": null, "a": "Persone comuni volontarie", "a_html": "Persone comuni volontarie"}, {"q": "27. Quando è utilizzato il sangue donato?", "key_id": "Q27", "raw": "D", "options": {"A": "Solo operazioni molto difficili", "B": "Solo malattie del sangue", "C": "Solo emergenze al pronto soccorso", "D": "Emergenze, operazioni e terapie"}, "is_text": false, "error": null, "a": "Emergenze, operazioni e terapie", "a_html": "Emergenze, operazioni e terapie"}, {"q": "28. In questi ultimi giorni, quanto sei felice?", "key_id": "Q28", "raw": "D", "options": {"A": "☹️ Per niente felice", "B": "😐 Poco felice", "C": "🙂 Abbastanza felice", "D": "😄 Molto felice"}, "is_text": false, "error": null, "a": "😄 Molto felice", "a_html": "😄 Molto felice"}, {"q": "29. Quanto sei soddisfatta/o della tua vita a scuola?", "key_id": "Q29", "raw": "D", "options": {"A": "☹️ Per niente soddisfatta/o", "B": "😐 Poco soddisfatta/o", "C": "🙂 Abbastanza soddisfatta/o", "D": "😄 Molto soddisfatta/o"}, "is_text": false, "error": null, "a": "😄 Molto soddisfatta/o", "a_html": "😄 Molto soddisfatta/o"}, {"q": "30. Quanto sei contenta/o della tua vita a casa?", "key_id": "Q30", "raw": "D", "options": {"A": "☹️ Per niente contenta/o", "B": "😐 Poco contenta/o", "C": "🙂 Abbastanza contenta/o", "D": "😄 Molto contenta/o"}, "is_text": false, "error": null, "a": "😄 Molto contenta/o", "a_html": "😄 Molto contenta/o"}, {"q": "31. Biglietti regalo (0-10)", "key_id": "Q31", "raw": "10", "options": null, "is_text": true, "error": null, "a": "10", "a_html": "<strong>10</strong>"}], "page_num": 2, "serenity_raw_data": {"Q10": "A", "Q11": "A", "Q28": "D", "Q29": "D", "Q30": "D", "Q31": "10"}, "pdf_data": "JVBERi0xLjQKJZOMi54gUmVwb3J0TGFiIEdlbmVyYXRlZCBQREYgZG9jdW1lbnQgaHR0cDovL3d3dy5yZXBvcnRsYWIuY29tCjEgMCBvYmoKPDwKL0YxIDIgMCBSIC9GMiAzIDAgUiAvRjMgNCAwIFIgL0Y0IDUgMCBSCj4+CmVuZG9iagoyIDAgb2JqCjw8Ci9CYXNlRm9udCAvSGVsdmV0aWNhIC9FbmNvZGluZyAvV2luQW5zaUVuY29kaW5nIC9OYW1lIC9GMSAvU3VidHlwZSAvVHlwZTEgL1R5cGUgL0ZvbnQKPj4KZW5kb2JqCjMgMCBvYmoKPDwKL0Jhc2VGb250IC9IZWx2ZXRpY2EtQm9sZCAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjIgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iago0IDAgb2JqCjw8Ci9CYXNlRm9udCAvWmFwZkRpbmdiYXRzIC9OYW1lIC9GMyAvU3VidHlwZSAvVHlwZTEgL1R5cGUgL0ZvbnQKPj4KZW5kb2JqCjUgMCBvYmoKPDwKL0Jhc2VGb250IC9IZWx2ZXRpY2EtT2JsaXF1ZSAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjQgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iago2IDAgb2JqCjw8Ci9Db250ZW50cyAxMCAwIFIgL01lZGlhQm94IFsgMCAwIDU5NS4yNzU2IDg0MS44ODk4IF0gL1BhcmVudCA5IDAgUiAvUmVzb3VyY2VzIDw8Ci9Gb250IDEgMCBSIC9Qcm9jU2V0IFsgL1BERiAvVGV4dCAvSW1hZ2VCIC9JbWFnZUMgL0ltYWdlSSBdCj4+IC9Sb3RhdGUgMCAvVHJhbnMgPDwKCj4+IAogIC9UeXBlIC9QYWdlCj4+CmVuZG9iago3IDAgb2JqCjw8Ci9QYWdlTW9kZSAvVXNlTm9uZSAvUGFnZXMgOSAwIFIgL1R5cGUgL0NhdGFsb2cKPj4KZW5kb2JqCjggMCBvYmoKPDwKL0F1dGhvciAoXChhbm9ueW1vdXNcKSkgL0NyZWF0aW9uRGF0ZSAoRDoyMDI2MDIwNzAwMTQxOSswMScwMCcpIC9DcmVhdG9yIChcKHVuc3BlY2lmaWVkXCkpIC9LZXl3b3JkcyAoKSAvTW9kRGF0ZSAoRDoyMDI2MDIwNzAwMTQxOSswMScwMCcpIC9Qcm9kdWNlciAoUmVwb3J0TGFiIFBERiBMaWJyYXJ5IC0gd3d3LnJlcG9ydGxhYi5jb20pIAogIC9TdWJqZWN0IChcKHVuc3BlY2lmaWVkXCkpIC9UaXRsZSAoXChhbm9ueW1vdXNcKSkgL1RyYXBwZWQgL0ZhbHNlCj4+CmVuZG9iago5IDAgb2JqCjw8Ci9Db3VudCAxIC9LaWRzIFsgNiAwIFIgXSAvVHlwZSAvUGFnZXMKPj4KZW5kb2JqCjEwIDAgb2JqCjw8Ci9GaWx0ZXIgWyAvQVNDSUk4NURlY29kZSAvRmxhdGVEZWNvZGUgXSAvTGVuZ3RoIDI2MjcKPj4Kc3RyZWFtCkdhdWBWPj5sS10mcTkiRm9MbT1QS3VaOixoOUYrbFJGaSFAISNvcUtVbUdMbU0paHNbR3FWcFhJc2xXVFYtVyFiMShMVnMnTSpjPGwxcW9ncXM0JkcraTclP14xU2ItZ007JypTY1dKQl1gb3NCSkV1K05oPV0xWSxDRSpPLk9cI0FVYmwqckwxWUwraVckbFIsVyZMTWFBYGNmOSpKMypRKlFXQFBKZDZQLElFNXVwaEZINCFUaFY8LFxnczRJbnQ5S1lfNnRoS1Mia3QrcEgjUlFNPThSZDZBWFFobyMtZSVUa2RzMysnPjRdWFc/PUZhISJVRjhhIW8kK21JbF1mJShWczAiISNDTSctT15bZ3AqRFIyRSciMD8vVSIiYSRqWT11RmIsNU1udTsiV1NXMiRmTlcmT04jQyctSVRXKS0oWUtpSjgqUUlscC0iU0ZAR0g9MjVITlwuPGleXEFzWV5aQz9YVjQrSkJNLFNhL1gkJz5mcUgwazdvV1InPkVlPE9vaixFKEkqUUVYZ0xMKEFRcDJuSCVVcEtfKGljPUZOMVgiTS9yVUpEYSVkQygvSU5iSnAsUCFsVFhARF5bMEdoLS5danFlczxNNCJwYyhjXnVGLj1uLCFKSixfJD5oYm8xPk1UdTMnQl4tXEFfSmFpMjA9Z3FmNnFHRDp1cVklaTg3clIscFNYREQhKXQkJjZvWGVwbTwwXmJnWElmZzEqOFgnLkZVLzdnKTFSaUtrZFBgLzNFXmkxaWZkTFdaIzVKTE8+Sms7YEhLQSxoZEFJKV1oPExIcUBtSzZWOUFlK0RCSHJeZzFcaEo9XCVLPTNwPSZKSD43P0VVZFAqX1N0STxiM1E9IWFJI1tNXUElbyEuXStsOSpAPmdiNk4iUCZfbjttbi4vZ25KWyYrUFhoT0B1YiVSVVMoKHFzLCInQUJvZCx1TU9oXVRlSF9tMiNhW1ZkZ3I+RlMsMU0iSi1cWzFBMCVrNGUmcVlDJWE3NjhWUjohZ2csbjgtXm5mPEspdTczJSNidUlIZSdaLU9SS0JDZ11hRl4nYUhXITgpbj1DIypPVmsjSDEpMW1XcypfJSRkVERRdTZQYD1iPTVET11ZXS5oQWpxVT9vblomPU5LXFheXTJyVFlZcVNmdDtoU2UoL2QhSSU0VnUxUjYwISQjQzUiOWJKM2MnKFguODleVkNUQGovKF9hJipiUGIjQi9UW2AxKVNSXUxHbTJxbDpTOGc5XyJaTlZJPFNxdS5yW0ssNiI1STxqOlpyNUw+WjAhMVk5cUdKbEtxNVMhMWBTSWVPT19sJktrIj5KWkcqPiUrc1R1VEUvNEhtcSVsVXJAUzVnQCFZVG10aixsKC9rU1Y4MyhmWVhJKTsrITZITDlPPTVLNzohT1M4Y1k3TzQ3XiMhazdmZ1lTamgjYmQnMXBqPzFSRiw/K2VfVWFwY2A7M3U7Z0pbb1YqTWltT2E/VUhRX0UqPD5YKm9cPTU2PWQhZihuOmJMKlRWR0I0TD9sVGBjYVUrTyEhVjFeRT9lRCUzJFwxREtzVENxLzlPOXJEOllaIilZKSQkc09ALmljJ0UpTUdjLDM8ISUyImhIUjpqUHA6aDgtITZIby9OY2ErZCpzWSpfLjUxXXNEOXRtKD8tRkg2O2NeOV5xQlJVJUpvb149JVhQMnFCSyQjOGUlbTNaSENYQmhHPVtLKCsuWyQlMFVrYThAJEBmMXVCckplNC8sRkxxazIsN1o4ZSxcQzs4THI5LCYwVVlHYjFGcyFiNSspZSkpM11hRitLVjNAYTNbJWUhJmIrNCIqR2NDVEo/ZkdbbHBCTFZXbEtKKSxFaHVwaFY0SjsrMmFvNXRGMyQiTz4uZkRiUiFPTCZZMmtWU08/WlJjP3RIQ0goOExpI1FlPzJ1WFdYNFxaUzZWNDxQJWRvWzVQaik6YWYjQyNyKF9FZkdBTzo+T3JKVDVYTTA0dDNcMF9vW2FUUHEqaGlxTC8oXEdxMywkaF1PM04rJVJFU1MrJF1QVS05PEAnRWBlMSMlaGBTPEdkJUsrTkpdTEtcNSxIKyhmIkNZNSQuY0ZsMnBtQE44S2wxQztcbFthc2ZWT1BsLyljTUpaK188dDc1QzF0bj4/NmVyRUNadUZEbFxNQ1QwdSg5O2ppJ2ViX3JtcjBgI1ZzKTAxYm9oQlxeOXImNygkXFgnSmVdPWBeIi9mdTxqRC82bjVcQ2ZaR1lvckNIOzNYKTQjZzg4XzBmazo3WE5lQiZQZS1FRipmOlBgPCwmZjRKSzlTTVszaWleXmspOXUmPGEudW5YL2IpVWpyJSMmLylIK1tEaiIrXjJxLmpPUytuY0omMTBsZjNlKkdvL0lEQiZydVQsb01qJjBSLEFiaVgnc3NocjM9QXFIIjFlS0lOJTxeblVVMltoYSlPLkEwMFFBWjYpb1BVP1IpanBKa2tZW2glVSU3Qi5raiJVbFIiK2c5K2UxYWZOT2w+OiNXIyVWNz87dWF0LUgvdSRSSVJzOEFIUW1AMjBwbCg/SkJDYztXdFknL2xhayRoKjJraUhOUGdaUi9iW1E7P2lJW01MN100dFZzZEM9SHVYOlAkLDgqcVkickdGRUhdKGslOE8pWlFjbF5uJW1FYjUsKDMyWiIlbHAmLTNrLVViKThGU0Y+bE4qSz5WXFchZXBJKilrN2pmQk09XlAySDk/VEEiSz0+LT03aUVANSJaXDc9RVcwLStibkNiJ11AXipgWyReKyZFXF5fZ0deVkpUbFUlTidAKE87QCI1RUA4SFNHT2ksMWlEa08pYWV0WHREVWs7RDgiNnM5XS0/K2pNVmViWHEiSEkoU0QiRk8zMmFaOEpgPi8hWCc6bGNELiJhKkdcXCI/KiQ/VDtESjNUKSEyVkFWP0pSTz1YUj1GLz4lPlc8TkZ0cldGRT8jZmpNRlVWSThtbVJkKm07ZVBKUEc4LzhtbEhnImhXMyRocipTdUIwYF87ZENPTzo8RjdXXU5gMS9QbCxOKCMyXC9GQCZcb2FqITxrMFNMMENwYW5xNi9WKG5XbmlhZSsrK2Y+aDBqX19KZCxOMUZiaW45bl06OCw0KGpMSyh1aTRDMTdhJ15uK15SJzBsIWkrUFU6MUJiVD8hJE5ZbEdAZldJMF8rYEpXM1BZSi0sTycpbUk5ciYtT19lZj9eKEc9aVlSYkQzMy5jXENTMz1BO2BhJ3U8JmFzSG9aLmVcSz0rV0NIbTAvIXJdNTg3ajgrJmtqa2UuZGtbKCVfT0xjNiRWXm83M2V0MVcjZSNtaUZrcjg5MUlJKTdoP2QqSmlRMV06aU11bDVTKGY5ZkJeams6MU5ydV1vQCRDUD4hWjZ0PmAjdXJRTV4tYGYhK2BcNkpqNXEnMjhERjpqZyJZRSlWQVJiVEVgRFVhRjNCLVFgZFo1Wi5gbF0sJDJoNENEcz1ocFhuYig8M0pmWSRvRTo7KlpZK2IoTFJnNX4+ZW5kc3RyZWFtCmVuZG9iagp4cmVmCjAgMTEKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDczIDAwMDAwIG4gCjAwMDAwMDAxMzQgMDAwMDAgbiAKMDAwMDAwMDI0MSAwMDAwMCBuIAowMDAwMDAwMzUzIDAwMDAwIG4gCjAwMDAwMDA0MzYgMDAwMDAgbiAKMDAwMDAwMDU1MSAwMDAwMCBuIAowMDAwMDAwNzU1IDAwMDAwIG4gCjAwMDAwMDA4MjMgMDAwMDAgbiAKMDAwMDAwMTEwNiAwMDAwMCBuIAowMDAwMDAxMTY1IDAwMDAwIG4gCnRyYWlsZXIKPDwKL0lEIApbPGJiNDFmYTY4YTljODIwNzA2NzI2MDhiMjY2YmI1NzU4PjxiYjQxZmE2OGE5YzgyMDcwNjcyNjA4YjI2NmJiNTc1OD5dCiUgUmVwb3J0TGFiIGdlbmVyYXRlZCBQREYgZG9jdW1lbnQgLS0gZGlnZXN0IChodHRwOi8vd3d3LnJlcG9ydGxhYi5jb20pCgovSW5mbyA4IDAgUgovUm9vdCA3IDAgUgovU2l6ZSAxMQo+PgpzdGFydHhyZWYKMzg4NAolJUVPRgo="}, {"id": "MA-TERESA", "sex": "Femmina", "opt": "😐 53%", "answers": [{"q": "1. Hai mai sentito parlare di sistema trasfusionale?", "key_id": "Q01", "raw": "B", "options": {"A": "Sì", "B": "No"}, "is_text": false, "error": null, "a": "No", "a_html": "No"}, {"q": "2. Hai mai sentito parlare dei gruppi sanguigni?", "key_id": "Q02", "raw": "B", "options": {"A": "Sì", "B": "No"}, "is_text": false, "error": null, "a": "No", "a_html": "No"}, {"q": "3. Sai che gruppo sanguigno hai tu?", "key_id": "Q03", "raw": "B", "options": {"A": "Sì", "B": "No"}, "is_text": false, "error": null, "a": "No", "a_html": "No"}, {"q": "3b. Se hai risposto sì, sapresti dire quale?", "key_id": "Q03-T", "raw": "", "options": null, "is_text": true, "error": null, "a": "(nessuna risposta)", "a_html": "<span style=\"color:#999; font-style:italic;\">(nessuna risposta)</span>"}, {"q": "4. Cosa pensi significhi 'donazione di sangue'?", "key_id": "Q04", "raw": "A", "options": {"A": "Dare sangue a chi ne ha bisogno", "B": "Dare sangue in cambio di denaro", "C": "Non ne sono sicuro/a"}, "is_text": false, "error": null, "a": "Dare sangue a chi ne ha bisogno", "a_html": "Dare sangue a chi ne ha bisogno"}, {"q": "5. Cosa pensi significhi 'trasfusione di sangue'?", "key_id": "Q05", "raw": "B", "options": {"A": "Modificare il sangue di una persona", "B": "Trasferire sangue in una persona", "C": "Non ne sono sicuro/a"}, "is_text": false, "error": null, "a": "Trasferire sangue in una persona", "a_html": "Trasferire sangue in una persona"}, {"q": "6. Hai parlato di recente della donazione di sangue con qualcuno?", "key_id": "Q06", "raw": "A", "options": {"A": "Sì", "B": "No"}, "is_text": false, "error": null, "a": "Sì", "a_html": "Sì"}, {"q": "7. Conosci qualcuno che ha donato Sangue?", "key_id": "Q07", "raw": "C", "options": {"A": "Sì, più di una persona", "B": "Sì, una sola persona", "C": "Nessuno"}, "is_text": false, "error": null, "a": "Nessuno", "a_html": "Nessuno"}, {"q": "8. Conosci qualcuno che ha donato Plasma?", "key_id": "Q08", "raw": "C", "options": {"A": "Sì", "B": "No", "C": "Non so cos'è il plasma"}, "is_text": false, "error": null, "a": "Non so cos'è il plasma", "a_html": "Non so cos'è il plasma"}, {"q": "9. Secondo te quanto è importante donare sangue?", "key_id": "Q09", "raw": "A", "options": {"A": "È molto importante", "B": "È abbastanza importante", "C": "Non è importante"}, "is_text": false, "error": null, "a": "È molto importante", "a_html": "È molto importante"}, {"q": "10. Che cosa pensi della donazione di sangue?", "key_id": "Q10", "raw": "B", "options": {"A": "È una cosa bella", "B": "È una cosa brutta", "C": "Non ne sono sicuro/a"}, "is_text": false, "error": null, "a": "È una cosa brutta", "a_html": "È una cosa brutta"}, {"q": "11. Quando pensi alla donazione di sangue, come ti senti?", "key_id": "Q11", "raw": "B", "options": {"A": "Felice", "B": "Triste", "C": "Non lo so"}, "is_text": false, "error": null, "a": "Triste", "a_html": "Triste"}, {"q": "12. Quando pensi a qualcuno che dona, come ti senti?", "key_id": "Q12", "raw": "A", "options": {"A": "Felice", "B": "Triste", "C": "Non lo so"}, "is_text": false, "error": null, "a": "Felice", "a_html": "Felice"}, {"q": "13. Immaginando te da grande, cosa faresti?", "key_id": "Q13", "raw": "C", "options": {"A": "Vorrei donare il sangue", "B": "Non vorrei donare il sangue", "C": "Non ne sono sicuro/a"}, "is_text": false, "error": null, "a": "Non ne sono sicuro/a", "a_html": "Non ne sono sicuro/a"}, {"q": "14. Consiglieresti ad un adulto di donare sangue o plasma?", "key_id": "Q14", "raw": "A", "options": {"A": "Sì", "B": "No", "C": "Non ne sono sicuro/a"}, "is_text": false, "error": null, "a": "Sì", "a_html": "Sì"}, {"q": "15. Quanto spesso giochi ai giochi da tavolo o di carte?", "key_id": "Q15", "raw": "C", "options": {"A": "Tutti i giorni", "B": "Almeno una volta a settimana", "C": "Almeno una volta al mese", "D": "Quasi mai", "E": "Mai"}, "is_text": false, "error": null, "a": "Almeno una volta al mese", "a_html": "Almeno una volta al mese"}, {"q": "16. Quanto spesso giochi su cellulare, tablet, computer o console?", "key_id": "Q16", "raw": "B", "options": {"A": "Tutti i giorni", "B": "Almeno una volta a settimana", "C": "Almeno una volta al mese", "D": "Quasi mai", "E": "Mai"}, "is_text": false, "error": null, "a": "Almeno una volta a settimana", "a_html": "Almeno una volta a settimana"}, {"q": "17. Giochi più spesso a:", "key_id": "Q17", "raw": "A", "options": {"A": "Giochi in cui devi muoverti", "B": "Giochi in cui devi pensare"}, "is_text": false, "error": null, "a": "Giochi in cui devi muoverti", "a_html": "Giochi in cui devi muoverti"}, {"q": "18. Preferisci:", "key_id": "Q18", "raw": "B", "options": {"A": "Giochi in cui devi muoverti", "B": "Giochi in cui devi pensare"}, "is_text": false, "error": null, "a": "Giochi in cui devi pensare", "a_html": "Giochi in cui devi pensare"}, {"q": "19. Preferisci giochi in cui:", "key_id": "Q19", "raw": "B", "options": {"A": "Risolvere enigmi", "B": "Scoprire cose", "C": "Aiutare gli altri", "D": "Collezionare premi/obiettivi", "E": "Sconfiggere gli altri"}, "is_text": false, "error": null, "a": "Scoprire cose", "a_html": "Scoprire cose"}, {"q": "20. Scrivi il nome dei 3 giochi a cui giochi più spesso", "key_id": "Q20", "a": "UNO, MONOPOLY, ROBLOX", "a_html": "<strong>UNO, MONOPOLY, ROBLOX</strong>", "raw": "UNO, MONOPOLY, ROBLOX", "options": null, "is_text": true, "error": null}, {"q": "21. Cosa nel sangue è giallo, liquido e ricco di nutrienti?", "key_id": "Q21", "raw": "C", "options": {"A": "Piastrina", "B": "Globulo rosso", "C": "Globulo bianco", "D": "Plasma"}, "is_text": false, "error": null, "a": "Globulo bianco", "a_html": "Globulo bianco"}, {"q": "22. Quali sono i gruppi sanguigni?", "key_id": "Q22", "raw": "B", "options": {"A": "A, B, AB, 0", "B": "A, B, C, D", "C": "Plasma, sangue e globuli rossi", "D": "X, Y, XY, XX"}, "is_text": false, "error": null, "a": "A, B, C, D", "a_html": "A, B, C, D"}, {"q": "23. Chi tra queste persone può donare sangue?", "key_id": "Q23", "raw": "D", "options": {"A": "Luisa di 10 anni", "B": "Cristiano di 75 anni", "C": "Giovanna di 45 anni", "D": "Simone di 16 anni"}, "is_text": false, "error": null, "a": "Simone di 16 anni", "a_html": "Simone di 16 anni"}, {"q": "24. Quale gruppo sanguigno può donare sangue a più gruppi?", "key_id": "Q24", "raw": "C", "options": {"A": "AB", "B": "0 (Zero)", "C": "C", "D": "XY"}, "is_text": false, "error": null, "a": "C", "a_html": "C"}, {"q": "25. Cosa è AVIS?", "key_id": "Q25", "raw": "A", "options": {"A": "Assoc. Vaccinati Italiani Sanitari", "B": "Assistenza Volontari Sangue", "C": "Assoc. Volontari Italiani Sangue", "D": "Assemblea Veri Ispiratori"}, "is_text": false, "error": null, "a": "Assoc. Vaccinati Italiani Sanitari", "a_html": "Assoc. Vaccinati Italiani Sanitari"}, {"q": "26. Chi sono i donatori di sangue?", "key_id": "Q26", "raw": "C", "options": {"A": "Scelte dagli ospedali periodicamente", "B": "Medici e infermieri curanti", "C": "Persone comuni volontarie", "D": "Persone comuni pagate"}, "is_text": false, "error": null, "a": "Persone comuni volontarie", "a_html": "Persone comuni volontarie"}, {"q": "27. Quando è utilizzato il sangue donato?", "key_id": "Q27", "raw": "C", "options": {"A": "Solo operazioni molto difficili", "B": "Solo malattie del sangue", "C": "Solo emergenze al pronto soccorso", "D": "Emergenze, operazioni e terapie"}, "is_text": false, "error": null, "a": "Solo emergenze al pronto soccorso", "a_html": "Solo emergenze al pronto soccorso"}, {"q": "28. In questi ultimi giorni, quanto sei felice?", "key_id": "Q28", "raw": "0", "options": {"A": "☹️ Per niente felice", "B": "😐 Poco felice", "C": "🙂 Abbastanza felice", "D": "😄 Molto felice"}, "is_text": false, "error": "no-answer", "a": "(nessuna risposta)", "a_html": "(nessuna risposta)"}, {"q": "29. Quanto sei soddisfatta/o della tua vita a scuola?", "key_id": "Q29", "raw": "D", "options": {"A": "☹️ Per niente soddisfatta/o", "B": "😐 Poco soddisfatta/o", "C": "🙂 Abbastanza soddisfatta/o", "D": "😄 Molto soddisfatta/o"}, "is_text": false, "error": null, "a": "😄 Molto soddisfatta/o", "a_html": "😄 Molto soddisfatta/o"}, {"q": "30. Quanto sei contenta/o della tua vita a casa?", "key_id": "Q30", "raw": "D", "options": {"A": "☹️ Per niente contenta/o", "B": "😐 Poco contenta/o", "C": "🙂 Abbastanza contenta/o", "D": "😄 Molto contenta/o"}, "is_text": false, "error": null, "a": "😄 Molto contenta/o", "a_html": "😄 Molto contenta/o"}, {"q": "31. Biglietti regalo (0-10)", "key_id": "Q31", "raw": "10", "options": null, "is_text": true, "error": null, "a": "10", "a_html": "<strong>10</strong>"}], "page_num": 1, "serenity_raw_data": {"Q10": "B", "Q11": "B", "Q28": "0", "Q29": "D", "Q30": "D", "Q31": "10"}, "pdf_data": "JVBERi0xLjQKJZOMi54gUmVwb3J0TGFiIEdlbmVyYXRlZCBQREYgZG9jdW1lbnQgaHR0cDovL3d3dy5yZXBvcnRsYWIuY29tCjEgMCBvYmoKPDwKL0YxIDIgMCBSIC9GMiAzIDAgUiAvRjMgNCAwIFIgL0Y0IDUgMCBSCj4+CmVuZG9iagoyIDAgb2JqCjw8Ci9CYXNlRm9udCAvSGVsdmV0aWNhIC9FbmNvZGluZyAvV2luQW5zaUVuY29kaW5nIC9OYW1lIC9GMSAvU3VidHlwZSAvVHlwZTEgL1R5cGUgL0ZvbnQKPj4KZW5kb2JqCjMgMCBvYmoKPDwKL0Jhc2VGb250IC9IZWx2ZXRpY2EtQm9sZCAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjIgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iago0IDAgb2JqCjw8Ci9CYXNlRm9udCAvWmFwZkRpbmdiYXRzIC9OYW1lIC9GMyAvU3VidHlwZSAvVHlwZTEgL1R5cGUgL0ZvbnQKPj4KZW5kb2JqCjUgMCBvYmoKPDwKL0Jhc2VGb250IC9IZWx2ZXRpY2EtT2JsaXF1ZSAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjQgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iago2IDAgb2JqCjw8Ci9Db250ZW50cyAxMCAwIFIgL01lZGlhQm94IFsgMCAwIDU5NS4yNzU2IDg0MS44ODk4IF0gL1BhcmVudCA5IDAgUiAvUmVzb3VyY2VzIDw8Ci9Gb250IDEgMCBSIC9Qcm9jU2V0IFsgL1BERiAvVGV4dCAvSW1hZ2VCIC9JbWFnZUMgL0ltYWdlSSBdCj4+IC9Sb3RhdGUgMCAvVHJhbnMgPDwKCj4+IAogIC9UeXBlIC9QYWdlCj4+CmVuZG9iago3IDAgb2JqCjw8Ci9QYWdlTW9kZSAvVXNlTm9uZSAvUGFnZXMgOSAwIFIgL1R5cGUgL0NhdGFsb2cKPj4KZW5kb2JqCjggMCBvYmoKPDwKL0F1dGhvciAoXChhbm9ueW1vdXNcKSkgL0NyZWF0aW9uRGF0ZSAoRDoyMDI2MDIwNzAwMTQxOSswMScwMCcpIC9DcmVhdG9yIChcKHVuc3BlY2lmaWVkXCkpIC9LZXl3b3JkcyAoKSAvTW9kRGF0ZSAoRDoyMDI2MDIwNzAwMTQxOSswMScwMCcpIC9Qcm9kdWNlciAoUmVwb3J0TGFiIFBERiBMaWJyYXJ5IC0gd3d3LnJlcG9ydGxhYi5jb20pIAogIC9TdWJqZWN0IChcKHVuc3BlY2lmaWVkXCkpIC9UaXRsZSAoXChhbm9ueW1vdXNcKSkgL1RyYXBwZWQgL0ZhbHNlCj4+CmVuZG9iago5IDAgb2JqCjw8Ci9Db3VudCAxIC9LaWRzIFsgNiAwIFIgXSAvVHlwZSAvUGFnZXMKPj4KZW5kb2JqCjEwIDAgb2JqCjw8Ci9GaWx0ZXIgWyAvQVNDSUk4NURlY29kZSAvRmxhdGVEZWNvZGUgXSAvTGVuZ3RoIDI2MjkKPj4Kc3RyZWFtCkdhdUhOZ0pUIk8mcS9wbm5uI19fNnNEOUxYKGtzITBPb0dtQDJtdEc6PFosdU1eVXR0KWcsbEhgPXE0NmhpdC4/IWlCQzpVRztzbyItJk8rUkVAWFtWXlduZDhjQUNYIWRLLyhjWCdNQiUqbCYsJDZuRislRDRZYnFMIXJsTTkjanMpM0NBYzh1MGdPTykiVS0xbTxVVC5MMkE3X0dbP3UuXF5zTDtlUVZGckhzOmFpP3VAbllLaFo9XlViXCpeSDJAY21MPFNCaUJkaFMpPEY2bk5cQE8oVEQ0dCwzaipzYW9EXWg1bTI0ZEthal1odCsoKSpGcihHPWJoWEJDSlEyP21wLGxASlk2RGZHK1BodC1ocG5hcj4+QUpgdTlpSFNNQmhgSUElMlssPiEwW0JKYFlPNSNMQTJsYHJYIltGa0RVbmNxISpZSiQlTGROV2dfPihJVE9CKT03SUFPcFtLLmIkSGVuP0QqPENpVl4qJ00icldPMGNbImY6bjZuIlZEanNxPltYalkiP2EhblU9OjI2KkQtR2FTVFNMN1xGRGhPbVJDWT05OkBuU0M1LTZEbThsTTBGV1sqXVg8Pls+QC5OVUY1Oj03JE0yZSFhUGg/RGQ0QG5QWkRnLVVMIypVW2RsUltuPWhORj9tYl5UcS1gLkxnZyxdO3FXSDdqdVdzRHFUP2U2SEtNMCQvOFpUJypLLS0xLUs2KiUxQlE0Pm5hSDc4O1dRS15JQT8zOiNXUStQLDRUKVxEYHVLTi8tKz87I3NVY2kmMEtnS0NmJWlsZjBjam8vJFsybGlHJWFLbCZwPEc1KkZqRFszblZEJFxrYDNbSUp0MFhNS15RcVlGckJXSSkjSWAhXVEhR3RTPk5DWGtYYl9VJ2sra3NkW3InTltPITNCL2YnIU00MSElVD9MTV9NW1leayoyUTJGZGZDIVlJPTNiTFVqS1ZTZFpIMkkpK1MsLyVidGlrbkhBXz5TV2JiOGdyVSYnXkA4MCFPI0dqIzRyY2wrLW5yYTUvX2ZxJ2o1YDopJyMwYFNhTilIa2RcTCFyUlljQyIkZUtSQ1tKOClEZkJ1L08hPF5FZiVwNy5xXC0mT2g3OEY6QktJQFI7ck8qQSZTNUkvdWFoN0sqR3NnbTMyXWRDdElTSyRvKkpLYztfNjotYTczRTROZ2g4OldSbEcwaXVcPm9uQzFKVC1lZ2w/XnMyJjlQXDolZkdgUGlmVTkxYzpeT0NdUChbSENAYTdOKzVpUnA/Ym8nSiM0S11VJ1hLU15tT1YlNjsnVFFGLE9ZJzM4I0FzYlw5bXIjPFotLTFlOmNBRF0maWgxXV9BSCRPXT5QU2tBIVc6QmRcUnE3aklicGBpWS5CYSdyZWVbRmpoJ0BYcypKV3BzXEYuRk5yTmwrK2dnbTgxbDNKO01CTyUjZm83dC1tQjs8KjdlNS0mZ2E4a3E8VDMuSVVEQkNkTk1ePzNQa1xNJnFSNls2VkVtOSQmM1gqW1kxM1wsSyghXlAkQldabFprcitwNCNxYUlJOz1rVk5BdCpISSRiTCJGTj1OWzs0SyZxckhlK18hO0NLaSE2RWgpPFo4WkM7OGEmQSg/ZldlbmUzPiQoTitbPUgpV1csPlghNlU5SyZeS10pS2RiTilTRl4sT2wnVFstTWZHPFpIJ3BaVDU4bFlYN0lMVj07LyExWWJmZFg4O3BKRThlYiwpT19TOmVLWEpMLThqbiZVSmo5bmdoWU8xPTVKL2h1SDlPOVRrWTFuKjo7WjdZS1BuLEBqU0JXLWJmYW9KLl4xaz5BZWpiM2hUR10panI+SGpBcScmNCdsbDxvQmYnRCVWQFxjVWsjL0BaNnBWNzNuJ28oZEkqYj88PEVLZzAzc29yaFk/ZE1hLXRSYSpXOTNJMFVfbkcvPWpFMV5faVknYy9NQ2RYKDkhRCkmRUJaW2M6Sm84SDNoKFpZNkhRJVtRVyl1OUhLJzBdLXAnP04ma0snLldXKysrYFxARD1DcikoLHBqJnAjWFIrM0tgRGhsPTw4bGo6Ym9RR2ZvcyEmQkZwbGoqKi5sMz8zVllyYjMyLVtDa0ZpVi08M1JFJiRNRyJBVlBmXDQ+Zl4iQGAiVEFjQClvcDtPbF5xNj5mRCcpWicuNzdGJ1pSQnFxVW9ZIV0iXXAwI09CdUYySyQmMDlxMiIjMkYicENwVVxjNi5MZT9lTHFtYEw+RjUoLDlGOTw1dUsqRjhHP0QwOzE5JTNaYFlUJW87X1VKZjIsQ2YqTFlWQkZAL3NwOjlPa2tYSVdwYWYkNmZvIz0mVlc+XVowUXVWTSljazBgYmlQOHBzblNrU19aOSlDW1dZTDkwZTJtR19FVWE0cHBobiZbbUYnRSNlXDNLa2I7OFInc0kpTC8+YUwpb1YwJEgnL2c8VTJmaVhDbDcsWmBfRjFPMD44T2lIMVFqP2VIKG1UNGk5bzBAKWskY2YiP0giOFcyXmk2LCQpVGowOnJvTy9RRWZNZTsuLVM0TENdOmdRVzZSYiFOS0FSUmBURmpYQk8sJFJEJGFMaS9wcSxEP15QXGdyLFFbZCQ2OyR0bnFkSC8uM2M7c0gubStwQGxaVCFCOmk4YE1eMmVSVm5SJztEMTI2Uyohb1lNInIlZjokPz9CW3VHbElmP1dIQ0dZNnBARFtzLHIhXiJVQD5nbipyPUdPZ2ouL1E1IjVYZFJ0U3JIQFIwTCxAPEdrL0tZZk0wZj1aUSNvbyJmWERlWzZ1az9ISS1hZSJsT2Y/IkFrWU1hTCteUDsqZUxwZjFFKyZVZTBPRlU5Ui5YZ1VlJGVTbVVda2lAX19oS1pXM25UdClNXldHRUQ3LHVoOyRGUDZuIyVpdVtVMkdHUmIqViJBUlZHLzsxQEZUJSM8M002ODMkT006SVpyLC8+XUBWNiYtcmglbC1YazJkaTE9Ujk1SW9pXi5iS2UhO05Maz0uYFFMVFJCbiUnb2BYYTpHWkhWQWR0W1NCJm5dbCFxKElOXjpZPzliME1gUkw4cHAzRCk5WT9EbCNeN1hlTC10OW1JVmBYNzUjNmBrQjFNVlxrITY4PjhgMSM4PC46VFEoKUM1Mk4rKnEvRllAIWlEQklCWjUzWztFQDEiRT40KV4oUWtacy1JWTIvW3JOQ0UjTSZCVFFXMCtYRDdULSM2Z09VNjozNSY3M3N1WipjOU1dcmFFK0RlbHRyKClLJkNzJlhaUCpvYCs0PiNyWEAraFxFVVcrKChjYSNOVUZbb003Zz9rRnUrPiFKbU1gVVw7O0FtPytfXVg2TFttWCtvNmZoNzUkVF0oZUxMSzI9P1BSa2sjWlxdOTpYTEROWF1rKD8mIUsyYjtvRDAlZi9ZOmJnNiVRS2NnU11aNi4hLTcuSW1jUzxLUlltMEAvIjYuWGEwbCRkTUJrLXBVU21TcVZKby5DOScpZEROOXBZMV5VX1hOdFNlZU4iXWxGQjBTQlA1PnBKTEpjfj5lbmRzdHJlYW0KZW5kb2JqCnhyZWYKMCAxMQowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwNzMgMDAwMDAgbiAKMDAwMDAwMDEzNCAwMDAwMCBuIAowMDAwMDAwMjQxIDAwMDAwIG4gCjAwMDAwMDAzNTMgMDAwMDAgbiAKMDAwMDAwMDQzNiAwMDAwMCBuIAowMDAwMDAwNTUxIDAwMDAwIG4gCjAwMDAwMDA3NTUgMDAwMDAgbiAKMDAwMDAwMDgyMyAwMDAwMCBuIAowMDAwMDAxMTA2IDAwMDAwIG4gCjAwMDAwMDExNjUgMDAwMDAgbiAKdHJhaWxlcgo8PAovSUQgCls8YTc5NGY0OWE1NmExNjE5MWQ0OTgxODFiMjk3ZmJlZmI+PGE3OTRmNDlhNTZhMTYxOTFkNDk4MTgxYjI5N2ZiZWZiPl0KJSBSZXBvcnRMYWIgZ2VuZXJhdGVkIFBERiBkb2N1bWVudCAtLSBkaWdlc3QgKGh0dHA6Ly93d3cucmVwb3J0bGFiLmNvbSkKCi9JbmZvIDggMCBSCi9Sb290IDcgMCBSCi9TaXplIDExCj4+CnN0YXJ0eHJlZgozODg2CiUlRU9GCg=="}];
 const globalStats = {"Q01": {"B": 100.0}, "Q02": {"B": 50.0, "A": 50.0}, "Q03": {"B": 100.0}, "Q04": {"A": 100.0}, "Q05": {"B": 50.0, "C": 50.0}, "Q06": {"A": 50.0, "B": 50.0}, "Q07": {"C": 100.0}, "Q08": {"C": 100.0}, "Q09": {"A": 100.0}, "Q10": {"B": 50.0, "A": 50.0}, "Q11": {"B": 50.0, "A": 50.0}, "Q12": {"A": 50.0, "C": 50.0}, "Q13": {"C": 100.0}, "Q14": {"A": 50.0, "C": 50.0}, "Q15": {"C": 50.0, "D": 50.0}, "Q16": {"B": 100.0}, "Q17": {"A": 100.0}, "Q18": {"B": 50.0, "A": 50.0}, "Q19": {"B": 100.0, "A": 50.0}, "Q21": {"C": 100.0}, "Q22": {"B": 50.0, "C": 50.0}, "Q23": {"D": 100.0}, "Q24": {"C": 50.0, "A": 50.0}, "Q25": {"A": 50.0, "B": 50.0}, "Q26": {"C": 100.0}, "Q27": {"C": 50.0, "D": 50.0}, "Q29": {"D": 100.0}, "Q30": {"D": 100.0}, "Q28": {"D": 50.0}, "Q31": {"average": 10.0}};
-const allGamesList = ["Animal Crossing", "Just Dance", "Mario Kart", "Monopoly", "Roblox", "Uno"];
+const allGamesList = [{"name": "Animal Crossing", "count": 1}, {"name": "Just Dance", "count": 1}, {"name": "Mario Kart", "count": 1}, {"name": "Monopoly", "count": 1}, {"name": "Roblox", "count": 1}, {"name": "Uno", "count": 1}];
 const GITHUB_FRAME_URL = "https://sebastiano-mazzarisi.github.io/Test/Frame.pdf";
 
 let currentIndex = -1;
 let currentItem = null;
+document.body.tabIndex = -1;
+document.body.focus();
 
-// --- FUNZIONI CALCOLO SERENITÀ ---
+function getScrollElement() {
+    const isDesktop = window.innerWidth >= 1024;
+    return (currentIndex === -1 && isDesktop) ? document.getElementById('menu') : document.querySelector('.container');
+}
+
 function calculateSerenityBreakdown(rawData) {
     if (!rawData) return null;
-    
     const breakdown = [];
     let totalPoints = 0;
-    
-    const weights = {
-        'Q10': 20,
-        'Q11': 20,
-        'Q28': 15,
-        'Q29': 15,
-        'Q30': 15,
-        'Q31': 15
-    };
-    
+    const weights = {'Q10': 20, 'Q11': 20, 'Q28': 15, 'Q29': 15, 'Q30': 15, 'Q31': 15};
     const questionsText = {
-        'Q10': '10. Cosa pensi della donazione?',
-        'Q11': '11. Come ti senti pensando alla donazione?',
-        'Q28': '28. Quanto sei felice?',
-        'Q29': '29. Soddisfazione vita a scuola?',
-        'Q30': '30. Contentezza vita a casa?',
-        'Q31': '31. Biglietti regalo (0-10)'
+        'Q10': '10. Cosa pensi della donazione?', 'Q11': '11. Come ti senti pensando alla donazione?',
+        'Q28': '28. Quanto sei felice?', 'Q29': '29. Soddisfazione vita a scuola?',
+        'Q30': '30. Contentezza vita a casa?', 'Q31': '31. Biglietti regalo (0-10)'
     };
     
     for (const key of ['Q10', 'Q11', 'Q28', 'Q29', 'Q30', 'Q31']) {
         const rawValue = (rawData[key] || '').trim().toUpperCase();
         const maxPoints = weights[key];
         const midPoints = maxPoints / 2;
+        let points = 0, interpretation = '', displayValue = rawValue;
         
-        let points = 0;
-        let interpretation = '';
-        let displayValue = rawValue;
-        
-        // Gestione valori mancanti
         if (['0', '', '*', 'NAN'].includes(rawValue)) {
-            points = midPoints;
-            interpretation = 'Mancante (media)';
-            displayValue = '-';
-        }
-        // Q10: A=Bella (Max), B=Brutta (0), C=Non sicuro (Media)
-        else if (key === 'Q10') {
-            if (rawValue === 'A') {
-                points = maxPoints;
-                interpretation = 'Positivo (È bella)';
-            } else if (rawValue === 'C') {
-                points = midPoints;
-                interpretation = 'Incerto (Non sicuro)';
-            } else if (rawValue === 'B') {
-                points = 0;
-                interpretation = 'Negativo (È brutta)';
-            }
-        }
-        // Q11: A=Felice (Max), B=Triste (0), C=Non lo so (Media)
-        else if (key === 'Q11') {
-            if (rawValue === 'A') {
-                points = maxPoints;
-                interpretation = 'Positivo (Felice)';
-            } else if (rawValue === 'C') {
-                points = midPoints;
-                interpretation = 'Incerto (Non so)';
-            } else if (rawValue === 'B') {
-                points = 0;
-                interpretation = 'Negativo (Triste)';
-            }
-        }
-        // Q28, Q29, Q30: C/D=Positivi (Max), A/B=Negativi (0)
-        else if (['Q28', 'Q29', 'Q30'].includes(key)) {
-            if (['C', 'D'].includes(rawValue)) {
-                points = maxPoints;
-                interpretation = 'Positivo (C/D)';
-            } else if (['A', 'B'].includes(rawValue)) {
-                points = 0;
-                interpretation = 'Negativo (A/B)';
-            }
-        }
-        // Q31: Numero biglietti (0-10)
-        else if (key === 'Q31') {
+            points = midPoints; interpretation = 'Mancante (media)'; displayValue = '-';
+        } else if (key === 'Q10') {
+            if (rawValue === 'A') { points = maxPoints; interpretation = 'Positivo (È bella)'; }
+            else if (rawValue === 'C') { points = midPoints; interpretation = 'Incerto (Non sicuro)'; }
+            else if (rawValue === 'B') { points = 0; interpretation = 'Negativo (È brutta)'; }
+        } else if (key === 'Q11') {
+            if (rawValue === 'A') { points = maxPoints; interpretation = 'Positivo (Felice)'; }
+            else if (rawValue === 'C') { points = midPoints; interpretation = 'Incerto (Non so)'; }
+            else if (rawValue === 'B') { points = 0; interpretation = 'Negativo (Triste)'; }
+        } else if (['Q28', 'Q29', 'Q30'].includes(key)) {
+            if (['C', 'D'].includes(rawValue)) { points = maxPoints; interpretation = 'Positivo (C/D)'; }
+            else if (['A', 'B'].includes(rawValue)) { points = 0; interpretation = 'Negativo (A/B)'; }
+        } else if (key === 'Q31') {
             try {
                 const numeri = rawValue.replace(/\D/g, '');
                 if (numeri) {
                     const numBiglietti = parseInt(numeri);
                     points = Math.min((numBiglietti / 10) * maxPoints, maxPoints);
                     interpretation = `Altruismo (${numBiglietti} biglietti)`;
-                } else {
-                    points = midPoints;
-                    interpretation = 'Non numerico (media)';
-                }
-            } catch {
-                points = 0;
-                interpretation = 'Errore lettura';
-            }
+                } else { points = midPoints; interpretation = 'Non numerico (media)'; }
+            } catch { points = 0; interpretation = 'Errore lettura'; }
         }
-        
         totalPoints += points;
-        breakdown.push({
-            question: questionsText[key],
-            value: displayValue,
-            interpretation: interpretation,
-            points: points,
-            maxPoints: maxPoints
-        });
+        breakdown.push({question: questionsText[key], value: displayValue, interpretation: interpretation, points: points, maxPoints: maxPoints});
     }
-    
-    const totalFinal = Math.min(totalPoints, 100);
-    const totalRounded = Math.ceil(totalFinal);
-    
-    return {
-        breakdown: breakdown,
-        total: totalFinal,
-        totalRounded: totalRounded
-    };
+    return {breakdown: breakdown, total: Math.min(totalPoints, 100), totalRounded: Math.ceil(Math.min(totalPoints, 100))};
 }
 
 function showSerenityBreakdown(item) {
-    if (!item.serenity_raw_data) {
-        alert('Dati di calcolo non disponibili per questo questionario.');
-        return;
-    }
-    
+    if (!item.serenity_raw_data) { alert('Dati di calcolo non disponibili.'); return; }
     const result = calculateSerenityBreakdown(item.serenity_raw_data);
-    if (!result) {
-        alert('Impossibile calcolare il breakdown.');
-        return;
-    }
+    if (!result) return;
     
-    // Mappa per decodificare le risposte
     const answerMap = {
         'Q10': { 'A': 'È una cosa bella', 'B': 'È una cosa brutta', 'C': 'Non ne sono sicuro/a' },
         'Q11': { 'A': 'Felice', 'B': 'Triste', 'C': 'Non lo so' },
         'Q28': { 'A': '☹️ Per niente felice', 'B': '😐 Poco felice', 'C': '🙂 Abbastanza felice', 'D': '😄 Molto felice' },
         'Q29': { 'A': '☹️ Per niente soddisfatta/o', 'B': '😐 Poco soddisfatta/o', 'C': '🙂 Abbastanza soddisfatta/o', 'D': '😄 Molto soddisfatta/o' },
         'Q30': { 'A': '☹️ Per niente contenta/o', 'B': '😐 Poco contenta/o', 'C': '🙂 Abbastanza contenta/o', 'D': '😄 Molto contenta/o' },
-        'Q31': {}  // Per Q31 usiamo direttamente il numero
+        'Q31': {}
     };
     
-    let html = '<table class="serenity-breakdown-table">';
-    html += '<thead><tr>';
-    html += '<th>Domanda</th>';
-    html += '<th style="width:130px;">Risposta</th>';
-    html += '<th style="width:120px; text-align:right;">Punti</th>';
-    html += '</tr></thead><tbody>';
-    
+    let html = '<table class="serenity-breakdown-table"><thead><tr><th>Domanda e risposta</th><th style="width:120px; text-align:right;">Punti</th></tr></thead><tbody>';
     result.breakdown.forEach((item, index) => {
         const qKey = ['Q10', 'Q11', 'Q28', 'Q29', 'Q30', 'Q31'][index];
         let displayAnswer = '';
+        if (item.value === '-' || item.value === '') displayAnswer = '(nessuna risposta)';
+        else if (qKey === 'Q31') displayAnswer = `${item.value.replace(/\D/g, '')} biglietti`;
+        else displayAnswer = answerMap[qKey][item.value] || item.value;
         
-        if (item.value === '-' || item.value === '') {
-            displayAnswer = '(nessuna risposta)';
-        } else if (qKey === 'Q31') {
-            // Per Q31 mostra direttamente il numero di biglietti
-            const numBiglietti = item.value.replace(/\D/g, '');
-            displayAnswer = numBiglietti ? `${numBiglietti} biglietti` : '(nessuna risposta)';
-        } else {
-            // Decodifica la lettera nella risposta testuale
-            displayAnswer = answerMap[qKey][item.value] || item.value;
-        }
-        
-        html += '<tr>';
-        html += `<td class="breakdown-question">${item.question}</td>`;
-        html += `<td style="padding: 10px;">${displayAnswer}</td>`;
-        html += `<td class="breakdown-points">${item.points.toFixed(1)} / ${item.maxPoints}</td>`;
-        html += '</tr>';
+        html += `<tr><td><div class="breakdown-question">${item.question}</div><div class="breakdown-answer">${displayAnswer}</div></td><td class="breakdown-points">${item.points.toFixed(1)} / ${item.maxPoints}</td></tr>`;
     });
-    
-    html += '</tbody></table>';
-    html += `<div class="breakdown-total">`;
-    html += `TOTALE: ${result.total.toFixed(2)} → Arrotondato: ${result.totalRounded}%`;
-    html += `</div>`;
-    
+    html += `</tbody></table><div class="breakdown-total">TOTALE: ${result.total.toFixed(2)} → Arrotondato: ${result.totalRounded}%</div>`;
     document.getElementById('serenityModalContent').innerHTML = html;
     document.getElementById('serenityModal').style.display = 'flex';
     document.body.classList.add('modal-open');
@@ -388,81 +304,51 @@ function showSerenityBreakdown(item) {
 function renderMenu() {
     const menu = document.getElementById('menu');
     menu.innerHTML = '';
+    document.getElementById('title').innerText = `Questionari AVIS (${allData.length})`;
     allData.forEach((item, idx) => {
         const div = document.createElement('div');
         div.className = 'menu-item';
-        
-        // Mostra badge solo se opt non è vuoto
-        let badgeHtml = '';
-        if (item.opt) {
-            badgeHtml = `<span class="opt-badge" onclick="event.stopPropagation(); showSerenityBreakdown(allData[${idx}])">${item.opt}</span>`;
-        }
-        
-        div.innerHTML = `
-            <div class="menu-item-left">
-                <span class="menu-item-id">${item.id}</span>
-                <span class="menu-item-sex">${item.sex}</span>
-            </div>
-            ${badgeHtml}
-        `;
-        
-        // Click sulla row apre il dettaglio
-        div.addEventListener('click', (e) => {
-            if (!e.target.classList.contains('opt-badge')) {
-                showDetail(idx);
-            }
-        });
-        
+        let badgeHtml = item.opt ? `<span class="opt-badge" onclick="event.stopPropagation(); showSerenityBreakdown(allData[${idx}])">${item.opt}</span>` : '';
+        div.innerHTML = `<div class="menu-item-left"><span class="menu-item-id">${item.id}</span><span class="menu-item-sex">${item.sex}</span></div>${badgeHtml}`;
+        div.addEventListener('click', (e) => { if (!e.target.classList.contains('opt-badge')) showDetail(idx); });
         menu.appendChild(div);
     });
+    const spacer = document.createElement('div');
+    spacer.style.height = '100px'; spacer.style.gridColumn = '1 / -1';
+    menu.appendChild(spacer);
 }
 
 function showDetail(idx) {
     currentIndex = idx;
     currentItem = allData[idx];
-    
-    // Mostra titolo con o senza opt
     let titleHtml = currentItem.id;
-    if (currentItem.opt) {
-        titleHtml += ` • <span class="opt-badge" style="cursor:pointer; display:inline-block; vertical-align:middle;" onclick="showSerenityBreakdown(currentItem)">${currentItem.opt}</span>`;
-    }
+    if (currentItem.opt) titleHtml += ` • <span class="opt-badge" style="cursor:pointer; display:inline-block; vertical-align:middle;" onclick="showSerenityBreakdown(currentItem)">${currentItem.opt}</span>`;
     document.getElementById('title').innerHTML = titleHtml;
-    
-    // Toggle buttons
+    document.querySelector('.header-content').classList.add('detail-mode');
     ['prevBtn', 'homeBtn', 'viewBtn', 'printBtn', 'nextBtn'].forEach(id => document.getElementById(id).style.display = 'flex');
-    
     document.getElementById('menu').style.display = 'none';
     const detail = document.getElementById('detail');
     detail.className = 'detail active';
     
-    // --- ALWAYS GENERATE 4 COLUMN STRUCTURE ---
+    // --- DISTRIBUZIONE SU 4 COLONNE LOGICHE (Il CSS gestirà 1, 2 o 4 visive) ---
     const cols = [[], [], [], []]; 
-    
     currentItem.answers.forEach((ans, ansIdx) => {
         const num = parseInt(ans.key_id.replace(/\D/g, ''));
-        
-        let colIdx = 0;
-        if (num <= 9) colIdx = 0;        
-        else if (num <= 18) colIdx = 1;  
-        else if (num <= 26) colIdx = 2;  
-        else colIdx = 3;                 
-        
+        let colIdx = 3; // Default ultima colonna per item non numerici
+        if (!isNaN(num)) {
+            if (num <= 9) colIdx = 0;        
+            else if (num <= 18) colIdx = 1;  
+            else if (num <= 26) colIdx = 2;  
+            else colIdx = 3;                 
+        }
         const errorClass = ans.error ? ans.error : '';
         const answerText = ans.a_html || ans.a;
-        
-        const itemHtml = `
-        <div class="qa-item ${errorClass}" onclick="openQuestionModal(${ansIdx})">
-            <div class="qa-question" title="${ans.q}">${ans.q}</div>
-            <div class="qa-answer">${answerText}</div>
-        </div>`;
-        
+        const itemHtml = `<div class="qa-item ${errorClass}" onclick="openQuestionModal(${ansIdx})"><div class="qa-question" title="${ans.q}">${ans.q}</div><div class="qa-answer">${answerText}</div></div>`;
         cols[colIdx].push(itemHtml);
     });
     
     let html = '<div class="layout-columns">';
-    cols.forEach(colItems => {
-        html += '<div class="col-group">' + colItems.join('') + '</div>';
-    });
+    cols.forEach(colItems => { html += '<div class="col-group">' + colItems.join('') + '</div>'; });
     html += '</div>';
     detail.innerHTML = html;
 }
@@ -472,44 +358,32 @@ function openQuestionModal(ansIdx) {
     document.getElementById('qModalTitle').innerText = ans.q;
     const container = document.getElementById('qModalContent');
     let content = '';
-    
     if (ans.options) {
         const sortedKeys = Object.keys(ans.options).sort();
         const stats = globalStats[ans.key_id] || {};
-        sortedKeys.forEach((key, index) => {
+        sortedKeys.forEach((key) => {
             const text = ans.options[key];
             let isSelected = ans.raw && ans.raw.includes(key);
-            const selectedClass = isSelected ? 'selected' : '';
-            
-            // Checkbox visuale: ☑ per selezionato, ☐ per non selezionato
             const checkbox = isSelected ? '☑' : '☐';
-            
             const percent = stats[key] || 0;
-            
-            // VERDE per scelte effettuate, GIALLO SCURO per le altre
             const barColor = isSelected ? '#28a745' : '#c9a000';
-            
-            content += `
-            <div class="option-wrapper">
-                <div class="option-row ${selectedClass}">
-                    <span><strong>${checkbox}</strong> ${text}</span>
-                </div>
-                <div class="stat-bar-container">
-                     <div class="stat-bar" style="width: ${percent}%; background-color: ${barColor};"></div>
-                     <span class="stat-text">${percent}%</span>
-                </div>
-            </div>`;
+            const selectedClass = isSelected ? 'selected' : '';
+            content += `<div class="option-wrapper"><div class="option-row ${selectedClass}"><span><strong>${checkbox}</strong> ${text}</span></div><div class="stat-bar-container"><div class="stat-bar" style="width: ${percent}%; background-color: ${barColor};"></div><span class="stat-text">${percent}%</span></div></div>`;
         });
     } else {
         content += `<div style="background:#f9f9f9; padding:15px; border-radius:8px; font-style:italic;">${ans.a || '(Nessuna risposta)'}</div>`;
         if (ans.key_id === 'Q31') {
-            const avg = globalStats['Q31'] ? globalStats['Q31'].average : 0;
-            content += `<div style="margin-top:15px; font-weight:bold; color:#667eea; text-align:center;">📊 Media voti: ${avg} / 10</div>`;
+             const avg = globalStats['Q31'] ? globalStats['Q31'].average : 0;
+             content += `<div style="margin-top:15px; font-weight:bold; color:#667eea; text-align:center;">📊 Media voti: ${avg} / 10</div>`;
         }
         if (ans.key_id === 'Q20') {
-            content += '<hr><ul style="max-height:200px; overflow-y:auto; margin-top:10px;">';
-            allGamesList.forEach(game => content += `<li>${game}</li>`);
-            content += '</ul>';
+            const gamesAlphabetic = [...allGamesList].sort((a, b) => a.name.localeCompare(b.name));
+            const gamesByFrequency = [...allGamesList].sort((a, b) => b.count - a.count);
+            content += '<div class="games-columns"><div class="games-column"><h3>📖 Alfabetico</h3><ul>';
+            gamesAlphabetic.forEach(game => { content += `<li><span class="game-name">${game.name}</span><span class="game-count">${game.count}</span></li>`; });
+            content += '</ul></div><div class="games-column"><h3>🔥 Frequenza</h3><ul>';
+            gamesByFrequency.forEach(game => { content += `<li><span class="game-name">${game.name}</span><span class="game-count">${game.count}</span></li>`; });
+            content += '</ul></div></div>';
         }
     }
     container.innerHTML = content;
@@ -523,28 +397,27 @@ function closeModal(id) {
 }
 
 function goBack() {
-    currentIndex = -1;
-    currentItem = null;
+    currentIndex = -1; currentItem = null;
     document.getElementById('title').innerText = 'Questionari AVIS';
+    document.querySelector('.header-content').classList.remove('detail-mode');
     ['prevBtn', 'homeBtn', 'viewBtn', 'printBtn', 'nextBtn'].forEach(id => document.getElementById(id).style.display = 'none');
     document.getElementById('menu').style.display = 'flex';
     document.getElementById('detail').className = 'detail';
     document.getElementById('menu').style.display = ''; 
+    document.body.focus();
 }
 
 function navigate(direction) {
     const max = allData.length - 1;
     if (max < 0) return;
     let newIdx = currentIndex + direction;
-    if (newIdx < 0) newIdx = 0;
-    if (newIdx > max) newIdx = max;
+    if (newIdx < 0) newIdx = 0; if (newIdx > max) newIdx = max;
     showDetail(newIdx);
 }
 
 function viewPDF() {
     const item = allData[currentIndex];
-    const url = GITHUB_FRAME_URL + "#page=" + item.page_num;
-    window.open(url, '_blank');
+    window.open(GITHUB_FRAME_URL + "#page=" + item.page_num, '_blank');
 }
 
 function printPDF() {
@@ -557,15 +430,10 @@ function printPDF() {
     const blob = new Blob([byteArray], { type: 'application/pdf' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `Report_${item.id}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+    a.href = url; a.download = `Report_${item.id}.pdf`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); window.URL.revokeObjectURL(url);
 }
 
-// SWIPE RELOAD
 let touchStartY = 0;
 document.addEventListener('touchstart', e => touchStartY = e.changedTouches[0].screenY, {passive: true});
 document.addEventListener('touchend', e => {
@@ -579,12 +447,17 @@ document.addEventListener('touchend', e => {
 
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { 
-        closeModal('questionModal'); 
-        closeModal('serenityModal');
-        if (currentIndex === -1) return; // Se siamo nel menu, non fare altro
-        goBack(); 
+        if (document.getElementById('questionModal').style.display === 'flex') { closeModal('questionModal'); return; }
+        if (document.getElementById('serenityModal').style.display === 'flex') { closeModal('serenityModal'); return; }
+        if (currentIndex >= 0) goBack();
     }
-    if (currentIndex >= 0 && document.getElementById('questionModal').style.display !== 'flex' && document.getElementById('serenityModal').style.display !== 'flex') {
+    const scrollAmount = 100;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const scrollElement = getScrollElement();
+        if (scrollElement) scrollElement.scrollTop += (e.key === 'ArrowDown' ? scrollAmount : -scrollAmount);
+    }
+    if (currentIndex >= 0) {
         if (e.key === 'ArrowRight') navigate(1);
         if (e.key === 'ArrowLeft') navigate(-1);
     }
