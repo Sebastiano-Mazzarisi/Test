@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Elenchi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="color-scheme" content="light only">
+  
+  <link rel="icon" href="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Fare.png?v=1.0" type="image/png">
+  <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Fare.png?v=1.0">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/vfs_fonts.js"></script>
+
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --fg: #2c3e50;
+      --accent: #3498db;
+      --accent-dark: #2980b9;
+      --card-bg: #ffffff;
+      --border: #e0e6ed;
+      --shadow: 0 6px 16px rgba(0,0,0,0.08);
+      --border-radius-card: 12px;
+      --border-radius-element: 8px;
+      --touch-target: 48px;
+      --light-blue-border: #aed6f1;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      font-size: 20px;
+      background-color: var(--bg);
+      color: var(--fg);
+      padding: 1.5rem;
+      line-height: 1.6;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      overflow-x: hidden;
+      overscroll-behavior: none;
+      color-scheme: light;
+    }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--accent);
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    
+    #main-title {
+        cursor: pointer;
+        transition: opacity 0.3s;
+    }
+
+    h1 img {
+        vertical-align: middle;
+        height: 1.2em;
+        width: auto;
+        margin-right: 0.2em;
+        cursor: pointer;
+    }
+    
+    #current-list-title {
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        color: var(--accent);
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+    }
+
+    #home-icon, #manage-lists-btn, #manage-items-btn {
+        cursor: pointer;
+        font-size: 1.2em;
+        margin-left: 0.5rem;
+        color: var(--accent-dark);
+        transition: color 0.2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.2em;
+        height: 1.2em;
+        text-decoration: none;
+    }
+    
+    #home-icon:hover, #manage-lists-btn:hover, #manage-items-btn:hover {
+        color: var(--accent);
+    }
+
+    .section {
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+
+    .card {
+      background: #e6f3ff;
+      border: 2px solid var(--light-blue-border);
+      border-radius: var(--border-radius-card);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 0;
+      transition: border-color 0.5s, box-shadow 0.5s;
+    }
+
+    .is-online .card {
+      border-color: #28a745; 
+      box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+    }
+
+    .is-offline .card {
+      border-color: #dc3545;
+      box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
+    }
+
+    #single-list-view .card {
+      background: #e8f5e8;
+    }
+
+    .note-section .card {
+        background-color: #FFFACD !important;
+    }
+
+    input[type="text"], textarea {
+      font-size: 20px;
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      touch-action: manipulation;
+      border-radius: var(--border-radius-element);
+      border: 1px solid var(--border);
+      background-color: #ffffff !important;
+      color: #2c3e50 !important;
+    }
+
+    input[type="text"]:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+
+    button {
+      font-family: 'Inter', sans-serif;
+      font-size: 20px;
+      border-radius: var(--border-radius-element);
+      background: var(--accent);
+      border: none;
+      color: white;
+      padding: 0.75rem 1.2rem;
+      cursor: pointer;
+      font-weight: 600;
+      margin-right: 0.5rem;
+      transition: all 0.3s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      min-height: var(--touch-target);
+      touch-action: manipulation;
+      user-select: none;
+    }
+
+    button:hover {
+      background: var(--accent-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 1rem 0;
+    }
+
+    .list-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.8rem;
+        background: white;
+        border: 1.5px solid #3498db;
+        border-radius: var(--border-radius-element);
+        margin-bottom: 0.5rem;
+        transition: all 0.3s;
+    }
+    
+    .list-item.completed {
+      background-color: #FFFFE0; 
+      border-color: #E0E0B8;
+    }
+    
+    .list-item.completed input {
+        background-color: transparent !important;
+    }
+    
+    .item-content-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+    }
+    
+    .item-actions-row {
+        display: none;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        width: 100%;
+        padding-top: 0.5rem;
+        margin-top: 0.3rem;
+        border-top: 1px solid #e0e6ed;
+    }
+
+    .manage-mode .list-item .item-actions-row,
+    .manage-items-mode .list-item .item-actions-row {
+        display: flex;
+    }
+
+    .list-name-display, .list-name-input {
+        font-size: 20px;
+        font-weight: 500;
+        color: var(--fg);
+        flex-grow: 1;
+        text-align: left;
+    }
+    
+    .list-name-input {
+      border: 2px solid var(--accent) !important;
+      border-radius: 4px;
+      padding: 0.4rem 0.6rem !important;
+      margin: 0 !important;
+    }
+    
+    .list-item input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-size: 20px;
+      padding: 0.2rem 0.5rem;
+      margin: 0;
+    }
+    
+    .list-item .action-btn, .list-count-display {
+      width: var(--touch-target);
+      height: var(--touch-target);
+      padding: 0;
+      margin: 0;
+      flex-shrink: 0;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      user-select: none;
+    }
+    
+    .list-item .action-btn {
+      font-size: 1.6rem;
+    }
+    
+    .list-item .action-btn:hover, .list-count-display:hover {
+        transform: scale(1.05);
+    }
+    
+    .list-count-display {
+        font-size: 1.2rem;
+        font-weight: 600;
+        border: 2px solid var(--accent);
+        color: var(--accent);
+    }
+
+    .list-count-display:hover {
+        background-color: var(--accent);
+        color: white;
+    }
+    
+    .list-item .move-btn {
+        border: 2px solid #bdc3c7;
+        color: #bdc3c7;
+    }
+    
+    .list-item .rename-btn {
+        border: 2px solid #f39c12;
+        color: #f39c12;
+    }
+    
+    .list-item .select-btn {
+      border: 2px solid #28a745;
+      color: #28a745;
+    }
+    
+    .list-item .delete-btn {
+      border: 2px solid #dc3545;
+      color: #dc3545;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 0.7rem;
+      align-items: center;
+      margin-top: 1rem;
+    }
+
+    #new-list-name::placeholder,
+    #item-input::placeholder,
+    #note-input::placeholder {
+        color: #CCCCCC !important;
+        font-style: italic !important;
+    }
+
+    /* Modal Import */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .modal {
+      background: #fff;
+      width: min(560px, 92vw);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      padding: 1rem;
+    }
+    .modal h3 {
+      margin: 0 0 .75rem 0;
+      color: var(--accent);
+      font-size: 1.3rem;
+    }
+    .modal-list {
+      max-height: 320px;
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .5rem .75rem;
+      background: #fdfdfd;
+      font-size: .95rem;
+      line-height: 1.5;
+    }
+    .modal-list ul{list-style:none;padding:0;margin:0}
+    .modal-list li{display:flex;align-items:center;gap:.5rem;padding:.25rem 0;border-bottom:1px dashed #eee}
+    .modal-list li:last-child{border-bottom:none}
+    .modal-list label{flex:1}
+    .imp-status.ok{color:#28a745}
+    .imp-status.skip{color:#7f8c8d}
+    .imp-status.revived{color:#f39c12}
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: .5rem;
+      margin-top: .75rem;
+    }
+    .btn-secondary {
+      background: #95a5a6;
+    }
+    .btn-secondary:hover {
+      background: #7f8c8d;
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 0.5rem; }
+      h1 { font-size: 1.8rem; }
+      #current-list-title { font-size: 1.6rem; }
+      #current-list-title img { height: 1.0em; }
+      #home-icon, #manage-lists-btn, #manage-items-btn { font-size: 1.0em; }
+      .list-item .action-btn { font-size: 1.4rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="lists-view">
+      <h1 id="main-title">
+          <img id="pdf-export-all-logo" src="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Fare.png" alt="Icona Elenchi" title="Esporta tutti gli elenchi in PDF">
+          Elenchi
+          <span id="manage-lists-btn" title="Gestisci elenchi">⚙️</span>
+      </h1>
+      <div class="section">
+        <div class="card">
+          <ul id="list-names"></ul>
+          <div class="form-row">
+            <input type="text" id="new-list-name" placeholder="Nome nuovo elenco" maxlength="50">
+            <button onclick="addList()">➕</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="single-list-view" style="display: none;">
+      <h1 id="current-list-title">
+          <img id="pdf-export-logo" src="https://raw.githubusercontent.com/Sebastiano-Mazzarisi/Test/main/Fare.png" alt="Icona Elenco" style="cursor: pointer;" title="Esporta in PDF">
+          <span id="list-name-display"></span>
+          <span id="manage-items-btn" title="Gestisci elementi">⚙️</span>
+          <span id="home-icon">🏠</span>
+      </h1>
+      <div class="section">
+        <div class="card">
+          <ul id="item-list"></ul>
+          <div class="form-row">
+            <input type="text" id="item-input" placeholder="Aggiungi una cosa da fare" maxlength="200">
+            <button onclick="addItem()" id="add-item-btn">➕</button>
+          </div>
+        </div>
+      </div>
+      <div class="section note-section">
+          <div class="card">
+              <textarea id="note-input" placeholder="Scrivi qui i tuoi appunti per questo elenco..." rows="5" maxlength="1000"></textarea>
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="import-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="import-title">
+    <div class="modal">
+      <h3 id="import-title">Importa dalla nota</h3>
+      <div class="modal-list" id="import-list-preview"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="cancel-import-btn" type="button">Annulla</button>
+        <button id="confirm-import-btn" type="button">Importa</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  
+  <script>
+    // Configurazione Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyChsZzf69k_JTY0EwbrXyWMhh8uVl9pnbA",
+      authDomain: "elenchicondivisi.firebaseapp.com",
+      projectId: "elenchicondivisi",
+      storageBucket: "elenchicondivisi.appspot.com",
+      messagingSenderId: "615174125565",
+      appId: "1:615174125565:web:7a2b4b0bd6af9cbd6f4b94"
+    };
+
+    let db = null;
+    let isOnline = false;
+    let unsubscribeList = null;
+    let unsubscribeItems = null;
+    let currentList = null;
+    let isManageMode = false;
+    let isManageItemsMode = false;
+    let localDatabase = { lists: JSON.parse(localStorage.getItem('elenchiFare') || '{}') };
+    let listOrder = JSON.parse(localStorage.getItem('elenchiOrder') || '[]');
+    
+    let touchstartX = 0;
+    let touchendX = 0;
+    let touchstartY = 0;
+    let touchendY = 0;
+
+    const listNames = document.getElementById("list-names");
+    const itemList = document.getElementById("item-list");
+    const listNameDisplay = document.getElementById("list-name-display");
+    const newItemInput = document.getElementById("item-input");
+    const newListInput = document.getElementById("new-list-name");
+    const listsView = document.getElementById("lists-view");
+    const singleListView = document.getElementById("single-list-view");
+    const noteInput = document.getElementById("note-input");
+    const homeIcon = document.getElementById("home-icon");
+    const manageListsBtn = document.getElementById("manage-lists-btn");
+    const manageItemsBtn = document.getElementById("manage-items-btn");
+    const addItemBtn = document.getElementById("add-item-btn");
+
+    // Tooltip dinamico per il pulsante "+" in single-list view
+    function updateAddButtonTooltip() {
+        const inSingle = singleListView.style.display === 'block';
+        if (!inSingle) return; // Non toccare il tooltip fuori dalla vista singola
+        const itemEmpty = newItemInput.value.trim() === "";
+        const noteFilled = noteInput.value.trim() !== "";
+        addItemBtn.title = (itemEmpty && noteFilled) ? "Importa dalla nota" : "Aggiungi elemento";
+    }
+
+
+    // Modal elements and buffer
+    const importBackdrop = document.getElementById('import-modal-backdrop');
+    const importPreview = document.getElementById('import-list-preview');
+    const cancelImportBtn = document.getElementById('cancel-import-btn');
+    const confirmImportBtn = document.getElementById('confirm-import-btn');
+    let importBuffer = [];
+    // --- Sticky note draft in localStorage ---
+    function draftKey(listName){ return 'noteDraft:'+listName; }
+    function getNoteDraft(listName){ try { return localStorage.getItem(draftKey(listName)) || ''; } catch(e){ return ''; } }
+    function setNoteDraft(listName, text){ try { localStorage.setItem(draftKey(listName), text || ''); } catch(e){} }
+    function clearNoteDraft(listName){ try { localStorage.removeItem(draftKey(listName)); } catch(e){} }
+    
+
+    // Debounce utility
+    function debounce(fn, delay){
+        let t; return function(...args){ clearTimeout(t); t = setTimeout(()=>fn.apply(this,args), delay); };
+    }
+
+
+    // FUNZIONE BEEP
+    let audioCtx; 
+    function playBeep(frequency, duration, volume) {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume().then(() => {
+                _createAndPlaySound(frequency, duration, volume);
+            });
+        } else {
+            _createAndPlaySound(frequency, duration, volume);
+        }
+    }
+    function _createAndPlaySound(frequency, duration, volume) {
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + duration / 1000);
+    }
+
+    function toggleManageMode() {
+        isManageMode = !isManageMode;
+        manageListsBtn.textContent = isManageMode ? '✖️' : '⚙️';
+        manageListsBtn.title = isManageMode ? 'Termina gestione' : 'Gestisci elenchi';
+        loadListsLocal();
+    }
+
+    function toggleManageItemsMode() {
+        isManageItemsMode = !isManageItemsMode;
+        manageItemsBtn.textContent = isManageItemsMode ? '✖️' : '⚙️';
+        manageItemsBtn.title = isManageItemsMode ? 'Termina gestione' : 'Gestisci elementi';
+        singleListView.classList.toggle('manage-items-mode', isManageItemsMode);
+    }
+    
+    function updateConnectionStatus() {
+        const views = [listsView, singleListView];
+        if (isOnline) {
+            views.forEach(view => {
+                view.classList.remove('is-offline');
+                view.classList.add('is-online');
+            });
+        } else {
+            views.forEach(view => {
+                view.classList.remove('is-online');
+                view.classList.add('is-offline');
+            });
+        }
+    }
+
+    function getItemCount(listName) {
+        const list = localDatabase.lists[listName];
+        if (!list || !Array.isArray(list.items)) return 0;
+        return list.items.filter(item => !item.done).length;
+    }
+
+    async function updateListCounts(listName) {
+        const list = localDatabase.lists[listName];
+        if (!list || !Array.isArray(list.items)) return;
+        
+        list.itemCount = list.items.length;
+        list.pendingCount = list.items.filter(item => !item.done).length;
+
+        if (isOnline && db) {
+            try {
+                await db.collection("lists").doc(listName).update({
+                    itemCount: list.itemCount,
+                    pendingCount: list.pendingCount,
+                });
+            } catch (error) { console.error("Errore sinc conteggi:", error); }
+        }
+        saveToLocalStorage();
+        if (currentList === null) loadListsLocal();
+    }
+
+    function initFirebase() {
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            db.collection("_test").doc("connectivity").set({ test: true, timestamp: firebase.firestore.FieldValue.serverTimestamp() })
+            .then(() => {
+                db.collection("_test").doc("connectivity").delete(); isOnline = true; updateConnectionStatus(); loadLists();
+            }).catch(() => fallbackToLocal());
+        } catch (error) { fallbackToLocal(); }
+    }
+
+    function fallbackToLocal() { isOnline = false; updateConnectionStatus(); loadListsLocal(); }
+    
+    function loadLists() {
+        if (!db) return fallbackToLocal();
+        unsubscribeList = db.collection("lists").orderBy("order", "asc").onSnapshot(async snapshot => {
+            listOrder = snapshot.docs.map(doc => doc.id);
+            const newLocalLists = {};
+            for (const doc of snapshot.docs) {
+                const listName = doc.id;
+                const itemsSnapshot = await db.collection("lists").doc(listName).collection("items").get();
+                const oldL = localDatabase.lists[listName] || {};
+                const server = doc.data() || {};
+                const mergedNote = (server.note && server.note.trim()) ? server.note : (oldL.note || '');
+                newLocalLists[listName] = { ...oldL, ...server, note: mergedNote, items: itemsSnapshot.docs.map(d => ({ id: d.id, ...d.data() })) };
+            }
+            localDatabase.lists = newLocalLists; loadListsLocal(); saveToLocalStorage();
+        }, () => fallbackToLocal());
+    }
+
+    async function addList() {
+        const name = newListInput.value.trim(); if (!validateListName(name)) return;
+        if (isOnline && db) {
+            try { if ((await db.collection("lists").doc(name).get()).exists) { alert(`L'elenco "${name}" esiste già.`); return; }
+                await db.collection("lists").doc(name).set({ name, createdAt: firebase.firestore.FieldValue.serverTimestamp(), order: listOrder.length, note: "" });
+                newListInput.value = ""; selectList(name);
+            } catch { saveListLocally(name); }
+        } else { saveListLocally(name); }
+    }
+
+    function saveListLocally(name) {
+        if (localDatabase.lists[name]) { alert(`L'elenco "${name}" esiste già.`); return; }
+        localDatabase.lists[name] = { name, items: [], createdAt: new Date().toISOString(), order: listOrder.length, note: "" };
+        listOrder.push(name); saveToLocalStorage(); newListInput.value = ""; loadListsLocal(); selectList(name);
+    }
+
+    function deleteList(listName) {
+        if (!confirm(`Eliminare "${listName}"?\nTutti gli elementi saranno cancellati.`)) return;
+        if (isOnline && db) {
+            db.collection("lists").doc(listName).collection("items").get().then(snap => {
+                const batch = db.batch(); snap.forEach(doc => batch.delete(doc.ref)); return batch.commit();
+            }).then(() => db.collection("lists").doc(listName).delete()).then(() => { if (currentList === listName) backToLists(); });
+        } else {
+            delete localDatabase.lists[listName]; listOrder = listOrder.filter(n => n !== listName);
+            saveToLocalStorage(); if (currentList === listName) backToLists(); loadListsLocal();
+        }
+    }
+
+    function loadListsLocal() {
+        listNames.innerHTML = "";
+        listsView.classList.toggle('manage-mode', isManageMode);
+        if (listOrder.length === 0) { showEmptyLists(); } else {
+            listOrder.forEach((listName, index) => { if (localDatabase.lists[listName]) renderListItem(listName, index, listOrder.length); });
+        }
+    }
+
+    function enableInlineEdit(nameContainer, oldName) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = oldName;
+        input.className = 'list-name-input';
+        
+        const originalParent = nameContainer.parentNode;
+        
+        const save = async () => {
+            const newName = input.value.trim();
+            if (newName && newName !== oldName) {
+                const success = await renameList(oldName, newName);
+                if (!success) {
+                    originalParent.replaceChild(nameContainer, input);
+                    nameContainer.textContent = oldName;
+                }
+            } else {
+                originalParent.replaceChild(nameContainer, input);
+                nameContainer.textContent = oldName;
+            }
+        };
+
+        input.onblur = save;
+        input.onkeydown = (e) => {
+            if (e.key === 'Enter') input.blur();
+            if (e.key === 'Escape') {
+                nameContainer.textContent = oldName;
+                originalParent.replaceChild(nameContainer, input);
+            }
+        };
+
+        originalParent.replaceChild(input, nameContainer);
+        input.focus();
+        input.select();
+    }
+    
+    function renderListItem(name, index, total) {
+        const li = document.createElement("li");
+        li.className = "list-item";
+        const contentRow = document.createElement("div");
+        contentRow.className = "item-content-row";
+        const nameDisplay = document.createElement("div");
+        nameDisplay.className = "list-name-display";
+        nameDisplay.textContent = name;
+        nameDisplay.onclick = () => selectList(name);
+        const renameOrCountButton = document.createElement("div");
+        if (isManageMode) {
+            renameOrCountButton.className = "action-btn rename-btn";
+            renameOrCountButton.innerHTML = '✏️';
+            renameOrCountButton.title = 'Rinomina elenco';
+        } else {
+            renameOrCountButton.className = "list-count-display";
+            renameOrCountButton.textContent = getItemCount(name);
+            renameOrCountButton.title = "Rinomina elenco";
+        }
+        renameOrCountButton.onclick = (e) => { e.stopPropagation(); enableInlineEdit(nameDisplay, name); };
+        contentRow.append(nameDisplay, renameOrCountButton);
+        const actionsRow = document.createElement("div");
+        actionsRow.className = "item-actions-row";
+        ['up', 'down', 'delete'].forEach(action => {
+            const btn = document.createElement("button");
+            if (action === 'up') {
+                btn.textContent = "⬆️"; btn.className = "action-btn move-btn";
+                btn.onclick = () => moveList(name, 'up');
+                if (index === 0) btn.style.visibility = 'hidden';
+            } else if (action === 'down') {
+                btn.textContent = "⬇️"; btn.className = "action-btn move-btn";
+                btn.onclick = () => moveList(name, 'down');
+                if (index === total - 1) btn.style.visibility = 'hidden';
+            } else {
+                btn.textContent = "🗑️"; btn.className = "action-btn delete-btn";
+                btn.onclick = () => deleteList(name);
+            }
+            actionsRow.appendChild(btn);
+        });
+        li.append(contentRow, actionsRow);
+        listNames.appendChild(li);
+    }
+    
+    function renderItem(item, itemId, index, total) {
+        const li = document.createElement("li");
+        li.className = "list-item";
+        if(item.done) li.classList.add('completed');
+        const contentRow = document.createElement("div");
+        contentRow.className = "item-content-row";
+        const textInput = document.createElement("input");
+        textInput.type = "text";
+        textInput.value = item.text;
+        textInput.onblur = () => updateItem(itemId, { text: textInput.value });
+        textInput.onkeydown = e => { if (e.key === 'Enter') textInput.blur(); };
+        if (item.done) { textInput.style.textDecoration = "line-through"; textInput.style.color = "#7f8c8d"; }
+        const toggleBtn = document.createElement("button");
+        toggleBtn.textContent = item.done ? "✅" : "⭕";
+        toggleBtn.className = "action-btn select-btn";
+        toggleBtn.onclick = () => {
+            playBeep(200, 150, 1.4); 
+            updateItem(itemId, { done: !item.done });
+        };
+        contentRow.append(textInput, toggleBtn);
+        const actionsRow = document.createElement("div");
+        actionsRow.className = "item-actions-row";
+        ['up', 'down', 'delete'].forEach(action => {
+            const btn = document.createElement("button");
+            if (action === 'up') {
+                btn.textContent = "⬆️"; btn.className = "action-btn move-btn";
+                btn.onclick = () => moveItem(itemId, 'up');
+                if (index === 0) btn.style.visibility = 'hidden';
+            } else if (action === 'down') {
+                btn.textContent = "⬇️"; btn.className = "action-btn move-btn";
+                btn.onclick = () => moveItem(itemId, 'down');
+                if (index === total - 1) btn.style.visibility = 'hidden';
+            } else {
+                btn.textContent = "🗑️"; btn.className = "action-btn delete-btn";
+                btn.onclick = () => deleteItem(itemId);
+            }
+            actionsRow.appendChild(btn);
+        });
+        li.append(contentRow, actionsRow);
+        itemList.appendChild(li);
+    }
+
+    function selectList(name) {
+        if (currentList && currentList !== name && noteInput) {
+            try { updateNote(currentList, noteInput.value.trim()); } catch(e){}
+        }
+
+        currentList = name; listNameDisplay.textContent = name;
+        listsView.style.display = 'none'; singleListView.style.display = 'block';
+        if (isOnline) loadItemsFirebase(); else loadItemsLocal();
+        // PATCH: Prioritize draft note for resilience
+        noteInput.value = getNoteDraft(currentList) || localDatabase.lists[currentList]?.note || "";
+        updateConnectionStatus();
+        updateAddButtonTooltip();
+    }
+
+    function backToLists() {
+        if (currentList && noteInput) {
+            try { updateNote(currentList, noteInput.value.trim()); } catch(e){}
+        }
+
+        currentList = null; listsView.style.display = 'block'; singleListView.style.display = 'none';
+        if (unsubscribeItems) { unsubscribeItems(); unsubscribeItems = null; }
+        isManageMode = false; isManageItemsMode = false;
+        loadListsLocal(); updateConnectionStatus();
+        updateAddButtonTooltip();
+    }
+
+    
+    function findExistingItemCI(listName, text) {
+        const items = (localDatabase.lists[listName]?.items) || [];
+        const target = (text || "").trim().toLowerCase();
+        return items.find(it => (it.text || "").trim().toLowerCase() == target) || null;
+    }
+
+    function loadItemsFirebase() {
+        if (!db || !currentList) return;
+        unsubscribeItems = db.collection("lists").doc(currentList).collection("items").orderBy("order", "asc").onSnapshot(async snapshot => {
+            if (localDatabase.lists[currentList]) {
+                localDatabase.lists[currentList].items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                await updateListCounts(currentList);
+            }
+            loadItemsLocal();
+        });
+    }
+
+    // --- IMPORT MODAL LOGIC ---
+    function parseNoteToItems(noteText) {
+        return noteText.split(/[\n,]+/).map(s => s.trim()).filter(s => s.length > 0);
+    }
+
+    function showImportModal(items) {
+        // PATCH: Filter to only hide items that are present AND NOT done.
+        const filtered = items.filter(it => {
+            const existingItem = findExistingItemCI(currentList, it);
+            return !(existingItem && !existingItem.done);
+        });
+
+        importBuffer = filtered.slice();
+        const ul = document.createElement('ul');
+        filtered.forEach((it, i) => {
+            const li = document.createElement('li');
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.checked = true;
+            cb.id = 'imp_'+i;
+            cb.name = 'import-item';
+            cb.value = it;
+            const label = document.createElement('label');
+            label.setAttribute('for','imp_'+i);
+            label.textContent = it;
+            const status = document.createElement('span');
+            status.className = 'imp-status';
+            li.append(cb, label, status);
+            ul.appendChild(li);
+        });
+        importPreview.innerHTML = '';
+        
+        if (items.length !== filtered.length) {
+            const note = document.createElement('div');
+            note.style.fontSize = '.85rem';
+            note.style.margin = '0 0 .5rem 0';
+            note.style.opacity = '0.8';
+            // PATCH: Update message to be clearer
+            note.textContent = `${items.length - filtered.length} elemento/i non mostrato/i perché già presente/i (e non barrati).`;
+            importPreview.appendChild(note);
+        }
+        importPreview.appendChild(ul);
+        importBackdrop.style.display = 'flex';
+    }
+
+    function closeImportModal() {
+        importBackdrop.style.display = 'none';
+        importBuffer = [];
+    }
+
+    async function doImportItems() {
+        if (!currentList || importBuffer.length === 0) {
+            closeImportModal();
+            return;
+        }
+
+        const selectedItemsToImport = Array.from(importPreview.querySelectorAll('input[type=checkbox]:checked')).map(cb => cb.value);
+        if (selectedItemsToImport.length === 0) {
+             closeImportModal();
+             return;
+        }
+
+        const startIndex = (localDatabase.lists[currentList]?.items || []).length;
+        
+        // Generic import logic
+        const importLogic = async (text, order) => {
+            const existingItem = findExistingItemCI(currentList, text);
+            if (existingItem) {
+                if (existingItem.done) {
+                    await updateItem(existingItem.id, { done: false });
+                }
+                // If it exists and is not done, we skip it.
+            } else {
+                // Item does not exist, so we add it.
+                if (isOnline && db) {
+                     await db.collection("lists").doc(currentList).collection("items").add({
+                        text,
+                        done: false,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        order
+                    });
+                } else {
+                    await addItemLocally(text, order);
+                }
+            }
+        };
+
+        try {
+            let order = startIndex;
+            for (const text of selectedItemsToImport) {
+                // Use no-await-in-loop because we want sequential processing for order
+                // eslint-disable-next-line no-await-in-loop
+                await importLogic(text, order++);
+            }
+        } catch (e) {
+            console.error('Errore durante l\'import, alcuni elementi potrebbero non essere stati processati:', e);
+            alert('Si è verificato un errore durante l\'importazione.');
+        }
+
+        // PATCH: Remove the orphan `await` syntax error.
+        closeImportModal();
+        updateAddButtonTooltip();
+    }
+
+
+    cancelImportBtn.addEventListener('click', closeImportModal);
+    confirmImportBtn.addEventListener('click', doImportItems);
+
+    // --- END IMPORT MODAL LOGIC ---
+
+    async function addItem() {
+        const text = newItemInput.value.trim();
+
+        if (!text && noteInput.value.trim() !== "") {
+            const lista = parseNoteToItems(noteInput.value);
+            if (lista.length > 0) {
+                showImportModal(lista);
+            }
+            return;
+        }
+
+        if (!validateItemText(text)) return;
+        const items = localDatabase.lists[currentList]?.items || [];
+        const newOrder = items.length;
+        if (isOnline && db) {
+            try {
+                await db.collection("lists").doc(currentList).collection("items").add({ text, done: false, timestamp: firebase.firestore.FieldValue.serverTimestamp(), order: newOrder });
+                newItemInput.value = "";
+            } catch {
+                addItemLocally(text, newOrder);
+            }
+        } else {
+            addItemLocally(text, newOrder);
+        }
+    }
+
+    async function addItemLocally(text, order) {
+        if (!localDatabase.lists[currentList].items) localDatabase.lists[currentList].items = [];
+        localDatabase.lists[currentList].items.push({ text, done: false, timestamp: new Date().toISOString(), order, id: Date.now().toString() + Math.random().toString(36).slice(2) });
+        await updateListCounts(currentList); newItemInput.value = ""; loadItemsLocal();
+    }
+
+    async function updateItem(itemId, updates) {
+        if (isOnline && db && currentList) db.collection("lists").doc(currentList).collection("items").doc(itemId).update(updates);
+        else if (currentList) {
+            const item = localDatabase.lists[currentList].items.find(i => i.id === itemId);
+            if (item) { Object.assign(item, updates); await updateListCounts(currentList); loadItemsLocal(); if (updates.hasOwnProperty('done')) loadListsLocal(); }
+        }
+    }
+
+    async function deleteItem(itemId) {
+        if (isOnline && db && currentList) db.collection("lists").doc(currentList).collection("items").doc(itemId).delete();
+        else { localDatabase.lists[currentList].items = localDatabase.lists[currentList].items.filter(i => i.id !== itemId);
+            await updateListCounts(currentList); loadItemsLocal(); loadListsLocal();
+        }
+    }
+
+    function loadItemsLocal() {
+        itemList.innerHTML = ""; const items = localDatabase.lists[currentList]?.items || [];
+        if (items.length === 0) showEmptyItems();
+        else items.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).forEach((item, index) => renderItem(item, item.id, index, items.length));
+    }
+
+    async function moveItem(itemId, direction) {
+        let items = localDatabase.lists[currentList].items;
+        const i = items.findIndex(item => item.id === itemId);
+        const j = direction === 'up' ? i - 1 : i + 1;
+        if (i === -1 || j < 0 || j >= items.length) return;
+        [items[i], items[j]] = [items[j], items[i]];
+        updateItemsOrder(items); loadItemsLocal();
+    }
+
+    async function moveList(listName, direction) {
+        const i = listOrder.indexOf(listName);
+        const j = direction === 'up' ? i - 1 : i + 1;
+        if (i === -1 || j < 0 || j >= listOrder.length) return;
+        [listOrder[i], listOrder[j]] = [listOrder[j], listOrder[i]];
+        updateListsOrder(); loadListsLocal();
+    }
+
+    async function updateItemsOrder(items) {
+        items.forEach((item, index) => item.order = index);
+        await updateListCounts(currentList);
+        if (isOnline && db) {
+            const batch = db.batch();
+            items.forEach(item => batch.update(db.collection("lists").doc(currentList).collection("items").doc(item.id), { order: item.order }));
+            await batch.commit();
+        }
+    }
+
+    async function updateListsOrder() {
+        saveToLocalStorage();
+        if (isOnline && db) {
+            const batch = db.batch();
+            listOrder.forEach((id, i) => batch.update(db.collection("lists").doc(id), { order: i }));
+            await batch.commit();
+        }
+    }
+
+    function saveToLocalStorage() {
+        listOrder.forEach((name, i) => { if(localDatabase.lists[name]) localDatabase.lists[name].order = i; });
+        localStorage.setItem('elenchiOrder', JSON.stringify(listOrder));
+        localStorage.setItem('elenchiFare', JSON.stringify(localDatabase.lists));
+    }
+
+    async function renameList(oldName, newName) {
+        if (!validateListName(newName) || newName === oldName) return false;
+        if (isOnline && db) {
+            try { if ((await db.collection("lists").doc(newName).get()).exists) { alert(`L'elenco "${newName}" esiste già.`); return false; }
+                const oldDoc = await db.collection("lists").doc(oldName).get();
+                const items = await db.collection("lists").doc(oldName).collection("items").get();
+                const batch = db.batch(); batch.set(db.collection("lists").doc(newName), oldDoc.data());
+                items.forEach(doc => batch.set(db.collection("lists").doc(newName).collection("items").doc(doc.id), doc.data()));
+                batch.delete(db.collection("lists").doc(oldName)); await batch.commit();
+                if (currentList === oldName) selectList(newName);
+                else loadListsLocal();
+                return true;
+            } catch { return false; }
+        } else {
+            if (localDatabase.lists[newName]) { alert(`L'elenco "${newName}" esiste già.`); return false; }
+            localDatabase.lists[newName] = localDatabase.lists[oldName]; delete localDatabase.lists[oldName];
+            listOrder = listOrder.map(n => (n === oldName ? newName : n));
+            saveToLocalStorage();
+            if (currentList === oldName) selectList(newName); else loadListsLocal();
+            return true;
+        }
+    }
+    
+    async function updateNote(listName, newNote) {
+        if (!listName) return;
+        newNote = newNote.trim();
+        setNoteDraft(listName, newNote);
+        if (localDatabase.lists[listName]) {
+            localDatabase.lists[listName].note = newNote;
+            saveToLocalStorage();
+        }
+        if (isOnline && db) {
+            try { await db.collection('lists').doc(listName).update({ note: newNote }); }
+            catch(e){ console.warn('Firestore note update failed, keeping draft only'); }
+        }
+    }
+
+    async function exportPDF(content, styles) {
+        const pdfWindow = window.open('', '_blank');
+        pdfWindow.document.write('<h1>Preparazione PDF...</h1>');
+        try {
+            pdfMake.createPdf({ content, styles }).getBlob(blob => { 
+                pdfWindow.location.href = URL.createObjectURL(blob); 
+            });
+        } catch (error) {
+            pdfWindow.document.body.innerHTML = `<h1>Errore</h1><pre>${error.stack || error}</pre>`;
+        }
+    }
+
+    function createPdfTable(items) {
+        if (!items || items.length === 0) return null;
+        const midpoint = Math.ceil(items.length / 2);
+        const bodyFirst = items.slice(0, midpoint).map((item, i) => [(i + 1).toString(), item.done ? { text: item.text, decoration: 'lineThrough', color: '#7f8c8d' } : item.text]);
+        const bodySecond = items.slice(midpoint).map((item, i) => [(midpoint + i + 1).toString(), item.done ? { text: item.text, decoration: 'lineThrough', color: '#7f8c8d' } : item.text]);
+        if (items.length % 2 !== 0 && bodySecond.length > 0) bodySecond.push([' ', ' ']);
+        const layout = { hLineColor: '#ccc', vLineColor: '#ccc' };
+        return {
+            columnGap: 10,
+            columns: [
+                { table: { widths: ['auto', '*'], body: bodyFirst }, layout },
+                bodySecond.length > 0 ? { table: { widths: ['auto', '*'], body: bodySecond }, layout } : {}
+            ]
+        };
+    }
+
+    async function exportListToPDF(event) {
+        event.stopPropagation();
+        if (!currentList) { alert("Nessun elenco selezionato."); return; }
+        const { items, note } = localDatabase.lists[currentList] || {};
+        if ((!items || items.length === 0) && !note?.trim()) { alert("Elenco vuoto."); return; }
+        const content = [{ text: `${currentList} - ${new Date().toLocaleDateString('it-IT')}`, style: 'header' }];
+        const table = createPdfTable(items);
+        if (table) content.push(table);
+        if (note?.trim()) content.push({ text: `Nota: ${note}`, style: 'noteStyle' });
+        exportPDF(content, { header: { fontSize: 22, bold: true, margin: [0, 0, 0, 10], alignment: 'center' }, noteStyle: { italics: true, color: '#333', margin: [0, 10, 0, 0] } });
+    }
+
+    async function exportAllListsToPDF() {
+        if (listOrder.length === 0) { alert("Nessun elenco da esportare."); return; }
+        const content = [{ text: 'Riepilogo Elenchi', style: 'docHeader' }, { text: new Date().toLocaleDateString('it-IT'), style: 'docSubHeader' }];
+        for (const listName of listOrder) {
+            const { items, note } = localDatabase.lists[listName] || {};
+            if ((items && items.length > 0) || note?.trim()) {
+                content.push({ text: listName, style: 'listHeader' });
+                const table = createPdfTable(items);
+                if (table) content.push(table);
+                if (note?.trim()) content.push({ text: `Nota: ${note}`, style: 'noteStyle' });
+            }
+        }
+        exportPDF(content, { docHeader: { fontSize: 24, bold: true, alignment: 'center' }, docSubHeader: { fontSize: 12, alignment: 'center', margin: [0, 0, 0, 10] }, listHeader: { fontSize: 18, bold: true, margin: [0, 15, 0, 5] }, noteStyle: { italics: true, color: '#333', margin: [0, 5, 0, 10] } });
+    }
+
+    function validateListName(name) { if (!name || name.length > 50) { alert("Nome non valido (max 50 caratteri)."); return false; } return true; }
+    function validateItemText(text) { if (!text || text.length > 200) { alert("Testo non valido (max 200 caratteri)."); return false; } return true; }
+    function showEmptyLists() { listNames.innerHTML = "<li style='text-align: center; font-style: italic; color: #7f8c8d; border: none; background: transparent;'>Nessun elenco</li>"; }
+    function showEmptyItems() { itemList.innerHTML = "<li style='text-align: center; font-style: italic; color: #7f8c8d; border: none; background: transparent;'>Nessuna cosa da fare</li>"; }
+    
+    function navigateList(direction) {
+        if (!currentList) return;
+        const currentIndex = listOrder.indexOf(currentList);
+        let newIndex = -1;
+        if (direction === 'next' && currentIndex < listOrder.length - 1) {
+            newIndex = currentIndex + 1;
+        } else if (direction === 'prev' && currentIndex > 0) {
+            newIndex = currentIndex - 1;
+        }
+        if (newIndex !== -1) {
+            selectList(listOrder[newIndex]);
+        }
+    }
+
+    function handleSwipe() {
+        const swipeThreshold = 50; 
+        const verticalThreshold = 75;
+        const dx = touchendX - touchstartX;
+        const dy = touchendY - touchstartY;
+
+        if (Math.abs(dx) > swipeThreshold && Math.abs(dy) < verticalThreshold) {
+            if (dx < 0) { navigateList('next'); } 
+            else { navigateList('prev'); }
+        }
+    }
+    
+    function refreshData() {
+        if (!isOnline) {
+            alert("Sei offline. Impossibile aggiornare i dati dal server.");
+            return;
+        }
+        console.log("🔄 Forzando l'aggiornamento dei dati...");
+        if (unsubscribeList) {
+            unsubscribeList();
+        }
+        loadLists();
+        const mainTitle = document.getElementById("main-title");
+        if(mainTitle) {
+            mainTitle.style.opacity = '0.5';
+            setTimeout(() => { mainTitle.style.opacity = '1'; }, 400);
+        }
+    }
+
+    window.addEventListener('load', () => {
+        initFirebase();
+        homeIcon.onclick = backToLists;
+        document.getElementById('pdf-export-logo').addEventListener('click', exportListToPDF);
+        document.getElementById('pdf-export-all-logo').addEventListener('click', exportAllListsToPDF);
+        
+        const mainTitle = document.getElementById("main-title");
+        mainTitle.addEventListener('click', (event) => {
+            if (event.target.id !== 'manage-lists-btn') {
+                refreshData();
+            }
+        });
+
+        manageListsBtn.addEventListener('click', e => { e.stopPropagation(); toggleManageMode(); });
+        manageItemsBtn.addEventListener('click', e => { e.stopPropagation(); toggleManageItemsMode(); });
+        newListInput.addEventListener('keypress', e => { if (e.key === 'Enter') addList(); });
+        newItemInput.addEventListener('keypress', e => { if (e.key === 'Enter') addItem(); });
+        noteInput.addEventListener('blur', () => { if (currentList) updateNote(currentList, noteInput.value.trim()); });
+        noteInput.addEventListener('input', debounce(() => { if (currentList) updateNote(currentList, noteInput.value.trim()); }, 400));
+        newItemInput.addEventListener('input', updateAddButtonTooltip);
+        noteInput.addEventListener('input', updateAddButtonTooltip);
+        updateAddButtonTooltip();
+
+        
+        window.addEventListener('keydown', (event) => {
+            if (singleListView.style.display !== 'block') return;
+            if (event.key === 'ArrowRight') {
+                event.preventDefault();
+                navigateList('next');
+            } else if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                navigateList('prev');
+            }
+        });
+
+        singleListView.addEventListener('touchstart', e => {
+            touchstartX = e.changedTouches[0].screenX;
+            touchstartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+
+        singleListView.addEventListener('touchend', e => {
+            touchendX = e.changedTouches[0].screenX;
+            touchendY = e.changedTouches[0].screenY;
+            handleSwipe();
+        });
+    });
+
+    window.addEventListener('beforeunload', () => { if (unsubscribeList) unsubscribeList(); if (unsubscribeItems) unsubscribeItems(); });
+  </script>
+</body>
+</html>
