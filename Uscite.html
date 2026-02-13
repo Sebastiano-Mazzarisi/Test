@@ -67,15 +67,25 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-family: inherit;
+            /* dimensioni fisse (non cambia quando attivo) */
+            width: 85px;
+            height: 34px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            line-height: 34px;
+            font-size: 14px;
+            font-weight: 600;
+            box-sizing: border-box;
         }
 
         /* TIPO DATI */
         .type-active {
             background-color: var(--primary);
             color: white;
-            font-size: 18px;
             font-weight: 700;
-            padding: 10px 25px;
             opacity: 1;
             transform: translateY(0);
             box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
@@ -84,9 +94,7 @@
         .type-inactive {
             background-color: #34495e; 
             color: #bdc3c7;
-            font-size: 14px;
-            font-weight: 500;
-            padding: 6px 15px;
+            font-weight: 600;
             opacity: 0.8;
         }
         .type-inactive:hover { background-color: var(--secondary); color: white; opacity: 1; }
@@ -98,9 +106,18 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-family: inherit;
+            /* dimensioni fisse (coerenti con .mode-btn) */
+            width: 85px;
+            height: 34px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            line-height: 34px;
             font-size: 14px;
-            font-weight: 500;
-            padding: 6px 15px;
+            font-weight: 600;
+            box-sizing: border-box;
         }
 
         .sort-active {
@@ -113,6 +130,7 @@
         .sort-inactive {
             background-color: #34495e;
             color: #bdc3c7;
+            font-weight: 600;
             opacity: 0.8;
         }
         .sort-inactive:hover { background-color: var(--secondary); color: white; opacity: 1; }
@@ -131,6 +149,7 @@
             display: flex; align-items: center; justify-content: center;
         }
         .header-center { text-align: center; }
+        #header-info { cursor: pointer; user-select: none; }
         
         .header-line-1 { font-size: 16px; font-weight: 500; opacity: 0.9; }
         .header-line-2 { font-size: 20px; font-weight: 700; font-family: monospace; margin-top: 2px; }
@@ -270,10 +289,23 @@
         /* STILE DETTAGLIO */
         .item { padding: 12px 20px; border-bottom: 1px solid var(--border); }
         .item-row-1 { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; font-size: 15px; }
-        .date { color: #6c757d; font-size: 13px; width: 50px; flex-shrink: 0; }
+        
+        /* COLONNA DATA CENTRATA */
+        .date-col { 
+            width: 50px; 
+            flex-shrink: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            text-align: center; 
+        }
+        .date { color: #6c757d; font-size: 13px; font-weight: 700; } /* GG/MM in grassetto */
+        .year-sub { color: #6c757d; font-size: 13px; font-weight: 400; } /* AAAA normale */
+
         .ben { font-weight: 600; color: #212529; flex-grow: 1; margin-right: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .amount { font-weight: 700; color: #dc3545; font-family: monospace; font-size: 17px; flex-shrink: 0; letter-spacing: -0.5px; }
-        .item-row-2 { font-size: 13px; color: #6c757d; line-height: 1.4; padding-left: 50px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .item-row-2 { display: flex; align-items: baseline; }
+        .desc-text { font-size: 13px; color: #6c757d; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
 
         /* MODALE DETTAGLIO MOVIMENTO */
@@ -426,6 +458,16 @@
         return appState.mode === 'ESTRATTI' ? 'Estratti' : 'Bonifici';
     }
 
+    // Da HOME -> lista completa dei movimenti del DB selezionato (rispettando eventuale ricerca)
+    function goToAllDetail() {
+        appState.view = 'DETAIL';
+        appState.selectedYear = null;
+        appState.selectedMonth = null;
+        render();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+
     function formatMoney(number) {
         let str = Number(number).toFixed(2);
         str = str.replace('.', ',');
@@ -434,7 +476,6 @@
     }
 
     function formatCount(number) {
-        // Formatta numero intero con punti (es. 1.511)
         return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
 
@@ -620,15 +661,19 @@
             document.getElementById('global-sum').innerText = `€ ${formatMoney(totalSum)}`;
             renderHome(contentDiv);
         } else if (appState.view === 'DETAIL') {
-            let detailData = appState.filteredData.filter(x => x.anno === appState.selectedYear);
-            let title = "";
-            if (appState.selectedMonth !== null) {
-                detailData = detailData.filter(x => x.mese === appState.selectedMonth);
-                title = `${NOMI_MESI_FULL[appState.selectedMonth - 1]} ${appState.selectedYear}`;
-            } else {
-                title = `Anno ${appState.selectedYear} (Completo)`;
+            let detailData = appState.filteredData;
+            let title = `${label} (Tutti)`;
+
+            if (appState.selectedYear !== null) {
+                detailData = detailData.filter(x => x.anno === appState.selectedYear);
+                if (appState.selectedMonth !== null) {
+                    detailData = detailData.filter(x => x.mese === appState.selectedMonth);
+                    title = `${NOMI_MESI_FULL[appState.selectedMonth - 1]} ${appState.selectedYear}`;
+                } else {
+                    title = `Anno ${appState.selectedYear} (Completo)`;
+                }
             }
-            
+
             detailData = sortItems(detailData);
 
             totalCount = detailData.length;
@@ -728,7 +773,7 @@
     }
 
     function renderDetail(container, items) {
-        appState.currentList = items; // Salva la lista corrente per la navigazione in modale
+        appState.currentList = items; 
         if (items.length === 0) {
             const emptyEl = document.createElement('div');
             emptyEl.style.padding = '20px';
@@ -748,11 +793,14 @@
             el.onclick = () => openDetailModal(index);
             el.innerHTML = `
                 <div class="item-row-1">
-                    <span class="date">${tx.data_fmt}</span>
+                    <div class="date-col"><span class="date">${tx.data_fmt}</span></div>
                     <span class="ben">${benHtml}</span>
                     <span class="amount">${formatMoney(tx.importo)}</span>
                 </div>
-                <div class="item-row-2">${descHtml}</div>
+                <div class="item-row-2">
+                    <div class="date-col"><span class="year-sub">${tx.anno}</span></div>
+                    <div class="desc-text">${descHtml}</div>
+                </div>
             `;
             container.appendChild(el);
         });
@@ -819,8 +867,6 @@
                     3: { cellWidth: 17, halign: 'right', fontStyle: 'bold', textColor: [200, 0, 0] } 
                 }
             });
-        } else {
-            doc.text("Nessun dato da stampare.", 14, 30);
         }
 
         if (appState.view === 'HOME') {
@@ -879,16 +925,12 @@
             });
             
             let tabAnni = Object.keys(anni).sort((a,b) => b-a).map(y => [y, formatMoney(anni[y])]);
-            // Riga Totale per Anni
             tabAnni.push(['TOTALE', formatMoney(totalAnni)]);
             
-            // TOP 20
             let top20 = [...data].sort((a,b) => b.importo - a.importo).slice(0, 20);
             let totalTop = top20.reduce((acc, item) => acc + item.importo, 0);
             
-            // AUMENTATO substring a 75 per sfruttare due righe
             let tabTop = top20.map(x => [x.data_full, x.beneficiario.substring(0, 75), formatMoney(x.importo)]);
-            // Riga Totale per Top 20 (Vuoto, TOTALE, Importo)
             tabTop.push(['', 'TOTALE', formatMoney(totalTop)]);
             
             return { tabAnni, tabTop };
@@ -897,85 +939,67 @@
         const statsE = processStats(filteredE);
         const statsB = processStats(filteredB);
 
-        // TITOLO (SPOSTATO IN ALTO)
         doc.setFontSize(16);
         doc.text("Riepilogo Sintetico - Estratti vs Bonifici", 105, 12, null, null, "center");
-        // RIMOSSA RIGA "GENERATO IL"
 
-        // COLONNE
         const colW = 85; 
         const marginL = 14;
         const marginR = 110; 
 
-        // Helper per lo stile della riga Totale
         const styleTotalRow = (data) => {
             if (data.section === 'body') {
-                // Se la prima cella è "TOTALE" (tabella Anni) o la seconda (tabella Top)
                 if (data.row.raw[0] === 'TOTALE' || data.row.raw[1] === 'TOTALE') {
                     data.cell.styles.fontStyle = 'bold';
-                    data.cell.styles.fillColor = [220, 220, 220]; // Grigio chiaro
+                    data.cell.styles.fillColor = [220, 220, 220];
                 }
             }
         };
 
-        // INTESTAZIONI COLONNE IN GRASSETTO (SPOSTATE IN ALTO)
         doc.setFontSize(12);
-        
         doc.setFont("helvetica", "bold"); 
         doc.setTextColor(0, 100, 0); 
         doc.text("ESTRATTI", marginL + (colW/2), 20, null, null, "center");
-        
         doc.setTextColor(0, 0, 150); 
         doc.text("BONIFICI", marginR + (colW/2), 20, null, null, "center");
         doc.setFont("helvetica", "normal"); 
 
-        // TABELLE ANNI (INTERLINEA RIDOTTA)
-        const yearTableStyles = { fontSize: 9, cellPadding: 1 };
-
         doc.autoTable({
-            startY: 24, // ALZATO
+            startY: 24, 
             margin: { left: marginL },
             tableWidth: colW,
             head: [['Anno', 'Totale']],
             body: statsE.tabAnni,
             theme: 'grid',
-            styles: yearTableStyles,
+            styles: { fontSize: 9, cellPadding: 1 },
             headStyles: { fillColor: [44, 62, 80] },
             columnStyles: { 1: { halign: 'right' } },
-            didParseCell: styleTotalRow // Applica stile
+            didParseCell: styleTotalRow
         });
 
         let finalY_Anni = doc.lastAutoTable.finalY;
 
         doc.autoTable({
-            startY: 24, // ALZATO
+            startY: 24, 
             margin: { left: marginR },
             tableWidth: colW,
             head: [['Anno', 'Totale']],
             body: statsB.tabAnni,
             theme: 'grid',
-            styles: yearTableStyles,
+            styles: { fontSize: 9, cellPadding: 1 },
             headStyles: { fillColor: [44, 62, 80] },
             columnStyles: { 1: { halign: 'right' } },
-            didParseCell: styleTotalRow // Applica stile
+            didParseCell: styleTotalRow
         });
 
         if (doc.lastAutoTable.finalY > finalY_Anni) finalY_Anni = doc.lastAutoTable.finalY;
 
-        // TOP 20 - TITOLI SEPARATI
-        let startY_Top = finalY_Anni + 8; // RIDOTTO SPAZIO
-        
+        let startY_Top = finalY_Anni + 8; 
         doc.setFontSize(10);
-        
-        // Titolo Sinistro (Verde)
         doc.setTextColor(0, 100, 0); 
         doc.text("Top 20 Estratti", marginL + (colW/2), startY_Top - 2, null, null, "center");
-
-        // Titolo Destro (Blu)
         doc.setTextColor(0, 0, 150);
         doc.text("Top 20 Bonifici", marginR + (colW/2), startY_Top - 2, null, null, "center");
 
-        // TABELLA SX
         doc.autoTable({
             startY: startY_Top,
             margin: { left: marginL },
@@ -986,12 +1010,9 @@
             styles: { fontSize: 7, cellPadding: 1, overflow: 'linebreak' }, 
             headStyles: { fillColor: [200, 0, 0] },
             columnStyles: { 0: { cellWidth: 18 }, 2: { halign: 'right', cellWidth: 22 } },
-            didParseCell: styleTotalRow // Applica stile
+            didParseCell: styleTotalRow
         });
 
-        let finalY_Top = doc.lastAutoTable.finalY;
-
-        // TABELLA DX
         doc.autoTable({
             startY: startY_Top,
             margin: { left: marginR },
@@ -1002,7 +1023,7 @@
             styles: { fontSize: 7, cellPadding: 1, overflow: 'linebreak' },
             headStyles: { fillColor: [200, 0, 0] },
             columnStyles: { 0: { cellWidth: 18 }, 2: { halign: 'right', cellWidth: 22 } },
-            didParseCell: styleTotalRow // Applica stile
+            didParseCell: styleTotalRow
         });
 
         doc.save("Report_Sintetico.pdf");
@@ -1022,12 +1043,12 @@
         document.getElementById('det-desc').innerText = item.descrizione || "Nessuna descrizione";
         
         document.getElementById('detail-modal').style.display = 'flex';
-        document.body.style.overflow = 'hidden'; // Blocca scroll sfondo
+        document.body.style.overflow = 'hidden'; 
     }
 
     function closeDetailModal() {
         document.getElementById('detail-modal').style.display = 'none';
-        document.body.style.overflow = 'auto'; // Ripristina scroll
+        document.body.style.overflow = 'auto'; 
     }
 
     function navMove(step) {
@@ -1037,13 +1058,17 @@
         }
     }
 
-    // Navigazione da tastiera
     document.addEventListener('keydown', (e) => {
         if (document.getElementById('detail-modal').style.display === 'flex') {
             if (e.key === "ArrowRight") navMove(1);
             if (e.key === "ArrowLeft") navMove(-1);
             if (e.key === "Escape") closeDetailModal();
         }
+    });
+
+    // Click sul titolo centrale: vai alla lista completa
+    document.getElementById('header-info').addEventListener('click', () => {
+        if (appState.view === 'HOME') goToAllDetail();
     });
 
     render();
