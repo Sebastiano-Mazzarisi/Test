@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="it"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cruscotto Bilancio Familiare</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c0e14;--cd:#151821;--c2:#1a1e2b;--bd:#252a38;--tx:#e8e9ed;--mu:#727891;--gn:#34d399;--gd:rgba(52,211,153,.1);--rd:#f87171;--rdd:rgba(248,113,113,.1);--bl:#60a5fa;--bld:rgba(96,165,250,.1);--am:#fbbf24;--amd:rgba(251,191,36,.1);--ac:#818cf8}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);padding:14px 18px}
+.hd{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.hd h1{font-family:'Playfair Display',serif;font-weight:900;font-size:22px}
+.ts{display:flex;gap:4px;flex-wrap:wrap}
+.t{padding:5px 13px;border-radius:16px;cursor:pointer;font-size:11px;font-weight:600;border:1px solid var(--bd);background:var(--cd);color:var(--mu);transition:all .2s;user-select:none}
+.t:hover{background:var(--c2);color:var(--tx)}.t.a{background:var(--ac);color:#fff;border-color:var(--ac)}
+.st{font-size:12px;font-weight:700;color:var(--ac);text-transform:uppercase;letter-spacing:1px;margin:16px 0 10px;display:flex;align-items:center;gap:8px}
+.st::after{content:'';flex:1;height:1px;background:var(--bd)}
+.kr{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:4px}
+.k{background:var(--cd);border:1px solid var(--bd);border-radius:11px;padding:14px}
+.ki{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;margin-bottom:6px}
+.kl{font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.6px}
+.kv{font-size:20px;font-weight:700;letter-spacing:-.5px}
+.ks{font-size:9px;color:var(--mu);margin-top:2px}
+.kd{font-size:10px;margin-top:3px;font-weight:600;padding:2px 7px;border-radius:8px;display:inline-block}
+.kd.p{background:var(--gd);color:var(--gn)}.kd.n{background:var(--rdd);color:var(--rd)}
+.g2{display:grid;grid-template-columns:1.6fr 1fr;gap:10px;margin-bottom:4px}
+.ge{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
+@media(max-width:900px){.g2,.ge{grid-template-columns:1fr}}
+.c{background:var(--cd);border:1px solid var(--bd);border-radius:11px;padding:16px}
+.c h3{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px}
+.bw{display:flex;align-items:flex-end;gap:3px;height:175px}
+.bg{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end}
+.bp{display:flex;gap:2px;align-items:flex-end;width:100%;justify-content:center;flex:1}
+.b{width:12px;border-radius:3px 3px 0 0;transition:height .5s cubic-bezier(.34,1.56,.64,1);cursor:pointer}
+.b:hover{filter:brightness(1.2)}.b.e{background:var(--gn)}.b.u{background:var(--rd);opacity:.7}
+.bl{font-size:8px;color:var(--mu)}
+.dw{display:flex;flex-direction:column;align-items:center;gap:10px}
+.ds{position:relative;width:130px;height:130px}
+.dc{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.dc .da{font-size:15px;font-weight:700}.dc .dl{font-size:9px;color:var(--mu)}
+.lg{display:flex;flex-direction:column;gap:4px;width:100%}
+.li{display:flex;align-items:center;justify-content:space-between;font-size:10px}
+.ll{display:flex;align-items:center;gap:5px}.ld{width:7px;height:7px;border-radius:2px;flex-shrink:0}
+.lp{color:var(--mu);font-size:9px;white-space:nowrap}
+.tl{list-style:none}.tl li{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bd);font-size:11px}
+.tl li:last-child{border:none}
+.tc{display:flex;align-items:center;gap:6px;flex:1;min-width:0}
+.ti{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.tn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ta{font-weight:600;white-space:nowrap;margin-left:5px}
+.pb{width:50px;height:3px;background:var(--bd);border-radius:2px;overflow:hidden;margin-left:5px;flex-shrink:0}
+.pf{height:100%;border-radius:2px}
+.mg{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.mb{padding:8px 11px;border-radius:8px;background:var(--c2);border:1px solid var(--bd);min-width:100px;flex:1}
+.ml{font-size:8px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px}
+.mv{font-size:15px;font-weight:700;margin-top:1px}
+.tp{position:fixed;background:#22253a;color:var(--tx);padding:6px 10px;border-radius:7px;font-size:10px;pointer-events:none;z-index:999;display:none;border:1px solid var(--bd);box-shadow:0 4px 16px rgba(0,0,0,.5);max-width:240px}
+.ft{text-align:center;color:var(--mu);font-size:9px;padding:10px;border-top:1px solid var(--bd);margin-top:6px}
+</style></head><body>
+<div class="tp" id="tp"></div>
+<div class="hd"><h1>💰 Bilancio Familiare</h1><div class="ts" id="tabs"></div></div>
+<div id="s1"></div><div id="s2"></div><div id="s3"></div><div id="s4"></div>
+<div class="ft">Generato il 17/02/2026 19:09</div>
+<script>
+const D={"anni": [2020, 2021, 2022, 2023, 2024, 2025], "ac": 2025, "um": 12, "pya": {"2020": {"e": 25406, "u": 124577, "s": -99171, "nm": 12, "r": -390.3}, "2021": {"e": 28425, "u": 155162, "s": -126736, "nm": 12, "r": -445.9}, "2022": {"e": 65333, "u": 170448, "s": -105114, "nm": 12, "r": -160.9}, "2023": {"e": 130076, "u": 261626, "s": -131550, "nm": 12, "r": -101.1}, "2024": {"e": 119904, "u": 170780, "s": -50877, "nm": 12, "r": -42.4}, "2025": {"e": 116428, "u": 134528, "s": -18100, "nm": 12, "r": -15.5}}, "cmp": {"ac": 2025, "ap": 2024, "um": 12, "c": {"e": 116428, "u": 134528, "s": -18100}, "p": {"e": 119904, "u": 170780, "s": -50877}}, "pm": {"2020-01": {"e": 999, "u": 11738}, "2020-02": {"e": 1966, "u": 8724}, "2020-03": {"e": 1950, "u": 14759}, "2020-04": {"e": 1000, "u": 11383}, "2020-05": {"e": 1334, "u": 5760}, "2020-06": {"e": 2490, "u": 8328}, "2020-07": {"e": 1543, "u": 17853}, "2020-08": {"e": 6980, "u": 13156}, "2020-09": {"e": 2817, "u": 5574}, "2020-10": {"e": 1973, "u": 12041}, "2020-11": {"e": 1255, "u": 6071}, "2020-12": {"e": 1100, "u": 9191}, "2021-01": {"e": 2689, "u": 9180}, "2021-02": {"e": 1696, "u": 6230}, "2021-03": {"e": 2000, "u": 50425}, "2021-04": {"e": 1000, "u": 8353}, "2021-05": {"e": 3242, "u": 5036}, "2021-06": {"e": 1300, "u": 14757}, "2021-07": {"e": 4549, "u": 8510}, "2021-08": {"e": 1150, "u": 11400}, "2021-09": {"e": 2941, "u": 6638}, "2021-10": {"e": 1000, "u": 6815}, "2021-11": {"e": 2328, "u": 7464}, "2021-12": {"e": 4530, "u": 20353}, "2022-01": {"e": 2891, "u": 8464}, "2022-02": {"e": 2006, "u": 10670}, "2022-03": {"e": 1991, "u": 12142}, "2022-04": {"e": 2011, "u": 8682}, "2022-05": {"e": 2026, "u": 10289}, "2022-06": {"e": 2253, "u": 18182}, "2022-07": {"e": 41362, "u": 9819}, "2022-08": {"e": 2298, "u": 18249}, "2022-09": {"e": 2032, "u": 44766}, "2022-10": {"e": 2050, "u": 8196}, "2022-11": {"e": 2134, "u": 5579}, "2022-12": {"e": 2279, "u": 15409}, "2023-01": {"e": 4235, "u": 11928}, "2023-02": {"e": 2115, "u": 5762}, "2023-03": {"e": 3557, "u": 22432}, "2023-04": {"e": 8708, "u": 19444}, "2023-05": {"e": 2170, "u": 22670}, "2023-06": {"e": 17824, "u": 30764}, "2023-07": {"e": 2272, "u": 14423}, "2023-08": {"e": 2244, "u": 7758}, "2023-09": {"e": 2224, "u": 6288}, "2023-10": {"e": 2244, "u": 93241}, "2023-11": {"e": 2241, "u": 5629}, "2023-12": {"e": 80243, "u": 21287}, "2024-01": {"e": 3549, "u": 18643}, "2024-02": {"e": 2291, "u": 7947}, "2024-03": {"e": 2197, "u": 51863}, "2024-04": {"e": 2555, "u": 10960}, "2024-05": {"e": 4768, "u": 9807}, "2024-06": {"e": 6074, "u": 13472}, "2024-07": {"e": 15136, "u": 9687}, "2024-08": {"e": 6183, "u": 8844}, "2024-09": {"e": 56460, "u": 9405}, "2024-10": {"e": 6122, "u": 7660}, "2024-11": {"e": 6114, "u": 8477}, "2024-12": {"e": 8455, "u": 14015}, "2025-01": {"e": 8093, "u": 10070}, "2025-02": {"e": 5712, "u": 6626}, "2025-03": {"e": 5671, "u": 21227}, "2025-04": {"e": 11260, "u": 6044}, "2025-05": {"e": 5856, "u": 10124}, "2025-06": {"e": 11710, "u": 19048}, "2025-07": {"e": 8712, "u": 10918}, "2025-08": {"e": 5759, "u": 11875}, "2025-09": {"e": 5790, "u": 7475}, "2025-10": {"e": 5741, "u": 6512}, "2025-11": {"e": 32737, "u": 13683}, "2025-12": {"e": 9387, "u": 10924}}, "ms": ["2020-01", "2020-02", "2020-03", "2020-04", "2020-05", "2020-06", "2020-07", "2020-08", "2020-09", "2020-10", "2020-11", "2020-12", "2021-01", "2021-02", "2021-03", "2021-04", "2021-05", "2021-06", "2021-07", "2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"], "cu": {"2020": {"🏠 Affitto Casa": {"v": 3110, "m": "FISSE"}, "📈 Investimenti/Fondi": {"v": 30000, "m": "TRASF"}, "🏧 Prelievo Contante": {"v": 15500, "m": "TRASF"}, "💳 Satispay": {"v": 2932, "m": "VARIAB"}, "🏦 Costi Bancari": {"v": 12, "m": "FISSE"}, "🏛️ Bollo": {"v": 355, "m": "FISSE"}, "🛍️ Acquisti POS": {"v": 1625, "m": "VARIAB"}, "💳 Saldo Carta Credito": {"v": 18563, "m": "TRASF"}, "🏘️ Socim": {"v": 1300, "m": "STRAORD"}, "🏦 Commissioni": {"v": 6688, "m": "FISSE"}, "🌐 PayPal": {"v": 766, "m": "VARIAB"}, "🏗️ Notaio": {"v": 350, "m": "STRAORD"}, "❓ Altro": {"v": 4963, "m": "VARIAB"}, "🏦 Interessi Debitori": {"v": 6930, "m": "FISSE"}, "🏘️ Coop Casa Nuova": {"v": 14300, "m": "STRAORD"}, "🏗️ Ristrutturazione": {"v": 1584, "m": "STRAORD"}, "🏢 Cond. Torre Normanni": {"v": 3078, "m": "FISSE"}, "📮 Posta": {"v": 11, "m": "VARIAB"}, "🏛️ F24 / Tasse": {"v": 9610, "m": "FISSE"}, "🔄 Giroconto": {"v": 2500, "m": "TRASF"}, "🤝 Associazioni": {"v": 400, "m": "VARIAB"}}, "2021": {"📈 Investimenti/Fondi": {"v": 51000, "m": "TRASF"}, "🛒 Supermercato 7+7": {"v": 16, "m": "VARIAB"}, "🛍️ Acquisti POS": {"v": 2998, "m": "VARIAB"}, "💳 Satispay": {"v": 2997, "m": "VARIAB"}, "🏦 Costi Bancari": {"v": 12, "m": "FISSE"}, "🏛️ Bollo": {"v": 389, "m": "FISSE"}, "🏧 Prelievo Contante": {"v": 10000, "m": "TRASF"}, "🏗️ Ristrutturazione": {"v": 1570, "m": "STRAORD"}, "💳 Saldo Carta Credito": {"v": 23865, "m": "TRASF"}, "🏢 Cond. Don Minzoni": {"v": 1799, "m": "FISSE"}, "🌐 PayPal": {"v": 2612, "m": "VARIAB"}, "🏦 Commissioni": {"v": 6749, "m": "FISSE"}, "❓ Altro": {"v": 6735, "m": "VARIAB"}, "🍽️ Rosticceria": {"v": 26, "m": "VARIAB"}, "🏘️ Coop Casa Nuova": {"v": 12276, "m": "STRAORD"}, "🔄 Giroconto": {"v": 17500, "m": "TRASF"}, "📮 Posta": {"v": 16, "m": "VARIAB"}, "🏦 Interessi Debitori": {"v": 6757, "m": "FISSE"}, "👦 Onofrio": {"v": 63, "m": "FAMIGLIA"}, "🏗️ Notaio": {"v": 550, "m": "STRAORD"}, "🍰 Pasticceria": {"v": 20, "m": "VARIAB"}, "🏛️ F24 / Tasse": {"v": 4823, "m": "FISSE"}, "🏢 Cond. Torre Normanni": {"v": 2390, "m": "FISSE"}}, "2022": {"📈 Investimenti/Fondi": {"v": 27000, "m": "TRASF"}, "🌐 PayPal": {"v": 446, "m": "VARIAB"}, "💳 Satispay": {"v": 2724, "m": "VARIAB"}, "🏧 Prelievo Contante": {"v": 15150, "m": "TRASF"}, "🏦 Costi Bancari": {"v": 12, "m": "FISSE"}, "🏛️ Bollo": {"v": 492, "m": "FISSE"}, "💳 Saldo Carta Credito": {"v": 27169, "m": "TRASF"}, "🛍️ Acquisti POS": {"v": 3930, "m": "VARIAB"}, "👧 Maria Grazia": {"v": 3000, "m": "FAMIGLIA"}, "🏦 Commissioni": {"v": 5934, "m": "FISSE"}, "🏢 Cond. Don Minzoni": {"v": 1372, "m": "FISSE"}, "🏦 Interessi Debitori": {"v": 6273, "m": "FISSE"}, "👦 Onofrio": {"v": 300, "m": "FAMIGLIA"}, "🤝 Associazioni": {"v": 225, "m": "VARIAB"}, "📱 Telefonia": {"v": 334, "m": "FISSE"}, "❓ Altro": {"v": 857, "m": "VARIAB"}, "🏘️ Socim": {"v": 4000, "m": "STRAORD"}, "🏘️ Coop Casa Nuova": {"v": 14600, "m": "STRAORD"}, "🏢 Cond. Torre Normanni": {"v": 2809, "m": "FISSE"}, "🏛️ F24 / Tasse": {"v": 13508, "m": "FISSE"}, "👧 Teresa": {"v": 3352, "m": "FAMIGLIA"}, "🏗️ Acquisto Immobile": {"v": 36934, "m": "STRAORD"}, "🍰 Pasticceria": {"v": 25, "m": "VARIAB"}}, "2023": {"🏧 Prelievo Contante": {"v": 25650, "m": "TRASF"}, "🛍️ Acquisti POS": {"v": 3713, "m": "VARIAB"}, "📈 Investimenti/Fondi": {"v": 9000, "m": "TRASF"}, "🏦 Costi Bancari": {"v": 12, "m": "FISSE"}, "🏛️ Bollo": {"v": 431, "m": "FISSE"}, "🏛️ F24 / Tasse": {"v": 8906, "m": "FISSE"}, "💳 Saldo Carta Credito": {"v": 27404, "m": "TRASF"}, "🏗️ Notaio": {"v": 7500, "m": "STRAORD"}, "💳 Satispay": {"v": 992, "m": "VARIAB"}, "🤝 Associazioni": {"v": 500, "m": "VARIAB"}, "🏢 Cond. Don Minzoni": {"v": 14505, "m": "FISSE"}, "🏦 Commissioni": {"v": 5020, "m": "FISSE"}, "🏘️ Socim": {"v": 6000, "m": "STRAORD"}, "🏦 Interessi Debitori": {"v": 8491, "m": "FISSE"}, "🍽️ Rosticceria": {"v": 18, "m": "VARIAB"}, "❓ Altro": {"v": 2867, "m": "VARIAB"}, "🏗️ Ristrutturazione": {"v": 20039, "m": "STRAORD"}, "👧 Teresa": {"v": 3306, "m": "FAMIGLIA"}, "🏘️ Coop Casa Nuova": {"v": 13917, "m": "STRAORD"}, "👦 Onofrio": {"v": 6147, "m": "FAMIGLIA"}, "🏢 Cond. Torre Normanni": {"v": 2427, "m": "FISSE"}, "👧 Maria Grazia": {"v": 200, "m": "FAMIGLIA"}, "📮 Posta": {"v": 365, "m": "VARIAB"}, "🔄 Giroconto": {"v": 6000, "m": "TRASF"}, "🌐 PayPal": {"v": 43, "m": "VARIAB"}, "🏗️ Estinzione Mutuo": {"v": 86852, "m": "STRAORD"}, "🏛️ Tasse": {"v": 1100, "m": "FISSE"}, "🛒 Supermercato 7+7": {"v": 20, "m": "VARIAB"}, "🛒 Alimentari": {"v": 80, "m": "VARIAB"}, "💇 Estetica": {"v": 15, "m": "VARIAB"}, "🍽️ Gastronomia": {"v": 15, "m": "VARIAB"}, "🥩 Macelleria": {"v": 67, "m": "VARIAB"}, "🧹 Detersivi": {"v": 24, "m": "VARIAB"}}, "2024": {"📚 Libri": {"v": 61, "m": "VARIAB"}, "🏦 Costi Bancari": {"v": 12, "m": "FISSE"}, "🏧 Prelievo Contante": {"v": 34100, "m": "TRASF"}, "🏛️ Bollo": {"v": 464, "m": "FISSE"}, "🛍️ Acquisti POS": {"v": 11136, "m": "VARIAB"}, "🏢 Cond. Don Minzoni": {"v": 1979, "m": "FISSE"}, "🏥 Medico": {"v": 317, "m": "VARIAB"}, "💳 Saldo Carta Credito": {"v": 27688, "m": "TRASF"}, "🍽️ Gastronomia": {"v": 7, "m": "VARIAB"}, "🛒 Supermercato 7+7": {"v": 1335, "m": "VARIAB"}, "🥩 Macelleria": {"v": 240, "m": "VARIAB"}, "💳 Satispay": {"v": 1560, "m": "VARIAB"}, "🍽️ Ristorante": {"v": 1008, "m": "VARIAB"}, "✈️ Viaggi": {"v": 365, "m": "VARIAB"}, "🏘️ Socim": {"v": 9500, "m": "STRAORD"}, "🚗 Acquisto Auto": {"v": 8025, "m": "STRAORD"}, "🍽️ Rosticceria": {"v": 95, "m": "VARIAB"}, "🏛️ F24 / Tasse": {"v": 5036, "m": "FISSE"}, "🏦 Commissioni": {"v": 4029, "m": "FISSE"}, "💊 Farmacia": {"v": 572, "m": "VARIAB"}, "🚗 Rata Auto VW": {"v": 3469, "m": "FISSE"}, "📱 Telefonia": {"v": 140, "m": "FISSE"}, "🧹 Detersivi": {"v": 212, "m": "VARIAB"}, "❓ Altro": {"v": 2404, "m": "VARIAB"}, "🏦 Interessi Debitori": {"v": 22563, "m": "FISSE"}, "🛒 Alimentari": {"v": 472, "m": "VARIAB"}, "🍷 Bevande": {"v": 248, "m": "VARIAB"}, "🔄 Giroconto": {"v": 20000, "m": "TRASF"}, "👦 Onofrio": {"v": 4100, "m": "FAMIGLIA"}, "📮 Posta": {"v": 38, "m": "VARIAB"}, "👗 Abbigliamento": {"v": 257, "m": "VARIAB"}, "🍰 Pasticceria": {"v": 30, "m": "VARIAB"}, "🏛️ IMU": {"v": 3100, "m": "FISSE"}, "📺 SKY": {"v": 530, "m": "FISSE"}, "🧀 Caseificio": {"v": 35, "m": "VARIAB"}, "🛡️ Assicurazione": {"v": 1677, "m": "FISSE"}, "👶 Bambini": {"v": 228, "m": "VARIAB"}, "🏃 Sport": {"v": 45, "m": "VARIAB"}, "💇 Estetica": {"v": 538, "m": "VARIAB"}, "🏢 Cond. Torre Normanni": {"v": 1345, "m": "FISSE"}, "📦 Amazon": {"v": 50, "m": "VARIAB"}, "🤝 Associazioni": {"v": 300, "m": "VARIAB"}, "🌐 PayPal": {"v": 161, "m": "VARIAB"}, "🖼️ Decorazioni": {"v": 210, "m": "VARIAB"}, "🏛️ Tasse": {"v": 1100, "m": "FISSE"}}, "2025": {"🍽️ Ristorante": {"v": 1338, "m": "VARIAB"}, "🛒 Supermercato 7+7": {"v": 1083, "m": "VARIAB"}, "🌐 PayPal": {"v": 312, "m": "VARIAB"}, "🏦 Costi Bancari": {"v": 12, "m": "FISSE"}, "🏧 Prelievo Contante": {"v": 24800, "m": "TRASF"}, "🏛️ Bollo": {"v": 591, "m": "FISSE"}, "🍽️ Gastronomia": {"v": 132, "m": "VARIAB"}, "🛒 Alimentari": {"v": 981, "m": "VARIAB"}, "📚 Libri": {"v": 116, "m": "VARIAB"}, "🛍️ Acquisti POS": {"v": 6446, "m": "VARIAB"}, "🧀 Caseificio": {"v": 113, "m": "VARIAB"}, "💳 Satispay": {"v": 2146, "m": "VARIAB"}, "💳 Saldo Carta Credito": {"v": 28599, "m": "TRASF"}, "👗 Abbigliamento": {"v": 642, "m": "VARIAB"}, "💊 Farmacia": {"v": 725, "m": "VARIAB"}, "👧 Teresa": {"v": 1756, "m": "FAMIGLIA"}, "🚗 Rata Auto VW": {"v": 3715, "m": "FISSE"}, "📺 SKY": {"v": 938, "m": "FISSE"}, "🥩 Macelleria": {"v": 414, "m": "VARIAB"}, "🏘️ Socim": {"v": 7900, "m": "STRAORD"}, "❓ Altro": {"v": 2018, "m": "VARIAB"}, "📈 Investimenti/Fondi": {"v": 5160, "m": "TRASF"}, "🏦 Interessi Debitori": {"v": 17474, "m": "FISSE"}, "🍞 Panificio": {"v": 28, "m": "VARIAB"}, "🍽️ Rosticceria": {"v": 195, "m": "VARIAB"}, "📮 Posta": {"v": 31, "m": "VARIAB"}, "💇 Estetica": {"v": 60, "m": "VARIAB"}, "🍰 Pasticceria": {"v": 13, "m": "VARIAB"}, "✈️ Viaggi": {"v": 80, "m": "VARIAB"}, "🤝 Associazioni": {"v": 420, "m": "VARIAB"}, "🏃 Sport": {"v": 137, "m": "VARIAB"}, "🚌 Trasporto Pub.": {"v": 6, "m": "VARIAB"}, "🍷 Bevande": {"v": 143, "m": "VARIAB"}, "🔄 Giroconto": {"v": 2400, "m": "TRASF"}, "🏗️ Arredamento": {"v": 6944, "m": "STRAORD"}, "🏛️ F24 / Tasse": {"v": 6825, "m": "FISSE"}, "🏢 Cond. Torre Normanni": {"v": 102, "m": "FISSE"}, "🏢 Condominio": {"v": 1373, "m": "FISSE"}, "📱 Telefonia": {"v": 6, "m": "FISSE"}, "🛡️ Assicurazione": {"v": 1428, "m": "FISSE"}, "🧹 Detersivi": {"v": 90, "m": "VARIAB"}, "📦 Amazon": {"v": 50, "m": "VARIAB"}, "🏥 Medico": {"v": 102, "m": "VARIAB"}, "👧 Maria Grazia": {"v": 182, "m": "FAMIGLIA"}, "🚗 Acquisto Auto": {"v": 5000, "m": "STRAORD"}, "🏛️ Tasse": {"v": 1500, "m": "FISSE"}}}, "ce": {"2020": {"💼 JoyFit": {"v": 17572, "m": "REDDITO"}, "👨‍👩‍👧 Familiari": {"v": 5464, "m": "EXTRA"}, "🏛️ INPS": {"v": 2336, "m": "REDDITO"}, "🔄 Storno": {"v": 35, "m": "EXTRA"}}, "2021": {"💼 JoyFit": {"v": 16324, "m": "REDDITO"}, "🏛️ INPS": {"v": 6653, "m": "REDDITO"}, "🔄 Rimborso": {"v": 1748, "m": "EXTRA"}, "🔄 Giroconto": {"v": 1000, "m": "EXTRA"}, "🏠 Affitto Ricevuto": {"v": 2400, "m": "REDDITO"}, "👨‍👩‍👧 Familiari": {"v": 300, "m": "EXTRA"}}, "2022": {"💼 JoyFit": {"v": 25738, "m": "REDDITO"}, "👨‍👩‍👧 Familiari": {"v": 9550, "m": "EXTRA"}, "💼 Società": {"v": 30000, "m": "EXTRA"}, "🔄 Rimborso PayPal": {"v": 45, "m": "EXTRA"}}, "2023": {"💼 JoyFit": {"v": 28016, "m": "REDDITO"}, "👨‍👩‍👧 Familiari": {"v": 17142, "m": "EXTRA"}, "💼 Società": {"v": 6630, "m": "EXTRA"}, "⚡ GSE Fotovoltaico": {"v": 199, "m": "REDDITO"}, "🔄 Rimborso": {"v": 89, "m": "EXTRA"}, "💰 Versamento": {"v": 78000, "m": "EXTRA"}}, "2024": {"💼 JoyFit": {"v": 27988, "m": "REDDITO"}, "💰 Altre Entrate": {"v": 289, "m": "EXTRA"}, "⚡ GSE Fotovoltaico": {"v": 480, "m": "REDDITO"}, "🔄 Storno": {"v": 116, "m": "EXTRA"}, "👨‍👩‍👧 Familiari": {"v": 11500, "m": "EXTRA"}, "🏛️ Pensione": {"v": 79489, "m": "REDDITO"}, "🔄 Rimborso PayPal": {"v": 43, "m": "EXTRA"}}, "2025": {"💼 JoyFit": {"v": 29368, "m": "REDDITO"}, "🏛️ Pensione": {"v": 45145, "m": "REDDITO"}, "👨‍👩‍👧 Successione": {"v": 4042, "m": "EXTRA"}, "👨‍👩‍👧 Familiari": {"v": 10520, "m": "EXTRA"}, "⚡ GSE Fotovoltaico": {"v": 353, "m": "REDDITO"}, "💰 Versamento": {"v": 27000, "m": "EXTRA"}}}, "mu": {"2020": {"FISSE": 29784, "TRASF": 66563, "VARIAB": 10696, "STRAORD": 17534}, "2021": {"TRASF": 102365, "VARIAB": 15419, "FISSE": 22919, "STRAORD": 14396, "FAMIGLIA": 63}, "2022": {"TRASF": 69319, "VARIAB": 8207, "FISSE": 30735, "FAMIGLIA": 6652, "STRAORD": 55534}, "2023": {"TRASF": 68054, "VARIAB": 8720, "FISSE": 40891, "STRAORD": 134309, "FAMIGLIA": 9653}, "2024": {"VARIAB": 21924, "FISSE": 45443, "TRASF": 81788, "STRAORD": 17525, "FAMIGLIA": 4100}, "2025": {"VARIAB": 17821, "FISSE": 33966, "TRASF": 60959, "FAMIGLIA": 1938, "STRAORD": 19844}}, "tu": {"2020": [{"d": "02/03", "v": 6930, "n": "Interessi debitori", "c": "🏦 Interessi Debitori"}, {"d": "17/08", "v": 3887, "n": "Addebito saldo e/c carta di credito", "c": "💳 Saldo Carta Credito"}, {"d": "14/08", "v": 3738, "n": "Add. deleghe Fisco/Inps/Regioni", "c": "🏛️ F24 / Tasse"}, {"d": "15/03", "v": 2794, "n": "Addebito saldo e/c carta di credito", "c": "💳 Saldo Carta Credito"}, {"d": "02/07", "v": 2500, "n": "Bonifico da Voi disposto a favore di COOP. CASA NU", "c": "🏘️ Coop Casa Nuova"}, {"d": "02/07", "v": 2500, "n": "Bonifico da Voi disposto a favore di COOP. CASA NU", "c": "🏘️ Coop Casa Nuova"}, {"d": "29/07", "v": 2500, "n": "Bonifico da Voi disposto a favore di COOP. CASA NU", "c": "🏘️ Coop Casa Nuova"}, {"d": "29/07", "v": 2500, "n": "Bonifico da Voi disposto a favore di COOP. CASA NU", "c": "🏘️ Coop Casa Nuova"}, {"d": "23/04", "v": 1750, "n": "Bonifico da Voi disposto a favore di TECH 3.0", "c": "❓ Altro"}, {"d": "15/02", "v": 1728, "n": "Addebito saldo e/c carta di credito", "c": "💳 Saldo Carta Credito"}], "2021": [{"d": "09/03", "v": 21000, "n": "@M Sottoscr. fondi/polizze", "c": "📈 Investimenti/Fondi"}, {"d": "12/03", "v": 15000, "n": "Bonifico da Voi disposto a favore di UNICREDIT MAZ", "c": "🔄 Giroconto"}, {"d": "23/03", "v": 6757, "n": "Interessi debitori", "c": "🏦 Interessi Debitori"}, {"d": "15/12", "v": 5082, "n": "Addebito saldo e/c carta di credito", "c": "💳 Saldo Carta Credito"}, {"d": "15/08", "v": 3894, "n": "Addebito saldo e/c carta di credito", "c": "💳 Saldo Carta Credito"}, {"d": "08/06", "v": 2800, "n": "Bonifico da Voi disposto a favore di COOP. CASA NU", "c": "🏘️ Coop Casa Nuova"}, {"d": "08/06", "v": 2800, "n": "Bonifico da Voi disposto a favore di COOP. CASA NU", "c": "🏘️ Coop Casa Nuova"}, {"d": "14/12", "v": 2500, "n": "Bonifico da Voi disposto a favore di Cooperativa C", "c": "🏘️ Coop Casa Nuova"}, {"d": "14/12", "v": 2500, "n": "Bonifico da Voi disposto a favore di Cooperativa C", "c": "🏘️ Coop Casa Nuova"}, {"d": "15/04", "v": 2253, "n": "Addebito saldo e/c carta di credito", "c": "💳 Saldo Carta Credito"}], "2022": [{"d": "22/09", "v": 23334, "n": "Bonifico da Voi disposto a favore di Agata Marchit", "c": "🏗️ Acquisto Immobile"}, {"d": "16/09", "v": 10500, "n": "@M Add. deleghe Fisco/Inps/Regioni", "c": "🏛️ F24 / Tasse"}, {"d": "02/08", "v": 10000, "n": "Bonifico da Voi disposto a favore di Agata Marchit", "c": "🏗️ Acquisto Immobile"}, {"d": "01/03", "v": 6273, "n": "Interessi debitori", "c": "🏦 Interessi Debitori"}, {"d": "15/08", "v": 4484, "n": "Addebito saldo e/c carta di credito", "c": "💳 Saldo Carta Credito"}, {"d": "28/09", "v": 3600, "n": "Bonifico da Voi disposto a favore di Notaio Covell", "c": "🏗️ Acquisto Immobile"}, {"d": "15/10", "v": 3065, "n": "Addebito saldo e/c carta di credito", "c": "💳 Saldo Carta Credito"}, {"d": "15/02", "v": 2638, "n": "Addebito saldo e/c carta di credito", "c": "💳 Saldo Carta Credito"}, {"d": "15/04", "v": 2610, "n": "Addebito saldo e/c carta di credito", "c": "💳 Saldo Carta Credito"}, {"d": "15/09", "v": 2548, "n": "Addebito saldo e/c carta di credito", "c": "💳 Saldo Carta Credito"}], "2023": [{"d": "30/10", "v": 43426, "n": "Bonifico da Voi disposto a favore di BPER Banca - ", "c": "🏗️ Estinzione Mutuo"}, {"d": "30/10", "v": 43426, "n": "Bonifico da Voi disposto a favore di BPER Banca - ", "c": "🏗️ Estinzione Mutuo"}, {"d": "01/03", "v": 8491, "n": "Interessi debitori", "c": "🏦 Interessi Debitori"}, {"d": "21/03", "v": 7017, "n": "@M Bonifico da Voi disposto a favore di Serveco S.", "c": "🏗️ Ristrutturazione"}, {"d": "31/05", "v": 6380, "n": "@M Bonifico da Voi disposto a favore di Vaporterma", "c": "🏗️ Ristrutturazione"}, {"d": "01/06", "v": 6380, "n": "@M Disposizione di bonifico BONIFICO PER AGEVOLAZI", "c": "🏗️ Ristrutturazione"}, {"d": "28/12", "v": 6106, "n": "Bonifico da Voi disposto a favore di Condominio Vi", "c": "🏢 Cond. Don Minzoni"}, {"d": "07/04", "v": 5530, "n": "Bonifico da Voi disposto a favore di Coop. Casa Nu", "c": "🏘️ Coop Casa Nuova"}, {"d": "24/07", "v": 5000, "n": "@M Bonifico da Voi disposto a favore di Unicredit ", "c": "🔄 Giroconto"}, {"d": "09/06", "v": 4539, "n": "@M Bonifico da Voi disposto a favore di Condominio", "c": "🏢 Cond. Don Minzoni"}], "2024": [{"d": "01/03", "v": 22563, "n": "Interessi debitori", "c": "🏦 Interessi Debitori"}, {"d": "18/03", "v": 20000, "n": "Bonifico da Voi disposto a favore di Unicredit Maz", "c": "🔄 Giroconto"}, {"d": "23/01", "v": 8025, "n": "Bonifico da Voi disposto a favore di Pacello Srl", "c": "🚗 Acquisto Auto"}, {"d": "15/05", "v": 4284, "n": "Addebito saldo e/c carta di credito", "c": "💳 Saldo Carta Credito"}, {"d": "15/01", "v": 3350, "n": "Addebito saldo e/c carta di credito", "c": "💳 Saldo Carta Credito"}, {"d": "15/02", "v": 2621, "n": "Addebito saldo e/c carta di credito", "c": "💳 Saldo Carta Credito"}, {"d": "15/12", "v": 2586, "n": "Addebito saldo e/c carta di credito", "c": "💳 Saldo Carta Credito"}, {"d": "31/03", "v": 2500, "n": "Bonifico da Voi disposto a favore di Genius Mazzar", "c": "👦 Onofrio"}, {"d": "15/08", "v": 2333, "n": "Addebito saldo e/c carta di credito", "c": "💳 Saldo Carta Credito"}, {"d": "15/11", "v": 2176, "n": "Addebito saldo e/c carta di credito", "c": "💳 Saldo Carta Credito"}], "2025": [{"d": "03/03", "v": 17474, "n": "Interessi debitori", "c": "🏦 Interessi Debitori"}, {"d": "12/06", "v": 6944, "n": "@M Bonifico da Voi disposto a favore di Iris Mobil", "c": "🏗️ Arredamento"}, {"d": "20/11", "v": 5000, "n": "Bonifico da Voi disposto a favore di Emmeci Auto S", "c": "🚗 Acquisto Auto"}, {"d": "15/06", "v": 4286, "n": "Addebito saldo e/c carta di credito", "c": "💳 Saldo Carta Credito"}, {"d": "15/08", "v": 4022, "n": "Addebito saldo e/c carta di credito", "c": "💳 Saldo Carta Credito"}, {"d": "20/08", "v": 3097, "n": "Add. deleghe Fisco/Inps/Regioni", "c": "🏛️ F24 / Tasse"}, {"d": "15/05", "v": 3011, "n": "Addebito saldo e/c carta di credito", "c": "💳 Saldo Carta Credito"}, {"d": "15/02", "v": 2875, "n": "Addebito saldo e/c carta di credito", "c": "💳 Saldo Carta Credito"}, {"d": "15/10", "v": 2301, "n": "Addebito saldo e/c carta di credito", "c": "💳 Saldo Carta Credito"}, {"d": "15/12", "v": 2278, "n": "Addebito saldo e/c carta di credito", "c": "💳 Saldo Carta Credito"}]}};
+const MN=['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+const ML={'FISSE':'📋 Spese Fisse','VARIAB':'🛒 Spese Variabili','TRASF':'🔄 Trasferimenti','STRAORD':'⭐ Straordinarie','FAMIGLIA':'👨‍👩‍👧 Famiglia'};
+const MK={'FISSE':'#f87171','VARIAB':'#60a5fa','TRASF':'#a78bfa','STRAORD':'#fbbf24','FAMIGLIA':'#f472b6','REDDITO':'#34d399','EXTRA':'#22d3ee'};
+const CC=['#f87171','#60a5fa','#fbbf24','#a78bfa','#34d399','#fb923c','#e879f9','#38bdf8','#4ade80','#f472b6','#c084fc','#facc15','#22d3ee','#a3e635','#f97316','#818cf8','#2dd4bf','#fb7185','#84cc16','#e2e8f0'];
+const tp=document.getElementById('tp');
+let cy=D.ac;
+const fm=n=>Math.round(n).toLocaleString('it-IT');
+const fk=n=>Math.abs(n)>=1000?(n/1000).toFixed(1).replace('.',',')+'k':fm(n);
+const pc=(a,b)=>b?((a-b)/Math.abs(b)*100).toFixed(1):'0';
+function sh(e,h){tp.innerHTML=h;tp.style.display='block';tp.style.left=(e.clientX+10)+'px';tp.style.top=(e.clientY-6)+'px'}
+function hi(){tp.style.display='none'}
+function sel(y){cy=y;rAll()}
+
+function rAll(){
+  // Tabs
+  document.getElementById('tabs').innerHTML=D.anni.map(a=>`<div class="t ${cy===a?'a':''}" onclick="sel(${a})">${a}</div>`).join('');
+  rCmp();rKpi();rCh();rDet();
+}
+
+// === CONFRONTO ANNO CORRENTE ===
+function rCmp(){
+  const el=document.getElementById('s1');
+  if(cy!==D.ac||!D.cmp){el.innerHTML='';return;}
+  const c=D.cmp, m=c.um, cu=c.c, pr=c.p;
+  const dE=pc(cu.e,pr.e),dU=pc(cu.u,pr.u),dS=cu.s-pr.s;
+  el.innerHTML=`
+  <div class="st">📊 ${c.ac} vs ${c.ap} — stesso periodo (Gen–${MN[m-1]})</div>
+  <div class="kr">
+    <div class="k"><div class="ki" style="background:var(--gd);color:var(--gn)">↓</div><div class="kl">Entrate ${c.ac}</div><div class="kv" style="color:var(--gn)">€${fm(cu.e)}</div><div class="ks">vs €${fm(pr.e)} (${c.ap})</div><div class="kd ${dE>=0?'p':'n'}">${dE>=0?'▲':'▼'}${Math.abs(dE)}%</div></div>
+    <div class="k"><div class="ki" style="background:var(--rdd);color:var(--rd)">↑</div><div class="kl">Uscite ${c.ac}</div><div class="kv" style="color:var(--rd)">€${fm(cu.u)}</div><div class="ks">vs €${fm(pr.u)} (${c.ap})</div><div class="kd ${dU<=0?'p':'n'}">${dU<=0?'▼':'▲'}${Math.abs(dU)}%</div></div>
+    <div class="k"><div class="ki" style="background:var(--bld);color:var(--bl)">≡</div><div class="kl">Saldo ${c.ac}</div><div class="kv" style="color:${cu.s>=0?'var(--bl)':'var(--rd)'}">€${fm(cu.s)}</div><div class="ks">vs €${fm(pr.s)} (${c.ap})</div><div class="kd ${dS>=0?'p':'n'}">${dS>=0?'▲':'▼'}€${fm(Math.abs(dS))}</div></div>
+    <div class="k"><div class="ki" style="background:var(--amd);color:var(--am)">📈</div><div class="kl">Media mensile</div><div class="kv" style="color:var(--am)">€${fm(cu.s/m)}<span style="font-size:10px;color:var(--mu)">/m</span></div><div class="ks">vs €${fm(pr.s/m)}/m (${c.ap})</div></div>
+  </div>
+  <div class="g2" style="margin-top:8px">
+    <div class="c"><h3>↓ Entrate: ${c.ac} <span style="color:var(--gn)">■</span> vs ${c.ap} <span style="color:#166534">■</span></h3><div class="bw" id="cE"></div></div>
+    <div class="c"><h3>↑ Uscite: ${c.ac} <span style="color:var(--rd)">■</span> vs ${c.ap} <span style="color:#7f1d1d">■</span></h3><div class="bw" id="cU"></div></div>
+  </div>`;
+  cBar('cE','e',c.ac,c.ap,m,'var(--gn)','#166534');
+  cBar('cU','u',c.ac,c.ap,m,'var(--rd)','#7f1d1d');
+}
+
+function cBar(id,f,y1,y2,nm,c1,c2){
+  const el=document.getElementById(id);if(!el)return;el.innerHTML='';
+  let mx=0;
+  for(let i=1;i<=nm;i++){const k1=y1+'-'+(i<10?'0'+i:i),k2=y2+'-'+(i<10?'0'+i:i);mx=Math.max(mx,(D.pm[k1]||{})[f]||0,(D.pm[k2]||{})[f]||0)}
+  for(let i=1;i<=nm;i++){
+    const k1=y1+'-'+(i<10?'0'+i:i),k2=y2+'-'+(i<10?'0'+i:i);
+    const v1=(D.pm[k1]||{})[f]||0,v2=(D.pm[k2]||{})[f]||0;
+    const g=document.createElement('div');g.className='bg';
+    const bp=document.createElement('div');bp.className='bp';
+    const b1=document.createElement('div');b1.className='b';b1.style.cssText=`height:0%;background:${c2};width:10px`;
+    const b2=document.createElement('div');b2.className='b';b2.style.cssText=`height:0%;background:${c1};width:10px`;
+    [b1,b2].forEach(b=>{b.onmousemove=e=>sh(e,`<b>${MN[i-1]}</b><br>${y2}: €${fm(v2)}<br>${y1}: €${fm(v1)}<br>Δ ${v1>=v2?'+':''}€${fm(v1-v2)}`);b.onmouseleave=hi});
+    bp.append(b1,b2);const lb=document.createElement('div');lb.className='bl';lb.textContent=MN[i-1];
+    g.append(bp,lb);el.append(g);
+    setTimeout(()=>{b1.style.height=(v2/mx*100)+'%';b2.style.height=(v1/mx*100)+'%'},30+i*20);
+  }
+}
+
+// === KPI ANNO ===
+function rKpi(){
+  const d=D.pya[cy];if(!d)return;
+  document.getElementById('s2').innerHTML=`
+  <div class="st">📋 Riepilogo ${cy}</div>
+  <div class="kr">
+    <div class="k"><div class="ki" style="background:var(--gd);color:var(--gn)">↓</div><div class="kl">Entrate</div><div class="kv" style="color:var(--gn)">€${fm(d.e)}</div><div class="ks">€${fm(d.e/d.nm)}/m (${d.nm}m)</div></div>
+    <div class="k"><div class="ki" style="background:var(--rdd);color:var(--rd)">↑</div><div class="kl">Uscite</div><div class="kv" style="color:var(--rd)">€${fm(d.u)}</div><div class="ks">€${fm(d.u/d.nm)}/m</div></div>
+    <div class="k"><div class="ki" style="background:var(--bld);color:var(--bl)">≡</div><div class="kl">Saldo</div><div class="kv" style="color:${d.s>=0?'var(--bl)':'var(--rd)'}">€${fm(d.s)}</div><div class="ks">€${fm(d.s/d.nm)}/m</div></div>
+    <div class="k"><div class="ki" style="background:var(--amd);color:var(--am)">%</div><div class="kl">Risparmio</div><div class="kv" style="color:var(--am)">${d.r}%</div><div class="ks">${d.r>=10?'✅ Ok':d.r>=0?'⚠️ Equilibrio':'🔴 Deficit'}</div></div>
+  </div>
+  <div class="mg" id="mgr"></div>`;
+  const mu=D.mu[cy]||{};
+  document.getElementById('mgr').innerHTML=['FISSE','VARIAB','FAMIGLIA','STRAORD','TRASF'].filter(m=>mu[m]>0).map(m=>
+    `<div class="mb"><div class="ml">${ML[m]||m}</div><div class="mv" style="color:${MK[m]||'#fff'}">€${fk(mu[m])}</div></div>`).join('');
+}
+
+// === GRAFICI ===
+function rCh(){
+  document.getElementById('s3').innerHTML=`<div class="st">📊 Grafici ${cy}</div>
+  <div class="g2"><div class="c"><h3>Entrate vs Uscite Mensili</h3><div class="bw" id="bc"></div></div>
+  <div class="c"><h3>🍩 Composizione Uscite</h3><div class="dw" id="dn"></div></div></div>`;
+  // Bars
+  const el=document.getElementById('bc');el.innerHTML='';
+  const ms=D.ms.filter(m=>m.startsWith(cy+''));let mx=0;
+  ms.forEach(m=>{mx=Math.max(mx,D.pm[m].e,D.pm[m].u)});
+  ms.forEach((m,i)=>{
+    const[y,mm]=m.split('-'),en=D.pm[m].e,us=D.pm[m].u;
+    const g=document.createElement('div');g.className='bg';const bp=document.createElement('div');bp.className='bp';
+    const be=document.createElement('div');be.className='b e';be.style.height='0%';
+    const bu=document.createElement('div');bu.className='b u';bu.style.height='0%';
+    [be,bu].forEach(b=>{b.onmousemove=e=>sh(e,`<b>${MN[+mm-1]} ${y}</b><br><span style="color:var(--gn)">↓€${fm(en)}</span><br><span style="color:var(--rd)">↑€${fm(us)}</span><br><span style="color:var(--bl)">≡€${fm(en-us)}</span>`);b.onmouseleave=hi});
+    bp.append(be,bu);const lb=document.createElement('div');lb.className='bl';lb.textContent=MN[+mm-1];
+    g.append(bp,lb);el.append(g);
+    setTimeout(()=>{be.style.height=(en/mx*100)+'%';bu.style.height=(us/mx*100)+'%'},30+i*25);
+  });
+  // Donut
+  mkDn('dn',D.cu[cy]||{},false);
+}
+
+function mkDn(id,cats,isE){
+  const el=document.getElementById(id);if(!el)return;
+  const s=Object.entries(cats).map(([k,v])=>[k,v.v,v.m]).sort((a,b)=>b[1]-a[1]);
+  const tot=s.reduce((x,r)=>x+r[1],0);
+  let sv='',off=0;
+  s.forEach(([c,v,m],i)=>{const p=v/tot*100;const cl=MK[m]||CC[i%CC.length];
+    sv+=`<circle cx="18" cy="18" r="15.9" fill="none" stroke="${cl}" stroke-width="3" stroke-dasharray="${p} ${100-p}" stroke-dashoffset="${-off}"/>`;off+=p});
+  const lg=s.slice(0,12).map(([c,v,m],i)=>{const p=(v/tot*100).toFixed(1);const cl=MK[m]||CC[i%CC.length];
+    return `<div class="li"><span class="ll"><span class="ld" style="background:${cl}"></span>${c}</span><span class="lp">€${fk(v)} (${p}%)</span></div>`}).join('');
+  const vc=isE?'var(--gn)':'var(--tx)';
+  el.innerHTML=`<div class="ds"><svg viewBox="0 0 36 36" style="width:100%;height:100%;transform:rotate(-90deg)">${sv}</svg><div class="dc"><div class="da" style="color:${vc}">€${fk(tot)}</div><div class="dl">${isE?'entrate':'uscite'}</div></div></div><div class="lg">${lg}</div>`;
+}
+
+// === DETTAGLI ===
+function rDet(){
+  document.getElementById('s4').innerHTML=`<div class="st">🔍 Dettaglio ${cy}</div>
+  <div class="ge"><div class="c"><h3>🔝 Top Categorie Uscite</h3><ul class="tl" id="tcu"></ul></div>
+  <div class="c"><h3>💰 Fonti di Entrata</h3><ul class="tl" id="tce"></ul></div></div>
+  <div class="ge" style="margin-top:8px"><div class="c"><h3>💸 Top Transazioni Uscita</h3><ul class="tl" id="ttx"></ul></div>
+  <div class="c"><h3>🍩 Composizione Entrate</h3><div class="dw" id="dnE"></div></div></div>`;
+  mkList('tcu',D.cu[cy]||{},false);
+  mkList('tce',D.ce[cy]||{},true);
+  // Top tx
+  const txs=D.tu[cy]||[];
+  document.getElementById('ttx').innerHTML=txs.slice(0,10).map((t,i)=>
+    `<li><span class="tc"><span class="ti" style="background:var(--rdd);color:var(--rd)">${i+1}</span><span class="tn" title="${t.n}">${t.d} ${t.n}</span></span><span class="ta" style="color:var(--rd)">€${fm(t.v)}</span></li>`).join('');
+  mkDn('dnE',D.ce[cy]||{},true);
+}
+
+function mkList(id,cats,isE){
+  const el=document.getElementById(id);if(!el)return;
+  const s=Object.entries(cats).map(([k,v])=>[k,v.v,v.m]).sort((a,b)=>b[1]-a[1]);
+  const mx=s.length?s[0][1]:1;
+  el.innerHTML=s.slice(0,10).map(([c,v,m],i)=>{
+    const p=(v/mx*100).toFixed(0),cl=MK[m]||CC[i%CC.length];
+    const vc=isE?'color:var(--gn)':'';
+    return `<li><span class="tc"><span class="ti" style="background:${cl}22;color:${cl}">${c.split(' ')[0]}</span><span class="tn">${c.replace(/^\S+\s/,'')}</span></span><span class="ta" style="${vc}">€${fk(v)}</span><span class="pb"><span class="pf" style="width:${p}%;background:${cl}"></span></span></li>`}).join('');
+}
+
+rAll();
+</script></body></html>
