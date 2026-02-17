@@ -5,24 +5,18 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
 :root{
-    /* THEME: MIDNIGHT SLATE */
-    --bg:#1e293b;
-    --c1:#334155;
-    --c2:#475569;
-    --bd:#475569;
-    --tx:#f1f5f9;
-    --m1:#cbd5e1;
-    --gn:#34d399;
-    --rd:#f87171;
-    --bl:#60a5fa;
+    --bg:#1e293b; --c1:#334155; --c2:#475569; --bd:#475569;
+    --tx:#f1f5f9; --m1:#cbd5e1; --gn:#34d399; --rd:#f87171; --bl:#60a5fa;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);max-width:600px;margin:0 auto;padding-bottom:60px}
 
 .sticky-header {position:sticky;top:0;z-index:100;background:rgba(30,41,59,0.95);backdrop-filter:blur(8px);padding:10px 16px;border-bottom:1px solid var(--bd);box-shadow:0 4px 6px -1px rgba(0,0,0,0.1)}
-.yrs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.nav-row {display:flex;align-items:center;justify-content:space-between;gap:10px}
+.yrs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;flex:1;justify-content:center}
 .yr{padding:8px 16px;border-radius:20px;font-size:15px;font-weight:700;background:var(--c2);color:var(--m1);white-space:nowrap;cursor:pointer;border:1px solid var(--bd);transition:background .2s}
 .yr.a{background:var(--bl);color:#fff;border-color:var(--bl)}
+.nav-btn {background:transparent;border:none;color:var(--bl);font-size:24px;font-weight:800;cursor:pointer;padding:0 8px;user-select:none}
 
 .hero{margin:16px;background:linear-gradient(135deg, var(--c1), var(--c2));border:1px solid var(--bd);border-radius:20px;padding:24px;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.2)}
 .hero-val{font-size:40px;font-weight:800;margin:5px 0;letter-spacing:-1px}
@@ -65,7 +59,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);max-wid
 </style></head><body>
 
 <div class="sticky-header">
-    <div class="yrs" id="yrs"></div>
+    <div class="nav-row">
+        <button class="nav-btn" onclick="move(-1)">❮</button>
+        <div class="yrs" id="yrs"></div>
+        <button class="nav-btn" onclick="move(1)">❯</button>
+    </div>
     <div id="mini-status" style="display:none; text-align:center; font-size:13px; font-weight:800; margin-top:8px; color:var(--bl)"></div>
 </div>
 
@@ -76,16 +74,28 @@ const D={"anni": [2020, 2021, 2022, 2023, 2024, 2025], "ac": 2025, "um": 12, "py
 const MN=['GEN','FEB','MAR','APR','MAG','GIU','LUG','AGO','SET','OTT','NOV','DIC'];
 let cy=D.ac;
 
-// FUNZIONE CRUCIALE: Forza i punti millesimali con Regex, ignorando il locale del browser
 const fm = n => {
     if (n === undefined || n === null) return '0';
-    // Arrotonda e converte in stringa
     let s = Math.round(n).toString();
-    // Regex che inserisce il punto ogni 3 cifre
     return s.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 };
 
 function sel(y){ cy=y; render(); window.scrollTo(0,0); }
+
+function move(dir){
+    let idx = D.anni.indexOf(cy);
+    let n = idx + dir;
+    // LOGICA CIRCOLARE
+    if(n < 0) n = D.anni.length - 1;
+    if(n >= D.anni.length) n = 0;
+    sel(D.anni[n]);
+}
+
+// EVENT LISTENER TASTIERA
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft') move(-1);
+    if (e.key === 'ArrowRight') move(1);
+});
 
 window.onscroll = function() {
     let ms = document.getElementById('mini-status');
@@ -106,7 +116,6 @@ function render(){
   const d=D.pya[cy];
   let h='';
 
-  // 1. HERO & KPI (PRIMA POSIZIONE)
   h+=`<div class="hero">
     <div style="font-size:13px;text-transform:uppercase;color:var(--m1)">Saldo Anno ${cy}</div>
     <div class="hero-val" style="color:${d.s>=0?'var(--bl)':'var(--rd)'}">€ ${fm(d.s)}</div>
@@ -117,11 +126,10 @@ function render(){
     <div class="kpi"><div class="kpi-label">Uscite</div><div class="kpi-val" style="color:var(--rd)">€ ${fm(d.u)}</div></div>
   </div>`;
 
-  // 2. TABELLA CONFRONTO (SECONDA POSIZIONE, SOTTO HERO)
   const py = cy - 1;
   const hasPrev = D.anni.includes(py);
   
-  h+=`<div class="sec">📅 Confronto Uscite</div>`;
+  h+=`<div class="sec">📅 Confronto Uscite ${cy}</div>`;
   h+=`<div class="tbl-card"><table class="tbl">
       <thead><tr><th class="tbl-m">Mese</th><th>${py}</th><th>${cy}</th></tr></thead>
       <tbody>`;
@@ -131,16 +139,10 @@ function render(){
       const kP = py + '-' + (i<10?'0'+i:i);
       const vC = (D.pm[kC]||{}).u || 0;
       const vP = hasPrev ? ((D.pm[kP]||{}).u || 0) : 0;
-      
-      // Salta solo se entrambi zero E siamo oltre l'ultimo mese registrato
       if(vC===0 && vP===0 && i > D.um) continue; 
-      
       totC+=vC; totP+=vP;
-      
       let col = 'var(--tx)';
-      // Logica colori: Rosso se spendi di più dell'anno scorso, altrimenti normale
       if(vC > 0 && vP > 0) { col = vC > vP ? 'var(--rd)' : 'var(--tx)'; }
-      
       h+=`<tr><td class="tbl-m">${MN[i-1]}</td>
         <td style="color:var(--m1)">${vP?'€ '+fm(vP):'-'}</td>
         <td style="color:${col}">${vC?'€ '+fm(vC):'-'}</td></tr>`;
@@ -149,8 +151,7 @@ function render(){
       <td style="color:var(--m1)">€ ${fm(totP)}</td>
       <td style="color:var(--bl)">€ ${fm(totC)}</td></tr></tbody></table></div>`;
 
-  // 3. GRAFICI E ALTRO
-  h+=`<div class="sec">📈 Andamento Mensile</div>
+  h+=`<div class="sec">📈 Andamento Mensile ${cy}</div>
     <div class="vchart">
       <div style="display:flex;gap:15px;font-size:12px;margin-bottom:10px;justify-content:center">
         <span><b style="color:var(--gn)">■</b> Entrate</span><span><b style="color:var(--rd)">■</b> Uscite</span>
@@ -158,9 +159,9 @@ function render(){
       <div class="vbars" id="mainBars"></div>
     </div>`;
 
-  h+=`<div class="sec">💚 Fonti di Entrata</div><div class="card"><div id="donutE"></div></div>`;
-  h+=`<div class="sec">💰 Ripartizione Spese</div><div class="card" id="macroCard"></div>`;
-  h+=`<div class="sec">💸 Movimenti Top</div><div class="card" id="topTx"></div>`;
+  h+=`<div class="sec">💚 Fonti di Entrata ${cy}</div><div class="card"><div id="donutE"></div></div>`;
+  h+=`<div class="sec">💰 Ripartizione Spese ${cy}</div><div class="card" id="macroCard"></div>`;
+  h+=`<div class="sec">💸 Movimenti Top ${cy}</div><div class="card" id="topTx"></div>`;
 
   el.innerHTML=h;
   mkMainBars();
