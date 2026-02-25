@@ -167,7 +167,9 @@ body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background
 .sprint-item-title { font-size:14px; font-weight:700; color:var(--primary); margin-bottom:3px; }
 .sprint-item-query { font-size:12px; color:#777; font-family:Consolas,monospace; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-/* --- Stampa --- */
+/* Colonna importo mobile (nascosta su desktop) */
+.mov-amount-importo { display: none; }
+.sort-btn-importo   { display: none; }
 @media print {
     .header, .global-search, .sort-bar, .modal-overlay { display: none !important; }
     .container { max-width: 100%; box-shadow: none; margin: 0; background: #fff; }
@@ -176,20 +178,34 @@ body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background
 
 /* --- Mobile --- */
 @media (max-width: 600px) {
+    /* Sort bar: Data | Descrizione | Importo */
     .sort-bar { grid-template-columns: 65px 1fr 100px; gap: 3px; padding: 8px 4px; }
-    .sort-bar .sort-btn:last-child { display: none; }
-    .mov-item { grid-template-columns: 65px 1fr 100px; }
-    .mov-item .mov-amount:last-child { display: none; }
+    .sort-bar .sort-btn[data-sort="uscite"]  { display: none; }
+    .sort-bar .sort-btn[data-sort="entrate"] { display: none; }
+    .sort-bar .sort-btn-importo { display: flex !important; }
+
+    /* Righe movimenti: Data | Descrizione | Importo */
+    .mov-item   { grid-template-columns: 65px 1fr 100px; }
     .mov-totals { grid-template-columns: 65px 1fr 100px; }
-    .mov-totals .mov-amount:last-child { display: none; }
-    .mov-cell { padding: 5px 6px; }
+
+    /* Nascondi le due colonne separate Uscite/Entrate */
+    .mov-item   .mov-amount-uscita,
+    .mov-item   .mov-amount-entrata,
+    .mov-totals .mov-amount-uscita,
+    .mov-totals .mov-amount-entrata { display: none; }
+
+    /* Mostra la colonna unica Importo */
+    .mov-item   .mov-amount-importo,
+    .mov-totals .mov-amount-importo { display: flex !important; }
+
+    .mov-cell   { padding: 5px 6px; }
     .mov-amount { padding: 5px 6px; font-size: 13px; }
-    .mov-date { font-size: 13px; }
-    .mov-desc { font-size: 13px; }
+    .mov-date   { font-size: 13px; }
+    .mov-desc   { font-size: 13px; }
     .year-title { grid-template-columns: 1fr 70px 70px; }
     .year-title .year-money:last-child { display: none; }
-    .month-row { grid-template-columns: 55px 1fr 65px 65px; padding: 5px 8px 5px 15px; }
-    .month-row .month-val:last-child { display: none; }
+    .month-row  { grid-template-columns: 55px 1fr 65px 65px; padding: 5px 8px 5px 15px; }
+    .month-row  .month-val:last-child { display: none; }
     .gs-container { gap: 20px; }
     .gs-val { font-size: 18px; }
     .header h1 { font-size: 17px; }
@@ -402,6 +418,7 @@ body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background
             <button class="sort-btn"        data-sort="desc"    onclick="toggleSort('desc')">&#8645; Descrizione</button>
             <button class="sort-btn"        data-sort="uscite"  onclick="toggleSort('uscite')">&#8645; Uscite</button>
             <button class="sort-btn"        data-sort="entrate" onclick="toggleSort('entrate')">&#8645; Entrate</button>
+            <button class="sort-btn sort-btn-importo" data-sort="uscite" onclick="toggleSort('uscite')">&#8645; Importo</button>
         </div>
         <div id="movList"></div>
     </div>
@@ -1014,11 +1031,16 @@ function getSortFn() {
 function buildMovRow(d, idx) {
     var mainText = (d.sintesi && d.sintesi.trim() !== '' && d.sintesi.trim() !== d.gruppo) ? d.sintesi : d.descrizione;
     var shortYear = d.anno.substring(2);
+    var isUscita  = d.uscite  > 0;
+    var impVal    = isUscita ? d.uscite : d.entrate;
+    var impCls    = isUscita ? 'mov-uscita' : 'mov-entrata';
+    var impPfx    = isUscita ? '-' : '+';
     return '<div class="mov-item" onclick="openModal(' + idx + ')">'
         + '<div class="mov-cell"><div class="mov-date">' + d.gg + '/' + d.mm + '/' + shortYear + '</div></div>'
         + '<div class="mov-cell"><div class="mov-desc">' + highlightText(mainText) + '</div></div>'
-        + '<div class="mov-amount mov-uscita">'  + (d.uscite  > 0 ? fmtK(d.uscite)  : '') + '</div>'
-        + '<div class="mov-amount mov-entrata">' + (d.entrate > 0 ? fmtK(d.entrate) : '') + '</div>'
+        + '<div class="mov-amount mov-uscita  mov-amount-uscita">'  + (d.uscite  > 0 ? fmtK(d.uscite)  : '') + '</div>'
+        + '<div class="mov-amount mov-entrata mov-amount-entrata">' + (d.entrate > 0 ? fmtK(d.entrate) : '') + '</div>'
+        + '<div class="mov-amount ' + impCls + ' mov-amount-importo">' + (impVal > 0 ? impPfx + fmtK(impVal) : '') + '</div>'
         + '</div>';
 }
 
@@ -1026,11 +1048,13 @@ function buildTotalsRow(items) {
     var totU = 0, totE = 0;
     for (var j = 0; j < items.length; j++) { totU += items[j].uscite; totE += items[j].entrate; }
     var saldo = totE - totU, sPfx = saldo >= 0 ? '+' : '', sClr = saldo >= 0 ? 'var(--entrate-color)' : 'var(--uscite-color)';
+    var saldoCls = saldo >= 0 ? 'mov-entrata' : 'mov-uscita';
     return '<div class="mov-totals">'
         + '<div class="mov-cell"></div>'
         + '<div class="mov-cell" style="justify-content:flex-end;font-family:Consolas,monospace;color:' + sClr + '">Saldo: ' + sPfx + fmtK(saldo) + '</div>'
-        + '<div class="mov-amount mov-uscita">'  + fmtK(totU) + '</div>'
-        + '<div class="mov-amount mov-entrata">' + fmtK(totE) + '</div>'
+        + '<div class="mov-amount mov-uscita  mov-amount-uscita">'  + fmtK(totU) + '</div>'
+        + '<div class="mov-amount mov-entrata mov-amount-entrata">' + fmtK(totE) + '</div>'
+        + '<div class="mov-amount ' + saldoCls + ' mov-amount-importo">' + sPfx + fmtK(saldo) + '</div>'
         + '</div>';
 }
 
