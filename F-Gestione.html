@@ -119,16 +119,17 @@ body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background
 .mov-amount { font-size: 14px; font-weight: 700; font-family: 'Consolas', monospace; text-align: right; padding: 9px 10px; white-space: nowrap; display: flex; align-items: center; justify-content: flex-end; box-shadow: inset -1px 0 0 #ddd; }
 .mov-amount:last-child { box-shadow: none; }
 .mov-uscita  { color: var(--uscite-color);  background: #fff5f5; }
-.mov-entrata { color: var(--entrate-color); background: #f4fbf6; }
+.mov-entrata { color: var(--entrate-color); background: #e8f5e9; }
+.mov-entrata.has-value { border: 1.5px solid #81c784; }
 .mov-item:hover .mov-uscita  { background: #fde8e8; }
-.mov-item:hover .mov-entrata { background: #e2f5e9; }
+.mov-item:hover .mov-entrata { background: #d4edda; }
 .mov-totals { display: grid; grid-template-columns: 80px minmax(0,1fr) 130px 130px; gap: 0; padding: 0; background: #e0e0e0; border: 2px solid #666; border-radius: 4px; font-weight: 700; }
 .mov-totals .mov-cell { font-size: 14px; font-weight: 700; border-right: 1px solid #999; }
 .mov-totals .mov-cell:last-child { border-right: none; }
 .mov-totals .mov-amount { border-right: 1px solid #999; }
 .mov-totals .mov-amount:last-child { border-right: none; }
 .mov-totals .mov-uscita  { background: #fde8e8; }
-.mov-totals .mov-entrata { background: #dff2e8; }
+.mov-totals .mov-entrata { background: #d4edda; border: 1.5px solid #81c784; }
 
 /* --- Modali --- */
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: center; padding: 20px; }
@@ -1039,7 +1040,7 @@ function buildMovRow(d, idx) {
         + '<div class="mov-cell"><div class="mov-date">' + d.gg + '/' + d.mm + '/' + shortYear + '</div></div>'
         + '<div class="mov-cell"><div class="mov-desc">' + highlightText(mainText) + '</div></div>'
         + '<div class="mov-amount mov-uscita  mov-amount-uscita">'  + (d.uscite  > 0 ? fmtK(d.uscite)  : '') + '</div>'
-        + '<div class="mov-amount mov-entrata mov-amount-entrata">' + (d.entrate > 0 ? fmtK(d.entrate) : '') + '</div>'
+        + '<div class="mov-amount mov-entrata mov-amount-entrata' + (d.entrate > 0 ? ' has-value' : '') + '">' + (d.entrate > 0 ? fmtK(d.entrate) : '') + '</div>'
         + '<div class="mov-amount ' + impCls + ' mov-amount-importo">' + (impVal > 0 ? impPfx + fmtK(impVal) : '') + '</div>'
         + '</div>';
 }
