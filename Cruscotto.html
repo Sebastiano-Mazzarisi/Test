@@ -71,6 +71,32 @@ const fm = n => {
     return s.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 };
 
+function highlightRow(el) {
+    document.querySelectorAll('tr.hl-flash').forEach(r => {
+        r.classList.remove('hl-flash');
+        r.style.transition = '';
+        r.style.background = '';
+    });
+    const applyHL = r => {
+        r.style.transition = 'none';
+        r.style.background = 'rgba(255,255,255,0.15)';
+        r.classList.add('hl-flash');
+    };
+    applyHL(el);
+    let next = el.nextElementSibling;
+    while (next && !next.id && !next.classList.contains('riga-totale')) {
+        applyHL(next);
+        next = next.nextElementSibling;
+    }
+    setTimeout(() => {
+        document.querySelectorAll('tr.hl-flash').forEach(r => {
+            r.style.transition = 'background 1s';
+            r.style.background = '';
+            r.classList.remove('hl-flash');
+        });
+    }, 1500);
+}
+
 function scrollToDetailDay(d) {
     const el = document.getElementById('det-day-' + d);
     if (el) {
@@ -80,6 +106,7 @@ function scrollToDetailDay(d) {
         const elementPosition = elementRect - bodyRect;
         const offsetPosition = elementPosition - offset;
         window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+        setTimeout(() => highlightRow(el), 300);
     }
 }
 
@@ -92,6 +119,7 @@ function scrollToSummaryDay(d) {
         const elementPosition = elementRect - bodyRect;
         const offsetPosition = elementPosition - offset;
         window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+        setTimeout(() => highlightRow(el), 300);
     }
 }
 

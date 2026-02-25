@@ -151,9 +151,14 @@ body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background
 .btn-pano   { background: #2c3e50; }
 .btn-cancel { background: #999; }
 
-/* --- Bottone Sprint [$] --- */
-.sprint-btn { flex-shrink:0; width:36px; height:36px; background:var(--primary); color:#fff; border:none; border-radius:6px; font-size:18px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.15s; user-select:none; }
-.sprint-btn:hover { background:#1a4a1e; }
+/* --- Bottone Sprint [💲] --- */
+.sprint-btn { flex-shrink:0; width:36px; height:36px; background:#fff; color:#000; border:1px solid #ccc; border-radius:6px; font-size:18px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.15s, box-shadow 0.15s; user-select:none; box-shadow:0 1px 3px rgba(0,0,0,0.12); }
+.sprint-btn:hover { background:#f5f5f5; box-shadow:0 2px 6px rgba(0,0,0,0.18); }
+
+/* --- Badge Gruppo Sprint --- */
+.sprint-badge { flex-shrink:0; height:36px; padding:0 10px; background:#fefce8; color:var(--primary); border:1.5px solid #b8860b; border-radius:6px; font-size:13px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; white-space:nowrap; max-width:180px; overflow:hidden; text-overflow:ellipsis; box-shadow:0 1px 3px rgba(0,0,0,0.10); transition:background 0.15s; user-select:none; gap:5px; }
+.sprint-badge:hover { background:#fdf5c0; }
+.sprint-badge-x { font-size:16px; color:#b8860b; font-weight:900; line-height:1; margin-left:2px; }
 
 /* --- Modal Sprint --- */
 .sprint-item { display:flex; flex-direction:column; padding:12px 18px; border-bottom:1px solid #eee; cursor:pointer; transition:background 0.12s; }
@@ -376,6 +381,7 @@ body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background
 
     <div class="global-search">
         <button class="sprint-btn" id="sprintBtn" onclick="openSprintModal()" title="Filtri rapidi">💲</button>
+        <div class="sprint-badge" id="sprintBadge" onclick="clearSearch()" title="Rimuovi filtro gruppo" style="display:none;"></div>
         <div class="search-wrapper">
             <input type="text" class="search-input" id="searchInput"
                    placeholder="Anno: (2025)  Escludi: -(2020)  OR: [parola1 parola2]  NOT: -parola"
@@ -680,7 +686,12 @@ function handleSearchInput() {
     }, 1000);
 }
 
-function clearSearch() { $('searchInput').value = ''; handleSearchInput(); }
+function clearSearch() {
+    $('searchInput').value = '';
+    var badge = $('sprintBadge');
+    if (badge) badge.style.display = 'none';
+    handleSearchInput();
+}
 
 function updateGlobalFilter() {
     var raw = state.search || '';
@@ -1006,8 +1017,8 @@ function buildMovRow(d, idx) {
     return '<div class="mov-item" onclick="openModal(' + idx + ')">'
         + '<div class="mov-cell"><div class="mov-date">' + d.gg + '/' + d.mm + '/' + shortYear + '</div></div>'
         + '<div class="mov-cell"><div class="mov-desc">' + highlightText(mainText) + '</div></div>'
-        + '<div class="mov-amount mov-uscita">'  + (d.uscite  > 0 ? fmtMoney(d.uscite)  : '') + '</div>'
-        + '<div class="mov-amount mov-entrata">' + (d.entrate > 0 ? fmtMoney(d.entrate) : '') + '</div>'
+        + '<div class="mov-amount mov-uscita">'  + (d.uscite  > 0 ? fmtK(d.uscite)  : '') + '</div>'
+        + '<div class="mov-amount mov-entrata">' + (d.entrate > 0 ? fmtK(d.entrate) : '') + '</div>'
         + '</div>';
 }
 
@@ -1017,9 +1028,9 @@ function buildTotalsRow(items) {
     var saldo = totE - totU, sPfx = saldo >= 0 ? '+' : '', sClr = saldo >= 0 ? 'var(--entrate-color)' : 'var(--uscite-color)';
     return '<div class="mov-totals">'
         + '<div class="mov-cell"></div>'
-        + '<div class="mov-cell" style="text-align:right;color:' + sClr + '">Saldo: ' + sPfx + fmtMoney(saldo) + '</div>'
-        + '<div class="mov-amount mov-uscita">'  + fmtMoney(totU) + '</div>'
-        + '<div class="mov-amount mov-entrata">' + fmtMoney(totE) + '</div>'
+        + '<div class="mov-cell" style="justify-content:flex-end;font-family:Consolas,monospace;color:' + sClr + '">Saldo: ' + sPfx + fmtK(saldo) + '</div>'
+        + '<div class="mov-amount mov-uscita">'  + fmtK(totU) + '</div>'
+        + '<div class="mov-amount mov-entrata">' + fmtK(totE) + '</div>'
         + '</div>';
 }
 
@@ -1334,6 +1345,9 @@ function applySprint(idx) {
     input.classList.add('has-value');
     $('clearBtn').style.display = 'block';
     state.search = it.query.toLowerCase();
+    // Mostra badge con titolo sprint
+    var badge = $('sprintBadge');
+    if (badge) { badge.innerHTML = escH(it.titolo) + '<span class="sprint-badge-x">\u00d7</span>'; badge.style.display = 'flex'; }
     closeSprintModal();
     updateGlobalFilter();
     // Se siamo in panoramica, passa alla vista Tutti
