@@ -197,7 +197,8 @@ function renderMonth(y, m, doScroll=false) {
   const txlist = (D.txlist[mk] || []).slice().sort((a,b) => a.day - b.day);
   
   let h_sum = `<div class="sec">📅 ${titoloMese} ${y} - Entrate e Uscite</div>
-  <div class="tbl-card"><table class="tbl">
+  <div class="tbl-card"><table class="tbl" style="table-layout:fixed">
+    <colgroup><col style="width:78px"><col style="width:auto"><col style="width:auto"></colgroup>
     <thead><tr><th class="tbl-m" style="text-align:left">Giorno</th><th>Entrate</th><th>Uscite</th></tr></thead>
     <tbody>`;
   Object.keys(days).sort((a,b)=>+a-+b).forEach(d => {
@@ -205,14 +206,15 @@ function renderMonth(y, m, doScroll=false) {
     const dayLabel = DOW[dt.getDay() === 0 ? 6 : dt.getDay()-1] + '-' + d.padStart(2,'0');
     h_sum += `<tr id="sum-day-${d}" style="cursor:pointer" onclick="scrollToDetailDay(${d})">
       <td class="tbl-m" style="border-bottom: 1px solid var(--bd) !important;">${dayLabel}</td>
-      <td style="color:var(--gn)">${dv.e ? '€ '+fm(dv.e) : '-'}</td>
-      <td style="color:var(--rd)">${dv.u ? '€ '+fm(dv.u) : '-'}</td></tr>`;
+      <td style="color:var(--gn);white-space:nowrap">${dv.e ? '€ '+fm(dv.e) : '-'}</td>
+      <td style="color:var(--rd);white-space:nowrap">${dv.u ? '€ '+fm(dv.u) : '-'}</td></tr>`;
   });
   h_sum += `</tbody></table></div>`;
 
   let h_det = `<div class="sec">🔍 ${titoloMese} ${y} - Descrizione e importo</div>
-  <div class="tbl-card"><table class="tbl">
-    <thead><tr><th class="tbl-m" style="text-align:left">Giorno</th><th style="text-align:left;padding-left:8px">Descrizione</th><th>Importo</th></tr></thead>
+  <div class="tbl-card"><table class="tbl" style="table-layout:fixed">
+    <colgroup><col style="width:78px"><col style="width:auto"><col style="width:90px"></colgroup>
+    <thead><tr><th class="tbl-m" style="text-align:left;padding-right:4px">Giorno</th><th style="text-align:left;padding-left:4px">Descrizione</th><th style="white-space:nowrap">Importo</th></tr></thead>
     <tbody>`;
   
   let lastDay = -1;
@@ -227,12 +229,11 @@ function renderMonth(y, m, doScroll=false) {
     const borderStyle = isLastOfGroup ? '1px solid var(--bd)' : 'none';
 
     h_det += `<tr ${rowId} style="cursor:pointer" onclick="scrollToSummaryDay(${t.day})">
-      <td class="tbl-m" style="border-bottom: ${borderStyle} !important;">${dayLabel}</td>
-      <td style="text-align:left;padding-left:8px;font-size:14px;color:var(--m1); border-bottom: 1px solid var(--bd);">${t.si}</td>
-      <td style="color:${col};font-weight:700; border-bottom: 1px solid var(--bd);">${imp>0?'+':''}${fm(imp)}</td>
+      <td class="tbl-m" style="border-bottom: ${borderStyle} !important;padding-right:4px">${dayLabel}</td>
+      <td style="text-align:left;padding-left:4px;font-size:14px;color:var(--m1);border-bottom:1px solid var(--bd);word-break:break-word;white-space:normal">${t.si}</td>
+      <td style="color:${col};font-weight:700;white-space:nowrap;border-bottom:1px solid var(--bd);">${imp>0?'+':''}${fm(imp)}</td>
     </tr>`;
   });
-
   h_det += `<tr class="riga-totale"><td class="tbl-m" style="border-bottom: none !important;"></td>
       <td style="text-align:left;padding-left:8px;font-size:16px;color:${saldo>=0?'var(--gn)':'var(--rd)'}">Saldo mensile: € ${fm(saldo)}</td>
       <td></td></tr></tbody></table></div>`;
