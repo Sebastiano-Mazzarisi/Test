@@ -1,21 +1,29 @@
 import sys
 import re
-import msvcrt
 import subprocess
 import os
 import asyncio
 import edge_tts
-import pygame.mixer
 import io
 import tempfile
 import shutil
 import time
 
+# msvcrt e pygame sono disponibili solo su Windows (riproduzione diretta)
+ON_WINDOWS = os.name == 'nt'
+if ON_WINDOWS:
+    import msvcrt
+    import pygame.mixer
+
 # ── Configurazione velocità ──────────────────────────────────────────────────
 # Aumenta MAX_CONCURRENT per più velocità (rischio 403 più alto)
 # Valori consigliati: 3 (sicuro) | 5 (veloce) | 8 (massimo)
 MAX_CONCURRENT = 5
-STACCHETTO_MP3 = r"C:\Dropbox\Prog\Buongiorno\Chitarra.mp3"  # Stacchetto musicale per <T>
+# Path stacchetto: cerca prima nella stessa cartella dello script, poi il path Windows originale
+_script_dir = os.path.dirname(os.path.abspath(__file__))
+STACCHETTO_MP3 = os.path.join(_script_dir, "Chitarra.mp3")
+if not os.path.exists(STACCHETTO_MP3):
+    STACCHETTO_MP3 = r"C:\Dropbox\Prog\Buongiorno\Chitarra.mp3"
 RETRY_DELAY    = 0.5      # Secondi tra un retry e l'altro (era 2.0+)
 MAX_RETRIES    = 6        # Tentativi per frase
 # ─────────────────────────────────────────────────────────────────────────────
@@ -256,6 +264,8 @@ def print_parameters_help():
 
 
 async def speak_text_fast(text, voice_name, speed_rate="1.0", style=None, initial_delay=0.1):
+    if not ON_WINDOWS:
+        return
     audio_data = await generate_audio(text, voice_name, speed_rate, style)
     if audio_data:
         audio_buffer = io.BytesIO(audio_data)
@@ -429,6 +439,9 @@ async def leggi_file_con_voci_optimized(nome_file, parametri):
 
     # ── MODALITÀ RIPRODUZIONE DIRETTA ─────────────────────────────────────────
     else:
+        if not ON_WINDOWS:
+            print("ERRORE: riproduzione diretta non supportata su questo sistema.", file=sys.stderr)
+            return
         if not pygame.mixer.get_init():
             try:
                 pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=512)
@@ -436,7 +449,7 @@ async def leggi_file_con_voci_optimized(nome_file, parametri):
                 print(f"ERRORE mixer: {e}", file=sys.stderr); return
 
         for i, (frase, voce_mode, speed, pause, style) in enumerate(frasi_con_parametri, start=1):
-            if msvcrt.kbhit() and msvcrt.getch() == b'\x1b':
+            if ON_WINDOWS and msvcrt.kbhit() and msvcrt.getch() == b'\x1b':
                 print("\nInterruzione da utente.")
                 print_parameters_help()
                 sys.exit(0)
@@ -467,7 +480,7 @@ async def leggi_file_con_voci_optimized(nome_file, parametri):
             if pause > 0:
                 await asyncio.sleep(pause)
 
-        if pygame.mixer.get_init():
+        if ON_WINDOWS and pygame.mixer.get_init():
             pygame.mixer.quit()
 
     print_parameters_help()
