@@ -250,7 +250,7 @@
   </div>
 </div>
 
-<audio id="player" src="PodPutignano.mp3" preload="metadata"></audio>
+<audio id="player" preload="metadata"></audio>
 
 <script>
   const player   = document.getElementById('player');
@@ -275,9 +275,13 @@
   }
 
   // Controlla se l'MP3 esiste e leggi la data dell'ultimo aggiornamento
+  const ts = Date.now();
+  const MP3_URL = `PodPutignano.mp3?v=${ts}`;
+  player.src = MP3_URL;
+
   async function checkMP3() {
     try {
-      const r = await fetch('PodPutignano.mp3', { method: 'HEAD' });
+      const r = await fetch(MP3_URL, { method: 'HEAD', cache: 'no-store' });
       if (r.ok) {
         const lastMod = r.headers.get('last-modified');
         if (lastMod) {
