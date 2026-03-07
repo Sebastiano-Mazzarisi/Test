@@ -256,9 +256,82 @@
       white-space: pre-wrap;
       border: 1px solid rgba(41,128,185,0.15);
     }
+
+    .banner-installa {
+      display: none;
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 48px);
+      max-width: 380px;
+      background: white;
+      border-radius: 18px;
+      padding: 16px 18px;
+      box-shadow: 0 8px 32px rgba(41,128,185,0.25);
+      z-index: 999;
+      border: 1px solid rgba(41,128,185,0.15);
+    }
+
+    .banner-installa .banner-titolo {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #1a5276;
+      margin-bottom: 6px;
+    }
+
+    .banner-installa .banner-testo {
+      font-size: 0.82rem;
+      color: #5d8aa8;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .banner-installa .banner-testo b {
+      color: #2980b9;
+    }
+
+    .banner-btn-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .banner-btn-installa {
+      flex: 1;
+      background: linear-gradient(135deg, #5dade2, #2980b9);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 10px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      font-family: 'Lato', sans-serif;
+      cursor: pointer;
+    }
+
+    .banner-btn-chiudi {
+      background: transparent;
+      color: #a0bfd4;
+      border: 1px solid #d6eaf8;
+      border-radius: 50px;
+      padding: 10px 16px;
+      font-size: 0.82rem;
+      font-family: 'Lato', sans-serif;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
+
+<!-- Banner installazione -->
+<div class="banner-installa" id="bannerInstalla">
+  <div class="banner-titolo">📱 Aggiungi alla Home</div>
+  <div class="banner-testo" id="bannerTesto"></div>
+  <div class="banner-btn-row">
+    <button class="banner-btn-installa" id="bannerBtnInstalla">Installa</button>
+    <button class="banner-btn-chiudi" onclick="chiudiBanner()">Dopo</button>
+  </div>
+</div>
 
 <div class="card">
   <div class="icon-wrap" id="iconWrap">
@@ -511,6 +584,53 @@
 
   checkAggiornamento();
   setInterval(checkAggiornamento, 10000);
+
+  // ── BANNER INSTALLAZIONE ─────────────────────────────────────
+  const banner = document.getElementById('bannerInstalla');
+  const bannerTesto = document.getElementById('bannerTesto');
+  const bannerBtnInstalla = document.getElementById('bannerBtnInstalla');
+  let deferredPrompt = null;
+
+  function chiudiBanner() {
+    banner.style.display = 'none';
+  }
+
+  // Controlla se già installata (standalone mode)
+  const isInstallata = window.matchMedia('(display-mode: standalone)').matches
+                    || window.navigator.standalone === true;
+
+  if (!isInstallata) {
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+    if (isIOS && isSafari) {
+      // iPhone/iPad: istruzioni manuali
+      bannerTesto.innerHTML = 'Tocca <b>⎋ Condividi</b> in basso, poi <b>"Aggiungi a schermata Home"</b> per accedere velocemente ogni giorno.';
+      bannerBtnInstalla.style.display = 'none';
+      setTimeout(() => banner.style.display = 'block', 1500);
+    } else {
+      // Android/Chrome: prompt nativo
+      window.addEventListener('beforeinstallprompt', e => {
+        e.preventDefault();
+        deferredPrompt = e;
+        bannerTesto.innerHTML = 'Aggiungi <b>PodPutignano</b> alla schermata Home per aprirlo con un tap ogni mattina.';
+        bannerBtnInstalla.style.display = '';
+        setTimeout(() => banner.style.display = 'block', 1500);
+      });
+
+      bannerBtnInstalla.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          deferredPrompt = null;
+          chiudiBanner();
+        }
+      });
+
+      // Nasconde il banner se già installata
+      window.addEventListener('appinstalled', chiudiBanner);
+    }
+  }
 
   // Registra Service Worker per PWA
   if ('serviceWorker' in navigator) {
