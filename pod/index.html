@@ -613,10 +613,8 @@
   (async () => {
     const NS  = 'podputignano';
     const KEY = 'visite';
+    const OWNER_FLAG = 'podput-owner';
     const params  = new URLSearchParams(location.search);
-    const nohit   = params.get('nohit') === '1';
-
-    const sessionFlag = `sess-hit-${NS}-${KEY}`;
 
     const safe = (() => {
       const wrap = (obj) => ({
@@ -627,11 +625,19 @@
       return { session: wrap(window.sessionStorage), local: wrap(window.localStorage) };
     })();
 
+    // Se aperto con ?nohit=1, salva flag permanente nel localStorage
+    if (params.get('nohit') === '1') {
+      safe.local.set(OWNER_FLAG, '1');
+    }
+
+    // Se il flag owner è presente, non incrementare mai
+    const isOwner = safe.local.get(OWNER_FLAG) === '1';
+
+    const sessionFlag = `sess-hit-${NS}-${KEY}`;
     const sessCookie = {
       get: (n) => document.cookie.split('; ').find(r=>r.startsWith(n+'='))?.split('=')[1] || null,
       set: (n, v) => { document.cookie = `${n}=${v}; path=/`; }
     };
-
     const alreadyHit = safe.session.get(sessionFlag) === '1' || sessCookie.get(sessionFlag) === '1';
 
     const backends = [
@@ -665,11 +671,33 @@
     const mostra = (v) => {
       num.textContent = Number.isFinite(v) ? v : '–';
       pill.style.display = '';
+      if (isOwner) {
+        num.style.cursor = 'pointer';
+        num.style.textDecoration = 'underline';
+        num.title = 'Clicca per azzerare';
+        num.onclick = async () => {
+          if (!confirm(`Azzerare il contatore (attualmente ${num.textContent})?`)) return;
+          try {
+            for (const b of backends) {
+              try {
+                await fetchJSON(b.hit.replace('/hit/', '/set/') + '?value=0', 3500);
+              } catch {}
+            }
+            // Usa l'API set di mileshilliard
+            await fetchJSON(`https://countapi.mileshilliard.com/api/v1/set/${NS}_${KEY}?value=0`, 3500);
+            num.textContent = '0';
+            safe.local.set(localKey, '0');
+          } catch {
+            num.textContent = '0';
+            safe.local.set(localKey, '0');
+          }
+        };
+      }
     };
 
     try {
       let value;
-      if (nohit || alreadyHit) {
+      if (isOwner || alreadyHit) {
         value = await cascade('get');
       } else {
         value = await cascade('hit');
@@ -680,7 +708,7 @@
       if (safe.local.ok() && Number.isFinite(value)) safe.local.set(localKey, String(value));
     } catch {
       let v = parseInt(safe.local.get(localKey) || '0', 10);
-      if (!alreadyHit && !nohit) {
+      if (!isOwner && !alreadyHit) {
         v += 1;
         if (safe.local.ok()) safe.local.set(localKey, String(v));
         if (safe.session.ok()) safe.session.set(sessionFlag, '1');
