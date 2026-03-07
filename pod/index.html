@@ -33,6 +33,10 @@
       -webkit-backdrop-filter: blur(16px);
       border-radius: 28px;
       padding: 40px 32px 32px;
+    }
+
+    .card.testo-aperto {
+      padding: 16px 32px 16px;
       max-width: 380px;
       width: 100%;
       text-align: center;
@@ -236,7 +240,7 @@
       background: rgba(255,255,255,0.6);
       border-radius: 16px;
       padding: 16px;
-      max-height: 320px;
+      max-height: 70vh;
       overflow-y: auto;
       text-align: left;
       font-size: 0.88rem;
@@ -250,15 +254,14 @@
 <body>
 
 <div class="card">
-  <div class="icon-wrap">
-    <!-- Microfono SVG -->
+  <div class="icon-wrap" id="iconWrap">
     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
       <path d="M12 14a3 3 0 003-3V5a3 3 0 00-6 0v6a3 3 0 003 3zm5-3a5 5 0 01-10 0H5a7 7 0 0012 6.08V19h-3v2h8v-2h-3v-1.92A7 7 0 0019 11h-2z"/>
     </svg>
   </div>
 
-  <h1>PodPutignano</h1>
-  <p class="subtitle">Il podcast quotidiano di Putignano</p>
+  <h1 id="titolo">PodPutignano</h1>
+  <p class="subtitle" id="sottotitolo">Il podcast quotidiano di Putignano</p>
 
   <div id="stato">Caricamento in corso…</div>
 
@@ -272,7 +275,7 @@
     Scarica MP3
   </a>
 
-  <button class="btn-leggi" onclick="toggleTesto()">
+  <button class="btn-leggi" id="btnLeggi" onclick="toggleTesto()">
     <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6z"/></svg>
     <span id="labelLeggi">Leggi il testo</span>
   </button>
@@ -289,9 +292,9 @@
     </div>
   </div>
 
-  <hr class="divider">
+  <hr class="divider" id="divider">
 
-  <div class="info-row">
+  <div class="info-row" id="infoRow">
     <span class="info-pill">
       <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
       Aggiornato ogni 15 min
@@ -327,7 +330,6 @@
     return m + ':' + String(sec).padStart(2,'0');
   }
 
-  // Controlla se l'MP3 esiste e leggi la data dell'ultimo aggiornamento
   const ts = Date.now();
   const MP3_URL = `PodPutignano.mp3?v=${ts}`;
   player.src = MP3_URL;
@@ -341,7 +343,7 @@
           const d = new Date(lastMod);
           const ora = d.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit', timeZone:'Europe/Rome' });
           const giorno = d.toLocaleDateString('it-IT', { day:'numeric', month:'long', timeZone:'Europe/Rome' });
-          stato.textContent = `Notizie aggiornate alle ore ${ora}`;
+          stato.textContent = `Ultima puntata: ${giorno} ore ${ora}`;
         } else {
           stato.textContent = 'Puntata disponibile';
         }
@@ -403,21 +405,39 @@
   // ── LEGGI TESTO ──────────────────────────────────────────────
   const testoPanel = document.getElementById('testoPanel');
   const labelLeggi = document.getElementById('labelLeggi');
+  const btnDownload = document.getElementById('btnDownload');
+  const divider = document.getElementById('divider');
+  const infoRow = document.getElementById('infoRow');
   let testoCaricato = false;
+
+  const iconWrap    = document.getElementById('iconWrap');
+  const titolo      = document.getElementById('titolo');
+  const sottotitolo = document.getElementById('sottotitolo');
+  const statoDiv    = document.getElementById('stato');
+
+  const elementiDaNascondere = [iconWrap, titolo, sottotitolo, statoDiv, btnPlay, btnDownload, progressWrap, divider, infoRow];
+  const card = document.querySelector('.card');
 
   async function toggleTesto() {
     if (testoPanel.style.display === 'block') {
+      // Chiudi: mostra tutto, nascondi testo
       testoPanel.style.display = 'none';
       labelLeggi.textContent = 'Leggi il testo';
+      elementiDaNascondere.forEach(el => { if (el) el.style.display = ''; });
+      card.classList.remove('testo-aperto');
       return;
     }
+
+    // Apri: nascondi gli altri elementi
+    elementiDaNascondere.forEach(el => { if (el) el.style.display = 'none'; });
+    card.classList.add('testo-aperto');
+
     if (!testoCaricato) {
       testoPanel.style.display = 'block';
       testoPanel.textContent = 'Caricamento…';
       try {
         const r = await fetch(`https://sebastiano-mazzarisi.github.io/Test/Lettura.txt?v=${Date.now()}`, { cache: 'no-store' });
         const raw = await r.text();
-        // Rimuove tutti i marker tra parentesi quadre: [T], [F], [M], ecc.
         const pulito = raw
           .replace(/\[.*?\]/g, '')
           .replace(/\n{3,}/g, '\n\n')
