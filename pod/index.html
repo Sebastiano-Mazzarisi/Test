@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PodPutignano</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2980b9">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="PodPutignano">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Lato', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(160deg, #d0eaf8 0%, #a8d4f0 40%, #7ab8e0 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 28px;
+      padding: 40px 32px 32px;
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 8px 40px rgba(41,128,185,0.18), 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .icon-wrap {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(145deg, #5dade2, #2980b9);
+      border-radius: 26px;
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 20px rgba(41,128,185,0.35);
+    }
+
+    .icon-wrap svg {
+      width: 52px;
+      height: 52px;
+      fill: white;
+    }
+
+    h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: #1a5276;
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: #5d8aa8;
+      font-weight: 300;
+      margin-bottom: 28px;
+    }
+
+    #stato {
+      font-size: 0.88rem;
+      color: #2e86c1;
+      min-height: 20px;
+      margin-bottom: 20px;
+      font-weight: 400;
+    }
+
+    .btn-play {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #5dade2, #2980b9);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 16px 36px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      font-family: 'Lato', sans-serif;
+      cursor: pointer;
+      width: 100%;
+      box-shadow: 0 4px 16px rgba(41,128,185,0.35);
+      transition: transform 0.15s, box-shadow 0.15s;
+      letter-spacing: 0.3px;
+    }
+
+    .btn-play:active {
+      transform: scale(0.97);
+      box-shadow: 0 2px 8px rgba(41,128,185,0.25);
+    }
+
+    .btn-play svg {
+      width: 22px;
+      height: 22px;
+      fill: white;
+      flex-shrink: 0;
+    }
+
+    .btn-download {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: transparent;
+      color: #2980b9;
+      border: 2px solid #a8d4f0;
+      border-radius: 50px;
+      padding: 12px 24px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: 'Lato', sans-serif;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 12px;
+      transition: background 0.15s, border-color 0.15s;
+      text-decoration: none;
+    }
+
+    .btn-download:hover {
+      background: rgba(41,128,185,0.07);
+      border-color: #5dade2;
+    }
+
+    .btn-download svg {
+      width: 16px;
+      height: 16px;
+      fill: #2980b9;
+    }
+
+    .progress-wrap {
+      display: none;
+      margin-top: 24px;
+    }
+
+    .progress-bar-bg {
+      background: #d6eaf8;
+      border-radius: 10px;
+      height: 6px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #5dade2, #2980b9);
+      border-radius: 10px;
+      width: 0%;
+      transition: width 0.2s;
+    }
+
+    .time-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: #5d8aa8;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(41,128,185,0.12);
+      margin: 24px 0 20px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .info-pill {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.78rem;
+      color: #7fb3d3;
+      font-weight: 400;
+    }
+
+    .info-pill svg {
+      width: 13px;
+      height: 13px;
+      fill: #7fb3d3;
+    }
+
+    audio { display: none; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="icon-wrap">
+    <!-- Microfono SVG -->
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 14a3 3 0 003-3V5a3 3 0 00-6 0v6a3 3 0 003 3zm5-3a5 5 0 01-10 0H5a7 7 0 0012 6.08V19h-3v2h8v-2h-3v-1.92A7 7 0 0019 11h-2z"/>
+    </svg>
+  </div>
+
+  <h1>PodPutignano</h1>
+  <p class="subtitle">Il podcast quotidiano di Putignano</p>
+
+  <div id="stato">Caricamento in corso…</div>
+
+  <button class="btn-play" id="btnPlay" onclick="togglePlay()">
+    <svg id="iconPlay" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    <span id="labelPlay">Ascolta ora</span>
+  </button>
+
+  <a class="btn-download" id="btnDownload" href="PodPutignano.mp3" download="PodPutignano.mp3">
+    <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zm-7 9H5v2h14v-2h-7z"/></svg>
+    Scarica MP3
+  </a>
+
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-bar-bg">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="time-row">
+      <span id="timeCurrent">0:00</span>
+      <span id="timeDuration">--:--</span>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="info-row">
+    <span class="info-pill">
+      <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+      Aggiornato ogni 15 min
+    </span>
+    <span class="info-pill">
+      <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/></svg>
+      Putignano
+    </span>
+  </div>
+</div>
+
+<audio id="player" src="PodPutignano.mp3" preload="metadata"></audio>
+
+<script>
+  const player   = document.getElementById('player');
+  const btnPlay  = document.getElementById('btnPlay');
+  const iconPlay = document.getElementById('iconPlay');
+  const labelPlay= document.getElementById('labelPlay');
+  const stato    = document.getElementById('stato');
+  const progressWrap = document.getElementById('progressWrap');
+  const progressBar  = document.getElementById('progressBar');
+  const timeCurrent  = document.getElementById('timeCurrent');
+  const timeDuration = document.getElementById('timeDuration');
+
+  const ICONS = {
+    play:  '<path d="M8 5v14l11-7z"/>',
+    pause: '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>',
+    spin:  '<path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>'
+  };
+
+  function fmt(s) {
+    const m = Math.floor(s/60), sec = Math.floor(s%60);
+    return m + ':' + String(sec).padStart(2,'0');
+  }
+
+  // Controlla se l'MP3 esiste e leggi la data dell'ultimo aggiornamento
+  async function checkMP3() {
+    try {
+      const r = await fetch('PodPutignano.mp3', { method: 'HEAD' });
+      if (r.ok) {
+        const lastMod = r.headers.get('last-modified');
+        if (lastMod) {
+          const d = new Date(lastMod);
+          const ora = d.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit', timeZone:'Europe/Rome' });
+          const giorno = d.toLocaleDateString('it-IT', { day:'numeric', month:'long', timeZone:'Europe/Rome' });
+          stato.textContent = `Ultima puntata: ${giorno} ore ${ora}`;
+        } else {
+          stato.textContent = 'Puntata disponibile';
+        }
+      } else {
+        stato.textContent = 'Puntata non ancora disponibile';
+        btnPlay.disabled = true;
+        btnPlay.style.opacity = '0.5';
+      }
+    } catch(e) {
+      stato.textContent = 'Verifica connessione';
+    }
+  }
+
+  checkMP3();
+
+  function togglePlay() {
+    if (player.paused) {
+      iconPlay.innerHTML = ICONS.spin;
+      labelPlay.textContent = 'Caricamento…';
+      player.play().catch(() => {
+        stato.textContent = 'Errore riproduzione';
+        iconPlay.innerHTML = ICONS.play;
+        labelPlay.textContent = 'Ascolta ora';
+      });
+    } else {
+      player.pause();
+    }
+  }
+
+  player.addEventListener('playing', () => {
+    iconPlay.innerHTML = ICONS.pause;
+    labelPlay.textContent = 'Pausa';
+    progressWrap.style.display = 'block';
+  });
+
+  player.addEventListener('pause', () => {
+    iconPlay.innerHTML = ICONS.play;
+    labelPlay.textContent = 'Riprendi';
+  });
+
+  player.addEventListener('ended', () => {
+    iconPlay.innerHTML = ICONS.play;
+    labelPlay.textContent = 'Ascolta ora';
+    progressBar.style.width = '0%';
+    timeCurrent.textContent = '0:00';
+  });
+
+  player.addEventListener('loadedmetadata', () => {
+    timeDuration.textContent = fmt(player.duration);
+  });
+
+  player.addEventListener('timeupdate', () => {
+    if (!player.duration) return;
+    const pct = (player.currentTime / player.duration) * 100;
+    progressBar.style.width = pct + '%';
+    timeCurrent.textContent = fmt(player.currentTime);
+  });
+
+  // Registra Service Worker per PWA
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+</script>
+</body>
+</html>
