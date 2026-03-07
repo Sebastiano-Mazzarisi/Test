@@ -76,6 +76,11 @@
       margin-bottom: 28px;
     }
 
+    .testo-aperto h1,
+    .testo-aperto .subtitle {
+      text-align: center;
+    }
+
     #stato {
       font-size: 0.88rem;
       color: #2e86c1;
@@ -475,22 +480,12 @@
         return;
       }
       if (lastMod !== ultimaModifica) {
-        // File aggiornato: resetta testo e ricarica stato
-        ultimaModifica = lastMod;
-        testoCaricato = false;
-        if (testoPanel.style.display === 'block') {
-          testoPanel.textContent = 'Caricamento…';
-          await toggleTesto(); // chiudi
-          await toggleTesto(); // riapri con testo nuovo
-        }
-        // Aggiorna il player
-        player.src = `PodPutignano.mp3?v=${Date.now()}`;
-        checkMP3();
+        // File aggiornato: ricarica tutta la pagina
+        location.reload(true);
       }
     } catch(e) {}
   }
 
-  // Prima chiamata per inizializzare ultimaModifica
   checkAggiornamento();
   setInterval(checkAggiornamento, 10000);
 
