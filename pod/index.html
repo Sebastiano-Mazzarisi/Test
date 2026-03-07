@@ -282,6 +282,11 @@
     Scarica MP3
   </a>
 
+  <button class="btn-download" id="btnCondividi" onclick="condividi()">
+    <svg viewBox="0 0 24 24"><path d="M18 16c-.79 0-1.5.31-2.03.81L8.91 12.7A3.15 3.15 0 009 12c0-.24-.04-.47-.09-.7l7.06-4.11A2.99 2.99 0 0018 8a3 3 0 000-6 3 3 0 00-3 3c0 .24.04.47.09.7L8.03 9.81A2.99 2.99 0 006 9a3 3 0 000 6c.79 0 1.5-.31 2.03-.81l7.06 4.11c-.05.22-.09.45-.09.7a3 3 0 103-3z"/></svg>
+    Condividi
+  </button>
+
   <button class="btn-leggi" id="btnLeggi" onclick="toggleTesto()">
     <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6z"/></svg>
     <span id="labelLeggi">Leggi il testo</span>
@@ -413,6 +418,7 @@
   const testoPanel = document.getElementById('testoPanel');
   const labelLeggi = document.getElementById('labelLeggi');
   const btnDownload = document.getElementById('btnDownload');
+  const btnCondividi = document.getElementById('btnCondividi');
   const divider = document.getElementById('divider');
   const infoRow = document.getElementById('infoRow');
   let testoCaricato = false;
@@ -422,7 +428,22 @@
   const sottotitolo = document.getElementById('sottotitolo');
   const statoDiv    = document.getElementById('stato');
 
-  const elementiDaNascondere = [iconWrap, titolo, sottotitolo, statoDiv, btnPlay, btnDownload, progressWrap, divider, infoRow];
+  const elementiDaNascondere = [iconWrap, titolo, sottotitolo, statoDiv, btnPlay, btnDownload, btnCondividi, progressWrap, divider, infoRow];
+
+  function condividi() {
+    if (navigator.share) {
+      navigator.share({
+        title: 'PodPutignano',
+        text: 'Il podcast quotidiano di Putignano',
+        url: 'https://sebastiano-mazzarisi.github.io/Test/pod/index.html'
+      }).catch(() => {});
+    } else {
+      // Fallback: copia il link negli appunti
+      navigator.clipboard.writeText('https://sebastiano-mazzarisi.github.io/Test/pod/index.html')
+        .then(() => alert('Link copiato negli appunti!'))
+        .catch(() => alert('https://sebastiano-mazzarisi.github.io/Test/pod/index.html'));
+    }
+  }
   const card = document.querySelector('.card');
 
   async function toggleTesto() {
