@@ -260,62 +260,54 @@
     .banner-installa {
       display: none;
       position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: calc(100% - 48px);
-      max-width: 380px;
-      background: white;
-      border-radius: 18px;
-      padding: 16px 18px;
-      box-shadow: 0 8px 32px rgba(41,128,185,0.25);
+      inset: 0;
+      background: rgba(0,0,0,0.45);
       z-index: 999;
-      border: 1px solid rgba(41,128,185,0.15);
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .banner-installa.aperto {
+      display: flex;
+    }
+
+    .banner-box {
+      background: white;
+      border-radius: 22px;
+      padding: 28px 24px 22px;
+      max-width: 340px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.2);
     }
 
     .banner-installa .banner-titolo {
-      font-size: 0.95rem;
+      font-size: 1.2rem;
       font-weight: 700;
       color: #1a5276;
-      margin-bottom: 6px;
+      margin-bottom: 16px;
     }
 
     .banner-installa .banner-testo {
-      font-size: 0.82rem;
-      color: #5d8aa8;
-      line-height: 1.5;
-      margin-bottom: 12px;
+      font-size: 1rem;
+      color: #2c3e50;
+      line-height: 1.7;
+      margin-bottom: 20px;
     }
 
     .banner-installa .banner-testo b {
       color: #2980b9;
     }
 
-    .banner-btn-row {
-      display: flex;
-      gap: 8px;
-    }
-
-    .banner-btn-installa {
-      flex: 1;
+    .banner-btn-chiudi {
       background: linear-gradient(135deg, #5dade2, #2980b9);
       color: white;
       border: none;
       border-radius: 50px;
-      padding: 10px;
-      font-size: 0.88rem;
+      padding: 12px 32px;
+      font-size: 1rem;
       font-weight: 700;
-      font-family: 'Lato', sans-serif;
-      cursor: pointer;
-    }
-
-    .banner-btn-chiudi {
-      background: transparent;
-      color: #a0bfd4;
-      border: 1px solid #d6eaf8;
-      border-radius: 50px;
-      padding: 10px 16px;
-      font-size: 0.82rem;
       font-family: 'Lato', sans-serif;
       cursor: pointer;
     }
@@ -323,18 +315,17 @@
 </head>
 <body>
 
-<!-- Banner installazione -->
-<div class="banner-installa" id="bannerInstalla">
-  <div class="banner-titolo">📱 Aggiungi alla Home</div>
-  <div class="banner-testo" id="bannerTesto"></div>
-  <div class="banner-btn-row">
-    <button class="banner-btn-installa" id="bannerBtnInstalla">Installa</button>
-    <button class="banner-btn-chiudi" onclick="chiudiBanner()">Dopo</button>
+<!-- Popup installazione -->
+<div class="banner-installa" id="bannerInstalla" onclick="chiudiBanner()">
+  <div class="banner-box" onclick="event.stopPropagation()">
+    <div class="banner-titolo">📱 Aggiungi alla Home</div>
+    <div class="banner-testo" id="bannerTesto"></div>
+    <button class="banner-btn-chiudi" onclick="chiudiBanner()">Ho capito</button>
   </div>
 </div>
 
 <div class="card">
-  <div class="icon-wrap" id="iconWrap">
+  <div class="icon-wrap" id="iconWrap" onclick="apriBanner()" style="cursor:pointer">
     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
       <path d="M12 14a3 3 0 003-3V5a3 3 0 00-6 0v6a3 3 0 003 3zm5-3a5 5 0 01-10 0H5a7 7 0 0012 6.08V19h-3v2h8v-2h-3v-1.92A7 7 0 0019 11h-2z"/>
     </svg>
@@ -387,6 +378,10 @@
     <span class="info-pill">
       <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/></svg>
       Putignano
+    </span>
+    <span class="info-pill" id="visitePill" style="display:none">
+      <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5a5 5 0 110-10 5 5 0 010 10zm0-8a3 3 0 100 6 3 3 0 000-6z"/></svg>
+      <span id="visteNum">…</span>
     </span>
   </div>
 </div>
@@ -585,52 +580,118 @@
   checkAggiornamento();
   setInterval(checkAggiornamento, 10000);
 
-  // ── BANNER INSTALLAZIONE ─────────────────────────────────────
+  // ── POPUP INSTALLAZIONE (attivato dal logo) ───────────────────
   const banner = document.getElementById('bannerInstalla');
   const bannerTesto = document.getElementById('bannerTesto');
-  const bannerBtnInstalla = document.getElementById('bannerBtnInstalla');
   let deferredPrompt = null;
 
-  function chiudiBanner() {
-    banner.style.display = 'none';
-  }
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+  });
 
-  // Controlla se già installata (standalone mode)
-  const isInstallata = window.matchMedia('(display-mode: standalone)').matches
-                    || window.navigator.standalone === true;
-
-  if (!isInstallata) {
+  function apriBanner() {
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
     if (isIOS && isSafari) {
-      // iPhone/iPad: istruzioni manuali
-      bannerTesto.innerHTML = 'Tocca <b>⎋ Condividi</b> in basso, poi <b>"Aggiungi a schermata Home"</b> per accedere velocemente ogni giorno.';
-      bannerBtnInstalla.style.display = 'none';
-      setTimeout(() => banner.style.display = 'block', 1500);
+      bannerTesto.innerHTML =
+        'Su iPhone/iPad tocca il pulsante <b style="font-size:1.3rem">⬆</b> <b>"Condividi"</b> in basso nel browser Safari,<br><br>' +
+        'poi scegli <b>"Aggiungi alla schermata Home"</b>.<br><br>' +
+        'Troverai l\'icona di PodPutignano direttamente sulla Home! 🎙️';
     } else {
-      // Android/Chrome: prompt nativo
-      window.addEventListener('beforeinstallprompt', e => {
-        e.preventDefault();
-        deferredPrompt = e;
-        bannerTesto.innerHTML = 'Aggiungi <b>PodPutignano</b> alla schermata Home per aprirlo con un tap ogni mattina.';
-        bannerBtnInstalla.style.display = '';
-        setTimeout(() => banner.style.display = 'block', 1500);
-      });
-
-      bannerBtnInstalla.addEventListener('click', async () => {
-        if (deferredPrompt) {
-          deferredPrompt.prompt();
-          const { outcome } = await deferredPrompt.userChoice;
-          deferredPrompt = null;
-          chiudiBanner();
-        }
-      });
-
-      // Nasconde il banner se già installata
-      window.addEventListener('appinstalled', chiudiBanner);
+      bannerTesto.innerHTML =
+        'Su Android tocca il menu <b style="font-size:1.2rem">⋮</b> in alto a destra nel browser Chrome,<br><br>' +
+        'poi scegli <b>"Aggiungi alla schermata Home"</b> o <b>"Installa app"</b>.<br><br>' +
+        'Troverai l\'icona di PodPutignano direttamente sulla Home! 🎙️';
     }
+    banner.classList.add('aperto');
   }
+
+  function chiudiBanner() {
+    banner.classList.remove('aperto');
+  }
+
+  // ── CONTATORE VISITE ─────────────────────────────────────────
+  (async () => {
+    const NS  = 'podputignano';
+    const KEY = 'visite';
+    const params  = new URLSearchParams(location.search);
+    const nohit   = params.get('nohit') === '1';
+
+    const sessionFlag = `sess-hit-${NS}-${KEY}`;
+
+    const safe = (() => {
+      const wrap = (obj) => ({
+        get: (k) => { try { return obj.getItem(k); } catch { return null; } },
+        set: (k, v) => { try { obj.setItem(k, v); } catch {} },
+        ok:  () => { try { const t='__t__'+Math.random(); obj.setItem(t,'1'); obj.removeItem(t); return true; } catch { return false; } }
+      });
+      return { session: wrap(window.sessionStorage), local: wrap(window.localStorage) };
+    })();
+
+    const sessCookie = {
+      get: (n) => document.cookie.split('; ').find(r=>r.startsWith(n+'='))?.split('=')[1] || null,
+      set: (n, v) => { document.cookie = `${n}=${v}; path=/`; }
+    };
+
+    const alreadyHit = safe.session.get(sessionFlag) === '1' || sessCookie.get(sessionFlag) === '1';
+
+    const backends = [
+      { hit: `https://countapi.mileshilliard.com/api/v1/hit/${NS}_${KEY}`, get: `https://countapi.mileshilliard.com/api/v1/get/${NS}_${KEY}`, map: j => Number(j.value ?? j.count) },
+      { hit: `https://countapi.store/hit/${encodeURIComponent(KEY)}/visite`, get: `https://countapi.store/get/${encodeURIComponent(KEY)}/visite`, map: j => Number(j.value) },
+      { hit: `https://api.countapi.xyz/hit/${encodeURIComponent(NS)}/${encodeURIComponent(KEY)}`, get: `https://api.countapi.xyz/get/${encodeURIComponent(NS)}/${encodeURIComponent(KEY)}`, map: j => Number(j.value) }
+    ];
+
+    const fetchJSON = (url, ms=3500) => {
+      const ctrl = new AbortController();
+      setTimeout(() => ctrl.abort(), ms);
+      return fetch(url, { signal: ctrl.signal, cache: 'no-store' })
+        .then(r => { if (!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+    };
+
+    const cascade = async (mode) => {
+      for (const b of backends) {
+        try {
+          const data = await fetchJSON(mode === 'hit' ? b.hit : b.get, 3500);
+          const v = b.map(data);
+          if (Number.isFinite(v)) return v;
+        } catch {}
+      }
+      throw new Error('all backends failed');
+    };
+
+    const localKey = `local-count-${NS}-${KEY}`;
+    const pill = document.getElementById('visitePill');
+    const num  = document.getElementById('visteNum');
+
+    const mostra = (v) => {
+      num.textContent = Number.isFinite(v) ? v : '–';
+      pill.style.display = '';
+    };
+
+    try {
+      let value;
+      if (nohit || alreadyHit) {
+        value = await cascade('get');
+      } else {
+        value = await cascade('hit');
+        if (safe.session.ok()) safe.session.set(sessionFlag, '1');
+        else sessCookie.set(sessionFlag, '1');
+      }
+      mostra(value);
+      if (safe.local.ok() && Number.isFinite(value)) safe.local.set(localKey, String(value));
+    } catch {
+      let v = parseInt(safe.local.get(localKey) || '0', 10);
+      if (!alreadyHit && !nohit) {
+        v += 1;
+        if (safe.local.ok()) safe.local.set(localKey, String(v));
+        if (safe.session.ok()) safe.session.set(sessionFlag, '1');
+        else sessCookie.set(sessionFlag, '1');
+      }
+      mostra(v);
+    }
+  })();
 
   // Registra Service Worker per PWA
   if ('serviceWorker' in navigator) {
