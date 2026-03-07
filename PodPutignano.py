@@ -600,6 +600,20 @@ def pulisci_desc(desc, max_car=500):
                 break
     return d.strip().rstrip(".,; ")
 
+def normalizza_per_tts(testo: str) -> str:
+    """
+    Converte sigle puntate in sigle leggibili dal TTS.
+    Esempi: I.R.C.C.S. → IRCCS,  S.p.A. → SpA,  D.O.C. → DOC
+    Gestisce anche trattini nei nomi di città: Castellana-Grotte → Castellana Grotte
+    """
+    # Sigle tutto maiuscolo con punti: I.R.C.C.S. → IRCCS
+    testo = re.sub(r'\b([A-Z])(?:\.([A-Z]))+\.?', lambda m: m.group(0).replace('.', ''), testo)
+    # Sigle miste tipo S.p.A. → SpA, S.r.l. → Srl
+    testo = re.sub(r'\b([A-Za-z])\.([A-Za-z])\.([A-Za-z])\.?', lambda m: m.group(0).replace('.', ''), testo)
+    # Trattini in nomi di comuni/luoghi (Castellana-Grotte → Castellana Grotte)
+    testo = re.sub(r'([A-Z][a-zà-ÿ]+)-([A-Z][a-zà-ÿ]+)', r'\1 \2', testo)
+    return testo
+
 def fetch_article_text(url, max_car=600, domini_no_fetch=None):
     if not HAS_REQUESTS or not url: return ""
     if domini_no_fetch is None: domini_no_fetch = set()
@@ -704,8 +718,9 @@ def get_intestazione() -> list:
     oggi   = datetime.now()
     giorno = GIORNI_ITA[oggi.weekday()]
     data   = f"{oggi.day} {MESI_ITA[oggi.month]} {oggi.year}"
+    ora    = f"Sono le {oggi.hour} e {oggi.minute:02d}." if oggi.minute != 0 else f"Sono le {oggi.hour} in punto."
     santo  = get_onomastico()
-    riga_data = f"Oggi è {giorno} {data}, {santo}." if santo else f"Oggi è {giorno} {data}."
+    riga_data = f"Oggi è {giorno} {data}, {santo}. {ora}" if santo else f"Oggi è {giorno} {data}. {ora}"
 
     return [
         "[T] [M] Buongiorno Putignano.",
@@ -984,7 +999,7 @@ def componi_frase_italia(title, desc):
                 break
     base = re.sub(r"\s+", " ", base).strip()
     if base and not base.endswith("."): base += "."
-    return base
+    return normalizza_per_tts(base)
 
 def score_italia(item, now):
     s = item["weight"]
@@ -1140,7 +1155,7 @@ def componi_frase_put(title, desc, link="", min_car=400, max_car=620):
                 break
     base = re.sub(r"\s+", " ", base).strip()
     if base and not base.endswith("."): base += "."
-    return base
+    return normalizza_per_tts(base)
 
 def fetch_scrape_put(src, cutoff):
     if not HAS_REQUESTS: return []
@@ -1354,7 +1369,7 @@ if __name__ == "__main__":
 
     # ---- Copia in PodPutignano.mp3 ----
     mp3_path = os.path.join(SCRIPT_DIR, "Lettura.mp3")
-    pod_path = os.path.join(SCRIPT_DIR, "PodPutignano.mp3")
+    pod_path = os.path.join(SCRIPT_DIR, "pod", "PodPutignano.mp3")
     if os.path.isfile(mp3_path):
         shutil.copy2(mp3_path, pod_path)
         print(f"PodPutignano.mp3 aggiornato")
