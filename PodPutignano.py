@@ -715,12 +715,26 @@ def get_onomastico() -> str:
 # ============================================================
 
 def get_intestazione() -> list:
-    oggi   = datetime.now()
+    try:
+        import zoneinfo
+        tz_it = zoneinfo.ZoneInfo("Europe/Rome")
+        oggi = datetime.now(tz_it)
+    except ImportError:
+        from datetime import timezone, timedelta
+        oggi = datetime.now(timezone(timedelta(hours=1)))  # fallback UTC+1
+
     giorno = GIORNI_ITA[oggi.weekday()]
     data   = f"{oggi.day} {MESI_ITA[oggi.month]} {oggi.year}"
-    ora    = f"Sono le {oggi.hour} e {oggi.minute:02d}." if oggi.minute != 0 else f"Sono le {oggi.hour} in punto."
+    ora_h = oggi.hour
+    ora_m = oggi.minute
+    if ora_m != 0:
+        ora_tts = f"Notizie aggiornate alle ore {ora_h} e {ora_m:02d}."
+        ora_label = f"{ora_h}:{ora_m:02d}"
+    else:
+        ora_tts = f"Notizie aggiornate alle ore {ora_h} in punto."
+        ora_label = f"{ora_h}:00"
     santo  = get_onomastico()
-    riga_data = f"Oggi è {giorno} {data}, {santo}. {ora}" if santo else f"Oggi è {giorno} {data}. {ora}"
+    riga_data = f"Oggi è {giorno} {data}, {santo}. {ora_tts}" if santo else f"Oggi è {giorno} {data}. {ora_tts}"
 
     return [
         "[T] [M] Buongiorno Putignano.",
