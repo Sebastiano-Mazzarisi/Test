@@ -462,6 +462,38 @@
     labelLeggi.textContent = 'Nascondi testo';
   }
 
+  // ── AUTO-REFRESH ogni 10 secondi ────────────────────────────
+  let ultimaModifica = null;
+
+  async function checkAggiornamento() {
+    try {
+      const r = await fetch(`PodPutignano.mp3?v=${Date.now()}`, { method: 'HEAD', cache: 'no-store' });
+      if (!r.ok) return;
+      const lastMod = r.headers.get('last-modified');
+      if (ultimaModifica === null) {
+        ultimaModifica = lastMod;
+        return;
+      }
+      if (lastMod !== ultimaModifica) {
+        // File aggiornato: resetta testo e ricarica stato
+        ultimaModifica = lastMod;
+        testoCaricato = false;
+        if (testoPanel.style.display === 'block') {
+          testoPanel.textContent = 'Caricamento…';
+          await toggleTesto(); // chiudi
+          await toggleTesto(); // riapri con testo nuovo
+        }
+        // Aggiorna il player
+        player.src = `PodPutignano.mp3?v=${Date.now()}`;
+        checkMP3();
+      }
+    } catch(e) {}
+  }
+
+  // Prima chiamata per inizializzare ultimaModifica
+  checkAggiornamento();
+  setInterval(checkAggiornamento, 10000);
+
   // Registra Service Worker per PWA
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
