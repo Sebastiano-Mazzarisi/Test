@@ -199,6 +199,52 @@
     }
 
     audio { display: none; }
+
+    .btn-leggi {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: transparent;
+      color: #2980b9;
+      border: 2px solid #a8d4f0;
+      border-radius: 50px;
+      padding: 12px 24px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: 'Lato', sans-serif;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 12px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .btn-leggi:hover {
+      background: rgba(41,128,185,0.07);
+      border-color: #5dade2;
+    }
+
+    .btn-leggi svg {
+      width: 16px;
+      height: 16px;
+      fill: #2980b9;
+    }
+
+    .testo-panel {
+      display: none;
+      margin-top: 20px;
+      background: rgba(255,255,255,0.6);
+      border-radius: 16px;
+      padding: 16px;
+      max-height: 320px;
+      overflow-y: auto;
+      text-align: left;
+      font-size: 0.88rem;
+      color: #1a5276;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      border: 1px solid rgba(41,128,185,0.15);
+    }
   </style>
 </head>
 <body>
@@ -225,6 +271,13 @@
     <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zm-7 9H5v2h14v-2h-7z"/></svg>
     Scarica MP3
   </a>
+
+  <button class="btn-leggi" onclick="toggleTesto()">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6z"/></svg>
+    <span id="labelLeggi">Leggi il testo</span>
+  </button>
+
+  <div class="testo-panel" id="testoPanel"></div>
 
   <div class="progress-wrap" id="progressWrap">
     <div class="progress-bar-bg">
@@ -346,6 +399,39 @@
     progressBar.style.width = pct + '%';
     timeCurrent.textContent = fmt(player.currentTime);
   });
+
+  // ── LEGGI TESTO ──────────────────────────────────────────────
+  const testoPanel = document.getElementById('testoPanel');
+  const labelLeggi = document.getElementById('labelLeggi');
+  let testoCaricato = false;
+
+  async function toggleTesto() {
+    if (testoPanel.style.display === 'block') {
+      testoPanel.style.display = 'none';
+      labelLeggi.textContent = 'Leggi il testo';
+      return;
+    }
+    if (!testoCaricato) {
+      testoPanel.style.display = 'block';
+      testoPanel.textContent = 'Caricamento…';
+      try {
+        const r = await fetch(`../Lettura.txt?v=${Date.now()}`, { cache: 'no-store' });
+        const raw = await r.text();
+        // Rimuove tutti i marker tra parentesi quadre: [T], [F], [M], ecc.
+        const pulito = raw
+          .replace(/\[.*?\]/g, '')
+          .replace(/\n{3,}/g, '\n\n')
+          .trim();
+        testoPanel.textContent = pulito;
+        testoCaricato = true;
+      } catch(e) {
+        testoPanel.textContent = 'Impossibile caricare il testo.';
+      }
+    } else {
+      testoPanel.style.display = 'block';
+    }
+    labelLeggi.textContent = 'Nascondi testo';
+  }
 
   // Registra Service Worker per PWA
   if ('serviceWorker' in navigator) {
